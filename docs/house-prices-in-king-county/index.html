@@ -30,6 +30,10 @@
 <link rel="stylesheet" href="/css/fonts.css" media="all">
 <link rel="stylesheet" href="/css/main.css" media="all">
 
+<link rel="stylesheet" href="/css/custom.css">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Fira&#43;Code&amp;display=swap">
+
 
 
   </head>
@@ -174,7 +178,7 @@ house_sales_prediction$date = as.numeric(difftime(dates, min(dates), units = &qu
 <p>We can now plot the density of the <strong>price</strong> to get a first impression on its distribution.</p>
 <pre class="r"><code>library(ggplot2)
 ggplot(house_sales_prediction, aes(x = price)) + geom_density()</code></pre>
-<p><img src="/post/house-prices-in-king-county_files/figure-html/09-use-cases-007-1.png" width="672" /></p>
+<p><img src="/post/house-prices-in-king-county_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
 <p>We can see that the prices for most houses lie between 75.000 and 1.5 million dollars.
 There are few extreme values of up to 7.7 million dollars.</p>
 <p>Feature engineering often allows us to incorporate additional knowledge about the data and underlying processes.
@@ -194,12 +198,12 @@ The <code>autoplot</code> function provides a good first glimpse on our data.
 As the resulting object is a <code>ggplot2</code> object, we can use <code>faceting</code> and other functions from <strong>ggplot2</strong> in order to enhance plots.</p>
 <pre class="r"><code>library(ggplot2)
 autoplot(tsk) + facet_wrap(~renovated)</code></pre>
-<p><img src="/post/house-prices-in-king-county_files/figure-html/09-use-cases-009-1.png" width="672" /></p>
+<p><img src="/post/house-prices-in-king-county_files/figure-html/unnamed-chunk-11-1.png" width="672" /></p>
 <p>We can observe that renovated flats seem to achieve higher sales values, and this might thus be a relevant feature.</p>
 <p>Additionally, we can for example look at the condition of the house.
 Again, we clearly can see that the price rises with increasing condition.</p>
 <pre class="r"><code>autoplot(tsk) + facet_wrap(~condition)</code></pre>
-<p><img src="/post/house-prices-in-king-county_files/figure-html/09-use-cases-010-1.png" width="672" /></p>
+<p><img src="/post/house-prices-in-king-county_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
 </div>
 <div id="association-between-variables" class="section level4">
 <h4>Association between variables</h4>
@@ -213,10 +217,10 @@ autoplot(tsk$clone()$select(tsk$feature_names[c(3, 17)]),
 <pre><code>## Registered S3 method overwritten by &#39;GGally&#39;:
 ##   method from   
 ##   +.gg   ggplot2</code></pre>
-<p><img src="/post/house-prices-in-king-county_files/figure-html/09-use-cases-011-1.png" width="672" /></p>
+<p><img src="/post/house-prices-in-king-county_files/figure-html/unnamed-chunk-13-1.png" width="672" /></p>
 <pre class="r"><code>autoplot(tsk$clone()$select(tsk$feature_names[c(9:12)]),
   type = &quot;pairs&quot;)</code></pre>
-<p><img src="/post/house-prices-in-king-county_files/figure-html/09-use-cases-012-1.png" width="672" /></p>
+<p><img src="/post/house-prices-in-king-county_files/figure-html/unnamed-chunk-14-1.png" width="672" /></p>
 </div>
 </div>
 <div id="splitting-into-train-and-test-data" class="section level3">
@@ -238,7 +242,7 @@ lrn = lrn(&quot;regr.rpart&quot;)
 lrn$train(tsk_nozip, row_ids = train.idx)</code></pre>
 <pre class="r"><code>plot(lrn$model)
 text(lrn$model)</code></pre>
-<p><img src="/post/house-prices-in-king-county_files/figure-html/09-use-cases-015-1.png" width="672" /></p>
+<p><img src="/post/house-prices-in-king-county_files/figure-html/unnamed-chunk-17-1.png" width="672" /></p>
 <p>The learned tree relies on several variables in order to distinguish between cheaper and pricier houses.
 The features we split along are <strong>grade</strong>, <strong>sqft_living</strong>, but also some features related to the area (longitude and latitude).</p>
 <p>We can visualize the price across different regions in order to get more info:</p>
@@ -249,11 +253,11 @@ library(ggmap)
 qmplot(long, lat, maptype = &quot;watercolor&quot;, color = log(price),
   data = house_sales_prediction[train.idx[1:3000],]) +
   scale_colour_viridis_c()</code></pre>
-<p><img src="/post/house-prices-in-king-county_files/figure-html/09-use-cases-016-1.png" width="672" /></p>
+<p><img src="/post/house-prices-in-king-county_files/figure-html/unnamed-chunk-18-1.png" width="672" /></p>
 <pre class="r"><code># And the zipcode
 qmplot(long, lat, maptype = &quot;watercolor&quot;, color = zipcode,
   data = house_sales_prediction[train.idx[1:3000],]) + guides(color = FALSE)</code></pre>
-<p><img src="/post/house-prices-in-king-county_files/figure-html/09-use-cases-016-2.png" width="672" /></p>
+<p><img src="/post/house-prices-in-king-county_files/figure-html/unnamed-chunk-18-2.png" width="672" /></p>
 <p>We can see that the price is clearly associated with the zipcode when comparing then two plots.
 As a result, we might want to indeed use the <strong>zipcode</strong> column in our future endeavours.</p>
 </div>
