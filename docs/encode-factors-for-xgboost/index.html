@@ -79,12 +79,12 @@
       
 
 
-<p>The package <a href="https://cran.r-project.org/package=xgboost">xgboost</a> unfortunately does not support handling of factor levels.
-Therefore it is required to manually convert factor features to numerical dummy features.
+<p>The package <a href="https://cran.r-project.org/package=xgboost">xgboost</a> unfortunately does not support handling of categorical features.
+Therefore it is required to manually convert factor columns to numerical dummy features.
 We show how to use <a href="https://mlr3pipelines.mlr-org.com">mlr3pipelines</a> to augment the <a href="https://mlr3learners.mlr-org.com/reference/mlr_learners_classif.xgboost.html"><code>xgboost learner</code></a> with an automatic factor encoding.</p>
 <div id="construct-the-base-objects" class="section level2">
 <h2>Construct the Base Objects</h2>
-<p>First, we create an example task with factors (<a href="https://mlr3.mlr-org.com/reference/mlr_tasks_german_credit.html"><code>german_credit</code></a>) and the <a href="https://mlr3learners.mlr-org.com/reference/mlr_learners_classif.xgboost.html"><code>xgboost learner</code></a>:</p>
+<p>First, we take an example task with factors (<a href="https://mlr3.mlr-org.com/reference/mlr_tasks_german_credit.html"><code>german_credit</code></a>) and create the <a href="https://mlr3learners.mlr-org.com/reference/mlr_learners_classif.xgboost.html"><code>xgboost learner</code></a>:</p>
 <pre class="r"><code>library(mlr3)
 library(mlr3learners)
 
@@ -199,7 +199,7 @@ print(pipe)</code></pre>
 <pre class="r"><code>rr = resample(task, glearner, rsmp(&quot;cv&quot;, folds = 3))
 rr$aggregate()</code></pre>
 <pre><code>## classif.ce 
-##  0.2599935</code></pre>
+##  0.2450055</code></pre>
 <p>Success! We augmented xgboost with handling of factor and ordered factor levels.
 If we combine this learner with a tuner from <a href="https://mlr3tuning.mlr-org.com">mlr3tuning</a>, we get a universal and competitive learner.</p>
 </div>

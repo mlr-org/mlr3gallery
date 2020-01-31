@@ -14,14 +14,14 @@ library(mlr3)
 lgr::get_logger("mlr3")$set_threshold("warn")
 ```
 
-The package `r cran_pkg("xgboost")` unfortunately does not support handling of factor levels.
-Therefore it is required to manually convert factor features to numerical dummy features.
+The package `r cran_pkg("xgboost")` unfortunately does not support handling of categorical features.
+Therefore it is required to manually convert factor columns to numerical dummy features.
 We show how to use `r mlr_pkg("mlr3pipelines")` to augment the `r ref("mlr_learners_classif.xgboost", "xgboost learner")` with an automatic factor encoding.
 
 
 ## Construct the Base Objects
 
-First, we create an example task with factors (`r ref("mlr_tasks_german_credit", "german_credit")`) and the `r ref("mlr_learners_classif.xgboost", "xgboost learner")`:
+First, we take an example task with factors (`r ref("mlr_tasks_german_credit", "german_credit")`) and create the `r ref("mlr_learners_classif.xgboost", "xgboost learner")`:
 ```{r}
 library(mlr3)
 library(mlr3learners)
