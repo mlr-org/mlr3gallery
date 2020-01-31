@@ -5,10 +5,15 @@ date: '2020-01-30'
 slug: house-prices-in-king-county
 categories: []
 tags: ['regression', 'visualization', 'random forest', 'feature engineering', 'tuning', 'mlr3tuning']
-packages: ['mlr3', 'mlr3learners', 'mlr3viz', 'mlr3filters', 'mlr3tuning', 'paradox', 'lubridate', 'ggmap']
+packages: ['mlr3', 'mlr3learners', 'mlr3viz', 'mlr3filters', 'mlr3tuning', 'paradox', 'anytime', 'ggmap', 'GGally']
 ---
+
 ```{r, include = FALSE}
 library(mlr3book)
+library(mlr3)
+library(mlr3tuning)
+lgr::get_logger("mlr3")$set_threshold("warn")
+lgr::get_logger("mlr3tuning")$set_threshold("warn")
 ```
 
 This use case shows how to model housing price data in King County.
@@ -30,7 +35,7 @@ Following features are illustrated:
 
 We use the `house_sales_prediction` dataset contained in the package `r mlr_pkg("mlr3book")` in order to provide a use-case for the application of `r mlr_pkg("mlr3")` on real-world data.
 
-```{r 09-use-cases-001}
+```{r}
 library(mlr3)
 library(mlr3book)
 data("house_sales_prediction", package = "mlr3book")
@@ -43,7 +48,7 @@ This helps us to get a first impression of our data and might help us arrive at 
 
 We can get a quick overview using R's summary function:
 
-```{r 09-use-cases-002}
+```{r}
 summary(house_sales_prediction)
 dim(house_sales_prediction)
 ```
@@ -65,38 +70,42 @@ In addition to the price column, we have several other columns:
 
 Before we continue with the analysis,  we preprocess some features so that they are stored in the correct format.
 
-First we convert the `date` column to `numeric` to be able to treat it as a numeric feature:
+First we convert the `date` column to `numeric`.
+To do so, we convert the date to the POSIXct date/time class with the `r cran_pkg("anytime")` package.
+Next, use `difftime()` to convert to days since the first day recorded in the data set:
 
-```{r 09-use-cases-003, message = FALSE}
-library(lubridate)
-house_sales_prediction$date = ymd(substr(house_sales_prediction$date, 1, 8))
-house_sales_prediction$date = as.numeric(as.Date(house_sales_prediction$date, origin = "1900-01-01"))
-house_sales_prediction$date = house_sales_prediction$date
+```{r, message = FALSE}
+library(anytime)
+dates = anytime(house_sales_prediction$date)
+house_sales_prediction$date = as.numeric(difftime(dates, min(dates), units = "days"))
 ```
 
 Afterwards, we convert the zip code to a factor:
 
-```{r 09-use-cases-004}
+```{r}
 house_sales_prediction$zipcode = as.factor(house_sales_prediction$zipcode)
 ```
 
 And add a new column **renovated** indicating whether a house was renovated at some point.
 
-```{r 09-use-cases-005}
+```{r}
 house_sales_prediction$renovated = as.numeric(house_sales_prediction$yr_renovated > 0)
-# And drop the id column:
+```
+
+We drop the id column which provides no information about the house prices:
+```{r}
 house_sales_prediction$id = NULL
 ```
 
 Additionally we convert the price from Dollar to units of 1000 Dollar to improve readability.
 
-```{r 09-use-cases-006}
+```{r}
 house_sales_prediction$price = house_sales_prediction$price / 1000
 ```
 
 We can now plot the density of the **price** to get a first impression on its distribution.
 
-```{r 09-use-cases-007}
+```{r}
 library(ggplot2)
 ggplot(house_sales_prediction, aes(x = price)) + geom_density()
 ```
@@ -111,7 +120,7 @@ Additionally we want to drop features which should not have any influence (`id c
 
 After those initial manipulations, we load all required packages and create a Task containing our data.
 
-```{r 09-use-cases-008}
+```{r}
 library(mlr3)
 library(mlr3viz)
 tsk = TaskRegr$new("sales", house_sales_prediction, target = "price")
@@ -126,7 +135,7 @@ The outcome we want to predict is the **price** variable.
 The `autoplot` function provides a good first glimpse on our data.
 As the resulting object is a `ggplot2` object, we can use `faceting` and other functions from **ggplot2** in order to enhance plots.
 
-```{r 09-use-cases-009}
+```{r}
 library(ggplot2)
 autoplot(tsk) + facet_wrap(~renovated)
 ```
@@ -136,7 +145,7 @@ We can observe that renovated flats seem to achieve higher sales values, and thi
 Additionally, we can for example look at the condition of the house.
 Again, we clearly can see that the price rises with increasing condition.
 
-```{r 09-use-cases-010}
+```{r}
 autoplot(tsk) + facet_wrap(~condition)
 ```
 
@@ -147,13 +156,13 @@ We investigate using variables associated with the quality and size of the house
 Note that we use `$clone()` and `$select()` to clone the task and select only a subset of the features for the `autoplot` function, as `autoplot` per default uses all features.
 The task is cloned before we select features in order to keep the original task intact.
 
-```{r 09-use-cases-011}
+```{r}
 # Variables associated with quality
 autoplot(tsk$clone()$select(tsk$feature_names[c(3, 17)]),
   type = "pairs")
 ```
 
-```{r 09-use-cases-012}
+```{r}
 autoplot(tsk$clone()$select(tsk$feature_names[c(9:12)]),
   type = "pairs")
 ```
@@ -162,7 +171,7 @@ autoplot(tsk$clone()$select(tsk$feature_names[c(9:12)]),
 
 In `mlr3`, we do not create `train` and `test` data sets, but instead keep only a vector of train and test indices.
 
-```{r 09-use-cases-013}
+```{r}
 set.seed(4411)
 train.idx = sample(seq_len(tsk$nrow), 0.7 * tsk$nrow)
 test.idx = setdiff(seq_len(tsk$nrow), train.idx)
@@ -175,7 +184,7 @@ In order to fit a decision tree, we first get the `regr.rpart` learner from the 
 
 For now we leave out the  `zipcode` variable, as we also have the `latitude` and `longitude` of each house.
 
-```{r 09-use-cases-014}
+```{r}
 tsk_nozip = tsk$clone()$select(setdiff(tsk$feature_names, "zipcode"))
 # Get the learner
 lrn = lrn("regr.rpart")
@@ -183,7 +192,7 @@ lrn = lrn("regr.rpart")
 lrn$train(tsk_nozip, row_ids = train.idx)
 ```
 
-```{r 09-use-cases-015, width = 10, height = 10}
+```{r, width = 10, height = 10}
 plot(lrn$model)
 text(lrn$model)
 ```
@@ -193,7 +202,7 @@ The features we split along are **grade**, **sqft_living**, but also some featur
 
 We can visualize the price across different regions in order to get more info:
 
-```{r 09-use-cases-016, message = FALSE}
+```{r, message = FALSE}
 # Load the ggmap package in order to visualize on a map
 library(ggmap)
 
@@ -217,15 +226,14 @@ After getting an initial idea for our data, we might want to construct a first b
 We use `resample` with `3-fold cross-validation` on our training data in order to get a reliable estimate of the algorithm's performance on future data.
 Before we start with defining and training learners, we create a `r ref("Resampling")` in order to make sure that we always compare on exactly the same data.
 
-```{r 09-use-cases-017}
-library(mlr3learners)
+```{r}
 cv3 = rsmp("cv", folds = 3)
 cv3$instantiate(tsk$clone()$filter(train.idx))
 ```
 
 For the cross-validation we only use the **training data** by cloning the task and selecting only observations from the training set.
 
-```{r 09-use-cases-018}
+```{r}
 lrn_rpart = lrn("regr.rpart")
 res = resample(task = tsk$clone()$filter(train.idx), lrn_rpart, cv3)
 res$score(msr("regr.mse"))
@@ -235,9 +243,10 @@ sprintf("RMSE of the simple rpart: %s", round(sqrt(res$aggregate()), 2))
 ### Many Trees: Random Forest
 
 We might be able to improve upon the **RMSE** using more powerful learners.
-We first load the `mlr3learners` package, which contains the **ranger** learner (a package which implements the "Random Forest" algorithm).
+We first load the `r mlr_pkg("mlr3learners")` package, which contains the `r cran_pkg("ranger")` learner (a package which implements the "Random Forest" algorithm).
 
-```{r 09-use-cases-019}
+```{r}
+library(mlr3learners)
 lrn_ranger = lrn("regr.ranger", num.trees = 15L)
 res = resample(task = tsk$clone()$filter(train.idx), lrn_ranger, cv3)
 res$score(msr("regr.mse"))
@@ -257,7 +266,7 @@ For now we do not use the **zipcode** column, as `r cran_pkg("xgboost")` cannot 
 deal with categorical features.
 The **AutoTuner** automatically performs nested cross-validation.
 
-```{r 09-use-cases-020, eval = FALSE}
+```{r, eval = FALSE}
 set.seed(444L)
 library(mlr3tuning)
 library(paradox)
@@ -275,25 +284,25 @@ ps = ParamSet$new(
 ))
 
 # Define the Terminator
-terminator = TerminatorEvaluations$new(10)
+terminator = term("evals", n_evals = 10)
 cv3 = rsmp("cv", folds = 3)
 at = AutoTuner$new(lrn_xgb, cv3, measures = msr("regr.mse"), ps,
-  terminator, tuner = TunerRandomSearch, tuner_settings = list())
+  terminator, tuner = tnr("random_search"))
 ```
 
-```{r 09-use-cases-021, echo = FALSE, results = 'hide', eval = FALSE}
+```{r, echo = FALSE, results = 'hide', eval = FALSE}
 # And resample the AutoTuner
 res = resample(tsk_nozip$clone()$filter(train.idx), at, cv3)
 ```
 
-```{r 09-use-cases-022, eval = FALSE}
+```{r, eval = FALSE}
 res$score(msr("regr.mse"))
 sprintf("RMSE of the tuned xgboost: %s", round(sqrt(res$aggregate()), 2))
 ```
 
 We can obtain the resulting params in the respective splits by accessing the `r ref("ResampleResult")`.
 
-```{r 09-use-cases-023}
+```{r}
 sapply(res$learners, function(x) x$param_set$values)
 ```
 
@@ -321,17 +330,15 @@ In order to better cluster the zip codes, we compute a new feature: **med_price*
 It computes the median price in each zip-code.
 This might help our model to improve the prediction.
 
-```{r 09-use-cases-024}
-# Create a new feature and append it to the task
-zip_price = house_sales_prediction[, .(med_price = median(price)), by = zipcode]
-
-# Join on the original data to match with original columns, then cbind to the task
-tsk$cbind(house_sales_prediction[zip_price, on="zipcode"][,"med_price"])
+```{r}
+data = tsk$data(cols = c("price", "zipcode"))
+data[, med_price := median(price), by = "zipcode"]
+tsk$cbind(data[, .(med_price)])
 ```
 
-Again, we run `resample` and compute the **RMSE**.
+Again, we run `r ref("resample()")` and compute the **RMSE**.
 
-```{r 09-use-cases-025}
+```{r}
 lrn_ranger = lrn("regr.ranger")
 res = resample(task = tsk$clone()$filter(train.idx), lrn_ranger, cv3)
 res$score(msr("regr.mse"))
@@ -344,7 +351,7 @@ In many cases, we might want to have a sparse model.
 For this purpose we can use a `r ref("mlr3filters::Filter")` implemented in `mlr3filters`.
 This can prevent our learner from overfitting make it easier for humans to interpret models as fewer variables influence the resulting prediction.
 
-```{r 09-use-cases-026}
+```{r}
 library(mlr3filters)
 filter = FilterMRMR$new()$calculate(tsk)
 tsk_ftsel = tsk$clone()$select(head(names(filter$scores), 12))
@@ -352,7 +359,7 @@ tsk_ftsel = tsk$clone()$select(head(names(filter$scores), 12))
 
 The resulting **RMSE** is slightly higher, and at the same time we only use $12$ features.
 
-```{r 09-use-cases-027}
+```{r}
 lrn_ranger = lrn("regr.ranger")
 res = resample(task = tsk_ftsel$clone()$filter(train.idx), lrn_ranger, cv3)
 res$score(msr("regr.mse"))
