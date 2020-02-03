@@ -355,9 +355,9 @@ It computes the median price in each zip-code.
 This might help our model to improve the prediction.
 
 ```{r}
-data = tsk$data(cols = c("price", "zipcode"))
+data = task_train$data(cols = c("price", "zipcode"))
 data[, med_price := median(price), by = "zipcode"]
-tsk$cbind(data[, .(med_price)])
+task_train$cbind(data[, .(med_price)])
 ```
 
 Again, we run `r ref("resample()")` and compute the **RMSE**.
@@ -381,7 +381,6 @@ in the **mlr3 book**: [Feature Selection](https://mlr3book.mlr-org.com/fs.html) 
 
 ```{r}
 library(mlr3pipelines)
-library(mlr3learners)
 library(mlr3filters)
 filter = FilterMRMR$new()
 ```
@@ -411,3 +410,26 @@ We have seen different ways to improve models with respect to our criteria by:
 
 A combination of all of the above would most likely yield an even better model.
 This is left as an exercise to the reader.
+
+The best model we found in this example is the `ranger` model with the added `med_price` feature.
+In a final step, we now want to assess the model's quality on the held-out data we stored in our
+`task_test`. In order to do so, and to prevent data leakage, we can only add the median price from 
+the training data.
+
+```{r}
+data = task_train$data(cols = c("price", "zipcode"))
+data[, med_price := median(price), by = "zipcode"]
+test_data = task_test$data(cols = "zipcode")
+test = merge(test_data, unique(data[, .(zipcode, med_price)]), all.x = TRUE)
+task_test$cbind(test)
+```
+
+Now we can use the augmented `task_test` to predict on new data.
+
+```{r}
+lrn$train(task_train)
+lrn$predict(task_test)
+```
+
+
+
