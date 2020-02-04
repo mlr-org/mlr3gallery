@@ -10,5 +10,6 @@ if (ci_can_push() && !ci_is_tag()) {
     add_step(step_setup_ssh())
 
   get_stage("deploy") %>%
-    add_step(step_push_deploy(orphan = TRUE, branch = "gh-pages"))
+    add_step(step_setup_push_deploy(orphan = TRUE, branch = "gh-pages")) %>%
+    add_step(step_push_deploy())
 }
