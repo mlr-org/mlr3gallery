@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Hugo 0.63.2" />
+<meta name="generator" content="Hugo 0.64.0" />
 
 
 <title>House prices in King County - mlr3 gallery</title>
@@ -273,12 +273,10 @@ cv3$instantiate(tsk$clone()$filter(train.idx))</code></pre>
 res = resample(task = tsk$clone()$filter(train.idx), lrn_rpart, cv3)
 res$score(msr(&quot;regr.mse&quot;))</code></pre>
 <pre><code>##          task task_id            learner learner_id     resampling
-##        &lt;list&gt;  &lt;char&gt;             &lt;list&gt;     &lt;char&gt;         &lt;list&gt;
 ## 1: &lt;TaskRegr&gt;   sales &lt;LearnerRegrRpart&gt; regr.rpart &lt;ResamplingCV&gt;
 ## 2: &lt;TaskRegr&gt;   sales &lt;LearnerRegrRpart&gt; regr.rpart &lt;ResamplingCV&gt;
 ## 3: &lt;TaskRegr&gt;   sales &lt;LearnerRegrRpart&gt; regr.rpart &lt;ResamplingCV&gt;
 ##    resampling_id iteration prediction regr.mse
-##           &lt;char&gt;     &lt;int&gt;     &lt;list&gt;    &lt;num&gt;
 ## 1:            cv         1     &lt;list&gt; 45415.78
 ## 2:            cv         2     &lt;list&gt; 49598.67
 ## 3:            cv         3     &lt;list&gt; 42517.76</code></pre>
@@ -294,15 +292,13 @@ lrn_ranger = lrn(&quot;regr.ranger&quot;, num.trees = 15L)
 res = resample(task = tsk$clone()$filter(train.idx), lrn_ranger, cv3)
 res$score(msr(&quot;regr.mse&quot;))</code></pre>
 <pre><code>##          task task_id             learner  learner_id     resampling
-##        &lt;list&gt;  &lt;char&gt;              &lt;list&gt;      &lt;char&gt;         &lt;list&gt;
 ## 1: &lt;TaskRegr&gt;   sales &lt;LearnerRegrRanger&gt; regr.ranger &lt;ResamplingCV&gt;
 ## 2: &lt;TaskRegr&gt;   sales &lt;LearnerRegrRanger&gt; regr.ranger &lt;ResamplingCV&gt;
 ## 3: &lt;TaskRegr&gt;   sales &lt;LearnerRegrRanger&gt; regr.ranger &lt;ResamplingCV&gt;
 ##    resampling_id iteration prediction regr.mse
-##           &lt;char&gt;     &lt;int&gt;     &lt;list&gt;    &lt;num&gt;
-## 1:            cv         1     &lt;list&gt; 23837.18
-## 2:            cv         2     &lt;list&gt; 22343.25
-## 3:            cv         3     &lt;list&gt; 18912.59</code></pre>
+## 1:            cv         1     &lt;list&gt; 23837.03
+## 2:            cv         2     &lt;list&gt; 22343.27
+## 3:            cv         3     &lt;list&gt; 18912.51</code></pre>
 <pre class="r"><code>sprintf(&quot;RMSE of the simple ranger: %s&quot;, round(sqrt(res$aggregate()), 2))</code></pre>
 <pre><code>## [1] &quot;RMSE of the simple ranger: 147.3&quot;</code></pre>
 <p>Often tuning <strong>RandomForest</strong> methods does not increase predictive performances substantially.
@@ -382,15 +378,13 @@ tsk$cbind(data[, .(med_price)])</code></pre>
 res = resample(task = tsk$clone()$filter(train.idx), lrn_ranger, cv3)
 res$score(msr(&quot;regr.mse&quot;))</code></pre>
 <pre><code>##          task task_id             learner  learner_id     resampling
-##        &lt;list&gt;  &lt;char&gt;              &lt;list&gt;      &lt;char&gt;         &lt;list&gt;
 ## 1: &lt;TaskRegr&gt;   sales &lt;LearnerRegrRanger&gt; regr.ranger &lt;ResamplingCV&gt;
 ## 2: &lt;TaskRegr&gt;   sales &lt;LearnerRegrRanger&gt; regr.ranger &lt;ResamplingCV&gt;
 ## 3: &lt;TaskRegr&gt;   sales &lt;LearnerRegrRanger&gt; regr.ranger &lt;ResamplingCV&gt;
 ##    resampling_id iteration prediction regr.mse
-##           &lt;char&gt;     &lt;int&gt;     &lt;list&gt;    &lt;num&gt;
-## 1:            cv         1     &lt;list&gt; 20028.32
-## 2:            cv         2     &lt;list&gt; 19472.27
-## 3:            cv         3     &lt;list&gt; 15124.63</code></pre>
+## 1:            cv         1     &lt;list&gt; 20028.29
+## 2:            cv         2     &lt;list&gt; 19472.26
+## 3:            cv         3     &lt;list&gt; 15124.99</code></pre>
 <pre class="r"><code>sprintf(&quot;RMSE of ranger with med_price: %s&quot;, round(sqrt(res$aggregate()), 2))</code></pre>
 <pre><code>## [1] &quot;RMSE of ranger with med_price: 134.94&quot;</code></pre>
 </div>
@@ -407,12 +401,10 @@ tsk_ftsel = tsk$clone()$select(head(names(filter$scores), 12))</code></pre>
 res = resample(task = tsk_ftsel$clone()$filter(train.idx), lrn_ranger, cv3)
 res$score(msr(&quot;regr.mse&quot;))</code></pre>
 <pre><code>##          task task_id             learner  learner_id     resampling
-##        &lt;list&gt;  &lt;char&gt;              &lt;list&gt;      &lt;char&gt;         &lt;list&gt;
 ## 1: &lt;TaskRegr&gt;   sales &lt;LearnerRegrRanger&gt; regr.ranger &lt;ResamplingCV&gt;
 ## 2: &lt;TaskRegr&gt;   sales &lt;LearnerRegrRanger&gt; regr.ranger &lt;ResamplingCV&gt;
 ## 3: &lt;TaskRegr&gt;   sales &lt;LearnerRegrRanger&gt; regr.ranger &lt;ResamplingCV&gt;
 ##    resampling_id iteration prediction regr.mse
-##           &lt;char&gt;     &lt;int&gt;     &lt;list&gt;    &lt;num&gt;
 ## 1:            cv         1     &lt;list&gt; 26406.95
 ## 2:            cv         2     &lt;list&gt; 24857.70
 ## 3:            cv         3     &lt;list&gt; 18742.65</code></pre>
