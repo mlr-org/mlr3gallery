@@ -3,7 +3,8 @@ get_stage("install") %>%
   add_code_step(blogdown::install_hugo())
 
 get_stage("deploy") %>%
-  add_code_step(blogdown::build_site())
+  add_code_step(blogdown::build_site()) %>%
+  add_code_step(writeLines("mlr3gallery.mlr-org.com", "docs/CNAME"))
 
 if (ci_can_push() && !ci_is_tag()) {
   get_stage("before_deploy") %>%
