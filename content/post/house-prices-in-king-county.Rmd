@@ -421,8 +421,9 @@ task_test$cbind(test)
 Now we can use the augmented `task_test` to predict on new data.
 
 ```{r}
-lrn$train(task_train)
-lrn$predict(task_test)
+lrn_ranger$train(task_train)
+pred = lrn_ranger$predict(task_test)
+pred$score(msr("regr.mse"))
 ```
 
 
