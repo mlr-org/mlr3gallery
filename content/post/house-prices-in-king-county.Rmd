@@ -74,7 +74,8 @@ In addition to the price column, we have several other columns:
 * `date`: A date column, indicating when the house was sold.
   This column is currently not encoded as a `date` and requires some preprocessing.
 
-* `zipcode`: A column indicating the ZIP code. This is a categorical variable with many factor levels.
+* `zipcode`: A column indicating the ZIP code.
+  This is a categorical variable with many factor levels.
 
 * `long, lat` The longitude and latitude of the house
 
@@ -219,7 +220,6 @@ text(lrn$model)
 
 The learned tree relies on several variables in order to distinguish between cheaper and pricier houses.
 The features we split along are **grade**, **sqft_living**, but also some features related to the area (longitude and latitude).
-
 We can visualize the price across different regions in order to get more info:
 
 ```{r, message = FALSE}
@@ -237,7 +237,7 @@ qmplot(long, lat, maptype = "watercolor", color = zipcode,
 ```
 
 We can see that the price is clearly associated with the zipcode when comparing then two plots.
-As a result, we might want to indeed use the **zipcode** column in our future endeavours.
+As a result, we might want to indeed use the **zipcode** column in our future endeavors.
 
 ### A first baseline: Decision Tree
 
@@ -277,15 +277,16 @@ If time permits, it can nonetheless lead to improvements and should thus be perf
 In this case, we resort to tune a different kind of model: **Gradient Boosted Decision Trees** from the package `r cran_pkg("xgboost")`.
 
 ### A better baseline: `AutoTuner`
+
+<!-- The following snips are not evaluated because of runtime, no idea how we want to handle this.-->
 ```{r, echo=FALSE, results = 'hide'}
-  eval_tune = FALSE
+  eval_tune = TRUE
 ```
 
 Tuning can often further improve the performance.
 In this case, we *tune* the xgboost learner in order to see whether this can improve performance.
 For the `AutoTuner` we have to specify a **Termination Criterion** (how long the tuning should run) a **Tuner** (which tuning method to use) and a **ParamSet** (which space we might want to search through).
-For now we do not use the **zipcode** column, as `r cran_pkg("xgboost")` cannot naturally
-deal with categorical features.
+For now we do not use the **zipcode** column, as `r cran_pkg("xgboost")` cannot naturally deal with categorical features.
 The **AutoTuner** automatically performs nested cross-validation.
 
 ```{r, eval = eval_tune}
@@ -307,16 +308,14 @@ ps = ParamSet$new(
 
 # Define the Terminator
 terminator = term("evals", n_evals = 10)
-cv3 = rsmp("cv", folds = 3)
-at = AutoTuner$new(lrn_xgb, cv3, measures = msr("regr.mse"), ps,
+at = AutoTuner$new(lrn_xgb, rsmp("holdout"), measures = msr("regr.mse"), ps,
   terminator, tuner = tnr("random_search"))
 ```
 
-<!-- The following 2 snips are not evaluated because of runtime, no idea how we want to handle this.-->
 
 ```{r, echo = FALSE, results = 'hide', eval = eval_tune}
 # And resample the AutoTuner
-res = resample(tsk_nozip, at, cv3)
+res = resample(tsk_nozip, at, cv3, store_models = TRUE)
 ```
 
 ```{r, eval = eval_tune}
@@ -327,7 +326,7 @@ sprintf("RMSE of the tuned xgboost: %s", round(sqrt(res$aggregate()), 2))
 We can obtain the resulting params in the respective splits by accessing the `r ref("ResampleResult")`.
 
 ```{r, eval = eval_tune}
-sapply(res$learners, function(x) x$param_set$values)
+sapply(res$learners, function(x) x$param_set$values)[-2,]
 ```
 
 **NOTE:** To keep runtime low, we only tune parts of the hyperparameter space of `r cran_pkg("xgboost")` in this example.
@@ -375,9 +374,8 @@ In many cases, we might want to have a sparse model.
 For this purpose we can use a `r ref("mlr3filters::Filter")` implemented in `mlr3filters`.
 This can prevent our learner from overfitting make it easier for humans to interpret models as fewer variables influence the resulting prediction.
 
-In this example, we use `PipeOpFilter` (via `po("filter", ...)`) to add a feature-filter before
-training the model. For a more in-depth insight, refer to the sections on `mlr3pipelines` and `mlr3filters`
-in the **mlr3 book**: [Feature Selection](https://mlr3book.mlr-org.com/fs.html) and [Pipelines](https://mlr3book.mlr-org.com/pipelines.html).
+In this example, we use `PipeOpFilter` (via `po("filter", ...)`) to add a feature-filter before training the model.
+For a more in-depth insight, refer to the sections on `mlr3pipelines` and `mlr3filters` in the **mlr3 book**: [Feature Selection](https://mlr3book.mlr-org.com/fs.html) and [Pipelines](https://mlr3book.mlr-org.com/pipelines.html).
 
 ```{r}
 library(mlr3pipelines)
@@ -400,21 +398,17 @@ sprintf("RMSE of ranger with filtering: %s", round(sqrt(res$aggregate()), 2))
 
 We have seen different ways to improve models with respect to our criteria by:
 
-- Choosing a suitable algorithm
-
-- Choosing good hyperparameters (tuning)
-
-- Filtering features
-
-- Engineering new features
+* Choosing a suitable algorithm
+* Choosing good hyperparameters (tuning)
+* Filtering features
+* Engineering new features
 
 A combination of all of the above would most likely yield an even better model.
 This is left as an exercise to the reader.
 
 The best model we found in this example is the `ranger` model with the added `med_price` feature.
-In a final step, we now want to assess the model's quality on the held-out data we stored in our
-`task_test`. In order to do so, and to prevent data leakage, we can only add the median price from 
-the training data.
+In a final step, we now want to assess the model's quality on the held-out data we stored in our `task_test`.
+In order to do so, and to prevent data leakage, we can only add the median price from the training data.
 
 ```{r}
 data = task_train$data(cols = c("price", "zipcode"))
