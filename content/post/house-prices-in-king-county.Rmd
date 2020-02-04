@@ -26,7 +26,6 @@ The use-case illustrated below touches on the following concepts:
 
 The relevant sections in the `mlr3book` are linked to for the reader's convenience.
 
-
 This use case shows how to model housing price data in King County.
 Following features are illustrated:
 
@@ -40,8 +39,6 @@ Following features are illustrated:
 * Optimizing the baseline by implementing a tuner
 * Engineering features
 * Creating a sparser model
-
-
 
 ## House Price Prediction in King County {#use-case-regr-houses}
 
@@ -312,7 +309,6 @@ at = AutoTuner$new(lrn_xgb, rsmp("holdout"), measures = msr("regr.mse"), ps,
   terminator, tuner = tnr("random_search"))
 ```
 
-
 ```{r, echo = FALSE, results = 'hide', eval = eval_tune}
 # And resample the AutoTuner
 res = resample(tsk_nozip, at, cv3, store_models = TRUE)
@@ -425,6 +421,3 @@ lrn_ranger$train(task_train)
 pred = lrn_ranger$predict(task_test)
 pred$score(msr("regr.mse"))
 ```
-
-
-
