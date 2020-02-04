@@ -6,9 +6,9 @@ get_stage("deploy") %>%
   add_code_step(blogdown::build_site())
 
 if (ci_can_push() && !ci_is_tag()) {
-  get_stage("before_deploy") %>%
-    add_step(step_setup_ssh())
+  # get_stage("before_deploy") %>%
+  #   add_step(step_setup_ssh())
 
-  # get_stage("deploy") %>%
-  #   add_step(step_push_deploy())
+  get_stage("deploy") %>%
+    add_step(step_push_deploy())
 }
