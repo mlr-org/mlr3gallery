@@ -197,17 +197,26 @@ graph = po("copy", 2) %>>%
   po("featureunion")
 ```
 
-In order to test out our new graph, we again simulate a situation where our task has missing factor levels.
+In order to test out our new graph, we again create a situation where our task has missing factor levels.
+As the (`r ref("mlr_tasks_pima", "pima")`) task does not have any factor levels, we use the
+famous (`r ref("mlr_tasks_boston_housing", "boston_housing")`) task.
 
 
 ```{r}
-task = tsk("boston_housing")
-dt = task$data()
-dt[1:10, chas := NA]
-t2 = TaskRegr$new("bh", dt, target = "medv")
+# t1 is the training data without missings
+t1 = tsk("boston_housing")
 
+# t2 is the prediction data with missings
+dt = t1$data()
+dt[1:10, chas := NA][20:30, rm := NA]
+t2 = TaskRegr$new("bh", dt, target = "medv")
+```
+
+Now we train on `t1` and predict on `t2`:
+
+```{r}
 gl = GraphLearner$new(graph %>>% po(lrn("regr.ranger")))
-gl$train(task)
+gl$train(t1)
 gl$predict(t2)
 ```
 
