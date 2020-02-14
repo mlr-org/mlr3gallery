@@ -28,7 +28,7 @@ We show how to use `r mlr_pkg("mlr3pipelines")` to augment the `r ref("mlr_learn
 
 ## Construct the Base Objects
 
-First, we take an example task with factors (`r ref("mlr_tasks_pima", "pima")`) and create the `r ref("mlr_learners_classif.ranger", "ranger learner")`:
+First, we take an example task with missing values (`r ref("mlr_tasks_pima", "pima")`) and create the `r ref("mlr_learners_classif.ranger", "ranger learner")`:
 
 ```{r}
 library(mlr3)
@@ -191,10 +191,24 @@ This will simply replace every `NA` in each factor variable with a new value `mi
 A full graph might the look like this:
 
 ```{r}
-imp_fct = po("imputenewlvl")
+imp_fct = po("imputenewlvl", param_vals = list(affect_columns = selector_type("factor")))
 graph = po("copy", 2) %>>%
   gunion(list(imp_missind, imp_num %>>% imp_fct)) %>>%
   po("featureunion")
+```
+
+In order to test out our new graph, we again simulate a situation where our task has missing factor levels.
+
+
+```{r}
+task = tsk("boston_housing")
+dt = task$data()
+dt[1:10, chas := NA]
+t2 = TaskRegr$new("bh", dt, target = "medv")
+
+gl = GraphLearner$new(graph %>>% po(lrn("regr.ranger")))
+gl$train(task)
+gl$predict(t2)
 ```
 
 Success! We learned how to deal with missing values in less then 10 minutes.
