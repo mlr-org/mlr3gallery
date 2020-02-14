@@ -42,11 +42,11 @@ Following features are illustrated:
 
 ## House Price Prediction in King County {#use-case-regr-houses}
 
-We use the `house_sales_prediction` dataset contained in the package `r mlr_pkg("mlr3book")` in order to provide a use-case for the application of `r mlr_pkg("mlr3")` on real-world data.
+We use the `kc_housing` dataset contained in the package `r mlr_pkg("mlr3book")` in order to provide a use-case for the application of `r mlr_pkg("mlr3")` on real-world data.
 
 ```{r}
 library(mlr3)
-house_sales_prediction = data("kc_housing", package = "mlr3data")
+data("kc_housing", package = "mlr3data")
 ```
 
 ### Exploratory Data Analysis
@@ -57,11 +57,11 @@ This helps us to get a first impression of our data and might help us arrive at 
 We can get a quick overview using R's summary function:
 
 ```{r}
-summary(house_sales_prediction)
-dim(house_sales_prediction)
+summary(kc_housing)
+dim(kc_housing)
 ```
 
-Our dataset has `r nrow(house_sales_prediction)` observations and `r ncol(house_sales_prediction)` columns.
+Our dataset has `r nrow(kc_housing)` observations and `r ncol(kc_housing)` columns.
 The variable we want to predict is `price`.
 In addition to the price column, we have several other columns:
 
@@ -85,38 +85,48 @@ Next, use `difftime()` to convert to days since the first day recorded in the da
 
 ```{r, message = FALSE}
 library(anytime)
-dates = anytime(house_sales_prediction$date)
-house_sales_prediction$date = as.numeric(difftime(dates, min(dates), units = "days"))
+dates = anytime(kc_housing$date)
+kc_housing$date = as.numeric(difftime(dates, min(dates), units = "days"))
 ```
 
 Afterwards, we convert the zip code to a factor:
 
 ```{r}
-house_sales_prediction$zipcode = as.factor(house_sales_prediction$zipcode)
+kc_housing$zipcode = as.factor(kc_housing$zipcode)
 ```
 
 And add a new column **renovated** indicating whether a house was renovated at some point.
 
 ```{r}
-house_sales_prediction$renovated = as.numeric(house_sales_prediction$yr_renovated > 0)
+kc_housing$renovated = as.numeric(!is.na(kc_housing$yr_renovated))
+kc_housing$has_basement = as.numeric(!is.na(kc_housing$sqft_basement))
 ```
 
 We drop the id column which provides no information about the house prices:
 ```{r}
-house_sales_prediction$id = NULL
+kc_housing$id = NULL
 ```
 
 Additionally we convert the price from Dollar to units of 1000 Dollar to improve readability.
 
 ```{r}
-house_sales_prediction$price = house_sales_prediction$price / 1000
+kc_housing$price = kc_housing$price / 1000
+```
+
+Additionally, for now we simply drop the columns that have missing values, as some of our learners can not deal with them.
+A better option to deal with missing values would be imputation, i.e. replacing missing values with valid ones.
+We will deal with this in a separate article.
+
+```{r}
+kc_housing$yr_renovated = NULL
+kc_housing$sqft_basement = NULL
 ```
 
 We can now plot the density of the **price** to get a first impression on its distribution.
 
 ```{r}
 library(ggplot2)
-ggplot(house_sales_prediction, aes(x = price)) + geom_density()
+ggplot(kc_housing, aes(x = price)) + geom_density()
 ```
 
 We can see that the prices for most houses lie between 75.000 and 1.5 million dollars.
@@ -132,7 +142,7 @@ After those initial manipulations, we load all required packages and create a Ta
 ```{r}
 library(mlr3)
 library(mlr3viz)
-tsk = TaskRegr$new("sales", house_sales_prediction, target = "price")
+tsk = TaskRegr$new("sales", kc_housing, target = "price")
 ```
 
 We can inspect associations between variables using `mlr3viz`'s `autoplot` function in order to get some good first impressions for our data.
@@ -224,12 +234,12 @@ library(ggmap)
 
 # And create a quick plot for the price
 qmplot(long, lat, maptype = "watercolor", color = log(price),
-  data = house_sales_prediction[train.idx[1:3000],]) +
+  data = kc_housing[train.idx[1:3000],]) +
   scale_colour_viridis_c()
 
 # And the zipcode
 qmplot(long, lat, maptype = "watercolor", color = zipcode,
-  data = house_sales_prediction[train.idx[1:3000],]) + guides(color = FALSE)
+  data = kc_housing[train.idx[1:3000],]) + guides(color = FALSE)
 ```
 
 We can see that the price is clearly associated with the zipcode when comparing then two plots.
