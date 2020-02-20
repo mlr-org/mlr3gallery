@@ -4,7 +4,7 @@ author: Lennart Schneider
 date: '2020-02-20'
 slug: date-features
 categories: []
-tags: ['feature-engineering', 'mlr3pipelines', 'random-forest', 'regression']
+tags: ['feature-engineering', 'mlr3pipelines', 'random-forest', 'regression', 'date-features']
 packages: ['mlr3', 'mlr3learners', 'mlr3pipelines', 'ranger']
 ---
 
@@ -28,7 +28,7 @@ of a day are one hour apart, but so are the 23rd hour and midnight of the other 
 [fastai](https://docs.fast.ai/tabular.transform.html#Treating-date-columns) for more information).
 
 Not respecting this cyclical nature results in treating hours on a linear continuum. One way to
-handle a cyclical feature, $\mathbf{x}$, is to compute the sines and cosines transformation of
+handle a cyclical feature, $\mathbf{x}$, is to compute the sine and cosine transformation of
 $\frac{2 \pi \mathbf{x}}{max_{\mathbf{x}}}$. This results in a two-dimensional representation of the
 feature:
 ```{r, echo=FALSE, fig.height=5.5, fig.width=10, fig.align = "center"}
@@ -41,17 +41,21 @@ cols = rainbow(n, s = 1, v = 1, start = 0, end = max(1, n - 1) / n, alpha = 1)
 par(mfrow = c(1, 2))
 plot(hours, type = "n", xlab = "Index", ylab = "Hours")
 text(hours, col = cols, labels = as.character(hours))
-plot(hours_sin, hours_cos, type = "n", xlab = "Sinus Transformation", ylab = "Cosines Transformation")
+plot(hours_sin, hours_cos, type = "n", xlab = "Sine Transformation", ylab = "Cosine Transformation")
 text(hours_sin, hours_cos, col = cols, labels = as.character(hours))
 ```
 
 `r mlr_pkg("mlr3pipelines")` provides the `PipeOpDateFeatures` pipeline which can be used to
 automatically engineer features based on `POSIXct` columns, including handling of cyclical features.
+This is useful as most learners naturally cannot handle dates and `POSIXct` variables and therefore
+require conversion prior to training.
 
 ## Bike Sharing
 The [Bike Sharing Dataset](https://archive.ics.uci.edu/ml/datasets/bike+sharing+dataset) contains
 the hourly count of rental bikes between years 2011 and 2012 in Capital bikeshare system with the
-corresponding weather and seasonal information:
+corresponding weather and seasonal information. The dataset can be downloaded from the UCI Machine
+Learning Repository. After reading in the data, we fix some factor levels, and convert some data
+types.
 ```{r}
 tmp <- tempfile()
 download.file("https://archive.ics.uci.edu/ml/machine-learning-databases/00275/Bike-Sharing-Dataset.zip", tmp)
@@ -60,6 +64,10 @@ bikes$season = factor(bikes$season, labels = c("winter", "spring", "summer", "fa
 bikes$holiday = as.logical(bikes$holiday)
 bikes$workingday = as.logical(bikes$workingday)
 bikes$weathersit = as.factor(bikes$weathersit)
+```
+
+Our goal will be to predict the total number of rented bikes on a given day: `cnt`.
+```{r}
 str(bikes)
 ```
 
@@ -72,9 +80,7 @@ bikes$date = as.POSIXct(strptime(paste0(bikes$dteday, " ", bikes$hr, ":00:00"), 
 summary(bikes$date)
 ```
 
-Using a random forest, we want to predict the total count of rental bikes `cnt`.
-
-## Baseline
+## Baseline Random Forest
 We construct a new regression task and create a vector of train and test indices:
 ```{r}
 library(mlr3)
@@ -91,25 +97,26 @@ tsk_train = tsk$clone()$filter(train.idx)
 tsk_test = tsk$clone()$filter(test.idx)
 ```
 
-To estimate the performance on future data, we will use `5-fold cross-validation`:
+To estimate the performance on future data, we will use `3-fold cross-validation`:
 ```{r}
-cv5 = rsmp("cv", folds = 5)
+cv3 = rsmp("cv", folds = 3)
 ```
 
 As our baseline model, we use a random forest, `r ref("mlr_learners_regr.ranger", "ranger learner")`.
 For the baseline, we only use the original features that are sensible and drop `instant` (record
-index), `dteday` (year-month-day as a `character`, not usable), `date` (our new `POSIXct` variable
-which we will only use later), `casual` (count of casual users) and `registered` (count of
-registered users). Note that `casual` and `registered` adds up to `cnt`.
+index), `dteday` (year-month-day as a `character`, not usable) and `date` (our new `POSIXct`
+variable which we will only use later). We also do not use `casual` (count of casual users) and
+`registered` (count of registered users) as features as they together add up to `cnt` and could be
+used as different target variables if we were interested in only the casual or registered users.
 ```{r}
 lrn_rf = lrn("regr.ranger")
 tsk_train_rf = tsk_train$clone()$select(setdiff(tsk$feature_names,
   c("instant", "dteday", "date", "casual", "registered")))
 ```
 
-We can then use `resample` with `5-fold cross-validation`:
+We can then use `resample` with `3-fold cross-validation`:
 ```{r}
-res_rf = resample(tsk_train_rf, learner = lrn_rf, resampling = cv5)
+res_rf = resample(tsk_train_rf, learner = lrn_rf, resampling = cv3)
 res_rf$score(msr("regr.mse"))
 ```
 
@@ -142,6 +149,10 @@ tsk_train_ex = tsk_train$clone()$select(setdiff(tsk$feature_names,
 pop$train(list(tsk_train_ex))
 ```
 
+Note that it may be useful to familiarize yourself with `PipeOpRemoveConstants` which can be used after the
+feature engineering to remove features that are constant. `PipeOpDateFeatures` does not do this step
+automatically.
+
 To combine this feature engineering step with a random forest,
 `r ref("mlr_learners_regr.ranger", "ranger learner")`, we now construct a `GraphLearner`.
 
@@ -152,15 +163,15 @@ other `Learner`:
 ```{r}
 grl = GraphLearner$new(
   po("datefeatures", param_vals = list(cyclic = TRUE, minute = FALSE, second = FALSE)) %>>%
-  po("learner", lrn("regr.ranger"))
+  lrn("regr.ranger")
 )
 ```
 
-Using `resample` with `5-fold cross-validation` on the training task yields:
+Using `resample` with `3-fold cross-validation` on the training task yields:
 ```{r}
 tsk_train_grl = tsk_train$clone()$select(setdiff(tsk$feature_names,
   c("instant", "dteday", "yr", "mnth", "hr", "weekday", "casual", "registered")))
-res_grl = resample(tsk_train_grl, learner = grl, resampling = cv5)
+res_grl = resample(tsk_train_grl, learner = grl, resampling = cv3)
 res_grl$score(msr("regr.mse"))
 ```
 
