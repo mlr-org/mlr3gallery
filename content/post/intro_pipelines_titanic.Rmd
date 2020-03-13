@@ -282,6 +282,18 @@ and use `PipeOpSelect` in order to de-select the `character` features we used fo
 Additionally, we collapse the 'surname', so only surnames that make up more than 0.6 \% of the data
 are kept.
 
+In summary we do the following: 
+
+* `mutate`: The `po_ftextract` we defined above extracts additional features from the data.
+* `collapsefactors`: Removes factor levels that make up less then 3 \% of the data.
+* `select`: Drops `character` columns.
+* `gunion`: Puts two `PipeOp`s in parallel.
+  * `missind`: `po_indicator` adds a column for each numeric with the info whether the value is NA or not.
+  * `imputehist`: Imputes numeric and integer columns by sampling from the histogram.
+* `featureunion`: Cbind's parallel data streams.
+* `imputenewlvl`: Imputes factor and ordered columns.
+* `fixfactors`: Removes empty factor levels and removes factor levels that do not exist during training.
+* `learner`: Appends a learner to the `Graph`.
 
 The full graph we created is the following:
 
@@ -291,8 +303,8 @@ gr_final = po_ftextract %>>%
   po("select", param_vals = list(selector = selector_invert(selector_type("character")))) %>>%
   gunion(list(po_indicator, po("imputehist"))) %>>%
   po("featureunion") %>>%
-  po("fixfactors") %>>%
   po("imputenewlvl") %>>%
+  po("fixfactors") %>>%
   po(learner)
 ```
 
@@ -306,7 +318,7 @@ agg
 ```
 
 
-We have improved a little bit! But there are many more things to explore!
+We have improved even more! But there are many more things to explore!
 We could extract even more information from the different features and see
 what happens.
 
