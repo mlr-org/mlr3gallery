@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Hugo 0.67.0" />
+
+
+<title>Tuning Over Multiple Learners (Tuning Multiplexer) - mlr3 gallery</title>
+<meta property="og:title" content="Tuning Over Multiple Learners (Tuning Multiplexer) - mlr3 gallery">
+
+
+  <link href='/favicon.ico' rel='icon' type='image/x-icon'/>
+
+
+
+  
+
+
+
+
+
+
+
+
+<link href='//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/styles/gruvbox-dark.min.css' rel='stylesheet' type='text/css' />
+
+
+
+<link rel="stylesheet" href="/css/fonts.css" media="all">
+<link rel="stylesheet" href="/css/main.css" media="all">
+
+<link rel="stylesheet" href="/css/custom.css">
+
+
+
+  </head>
+  <body>
+    <div class="wrapper">
+      <header class="header">
+        <nav class="nav">
+  <a href="/" class="nav-logo">
+    <img src="/images/logo.png"
+         width="50"
+         height="50"
+         alt="mlr logo">
+  </a>
+
+  <ul class="nav-links">
+    
+    <li><a href="/about/">About</a></li>
+    
+    <li><a href="https://github.com/mlr-org/mlr3gallery">GitHub</a></li>
+    
+    <li><a href="https://mlr3.mlr-org.com">mlr3</a></li>
+    
+  </ul>
+</nav>
+
+      </header>
+
+
+<main class="content" role="main">
+
+  <article class="article">
+    
+    <span class="article-duration">7 min read</span>
+    
+
+    <h1 class="article-title">Tuning Over Multiple Learners (Tuning Multiplexer)</h1>
+
+    
+    <span class="article-date">2020-02-01 by Jakob Richter</span>
+    
+
+    <div class="article-content">
+      
+
+
+<p>This use case shows how to tune over multiple learners for a single task. Following tasks are illustrated:</p>
+<ul>
+<li>Build a pipeline that can switch between multiple learners.</li>
+<li>Define the hyperparameter search space for the pipeline.</li>
+<li>Define transformations for single hyperparameters.</li>
+<li>Define a hierarchical order of the hyperparameters.</li>
+<li>Run a random search.</li>
+</ul>
+<div id="build-the-pipeline" class="section level2">
+<h2>Build the Pipeline</h2>
+<p>The pipeline just has a single purpose in this example: It should allow us to switch between different learners. In the end we will have a so called Piped Learner that uses either an SVM or an random forest (as implemented in the R-package ranger) to train a model, depending on the hyperparameter setting.</p>
+<p>First we will define the learners that we are going to use in a named list. The names are needed to control which learner to use in the pipeline. They can also be different from the learner id to allow multiple learners with the same id but possible different settings. We also have to set the <code>type</code> hyperparameter of the SVM at this stage already to be able to tune over the <code>cost</code> parameter.</p>
+<pre class="r"><code>set.seed(1)
+library(mlr3)
+library(mlr3tuning)
+library(mlr3pipelines)
+library(mlr3learners)
+library(paradox)
+lgr::get_logger(&quot;mlr3&quot;)$set_threshold(&quot;warn&quot;)
+lgr::get_logger(&quot;mlr3tuning&quot;)$set_threshold(&quot;warn&quot;)
+
+
+learns = list(
+  lrn(&quot;classif.svm&quot;, type = &quot;C-classification&quot;),
+  lrn(&quot;classif.ranger&quot;)
+)
+names(learns) = mlr3misc::map(learns, &quot;id&quot;) # does the same as purrr::map</code></pre>
+<p>The pipe consists of three elements: The <code>branch</code> operator will pipe the incoming data to one of the following elements depending on how the <code>branch.selection</code> parameter is set. The second element consists of our learners. Using <code>lapply(learns, po)</code> we convert them to single pipe operators. <code>gunion</code> combines them in an unconnected manner, so that they can be used after a branching. Naturally, one of the learner models has to be the end result of the graph. <code>unbranch</code> takes care of that.</p>
+<pre class="r"><code>pipe =
+  po(&quot;branch&quot;, names(learns)) %&gt;&gt;%
+  gunion(unname(lapply(learns, po))) %&gt;&gt;%
+  po(&quot;unbranch&quot;)
+
+pipe$plot()</code></pre>
+<p><img src="/post/tuning_multiplexer_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
+</div>
+<div id="define-the-search-space" class="section level2">
+<h2>Define the Search Space</h2>
+<p>First we want to get a glance of all the hyperparameters we could tune over. The pipe has a combined parameter set of all learners that is so big, so we have to use a trick to get an overview.</p>
+<pre class="r"><code>as.data.table(pipe$param_set)[,1:4]</code></pre>
+<pre><code>##                                              id    class lower upper
+##  1:                            branch.selection ParamFct    NA    NA
+##  2:                            classif.svm.type ParamFct    NA    NA
+##  3:                            classif.svm.cost ParamDbl     0   Inf
+##  4:                              classif.svm.nu ParamDbl  -Inf   Inf
+##  5:                          classif.svm.kernel ParamFct    NA    NA
+##  6:                          classif.svm.degree ParamInt     1   Inf
+##  7:                           classif.svm.coef0 ParamDbl  -Inf   Inf
+##  8:                           classif.svm.gamma ParamDbl     0   Inf
+##  9:                       classif.svm.cachesize ParamDbl  -Inf   Inf
+## 10:                       classif.svm.tolerance ParamDbl     0   Inf
+## 11:                       classif.svm.shrinking ParamLgl    NA    NA
+## 12:                           classif.svm.cross ParamInt     0   Inf
+## 13:                          classif.svm.fitted ParamLgl    NA    NA
+## 14:                           classif.svm.scale ParamUty    NA    NA
+## 15:                   classif.svm.class.weights ParamUty    NA    NA
+## 16:                    classif.ranger.num.trees ParamInt     1   Inf
+## 17:                         classif.ranger.mtry ParamInt     1   Inf
+## 18:                   classif.ranger.importance ParamFct    NA    NA
+## 19:                 classif.ranger.write.forest ParamLgl    NA    NA
+## 20:                classif.ranger.min.node.size ParamInt     1   Inf
+## 21:                      classif.ranger.replace ParamLgl    NA    NA
+## 22:              classif.ranger.sample.fraction ParamDbl     0     1
+## 23:                classif.ranger.class.weights ParamDbl  -Inf   Inf
+## 24:                    classif.ranger.splitrule ParamFct    NA    NA
+## 25:            classif.ranger.num.random.splits ParamInt     1   Inf
+## 26:         classif.ranger.split.select.weights ParamDbl     0     1
+## 27:       classif.ranger.always.split.variables ParamUty    NA    NA
+## 28:    classif.ranger.respect.unordered.factors ParamFct    NA    NA
+## 29: classif.ranger.scale.permutation.importance ParamLgl    NA    NA
+## 30:                   classif.ranger.keep.inbag ParamLgl    NA    NA
+## 31:                      classif.ranger.holdout ParamLgl    NA    NA
+## 32:                  classif.ranger.num.threads ParamInt     1   Inf
+## 33:                  classif.ranger.save.memory ParamLgl    NA    NA
+## 34:                      classif.ranger.verbose ParamLgl    NA    NA
+## 35:                    classif.ranger.oob.error ParamLgl    NA    NA
+##                                              id    class lower upper</code></pre>
+<p>We decide to tune the <code>mtry</code> parameter of the random forest (<code>ranger</code>) and the <code>cost</code> parameter of the SVM. Additionally we tune the pipe parameter that chooses whether to use <code>ranger</code> or <code>svm</code> to build the model. We have to manually specify the numerical parameters with boundaries. The categorical parameter of the branch selection can be directly copied.</p>
+<p>We know that the <code>cost</code> parameter is more sensitive to changes below 1. To reflect that, we will use a transformation, so that evenly distributed values between -10 and 10 are transformed to values between <span class="math inline">\(2^{-10}\)</span> and <span class="math inline">\(2^{10}\)</span>.</p>
+<p>Additionally we have to reflect the hierarchical order of the parameter sets. We can only set the <code>mtry</code> value if the pipe is configured to use the random forest (<code>ranger</code>). The same applies to the <code>cost_trafo</code> parameter of the SVM.</p>
+<pre class="r"><code>ps = ParamSet$new(list(
+  pipe$param_set$params$branch.selection$clone(), # ParamFct can be copied.
+  ParamInt$new(&quot;classif.ranger.mtry&quot;, lower = 1L, upper = 20L),
+  ParamDbl$new(&quot;classif.svm.cost_trafo&quot;, lower = -10, upper = 10)
+))
+
+ps$trafo = function(x, param_set) {
+  # we only do the trafo if branch.selection == &quot;classif.svm&quot;,
+  # yes we could also write that in the if statement
+  if (!is.null(x$classif.svm.cost_trafo)) {
+    x$classif.svm.cost = 2^x$classif.svm.cost_trafo
+    x$classif.svm.cost_trafo = NULL
+  }
+  return(x)
+}
+
+ps$add_dep(&quot;classif.ranger.mtry&quot;, &quot;branch.selection&quot;, CondEqual$new(&quot;classif.ranger&quot;))
+ps$add_dep(&quot;classif.svm.cost_trafo&quot;, &quot;branch.selection&quot;, CondEqual$new(&quot;classif.svm&quot;))</code></pre>
+</div>
+<div id="tune-the-pipeline-with-a-random-search" class="section level2">
+<h2>Tune the Pipeline with a Random Search</h2>
+<p>First, we need to build a <code>Learner</code> object from the pipe. Afterwards we can <a href="https://mlr3book.mlr-org.com/tuning.html">tune</a> it like every other learner.</p>
+<pre class="r"><code>glrn = GraphLearner$new(pipe)
+tsk = tsk(&quot;sonar&quot;)
+cv5 = rsmp(&quot;cv&quot;, folds = 5)
+cv5$instantiate(tsk)
+# not a must, but ensures that all evals are on the same exact split
+
+instance = TuningInstance$new(
+  task = tsk,
+  learner = glrn,
+  resampling = cv5,
+  measures = msr(&quot;classif.ce&quot;),
+  param_set = ps,
+  terminator = term(&quot;evals&quot;, n_evals = 20)
+)
+
+tuner = TunerRandomSearch$new()
+tuner$tune(instance)
+instance$result</code></pre>
+<pre><code>## $tune_x
+## $tune_x$branch.selection
+## [1] &quot;classif.svm&quot;
+## 
+## $tune_x$classif.svm.cost_trafo
+## [1] 3.196421
+## 
+## 
+## $params
+## $params$branch.selection
+## [1] &quot;classif.svm&quot;
+## 
+## $params$classif.svm.type
+## [1] &quot;C-classification&quot;
+## 
+## $params$classif.svm.cost
+## [1] 9.166815
+## 
+## 
+## $perf
+## classif.ce 
+##  0.1108014</code></pre>
+<p>The following shows a quick way to visualize the tuning results.</p>
+<pre class="r"><code># resdf = instance$archive(unnest = &quot;params&quot;) #this unnests the transformed values
+resdf = instance$archive(unnest = &quot;tune_x&quot;) #this unnests the tuner search space values
+resdf = tidyr::pivot_longer(
+  resdf,
+  c(&quot;classif.ranger.mtry&quot;, &quot;classif.svm.cost_trafo&quot;),
+  values_drop_na = TRUE)
+library(ggplot2)
+g = ggplot(resdf, aes(x = value, y = classif.ce))
+g = g + geom_point()
+g = g + facet_grid(~name, scales = &quot;free&quot;)
+g</code></pre>
+<p><img src="/post/tuning_multiplexer_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+</div>
+<div id="possible-errors" class="section level2">
+<h2>Possible Errors</h2>
+<p>In the beginning we had to set <code>type = &quot;C-classification&quot;)</code> for the learner. Here is what happens if we forget to do that (some objects are taken from above):</p>
+<pre class="r"><code>learns2 = list(
+  lrn(&quot;classif.svm&quot;),
+  lrn(&quot;classif.ranger&quot;)
+)
+names(learns2) = mlr3misc::map(learns, &quot;id&quot;)
+
+pipe2 =
+  po(&quot;branch&quot;, names(learns2)) %&gt;&gt;%
+  gunion(unname(lapply(learns2, po))) %&gt;&gt;%
+  po(&quot;unbranch&quot;)
+
+glrn2 = GraphLearner$new(pipe2)
+
+instance2 = TuningInstance$new(
+  task = tsk,
+  learner = glrn2,
+  resampling = cv5,
+  measures = msr(&quot;classif.ce&quot;),
+  param_set = ps, #same param set as above
+  terminator = term(&quot;evals&quot;, n_evals = 20)
+)
+
+
+tuner = TunerRandomSearch$new()
+tuner$tune(instance2)</code></pre>
+<pre><code>## Error in (function (xs) : Assertion on &#39;xs&#39; failed: The parameter &#39;cost&#39; can only be set if the following condition is met &#39;type = C-classification&#39;. Instead the parameter value for &#39;type&#39; is not set at all. Try setting &#39;type&#39; to a value that satisfies the condition.</code></pre>
+<p>So this error tells me that the <code>type</code> parameter for the learner is not set but to set the parameter <code>cost</code>, <code>type</code> has to be set to <code>&quot;C-classification&quot;</code>. The easiest point to do so is before the construction of the pipe.</p>
+<p>Another problem that might occur is a wrong definition of the transformation function in the parameter set.</p>
+<pre class="r"><code>ps3 = ps$clone(deep = TRUE)
+ps3$trafo = function(x, param_set) {
+  # Wrong! We forgot that classif.svm.cost_trafo is not always present!
+  x$classif.svm.cost = 2^x$classif.svm.cost_trafo
+  return(x)
+}
+
+instance3 = TuningInstance$new(
+  task = tsk,
+  learner = glrn,
+  resampling = cv5,
+  measures = msr(&quot;classif.ce&quot;),
+  param_set = ps3,
+  terminator = term(&quot;evals&quot;, n_evals = 20)
+)
+
+
+tuner = TunerRandomSearch$new()
+tuner$tune(instance3)</code></pre>
+<pre><code>## Error in (function (xs) : Assertion on &#39;xs&#39; failed: Parameter &#39;classif.svm.cost_trafo&#39; not available. Did you mean &#39;branch.selection&#39; / &#39;classif.svm.type&#39; / &#39;classif.svm.cost&#39;?.</code></pre>
+<p>Here the error is less helpful and even a <code>traceback()</code> does not hint you directly towards the <code>trafo</code> function that is the cause of the error. If you encounter an error like this it makes sense to use <code>browser()</code> inside the <code>tafo</code> function or set a breakpoint in RStudio to see how the <code>x</code> looks like.</p>
+</div>
+
+    </div>
+  </article>
+
+  
+
+
+</main>
+
+      <footer class="footer">
+        <ul class="footer-links">
+          <li>
+            <a href="/index.xml" type="application/rss+xml" target="_blank">RSS feed</a>
+          </li>
+          <li>
+            <a href="https://gohugo.io/" class="footer-links-kudos">Made with <img src="/images/hugo-logo.png" alt="Img link to Hugo website" width="22" height="22"></a>
+          </li>
+        </ul>
+      </footer>
+
+    </div>
+    
+
+
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/highlight.min.js"></script>
+
+
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/languages/r.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/languages/yaml.min.js"></script>
+<script>hljs.configure({languages: []}); hljs.initHighlightingOnLoad();</script>
+
+
+
+    
+<script src="/js/math-code.js"></script>
+<script async src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+
+
+    
+  </body>
+</html>
+

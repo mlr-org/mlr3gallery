@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Hugo 0.67.0" />
+
+
+<title>Feature Engineering of Date-Time Variables - mlr3 gallery</title>
+<meta property="og:title" content="Feature Engineering of Date-Time Variables - mlr3 gallery">
+
+
+  <link href='/favicon.ico' rel='icon' type='image/x-icon'/>
+
+
+
+  
+
+
+
+
+
+
+
+
+<link href='//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/styles/gruvbox-dark.min.css' rel='stylesheet' type='text/css' />
+
+
+
+<link rel="stylesheet" href="/css/fonts.css" media="all">
+<link rel="stylesheet" href="/css/main.css" media="all">
+
+<link rel="stylesheet" href="/css/custom.css">
+
+
+
+  </head>
+  <body>
+    <div class="wrapper">
+      <header class="header">
+        <nav class="nav">
+  <a href="/" class="nav-logo">
+    <img src="/images/logo.png"
+         width="50"
+         height="50"
+         alt="mlr logo">
+  </a>
+
+  <ul class="nav-links">
+    
+    <li><a href="/about/">About</a></li>
+    
+    <li><a href="https://github.com/mlr-org/mlr3gallery">GitHub</a></li>
+    
+    <li><a href="https://mlr3.mlr-org.com">mlr3</a></li>
+    
+  </ul>
+</nav>
+
+      </header>
+
+
+<main class="content" role="main">
+
+  <article class="article">
+    
+    <span class="article-duration">8 min read</span>
+    
+
+    <h1 class="article-title">Feature Engineering of Date-Time Variables</h1>
+
+    
+    <span class="article-date">2020-02-23 by Lennart Schneider</span>
+    
+
+    <div class="article-content">
+      
+
+
+<p>In this tutorial, we demonstrate how <a href="https://mlr3pipelines.mlr-org.com">mlr3pipelines</a> can be used to easily engineer features based on date-time variables. Relying on the <a href="https://archive.ics.uci.edu/ml/datasets/bike+sharing+dataset">Bike Sharing Dataset</a> and the <a href="https://mlr3learners.mlr-org.com/reference/mlr_learners_regr.ranger.html"><code>ranger learner</code></a> we compare the RMSE of a random forest using the original features (baseline), to the RMSE of a random forest using newly engineered features on top of the original ones.</p>
+<div id="motivation" class="section level2">
+<h2>Motivation</h2>
+<p>A single Date-Time variable (i.e., a <code>POSIXct</code> column) contains plenty of information ranging from year, month, day, hour, minute and second to other features such as week of the year, or day of the week. Moreover, most of these features are of cyclical nature, i.e., the eleventh and twelfth hour of a day are one hour apart, but so are the 23rd hour and midnight of the other day (see also this <a href="http://blog.davidkaleko.com/feature-engineering-cyclical-features.html">blog post</a> and <a href="https://docs.fast.ai/tabular.transform.html#Treating-date-columns">fastai</a> for more information).</p>
+<p>Not respecting this cyclical nature results in treating hours on a linear continuum. One way to handle a cyclical feature <span class="math inline">\(\mathbf{x}\)</span> is to compute the sine and cosine transformation of <span class="math inline">\(\frac{2 \pi \mathbf{x}}{\mathbf{x}_{\text{max}}}\)</span>, with <span class="math inline">\(\mathbf{x}_{\text{max}} = 24\)</span> for hours and <span class="math inline">\(60\)</span> for minutes and seconds. This results in a two-dimensional representation of the feature: <img src="/post/date_features_files/figure-html/unnamed-chunk-2-1.png" width="960" style="display: block; margin: auto;" /></p>
+<p><a href="https://mlr3pipelines.mlr-org.com">mlr3pipelines</a> provides the <code>PipeOpDateFeatures</code> pipeline which can be used to automatically engineer features based on <code>POSIXct</code> columns, including handling of cyclical features. This is useful as most learners naturally cannot handle dates and <code>POSIXct</code> variables and therefore require conversion prior to training.</p>
+</div>
+<div id="bike-sharing" class="section level2">
+<h2>Bike Sharing</h2>
+<p>The <a href="https://archive.ics.uci.edu/ml/datasets/bike+sharing+dataset">Bike Sharing Dataset</a> contains the hourly count of rental bikes between years 2011 and 2012 in Capital bikeshare system with the corresponding weather and seasonal information. The dataset can be downloaded from the UCI Machine Learning Repository. After reading in the data, we fix some factor levels, and convert some data types:</p>
+<pre class="r"><code>tmp &lt;- tempfile()
+download.file(&quot;https://archive.ics.uci.edu/ml/machine-learning-databases/00275/Bike-Sharing-Dataset.zip&quot;, tmp)
+bikes = read.csv(unz(tmp, filename = &quot;hour.csv&quot;), as.is = TRUE)
+bikes$season = factor(bikes$season, labels = c(&quot;winter&quot;, &quot;spring&quot;, &quot;summer&quot;, &quot;fall&quot;))
+bikes$holiday = as.logical(bikes$holiday)
+bikes$workingday = as.logical(bikes$workingday)
+bikes$weathersit = as.factor(bikes$weathersit)</code></pre>
+<p>Our goal will be to predict the total number of rented bikes on a given day: <code>cnt</code>.</p>
+<pre class="r"><code>str(bikes)</code></pre>
+<pre><code>## &#39;data.frame&#39;:    17379 obs. of  17 variables:
+##  $ instant   : int  1 2 3 4 5 6 7 8 9 10 ...
+##  $ dteday    : chr  &quot;2011-01-01&quot; &quot;2011-01-01&quot; &quot;2011-01-01&quot; &quot;2011-01-01&quot; ...
+##  $ season    : Factor w/ 4 levels &quot;winter&quot;,&quot;spring&quot;,..: 1 1 1 1 1 1 1 1 1 1 ...
+##  $ yr        : int  0 0 0 0 0 0 0 0 0 0 ...
+##  $ mnth      : int  1 1 1 1 1 1 1 1 1 1 ...
+##  $ hr        : int  0 1 2 3 4 5 6 7 8 9 ...
+##  $ holiday   : logi  FALSE FALSE FALSE FALSE FALSE FALSE ...
+##  $ weekday   : int  6 6 6 6 6 6 6 6 6 6 ...
+##  $ workingday: logi  FALSE FALSE FALSE FALSE FALSE FALSE ...
+##  $ weathersit: Factor w/ 4 levels &quot;1&quot;,&quot;2&quot;,&quot;3&quot;,&quot;4&quot;: 1 1 1 1 1 2 1 1 1 1 ...
+##  $ temp      : num  0.24 0.22 0.22 0.24 0.24 0.24 0.22 0.2 0.24 0.32 ...
+##  $ atemp     : num  0.288 0.273 0.273 0.288 0.288 ...
+##  $ hum       : num  0.81 0.8 0.8 0.75 0.75 0.75 0.8 0.86 0.75 0.76 ...
+##  $ windspeed : num  0 0 0 0 0 0.0896 0 0 0 0 ...
+##  $ casual    : int  3 8 5 3 0 0 2 1 1 8 ...
+##  $ registered: int  13 32 27 10 1 1 0 2 7 6 ...
+##  $ cnt       : int  16 40 32 13 1 1 2 3 8 14 ...</code></pre>
+<p>The original dataset does not contain a <code>POSIXct</code> column, but we can easily generate one based on the other variables available (note that as no information regarding minutes and seconds is available, we set them to <code>:00:00</code>):</p>
+<pre class="r"><code>bikes$date = as.POSIXct(strptime(paste0(bikes$dteday, &quot; &quot;, bikes$hr, &quot;:00:00&quot;), tz = &quot;GMT&quot;,
+  format = &quot;%Y-%m-%d %H:%M:%S&quot;))
+summary(bikes$date)</code></pre>
+<pre><code>##                  Min.               1st Qu.                Median 
+## &quot;2011-01-01 00:00:00&quot; &quot;2011-07-04 22:30:00&quot; &quot;2012-01-02 21:00:00&quot; 
+##                  Mean               3rd Qu.                  Max. 
+## &quot;2012-01-02 15:41:22&quot; &quot;2012-07-02 06:30:00&quot; &quot;2012-12-31 23:00:00&quot;</code></pre>
+</div>
+<div id="baseline-random-forest" class="section level2">
+<h2>Baseline Random Forest</h2>
+<p>We construct a new regression task and create a vector of train and test indices:</p>
+<pre class="r"><code>library(mlr3)
+library(mlr3learners)
+set.seed(2906)
+tsk = TaskRegr$new(&quot;bikes&quot;, backend = bikes, target = &quot;cnt&quot;)
+train.idx = sample(seq_len(tsk$nrow), size = 0.7 * tsk$nrow)
+test.idx = setdiff(seq_len(tsk$nrow), train.idx)</code></pre>
+<p>This allows us to construct a train and test task:</p>
+<pre class="r"><code>tsk_train = tsk$clone()$filter(train.idx)
+tsk_test = tsk$clone()$filter(test.idx)</code></pre>
+<p>To estimate the performance on unseen data, we will use a <code>3-fold cross-validation</code>. Note that this involves validating on past data, which is usually a bad practice but should suffice for this example:</p>
+<pre class="r"><code>cv3 = rsmp(&quot;cv&quot;, folds = 3)</code></pre>
+<p>As our baseline model, we use a random forest, ranger learner. For the baseline, we only use the original features that are sensible and drop <code>instant</code> (record index), <code>dteday</code> (year-month-day as a <code>character</code>, not usable) and <code>date</code> (our new <code>POSIXct</code> variable which we will only use later). We also do not use <code>casual</code> (count of casual users) and <code>registered</code> (count of registered users) as features as they together add up to <code>cnt</code> and could be used as different target variables if we were interested in only the casual or registered users.</p>
+<pre class="r"><code>lrn_rf = lrn(&quot;regr.ranger&quot;)
+tsk_train_rf = tsk_train$clone()$select(setdiff(tsk$feature_names,
+  c(&quot;instant&quot;, &quot;dteday&quot;, &quot;date&quot;, &quot;casual&quot;, &quot;registered&quot;)))</code></pre>
+<p>We can then use <code>resample</code> with <code>3-fold cross-validation</code>:</p>
+<pre class="r"><code>res_rf = resample(tsk_train_rf, learner = lrn_rf, resampling = cv3)</code></pre>
+<pre><code>## INFO  [15:49:00.491] Applying learner &#39;regr.ranger&#39; on task &#39;bikes&#39; (iter 1/3) 
+## INFO  [15:49:02.924] Applying learner &#39;regr.ranger&#39; on task &#39;bikes&#39; (iter 2/3) 
+## INFO  [15:49:04.175] Applying learner &#39;regr.ranger&#39; on task &#39;bikes&#39; (iter 3/3)</code></pre>
+<pre class="r"><code>res_rf$score(msr(&quot;regr.mse&quot;))</code></pre>
+<pre><code>##          task task_id             learner  learner_id     resampling
+## 1: &lt;TaskRegr&gt;   bikes &lt;LearnerRegrRanger&gt; regr.ranger &lt;ResamplingCV&gt;
+## 2: &lt;TaskRegr&gt;   bikes &lt;LearnerRegrRanger&gt; regr.ranger &lt;ResamplingCV&gt;
+## 3: &lt;TaskRegr&gt;   bikes &lt;LearnerRegrRanger&gt; regr.ranger &lt;ResamplingCV&gt;
+##    resampling_id iteration prediction regr.mse
+## 1:            cv         1     &lt;list&gt; 4563.564
+## 2:            cv         2     &lt;list&gt; 4696.805
+## 3:            cv         3     &lt;list&gt; 4431.978</code></pre>
+<p>The average RMSE is given by:</p>
+<pre class="r"><code>sprintf(&quot;RMSE ranger original features: %s&quot;, round(sqrt(res_rf$aggregate()), digits = 2))</code></pre>
+<pre><code>## [1] &quot;RMSE ranger original features: 67.56&quot;</code></pre>
+<p>We now want to improve our baseline model by using newly engineered features based on the <code>date</code> <code>POSIXct</code> column.</p>
+</div>
+<div id="pipeopdatefeatures" class="section level2">
+<h2>PipeOpDateFeatures</h2>
+<p>To engineer new features we use <code>PipeOpDateFeatures</code>. This pipeline automatically dispatches on <code>POSIXct</code> columns of the data and by default adds plenty of new date-time related features. Here, we want to add all except for <code>minute</code> and <code>second</code>, because this information is not available. As we additionally want to use cyclical versions of the features we set <code>cyclic = TRUE</code>:</p>
+<pre class="r"><code>library(mlr3pipelines)
+pop = po(&quot;datefeatures&quot;, param_vals = list(cyclic = TRUE, minute = FALSE, second = FALSE))</code></pre>
+<p>Training this pipeline will result in simply adding the new features (and removing the original <code>POSIXct</code> feature(s) used for the feature engineering, see also the <code>keep_date_var</code> parameter). In our training task, we can now drop the features, <code>yr</code>, <code>mnth</code>, <code>hr</code>, and <code>weekday</code>, because our pipeline will generate these anyways:</p>
+<pre class="r"><code>tsk_train_ex = tsk_train$clone()$select(setdiff(tsk$feature_names,
+  c(&quot;instant&quot;, &quot;dteday&quot;, &quot;yr&quot;, &quot;mnth&quot;, &quot;hr&quot;, &quot;weekday&quot;, &quot;casual&quot;, &quot;registered&quot;)))
+pop$train(list(tsk_train_ex))</code></pre>
+<pre><code>## $output
+## &lt;TaskRegr:bikes&gt; (12165 x 29)
+## * Target: cnt
+## * Properties: -
+## * Features (28):
+##   - dbl (23): atemp, date.day_of_month, date.day_of_month_cos,
+##     date.day_of_month_sin, date.day_of_week, date.day_of_week_cos,
+##     date.day_of_week_sin, date.day_of_year, date.day_of_year_cos,
+##     date.day_of_year_sin, date.hour, date.hour_cos, date.hour_sin,
+##     date.month, date.month_cos, date.month_sin, date.week_of_year,
+##     date.week_of_year_cos, date.week_of_year_sin, date.year, hum, temp,
+##     windspeed
+##   - lgl (3): date.is_day, holiday, workingday
+##   - fct (2): season, weathersit</code></pre>
+<p>Note that it may be useful to familiarize yourself with <code>PipeOpRemoveConstants</code> which can be used after the feature engineering to remove features that are constant. <code>PipeOpDateFeatures</code> does not do this step automatically.</p>
+<p>To combine this feature engineering step with a random forest, ranger learner, we now construct a <code>GraphLearner</code>.</p>
+</div>
+<div id="using-the-new-features-in-a-graphlearner" class="section level2">
+<h2>Using the New Features in a GraphLearner</h2>
+<p>We create a <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_learners_graph.html"><code>GraphLearner</code></a> consisting of the <code>PipeOpDateFeatures</code> pipeline and a ranger learner. This <code>GraphLearner</code> then behaves like any other <code>Learner</code>:</p>
+<pre class="r"><code>grl = GraphLearner$new(
+  po(&quot;datefeatures&quot;, param_vals = list(cyclic = TRUE, minute = FALSE, second = FALSE)) %&gt;&gt;%
+  lrn(&quot;regr.ranger&quot;)
+)</code></pre>
+<p>Using <code>resample</code> with <code>3-fold cross-validation</code> on the training task yields:</p>
+<pre class="r"><code>tsk_train_grl = tsk_train$clone()$select(setdiff(tsk$feature_names,
+  c(&quot;instant&quot;, &quot;dteday&quot;, &quot;yr&quot;, &quot;mnth&quot;, &quot;hr&quot;, &quot;weekday&quot;, &quot;casual&quot;, &quot;registered&quot;)))
+res_grl = resample(tsk_train_grl, learner = grl, resampling = cv3)</code></pre>
+<pre><code>## INFO  [15:49:06.580] Applying learner &#39;datefeatures.regr.ranger&#39; on task &#39;bikes&#39; (iter 1/3) 
+## INFO  [15:49:08.626] Applying learner &#39;datefeatures.regr.ranger&#39; on task &#39;bikes&#39; (iter 2/3) 
+## INFO  [15:49:11.261] Applying learner &#39;datefeatures.regr.ranger&#39; on task &#39;bikes&#39; (iter 3/3)</code></pre>
+<pre class="r"><code>res_grl$score(msr(&quot;regr.mse&quot;))</code></pre>
+<pre><code>##          task task_id        learner               learner_id     resampling
+## 1: &lt;TaskRegr&gt;   bikes &lt;GraphLearner&gt; datefeatures.regr.ranger &lt;ResamplingCV&gt;
+## 2: &lt;TaskRegr&gt;   bikes &lt;GraphLearner&gt; datefeatures.regr.ranger &lt;ResamplingCV&gt;
+## 3: &lt;TaskRegr&gt;   bikes &lt;GraphLearner&gt; datefeatures.regr.ranger &lt;ResamplingCV&gt;
+##    resampling_id iteration prediction regr.mse
+## 1:            cv         1     &lt;list&gt; 2374.592
+## 2:            cv         2     &lt;list&gt; 2249.154
+## 3:            cv         3     &lt;list&gt; 2429.190</code></pre>
+<p>The average RMSE is given by</p>
+<pre class="r"><code>sprintf(&quot;RMSE graph learner date features: %s&quot;, round(sqrt(res_grl$aggregate()), digits = 2))</code></pre>
+<pre><code>## [1] &quot;RMSE graph learner date features: 48.49&quot;</code></pre>
+<p>and therefore improved by almost 30%.</p>
+<p>Finally, we fit our <code>GraphLearner</code> on the complete training task and predict on the test task:</p>
+<pre class="r"><code>tsk_train$select(setdiff(tsk$feature_names,
+  c(&quot;instant&quot;, &quot;dteday&quot;, &quot;yr&quot;, &quot;mnth&quot;, &quot;hr&quot;, &quot;weekday&quot;, &quot;casual&quot;, &quot;registered&quot;)))
+grl$train(tsk_train)</code></pre>
+<pre class="r"><code>tsk_test$select(setdiff(tsk$feature_names,
+  c(&quot;instant&quot;, &quot;dteday&quot;, &quot;yr&quot;, &quot;mnth&quot;, &quot;hr&quot;, &quot;weekday&quot;, &quot;casual&quot;, &quot;registered&quot;)))
+pred = grl$predict(tsk_test)
+pred$score(msr(&quot;regr.mse&quot;))</code></pre>
+<pre><code>## regr.mse 
+## 1813.609</code></pre>
+</div>
+
+    </div>
+  </article>
+
+  
+
+
+</main>
+
+      <footer class="footer">
+        <ul class="footer-links">
+          <li>
+            <a href="/index.xml" type="application/rss+xml" target="_blank">RSS feed</a>
+          </li>
+          <li>
+            <a href="https://gohugo.io/" class="footer-links-kudos">Made with <img src="/images/hugo-logo.png" alt="Img link to Hugo website" width="22" height="22"></a>
+          </li>
+        </ul>
+      </footer>
+
+    </div>
+    
+
+
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/highlight.min.js"></script>
+
+
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/languages/r.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/languages/yaml.min.js"></script>
+<script>hljs.configure({languages: []}); hljs.initHighlightingOnLoad();</script>
+
+
+
+    
+<script src="/js/math-code.js"></script>
+<script async src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+
+
+    
+  </body>
+</html>
+
