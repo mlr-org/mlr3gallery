@@ -75,7 +75,7 @@ Let's score our prediction object with some metrics.
 And take a deeper look by inspecting the confusion matrix.
 
 ```{r}
-print(as.data.table(mlr_measures))
+head(as.data.table(mlr_measures))
 s = preds$score(msr("classif.acc"))
 print(s)
 s = preds$score(msrs(c("classif.acc", "classif.ce")))
@@ -121,10 +121,10 @@ If we want more, we can load on extension package from mlr3's
 Note how after the install the dictionary increases in size.
 
 ```{r}
-print(as.data.table(mlr_learners))
+head(as.data.table(mlr_learners)[, c("key", "packages")])
 # remotes::install_github("mlr3learners/mlr3learners.randomForest")
 library(mlr3learners.randomForest)
-print(as.data.table(mlr_learners))
+print(as.data.table(mlr_learners)[, c("key", "packages")])
 ```
 
 ## Benchmarking multiple learners
@@ -137,7 +137,6 @@ bm_grid = benchmark_grid(task, learners, cv10)
 bm = benchmark(bm_grid)
 print(bm)
 print(bm$aggregate(measures = msrs(c("classif.acc", "classif.ce"))))
-print(bm$data)
 ```
 
 ## Conclusion
