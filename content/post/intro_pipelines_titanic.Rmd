@@ -86,7 +86,7 @@ This might be important, as shifts in the data distribution often make our model
 DataExplorer::plot_bar(titanic_train, nrow = 5, ncol = 3)
 ```
 
-```{r, out.width="100%", fig.height=4, warning = FALSE}
+```{r, out.width="100%", fig.height=4, warning=FALSE}
 DataExplorer::plot_histogram(titanic_train, nrow = 2, ncol = 3)
 DataExplorer::plot_boxplot(titanic_train, by = "survived", nrow = 2, ncol = 3)
 ```
@@ -123,6 +123,9 @@ To get a first impression of what performance we can fit a simple decision tree:
 
 ```{r}
 learner = mlr_learners$get("classif.rpart")
+# or shorter:
+learner = lrn("classif.rpart")
+
 res = resample(task, learner, rdesc, store_models = TRUE)
 agg = res$aggregate(msr("classif.acc"))
 agg
@@ -293,6 +296,7 @@ In summary we do the following:
 * `featureunion`: Cbind's parallel data streams.
 * `imputenewlvl`: Imputes factor and ordered columns.
 * `fixfactors`: Removes empty factor levels and removes factor levels that do not exist during training.
+* `imputesample`: In some cases, if missing factor levels do not occur during training but only while predicting, `imputenewlvl` does not create a new level. For those, we sample a random value.
 * `learner`: Appends a learner to the `Graph`.
 
 The full graph we created is the following:
@@ -305,6 +309,7 @@ gr_final = po_ftextract %>>%
   po("featureunion") %>>%
   po("imputenewlvl") %>>%
   po("fixfactors") %>>%
+  po("imputesample") %>>%
   po(learner)
 ```
 
