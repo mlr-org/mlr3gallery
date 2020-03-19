@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Hugo 0.67.0" />
+
+
+<title>Impute missing variables - mlr3 gallery</title>
+<meta property="og:title" content="Impute missing variables - mlr3 gallery">
+
+
+  <link href='/favicon.ico' rel='icon' type='image/x-icon'/>
+
+
+
+  
+
+
+
+
+
+
+
+
+<link href='//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/styles/gruvbox-dark.min.css' rel='stylesheet' type='text/css' />
+
+
+
+<link rel="stylesheet" href="/css/fonts.css" media="all">
+<link rel="stylesheet" href="/css/main.css" media="all">
+
+<link rel="stylesheet" href="/css/custom.css">
+
+
+
+  </head>
+  <body>
+    <div class="wrapper">
+      <header class="header">
+        <nav class="nav">
+  <a href="/" class="nav-logo">
+    <img src="/images/logo.png"
+         width="50"
+         height="50"
+         alt="mlr logo">
+  </a>
+
+  <ul class="nav-links">
+    
+    <li><a href="/about/">About</a></li>
+    
+    <li><a href="https://github.com/mlr-org/mlr3gallery">GitHub</a></li>
+    
+    <li><a href="https://mlr3.mlr-org.com">mlr3</a></li>
+    
+  </ul>
+</nav>
+
+      </header>
+
+
+<main class="content" role="main">
+
+  <article class="article">
+    
+    <span class="article-duration">7 min read</span>
+    
+
+    <h1 class="article-title">Impute missing variables</h1>
+
+    
+    <span class="article-date">2020-01-31 by Florian Pfisterer</span>
+    
+
+    <div class="article-content">
+      
+<script src="/rmarkdown-libs/htmlwidgets/htmlwidgets.js"></script>
+<link href="/rmarkdown-libs/vis/vis.css" rel="stylesheet" />
+<script src="/rmarkdown-libs/vis/vis.min.js"></script>
+<script src="/rmarkdown-libs/visNetwork-binding/visNetwork.js"></script>
+
+
+<div id="prerequisites" class="section level2">
+<h2>Prerequisites</h2>
+<p>This tutorial assumes familiarity with the basics of <a href="https://mlr3pipelines.mlr-org.com">mlr3pipelines</a>. Consult the <a href="https://mlr3book.mlr-org.com/pipelines.html">mlr3book</a> if some aspects are not fully understandable. It deals with the problem of missing data.</p>
+<p>The random forest implementation in the package <a href="https://cran.r-project.org/package=ranger">ranger</a> unfortunately does not support missing values. Therefore it is required to impute missing features before passing the data to the learner.</p>
+<p>We show how to use <a href="https://mlr3pipelines.mlr-org.com">mlr3pipelines</a> to augment the <a href="https://mlr3learners.mlr-org.com/reference/mlr_learners_classif.ranger.html"><code>ranger learner</code></a> with automatic imputation.</p>
+</div>
+<div id="construct-the-base-objects" class="section level2">
+<h2>Construct the Base Objects</h2>
+<p>First, we take an example task with missing values (<a href="https://mlr3.mlr-org.com/reference/mlr_tasks_pima.html"><code>pima</code></a>) and create the <a href="https://mlr3learners.mlr-org.com/reference/mlr_learners_classif.ranger.html"><code>ranger learner</code></a>:</p>
+<pre class="r"><code>library(mlr3)
+library(mlr3learners)
+
+task = tsk(&quot;pima&quot;)
+print(task)</code></pre>
+<pre><code>## &lt;TaskClassif:pima&gt; (768 x 9)
+## * Target: diabetes
+## * Properties: twoclass
+## * Features (8):
+##   - dbl (8): age, glucose, insulin, mass, pedigree, pregnant, pressure,
+##     triceps</code></pre>
+<pre class="r"><code>learner = lrn(&quot;classif.ranger&quot;)
+print(learner)</code></pre>
+<pre><code>## &lt;LearnerClassifRanger:classif.ranger&gt;
+## * Model: -
+## * Parameters: list()
+## * Packages: ranger
+## * Predict Type: response
+## * Feature types: logical, integer, numeric, character, factor, ordered
+## * Properties: importance, multiclass, oob_error, twoclass, weights</code></pre>
+<p>We can now inspect the task for missing values. <code>task$missings()</code> returns the count of missing values for each variable.</p>
+<pre class="r"><code>task$missings()</code></pre>
+<pre><code>## diabetes      age  glucose  insulin     mass pedigree pregnant pressure 
+##        0        0        5      374       11        0        0       35 
+##  triceps 
+##      227</code></pre>
+<p>Additionally, we can see that the <a href="https://mlr3learners.mlr-org.com/reference/mlr_learners_classif.ranger.html"><code>ranger learner</code></a> can not handle missing values:</p>
+<pre class="r"><code>learner$properties</code></pre>
+<pre><code>## [1] &quot;importance&quot; &quot;multiclass&quot; &quot;oob_error&quot;  &quot;twoclass&quot;   &quot;weights&quot;</code></pre>
+<p>For comparison, other learners, e.g. the <a href="https://mlr3.mlr-org.com/reference/mlr_learners_classif.rpart.html"><code>rpart learner</code></a> can handle missing values internally.</p>
+<pre class="r"><code>lrn(&quot;classif.rpart&quot;)$properties</code></pre>
+<pre><code>## [1] &quot;importance&quot;        &quot;missings&quot;          &quot;multiclass&quot;       
+## [4] &quot;selected_features&quot; &quot;twoclass&quot;          &quot;weights&quot;</code></pre>
+<p>Before we dive deeper, we quickly try to visualize the columns with many missing values:</p>
+<pre class="r"><code>library(mlr3viz)
+autoplot(task$clone()$select(c(&quot;insulin&quot;, &quot;triceps&quot;)), type = &quot;pairs&quot;)</code></pre>
+<p><img src="/post/impute-missing-levels_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+</div>
+<div id="operators-overview" class="section level2">
+<h2>Operators overview</h2>
+<p>An overview over implemented <a href="https://mlr3pipelines.mlr-org.com/reference/PipeOp.html"><code>PipeOp</code></a>s for imputation can be obtained like so:</p>
+<pre class="r"><code>library(mlr3pipelines)
+dt = as.data.table(mlr_pipeops)
+dt[grepl(&quot;impute&quot;, dt$key) | grepl(&quot;miss&quot;, dt$key),]</code></pre>
+<pre><code>##             key packages input.num output.num input.type.train
+## 1:   imputehist graphics         1          1             Task
+## 2:   imputemean                  1          1             Task
+## 3: imputemedian    stats         1          1             Task
+## 4: imputenewlvl                  1          1             Task
+## 5: imputesample                  1          1             Task
+## 6:      missind                  1          1             Task
+##    input.type.predict output.type.train output.type.predict
+## 1:               Task              Task                Task
+## 2:               Task              Task                Task
+## 3:               Task              Task                Task
+## 4:               Task              Task                Task
+## 5:               Task              Task                Task
+## 6:               Task              Task                Task</code></pre>
+<!-- Replace with something using tags at some point-->
+</div>
+<div id="construct-operators" class="section level2">
+<h2>Construct Operators</h2>
+<p><a href="https://mlr3pipelines.mlr-org.com">mlr3pipelines</a> contains several imputation methods. We focus on rather simple ones, and show how to impute missing values for <code>factor</code> features and <code>numeric</code> features respectively.</p>
+<p>Since our task only has numeric features, we do not need to deal with imputing factor levels, and can instead concentrate on imputing numeric values:</p>
+<p>We do this in a two-step process: * For every column we create a new indicator column, that tells us whether the value is “missing” or “present”. We achieve this using the <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_missind.html"><code>missind</code></a> <a href="https://mlr3pipelines.mlr-org.com/reference/PipeOp.html"><code>PipeOp</code></a>.</p>
+<ul>
+<li>Afterwards, we impute every missing value by sampling from the histogram of the respective column. We achieve this using the <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_imputehist.html"><code>imputehist</code></a> <a href="https://mlr3pipelines.mlr-org.com/reference/PipeOp.html"><code>PipeOp</code></a>.</li>
+</ul>
+<p>We also have to make sure to apply the pipeops in the correct order!</p>
+<pre class="r"><code>imp_missind = po(&quot;missind&quot;)
+imp_num =  po(&quot;imputehist&quot;, param_vals = list(affect_columns = selector_type(&quot;numeric&quot;)))</code></pre>
+<p>In order to better understand we can look at the results of every <a href="https://mlr3pipelines.mlr-org.com/reference/PipeOp.html"><code>PipeOp</code></a> separately.</p>
+<p>We can manually trigger the <a href="https://mlr3pipelines.mlr-org.com/reference/PipeOp.html"><code>PipeOp</code></a> to test the operator on our task:</p>
+<pre class="r"><code>ext_task = imp_missind$train(list(task))[[1]]
+ext_task$data()</code></pre>
+<pre><code>##      diabetes missing_glucose missing_insulin missing_mass missing_pressure
+##   1:      pos         present         missing      present          present
+##   2:      neg         present         missing      present          present
+##   3:      pos         present         missing      present          present
+##   4:      neg         present         present      present          present
+##   5:      pos         present         present      present          present
+##  ---                                                                       
+## 764:      neg         present         present      present          present
+## 765:      neg         present         missing      present          present
+## 766:      neg         present         present      present          present
+## 767:      pos         present         missing      present          present
+## 768:      neg         present         missing      present          present
+##      missing_triceps
+##   1:         present
+##   2:         present
+##   3:         missing
+##   4:         present
+##   5:         present
+##  ---                
+## 764:         present
+## 765:         present
+## 766:         present
+## 767:         missing
+## 768:         present</code></pre>
+<p>For <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_imputehist.html"><code>imputehist</code></a>, we can do the same:</p>
+<pre class="r"><code>ext_task = imp_num$train(list(task))[[1]]
+ext_task$data()</code></pre>
+<pre><code>##      diabetes age pedigree pregnant glucose   insulin mass pressure  triceps
+##   1:      pos  50    0.627        6     148  80.90314 33.6       72 35.00000
+##   2:      neg  31    0.351        1      85 173.06263 26.6       66 29.00000
+##   3:      pos  32    0.672        8     183 350.74529 23.3       64 27.25216
+##   4:      neg  21    0.167        1      89  94.00000 28.1       66 23.00000
+##   5:      pos  33    2.288        0     137 168.00000 43.1       40 35.00000
+##  ---                                                                        
+## 764:      neg  63    0.171       10     101 180.00000 32.9       76 48.00000
+## 765:      neg  27    0.340        2     122 112.92436 36.8       70 27.00000
+## 766:      neg  30    0.245        5     121 112.00000 26.2       72 23.00000
+## 767:      pos  47    0.349        1     126 255.78864 30.1       60 33.19399
+## 768:      neg  23    0.315        1      93 279.78118 30.4       70 31.00000</code></pre>
+<p>This time we obtain the imputed data set without <code>missing</code> values.</p>
+<pre class="r"><code>ext_task$missings()</code></pre>
+<pre><code>## diabetes      age pedigree pregnant  glucose  insulin     mass pressure 
+##        0        0        0        0        0        0        0        0 
+##  triceps 
+##        0</code></pre>
+</div>
+<div id="putting-everything-together" class="section level2">
+<h2>Putting everything together</h2>
+<p>Now we have to put all <a href="https://mlr3pipelines.mlr-org.com/reference/PipeOp.html"><code>PipeOp</code></a>s together in order to form a graph that handles imputation automatically.</p>
+<p>We do this by creating a <a href="https://mlr3pipelines.mlr-org.com/reference/Graph.html"><code>Graph</code></a> that copies the data twice, processes each copy using the respective imputation method and afterwards unions the features. For this we need the following two <a href="https://mlr3pipelines.mlr-org.com/reference/PipeOp.html"><code>PipeOp</code></a>s : * <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_copy.html"><code>copy</code></a>: Creates copies of the data. * <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_featureunion.html"><code>featureunion</code></a> Merges the two tasks together.</p>
+<pre class="r"><code>graph = po(&quot;copy&quot;, 2) %&gt;&gt;% gunion(list(imp_missind, imp_num)) %&gt;&gt;% po(&quot;featureunion&quot;)</code></pre>
+<p>as a last step we append the learner we planned on using:</p>
+<pre class="r"><code>graph = graph %&gt;&gt;% po(learner)</code></pre>
+<p>We can now visualize the resulting graph:</p>
+<pre class="r"><code>graph$plot(html = TRUE)</code></pre>
+<div id="htmlwidget-1" style="width:50%;height:400px;" class="visNetwork html-widget"></div>
+<script type="application/json" data-for="htmlwidget-1">{"x":{"nodes":{"id":["copy","missind","imputehist","featureunion","<INPUT>","classif.ranger","<OUTPUT>"],"label":["copy","missind","imputehist","featureunion","<INPUT>","classif.ranger","<OUTPUT>"],"shape":["box","box","box","box","database","box","ellipse"],"color":["lightblue","lightblue","lightblue","lightblue","rgba(0,204,102,0.2)","lightblue","rgba(255,51,51,0.2)"],"value":[1,1,1,1,0.8,1,0.8],"title":["<p>PipeOp: <b>copy<\/b> (not trained)<br>values: <b>list()<\/b><br>Input channels <b>name [train type, predict type]<\/b>:<br>  input [*,*]<br>Output channels <b>name [train type, predict type]<\/b>:<br>  output1 [*,*], output2 [*,*]<\/p>","<p>PipeOp: <b>missind<\/b> (trained)<br>values: <b>which=missing_train, type=factor<\/b><br>Input channels <b>name [train type, predict type]<\/b>:<br>  input [Task,Task]<br>Output channels <b>name [train type, predict type]<\/b>:<br>  output [Task,Task]<\/p>","<p>PipeOp: <b>imputehist<\/b> (trained)<br>values: <b>affect_columns=<Selector><\/b><br>Input channels <b>name [train type, predict type]<\/b>:<br>  input [Task,Task]<br>Output channels <b>name [train type, predict type]<\/b>:<br>  output [Task,Task]<\/p>","<p>PipeOp: <b>featureunion<\/b> (not trained)<br>values: <b>list()<\/b><br>Input channels <b>name [train type, predict type]<\/b>:<br>  ... [Task,Task]<br>Output channels <b>name [train type, predict type]<\/b>:<br>  output [Task,Task]<\/p>","<p>Input:<br>Name: copy.input<br>Train: *<br>Predict: *<\/p>","<p>PipeOp: <b>classif.ranger<\/b> (not trained)<br>values: <b>list()<\/b><br>Input channels <b>name [train type, predict type]<\/b>:<br>  input [TaskClassif,TaskClassif]<br>Output channels <b>name [train type, predict type]<\/b>:<br>  output [NULL,PredictionClassif]<\/p>","<p>Output:<br>Name: classif.ranger.output<br>Train: NULL<br>Predict: PredictionClassif<\/p>"],"x":[0,-1,1,0,0,0,0],"y":[-0.6,-0.2,-0.2,0.2,-1,0.6,1]},"edges":{"from":["copy","copy","missind","imputehist","featureunion","<INPUT>","classif.ranger"],"to":["missind","imputehist","featureunion","featureunion","classif.ranger","copy","<OUTPUT>"],"color":["lightblue","lightblue","lightblue","lightblue","lightblue","lightblue","lightblue"]},"nodesToDataframe":true,"edgesToDataframe":true,"options":{"width":"100%","height":"100%","nodes":{"shape":"dot","physics":false},"manipulation":{"enabled":false},"edges":{"arrows":"to","smooth":{"enabled":false,"forceDirection":"vertical"}},"physics":{"stabilization":false}},"groups":null,"width":"50%","height":"400px","idselection":{"enabled":false},"byselection":{"enabled":false},"main":null,"submain":null,"footer":null,"background":"rgba(0, 0, 0, 0)","igraphlayout":{"type":"full"}},"evals":[],"jsHooks":[]}</script>
+</div>
+<div id="resampling" class="section level2">
+<h2>Resampling</h2>
+<p>Correct imputation is especially important when applying imputation to held-out data during the <code>predict</code> step. If applied incorrectly, imputation could leak info from the test set, which potentially skews our performance estimates. <a href="https://mlr3pipelines.mlr-org.com">mlr3pipelines</a> takes this complexity away from the user and handles correct imputation internally.</p>
+<p>By wrapping this graph into a <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_learners_graph.html"><code>GraphLearner</code></a>, we can now train resample the full graph, here with a 3-fold cross validation:</p>
+<pre class="r"><code>glearner = GraphLearner$new(graph)
+rr = resample(task, glearner, rsmp(&quot;cv&quot;, folds = 3))
+rr$aggregate()</code></pre>
+<pre><code>## classif.ce 
+##  0.2408854</code></pre>
+</div>
+<div id="missing-values-during-prediction" class="section level2">
+<h2>Missing values during prediction</h2>
+<p>In some cases, we have missing values only in the data we want to predict on. In order to showcase this, we create a copy of the task with several more missing columns.</p>
+<pre class="r"><code>dt = task$data()
+dt[1:10, &quot;age&quot;] = NA
+dt[30:70, &quot;pedigree&quot;] = NA
+task2 = TaskClassif$new(&quot;pima2&quot;, dt, target = &quot;diabetes&quot;)</code></pre>
+<p>And now we learn on <code>task</code>, while trying to predict on <code>task2</code>.</p>
+<pre class="r"><code>glearner$train(task)
+glearner$predict(task2)</code></pre>
+<pre><code>## &lt;PredictionClassif&gt; for 768 observations:
+##     row_id truth response
+##          1   pos      pos
+##          2   neg      neg
+##          3   pos      pos
+## ---                      
+##        766   neg      neg
+##        767   pos      pos
+##        768   neg      neg</code></pre>
+</div>
+<div id="missing-factor-features" class="section level2">
+<h2>Missing factor features</h2>
+<p>For <code>factor</code> features, the process works analogously. Instead of using <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_imputehist.html"><code>imputehist</code></a>, we can for example use <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_imputenewlvl.html"><code>imputenewlvl</code></a>. This will simply replace every <code>NA</code> in each factor variable with a new value <code>missing</code>.</p>
+<p>A full graph might the look like this:</p>
+<pre class="r"><code>imp_fct = po(&quot;imputenewlvl&quot;, param_vals = list(affect_columns = selector_type(&quot;factor&quot;)))
+graph = po(&quot;copy&quot;, 2) %&gt;&gt;%
+  gunion(list(imp_missind, imp_num %&gt;&gt;% imp_fct)) %&gt;&gt;%
+  po(&quot;featureunion&quot;)</code></pre>
+<p>In order to test out our new graph, we again create a situation where our task has missing factor levels. As the (<a href="https://mlr3.mlr-org.com/reference/mlr_tasks_pima.html"><code>pima</code></a>) task does not have any factor levels, we use the famous (<a href="https://mlr3.mlr-org.com/reference/mlr_tasks_boston_housing.html"><code>boston_housing</code></a>) task.</p>
+<pre class="r"><code># t1 is the training data without missings
+t1 = tsk(&quot;boston_housing&quot;)
+
+# t2 is the prediction data with missings
+dt = t1$data()
+dt[1:10, chas := NA][20:30, rm := NA]
+t2 = TaskRegr$new(&quot;bh&quot;, dt, target = &quot;medv&quot;)</code></pre>
+<p>Now we train on <code>t1</code> and predict on <code>t2</code>:</p>
+<pre class="r"><code>gl = GraphLearner$new(graph %&gt;&gt;% po(lrn(&quot;regr.ranger&quot;)))
+gl$train(t1)
+gl$predict(t2)</code></pre>
+<pre><code>## &lt;PredictionRegr&gt; for 506 observations:
+##     row_id truth response
+##          1  24.0 24.78061
+##          2  21.6 22.09581
+##          3  34.7 34.49812
+## ---                      
+##        504  23.9 24.03860
+##        505  22.0 22.35089
+##        506  11.9 15.71267</code></pre>
+<p>Success! We learned how to deal with missing values in less then 10 minutes.</p>
+</div>
+
+    </div>
+  </article>
+
+  
+
+
+</main>
+
+      <footer class="footer">
+        <ul class="footer-links">
+          <li>
+            <a href="/index.xml" type="application/rss+xml" target="_blank">RSS feed</a>
+          </li>
+          <li>
+            <a href="https://gohugo.io/" class="footer-links-kudos">Made with <img src="/images/hugo-logo.png" alt="Img link to Hugo website" width="22" height="22"></a>
+          </li>
+        </ul>
+      </footer>
+
+    </div>
+    
+
+
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/highlight.min.js"></script>
+
+
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/languages/r.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/languages/yaml.min.js"></script>
+<script>hljs.configure({languages: []}); hljs.initHighlightingOnLoad();</script>
+
+
+
+    
+<script src="/js/math-code.js"></script>
+<script async src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+
+
+    
+  </body>
+</html>
+
