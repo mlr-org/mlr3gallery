@@ -265,7 +265,6 @@ po_ftextract = po("mutate", param_vals = list(
     mutation = list(
       fare_per_person = ~ fare / (parch + sib_sp + 1),
       deck = ~ factor(stri_sub(cabin, 1,1)),
-      portside = ~ as.numeric(stri_extract_last_regex(cabin, "[0-9]")) %% 2,
       title = ~ factor(stri_match(name, regex = ", (.*)\\.")[,2]),
       surname = ~ factor(stri_match(name, regex = "(.*),")[,2]),
       ticket_prefix = ~ factor(stri_replace_all_fixed(stri_trim(stri_match(ticket, regex ="(.*) ")[, 2]), ".", ""))
@@ -300,6 +299,11 @@ In summary we do the following:
 * `learner`: Appends a learner to the `Graph`.
 
 The full graph we created is the following:
+
+```{r}
+learner = lrn("classif.ranger")
+learner$param_set$values = list(num.trees = 500, min.node.size = 4)
+```
 
 ```{r}
 gr_final = po_ftextract %>>%
