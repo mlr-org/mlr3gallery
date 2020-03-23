@@ -1,6 +1,6 @@
 ---
 title: mlr3 basics - german credit
-author: Martin Binder & Florian Pfisterer
+author: Martin Binder, Florian Pfisterer & Philipp Kopper
 date: '2020-03-11'
 slug: basics_german_credit
 categories: []
@@ -29,9 +29,6 @@ The other parts of this series can be found here:
 
 * [Part II - Pipelines](/basics_pipelines_german_credit/)
 * [Part III - Tuning](/basics_tuning_german_credit/)
-
-**mlr3** is a machine learning framework for R. Together with other packages from the same developers, mostly following the naming scheme "mlr3___", it offers functionality around developing, tuning, and evaluating machine learning workflows.
-
 
 We will walk through this tutorial interactively. The text is kept short to be followed in real time. 
 
@@ -72,8 +69,13 @@ theme_set(theme_light())
 
 ## Machine Learning Use Case: German Credit Data
 
-- The German credit data is a research data set of the University of Hamburg from 1994 donated by Prof. Hans Hoffman.
-- Description (and manual download) can be found at the [UCI repository](https://archive.ics.uci.edu/ml/datasets/Statlog+%28German+Credit+Data%29).
+In our tutorials we use the `german_credit` dataset for our next example.
+The German credit data is a research data set of the University of Hamburg from 1994 donated by Prof. Hans Hoffman.
+The data features personal, demographic and financial data on individuals.
+Furthermore, it contains an assessment on the individual's creditworthniness.
+A detailed description (and manual download) can be found at the [UCI repository](https://archive.ics.uci.edu/ml/datasets/Statlog+%28German+Credit+Data%29).
+
+As the `"GermanCredit"` data set is frequently used within `r mlr_pkg("mlr3")`, there is a task already existing just for this purpose.
 
 - Goal is to classify people by their credit risk (**good** or **bad**) using 20 features:
   - `checking_status:          status/balance of checking account at this bank`
@@ -113,14 +115,19 @@ credit = task$data()
 ```
 
 ### Exploring the Data
-- We have a look at the data set before we start modeling.
-- The `str()` and `summary()` functions gives an overview of features and their type.
-- The `skimr` package gives more readable summaries.
-- The `DataExplorer` package lets us visualize categorical (`plot_bar()`) and numeric (`plot_histogram()` and `plot_boxplot()`) data, as well as data relationships.
-- Basic things to watch out for:
-  - Skewed distributions
-  - Missing values
-  - Empty / rare factor variables
+We can get a quick overview on our data set using R's summary function:
+
+```{r 09-use-cases-2-002}
+german_credit = task$data()
+summary(german_credit)
+dim(german_credit)
+```
+
+Our dataset has `r nrow(german_credit)` observations and `r ncol(german_credit)` columns.
+The variable we want to predict is `credit_risk` (either **good** or **bad**).
+That means we aim to classify people by their credit risk (**good** or **bad**).
+  
+We recommend the `skimr` (`skimr::skim`) and `DataExplorer` (`DataExplorer::plot_bar`, `DataExplorer::plot_histogram`, `DataExplorer::plot_boxplot`) packages as they create very well readable and understandable overviews.
 
 ```{r, R.options=list(width = 120)}
 skimr::skim(credit)
@@ -151,65 +158,153 @@ DataExplorer::plot_histogram(credit, nrow = 2, ncol = 3)
 DataExplorer::plot_boxplot(credit, by = "credit_risk", nrow = 2, ncol = 3)
 ```
 
+During this exploratory analysis meaningful analysis aspects could be:
+
+  - Skewed distributions
+  - Missing values
+  - Empty / rare factor variables
+  
+An explanatory analysis is crucial to get a feeling for your data.
+On the other hand the data can be validated this way.
+Non plausible data can be investigated or outliers can be removed.
+  
+However, in this use case we do not focus on the exploratory analysis.
+
+We want to do modeling now!
+
 ## Modeling
 Considering how we are going to tackle the problem relates closely to what `mlr3` entities we will use.
 
-- What is the problem we are trying to solve?
-  - i.e. what **Task** do we use?
-  - Binary classification.
-  - $\Rightarrow$ We use `TaskClassif`.
-- What are appropriate learning algorithms?
-  - i.e. what **Learner** do we use?
-  - Logistic regression, CART, Random Forest
-  - $\Rightarrow$ `lrn("classif.log_reg")`, `lrn("classif.rpart")`, `lrn("classif.ranger")`
-- How do we evaluate "good" performance? $\Rightarrow$ Depends on many things! Cost of false positive vs. false negative, legal requirements, ...
-  - i.e. what **Measure** do we use?
-  - We start with misclassification error (simle!) and will also consider AUC.
-  - $\Rightarrow$ `msr("classif.ce")`, `msr("classif.auc")`
+The typical questions that arise when building an ML workflow are:
+
+What is the problem we are trying to solve?
+What are appropriate learning algorithms?
+How do we evaluate "good" performance? 
+
+More systematically in `r mlr_pkg("mlr3")` they can be expressed via five components:
+
+1) The **task** defintion
+
+2) The **learner** definition
+
+3) The **training**
+
+4) The **prediction**
+
+5) The evaluation via **measures**
 
 ### Task Definition
 
-We create a new task from our data in order to show how Tasks are created.
+First of all, we are interested in the target which we want to model.
+Most supervised machine learning problems are __regression__ or __classification__ problems.
+However, note that other problems include unsupervised learning or time-to-event data (covered in `mlr3survival`).
+In the `r mlr_pkg("mlr3")` context to distinguish between these problems, we define **tasks**.
+If we want to solve a classification problem, we define a classifaction task -- `TaskClassif`.
+For a regression problem, we establish a regression task -- `TaskRegr`.
+Tasks are not only a different word for problems.
+They also reflect some technical properties with respect to `r mlr_pkg("mlr3")`.
 
-With `TaskClassif$new()`, we can initialize a classification task. 
-We need to specify a name for the task, the data we want to use and name of the target variable (here `"credit_risk"`):
+In our case it is clearly our objective to model or predict the binary `factor` variable `credit_risk`.
+Thus, we use `TaskClassif`.
+
+With `TaskClassif$new()` we can initialize a classification task. 
+We need to specify a name for the task (we choose `"GermanCredit"`), the data we want to use (`credit`) and name of the target (`"credit_risk"`):
 
 ```{r}
 task = TaskClassif$new("GermanCredit", credit, "credit_risk")
 ```
 
-
 ### Learner Definition
 
-You need to install and load the `mlr3learners` package to get access to a wide range of learners.
-All available `Learner`s can be obtained by:
+After having decided _what_ should be modeled, we need to decide on how.
+This means we need to decide which learning algrorithms, or **Learners** are appropriate.
+Using prior knowledge (e.g. knowing that it is a classification task or assuming that the classes are linearly separable) one ends up with one or some suitable **Learners**.
+Many learners can be obtained via the `mlr3learners` package (CRAN). 
+Additionally, many learners are provided on the `mlr3learners` organsisation [github page](https://github.com/mlr3learners).
+These two ressources combined account for a large fraction of standard learning algorithms.
+As `r mlr_pkg("mlr3")` usually only wraps learners from packages, it is easy to create a formal **Learner** by yourself using our template (). 
+You may find the section 'Extending mlr3' in this book also very helpful.
+If you happen to write your own **Learner** in `r mlr_pkg("mlr3")`, we would be happy if you share it with the `r mlr_pkg("mlr3")` community.
+
+All available `Learner`s (i.e. all which you have installed from `r mlr_pkg("mlr3")`, `mlr3learners`, the mlr3learners github page or self-written ones) can be obtained by:
 
 ```{r}
 mlr_learners
 ```
 
-A learner can be initialized with the `lrn` function and the name of the learner (e.g., `lrn("classif.xxx")`). Use `?mlr_learners_xxx` to open the help page of a learner named `xxx`, or use [the internet](https://mlr3learners.mlr-org.com/reference/index.html).
+For our problem, a suitable learner could be one of the following:
+Logistic regression, CART, Random Forest (or many more).
 
-### Model Fitting: Logistic Regression
+A learner can be initialized with the `lrn` function and the name of the learner (e.g., `lrn("classif.xxx")`). 
+Use `?mlr_learners_xxx` to open the help page of a learner named `xxx`, or use [the internet](https://mlr3learners.mlr-org.com/reference/index.html).
 
-- The `Learner` for logistic regression uses R's `glm()` function and is provided by the `mlr3learners` package.
+For example a logistic regression can be initialised in the following manner (logistic regression using R's `glm()` function and is provided by the `mlr3learners` package).
 
 ```{r}
 learner_logreg = lrn("classif.log_reg")
 ```
 
-- Model fitting is easy, the resulting model is stored in the `$model` slot.
+Alternatively but equivalently, one could use:
+
+```{r}
+learner_logreg = LearnerClassifLogReg$new()
+```
+
+### Training
+
+Training is the procedure, where a model is fitted on data.
+The selected model is trained so that is reflects the data situation in the best possible manner.
+
+#### Logistic Regression
+
+We start with the example of the logistic regression.
+However, you will immediately see that the procedure generalises to any learner very easily.
+
+An initialised learner can be trained on data using the `R6` method `train`.
 
 ```{r}
 learner_logreg$train(task)
 ```
 
-- Inspecting the model. It is the result returned by `glm()` and can be inspected as such.
+Typically, in machine learning, one does not use the full data which is available but a subset, the so-called training data.
 
-```{r}
-summary(learner_logreg$model)
+To efficiently perform a spilt of the data one could do the following:
+
+```{r 09-use-cases-2-013}
+train_set = sample(task$nrow, 0.8 * task$nrow)
+test_set = setdiff(seq_len(task$nrow), train_set)
 ```
 
+80 percent of the data is used for training.
+The remaining 20 percent are used for evaluation at a subsequent later point in time.
+`train_set` is an integer vector displaying the selected rows of the original data set.
+
+```{r 09-use-cases-2-014}
+head(train_set)
+```
+
+In `r mlr_pkg("mlr3")` the training with a subset of the data is declared by the additional argument `row_ids = train_set`.
+
+```{r 09-use-cases-2-015}
+learner_logreg$train(task, row_ids = train_set)
+```
+
+We used logistic regression from the `r cran_pkg("stats")` package.
+To be precise `stats::glm` with the `family` argument set to `family = binomial()`.
+All other arguments are set to the default of the `r ref("stats::glm")` function.
+`r mlr_pkg("mlr3")` only works as a wrapper. 
+The original model can be accessed via:
+
+```{r 09-use-cases-2-016, echo = FALSE}
+learner_logreg$model
+```
+
+The stored object is a normal `glm` object and works with its `S3` methods.
+
+```{r 09-use-cases-2-017}
+class(learner_logreg$model)
+summary(learner_logreg$model)
+```
 ### Model Fitting: Random Forest
 
 - Same procedure as before.
