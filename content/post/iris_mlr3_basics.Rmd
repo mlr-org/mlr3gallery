@@ -139,6 +139,15 @@ print(bm)
 print(bm$aggregate(measures = msrs(c("classif.acc", "classif.ce"))))
 ```
 
+## Plotting the Prediction results
+
+```{r}
+task = tsk("iris")$select(c("Sepal.Length", "Sepal.Width"))
+resampling = rsmp("cv", folds = 9)
+object = resample(task, learner2, resampling, store_models = TRUE)
+autoplot(object, type = "prediction")
+```
+
 ## Conclusion
 
 We left out a lot of details and other features.
