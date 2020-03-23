@@ -31,13 +31,6 @@ For the second part, see the following page:
 
 * [Part II - Pipelines](/mlr3_pipelines_titanic/)
 
-Following features are illustrated in this section:
-  
-* Summarizing the data set
-* Visualizing data
-* Splitting data into train and test data sets
-* Defining a task and a learner
-
 First of all we are going to load required packages and the data. 
 The data is part of the `mlr3data` package.
 
@@ -54,6 +47,13 @@ data("titanic")
 
 The titanic data is very interesting to analyze, even though it is part of many tutorials and showcases. 
 This is because it requires many steps often required in real-world applications of machine learning techniques, such as **feature engineering**, **missing value imputation**, **handling factors** and others.
+
+Following features are illustrated in this use case section:
+  
+* Summarizing the data set
+* Visualizing data
+* Splitting data into train and test data sets
+* Defining a task and a learner
 
 In order to obtain solutions comparable to official leaderboards, such as the ones available from CRAN, we split the data into train and test set before doing any further analysis.
 Here we are using the predefined split used by Kaggle. 
@@ -132,7 +132,7 @@ task
 ```
 
 ```{r}
-autoplot(task$clone()$select(c("sex", "fare")), type = "pairs")
+autoplot(task$clone()$select(c("sex", "age")), type = "pairs")
 ```
 
 Our `Task` currently has $3$ features of type `character`, which we don't really know how  to handle:

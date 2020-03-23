@@ -110,6 +110,7 @@ task_imputed$missings()
 Awesome, now we do not have any missing values!
 
 ```{r}
+
 autoplot(task_imputed)
 ```
 
@@ -219,24 +220,33 @@ agg_ranger
 
 ```
 
-
 We have improved even more!
-But there are many more things to explore!
-We could extract even more information from the different features and see what happens.
+
+## ROC and Benchmarking 
 
 ```{r}
-task = task_eng
 learner = lrn("classif.rpart", predict_type = "prob")
-resampling = rsmp("cv")
-object = resample(task, learner, resampling)
-autoplot(object)
-autoplot(object, type = "histogram", bins = 30)
-autoplot(object, type = "roc")
-autoplot(object, type = "prc")
+pred = learner$train(task)$predict(task)
+C = pred$confusion
+print(C)
+
+library("mlr3viz")
+
+# TPR vs FPR / Sensitivity vs (1 - Specificity)
+ggplot2::autoplot(pred, type = "roc")
+```
+
+Moreover, we can compare precision versus recall: 
+
+```{r}
+# Precision vs Recall
+ggplot2::autoplot(pred, type = "prc")
 ```
 
 ## Future
 
+In this case we have examined a number of different features, but there are many more things to explore!
+We could extract even more information from the different features and see what happens.
 But now you are left to yourself! There are many [kaggle kernels](https://www.kaggle.com/c/titanic) that treat the **Titanic Dataset**
 available. This can be a great starter to find even better models.
 
