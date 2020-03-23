@@ -1,7 +1,7 @@
 # mlr3gallery
 
 <!-- badges: start -->
-[![R CMD Check via {tic}](https://img.shields.io/github/workflow/status/mlr-org/mlr3gallery/R%20CMD%20Check%20via%20%7Btic%7D?logo=github&label=R%20CMD%20Check%20via%20{tic}&style=flat-square)](https://github.com/mlr-org/mlr3gallery/actions)
+![R CMD Check via {tic}](https://github.com/mlr-org/mlr3gallery/workflows/R%20CMD%20Check%20via%20%7Btic%7D/badge.svg?branch=master&event=push)
 <!-- badges: end -->
 
 A simple blogdown site for case studies using mlr3.
