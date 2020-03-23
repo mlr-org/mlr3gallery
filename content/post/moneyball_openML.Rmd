@@ -1,11 +1,17 @@
 ---
-title: mlr3 and OpenML - Moneyball use case
-author: Philipp Kopper
+title: "mlr3 and OpenML - Moneyball use case"
+author: "Philipp Kopper"
 date: '2020-03-22'
+packages:
+- mlr3
+- mlr3learners
+- mlr3pipelines
 slug: mlr3-OpenML-Imputation
+tags:
+- mlr3
+- OpenML
+- Imputation
 categories: []
-tags: ['mlr3', 'OpenML', 'Imputation']
-packages: ['mlr3', 'mlr3learners', 'mlr3pipelines']
 ---
 
 This use case shows how to easily embed the rich data available via [OpenML](https://www.openml.org/) into our mlr3 workflow.
@@ -31,8 +37,8 @@ The following operations are shown:
 library("mlr3")
 # about a dozen reasonable learners
 library("mlr3learners")
-# Tuning
-library("mlr3tuning")
+# Pipelines
+library("mlr3pipelines")
 # lots of measures for evaluation
 library("mlr3measures")
 # Retreiving the data
@@ -47,7 +53,7 @@ However, we can still use the `OpenML` package to retrieve data (and more) strai
 Typically, you can retrieve the data with an `id`.
 The `id` can be found on [OpenML](https://www.openml.org/).
 We choose the `41021`as our `oml_id`.
-The related web page cann be accessed [here](https://www.openml.org/d/41021).
+The related web page can be accessed [here](https://www.openml.org/d/41021).
 This data set is uploaded by [Joaquin Vanschoren](https://www.openml.org/u/2).
 
 ```{r}
@@ -97,7 +103,7 @@ The variables are as follows:
 While Beane and DePodesta defined most of these statistics and measures for individual players, this data set is on team level.
 
 If you are a baseball enthusiast these statistics seem very informative.
-If baseball of rather obscure to you, simply take these features as given or give this [article](https://en.wikipedia.org/wiki/Baseball_statistics) a quick view.
+If baseball of rather obscure to you, simply take these features as given or give this [article](https://en.wikipedia.org/wiki/Baseball_statistics) a quick read.
 
 ```{r}
 data = oml_dat$data
@@ -304,7 +310,7 @@ As we are mostly interested in the numeric imputation we leave the remaining gra
 ```{r}
 nop = po("nop")
 imp_fct = po("imputenewlvl", param_vals = list(affect_columns = selector_type("factor")))
-graph2 = po("copy", 2) %>>% gunion(list(imp_missind, imp_fct)) %>>% po("featureunion") 
+graph2 = po("copy", 2) %>>% gunion(list(nop, imp_fct)) %>>% po("featureunion") 
 ```
 
 We then add the `PipeOpSelect` `PipeOp` to the pipeline.
