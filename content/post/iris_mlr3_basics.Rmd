@@ -55,7 +55,7 @@ print(learner1)
 
 ## Train and predict
 
-Lets do usual ML operations: Train on some obervations, predict on others.
+Lets do usual ML operations: Train on some observations, predict on others.
 
 ```{r}
 # train learner on subset of task
@@ -84,9 +84,10 @@ cm = preds$confusion
 print(cm)
 ```
 
-## Changing hyperpars
+## Changing hyperparameters
 
-The learner contains information about all parameters that can be configured, including data type, constraints, defaults, etc.
+The learner contains information about all parameters that can be configured.
+This includes data type, constraints, defaults, etc.
 We can change the hyperparameters either during construction of later through an active binding.
 
 ```{r}
@@ -116,7 +117,7 @@ print(cm)
 
 mlr3learners ships out with a dozen different popular learners.
 We can list them from the its dictionary.
-If we want more, we can load on extension package from mlr3's
+If we want more learners, we can load on extension package from mlr3's
 [learner-org](https://github.com/mlr-org/mlr3learners/wiki) on GitHub.
 Note how after the install the dictionary increases in size.
 
@@ -132,12 +133,30 @@ print(as.data.table(mlr_learners)[, c("key", "packages")])
 The `benchmark()` function can conveniently compare learners on the same dataset(s).
 
 ```{r}
-learners = list(learner1, learner2, lrn("classif.randomForest"))
+learners = list(learner1, learner2, lrn("classif.rpart"))
 bm_grid = benchmark_grid(task, learners, cv10)
 bm = benchmark(bm_grid)
 print(bm)
 print(bm$aggregate(measures = msrs(c("classif.acc", "classif.ce"))))
 ```
+
+
+## Visualization
+
+We can visualize the performance of a learner using the `mlr3viz`package.
+
+```{r}
+task = tsk("iris")$select(c("Sepal.Length", "Sepal.Width"))
+resampling = rsmp("cv", folds = 3)
+object = resample(task, learner2, resampling, store_models = TRUE)
+autoplot(object, type = "prediction")
+```
+
+```{r}
+autoplot(object, type= "roc")
+```
+
+
 
 ## Conclusion
 
