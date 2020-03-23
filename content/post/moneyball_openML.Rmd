@@ -94,49 +94,131 @@ The variables are as follows:
 * Opponent On-Base Percentage (OOBP)
 * Opponent Slugging Percentage (OSLG)
 
-If you are a baseball enthusiast these statistics seem very informative.
-If basebakk
+While Beane and DePodesta defined most of these statistics and measures for individual players, this data set is on team level.
 
-The summary shows how this data we are dealing with looks like:
+If you are a baseball enthusiast these statistics seem very informative.
+If baseball of rather obscure to you, simply take these features as given or give this [article](https://en.wikipedia.org/wiki/Baseball_statistics) a quick view.
 
 ```{r}
-summary(oml_dat$data)
+data = oml_dat$data
+summary(data)
+```
+
+The summary shows how this data we are dealing with looks like:
+Some data is missing, however this has strucural reasons.
+There are $39$ teams with each maximally $47$ years ($1962$ - $2012$) of observation.
+For $988$ cases the information on `RankSeason` and `RankPlayoffs` is missing.
+This is however because these simply did not reach the playoffs and hence have no reported rank.
+
+```{r} 
+summary(data[data$Playoffs == 0, c("RankSeason", "RankPlayoffs")])
+```
+
+On the other hand `OOBP` and `OSLG` have $812$ missing values.
+It seems as if these measures are not available before $1998$.
+
+```{r} 
+summary(data[is.na(data$OOBP), "Year"])
+```
+
+We seem to have a missing data problem.
+Typically in this case we have three options:
+They are:
+
+* Complete case analysis: Exclude all observation with missing values.
+
+* Complete feature analysis: Exclude all features with missing values.
+
+* Missing value imputation: Use a model to "guess" the missing values (based on the underlying distrubtion of the data.
+
+Typically, missing value imputation is preferred over the first two.
+However, in machine learning one can try out all options and see which performs best for the underlying problem.
+For now we limit ourselves on a rather simple impuation technique, impuation by randomly sampling from the univariate distribution.
+Note that this does not take the multvariate distribution into account properly and that there are more elaborate approaches.
+
+`mlr3` has some solutions for that within the `mlr3pipelines` package.
+We define the `PipeOp` in the following fashion:
+
+```{r}
+imp_missind = po("missind")
+imp_num =  po("imputehist", param_vals = list(affect_columns = selector_type("numeric")))
+imp_fct = po("imputenewlvl", param_vals = list(affect_columns = selector_type("factor")))
+imputer = imp_missind %>>% imp_num
+```
+
+We only aim to impute `OOBP` and `OSLG`. 
+For the other missing (categorical) features we use `PipeOpImputeNewlvl` to add a new level which indicates that information is missing.
+So far we only prepared the pipeline without actually modeling.
+Before we come to this step, we perform a last prepocessing step manually.
+Namely, we make `G` (games played) a numerical feature.
+
+```{r}
+data$G = as.numeric(data$G)
+```
+
+Additionally, the row names (starting with $0$) are changed. 
+
+```{r}
+rownames(data) <- 1:nrow(data)
 ```
 
 ## Creating tasks and learners
 
-Lets work on the canonical, simple iris data set, and try out some ML algorithms.
-We will start by using a decision tree with default settings.
+The fact that there is missing data does not affect the `task` definition.
+The `task` determines what is actually the probelm to be solved by machine learning.
+We want to explain the Runs Scored (RS).
+The task is defined by:
 
 ```{r}
 # creates a mlr3 task from scratch, from a data.frame
 # 'target' names the column in the dataset we want to learn to predict
-task = TaskClassif$new(id = "iris", backend = iris, target = "Species")
-# in this case we could also take the iris example from mlr3's dictionary of shipped example tasks
-# 2 equivalent calls to create a task. The second is just sugar for the user.
-task = mlr_tasks$get("iris")
-task = tsk("iris")
-print(task)
-# create learner from dictionary of mlr3learners
-# 2 equivalent calls:
-learner1 = mlr_learners$get("classif.rpart")
-learner1 = lrn("classif.rpart")
-print(learner1)
+task = TaskRegr$new(id = "moneyball", backend = data, target = "RS")
+task$missings()
+```
+
+The `missings` method indicates what we already knew: our missing values.
+Missing values are not always a problem. 
+Some learners can deal with the pretty well.
+However, today we want to use a random forest for our task.
+
+```{r}
+# creates a learner
+test_lrn = LearnerRegrLM$new()
+# displays the properties
+test_lrn$properties
+```
+
+Typically, in `mlr3` the `properties` method would tell us whether missingness is a problem to this learner or not.
+As it is not listed here, the random forest cannot deal with missingness.
+
+The learner is the statistical approach to solve the problem implied by the `task` (and not only the model used).
+As we aim to use imputation beforehand, we incorporate it into the learner.
+The model we use within the learner is going to be a random forest from the `ranger` package.
+One can allow the embedding of the preprocessing (imputation) into a learner by creating `new` (method) `PipeOpLearner` (R6 class).
+This special `learner` can be put into a graph together with the `imputer` via the `new` method of the `GraphLearner` class.
+
+```{r}
+# creates a normal learner however allows further embedding of PipeOp's.
+polrn = PipeOpLearner$new(mlr_learners$get("regr.lm"))
+# sets number of trees to 1000
+#polrn$param_set$values = list(num.trees = 1000)
+# the final learner is a graph consisting of the imputer and the normal learner.
+lrn = GraphLearner$new(graph = imputer %>>% polrn)
+#
 ```
 
 ## Train and predict
 
-Lets do usual ML operations: Train on some obervations, predict on others.
+To get a feeling how our model performs in the wild we simply train the `learner` on a subset of the data and predict on the held out data.
 
 ```{r}
+# defines the training and testing data; 95% is used for training
+train_set = sample(task$nrow, 0.95 * task$nrow)
+test_set = setdiff(seq_len(task$nrow), train_set)
 # train learner on subset of task
-learner1$train(task, row_ids = 1:120)
-# this is what the decision tree looks like
-print(learner1$model)
-# predict using observations from task
-preds = learner1$predict(task, row_ids = 121:150)
-# predict using "new" observations from an external data.frame
-preds = learner1$predict_newdata(newdata = iris[121:150, ])
+lrn$train(task, row_ids = train_set)
+# predict using held out observations
+preds = lrn$predict(task, row_ids = test_set)
 print(preds)
 ```
 
