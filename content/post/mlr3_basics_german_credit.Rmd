@@ -270,7 +270,7 @@ Typically, in machine learning, one does not use the full data which is availabl
 
 To efficiently perform a spilt of the data one could do the following:
 
-```{r 09-use-cases-2-013}
+```{r}
 train_set = sample(task$nrow, 0.8 * task$nrow)
 test_set = setdiff(seq_len(task$nrow), train_set)
 ```
@@ -279,13 +279,13 @@ test_set = setdiff(seq_len(task$nrow), train_set)
 The remaining 20 percent are used for evaluation at a subsequent later point in time.
 `train_set` is an integer vector displaying the selected rows of the original data set.
 
-```{r 09-use-cases-2-014}
+```{r}
 head(train_set)
 ```
 
 In `r mlr_pkg("mlr3")` the training with a subset of the data is declared by the additional argument `row_ids = train_set`.
 
-```{r 09-use-cases-2-015}
+```{r}
 learner_logreg$train(task, row_ids = train_set)
 ```
 
@@ -295,142 +295,164 @@ All other arguments are set to the default of the `r ref("stats::glm")` function
 `r mlr_pkg("mlr3")` only works as a wrapper. 
 The original model can be accessed via:
 
-```{r 09-use-cases-2-016, echo = FALSE}
+```{r}
 learner_logreg$model
 ```
 
 The stored object is a normal `glm` object and works with its `S3` methods.
 
-```{r 09-use-cases-2-017}
+```{r}
 class(learner_logreg$model)
 summary(learner_logreg$model)
 ```
-### Model Fitting: Random Forest
 
-- Same procedure as before.
-- We let the model store the variable importance (`importance = "permutation"`) 
+#### Random Forest
+
+Just like the logistic regression, we could train a random forest instead.
+We use the fast implementation from the `r cran_pkg("ranger")` package.
+To do so we first need to define the learner and then actually train it.
+Before we just used the default logistic regression learner.
+
+We now additionally supply the importance argument (`importance = "permutation"`).
+Doing so, we override the default and let the learner do feature importance determination based on permutation feature importance.
 
 ```{r}
 learner_rf = lrn("classif.ranger", importance = "permutation")
 learner_rf$train(task)
 ```
 
-- We can access the importance values using `$importance()`
+We can access the importance values using `$importance()`.
+The `R6` importance method plots the feature importance derived during training.
 
-```{r, R.options=list(width = 120)}
+```{r}
 learner_rf$importance()
 ```
 
-- We convert the importance into a `data.table` so we can plot it
+In order to obtain a better plot, we convert the importance into a `data.table`.
 
 ```{r}
 importance = as.data.table(learner_rf$importance(), keep.rownames = TRUE)
 colnames(importance) = c("Feature", "Importance")
 importance
-
 ggplot(importance, aes(x = reorder(Feature, Importance), y = Importance)) +
   geom_col() + coord_flip() + xlab("")
 ```
 
-## Prediction
+### Prediction
 
-- A model, once trained, can be used to predict outcomes from new data.
-- We simulate new data by sampling from the credit data. No need to pay close attention what is going on here.
+After training the machine learning model, the model can be used for prediction.
+Usually, prediction is the main purpose of machine learning models.
+In our case, the model can be used to classify new credit applicants w.r.t. their associated credit status (good vs. bad) on the basis of the features.
+Typically, machine learning models create numeric values.
+In the regression case this is very natural.
+For classification, most models create scores or probabilites.
+Based on these values, one can derive class predictions.
 
-```{r, R.options=list(width = 120)}
-# For each variable, we randomly sample 3 values with replacement
-newdata = as.data.table(lapply(credit, sample, size = 3, replace = TRUE))
-# we need to set the 'class' column to 'NA', otherwise mlr3 thinks this is the
-# actual outcome. This is desirable for performance evaluation, but not here.
-newdata$credit_risk = NULL
-newdata
-```
+#### Predict Classes
 
-### Predict Classes
-
-- Let's see what the models predict
+First, we directly predict classes.
+Here, we do something which is almost never a good idea in machine learning:
+Use the same data for prediction as for training.
+However, for the purpose of demonstration we can negelct this.
 
 ```{r}
-pred_logreg = learner_logreg$predict_newdata(newdata)
-pred_rf = learner_rf$predict_newdata(newdata)
-
+pred_logreg = learner_logreg$predict_newdata(german_credit)
+pred_rf = learner_rf$predict_newdata(german_credit)
 pred_logreg
 pred_rf
 ```
 
-- The `predict()` function actually gives a `Prediction` object. It can be converted to a `data.table`, as well as inspected for other things.
+The `predict()` function gives a `Prediction` object. 
+It can be converted to a `data.table` if one wants to use it downstream.
+
+We display the prediction results aggregated in a confusion matrix.
 
 ```{r}
-pred = learner_rf$predict_newdata(newdata)
-
-head(as.data.table(pred))
-
-pred$confusion
+pred_logreg$confusion
+pred_rf$confusion
 ```
 
-- The predictions may disagree, but which do we trust most? We should do [Performance Evaluation](#performance-evaluation) and [benchmarks](#performance-comparison-and-benchmarks)!
+The random forest seems to perform much better than the logistic regression.
+Based on this output, we would always want the random forest to do our credit worthiness classification.
+However, as outlined, we evalaute on the training data.
+It is possible that the results are steered by overfitting.
+Additionally, we use the default options of the packages which seems 'unfair'.
+It could be that the default options of the random forest are much better suited to the data situation than the logistic regression.
+We should do performance evaluation, tuning and benchmarks
 
-### Predict Probabilities
+#### Predict Probabilities
 
-- Learners may not only predict a class variable ("response"), but also their degree of "belief" / uncertainty in a given response.
-- We achieve this by setting the `$predict_type` slot to `"prob"`.
-- Sometimes this needs to be done *before* the learner is trained.
-- Alternatively, we can directly create the learner with this option: `lrn("classif.log_reg", predict_type = "prob")`
+Most learners may not only predict a class variable ("response"), but also their degree of "belief" / uncertainty in a given response.
+Typically, we achieve this by setting the `$predict_type` slot to `"prob"`.
+Sometimes this needs to be done *before* the learner is trained.
+This is necessary because the wrapped package requires this.
+Alternatively, we can directly create the learner with this option: `lrn("classif.log_reg", predict_type = "prob")`.
 
 ```{r}
 learner_logreg$predict_type = "prob"
 ```
 
 ```{r}
-learner_logreg$predict_newdata(newdata)
+learner_logreg$predict_newdata(german_credit)
 ```
 
-- Sometimes, you need to be careful when interpreting these values as probabilities!
+Note that sometimes one needs to be cautious when dealing with the probability interpretation of the predictions.
 
-# Performance Evaluation
+### Performance Evaluation
 
 To measure the performance of a learner on new unseen data, we usually mimic the scenario of unseen data by splitting up the data into training and test set.
 The training set is used for training the learner, and the test set is only used for predicting and evaluating the performance of the trained learner.
-Many resampling methods (cross-validation, bootstrap) repeat the splitting process in different ways.
+Numerous resampling methods (cross-validation, bootstrap) repeat the splitting process in different ways.
 
-- We need to specify the resampling scheme using the `rsmp()` function:
+We need to specify the resampling strategy using the `rsmp()` function:
 
 ```{r}
 resampling = rsmp("holdout", ratio = 2/3)
 print(resampling)
 ```
 
-- We use `resample()` to do the resampling calculation:
+Here, we use "holdout", a simple train-test split (with just one interation).
+We use the `resample()` function to undertake the resampling calculation:
 
 ```{r}
 res = resample(task, learner_logreg, resampling)
 res
 ```
 
-- The default score of the measure is included in the `$aggregate()` slot:
+The default score of the measure is included in the `$aggregate()` slot:
 
 ```{r}
 res$aggregate()
 ```
 
-- We can easily do differend resampling schemes, e.g. repeated holdout (`"subsampling"`), or cross validation. - Most methods do repeated train/predict cycles on different data subsets and aggregate the result (usually as the `mean()`). Doing this manually would require us to write loops.
+The default in this scenario is `classif.ce`. 
+This refers to the classification error. 
+A low value close to one is desired.
+
+We can easily run differend resampling strategies, e.g. repeated holdout (`"subsampling"`), or cross validation.
+Most methods perform repeated train/predict cycles on different data subsets and aggregate the result (usually as the `mean()`). 
+Doing this manually would require us to write loops.
+`r mlr_pkg("mlr3")` does the job for us.
 
 ```{r}
 res_sub = resample(task, learner_logreg, rsmp("subsampling", repeats = 10))
 res_sub$aggregate()
 ```
 
+Instead, we could also apply cross-validation.
+
 ```{r}
 res_cv = resample(task, learner_logreg, rsmp("cv", folds = 10))
 res_cv$aggregate()
 ```
 
-- We can also calculate scores for different measures (e.g., `msr("classif.fpr")` for the false positive rate).
+`r mlr_pkg("mlr3")` features scores for many more measures. 
+Here we apply `msr("classif.fpr")` for the false positive rate, or `msr("classif.fnr")` for the false negative rate.
+Multiple measures are entered via a list.
 
 ```{r}
 # false positive rate
 res_cv$aggregate(msr("classif.fpr"))
-
 # false positive rate and false negative
 msr_list = list(
   msr("classif.fpr"),
@@ -439,48 +461,55 @@ msr_list = list(
 res_cv$aggregate(msr_list)
 ```
 
-- There are a few more resampling methods, and quite a few more measures. List them in
+There are a few more resampling methods, and quite a few more measures. 
+We list them in
 
 ```{r}
 mlr_resamplings
 ```
 
+and 
+
 ```{r}
 mlr_measures
 ```
 
-To get help on a resampling method, use `?mlr_resamplings_xxx`, for a measure do `?mlr_measures_xxx`. you can also use the [mlr3 reference](https://mlr3.mlr-org.com/reference/index.html) online.
+To get help on a resampling method, use `?mlr_resamplings_xxx`, for a measure do `?mlr_measures_xxx`. 
+You can also use the [mlr3 reference](https://mlr3.mlr-org.com/reference/index.html) online.
 
-Some measure, for example `"auc"`, require a "probability" prediction, instead of a response prediction, see [**Probability Prediction**](#probability-prediction).
+Some measure, for example `"auc"`, require a "probability" prediction, instead of a response prediction.
 
-## Performance Comparison and Benchmarks
+### Performance Comparison and Benchmarks
 
-- We could compare `Learners` by evaluating `resample()` for each of them manually.
-- `benchmark()` automatically performs resampling evaluations for multiple learners and tasks.
-- Create fully crossed designs using `benchmark_grid()`: multiple `Learner`s **x** multiple `Task`s **x** multiple `Resampling`s.
-
+We could compare `Learners` by evaluating `resample()` for each of them manually.
+However, `benchmark()` automatically performs resampling evaluations for multiple learners and tasks.
+`benchmark_grid()` creates fully crossed designs:
+Multiple `Learner`s for multiple `Task`s are compared w.r.t. multiple `Resampling`s.
 ```{r}
 lrn_list = list(
   lrn("classif.log_reg", predict_type = "prob"),
   lrn("classif.ranger", predict_type = "prob")
 )
-
 bm_design = benchmark_grid(task = task, resamplings = rsmp("cv", folds = 10), learners = lrn_list)
 ```
 
-- Careful, large benchmarks may take a long time! This one should take less than a minute, however.
-- In General, we want use *parallelization* to speed things up on multicore machines.
-- This does **not work** on rstudio cloud, so only uncomment it locally!
+At this point, we want to mention that large benchmarks will (naturally) be very time-consuming and computionally expensvie.
+Our use case is very simple, so expect it to take about one minute.
+In general, we want use *parallelization* to speed things up on multicore machines.
+A benchmark is an 'embarassingly parallel' task, so in this case it would be very easy.
+This does **not work** on rstudio cloud, though.
+So only uncomment it locally!
 
-```{r, eval = FALSE}
+```{r}
 # future::plan("multiprocess")
 ```
 
-```{r}
+```{r} 
 bmr = benchmark(bm_design)
 ```
 
-- We can compare different measures. We compare misclassification rate and AUC.
+In the benchmark we can compare different measures. 
+We compare misclassification rate and AUC.
 
 ```{r}
 msr_list = list(msr("classif.ce"), msr("classif.auc"))
@@ -488,13 +517,110 @@ performances = bmr$aggregate(msr_list)
 performances[, c("learner_id", "classif.ce", "classif.auc")]
 ```
 
+In contrast to before, we see that the two models perform very similarly.
+The perfect class assignment from before was obviously a very optimistic evalution.
+
+## Deviating from package defaults
+
+The previously shown techniques build the backbone of an `r mlr_pkg("mlr3")`-featured machine learning work bench.
+However, in most cases one would never proceed in the way we did.
+While many `R` packages have carefully selected default settings, they will not perform optimally in any scenario.
+Typically, we can select the values of hyperparameters.
+These (hyper)parameters can be accessed via
+
+```{r}
+learner_logreg$param_set$get_values()
+```
+
+or 
+
+```{r}
+learner_logreg$param_set
+```
+
+As of now, the parameter set is empty.
+
+We can parametrise our learners in two distinct manners.
+If we have prior knowledge on how the learner should be (hyper-)parametrised, the way to go would be manually entering the parameters in the parameter set.
+In most cases, however, we would want to tune the model so that it can search good model configurations itself.
+For now however we only want to compare a small number of models.
+
+To get an idea on which parameters can be manipulated, we can investigate the parameters of the original package version.
+
+```{r}
+?ranger::ranger
+```
+
+```{r}
+expression1 = floor(sqrt(ncol(german_credit) - 1))
+``` 
+
+For the random forest two meaninful parameters which steer model complexity are:
+`num.trees` and `mtry`
+
+`num.trees` defaults to `500` and `mtry` to `floor(sqrt(ncol(data) - 1))`, in our case `r expression1`.
+
+In the following we aim to train three different learners:
+
+1) The default random forest.
+
+2) A random forest with low `num.trees` and low `mtry`.
+
+3) A random forest with high `num.trees` and high `mtry`.
+
+We will benchmark their performance on the German credit data set.
+
+We construct the three learners and set the parameters with a named list.
+
+```{r}
+learner_rf_medium = lrn("classif.ranger", predict_type = "prob")
+
+learner_rf_low = lrn("classif.ranger", predict_type = "prob")
+learner_rf_low$param_set$values <- list(num.trees = 5, mtry = 2)
+
+learner_rf_high = lrn("classif.ranger", predict_type = "prob")
+learner_rf_high$param_set$values <- list(num.trees = 1000, mtry = 11)
+```
+
+Once the learners are defined, we can benchmark them.
+
+```{r}
+lrn_list = list(
+  learner_rf_low = learner_rf_low,
+  learner_rf_medium = learner_rf_medium,
+  learner_rf_high = learner_rf_high
+)
+bm_design = benchmark_grid(task = task, resamplings = rsmp("cv", folds = 10), learners = lrn_list)
+```
+
+```{r}
+bmr = benchmark(bm_design)
+```
+
+We compare misclassification rate and AUC again.
+
+```{r}
+msr_list = list(msr("classif.ce"), msr("classif.auc"))
+performances = bmr$aggregate(msr_list)
+cbind(learner = names(lrn_list), performances[, c("classif.ce", "classif.auc")])
+```
+
+All learners seem to have similar performance while the `learner_rf_low` seems to underfit a bit.
+
 ## Outlook
 
-- How did we do? We can check the [OpenML](https://www.openml.org/t/31) website for performances of other machine learning methods.
-  - We see `ranger` is among the top methods
-- Things we have not done that should be considered:
-  - We have worked with default hyperparameters, but we may want to see if tuning them helps (Day 2)
-  - Some preprocessing and feature extraction steps may sometimes be helpful (Day 3)
+This tutorial was very detailed on the default workflow within `r mlr_pkg("mlr3")`.
+Having followed this tutorial you should be able to run your first models yourself.
+Next to that we spiked into performance evaluation and benchmarking.
+Furthermore, we showed how to customise learners.
+
+The next parts of the tutorial will go more into depth into additional `mlr3` topics.
+
+[Part II - Pipelines](/basics_pipelines_german_credit/) introduces you into the `r mlr_pkg("mlr3pipelines")` package.
+You will learn you to build complete machine learning workflows including, e.g. data preprocessing.
+
+[Part III - Tuning](/basics_tuning_german_credit/) introduces you into the `r mlr_pkg("mlr3tuning")` package.
+You will learn how to find parametrisations of your model that perform better than others.
 
 ## Appendix
 
