@@ -73,52 +73,56 @@ Check if the target class distribution is similar in each fold:
 
 ```{r cv2}
 cv3$instance %>%
-  left_join(gc_tsk$data() %>%
-      mutate(row_id = 1:n()) %>%
-      select(credit_risk, row_id)) %>%
+  left_join(gc_tsk$data() %>% mutate(row_id = 1:n())) %>%
   group_by(fold) %>%
-  summarise(class_ratio = sum(.$credit_risk == "bad")/sum(.$credit_risk == "good"))
+  summarise(class_ratio = sum(credit_risk == "bad")/sum(credit_risk == "good"))
 ```
 
 And compare it with the target class distribution from the whole data set:
 
 ```{r cv3}
 gc_tsk$data() %>%
-  summarise(class_ratio = sum(.$credit_risk == "bad")/sum(.$credit_risk == "good"))
+  summarise(class_ratio = sum(credit_risk == "bad")/sum(credit_risk == "good"))
 ```
 
 Note that the column used for stratification does not necessarily have to be the target class.
-In fact, multiple discrete variables can be used:
+In fact, multiple categorical features can be used for stratification to maintain their frequency distribution in each fold:
 
 ```{r cv4}
 gc_tsk$col_roles$stratum = c("housing", "telephone")
 gc_tsk$strata
 ```
 
-To check if stratification works in this case, a 2-fold CV will be specified and instantiated:
+To illustrate if stratification based on multiple categorical features works, we need to instantiate the CV folds again as we changed the features used for stratification:
 
 ```{r cv6}
-cv2 = rsmp("cv", folds = 2)
-
 set.seed(123)
-cv2$instantiate(gc_tsk)
-cv2$instance
+cv3$instantiate(gc_tsk)
+cv3$instance
 ```
 
-Again, we check the ratio of observations in each group (combination of groups) will be checked:  
+Again, we check the relative frequency of observations in each group (combination of `housing` and `telephone`) across each folds:  
 
 ```{r cv7}
-cv2$instance %>%
-  left_join(gc_tsk$data() %>%
-              mutate(row_id = 1:n()) %>%
-              select(housing, telephone, row_id)) %>%
+cv3$instance %>%
+  left_join(gc_tsk$data() %>% mutate(row_id = 1:n())) %>%
   group_by(fold, housing, telephone) %>%
-  summarise(n = n()) %>%
-  ungroup() %>%
-  mutate(ratio = n/n()) 
+  summarise(freq = n()) %>% 
+  ungroup() %>% 
+  group_by(fold) %>%
+  mutate(freq = freq/sum(freq)) %>%
+  spread(fold, freq)
 ```
 
-It is evident that each combination of "housing" and "telephone" have a similar ratio of observations in each fold.
+And compare it with the relative frequency from the whole data set:
+
+```{r}
+gc_tsk$data() %>%
+  group_by(housing, telephone) %>%
+  summarize(n = n()/nrow(.))
+```
+
+It is evident that in each fold, the combination of `housing` and `telephone` have similar frequencies that also coincide with the frequencies from the whole data set.
 
 ## Blocked resampling
 
@@ -131,9 +135,6 @@ bc_tsk = TaskClassif$new(id = "BreastCancer",
   backend = BreastCancer,
   target = "Class",
   positive = "malignant")
-
-# remove Id column as feature
-bc_tsk$col_roles$group = "Id"
 ```
 
 An additional concern when specifying resampling is respecting the natural grouping of the data.
@@ -153,6 +154,11 @@ This is known as blocked cross validation.
 The following example will illustrate blocked cross validation which can be achieved by specifying a blocking factor in the [`task$col_roles$group`](https://mlr3.mlr-org.com/reference/Task.html#active-bindings) slot:  
 
 ```{r create task_ blocked}
+# Use Id column as grouping
+bc_tsk$col_roles$group = "Id"
+# Remove Id from feature
+#bc_tsk$col_roles$feature = setdiff(bc_tsk$col_roles$feature, "Id")
+
 cv5 = rsmp("cv", folds = 5)
 set.seed(123)
 cv5$instantiate(bc_tsk)
@@ -167,97 +173,84 @@ all(cv5$instance$row_id %in% BreastCancer$Id)
 nrow(cv5$instance) == length(unique(BreastCancer$Id))
 ```
 
-To check if the specified groups are respected we can create a data frame with the specified folds:  
+If the specified groups are respected, each `Id` appears only in exactly one fold, i.e., we count how often each `Id` appears in a specific fold and print the `Id`s that appear in more than one fold:
 
 ```{r grouped_folds1}
-grouped_folds = map_df(1:5, function(x){
-  data.frame(row_id = cv5$test_set(x),
-    fold = x)
-}) 
-```
-
-And check if any of the Ids is present in more than one folds:  
-
-```{r grouped_folds2}
-grouped_folds %>%
-  left_join(bc_tsk$data() %>%
-      mutate(row_id = as.character(1:n())) %>%
-      select(Class, Id, row_id))  %>%
+bc_tsk$data() %>%
+  merge(cv5$instance, by.x = "Id", by.y = "row_id") %>%
   group_by(Id) %>%
-  summarise(unique_folds = length(unique(fold))) %>%
+  summarize(unique_folds = length(unique(fold))) %>%
   filter(unique_folds > 1)
 ```
 
-As expected there are no Id's present in more than one fold.
+As expected, the table is empty as there are no Id's present in more than one fold.
 
 ## Resampling with predefined folds
 
-In some circumstances on specific tasks it may be desirable to specify predefined fold indexes. This can also be achieved using the [`task$col_roles$group`](https://mlr3.mlr-org.com/reference/Task.html#active-bindings) when using k-fold cross validation.
-
-First create some predefined folds:  
+In some use cases, it might be necessary to use predefined folds. 
+This can be achieved by manually creating a feature used for grouping and assigning it to the [`task$col_roles$group`](https://mlr3.mlr-org.com/reference/Task.html#active-bindings) slot.
+First, we create a vector that contains 5 predefined folds:  
 
 ```{r predefined_folds1}
 set.seed(1)
 folds = sample(rep(1:5, length.out = nrow(BreastCancer)),
-               size = nrow(BreastCancer),
-               replace = F)
+  size = nrow(BreastCancer),
+  replace = F)
 head(folds, 20)
 table(folds)
 ```
 
-and specify them as a blocking factor:
+This vector is now added to the data set and will be used as blocking factor:
 
 ```{r predefined_folds2}
 bc_tsk = TaskClassif$new(id = "BreastCancer",
-                         backend = data.frame(BreastCancer, folds = as.factor(folds)),
-                         target = "Class",
-                         positive = "malignant")
-bc_tsk$col_roles$group = "folds"
-bc_tsk$col_roles$feature = bc_tsk$col_roles$feature[!bc_tsk$col_roles$feature %in% c("folds", "Id")]
+  backend = data.frame(BreastCancer, foldIds = as.factor(folds)),
+  target = "Class",
+  positive = "malignant")
+
+bc_tsk$col_roles$group = "foldIds"
+```
+
+We now instantiate a 5-fold CV that will respect the predefined folds:
+
+```{r}
 cv5 = rsmp("cv", folds = 5)
 set.seed(123)
 cv5$instantiate(bc_tsk)
 cv5$instance
 ```
 
-Since we have only five predetermined folds the `cv5$instance` data table has five rows.
-To check if the predefined groups are respected:
+Since we have only five predefined folds, the `cv5$instance` data table has five rows and shows which of our `foldIds` values (contained in the `row_id` column) will belong to which instantiated fold.
+To check if the predefined groups are respected, we count how often each `foldIds` appears in a specific fold:
 
 ```{r predefined_folds3}
-grouped_folds = map_df(1:5, function(x){
-  data.frame(row_id = cv5$test_set(x),
-             fold = x)
-}) 
-grouped_folds %>%
-  left_join(data.frame(row_id = 1:nrow(BreastCancer),
-                       folds = folds)) %>%
-  group_by(fold, folds) %>%
-  n_groups
+bc_tsk$data() %>%
+  merge(cv5$instance, by.x = "foldIds", by.y = "row_id") %>%
+  group_by(foldIds) %>%
+  summarize(unique_folds = length(unique(fold)))
 ```
 
-There are five groups so it can be concluded each instantiated fold corresponds to one of the predefined folds.
+There are five groups and each `foldIds` appears only in exactly one fold, i.e., each instantiated fold corresponds to one of the predefined folds.
 
-From the above example it is not clear how to perform repeated k-fold CV or time series CV with predefined indices. This is possible via the [`mlr_resamplings_custom()`](https://mlr3.mlr-org.com/reference/mlr_resamplings_custom.html) to which a list of predefined train and test indices are provided. In the following example custom indexes will be created using [`caret::createMultiFolds()`](https://www.rdocumentation.org/packages/caret/versions/6.0-85/topics/createDataPartition):  
-
+The previous example does not cover how to perform repeated k-fold CV or time series CV with predefined indices. 
+This is possible via the [`mlr_resamplings_custom()`](https://mlr3.mlr-org.com/reference/mlr_resamplings_custom.html) to which a list of predefined train and test indices can be assigned.
+In the following example, a custom resampling is created using indices created by [`caret::createMultiFolds()`](https://www.rdocumentation.org/packages/caret/versions/6.0-85/topics/createDataPartition):  
 
 ```{r predefined_folds4}
 gc_tsk = tsk("german_credit")
-train_ind = caret::createMultiFolds(gc_tsk$truth(),
-                                    k = 5,
-                                    times = 10)
-all_ind = seq_along(gc_tsk$truth())
-test_ind = lapply(train_ind,
-                  function(x) setdiff(all_ind, x))
+train_ind = caret::createMultiFolds(gc_tsk$truth(), k = 5, times = 10)
+test_ind = lapply(train_ind, function(x) setdiff(1:gc_tsk$nrow, x))
 rc = rsmp("custom")
 rc$instantiate(gc_tsk, train_ind, test_ind)
 ```
 
-To check if it performs as intended:
+We now check if the instantiated custom resampling contains the intended folds:
 
 ```{r predefined_folds5}
-all.equal(
-  rc$train_set(1),
-  train_ind[[1]])
+# check it for the first fold
+all.equal(train_ind[[1]], rc$train_set(1)) 
+# check it for all folds
+unlist(lapply(1:rc$iters, function(i) all.equal(train_ind[[i]], rc$train_set(i))))
 ```
 
 ## Conclusions
