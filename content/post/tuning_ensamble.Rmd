@@ -88,7 +88,7 @@ To join everything into level 0, the  [gunion](https://mlr3pipelines.mlr-org.com
 The out-of-bag predictions of all Level 0 learners will be concatenated using [PipeOpFeatureUnion](https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_featureunion.html) along with the original data passed via [PipeOpNOP()](https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_nop.html):  
 
 ```{r lrn3}
-level1 = gunion(list(
+level0 = gunion(list(
   anova %>>% rprt_cv1,
   mrmr %>>% glmnet_cv1,
   find_cor %>>% lda_cv1,
@@ -99,7 +99,7 @@ level1 = gunion(list(
 Check how the pipeline looks like:  
 
 ```{r lrn4, fig.width=6, fig.height = 6}
-level1$plot(html = FALSE)
+level0$plot(html = FALSE)
 ```
 
 ### Level 1
@@ -115,7 +115,7 @@ lda_cv2 = po("learner_cv", lda_lrn, id = "lda_2")
 All level 1 learners will as input receive PCA transformed data:
 
 ```{r lrn6}
-pca = level2 = level1 %>>%
+level1 = level0 %>>%
   po("copy", 4) %>>%
   gunion(list(
     po("pca", id = "pca2_1", param_vals = list(scale. = TRUE)) %>>% rprt_cv2,
@@ -132,7 +132,7 @@ Level 1 learner out-of-bag predictions will be concatenated with the input to le
 ranger_lrn = lrn("classif.ranger")
 ranger_lrn$predict_type <- "prob"
 
-ensemble = level2 %>>% ranger_lrn
+ensemble = level1 %>>% ranger_lrn
 
 ensemble$plot(html = FALSE)
 ```
