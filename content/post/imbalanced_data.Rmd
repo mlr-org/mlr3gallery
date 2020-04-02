@@ -4,8 +4,8 @@ author: Giuseppe Casalicchio
 date: '2020-03-30'
 slug: mlr3-imbalanced
 categories: []
-tags: ['mlr3', 'mlr3pipelines', 'mlr3pipelines', 'basics', 'visualization']
-packages: ['mlr3', 'mlr3learners', 'mlr3pipelines', 'mlr3tuning']
+tags: ['mlr3', 'mlr3pipelines', 'mlr3tuning', 'tuning', 'OpenML']
+packages: ['OpenML', 'mlr3', 'mlr3learners', 'mlr3pipelines', 'mlr3tuning', 'mlr3measures', 'mlr3viz']
 ---
 
 # Intro 
@@ -123,19 +123,19 @@ ps_under = ParamSet$new(list(ParamDbl$new("undersample.ratio", lower = 1/5, uppe
 ps_over = ParamSet$new(list(ParamDbl$new("oversample.ratio", lower = 1, upper = 5)))
 ps_smote = ParamSet$new(list(
   ParamInt$new("smote.dup_size", lower = 1, upper = 5),
-  ParamInt$new("smote.K", lower = 1, upper = 5)
+  ParamInt$new("smote.K", lower = 2, upper = 6)
 ))
 ```
 
-We use `AutoTuner` to tune the pipeline (random forest learner + imbalancy correction method) based on a 3-fold CV using the `classif.f_score` as performance measure. 
+We use `AutoTuner` to tune the pipeline (random forest learner + imbalancy correction method) based on a 3-fold CV using the `classif.fbeta` as performance measure. 
 As we defined the search space only for the imbalacy correction method, we will only tune their hyperparameter to keep the computational runtime low.
 However, we could also jointly tune the hyperparameter of the learner along with the imbalancy correction method. 
-We use grid search with 8 different hyperparameter configurations:
+We use grid search with 5 different hyperparameter configurations:
 
 ```{r}
 # define the 
 inner_cv3 = rsmp("cv", folds = 3)
-measure = msr("classif.f_score")
+measure = msr("classif.fbeta")
 
 learns = list(
   AutoTuner$new(
@@ -144,7 +144,7 @@ learns = list(
     measures = measure,
     tune_ps = ps_under,
     terminator = term("none"),
-    tuner = tnr("grid_search", resolution = 8)
+    tuner = tnr("grid_search", resolution = 5)
   ),
   AutoTuner$new(
     learner = lrn_over,
@@ -152,7 +152,7 @@ learns = list(
     measures = measure,
     tune_ps = ps_over,
     terminator = term("none"),
-    tuner = tnr("grid_search", resolution = 8)
+    tuner = tnr("grid_search", resolution = 5)
   ),
   AutoTuner$new(
     learner = lrn_smote,
@@ -160,7 +160,7 @@ learns = list(
     measures = measure,
     tune_ps = ps_smote,
     terminator = term("none"),
-    tuner = tnr("grid_search", resolution = 8)
+    tuner = tnr("grid_search", resolution = 5)
   )
 )
 names(learns) = mlr3misc::map(learns, "id")
@@ -171,9 +171,10 @@ names(learns)
 
 The `AutoTuner` is a fully tuned pipeline that behaves like a usual learner. 
 For the tuning, we used 3-fold CV.
-Now, we use the `benchmark` function to compare the tuned class imbalancy pipelines based on a 5 times repeated subsampling for the outer evaluation:
+Now, we use the `benchmark` function to compare the tuned class imbalancy pipelines based on a holdout for the outer evaluation:
 
 ```{r, cache=TRUE}
+# NOTE: This code runs about 3 minutes
 outer_resampling = rsmp("holdout")
 design = benchmark_grid(
   tasks = task,
@@ -187,23 +188,11 @@ set.seed(1)
 bmr = benchmark(design, store_models = TRUE)
 ```
 
-```{r, echo = FALSE, eval = FALSE}
-# compute and store benchmark result (or load it from file if it already exists)
-if (!file.exists("imbalanced_data_bench.Rds")) {
-  set.seed(1)
-  # future::plan("multiprocess")
-  bmr = benchmark(design, store_models = TRUE)
-  saveRDS(bmr, file = "imbalanced_data_bench.Rds")
-} else {
-  bmr = readRDS("imbalanced_data_bench.Rds")
-}
-```
-
 ### Visualize benchmark results
 
 ```{r}
 bmr$aggregate(measure)
-autoplot(bmr, measure)
+autoplot(bmr, measure = measure) # one value per boxplot since we used holdout as outer resampling 
 ```
 
 ### Visualize the tuning path
@@ -213,18 +202,18 @@ Therefore, we can plot the tuning path of the best learner from the subsampling 
 
 ```{r}
 library(ggplot2)
-utune_path = bmr$learners$learner[[1]]$archive("params")
-utune_gg = ggplot(utune_path, aes(x = undersample.ratio, y = classif.f_score)) +
+utune_path = bmr$data$learner[[1]]$archive("params")
+utune_gg = ggplot(utune_path, aes(x = undersample.ratio, y = classif.fbeta)) +
   geom_point(size = 3) + 
   geom_line() + ylim(0.9, 1)
 
-otune_path = bmr$learners$learner[[2]]$archive("params")
-otune_gg = ggplot(otune_path, aes(x = oversample.ratio, y = classif.f_score)) +
+otune_path = bmr$data$learner[[2]]$archive("params")
+otune_gg = ggplot(otune_path, aes(x = oversample.ratio, y = classif.fbeta)) +
   geom_point(size = 3) + 
   geom_line() + ylim(0.9, 1)
 
-stune_path = bmr$learners$learner[[3]]$archive("params")
-stune_gg = ggplot(stune_path, aes(x = smote.dup_size, y = classif.f_score, col = factor(smote.K))) +
+stune_path = bmr$data$learner[[3]]$archive("params")
+stune_gg = ggplot(stune_path, aes(x = smote.dup_size, y = classif.fbeta, col = factor(smote.K))) +
   geom_point(size = 3) + 
   geom_line() + ylim(0.9, 1)
 
