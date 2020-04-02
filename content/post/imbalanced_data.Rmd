@@ -5,7 +5,7 @@ date: '2020-03-30'
 slug: mlr3-imbalanced
 categories: []
 tags: ['mlr3', 'mlr3pipelines', 'mlr3tuning', 'tuning', 'OpenML']
-packages: ['OpenML', 'mlr3', 'mlr3learners', 'mlr3pipelines', 'mlr3tuning', 'mlr3measures', 'mlr3viz']
+packages: ['OpenML', 'mlr3', 'mlr3learners', 'mlr3pipelines', 'mlr3tuning', 'mlr3viz']
 ---
 
 # Intro 
@@ -13,9 +13,9 @@ packages: ['OpenML', 'mlr3', 'mlr3learners', 'mlr3pipelines', 'mlr3tuning', 'mlr
 This use case compares different approaches to handle class imbalancy for the [`optdigits`](https://www.openml.org/d/980) binary classification data set using the mlr3 package. 
 We mainly focus on undersampling the majority class, oversampling the minority class, and the smote imbalancy correction that enriches the minority class with synthetic data. 
 The use case requires prior knowledge in basic ML concepts (e.g., issues imbalanced data, hyperparameter tuning, nested cross-validation) and `mlr3`, `mlr3pipelines` and `mlr3tuning` is required.
-You can find most of the content here also in the [mlr3book](https://mlr3book.mlr-org.com/) in a more detailed way.
+You can find most of the content here also in the [mlr3book](https://mlr3book.mlr-org.com/) explained in a more detailed way.
 
-The steps are performed:
+These steps are performed:
 
 * Retrieve data sets from `OpenML`
 * Define imbalancy correction pipelines (undersampling, oversampling and smote) with `mlr3pipelines`  
@@ -29,7 +29,6 @@ The steps are performed:
 ```{r}
 library("mlr3")          # mlr3 base package
 library("mlr3misc")      # contains some helper functions
-library("mlr3measures")  # lots of performance measures
 library("mlr3pipelines") # create ML pipelines
 library("mlr3tuning")    # tuning ML algorithms
 library("mlr3learners")  # additional ML algorithms
@@ -77,7 +76,7 @@ skimr::skim(data)
 
 ## Imbalancy correction
 
-In `mlr3pipelines`, there is a `classbalancing` and a `smote` pipe operator that can be combined with any learner. 
+In `mlr3pipelines`, there is a [`classbalancing`](https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_classbalancing.html) and a [`smote`](https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_smote.html) pipe operator that can be combined with any learner. 
 Below, we define the undersampling, oversampling and smote `PipeOp`s.
 All three imbalancy correction methods have hyperparameters to control the degree of class imbalance.
 We apply the `PipeOp`s to the current `task` with specific hyperparameter values to see how the class balance changes:
@@ -219,11 +218,11 @@ stune_gg = ggplot(stune_path, aes(x = smote.dup_size, y = classif.fbeta, col = f
   geom_point(size = 3) + 
   geom_line() + ylim(0.9, 1)
 
-library(gridExtra)
-grid.arrange(utune_gg, otune_gg, stune_gg, nrow = 1)
+library(ggpubr)
+ggarrange(utune_gg, otune_gg, stune_gg, common.legend = TRUE, nrow = 1) 
 ```
 
 ## Conclusion
 
-We left out a lot of details and other features.
+In this post, we tuned and compared 5 different settings of sampling ratios for the undersampling method, the oversampling method and different SMOTE variants (using different values of `K` nearest neighbors during the sampling process). 
 If you want to know more, read the [mlr3book](https://mlr3book.mlr-org.com/) and the documentation of the mentioned packages.
