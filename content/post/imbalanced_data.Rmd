@@ -115,7 +115,7 @@ lrn_over = GraphLearner$new(po_over %>>% lrn)
 lrn_smote = GraphLearner$new(po_smote %>>% lrn)
 ```
 
-We define the search space in order to tune the hyperparameters of the class imbalancy methods:
+We define the search space in order to tune the hyperparameters of the class imbalancy methods. 
 
 ```{r}
 # define parameter search space for each method
@@ -128,9 +128,10 @@ ps_smote = ParamSet$new(list(
 ```
 
 We use `AutoTuner` to tune the pipeline (random forest learner + imbalancy correction method) based on a 3-fold CV using the `classif.fbeta` as performance measure. 
-As we defined the search space only for the imbalacy correction method, we will only tune their hyperparameter to keep the computational runtime low.
-However, we could also jointly tune the hyperparameter of the learner along with the imbalancy correction method. 
-We use grid search with 5 different hyperparameter configurations:
+To keep computational runtime low, we define the search space only for the imbalacy correction method. However, one can also jointly tune the hyperparameter of the learner along with the imbalancy correction method by extending the search space with the learner's hyperparameters. 
+Note that SMOTE has two hyperparameters `K` and `dup_size` where `K` changes the behavior of the SMOTE algorithm and `dup_size` affects oversampling rate. 
+Hence, SMOTE with K = 1 can be seen as a different imbalacy correction method as SMOTE with K=2 (and so on).
+We use grid search with 5 different hyperparameter configurations for the undersampling method, the oversampling method and each SMOTE variant for tuning:
 
 ```{r}
 # define the 
