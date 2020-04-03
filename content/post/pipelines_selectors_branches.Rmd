@@ -13,7 +13,7 @@ packages: ['mlr3', 'mlr3pipelines', 'mlr3tuning', 'paradox']
 [mlr3pipelines](https://mlr3pipelines.mlr-org.com/) allows a large amount of freedom when constructing data preprocessing steps.
 This is achieved via a modular approach using [`PipeOps`](https://mlr3pipelines.mlr-org.com/reference/PipeOp.html). For detailed overview check the [mlr3book](https://mlr3book.mlr-org.com/pipelines.html).  
 
-Before going further recommended reading is [mlr3pipelines tutorial - german credit](https://mlr3gallery.mlr-org.com/basics_pipelines_german_credit/).  
+Before going further recommended reading are posts [mlr3pipelines tutorial - german credit](https://mlr3gallery.mlr-org.com/basics_pipelines_german_credit/), and [Impute missing variables](https://mlr3gallery.mlr-org.com/impute-missing-variables/) .  
 
 This post covers:  
 
@@ -52,7 +52,7 @@ on features "insulin" and "triceps" which have quite a big portion of missing va
 
 There are two approaches which can be used to perform this:
 
-  1. using the `affect_columns` argument to define the variables on which a `PipeOp` will operate during its construction along with an appropriate [`selector`](https://mlr3pipelines.mlr-org.com/reference/Selector.html) function:
+  1. Using the `PipeOp` `affect_columns` argument to define the variables on which a `PipeOp` will operate with an appropriate [`selector`](https://mlr3pipelines.mlr-org.com/reference/Selector.html) function:
   
 ```{r}
 hist_imp = po("imputehist", param_vals = list(affect_columns = selector_name(c("glucose", "mass", "pressure"))))
@@ -133,6 +133,21 @@ impute_missind2$plot(html = FALSE)
 
 impute_missind2$train(pima_tsk)[[1]]$data()
 ```
+
+It should be noted that when there is one input channel, it is automatically copied as many times needed for the downstream `PipeOps`. In other words the above call works without `po("copy", 4)`:  
+
+```{r}
+impute_missind3 = gunion(list(hist_imp2,
+                              median_imp2,
+                              miss_ind,
+                              po("select", selector = selector_name(other_features), id = "slct3"))) %>>%
+  po("featureunion")
+
+impute_missind3$train(pima_tsk)[[1]]$data()
+```
+
+`po("copy")` is required when there are more than one input channels and multiple output channels, and their numbers do not match.
+
 
 ## Branching
 
