@@ -35,8 +35,10 @@ In classification tasks, the ratio of the target class distribution should be si
 
 Stratification can also be performed with respect to explanatory categorical variables to ensure that all subgroups are represented in all training and test sets.
 
-In `mlr3`, each [task](https://mlr3.mlr-org.com/reference/Task.html) has a slot [`col_roles`](https://mlr3.mlr-org.com/reference/Task.html#active-bindings). This slot denotes in a general manner the roles certain features will have throughout different stages of the machine learning process. 
-Minimally the `col_roles` slot shows which variables will be used as `feature`s and the `target`.
+In `mlr3`, each [task](https://mlr3.mlr-org.com/reference/Task.html) has a slot [`col_roles`](https://mlr3.mlr-org.com/reference/Task.html#active-bindings).
+This slot shows general roles certain features will have throughout different stages of the machine learning process. 
+At least, the `col_roles` slot shows which variables will be used as `feature`s and as the `target`.
+Hoever, the `col_roles` slot can be more diverse and some variables might even serve multiple roles. 
 We can specify the variable used for stratification in `task$col_roles$stratum`. 
 This will be illustrated in the following example using the `german_credit` data:  
 
@@ -226,7 +228,8 @@ bc_tsk$data() %>%
   summarize(unique_folds = length(unique(fold)))
 ```
 
-There are five groups and each `foldIds` appears only in exactly one fold, i.e., each instantiated fold corresponds to one of the predefined folds.
+There are five groups and each `foldIds` appears only in exactly one fold. 
+This means that each instantiated fold corresponds to one of the predefined folds.
 
 The previous example does not cover how to perform repeated k-fold CV or time series CV with predefined indices. 
 This is possible via the [`mlr_resamplings_custom()`](https://mlr3.mlr-org.com/reference/mlr_resamplings_custom.html) to which a list of predefined train and test indices can be assigned.
