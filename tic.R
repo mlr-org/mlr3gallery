@@ -4,7 +4,8 @@ get_stage("install") %>%
 
 get_stage("deploy") %>%
   add_code_step(blogdown::build_site()) %>%
-  add_code_step(writeLines("mlr3gallery.mlr-org.com", "docs/CNAME"))
+  add_code_step(writeLines("mlr3gallery.mlr-org.com", "docs/CNAME")) %>%
+  add_code_step(system("touch docs/.nojekyll"))
 
 if (ci_can_push() && !ci_is_tag()) {
   get_stage("before_deploy") %>%
