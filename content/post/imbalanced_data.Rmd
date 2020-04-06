@@ -127,7 +127,7 @@ ps_smote = ParamSet$new(list(
 ))
 ```
 
-We use `AutoTuner` to tune the pipeline (random forest learner + imbalancy correction method) based on a 3-fold CV using the `classif.fbeta` as performance measure. 
+We create an `AutoTuner` class from the learner to tune the graph (random forest learner + imbalancy correction method) based on a 3-fold CV using the `classif.fbeta` as performance measure. 
 To keep computational runtime low, we define the search space only for the imbalacy correction method. However, one can also jointly tune the hyperparameter of the learner along with the imbalancy correction method by extending the search space with the learner's hyperparameters. 
 Note that SMOTE has two hyperparameters `K` and `dup_size`. 
 While `K` changes the behavior of the SMOTE algorithm, `dup_size` will affect oversampling rate. 
