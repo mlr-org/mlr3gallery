@@ -26,7 +26,7 @@ This post covers three ways to achieve such reliable resampling procedures:
 ```{r packages}
 library(mlr3)
 library(mlbench)
-library(tidyverse)
+library(data.table)
 ```
 
 ## Stratified resampling
@@ -71,17 +71,14 @@ cv3$instance
 Check if the target class distribution is similar in each fold:
 
 ```{r cv2}
-cv3$instance %>%
-  left_join(gc_tsk$data() %>% mutate(row_id = 1:n())) %>%
-  group_by(fold) %>%
-  summarise(class_ratio = sum(credit_risk == "bad") / sum(credit_risk == "good"))
+dt = merge(cv3$instance, gc_tsk$data()[,row_id := .I], by = "row_id")
+dt[,.(class_ratio = sum(credit_risk == "bad") / sum(credit_risk == "good")), by = fold]
 ```
 
 And compare it with the target class distribution from the whole data set:
 
 ```{r cv3}
-gc_tsk$data() %>%
-  summarise(class_ratio = sum(credit_risk == "bad") / sum(credit_risk == "good"))
+dt[,.(class_ratio = sum(credit_risk == "bad") / sum(credit_risk == "good"))]
 ```
 
 Note that the variable used for stratification does not necessarily have to be the target class.
@@ -103,22 +100,17 @@ cv3$instance
 Again, we check the relative frequency of observations in each group (combination of `housing` and `telephone`) across all folds:  
 
 ```{r cv7}
-cv3$instance %>%
-  left_join(gc_tsk$data() %>% mutate(row_id = 1:n())) %>%
-  group_by(fold, housing, telephone) %>%
-  summarise(freq = n()) %>% 
-  ungroup() %>% 
-  group_by(fold) %>%
-  mutate(freq = freq/sum(freq)) %>%
-  spread(fold, freq)
+dt = merge(cv3$instance, gc_tsk$data()[,row_id := .I], by = "row_id")
+dt = dt[,.(freq = .N), by = list(fold, housing, telephone)]
+dt = dcast(dt, housing + telephone ~ fold)
+dt[,c(3:5) :=  lapply(.SD, function(x) x/sum(x)), .SDcols=3:5]
+dt
 ```
 
 And compare it with the relative frequency from the whole data set:
 
 ```{r}
-gc_tsk$data() %>%
-  group_by(housing, telephone) %>%
-  summarize(n = n()/nrow(.))
+gc_tsk$data()[,.(freq = .N/max(.I)), by = list(housing, telephone)][order(housing, telephone),]
 ```
 
 It is evident that in each fold, the combination of `housing` and `telephone` have similar frequencies that also coincide with the frequencies from the whole data set.
@@ -174,11 +166,9 @@ nrow(cv5$instance) == length(unique(BreastCancer$Id))
 If the specified blocking groups are respected, each `Id` appears only in exactly one fold. To inspect if blocking was successful when generating the folds we count how often each `Id` appears in a specific fold and print the `Id`s that appear in more than one fold:
 
 ```{r grouped_folds1}
-bc_tsk$data() %>%
-  merge(cv5$instance, by.x = "Id", by.y = "row_id") %>%
-  group_by(Id) %>%
-  summarize(unique_folds = length(unique(fold))) %>%
-  filter(unique_folds > 1)
+dt = merge(bc_tsk$data(), cv5$instance, by.x = "Id", by.y = "row_id")
+dt = dt[,.(unique_folds = length(unique(fold))), by = Id]
+dt[unique_folds > 1,]
 ```
 
 As expected, the table is empty as there are no Id's present in more than one fold.
@@ -222,10 +212,8 @@ Since we have only five predefined folds, the `cv5$instance` data table has five
 To check if the predefined groups are respected, we count how often each `foldIds` appears in a specific fold:
 
 ```{r predefined_folds3}
-bc_tsk$data() %>%
-  merge(cv5$instance, by.x = "foldIds", by.y = "row_id") %>%
-  group_by(foldIds) %>%
-  summarize(unique_folds = length(unique(fold)))
+dt = merge(bc_tsk$data(), cv5$instance, by.x = "foldIds", by.y = "row_id") 
+dt[,.(unique_folds = length(unique(fold))), by = foldIds]
 ```
 
 There are five groups and each `foldIds` appears only in exactly one fold. 
