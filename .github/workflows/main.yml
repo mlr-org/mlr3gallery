@@ -20,9 +20,9 @@ jobs:
         config:
           # comment out lines if you do not want to build on certain platforms
           #- { os: windows-latest, r: "release" }
-          - { os: macOS-latest, r: "release" }
+          #- { os: macOS-latest, r: "release" }
           #- { os: macOS-latest, r: "devel" }
-          #- { os: ubuntu-latest, r: "release" }
+          - { os: ubuntu-latest, r: "release" }
 
     env:
       # otherwise remotes::fun() errors cause the build to fail. Example: Unavailability of binaries
@@ -144,14 +144,11 @@ jobs:
           name: ${{ runner.os }}-r${{ matrix.config.r }}-results
           path: check
       - name: "[Stage] Before Deploy"
-        if: matrix.config.os == 'macOS-latest' && matrix.config.r == 'release'
         run: |
           Rscript -e "tic::before_deploy()"
 
       - name: "[Stage] Deploy"
-        if: matrix.config.os == 'macOS-latest' && matrix.config.r == 'release'
         run: Rscript -e "tic::deploy()"
 
       - name: "[Stage] After Deploy"
-        if: matrix.config.os == 'macOS-latest' && matrix.config.r == 'release'
         run: Rscript -e "tic::after_deploy()"
