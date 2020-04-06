@@ -10,8 +10,8 @@ packages: ['OpenML', 'mlr3', 'mlr3learners', 'mlr3pipelines', 'mlr3tuning', 'mlr
 
 # Intro 
 
-This use case compares different approaches to handle class imbalancy for the [`optdigits`](https://www.openml.org/d/980) binary classification data set using the mlr3 package. 
-We mainly focus on undersampling the majority class, oversampling the minority class, and the smote imbalancy correction that enriches the minority class with synthetic data. 
+This use case compares different approaches to handle class imbalance for the [`optdigits`](https://www.openml.org/d/980) binary classification data set using the mlr3 package. 
+We mainly focus on undersampling the majority class, oversampling the minority class, and the SMOTE imbalance correction that enriches the minority class with synthetic data. 
 The use case requires prior knowledge in basic ML concepts (issues imbalanced data, hyperparameter tuning, nested cross-validation).
 The R packages `mlr3`, `mlr3pipelines` and `mlr3tuning` will be used.
 You can find most of the content here also in the [mlr3book](https://mlr3book.mlr-org.com/) explained in a more detailed way.
@@ -19,9 +19,9 @@ You can find most of the content here also in the [mlr3book](https://mlr3book.ml
 These steps are performed:
 
 * Retrieve data sets from `OpenML`
-* Define imbalance correction pipelines (undersampling, oversampling and smote) with `mlr3pipelines`
-* Combine pipeline with a learner and autotune it with `mlr3tuning`
-* Benchmark the autotuned pipelines and visualize the results using `mlr3viz`
+* Define imbalance correction pipeline [`Graph`](https://mlr3pipelines.mlr-org.com/reference/Graph.html)s (undersampling, oversampling and SMOTE) with `mlr3pipelines`
+* Autotune the `Graph` together with a learner using `mlr3tuning`
+* Benchmark the autotuned `Graph` and visualize the results using `mlr3viz`
 
 # Prerequisites
 
@@ -36,12 +36,12 @@ library("mlr3learners")  # additional ML algorithms
 library("mlr3viz")       # autoplot for benchmarks
 library("paradox")       # hyperparameter space
 library("OpenML")        # to obtain data sets
-library("smotefamily")   # smote algorithm for imbalancy correction
+library("smotefamily")   # SMOTE algorithm for imbalance correction
 ```
 
 ## Retrieve data sets from OpenML
 
-OpenML.org is an open machine learning platform, which allows users to share data, code and machine learning experiments.
+[OpenML.org](https://www.openml.org) is an open machine learning platform, which allows users to share data, code and machine learning experiments.
 The OpenML R package can query available data sets using a filter-like approach by providing desired dataset characteristics like `number.of.classes` or `number.of.features`.
 
 ```{r}
@@ -51,7 +51,7 @@ ds = listOMLDataSets(
   number.of.features = c(1, 100), 
   number.of.instances = c(5000, 10000)
 )
-# select imbalanced data sets (without categorical features as smote cannot handle them)
+# select imbalanced data sets (without categorical features as SMOTE cannot handle them)
 ds = subset(ds, minority.class.size/number.of.instances < 0.2 & number.of.symbolic.features == 1)
 ds
 
@@ -75,11 +75,11 @@ Quick overview of the data:
 skimr::skim(data)
 ```
 
-## Imbalancy correction
+## Imbalance correction
 
 In `mlr3pipelines`, there is a [`classbalancing`](https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_classbalancing.html) and a [`smote`](https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_smote.html) pipe operator that can be combined with any learner. 
-Below, we define the undersampling, oversampling and smote `PipeOp`s.
-All three imbalancy correction methods have hyperparameters to control the degree of class imbalance.
+Below, we define the undersampling, oversampling and SMOTE `PipeOp`s.
+All three imbalance correction methods have hyperparameters to control the degree of class imbalance.
 We apply the `PipeOp`s to the current `task` with specific hyperparameter values to see how the class balance changes:
 
 ```{r}
@@ -88,55 +88,60 @@ table(task$truth())
 
 # undersample majority class (relative to majority class)
 po_under = po("classbalancing", id = "undersample", adjust = "major", 
-  reference = "major", shuffle = FALSE, ratio = 1/5)
-table(po_under$train(list(task))$output$truth()) # reduce majority class by factor 5
+  reference = "major", shuffle = FALSE, ratio = 1/6)
+table(po_under$train(list(task))$output$truth()) # reduce majority class by factor '1/ratio'
 
 # oversample majority class (relative to majority class)
 po_over = po("classbalancing", id = "oversample", adjust = "minor", 
-  reference = "minor", shuffle = FALSE, ratio = 5)
-table(po_over$train(list(task))$output$truth()) # enrich minority class by factor 5
+  reference = "minor", shuffle = FALSE, ratio = 6)
+table(po_over$train(list(task))$output$truth()) # enrich minority class by factor 'ratio'
 
-# smote enriches the minority class with synthetic data
-po_smote = po("smote", dup_size = 5)
+# SMOTE enriches the minority class with synthetic data
+po_smote = po("smote", dup_size = 6)
 table(po_smote$train(list(task))$output$truth()) # enrich minority class by factor (dup_size + 1)
 ```
 
 ## Construct `AutoTuner`
 
-We combine the `PipeOp`s with a learner (here `ranger`) to make each pipeline behave like a learner:
+We combine the `PipeOp`s with a learner (here `ranger`) to make each pipeline graph behave like a learner:
 
 ```{r}
 # create random forest learner
 lrn = lrn("classif.ranger", num.trees = 50)
 
-# combine learner with pipeline
+# combine learner with pipeline graph
 lrn_under = GraphLearner$new(po_under %>>% lrn)
 lrn_over = GraphLearner$new(po_over %>>% lrn)
 lrn_smote = GraphLearner$new(po_smote %>>% lrn)
 ```
 
-We define the search space in order to tune the hyperparameters of the class imbalancy methods. 
+We define the search space in order to tune the hyperparameters of the class imbalance methods. 
 
 ```{r}
 # define parameter search space for each method
-ps_under = ParamSet$new(list(ParamDbl$new("undersample.ratio", lower = 1/5, upper = 1)))
-ps_over = ParamSet$new(list(ParamDbl$new("oversample.ratio", lower = 1, upper = 5)))
+ps_under = ParamSet$new(list(ParamDbl$new("undersample.ratio", lower = 1/6, upper = 1)))
+ps_over = ParamSet$new(list(ParamDbl$new("oversample.ratio", lower = 1, upper = 6)))
 ps_smote = ParamSet$new(list(
-  ParamInt$new("smote.dup_size", lower = 1, upper = 5),
-  ParamInt$new("smote.K", lower = 2, upper = 6)
+  ParamInt$new("smote.dup_size", lower = 1, upper = 6),
+  ParamInt$new("smote.K", lower = 1, upper = 6)
 ))
+
+# makes sure we use numbers to the power of two to better explore the parameter space
+ps_smote$trafo = function(x, param_set) {
+  x$smote.K = round(2^(x$smote.K))
+  x
+}
 ```
 
-We create an `AutoTuner` class from the learner to tune the graph (random forest learner + imbalancy correction method) based on a 3-fold CV using the `classif.fbeta` as performance measure. 
+We create an `AutoTuner` class from the learner to tune the graph (random forest learner + imbalance correction method) based on a 3-fold CV using the `classif.fbeta` as performance measure. 
 To keep runtime low, we define the search space only for the imbalacy correction method. 
-However, one can also jointly tune the hyperparameter of the learner along with the imbalancy correction method by extending the search space with the learner's hyperparameters. 
+However, one can also jointly tune the hyperparameter of the learner along with the imbalance correction method by extending the search space with the learner's hyperparameters. 
 Note that SMOTE has two hyperparameters `K` and `dup_size`. 
 While `K` changes the behavior of the SMOTE algorithm, `dup_size` will affect oversampling rate. 
-To focus on the effect of the oversampling rate on the performance, we will consider SMOTE with K = 1 as a different imbalacy correction method as SMOTE with K = 2 (and so on).
+To focus on the effect of the oversampling rate on the performance, we will consider SMOTE with K = 2 as a different imbalacy correction method as SMOTE with K = 4 (and so on).
 Hence, we use grid search with 5 different hyperparameter configurations for the undersampling method, the oversampling method and each SMOTE variant for tuning:
 
 ```{r}
-# define the 
 inner_cv3 = rsmp("cv", folds = 3)
 measure = msr("classif.fbeta")
 
@@ -147,7 +152,7 @@ learns = list(
     measures = measure,
     tune_ps = ps_under,
     terminator = term("none"),
-    tuner = tnr("grid_search", resolution = 5)
+    tuner = tnr("grid_search", resolution = 6)
   ),
   AutoTuner$new(
     learner = lrn_over,
@@ -155,7 +160,7 @@ learns = list(
     measures = measure,
     tune_ps = ps_over,
     terminator = term("none"),
-    tuner = tnr("grid_search", resolution = 5)
+    tuner = tnr("grid_search", resolution = 6)
   ),
   AutoTuner$new(
     learner = lrn_smote,
@@ -163,7 +168,7 @@ learns = list(
     measures = measure,
     tune_ps = ps_smote,
     terminator = term("none"),
-    tuner = tnr("grid_search", resolution = 5)
+    tuner = tnr("grid_search", resolution = 6)
   )
 )
 names(learns) = mlr3misc::map(learns, "id")
@@ -174,10 +179,10 @@ names(learns)
 
 The `AutoTuner` is a fully tuned graph that behaves like a usual learner. 
 For the tuning a 3-fold CV is used.
-Now, we use the `benchmark` function to compare the tuned class imbalancy pipelines based on a holdout for the outer evaluation:
+Now, we use the `benchmark` function to compare the tuned class imbalance pipeline graphs based on a holdout for the outer evaluation:
 
 ```{r}
-# NOTE: This code runs about 3 minutes
+# NOTE: This code runs about 5 minutes
 outer_resampling = rsmp("holdout")
 design = benchmark_grid(
   tasks = task,
@@ -187,7 +192,6 @@ design = benchmark_grid(
 print(design)
 
 set.seed(1)
-# future::plan("multiprocess")
 bmr = benchmark(design, store_models = TRUE)
 ```
 
@@ -223,6 +227,8 @@ stune_gg = ggplot(stune_path, aes(x = smote.dup_size, y = classif.fbeta, col = f
 library(ggpubr)
 ggarrange(utune_gg, otune_gg, stune_gg, common.legend = TRUE, nrow = 1) 
 ```
+
+The results show that oversampling the minority class (for simple oversampling as well as for SMOTE) and undersampling the majority class yield a better performance for this specific data set.
 
 ## Conclusion
 
