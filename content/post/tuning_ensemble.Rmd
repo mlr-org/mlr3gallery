@@ -28,7 +28,7 @@ To avoid overfitting, it is advisable to use test set (out-of-bag) predictions i
 
 In this post, a multilevel stacking example will be described using [mlr3pipelines](https://mlr3pipelines.mlr-org.com/articles/introduction.html). 
 A slightly different example is available in the [mlr3book](https://mlr3book.mlr-org.com/pipe-nonlinear.html#multilevel-stacking). 
-An important distinction to the book example is in explaining how to tune the hyperparameters of the whole ensamble and each underlying learner jointly.  
+An important distinction to the book example is in explaining how to tune the hyperparameters of the whole ensemble and each underlying learner jointly.  
 
 In the following pipeline, three learners (`rpart`, `glmnet` and `lda`) will be trained on a sparser feature space obtained using functions from [mlr3filters](https://mlr3filters.mlr-org.com/) on the input data in level 0. 
 The test set predictions of these models will then be concatenated with the original data and used as input to the level 1 learners. 
@@ -112,7 +112,7 @@ glmnet_cv2 = po("learner_cv", glmnet_lrn, id = "glmnet_2")
 lda_cv2 = po("learner_cv", lda_lrn, id = "lda_2")
 ```
 
-All level 1 learners will as input receive PCA transformed data:
+All level 1 learners will as input receive [PCA](https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_pca.html) transformed data:
 
 ```{r lrn6}
 level1 = level0 %>>%
