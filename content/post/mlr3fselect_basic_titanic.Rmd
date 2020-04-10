@@ -31,7 +31,7 @@ library(mlr3learners)
 
 In this tutorial, we introduce the **mlr3fselect** package by comparing feature
 selection methods on the titanic disaster data set. The objective of feature
-selection is to enhance the interpretability of the model, speed up the learning
+selection is to enhance the interpretability of models, speed up the learning
 process and increase the predictive performance.
 
 ## Titanic data set
@@ -176,10 +176,11 @@ fs$optimize(instance)
 instance$result
 ```
 
-## Evolutionary
+## Evolutionary search
 
-For evolutionary search, we have to define the population and offspring
-parameter `mu` and `lambda`.
+In an evolutionary search, feature sets with a high predictive performance
+survive and generate new offspring feature sets by combination and mutation.
+We have to define the population and offspring parameter `mu` and `lambda`.
 
 ```{r evolutionary}
 set.seed(7832)
@@ -189,13 +190,13 @@ fs = fs("evolutionary", mu = 10, lambda = 20)
 fs$optimize(instance)
 ```
 
-We retrieve the best performing feature set with 
+We retrieve the best performing feature set.
 
 ```{r evolutionary result}
 instance$result
 ```
 
-## Exhaustive Search
+## Exhaustive search
 
 Let's try exhaustive search which evaluates every possible feature subset. We
 choose the `none` terminator to evaluate all possible feature subsets. The small
@@ -210,13 +211,13 @@ fs = fs("exhaustive")
 fs$optimize(instance)
 ```
 
-We retrieve the best performing feature set with
+We retrieve the best performing feature set.
 
 ```{r exhaustive search result}
 instance$result
 ```
 
-## Nested Resampling
+## Nested resampling
 
 The feature selection should not be performed on the same resampling sets which
 are used for evaluating the model itself since this would result in biased
@@ -237,7 +238,7 @@ We use  a `3-fold-cross-validation` to evaluate the predictive performance
 during the feature selection.
 
 ```{r inner resampling}
-resampling_inner = rsmp("cv", folds = 3)
+resampling_inner = rsmp("cv", folds = 10)
 measure = msr("classif.ce")
 terminator = term("evals", n_evals = 120)
 ```
@@ -297,6 +298,11 @@ bmr$data$learner[[2]]$fselect_result
 bmr$data$learner[[3]]$fselect_result
 ```
 
+The feature sets with all features except `age` achieved the highest predictive performance.
+We may see a different result if we replace the `3-fold-cross-validation` with a
+cross validation with many repetitions since the used resampling instance
+introduces much randomness.
+
 # Recursive feature elimination
 
 Recrusive feature elemiation utilizes the `importance()` method of learners. In
@@ -304,9 +310,7 @@ each iteration the feature with the lowest importance score is droped. We choose
 the non-recruvie algorithm (`recursive = FALSE`) which calculates the feature
 importance once on the complete feature set. The recrusive version (`recursive =
 TRUE`) recomputes the feature importance on the reduced feature set in every
-iteration. The chosen algortihm depends on the used learner. In case of random
-forest, the recomputation in every iteration might result in a decreased
-performance [@svetnikApplicationBreimanRandom2004].
+iteration. 
 
 ```{r rfe}
 set.seed(7832)
@@ -317,7 +321,7 @@ fs = fs("rfe", recursive = FALSE)
 fs$optimize(instance)
 ```
 
-We access the results with
+We access the results.
 
 ```{r rfe archive}
 instance$archive$data
