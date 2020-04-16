@@ -24,7 +24,7 @@
    The website can be previewed using `rmarkdown::render_site()` and `pkgdown::preview_site()` or (when using RStudio) by clicking on "Build Website" in the "Build" pane.
 1. Apply the [mlr-style](https://github.com/mlr-org/mlr3/wiki/Style-Guide#styler-mlr-style) to the post.
 1. Check if everything looks good.
-1. Open Pull Request for review.
+1. Open Pull Request for review (the `docs/` directory needs to be included - this is the directory that is going to be served via gh-pages)
 
 ## CI
 
