@@ -43,8 +43,7 @@ In this case we will continue working with the **German Credit Dataset**. Yester
 
 ## Prerequisites
 
-We expect you have installed all packages from day 1. 
-If not, load the day 1 (basics) script and run the **Prerequisites** install chunk.
+We expect you have installed all packages from day 1. If not, load the day 1 script and run the **Prerequisites** install chunk.
 
 Load the packages we are going to use:
 
@@ -66,8 +65,7 @@ We use the same data as in the earlier blog posts.
 task = tsk("german_credit")
 ```
 
-Also, because tuning often takes a long time, we want to make more efficient use of our multicore CPUs. 
-Don't do this on rstudio cloud, however.
+Also, because tuning often takes a long time, we want to make more efficient use of our multicore CPUs. Don't do this on rstudio cloud, however.
 
 ```{r, warning=FALSE}
 # future::plan("multiprocess")
@@ -75,9 +73,7 @@ Don't do this on rstudio cloud, however.
 
 ### Evaluation
 
-We evaluate all algorithms using 10-fold cross-validation. 
-We use a *fixed* train-test split, i.e. the same splits for each evaluation. 
-Otherwise, some evaluation could get unusually "hard" splits, which would make comparisons unfair.
+We evaluate all algorithms using 10-fold cross-validation. We use a *fixed* train-test split, i.e. the same splits for each evaluation. Otherwise, some evaluation could get unusually "hard" splits, which would make comparisons unfair.
 
 ```{r}
 set.seed(8008135)
@@ -90,9 +86,8 @@ cv10_instance$instance
 
 ## Simple Parameter Tuning
 
-Parameter tuning in `mlr3` needs two packages:
-The `paradox` package is used for the search space definition of the hyperparameters.
-The `mlr3tuning` package is used for tuning the hyperparameters.
+- Use the `paradox` package for search space definition of the hyperparameters
+- Use the `mlr3tuning` package for tuning the hyperparameters
 
 ```{r}
 library("mlr3tuning")
@@ -101,9 +96,9 @@ library("paradox")
 
 ### Search Space and Problem Definition
 
-First, we need to decide what `Learner` we want to optimize. 
-We will use `"classif.kknn"`, the "kernelized" k-nearest neighbor classifier.
-We will use `kknn` as a normal kNN without weighting first (i.e., use the `rectangular` kernel):
+- First need to decide what `Learner` to optimize. We will use `"classif.kknn"`, the "kernelized" k-nearest neighbor classifier.
+  <!-- - (We could also try to optimize multiple `Learner`s simultaneously, i.e. choose the `Learner` to use automatically. Look into mlr3pipelines if you want to do that. -->
+- We will use `kknn` as a normal kNN without weighting first (i.e., use the `rectangular` kernel):
 
 ```{r}
 knn = lrn("classif.kknn", predict_type = "prob")
@@ -111,18 +106,13 @@ knn = lrn("classif.kknn", predict_type = "prob")
 knn$param_set$values$kernel = "rectangular"
 ```
 
-As a next step, we decide what parameters we optimize over. 
-Before that, though, we are interested in the parameter set on which we could actually tune.
+- Then we decide what parameters we optimize over. What are our options?
 
 ```{r}
 knn$param_set
 ```
 
-We first tune the `k` parameter (i.e. the number of neighbours to be accounted for).
-A range from 3 to 20 seems reasonable for this.
-Second, we aim to tune the `distance` function.
-We aim to keep it simple and only tune over the L1 and L2 distance.
-To do so, we use the `paradox` package to define a search space (see [Appendix](#very-quick-paradox-primer) for a short list of possible parameter types).
+- We first tune the `k` parameter from 3 to 20 and the `distance` function (either L1 or L2). To do so, we use the `paradox` package to define a search space (see [Appendix](#very-quick-paradox-primer) for a short list of possible parameter types).
 
 ```{r}
 searchspace = ParamSet$new(list(
@@ -131,15 +121,13 @@ searchspace = ParamSet$new(list(
 ))
 ```
 
-As a next step, we define a "tuning instance" that represents the problem we are trying to optimize.
-
-Typically a tuning instance needs to be supplied with:
-  - The task we are optimizing for.
-  - The learner are we using.
-  - The resampling we use.
-  - The performance measure to be optimized.
-  - The search space ("parameter set").
-  - The end of tuning ("terminator") (ignore this for now).
+- We define a "tuning instance" that represents the problem we are trying to optimize.
+  - What is the task we are optimizing for?
+  - What learner are we using?
+  - How do we do resampling?
+  - What is the performance measure?
+  - What is the search space ("parameter set")?
+  - When are we done searching? (Disregard this for now).
 
 ```{r}
 instance_grid = TuningInstance$new(
@@ -154,22 +142,17 @@ instance_grid = TuningInstance$new(
 
 ### Grid Search
 
-After having set up a tuning instance, we can start tuning.
-Before that we need a tuning strategy, though.
-A simple tuning method is to try all possible combinations of parameters: **Grid Search**
-While it is very intuitive and simple, it is inefficient if the search space is large.
-For this simple use case, it suffices, though.
-We get the `"grid_search"` tuner by:
+- A simple tuning method is to try all possible combinations of parameters: **Grid Search**
+  - Pro: Very intuitive and simple
+  - Con: Inefficient if the search space is large
+- We get the `"grid_search"` tuner for this
 
 ```{r}
 set.seed(1)
 tuner_grid = tnr("grid_search", resolution = 18, batch_size = 36)
 ```
 
-Tuning works by calling `$tune()`. 
-Note that the tuning procedure *modifies* our "tuning instance" (As usual for `R6` class objects). 
-The result can be found in the `instance` object.
-Before tuning it is empty:
+- Tuning works by calling `$tune()`. Note that it *modifies* our "tuning instance"--the result can be found in the `instance` object.
 
 ```{r}
 ## empty instance object:
@@ -178,14 +161,14 @@ instance_grid$result
 tuner_grid$tune(instance_grid)
 ```
 
-The result of tuning can now be found in the `$result` slot -- together with its performance.
+- The result can be found in the `$result` slot. We can also plot the performance.
 
 ```{r}
 instance_grid$result
 ```
 
-We can also look at the "archive" of evaluated configurations.
-We do so by expandin the "params" (the parameters that the `Learner` actually saw).
+- We can look at the "archive" of evaluated configurations
+- We expand the "params" (the parameters that the `Learner` actually saw)
 
 ```{r}
 perfdata = instance_grid$archive("params")
@@ -197,10 +180,8 @@ ggplot(perfdata, aes(x = k, y = classif.ce, color = as.factor(distance))) +
   geom_line() + geom_point(size = 3)
 ```
 
-On average, the Euclidean distance (`distance` = 2) seems to work better.
-However, there is much randomness introduced by the resampling instance.
-So you, the reader, may see a different result, when you run the experiment yourself.
-For `k`, we find that values between 10 and 15 perform well.
+- Euclidean distance (`distance` = 2) seems to work better, but there is much randomness introduced by the resampling instance, so you may see a different result!
+- `k` between 10 and 15 perform well
 
 ### Random Search and Transformation
 
@@ -217,7 +198,6 @@ large_searchspace = ParamSet$new(list(
   ParamFct$new("kernel", c("rectangular", "gaussian", "rank", "optimal")),
   ParamLgl$new("scale")
 ))
-
 large_searchspace$trafo = function(x, param_set) {
   x$k = round(exp(x$k))
   x
@@ -231,7 +211,6 @@ large_searchspace$trafo = function(x, param_set) {
 
 ```{r}
 tuner_random = tnr("random_search", batch_size = 36)
-
 instance_random = TuningInstance$new(
   task = task,
   learner = knn,
@@ -391,7 +370,6 @@ ParamInt$new("parameter_id", lower = 0, upper = 10)
 ## - numeric (from 'lower' to 'upper' bound)
 ## - unfortunately named after the storage type, "double precision floating point"
 ParamDbl$new("parameter_id", lower = 0, upper = 10)
-
 ## Also possible: "untyped", but we can not tune with this!
 ParamUty$new("parameter_id")
 ```
