@@ -1,0 +1,339 @@
+---
+title: A pipeline for the titanic data set
+categories:
+  - imputation
+  - classification
+  - mlr3pipelines
+  - feature engineering
+author:
+  - name: Florian Pfisterer
+description: |
+  This post shows how to build a Graph using the mlr3pipelines package on the "titanic" dataset.
+date: 03-12-2020
+output:
+  distill::distill_article:
+    self_contained: false
+    css: ../../custom.css
+---
+
+```{r, include = FALSE, warning = FALSE, message = FALSE}
+# Just some preparation
+knitr::opts_chunk$set(
+  echo = TRUE,
+  R.options = list(width = 80)
+)
+if (require("data.table")) data.table::setDTthreads(1)
+options(width = 90)
+set.seed(8008135)
+lgr::get_logger("mlr3")$set_threshold("warn")
+library(skimr)
+```
+
+## Intro
+
+First of all we are going to load required packages and the data. 
+The data is part of the `mlr3data` package.
+
+```{r}
+library("mlr3")
+library("mlr3learners")
+library("mlr3pipelines")
+library("mlr3data")
+library("mlr3misc")
+data("titanic")
+```
+
+The titanic data is very interesting to analyze, even though it is part of many tutorials 
+and showcases. 
+This is because it requires many steps often required in real-world applications of machine 
+learning techniques, such as **feature engineering**, **missing value imputation**, **handling factors**
+and others.
+
+
+In order to obtain solutions comparable to official leaderboards, such as the ones available from CRAN, we split the data into train and test set before doing any further analysis.
+
+```{r}
+titanic_train = titanic[1:891, ]
+titanic_test = titanic[892:1309, ]
+```
+
+## Exploratory Data Analysis
+
+With the dataset, we get an explanation of the meanings of the different variables:
+
+```
+survived        Survival
+                (0 = No; 1 = Yes)
+pclass          Passenger Class
+                (1 = 1st; 2 = 2nd; 3 = 3rd)
+name            Name
+sex             Sex
+age             Age
+sibsp           Number of Siblings/Spouses Aboard
+parch           Number of Parents/Children Aboard
+ticket          Ticket Number
+fare            Passenger Fare
+cabin           Cabin
+embarked        Port of Embarkation
+                (C = Cherbourg; Q = Queenstown; S = Southampton)
+```
+
+We can use the `skimr` package in order to get a first overview of the data:
+
+```{r, R.options=list(width = 120)}
+skimr::skim(titanic_train)
+skimr::skim(titanic_test)
+```
+
+Here we can also inspect the data for differences in the train and test set. 
+This might be important, as shifts in the data distribution often make our models unreliable.
+
+```{r, out.width="100%", fig.height=7}
+DataExplorer::plot_bar(titanic_train, nrow = 5, ncol = 3)
+```
+
+```{r, out.width="100%", fig.height=4, warning=FALSE}
+DataExplorer::plot_histogram(titanic_train, nrow = 2, ncol = 3)
+DataExplorer::plot_boxplot(titanic_train, by = "survived", nrow = 2, ncol = 3)
+```
+
+We can now create a `Task` from our data. 
+As we want to classify whether the person survived or not, we will create a 
+`TaskClassif`. We'll ignore the 'titanic_test' data for now and come back to it later.
+
+## A first model
+
+```{r}
+task = TaskClassif$new("titanic", titanic_train, target = "survived", positive = "1")
+task
+```
+
+Our `Task` currently has $3$ features of type `character`, which we don't really know how  to handle:
+"Cabin", "Name", "Ticket" and "PassengerId".
+Additionally, from our `skim` of the data, we have seen, that they have many unique values (up to 891).
+
+We'll drop them for now and see how we can deal with them later on.
+
+```{r}
+task$select(cols = setdiff(task$feature_names, c("cabin", "name", "ticket")))
+```
+
+Additionally, we create a resampling instance that allows to compare data.
+
+```{r}
+rdesc = rsmp("cv", folds = 3L)$instantiate(task)
+```
+
+To get a first impression of what performance we can fit a simple decision tree:
+
+```{r}
+learner = mlr_learners$get("classif.rpart")
+# or shorter:
+learner = lrn("classif.rpart")
+
+res = resample(task, learner, rdesc, store_models = TRUE)
+agg = res$aggregate(msr("classif.acc"))
+agg
+```
+
+So our model should have a minimal accuracy of `r round(agg, 3)` in order to improve over the
+simple decision tree.
+
+If we now try to fit a 'ranger' random forest model, we will get an error, 
+as 'ranger' models can not naturally handle missing values.
+
+```{r, error = TRUE}
+learner = lrn("classif.ranger")
+learner$param_set$values = list(num.trees = 250, min.node.size = 4)
+res = resample(task, learner, rdesc, store_models = TRUE)
+```
+
+This means we have to find a way to impute the missing values.
+
+## Imputation
+
+A very simple way to do this to just impute a constant value for each 
+feature, we could i.e. impute every `character` or `factor` column  with `missing` and 
+every numeric column with `-999`.
+And depending on the model, this might actually be fine.
+This approach has a few drawbacks though:
+
+* `-999` could be a real value in the data.
+* imputing `-999` skews the distribution of the data, which might result in bad models.
+
+As a result, instead of imputing a constant value, we will do two things:
+* Draw samples from each numeric features' histogram using `PipeOpImputeHist`
+* Add an additional column for each `variable` that indicates whether a value was missing or not.
+  If the information that a value was missing is important, this column contains this information.
+
+This imputation scheme is called 'imputation with constants' and is already implemented in `mlr3pipelines`.
+It can be done using `PipeOpImputeConstant`.
+
+Before imputation, our data looks as follows:
+
+```{r}
+task$missings()
+```
+
+Let's first deal with the categorical variables:
+
+```{r}
+po_newlvl = po("imputenewlvl")
+task_newlvl = po_newlvl$train(list(task))[[1]]
+```
+
+Note that we use the `PipeOp` in an unusual way, which is why the syntax does not look
+very clean. We'll learn how to use a full graph below.
+
+First, let's look at the result:
+
+```{r}
+task_newlvl$missings()
+```
+
+Cool! `embarked` does not have missing values anymore. Note that `PipeOpImputeNewLvl` by default
+affects `character`, `factor` and `ordered` columns.
+
+For the `numeric` features we want to do two things, impute values and add an indicator column.
+In order to do this, we need a more complicated structure, a `Graph`.
+
+Our `po_indicator` creates the indicator column. We tell it to only do this for `numeric` and `integer` columns
+via its `param_vals`, and additionally tell it to create a numeric column (0 = "not missing", 1 = "missing").
+
+```{r}
+po_indicator = po("missind",
+  param_vals = list(affect_columns = selector_type(c("numeric", "integer")), type = "numeric"))
+```
+
+Now we can simultaneously impute features from the histogram and create indicator columns.
+This can be achieved using the `gunion` function, which puts two operations in parallel:
+
+```{r}
+gr = gunion(list(po_indicator, po("imputehist")))
+gr = gr %>>% po("featureunion")
+```
+
+Afterwards, we `cbind` the resulting data using `po("featureunion")`, connecting the different 
+operations using our **graph connector**: `%>>%`.
+
+We can now also connect the newlvl imputation:
+
+```{r}
+gr = gr %>>% po("imputenewlvl")
+```
+
+and see what happens when we now train the whole **Graph**:
+
+```{r}
+task_imputed = gr$clone()$train(task)[[1]]
+task_imputed$missings()
+```
+
+Awesome, no more missing values!
+
+We could now use `task_imputed` for resampling and see whether a **ranger** model does better.
+But this is dangerous! 
+If we preprocess all training data at once, data could leak through the different cross-validation folds.
+In order to do this properly, we have to process the training data in every fold separately.
+Luckily, this is automatically handled in our `Graph`, if we use it through a `GraphLearner`.
+
+We can simple append a `ranger` learner to the Graph and create a `GraphLearner` from this.
+
+```{r}
+glrn = GraphLearner$new(gr$clone() %>>% po(learner))
+```
+
+```{r}
+res = resample(task, glrn, rdesc, store_models = TRUE)
+agg = res$aggregate(msr("classif.acc"))
+agg
+```
+
+So our model has not improved heavily, currently it has an accuracy of  `r round(agg, 3)`.
+In order to improve more, we might need to do some feature engineering.
+
+## Feature Engineering
+
+We will do this using `PipeOpMutate` in order to showcase the power of `mlr3pipelines`.
+Additionally, we will make use of the `character` columns, and thus re-select them:
+
+```{r}
+task$col_roles$feature = c(task$feature_names, c("cabin", "name", "ticket"))
+```
+
+```{r}
+library("stringi")
+po_ftextract = po("mutate", param_vals = list(
+  mutation = list(
+    fare_per_person = ~ fare / (parch + sib_sp + 1),
+    deck = ~ factor(stri_sub(cabin, 1, 1)),
+    title = ~ factor(stri_match(name, regex = ", (.*)\\.")[, 2]),
+    surname = ~ factor(stri_match(name, regex = "(.*),")[, 2]),
+    ticket_prefix = ~ factor(stri_replace_all_fixed(
+      stri_trim(stri_match(ticket, regex = "(.*) ")[, 2]), ".", ""))
+  )
+))
+```
+
+Quickly checking what happens:
+
+```{r}
+task_eng = po_ftextract$clone()$train(list(task))[[1]]
+task_eng$data()
+```
+
+Now we can put everything together again, we concatenate our new `PipeOp` with the `Graph` created abve
+and use `PipeOpSelect` in order to de-select the `character` features we used for feature extraction.
+Additionally, we collapse the 'surname', so only surnames that make up more than 0.6 \% of the data
+are kept.
+
+In summary we do the following: 
+
+* `mutate`: The `po_ftextract` we defined above extracts additional features from the data.
+* `collapsefactors`: Removes factor levels that make up less then 3 \% of the data.
+* `select`: Drops `character` columns.
+* `gunion`: Puts two `PipeOp`s in parallel.
+  * `missind`: `po_indicator` adds a column for each numeric with the info whether the value is NA or not.
+  * `imputehist`: Imputes numeric and integer columns by sampling from the histogram.
+* `featureunion`: Cbind's parallel data streams.
+* `imputenewlvl`: Imputes factor and ordered columns.
+* `fixfactors`: Removes empty factor levels and removes factor levels that do not exist during training.
+* `imputesample`: In some cases, if missing factor levels do not occur during training but only while predicting, `imputenewlvl` does not create a new level. For those, we sample a random value.
+* `learner`: Appends a learner to the `Graph`.
+
+The full graph we created is the following:
+
+```{r}
+learner = lrn("classif.ranger")
+learner$param_set$values = list(num.trees = 500, min.node.size = 4)
+```
+
+```{r}
+gr_final = po_ftextract %>>%
+  po("collapsefactors", param_vals = list(no_collapse_above_prevalence = 0.03)) %>>%
+  po("select", param_vals = list(selector = selector_invert(selector_type("character")))) %>>%
+  gunion(list(po_indicator, po("imputehist"))) %>>%
+  po("featureunion") %>>%
+  po("imputenewlvl") %>>%
+  po("fixfactors") %>>%
+  po("imputesample") %>>%
+  po(learner)
+```
+
+Let us see if things have improved:
+
+```{r}
+glrn = GraphLearner$new(gr_final)
+res = resample(task, glrn, rdesc, store_models = TRUE)
+agg = res$aggregate(msr("classif.acc"))
+agg
+```
+
+We have improved even more! But there are many more things to explore!
+We could extract even more information from the different features and see
+what happens.
+
+## Future
+
+But now you are left to yourself! There are many [kaggle kernels](https://www.kaggle.com/c/titanic) that treat the **Titanic Dataset**
+available. This can be a great starter to find even better models.

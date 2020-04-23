@@ -1,0 +1,1778 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1"/>
+  <meta name="generator" content="distill" />
+
+  <style type="text/css">
+  /* Hide doc at startup (prevent jankiness while JS renders/transforms) */
+  body {
+    visibility: hidden;
+  }
+  </style>
+
+ <!--radix_placeholder_import_source-->
+ <!--/radix_placeholder_import_source-->
+
+  <!--radix_placeholder_meta_tags-->
+<title>mlr3 Use Cases: House prices in King County</title>
+
+<meta property="description" itemprop="description" content="Use case illustrating data preprocessing and model fitting via mlr3 on the &quot;King County House Prices&quot; dataset."/>
+
+
+<!--  https://schema.org/Article -->
+<meta property="article:published" itemprop="datePublished" content="2020-01-30"/>
+<meta property="article:created" itemprop="dateCreated" content="2020-01-30"/>
+<meta name="article:author" content="Florian Pfisterer"/>
+
+<!--  https://developers.facebook.com/docs/sharing/webmasters#markup -->
+<meta property="og:title" content="mlr3 Use Cases: House prices in King County"/>
+<meta property="og:type" content="article"/>
+<meta property="og:description" content="Use case illustrating data preprocessing and model fitting via mlr3 on the &quot;King County House Prices&quot; dataset."/>
+<meta property="og:locale" content="en_US"/>
+<meta property="og:site_name" content="mlr3 Use Cases"/>
+
+<!--  https://dev.twitter.com/cards/types/summary -->
+<meta property="twitter:card" content="summary"/>
+<meta property="twitter:title" content="mlr3 Use Cases: House prices in King County"/>
+<meta property="twitter:description" content="Use case illustrating data preprocessing and model fitting via mlr3 on the &quot;King County House Prices&quot; dataset."/>
+
+<!--/radix_placeholder_meta_tags-->
+  <!--radix_placeholder_rmarkdown_metadata-->
+
+<script type="text/json" id="radix-rmarkdown-metadata">
+{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["title","categories","author","date","description","output"]}},"value":[{"type":"character","attributes":{},"value":["House prices in King County"]},{"type":"character","attributes":{},"value":["regression","visualization","feature engineering","tuning"]},{"type":"list","attributes":{},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name"]}},"value":[{"type":"character","attributes":{},"value":["Florian Pfisterer"]}]}]},{"type":"character","attributes":{},"value":["01-30-2020"]},{"type":"character","attributes":{},"value":["Use case illustrating data preprocessing and model fitting via mlr3 on the \"King County House Prices\" dataset."]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["distill::distill_article"]}},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["self_contained","css"]}},"value":[{"type":"logical","attributes":{},"value":[false]},{"type":"character","attributes":{},"value":["../../custom.css"]}]}]}]}
+</script>
+<!--/radix_placeholder_rmarkdown_metadata-->
+  
+  <script type="text/json" id="radix-resource-manifest">
+  {"type":"character","attributes":{},"value":["2020-01-30-house-prices-in-king-county_files/bowser-1.9.3/bowser.min.js","2020-01-30-house-prices-in-king-county_files/distill-2.2.21/template.v2.js","2020-01-30-house-prices-in-king-county_files/figure-html5/unnamed-chunk-10-1.png","2020-01-30-house-prices-in-king-county_files/figure-html5/unnamed-chunk-12-1.png","2020-01-30-house-prices-in-king-county_files/figure-html5/unnamed-chunk-13-1.png","2020-01-30-house-prices-in-king-county_files/figure-html5/unnamed-chunk-14-1.png","2020-01-30-house-prices-in-king-county_files/figure-html5/unnamed-chunk-15-1.png","2020-01-30-house-prices-in-king-county_files/figure-html5/unnamed-chunk-19-1.png","2020-01-30-house-prices-in-king-county_files/figure-html5/unnamed-chunk-20-1.png","2020-01-30-house-prices-in-king-county_files/figure-html5/unnamed-chunk-20-2.png","2020-01-30-house-prices-in-king-county_files/header-attrs-2.1/header-attrs.js","2020-01-30-house-prices-in-king-county_files/jquery-1.11.3/jquery.min.js","2020-01-30-house-prices-in-king-county_files/webcomponents-2.0.0/webcomponents.js"]}
+  </script>
+  <!--radix_placeholder_navigation_in_header-->
+
+<script type="application/javascript">
+
+  window.headroom_prevent_pin = false;
+
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+
+    // initialize headroom for banner
+    var header = $('header').get(0);
+    var headerHeight = header.offsetHeight;
+    var headroom = new Headroom(header, {
+      onPin : function() {
+        if (window.headroom_prevent_pin) {
+          window.headroom_prevent_pin = false;
+          headroom.unpin();
+        }
+      }
+    });
+    headroom.init();
+    if(window.location.hash)
+      headroom.unpin();
+    $(header).addClass('headroom--transition');
+
+    // offset scroll location for banner on hash change
+    // (see: https://github.com/WickyNilliams/headroom.js/issues/38)
+    window.addEventListener("hashchange", function(event) {
+      window.scrollTo(0, window.pageYOffset - (headerHeight + 25));
+    });
+
+    // responsive menu
+    $('.distill-site-header').each(function(i, val) {
+      var topnav = $(this);
+      var toggle = topnav.find('.nav-toggle');
+      toggle.on('click', function() {
+        topnav.toggleClass('responsive');
+      });
+    });
+
+    // nav dropdowns
+    $('.nav-dropbtn').click(function(e) {
+      $(this).next('.nav-dropdown-content').toggleClass('nav-dropdown-active');
+      $(this).parent().siblings('.nav-dropdown')
+         .children('.nav-dropdown-content').removeClass('nav-dropdown-active');
+    });
+    $("body").click(function(e){
+      $('.nav-dropdown-content').removeClass('nav-dropdown-active');
+    });
+    $(".nav-dropdown").click(function(e){
+      e.stopPropagation();
+    });
+  });
+</script>
+
+<style type="text/css">
+
+/* Theme (user-documented overrideables for nav appearance) */
+
+.distill-site-nav {
+  color: rgba(255, 255, 255, 0.8);
+  background-color: #455a64;
+  font-size: 15px;
+  font-weight: 300;
+}
+
+.distill-site-nav a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.distill-site-nav a:hover {
+  color: white;
+}
+
+@media print {
+  .distill-site-nav {
+    display: none;
+  }
+}
+
+.distill-site-header {
+
+}
+
+.distill-site-footer {
+
+}
+
+
+/* Site Header */
+
+.distill-site-header {
+  width: 100%;
+  box-sizing: border-box;
+  z-index: 3;
+}
+
+.distill-site-header .nav-left {
+  display: inline-block;
+  margin-left: 8px;
+}
+
+@media screen and (max-width: 768px) {
+  .distill-site-header .nav-left {
+    margin-left: 0;
+  }
+}
+
+
+.distill-site-header .nav-right {
+  float: right;
+  margin-right: 8px;
+}
+
+.distill-site-header a,
+.distill-site-header .title {
+  display: inline-block;
+  text-align: center;
+  padding: 14px 10px 14px 10px;
+}
+
+.distill-site-header .title {
+  font-size: 18px;
+}
+
+.distill-site-header .logo {
+  padding: 0;
+}
+
+.distill-site-header .logo img {
+  display: none;
+  max-height: 20px;
+  width: auto;
+  margin-bottom: -4px;
+}
+
+.distill-site-header .nav-image img {
+  max-height: 18px;
+  width: auto;
+  display: inline-block;
+  margin-bottom: -3px;
+}
+
+
+
+@media screen and (min-width: 1000px) {
+  .distill-site-header .logo img {
+    display: inline-block;
+  }
+  .distill-site-header .nav-left {
+    margin-left: 20px;
+  }
+  .distill-site-header .nav-right {
+    margin-right: 20px;
+  }
+  .distill-site-header .title {
+    padding-left: 12px;
+  }
+}
+
+
+.distill-site-header .nav-toggle {
+  display: none;
+}
+
+.nav-dropdown {
+  display: inline-block;
+  position: relative;
+}
+
+.nav-dropdown .nav-dropbtn {
+  border: none;
+  outline: none;
+  color: rgba(255, 255, 255, 0.8);
+  padding: 16px 10px;
+  background-color: transparent;
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  margin: 0;
+  margin-top: 1px;
+  z-index: 2;
+}
+
+.nav-dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: white;
+  min-width: 200px;
+  border: 1px solid rgba(0,0,0,0.15);
+  border-radius: 4px;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.1);
+  z-index: 1;
+  margin-top: 2px;
+  white-space: nowrap;
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+.nav-dropdown-content hr {
+  margin-top: 4px;
+  margin-bottom: 4px;
+  border: none;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.nav-dropdown-active {
+  display: block;
+}
+
+.nav-dropdown-content a, .nav-dropdown-content .nav-dropdown-header {
+  color: black;
+  padding: 6px 24px;
+  text-decoration: none;
+  display: block;
+  text-align: left;
+}
+
+.nav-dropdown-content .nav-dropdown-header {
+  display: block;
+  padding: 5px 24px;
+  padding-bottom: 0;
+  text-transform: uppercase;
+  font-size: 14px;
+  color: #999999;
+  white-space: nowrap;
+}
+
+.nav-dropdown:hover .nav-dropbtn {
+  color: white;
+}
+
+.nav-dropdown-content a:hover {
+  background-color: #ddd;
+  color: black;
+}
+
+.nav-right .nav-dropdown-content {
+  margin-left: -45%;
+  right: 0;
+}
+
+@media screen and (max-width: 768px) {
+  .distill-site-header a, .distill-site-header .nav-dropdown  {display: none;}
+  .distill-site-header a.nav-toggle {
+    float: right;
+    display: block;
+  }
+  .distill-site-header .title {
+    margin-left: 0;
+  }
+  .distill-site-header .nav-right {
+    margin-right: 0;
+  }
+  .distill-site-header {
+    overflow: hidden;
+  }
+  .nav-right .nav-dropdown-content {
+    margin-left: 0;
+  }
+}
+
+
+@media screen and (max-width: 768px) {
+  .distill-site-header.responsive {position: relative;}
+  .distill-site-header.responsive a.nav-toggle {
+    position: absolute;
+    right: 0;
+    top: 0;
+  }
+  .distill-site-header.responsive a,
+  .distill-site-header.responsive .nav-dropdown {
+    display: block;
+    text-align: left;
+  }
+  .distill-site-header.responsive .nav-left,
+  .distill-site-header.responsive .nav-right {
+    width: 100%;
+  }
+  .distill-site-header.responsive .nav-dropdown {float: none;}
+  .distill-site-header.responsive .nav-dropdown-content {position: relative;}
+  .distill-site-header.responsive .nav-dropdown .nav-dropbtn {
+    display: block;
+    width: 100%;
+    text-align: left;
+  }
+}
+
+/* Site Footer */
+
+.distill-site-footer {
+  width: 100%;
+  overflow: hidden;
+  box-sizing: border-box;
+  z-index: 3;
+  margin-top: 30px;
+  padding-top: 30px;
+  padding-bottom: 30px;
+  text-align: center;
+}
+
+/* Headroom */
+
+d-title {
+  padding-top: 6rem;
+}
+
+@media print {
+  d-title {
+    padding-top: 4rem;
+  }
+}
+
+.headroom {
+  z-index: 1000;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+}
+
+.headroom--transition {
+  transition: all .4s ease-in-out;
+}
+
+.headroom--unpinned {
+  top: -100px;
+}
+
+.headroom--pinned {
+  top: 0;
+}
+
+</style>
+
+<link href="../../site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet"/>
+<link href="../../site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet"/>
+<script src="../../site_libs/headroom-0.9.4/headroom.min.js"></script>
+<!--/radix_placeholder_navigation_in_header-->
+  <!--radix_placeholder_distill-->
+
+<style type="text/css">
+
+body {
+  background-color: white;
+}
+
+.pandoc-table {
+  width: 100%;
+}
+
+.pandoc-table>caption {
+  margin-bottom: 10px;
+}
+
+.pandoc-table th:not([align]) {
+  text-align: left;
+}
+
+.pagedtable-footer {
+  font-size: 15px;
+}
+
+.html-widget {
+  margin-bottom: 2.0em;
+}
+
+.l-screen-inset {
+  padding-right: 16px;
+}
+
+.l-screen .caption {
+  margin-left: 10px;
+}
+
+.shaded {
+  background: rgb(247, 247, 247);
+  padding-top: 20px;
+  padding-bottom: 20px;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.shaded .html-widget {
+  margin-bottom: 0;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.shaded .shaded-content {
+  background: white;
+}
+
+.text-output {
+  margin-top: 0;
+  line-height: 1.5em;
+}
+
+.hidden {
+  display: none !important;
+}
+
+d-article {
+  padding-bottom: 30px;
+}
+
+d-appendix {
+  padding-top: 30px;
+}
+
+d-article>p>img {
+  width: 100%;
+}
+
+d-article iframe {
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  margin-bottom: 2.0em;
+  width: 100%;
+}
+
+figure img.external {
+  background: white;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.1);
+  padding: 18px;
+  box-sizing: border-box;
+}
+
+/* CSS for table of contents */
+
+.d-toc {
+  color: rgba(0,0,0,0.8);
+  font-size: 0.8em;
+  line-height: 1em;
+}
+
+.d-toc-header {
+  font-size: 0.6rem;
+  font-weight: 400;
+  color: rgba(0, 0, 0, 0.5);
+  text-transform: uppercase;
+  margin-top: 0;
+  margin-bottom: 1.3em;
+}
+
+.d-toc a {
+  border-bottom: none;
+}
+
+.d-toc ul {
+  padding-left: 0;
+}
+
+.d-toc li>ul {
+  padding-top: 0.8em;
+  padding-left: 16px;
+  margin-bottom: 0.6em;
+}
+
+.d-toc ul,
+.d-toc li {
+  list-style-type: none;
+}
+
+.d-toc li {
+  margin-bottom: 0.9em;
+}
+
+.d-toc-separator {
+  margin-top: 20px;
+  margin-bottom: 2em;
+}
+
+.d-article-with-toc {
+  border-top: none;
+  padding-top: 0;
+}
+
+
+
+/* Tweak code blocks (note that this CSS is repeated above in an injection
+   into the d-code shadow dom) */
+
+d-code {
+  overflow-x: auto !important;
+}
+
+pre.d-code code.d-code {
+  padding-left: 10px;
+  font-size: 12px;
+  border-left: 2px solid rgba(0,0,0,0.1);
+}
+
+pre.text-output {
+
+  font-size: 12px;
+  color: black;
+  background: none;
+  font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+  text-align: left;
+  white-space: pre;
+  word-spacing: normal;
+  word-break: normal;
+  word-wrap: normal;
+  line-height: 1.5;
+
+  -moz-tab-size: 4;
+  -o-tab-size: 4;
+  tab-size: 4;
+
+  -webkit-hyphens: none;
+  -moz-hyphens: none;
+  -ms-hyphens: none;
+  hyphens: none;
+}
+
+@media(min-width: 768px) {
+
+d-code {
+  overflow-x: visible !important;
+}
+
+pre.d-code code.d-code  {
+    padding-left: 18px;
+    font-size: 14px;
+}
+pre.text-output {
+  font-size: 14px;
+}
+}
+
+/* Figure */
+
+.figure {
+  position: relative;
+  margin-bottom: 2.5em;
+  margin-top: 1.5em;
+}
+
+.figure img {
+  width: 100%;
+}
+
+.figure .caption {
+  color: rgba(0, 0, 0, 0.6);
+  font-size: 12px;
+  line-height: 1.5em;
+}
+
+.figure img.external {
+  background: white;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.1);
+  padding: 18px;
+  box-sizing: border-box;
+}
+
+.figure .caption a {
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.figure .caption b,
+.figure .caption strong, {
+  font-weight: 600;
+  color: rgba(0, 0, 0, 1.0);
+}
+
+
+
+/* Tweak 1000px media break to show more text */
+
+@media(min-width: 1000px) {
+  .base-grid,
+  distill-header,
+  d-title,
+  d-abstract,
+  d-article,
+  d-appendix,
+  distill-appendix,
+  d-byline,
+  d-footnote-list,
+  d-citation-list,
+  distill-footer {
+    grid-template-columns: [screen-start] 1fr [page-start kicker-start] 80px [middle-start] 50px [text-start kicker-end] 65px 65px 65px 65px 65px 65px 65px 65px [text-end gutter-start] 65px [middle-end] 65px [page-end gutter-end] 1fr [screen-end];
+    grid-column-gap: 16px;
+  }
+
+  .grid {
+    grid-column-gap: 16px;
+  }
+
+  d-article {
+    font-size: 1.06rem;
+    line-height: 1.7em;
+  }
+  figure .caption, .figure .caption, figure figcaption {
+    font-size: 13px;
+  }
+}
+
+@media(min-width: 1180px) {
+  .base-grid,
+  distill-header,
+  d-title,
+  d-abstract,
+  d-article,
+  d-appendix,
+  distill-appendix,
+  d-byline,
+  d-footnote-list,
+  d-citation-list,
+  distill-footer {
+    grid-template-columns: [screen-start] 1fr [page-start kicker-start] 60px [middle-start] 60px [text-start kicker-end] 60px 60px 60px 60px 60px 60px 60px 60px [text-end gutter-start] 60px [middle-end] 60px [page-end gutter-end] 1fr [screen-end];
+    grid-column-gap: 32px;
+  }
+
+  .grid {
+    grid-column-gap: 32px;
+  }
+}
+
+
+/* Get the citation styles for the appendix (not auto-injected on render since
+   we do our own rendering of the citation appendix) */
+
+d-appendix .citation-appendix,
+.d-appendix .citation-appendix {
+  font-size: 11px;
+  line-height: 15px;
+  border-left: 1px solid rgba(0, 0, 0, 0.1);
+  padding-left: 18px;
+  border: 1px solid rgba(0,0,0,0.1);
+  background: rgba(0, 0, 0, 0.02);
+  padding: 10px 18px;
+  border-radius: 3px;
+  color: rgba(150, 150, 150, 1);
+  overflow: hidden;
+  margin-top: -12px;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+
+/* Social footer */
+
+.social_footer {
+  margin-top: 30px;
+  margin-bottom: 0;
+  color: rgba(0,0,0,0.67);
+}
+
+.disqus-comments {
+  margin-right: 30px;
+}
+
+.disqus-comment-count {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.4);
+  cursor: pointer;
+}
+
+#disqus_thread {
+  margin-top: 30px;
+}
+
+.article-sharing a {
+  border-bottom: none;
+  margin-right: 8px;
+}
+
+.article-sharing a:hover {
+  border-bottom: none;
+}
+
+.sidebar-section.subscribe {
+  font-size: 12px;
+  line-height: 1.6em;
+}
+
+.subscribe p {
+  margin-bottom: 0.5em;
+}
+
+
+.article-footer .subscribe {
+  font-size: 15px;
+  margin-top: 45px;
+}
+
+
+/* Improve display for browsers without grid (IE/Edge <= 15) */
+
+.downlevel {
+  line-height: 1.6em;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", Arial, sans-serif;
+  margin: 0;
+}
+
+.downlevel .d-title {
+  padding-top: 6rem;
+  padding-bottom: 1.5rem;
+}
+
+.downlevel .d-title h1 {
+  font-size: 50px;
+  font-weight: 700;
+  line-height: 1.1em;
+  margin: 0 0 0.5rem;
+}
+
+.downlevel .d-title p {
+  font-weight: 300;
+  font-size: 1.2rem;
+  line-height: 1.55em;
+  margin-top: 0;
+}
+
+.downlevel .d-byline {
+  padding-top: 0.8em;
+  padding-bottom: 0.8em;
+  font-size: 0.8rem;
+  line-height: 1.8em;
+}
+
+.downlevel .section-separator {
+  border: none;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.downlevel .d-article {
+  font-size: 1.06rem;
+  line-height: 1.7em;
+  padding-top: 1rem;
+  padding-bottom: 2rem;
+}
+
+
+.downlevel .d-appendix {
+  padding-left: 0;
+  padding-right: 0;
+  max-width: none;
+  font-size: 0.8em;
+  line-height: 1.7em;
+  margin-bottom: 0;
+  color: rgba(0,0,0,0.5);
+  padding-top: 40px;
+  padding-bottom: 48px;
+}
+
+.downlevel .footnotes ol {
+  padding-left: 13px;
+}
+
+.downlevel .base-grid,
+.downlevel .distill-header,
+.downlevel .d-title,
+.downlevel .d-abstract,
+.downlevel .d-article,
+.downlevel .d-appendix,
+.downlevel .distill-appendix,
+.downlevel .d-byline,
+.downlevel .d-footnote-list,
+.downlevel .d-citation-list,
+.downlevel .distill-footer,
+.downlevel .appendix-bottom,
+.downlevel .posts-container {
+  padding-left: 40px;
+  padding-right: 40px;
+}
+
+@media(min-width: 768px) {
+  .downlevel .base-grid,
+  .downlevel .distill-header,
+  .downlevel .d-title,
+  .downlevel .d-abstract,
+  .downlevel .d-article,
+  .downlevel .d-appendix,
+  .downlevel .distill-appendix,
+  .downlevel .d-byline,
+  .downlevel .d-footnote-list,
+  .downlevel .d-citation-list,
+  .downlevel .distill-footer,
+  .downlevel .appendix-bottom,
+  .downlevel .posts-container {
+  padding-left: 150px;
+  padding-right: 150px;
+  max-width: 900px;
+}
+}
+
+.downlevel pre code {
+  display: block;
+  border-left: 2px solid rgba(0, 0, 0, .1);
+  padding: 0 0 0 20px;
+  font-size: 14px;
+}
+
+.downlevel code, .downlevel pre {
+  color: black;
+  background: none;
+  font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+  text-align: left;
+  white-space: pre;
+  word-spacing: normal;
+  word-break: normal;
+  word-wrap: normal;
+  line-height: 1.5;
+
+  -moz-tab-size: 4;
+  -o-tab-size: 4;
+  tab-size: 4;
+
+  -webkit-hyphens: none;
+  -moz-hyphens: none;
+  -ms-hyphens: none;
+  hyphens: none;
+}
+
+</style>
+
+<script type="application/javascript">
+
+function is_downlevel_browser() {
+  if (bowser.isUnsupportedBrowser({ msie: "12", msedge: "16"},
+                                 window.navigator.userAgent)) {
+    return true;
+  } else {
+    return window.load_distill_framework === undefined;
+  }
+}
+
+// show body when load is complete
+function on_load_complete() {
+
+  // set body to visible
+  document.body.style.visibility = 'visible';
+
+  // force redraw for leaflet widgets
+  if (window.HTMLWidgets) {
+    var maps = window.HTMLWidgets.findAll(".leaflet");
+    $.each(maps, function(i, el) {
+      var map = this.getMap();
+      map.invalidateSize();
+      map.eachLayer(function(layer) {
+        if (layer instanceof L.TileLayer)
+          layer.redraw();
+      });
+    });
+  }
+
+  // trigger 'shown' so htmlwidgets resize
+  $('d-article').trigger('shown');
+}
+
+function init_distill() {
+
+  init_common();
+
+  // create front matter
+  var front_matter = $('<d-front-matter></d-front-matter>');
+  $('#distill-front-matter').wrap(front_matter);
+
+  // create d-title
+  $('.d-title').changeElementType('d-title');
+
+  // create d-byline
+  var byline = $('<d-byline></d-byline>');
+  $('.d-byline').replaceWith(byline);
+
+  // create d-article
+  var article = $('<d-article></d-article>');
+  $('.d-article').wrap(article).children().unwrap();
+
+  // move posts container into article
+  $('.posts-container').appendTo($('d-article'));
+
+  // create d-appendix
+  $('.d-appendix').changeElementType('d-appendix');
+
+  // create d-bibliography
+  var bibliography = $('<d-bibliography></d-bibliography>');
+  $('#distill-bibliography').wrap(bibliography);
+
+  // flag indicating that we have appendix items
+  var appendix = $('.appendix-bottom').children('h3').length > 0;
+
+  // replace citations with <d-cite>
+  $('.citation').each(function(i, val) {
+    appendix = true;
+    var cites = $(this).attr('data-cites').split(" ");
+    var dt_cite = $('<d-cite></d-cite>');
+    dt_cite.attr('key', cites.join());
+    $(this).replaceWith(dt_cite);
+  });
+  // remove refs
+  $('#refs').remove();
+
+  // replace footnotes with <d-footnote>
+  $('.footnote-ref').each(function(i, val) {
+    appendix = true;
+    var href = $(this).attr('href');
+    var id = href.replace('#', '');
+    var fn = $('#' + id);
+    var fn_p = $('#' + id + '>p');
+    fn_p.find('.footnote-back').remove();
+    var text = fn_p.html();
+    var dtfn = $('<d-footnote></d-footnote>');
+    dtfn.html(text);
+    $(this).replaceWith(dtfn);
+  });
+  // remove footnotes
+  $('.footnotes').remove();
+
+  $('h1.appendix, h2.appendix').each(function(i, val) {
+    $(this).changeElementType('h3');
+  });
+  $('h3.appendix').each(function(i, val) {
+    var id = $(this).attr('id');
+    $('.d-toc a[href="#' + id + '"]').parent().remove();
+    appendix = true;
+    $(this).nextUntil($('h1, h2, h3')).addBack().appendTo($('d-appendix'));
+  });
+
+  // show d-appendix if we have appendix content
+  $("d-appendix").css('display', appendix ? 'grid' : 'none');
+
+  // replace code blocks with d-code
+  $('pre>code').each(function(i, val) {
+    var code = $(this);
+    var pre = code.parent();
+    var clz = "";
+    var language = pre.attr('class');
+    if (language) {
+      // map unknown languages to "clike" (without this they just dissapear)
+      if ($.inArray(language, ["bash", "clike", "css", "go", "html",
+                               "javascript", "js", "julia", "lua", "markdown",
+                               "markup", "mathml", "python", "svg", "xml"]) == -1)
+        language = "clike";
+      language = ' language="' + language + '"';
+      var dt_code = $('<d-code block' + language + clz + '></d-code>');
+      dt_code.text(code.text());
+      pre.replaceWith(dt_code);
+    } else {
+      code.addClass('text-output').unwrap().changeElementType('pre');
+    }
+  });
+
+  // localize layout chunks to just output
+  $('.layout-chunk').each(function(i, val) {
+
+    // capture layout
+    var layout = $(this).attr('data-layout');
+
+    // apply layout to markdown level block elements
+    var elements = $(this).children().not('d-code, pre.text-output, script');
+    elements.each(function(i, el) {
+      var layout_div = $('<div class="' + layout + '"></div>');
+      if (layout_div.hasClass('shaded')) {
+        var shaded_content = $('<div class="shaded-content"></div>');
+        $(this).wrap(shaded_content);
+        $(this).parent().wrap(layout_div);
+      } else {
+        $(this).wrap(layout_div);
+      }
+    });
+
+
+    // unwrap the layout-chunk div
+    $(this).children().unwrap();
+  });
+
+  // load distill framework
+  load_distill_framework();
+
+  // wait for window.distillRunlevel == 4 to do post processing
+  function distill_post_process() {
+
+    if (!window.distillRunlevel || window.distillRunlevel < 4)
+      return;
+
+    // hide author/affiliations entirely if we have no authors
+    var front_matter = JSON.parse($("#distill-front-matter").html());
+    var have_authors = front_matter.authors && front_matter.authors.length > 0;
+    if (!have_authors)
+      $('d-byline').addClass('hidden');
+
+    // table of contents
+    if (have_authors) // adjust border if we are in authors
+      $('.d-toc').parent().addClass('d-article-with-toc');
+
+    // strip links that point to #
+    $('.authors-affiliations').find('a[href="#"]').removeAttr('href');
+
+    // hide elements of author/affiliations grid that have no value
+    function hide_byline_column(caption) {
+      $('d-byline').find('h3:contains("' + caption + '")').parent().css('visibility', 'hidden');
+    }
+
+    // affiliations
+    var have_affiliations = false;
+    for (var i = 0; i<front_matter.authors.length; ++i) {
+      var author = front_matter.authors[i];
+      if (author.affiliation !== "&nbsp;") {
+        have_affiliations = true;
+        break;
+      }
+    }
+    if (!have_affiliations)
+      $('d-byline').find('h3:contains("Affiliations")').css('visibility', 'hidden');
+
+    // published date
+    if (!front_matter.publishedDate)
+      hide_byline_column("Published");
+
+    // document object identifier
+    var doi = $('d-byline').find('h3:contains("DOI")');
+    var doi_p = doi.next().empty();
+    if (!front_matter.doi) {
+      // if we have a citation and valid citationText then link to that
+      if ($('#citation').length > 0 && front_matter.citationText) {
+        doi.html('Citation');
+        $('<a href="#citation"></a>')
+          .text(front_matter.citationText)
+          .appendTo(doi_p);
+      } else {
+        hide_byline_column("DOI");
+      }
+    } else {
+      $('<a></a>')
+         .attr('href', "https://doi.org/" + front_matter.doi)
+         .html(front_matter.doi)
+         .appendTo(doi_p);
+    }
+
+     // change plural form of authors/affiliations
+    if (front_matter.authors.length === 1) {
+      var grid = $('.authors-affiliations');
+      grid.children('h3:contains("Authors")').text('Author');
+      grid.children('h3:contains("Affiliations")').text('Affiliation');
+    }
+
+    // inject pre code styles (can't do this with a global stylesheet b/c a shadow root is used)
+    $('d-code').each(function(i, val) {
+      var style = document.createElement('style');
+      style.innerHTML = 'pre code { padding-left: 10px; font-size: 12px; border-left: 2px solid rgba(0,0,0,0.1); } ' +
+                        '@media(min-width: 768px) { pre code { padding-left: 18px; font-size: 14px; } }';
+      if (this.shadowRoot)
+        this.shadowRoot.appendChild(style);
+    });
+
+    // move appendix-bottom entries to the bottom
+    $('.appendix-bottom').appendTo('d-appendix').children().unwrap();
+    $('.appendix-bottom').remove();
+
+    // clear polling timer
+    clearInterval(tid);
+
+    // show body now that everything is ready
+    on_load_complete();
+  }
+
+  var tid = setInterval(distill_post_process, 50);
+  distill_post_process();
+
+}
+
+function init_downlevel() {
+
+  init_common();
+
+   // insert hr after d-title
+  $('.d-title').after($('<hr class="section-separator"/>'));
+
+  // check if we have authors
+  var front_matter = JSON.parse($("#distill-front-matter").html());
+  var have_authors = front_matter.authors && front_matter.authors.length > 0;
+
+  // manage byline/border
+  if (!have_authors)
+    $('.d-byline').remove();
+  $('.d-byline').after($('<hr class="section-separator"/>'));
+  $('.d-byline a').remove();
+
+  // remove toc
+  $('.d-toc-header').remove();
+  $('.d-toc').remove();
+  $('.d-toc-separator').remove();
+
+  // move appendix elements
+  $('h1.appendix, h2.appendix').each(function(i, val) {
+    $(this).changeElementType('h3');
+  });
+  $('h3.appendix').each(function(i, val) {
+    $(this).nextUntil($('h1, h2, h3')).addBack().appendTo($('.d-appendix'));
+  });
+
+
+  // inject headers into references and footnotes
+  var refs_header = $('<h3></h3>');
+  refs_header.text('References');
+  $('#refs').prepend(refs_header);
+
+  var footnotes_header = $('<h3></h3');
+  footnotes_header.text('Footnotes');
+  $('.footnotes').children('hr').first().replaceWith(footnotes_header);
+
+  // move appendix-bottom entries to the bottom
+  $('.appendix-bottom').appendTo('.d-appendix').children().unwrap();
+  $('.appendix-bottom').remove();
+
+  // remove appendix if it's empty
+  if ($('.d-appendix').children().length === 0)
+    $('.d-appendix').remove();
+
+  // prepend separator above appendix
+  $('.d-appendix').before($('<hr class="section-separator" style="clear: both"/>'));
+
+  // trim code
+  $('pre>code').each(function(i, val) {
+    $(this).html($.trim($(this).html()));
+  });
+
+  // move posts-container right before article
+  $('.posts-container').insertBefore($('.d-article'));
+
+  $('body').addClass('downlevel');
+
+  on_load_complete();
+}
+
+
+function init_common() {
+
+  // jquery plugin to change element types
+  (function($) {
+    $.fn.changeElementType = function(newType) {
+      var attrs = {};
+
+      $.each(this[0].attributes, function(idx, attr) {
+        attrs[attr.nodeName] = attr.nodeValue;
+      });
+
+      this.replaceWith(function() {
+        return $("<" + newType + "/>", attrs).append($(this).contents());
+      });
+    };
+  })(jQuery);
+
+  // prevent underline for linked images
+  $('a > img').parent().css({'border-bottom' : 'none'});
+
+  // mark non-body figures created by knitr chunks as 100% width
+  $('.layout-chunk').each(function(i, val) {
+    var figures = $(this).find('img, .html-widget');
+    if ($(this).attr('data-layout') !== "l-body") {
+      figures.css('width', '100%');
+    } else {
+      figures.css('max-width', '100%');
+      figures.filter("[width]").each(function(i, val) {
+        var fig = $(this);
+        fig.css('width', fig.attr('width') + 'px');
+      });
+
+    }
+  });
+
+  // auto-append index.html to post-preview links in file: protocol
+  // and in rstudio ide preview
+  $('.post-preview').each(function(i, val) {
+    if (window.location.protocol === "file:")
+      $(this).attr('href', $(this).attr('href') + "index.html");
+  });
+
+  // get rid of index.html references in header
+  if (window.location.protocol !== "file:") {
+    $('.distill-site-header a[href]').each(function(i,val) {
+      $(this).attr('href', $(this).attr('href').replace("index.html", "./"));
+    });
+  }
+
+  // add class to pandoc style tables
+  $('tr.header').parent('thead').parent('table').addClass('pandoc-table');
+  $('.kable-table').children('table').addClass('pandoc-table');
+
+  // add figcaption style to table captions
+  $('caption').parent('table').addClass("figcaption");
+
+  // initialize posts list
+  if (window.init_posts_list)
+    window.init_posts_list();
+
+  // implmement disqus comment link
+  $('.disqus-comment-count').click(function() {
+    window.headroom_prevent_pin = true;
+    $('#disqus_thread').toggleClass('hidden');
+    if (!$('#disqus_thread').hasClass('hidden')) {
+      var offset = $(this).offset();
+      $(window).resize();
+      $('html, body').animate({
+        scrollTop: offset.top - 35
+      });
+    }
+  });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  if (is_downlevel_browser())
+    init_downlevel();
+  else
+    window.addEventListener('WebComponentsReady', init_distill);
+});
+
+</script>
+
+<!--/radix_placeholder_distill-->
+  <script src="../../site_libs/header-attrs-2.1/header-attrs.js"></script>
+  <script src="../../site_libs/jquery-1.11.3/jquery.min.js"></script>
+  <script src="../../site_libs/bowser-1.9.3/bowser.min.js"></script>
+  <script src="../../site_libs/webcomponents-2.0.0/webcomponents.js"></script>
+  <script src="../../site_libs/distill-2.2.21/template.v2.js"></script>
+  <!--radix_placeholder_site_in_header-->
+<!--/radix_placeholder_site_in_header-->
+
+  <link rel="stylesheet" href="../../custom.css" type="text/css"/>
+
+</head>
+
+<body>
+
+<!--radix_placeholder_front_matter-->
+
+<script id="distill-front-matter" type="text/json">
+{"title":"House prices in King County","description":"Use case illustrating data preprocessing and model fitting via mlr3 on the \"King County House Prices\" dataset.","authors":[{"author":"Florian Pfisterer","authorURL":"#","affiliation":"&nbsp;","affiliationURL":"#"}],"publishedDate":"2020-01-30T00:00:00.000+01:00","citationText":"Pfisterer, 2020"}
+</script>
+
+<!--/radix_placeholder_front_matter-->
+<!--radix_placeholder_navigation_before_body-->
+<header class="header header--fixed" role="banner">
+<nav class="distill-site-nav distill-site-header">
+<div class="nav-left">
+<a href="../../index.html" class="title">mlr3 Use Cases</a>
+</div>
+<div class="nav-right">
+<a href="javascript:void(0);" class="nav-toggle">&#9776;</a>
+</div>
+</nav>
+</header>
+<!--/radix_placeholder_navigation_before_body-->
+<!--radix_placeholder_site_before_body-->
+<!--/radix_placeholder_site_before_body-->
+
+<div class="d-title">
+<h1>House prices in King County</h1>
+<p><p>Use case illustrating data preprocessing and model fitting via mlr3 on the “King County House Prices” dataset.</p></p>
+</div>
+
+<div class="d-byline">
+  Florian Pfisterer  
+  
+<br/>01-30-2020
+</div>
+
+<div class="d-article">
+<p>The use-case illustrated below touches on the following concepts:</p>
+<ul>
+<li>Data preprocessing</li>
+<li><a href="https://mlr3book.mlr-org.com/tasks.html">Task</a></li>
+<li><a href="https://mlr3book.mlr-org.com/train-predict.html">Fitting a learner</a></li>
+<li><a href="https://mlr3book.mlr-org.com/resampling.html">Resampling</a></li>
+<li><a href="https://mlr3book.mlr-org.com/tuning.html">Tuning</a></li>
+</ul>
+<p>The relevant sections in the <code>mlr3book</code> are linked to for the reader’s convenience.</p>
+<p>This use case shows how to model housing price data in King County. Following features are illustrated:</p>
+<ul>
+<li>Summarizing the data set</li>
+<li>Converting data to treat it as a numeric feature/factor</li>
+<li>Generating new variables</li>
+<li>Splitting data into train and test data sets</li>
+<li>Computing a first model (decision tree)</li>
+<li>Building many trees (random forest)</li>
+<li>Visualizing price data across different region</li>
+<li>Optimizing the baseline by implementing a tuner</li>
+<li>Engineering features</li>
+<li>Creating a sparser model</li>
+</ul>
+<h2 id="use-case-regr-houses">House Price Prediction in King County</h2>
+<p>We use the <code>kc_housing</code> dataset contained in the package <a href="https://mlr3book.mlr-org.com">mlr3book</a> in order to provide a use-case for the application of <a href="https://mlr3.mlr-org.com">mlr3</a> on real-world data.</p>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+library(mlr3)
+data(&quot;kc_housing&quot;, package = &quot;mlr3data&quot;)</code></pre>
+</div>
+<h3 id="exploratory-data-analysis">Exploratory Data Analysis</h3>
+<p>In order to get a quick impression of our data, we perform some initial <em>Exploratory Data Analysis</em>. This helps us to get a first impression of our data and might help us arrive at additional features that can help with the prediction of the house prices.</p>
+<p>We can get a quick overview using R’s summary function:</p>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+summary(kc_housing)</code></pre>
+<pre><code>
+      date                         price            bedrooms     
+ Min.   :2014-05-02 00:00:00   Min.   :  75000   Min.   : 0.000  
+ 1st Qu.:2014-07-22 00:00:00   1st Qu.: 321950   1st Qu.: 3.000  
+ Median :2014-10-16 00:00:00   Median : 450000   Median : 3.000  
+ Mean   :2014-10-29 03:58:09   Mean   : 540088   Mean   : 3.371  
+ 3rd Qu.:2015-02-17 00:00:00   3rd Qu.: 645000   3rd Qu.: 4.000  
+ Max.   :2015-05-27 00:00:00   Max.   :7700000   Max.   :33.000  
+                                                                 
+   bathrooms      sqft_living       sqft_lot           floors     
+ Min.   :0.000   Min.   :  290   Min.   :    520   Min.   :1.000  
+ 1st Qu.:1.750   1st Qu.: 1427   1st Qu.:   5040   1st Qu.:1.000  
+ Median :2.250   Median : 1910   Median :   7618   Median :1.500  
+ Mean   :2.115   Mean   : 2080   Mean   :  15107   Mean   :1.494  
+ 3rd Qu.:2.500   3rd Qu.: 2550   3rd Qu.:  10688   3rd Qu.:2.000  
+ Max.   :8.000   Max.   :13540   Max.   :1651359   Max.   :3.500  
+                                                                  
+ waterfront           view          condition         grade       
+ Mode :logical   Min.   :0.0000   Min.   :1.000   Min.   : 1.000  
+ FALSE:21450     1st Qu.:0.0000   1st Qu.:3.000   1st Qu.: 7.000  
+ TRUE :163       Median :0.0000   Median :3.000   Median : 7.000  
+                 Mean   :0.2343   Mean   :3.409   Mean   : 7.657  
+                 3rd Qu.:0.0000   3rd Qu.:4.000   3rd Qu.: 8.000  
+                 Max.   :4.0000   Max.   :5.000   Max.   :13.000  
+                                                                  
+   sqft_above   sqft_basement       yr_built     yr_renovated      zipcode     
+ Min.   : 290   Min.   :  10.0   Min.   :1900   Min.   :1934    Min.   :98001  
+ 1st Qu.:1190   1st Qu.: 450.0   1st Qu.:1951   1st Qu.:1987    1st Qu.:98033  
+ Median :1560   Median : 700.0   Median :1975   Median :2000    Median :98065  
+ Mean   :1788   Mean   : 742.4   Mean   :1971   Mean   :1996    Mean   :98078  
+ 3rd Qu.:2210   3rd Qu.: 980.0   3rd Qu.:1997   3rd Qu.:2007    3rd Qu.:98118  
+ Max.   :9410   Max.   :4820.0   Max.   :2015   Max.   :2015    Max.   :98199  
+                NA&#39;s   :13126                   NA&#39;s   :20699                  
+      lat             long        sqft_living15    sqft_lot15    
+ Min.   :47.16   Min.   :-122.5   Min.   : 399   Min.   :   651  
+ 1st Qu.:47.47   1st Qu.:-122.3   1st Qu.:1490   1st Qu.:  5100  
+ Median :47.57   Median :-122.2   Median :1840   Median :  7620  
+ Mean   :47.56   Mean   :-122.2   Mean   :1987   Mean   : 12768  
+ 3rd Qu.:47.68   3rd Qu.:-122.1   3rd Qu.:2360   3rd Qu.: 10083  
+ Max.   :47.78   Max.   :-121.3   Max.   :6210   Max.   :871200  
+                                                                 </code></pre>
+<pre class="r"><code>
+dim(kc_housing)</code></pre>
+<pre><code>
+[1] 21613    20</code></pre>
+</div>
+<p>Our dataset has 21613 observations and 20 columns. The variable we want to predict is <code>price</code>. In addition to the price column, we have several other columns:</p>
+<ul>
+<li><p><code>id:</code> A unique identifier for every house.</p></li>
+<li><p><code>date</code>: A date column, indicating when the house was sold. This column is currently not encoded as a <code>date</code> and requires some preprocessing.</p></li>
+<li><p><code>zipcode</code>: A column indicating the ZIP code. This is a categorical variable with many factor levels.</p></li>
+<li><p><code>long, lat</code> The longitude and latitude of the house</p></li>
+<li><p><code>...</code> several other numeric columns providing information about the house, such as number of rooms, square feet etc.</p></li>
+</ul>
+<p>Before we continue with the analysis, we preprocess some features so that they are stored in the correct format.</p>
+<p>First we convert the <code>date</code> column to <code>numeric</code>. To do so, we convert the date to the POSIXct date/time class with the <a href="https://cran.r-project.org/package=anytime">anytime</a> package. Next, use <code>difftime()</code> to convert to days since the first day recorded in the data set:</p>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+library(anytime)
+dates = anytime(kc_housing$date)
+kc_housing$date = as.numeric(difftime(dates, min(dates), units = &quot;days&quot;))</code></pre>
+</div>
+<p>Afterwards, we convert the zip code to a factor:</p>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+kc_housing$zipcode = as.factor(kc_housing$zipcode)</code></pre>
+</div>
+<p>And add a new column <strong>renovated</strong> indicating whether a house was renovated at some point.</p>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+kc_housing$renovated = as.numeric(!is.na(kc_housing$yr_renovated))
+kc_housing$has_basement = as.numeric(!is.na(kc_housing$sqft_basement))</code></pre>
+</div>
+<p>We drop the id column which provides no information about the house prices:</p>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+kc_housing$id = NULL</code></pre>
+</div>
+<p>Additionally we convert the price from Dollar to units of 1000 Dollar to improve readability.</p>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+kc_housing$price = kc_housing$price / 1000</code></pre>
+</div>
+<p>Additionally, for now we simply drop the columns that have missing values, as some of our learners can not deal with them. A better option to deal with missing values would be imputation, i.e. replacing missing values with valid ones. We will deal with this in a separate article.</p>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+kc_housing$yr_renovated = NULL
+kc_housing$sqft_basement = NULL</code></pre>
+</div>
+<p>We can now plot the density of the <strong>price</strong> to get a first impression on its distribution.</p>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+library(ggplot2)
+ggplot(kc_housing, aes(x = price)) + geom_density()</code></pre>
+<p><img src="2020-01-30-house-prices-in-king-county_files/figure-html5/unnamed-chunk-10-1.png" width="624" /></p>
+</div>
+<p>We can see that the prices for most houses lie between 75.000 and 1.5 million dollars. There are few extreme values of up to 7.7 million dollars.</p>
+<p>Feature engineering often allows us to incorporate additional knowledge about the data and underlying processes. This can often greatly enhance predictive performance. A simple example: A house which has <code>yr_renovated == 0</code> means that is has not been renovated yet. Additionally we want to drop features which should not have any influence (<code>id column</code>).</p>
+<p>After those initial manipulations, we load all required packages and create a Task containing our data.</p>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+library(mlr3)
+library(mlr3viz)
+tsk = TaskRegr$new(&quot;sales&quot;, kc_housing, target = &quot;price&quot;)</code></pre>
+</div>
+<p>We can inspect associations between variables using <code>mlr3viz</code>’s <code>autoplot</code> function in order to get some good first impressions for our data. Note, that this does in no way prevent us from using other powerful plot functions of our choice on the original data.</p>
+<h4 id="distribution-of-the-price">Distribution of the price:</h4>
+<p>The outcome we want to predict is the <strong>price</strong> variable. The <code>autoplot</code> function provides a good first glimpse on our data. As the resulting object is a <code>ggplot2</code> object, we can use <code>faceting</code> and other functions from <strong>ggplot2</strong> in order to enhance plots.</p>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+library(ggplot2)
+autoplot(tsk) + facet_wrap(~renovated)</code></pre>
+<p><img src="2020-01-30-house-prices-in-king-county_files/figure-html5/unnamed-chunk-12-1.png" width="624" /></p>
+</div>
+<p>We can observe that renovated flats seem to achieve higher sales values, and this might thus be a relevant feature.</p>
+<p>Additionally, we can for example look at the condition of the house. Again, we clearly can see that the price rises with increasing condition.</p>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+autoplot(tsk) + facet_wrap(~condition)</code></pre>
+<p><img src="2020-01-30-house-prices-in-king-county_files/figure-html5/unnamed-chunk-13-1.png" width="624" /></p>
+</div>
+<h4 id="association-between-variables">Association between variables</h4>
+<p>In addition to the association with the target variable, the association between the features can also lead to interesting insights. We investigate using variables associated with the quality and size of the house. Note that we use <code>$clone()</code> and <code>$select()</code> to clone the task and select only a subset of the features for the <code>autoplot</code> function, as <code>autoplot</code> per default uses all features. The task is cloned before we select features in order to keep the original task intact.</p>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+# Variables associated with quality
+autoplot(tsk$clone()$select(tsk$feature_names[c(3, 17)]),
+  type = &quot;pairs&quot;)</code></pre>
+<p><img src="2020-01-30-house-prices-in-king-county_files/figure-html5/unnamed-chunk-14-1.png" width="624" /></p>
+</div>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+autoplot(tsk$clone()$select(tsk$feature_names[c(9:12)]),
+  type = &quot;pairs&quot;)</code></pre>
+<p><img src="2020-01-30-house-prices-in-king-county_files/figure-html5/unnamed-chunk-15-1.png" width="624" /></p>
+</div>
+<h3 id="splitting-into-train-and-test-data">Splitting into train and test data</h3>
+<p>In <code>mlr3</code>, we do not create <code>train</code> and <code>test</code> data sets, but instead keep only a vector of train and test indices.</p>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+set.seed(4411)
+train.idx = sample(seq_len(tsk$nrow), 0.7 * tsk$nrow)
+test.idx = setdiff(seq_len(tsk$nrow), train.idx)</code></pre>
+</div>
+<p>We can do the same for our task:</p>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+task_train = tsk$clone()$filter(train.idx)
+task_test  = tsk$clone()$filter(test.idx)</code></pre>
+</div>
+<h3 id="a-first-model-decision-tree">A first model: Decision Tree</h3>
+<p>Decision trees cannot only be used as a powerful tool for predictive models but also for exploratory data analysis. In order to fit a decision tree, we first get the <code>regr.rpart</code> learner from the <code>mlr_learners</code> dictionary by using the sugar function <a href="https://mlr3.mlr-org.com/reference/mlr_sugar.html"><code>lrn</code></a>.</p>
+<p>For now we leave out the <code>zipcode</code> variable, as we also have the <code>latitude</code> and <code>longitude</code> of each house. Again, we use <code>$clone()</code>, so we do not change the original task.</p>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+tsk_nozip = task_train$clone()$select(setdiff(tsk$feature_names, &quot;zipcode&quot;))
+# Get the learner
+lrn = lrn(&quot;regr.rpart&quot;)
+# And train on the task
+lrn$train(tsk_nozip, row_ids = train.idx)</code></pre>
+</div>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+plot(lrn$model)
+text(lrn$model)</code></pre>
+<p><img src="2020-01-30-house-prices-in-king-county_files/figure-html5/unnamed-chunk-19-1.png" width="624" /></p>
+</div>
+<p>The learned tree relies on several variables in order to distinguish between cheaper and pricier houses. The features we split along are <strong>grade</strong>, <strong>sqft_living</strong>, but also some features related to the area (longitude and latitude). We can visualize the price across different regions in order to get more info:</p>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+# Load the ggmap package in order to visualize on a map
+library(ggmap)
+
+# And create a quick plot for the price
+qmplot(long, lat, maptype = &quot;watercolor&quot;, color = log(price),
+  data = kc_housing[train.idx[1:3000],]) +
+  scale_colour_viridis_c()</code></pre>
+<p><img src="2020-01-30-house-prices-in-king-county_files/figure-html5/unnamed-chunk-20-1.png" width="624" /></p>
+<pre class="r"><code>
+# And the zipcode
+qmplot(long, lat, maptype = &quot;watercolor&quot;, color = zipcode,
+  data = kc_housing[train.idx[1:3000],]) + guides(color = FALSE)</code></pre>
+<p><img src="2020-01-30-house-prices-in-king-county_files/figure-html5/unnamed-chunk-20-2.png" width="624" /></p>
+</div>
+<p>We can see that the price is clearly associated with the zipcode when comparing then two plots. As a result, we might want to indeed use the <strong>zipcode</strong> column in our future endeavors.</p>
+<h3 id="a-first-baseline-decision-tree">A first baseline: Decision Tree</h3>
+<p>After getting an initial idea for our data, we might want to construct a first baseline, in order to see what a simple model already can achieve.</p>
+<p>We use <code>resample</code> with <code>3-fold cross-validation</code> on our training data in order to get a reliable estimate of the algorithm’s performance on future data. Before we start with defining and training learners, we create a <a href="https://mlr3.mlr-org.com/reference/Resampling.html"><code>Resampling</code></a> in order to make sure that we always compare on exactly the same data.</p>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+cv3 = rsmp(&quot;cv&quot;, folds = 3)</code></pre>
+</div>
+<p>For the cross-validation we only use the <strong>training data</strong> by cloning the task and selecting only observations from the training set.</p>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+lrn_rpart = lrn(&quot;regr.rpart&quot;)
+res = resample(task = task_train, lrn_rpart, cv3)
+res$score(msr(&quot;regr.mse&quot;))</code></pre>
+<pre><code>
+         task task_id            learner learner_id     resampling
+1: &lt;TaskRegr&gt;   sales &lt;LearnerRegrRpart&gt; regr.rpart &lt;ResamplingCV&gt;
+2: &lt;TaskRegr&gt;   sales &lt;LearnerRegrRpart&gt; regr.rpart &lt;ResamplingCV&gt;
+3: &lt;TaskRegr&gt;   sales &lt;LearnerRegrRpart&gt; regr.rpart &lt;ResamplingCV&gt;
+   resampling_id iteration prediction regr.mse
+1:            cv         1     &lt;list&gt; 45415.78
+2:            cv         2     &lt;list&gt; 49598.67
+3:            cv         3     &lt;list&gt; 42517.76</code></pre>
+<pre class="r"><code>
+sprintf(&quot;RMSE of the simple rpart: %s&quot;, round(sqrt(res$aggregate()), 2))</code></pre>
+<pre><code>
+[1] &quot;RMSE of the simple rpart: 214.11&quot;</code></pre>
+</div>
+<h3 id="many-trees-random-forest">Many Trees: Random Forest</h3>
+<p>We might be able to improve upon the <strong>RMSE</strong> using more powerful learners. We first load the <a href="https://mlr3learners.mlr-org.com">mlr3learners</a> package, which contains the <a href="https://cran.r-project.org/package=ranger">ranger</a> learner (a package which implements the “Random Forest” algorithm).</p>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+library(mlr3learners)
+lrn_ranger = lrn(&quot;regr.ranger&quot;, num.trees = 15L)
+res = resample(task = task_train, lrn_ranger, cv3)
+res$score(msr(&quot;regr.mse&quot;))</code></pre>
+<pre><code>
+         task task_id             learner  learner_id     resampling
+1: &lt;TaskRegr&gt;   sales &lt;LearnerRegrRanger&gt; regr.ranger &lt;ResamplingCV&gt;
+2: &lt;TaskRegr&gt;   sales &lt;LearnerRegrRanger&gt; regr.ranger &lt;ResamplingCV&gt;
+3: &lt;TaskRegr&gt;   sales &lt;LearnerRegrRanger&gt; regr.ranger &lt;ResamplingCV&gt;
+   resampling_id iteration prediction regr.mse
+1:            cv         1     &lt;list&gt; 20254.29
+2:            cv         2     &lt;list&gt; 18892.31
+3:            cv         3     &lt;list&gt; 26758.39</code></pre>
+<pre class="r"><code>
+sprintf(&quot;RMSE of the simple ranger: %s&quot;, round(sqrt(res$aggregate()), 2))</code></pre>
+<pre><code>
+[1] &quot;RMSE of the simple ranger: 148.22&quot;</code></pre>
+</div>
+<p>Often tuning <strong>RandomForest</strong> methods does not increase predictive performances substantially. If time permits, it can nonetheless lead to improvements and should thus be performed. In this case, we resort to tune a different kind of model: <strong>Gradient Boosted Decision Trees</strong> from the package <a href="https://cran.r-project.org/package=xgboost">xgboost</a>.</p>
+<h3 id="a-better-baseline-autotuner">A better baseline: <code>AutoTuner</code></h3>
+<!-- The following snips are not evaluated because of runtime, no idea how we want to handle this.-->
+<div class="layout-chunk" data-layout="l-body">
+
+</div>
+<p>Tuning can often further improve the performance. In this case, we <em>tune</em> the xgboost learner in order to see whether this can improve performance. For the <code>AutoTuner</code> we have to specify a <strong>Termination Criterion</strong> (how long the tuning should run) a <strong>Tuner</strong> (which tuning method to use) and a <strong>ParamSet</strong> (which space we might want to search through). For now we do not use the <strong>zipcode</strong> column, as <a href="https://cran.r-project.org/package=xgboost">xgboost</a> cannot naturally deal with categorical features. The <strong>AutoTuner</strong> automatically performs nested cross-validation.</p>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+set.seed(444L)
+library(mlr3tuning)
+library(paradox)
+lrn_xgb = lrn(&quot;regr.xgboost&quot;)
+
+# Define the ParamSet
+ps = ParamSet$new(
+  params = list(
+    ParamDbl$new(id = &quot;eta&quot;, lower = 0.2, upper = .4),
+    ParamDbl$new(id = &quot;min_child_weight&quot;, lower = 1, upper = 20),
+    ParamDbl$new(id = &quot;subsample&quot;, lower = .7, upper = .8),
+    ParamDbl$new(id = &quot;colsample_bytree&quot;,  lower = .9, upper = 1),
+    ParamDbl$new(id = &quot;colsample_bylevel&quot;, lower = .5, upper = .7),
+    ParamInt$new(id = &quot;nrounds&quot;, lower = 1L, upper = 25)
+))
+
+# Define the Terminator
+terminator = term(&quot;evals&quot;, n_evals = 10)
+at = AutoTuner$new(lrn_xgb, rsmp(&quot;holdout&quot;), measures = msr(&quot;regr.mse&quot;), ps,
+  terminator, tuner = tnr(&quot;random_search&quot;))</code></pre>
+</div>
+<div class="layout-chunk" data-layout="l-body">
+
+</div>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+res$score(msr(&quot;regr.mse&quot;))</code></pre>
+<pre><code>
+         task task_id     learner         learner_id     resampling
+1: &lt;TaskRegr&gt;   sales &lt;AutoTuner&gt; regr.xgboost.tuned &lt;ResamplingCV&gt;
+2: &lt;TaskRegr&gt;   sales &lt;AutoTuner&gt; regr.xgboost.tuned &lt;ResamplingCV&gt;
+3: &lt;TaskRegr&gt;   sales &lt;AutoTuner&gt; regr.xgboost.tuned &lt;ResamplingCV&gt;
+   resampling_id iteration prediction regr.mse
+1:            cv         1     &lt;list&gt; 20849.30
+2:            cv         2     &lt;list&gt; 20365.25
+3:            cv         3     &lt;list&gt; 19136.54</code></pre>
+<pre class="r"><code>
+sprintf(&quot;RMSE of the tuned xgboost: %s&quot;, round(sqrt(res$aggregate()), 2))</code></pre>
+<pre><code>
+[1] &quot;RMSE of the tuned xgboost: 141.83&quot;</code></pre>
+</div>
+<p>We can obtain the resulting params in the respective splits by accessing the <a href="https://mlr3.mlr-org.com/reference/ResampleResult.html"><code>ResampleResult</code></a>.</p>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+sapply(res$learners, function(x) x$param_set$values)[-2,]</code></pre>
+<pre><code>
+                  [,1]      [,2]      [,3]     
+nrounds           24        19        22       
+eta               0.3026393 0.3725926 0.2348035
+min_child_weight  13.35305  16.98946  10.62785 
+subsample         0.7400116 0.7621237 0.7601959
+colsample_bytree  0.9716076 0.9236286 0.9987225
+colsample_bylevel 0.6090116 0.5194845 0.6217055</code></pre>
+</div>
+<p><strong>NOTE:</strong> To keep runtime low, we only tune parts of the hyperparameter space of <a href="https://cran.r-project.org/package=xgboost">xgboost</a> in this example. Additionally, we only allow for <span class="math inline">\(10\)</span> random search iterations, which is usually to little for real-world applications. Nonetheless, we are able to obtain an improved performance when comparing to the <a href="https://cran.r-project.org/package=ranger">ranger</a> model.</p>
+<p>In order to further improve our results we have several options:</p>
+<ul>
+<li>Find or engineer better features</li>
+<li>Remove Features to avoid overfitting</li>
+<li>Obtain additional data (often prohibitive)</li>
+<li>Try more models</li>
+<li>Improve the tuning
+<ul>
+<li>Increase the tuning budget</li>
+<li>Enlarge the tuning search space</li>
+<li>Use a more efficient tuning algorithm</li>
+</ul></li>
+<li>Stacking and Ensembles</li>
+</ul>
+<p>Below we will investigate some of those possibilities and investigate whether this improves performance.</p>
+<h3 id="engineering-features-mutating-zip-codes">Engineering Features: Mutating ZIP-Codes</h3>
+<p>In order to better cluster the zip codes, we compute a new feature: <strong>med_price</strong>: It computes the median price in each zip-code. This might help our model to improve the prediction.</p>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+data = task_train$data(cols = c(&quot;price&quot;, &quot;zipcode&quot;))
+data[, med_price := median(price), by = &quot;zipcode&quot;]
+task_train$cbind(data[, .(med_price)])</code></pre>
+</div>
+<p>Again, we run <a href="https://mlr3.mlr-org.com/reference/resample.html"><code>resample()</code></a> and compute the <strong>RMSE</strong>.</p>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+lrn_ranger = lrn(&quot;regr.ranger&quot;)
+res = resample(task = task_train, lrn_ranger, cv3)
+res$score(msr(&quot;regr.mse&quot;))</code></pre>
+<pre><code>
+         task task_id             learner  learner_id     resampling
+1: &lt;TaskRegr&gt;   sales &lt;LearnerRegrRanger&gt; regr.ranger &lt;ResamplingCV&gt;
+2: &lt;TaskRegr&gt;   sales &lt;LearnerRegrRanger&gt; regr.ranger &lt;ResamplingCV&gt;
+3: &lt;TaskRegr&gt;   sales &lt;LearnerRegrRanger&gt; regr.ranger &lt;ResamplingCV&gt;
+   resampling_id iteration prediction regr.mse
+1:            cv         1     &lt;list&gt; 22797.43
+2:            cv         2     &lt;list&gt; 18270.64
+3:            cv         3     &lt;list&gt; 13688.15</code></pre>
+<pre class="r"><code>
+sprintf(&quot;RMSE of ranger with med_price: %s&quot;, round(sqrt(res$aggregate()), 2))</code></pre>
+<pre><code>
+[1] &quot;RMSE of ranger with med_price: 135.1&quot;</code></pre>
+</div>
+<h3 id="advanced-obtaining-a-sparser-model">Advanced: Obtaining a sparser model</h3>
+<p>In many cases, we might want to have a sparse model. For this purpose we can use a <a href="https://mlr3filters.mlr-org.com/reference/Filter.html"><code>mlr3filters::Filter</code></a> implemented in <code>mlr3filters</code>. This can prevent our learner from overfitting make it easier for humans to interpret models as fewer variables influence the resulting prediction.</p>
+<p>In this example, we use <code>PipeOpFilter</code> (via <code>po("filter", ...)</code>) to add a feature-filter before training the model. For a more in-depth insight, refer to the sections on <code>mlr3pipelines</code> and <code>mlr3filters</code> in the <strong>mlr3 book</strong>: <a href="https://mlr3book.mlr-org.com/fs.html">Feature Selection</a> and <a href="https://mlr3book.mlr-org.com/pipelines.html">Pipelines</a>.</p>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+library(mlr3pipelines)
+library(mlr3filters)
+filter = FilterMRMR$new()</code></pre>
+</div>
+<p>The resulting <strong>RMSE</strong> is slightly higher, and at the same time we only use <span class="math inline">\(12\)</span> features.</p>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+lrn_filter = GraphLearner$new(
+  po(&quot;filter&quot;, filter, param_vals = list(filter.nfeat = 12)) %&gt;&gt;% po(&quot;learner&quot;, lrn(&quot;regr.ranger&quot;))
+  )
+res = resample(task = task_train, lrn_filter, cv3)
+res$score(msr(&quot;regr.mse&quot;))</code></pre>
+<pre><code>
+         task task_id        learner       learner_id     resampling
+1: &lt;TaskRegr&gt;   sales &lt;GraphLearner&gt; mrmr.regr.ranger &lt;ResamplingCV&gt;
+2: &lt;TaskRegr&gt;   sales &lt;GraphLearner&gt; mrmr.regr.ranger &lt;ResamplingCV&gt;
+3: &lt;TaskRegr&gt;   sales &lt;GraphLearner&gt; mrmr.regr.ranger &lt;ResamplingCV&gt;
+   resampling_id iteration prediction regr.mse
+1:            cv         1     &lt;list&gt; 27312.88
+2:            cv         2     &lt;list&gt; 20360.36
+3:            cv         3     &lt;list&gt; 19823.75</code></pre>
+<pre class="r"><code>
+sprintf(&quot;RMSE of ranger with filtering: %s&quot;, round(sqrt(res$aggregate()), 2))</code></pre>
+<pre><code>
+[1] &quot;RMSE of ranger with filtering: 150&quot;</code></pre>
+</div>
+<h2 id="summary">Summary:</h2>
+<p>We have seen different ways to improve models with respect to our criteria by:</p>
+<ul>
+<li>Choosing a suitable algorithm</li>
+<li>Choosing good hyperparameters (tuning)</li>
+<li>Filtering features</li>
+<li>Engineering new features</li>
+</ul>
+<p>A combination of all of the above would most likely yield an even better model. This is left as an exercise to the reader.</p>
+<p>The best model we found in this example is the <code>ranger</code> model with the added <code>med_price</code> feature. In a final step, we now want to assess the model’s quality on the held-out data we stored in our <code>task_test</code>. In order to do so, and to prevent data leakage, we can only add the median price from the training data.</p>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+data = task_train$data(cols = c(&quot;price&quot;, &quot;zipcode&quot;))
+data[, med_price := median(price), by = &quot;zipcode&quot;]
+test_data = task_test$data(cols = &quot;zipcode&quot;)
+test = merge(test_data, unique(data[, .(zipcode, med_price)]), all.x = TRUE)
+task_test$cbind(test)</code></pre>
+</div>
+<p>Now we can use the augmented <code>task_test</code> to predict on new data.</p>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+lrn_ranger$train(task_train)
+pred = lrn_ranger$predict(task_test)
+pred$score(msr(&quot;regr.mse&quot;))</code></pre>
+<pre><code>
+regr.mse 
+ 36238.5 </code></pre>
+</div>
+<!--radix_placeholder_article_footer-->
+<!--/radix_placeholder_article_footer-->
+</div>
+
+<div class="d-appendix">
+</div>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+<!--radix_placeholder_site_after_body-->
+<!--/radix_placeholder_site_after_body-->
+<!--radix_placeholder_appendices-->
+<div class="appendix-bottom"></div>
+<!--/radix_placeholder_appendices-->
+<!--radix_placeholder_navigation_after_body-->
+<!--/radix_placeholder_navigation_after_body-->
+
+</body>
+
+</html>
