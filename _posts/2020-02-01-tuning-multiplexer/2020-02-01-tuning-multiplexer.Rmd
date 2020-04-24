@@ -1,0 +1,221 @@
+---
+title: Tuning Over Multiple Learners (Tuning Multiplexer)
+categories: 
+ - tuning
+author:
+  - name: Jakob Richter
+date: 02-01-2020
+description: |
+  This use case shows how to tune over multiple learners for a single task.
+output:
+  distill::distill_article:
+    self_contained: false
+    css: ../../custom.css
+---
+
+This use case shows how to tune over multiple learners for a single task.
+Following tasks are illustrated:
+
+* Build a pipeline that can switch between multiple learners.
+* Define the hyperparameter search space for the pipeline.
+  - Define transformations for single hyperparameters.
+  - Define a hierarchical order of the hyperparameters.
+* Run a random search.
+
+## Build the Pipeline
+
+The pipeline just has a single purpose in this example: It should allow us to switch between different learners.
+In the end we will have a so called Piped Learner that uses either an SVM or an random forest (as implemented in the R-package ranger) to train a model, depending on the hyperparameter setting.
+
+First we will define the learners that we are going to use in a named list.
+The names are needed to control which learner to use in the pipeline.
+They can also be different from the learner id to allow multiple learners with the same id but possible different settings.
+We also have to set the `type` hyperparameter of the SVM at this stage already to be able to tune over the `cost` parameter.
+
+```{r}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  R.options = list(width = 80)
+)
+set.seed(1)
+library(mlr3)
+library(mlr3tuning)
+library(mlr3pipelines)
+library(mlr3learners)
+library(paradox)
+lgr::get_logger("mlr3")$set_threshold("warn")
+lgr::get_logger("mlr3tuning")$set_threshold("warn")
+
+
+learns = list(
+  lrn("classif.svm", type = "C-classification"),
+  lrn("classif.ranger")
+)
+names(learns) = mlr3misc::map(learns, "id") # does the same as purrr::map
+```
+
+The pipe consists of three elements:
+The `branch` operator will pipe the incoming data to one of the following elements depending on how the `branch.selection` parameter is set.
+The second element consists of our learners.
+Using `lapply(learns, po)` we convert them to single pipe operators.
+`gunion` combines them in an unconnected manner, so that they can be used after a branching.
+Naturally, one of the learner models has to be the end result of the graph.
+`unbranch` takes care of that.
+
+```{r}
+pipe =
+  po("branch", names(learns)) %>>%
+  gunion(unname(lapply(learns, po))) %>>%
+  po("unbranch")
+
+pipe$plot()
+```
+
+## Define the Search Space
+
+First we want to get a glance of all the hyperparameters we could tune over.
+The pipe has a combined parameter set of all learners that is so big, so we have to use a trick to get an overview.
+
+```{r}
+as.data.table(pipe$param_set)[,1:4]
+```
+
+We decide to tune the `mtry` parameter of the random forest (`ranger`) and the `cost` parameter of the SVM.
+Additionally we tune the pipe parameter that chooses whether to use `ranger` or `svm` to build the model.
+We have to manually specify the numerical parameters with boundaries.
+The categorical parameter of the branch selection can be directly copied.
+
+We know that the `cost` parameter is more sensitive to changes below 1.
+To reflect that, we will use a transformation, so that evenly distributed values between -10 and 10 are transformed to values between $2^{-10}$ and $2^{10}$.
+
+Additionally we have to reflect the hierarchical order of the parameter sets.
+We can only set the `mtry` value if the pipe is configured to use the random forest (`ranger`).
+The same applies to the `cost_trafo` parameter of the SVM.
+
+```{r}
+ps = ParamSet$new(list(
+  pipe$param_set$params$branch.selection$clone(), # ParamFct can be copied.
+  ParamInt$new("classif.ranger.mtry", lower = 1L, upper = 20L),
+  ParamDbl$new("classif.svm.cost_trafo", lower = -10, upper = 10)
+))
+
+ps$trafo = function(x, param_set) {
+  # we only do the trafo if branch.selection == "classif.svm",
+  # yes we could also write that in the if statement
+  if (!is.null(x$classif.svm.cost_trafo)) {
+    x$classif.svm.cost = 2^x$classif.svm.cost_trafo
+    x$classif.svm.cost_trafo = NULL
+  }
+  return(x)
+}
+
+ps$add_dep("classif.ranger.mtry", "branch.selection", CondEqual$new("classif.ranger"))
+ps$add_dep("classif.svm.cost_trafo", "branch.selection", CondEqual$new("classif.svm"))
+```
+
+## Tune the Pipeline with a Random Search
+
+First, we need to build a `Learner` object from the pipe.
+Afterwards we can [tune](https://mlr3book.mlr-org.com/tuning.html) it like every other learner.
+
+```{r}
+glrn = GraphLearner$new(pipe)
+tsk = tsk("sonar")
+cv5 = rsmp("cv", folds = 5)
+cv5$instantiate(tsk)
+# not a must, but ensures that all evals are on the same exact split
+
+instance = TuningInstance$new(
+  task = tsk,
+  learner = glrn,
+  resampling = cv5,
+  measures = msr("classif.ce"),
+  param_set = ps,
+  terminator = term("evals", n_evals = 20)
+)
+
+tuner = TunerRandomSearch$new()
+tuner$tune(instance)
+instance$result
+```
+
+
+The following shows a quick way to visualize the tuning results.
+
+```{r}
+
+# resdf = instance$archive(unnest = "params") #this unnests the transformed values
+resdf = instance$archive(unnest = "tune_x") #this unnests the tuner search space values
+resdf = tidyr::pivot_longer(
+  resdf,
+  c("classif.ranger.mtry", "classif.svm.cost_trafo"),
+  values_drop_na = TRUE)
+library(ggplot2)
+g = ggplot(resdf, aes(x = value, y = classif.ce))
+g = g + geom_point()
+g = g + facet_grid(~name, scales = "free")
+g
+```
+
+## Possible Errors
+
+In the beginning we had to set `type = "C-classification")` for the learner.
+Here is what happens if we forget to do that (some objects are taken from above):
+
+```{r, error = TRUE}
+learns2 = list(
+  lrn("classif.svm"),
+  lrn("classif.ranger")
+)
+names(learns2) = mlr3misc::map(learns, "id")
+
+pipe2 =
+  po("branch", names(learns2)) %>>%
+  gunion(unname(lapply(learns2, po))) %>>%
+  po("unbranch")
+
+glrn2 = GraphLearner$new(pipe2)
+
+instance2 = TuningInstance$new(
+  task = tsk,
+  learner = glrn2,
+  resampling = cv5,
+  measures = msr("classif.ce"),
+  param_set = ps, #same param set as above
+  terminator = term("evals", n_evals = 20)
+)
+
+
+tuner = TunerRandomSearch$new()
+tuner$tune(instance2)
+```
+
+So this error tells me that the `type` parameter for the learner is not set but to set the parameter `cost`, `type` has to be set to `"C-classification"`.
+The easiest point to do so is before the construction of the pipe.
+
+
+Another problem that might occur is a wrong definition of the transformation function in the parameter set.
+
+```{r, error = TRUE}
+ps3 = ps$clone(deep = TRUE)
+ps3$trafo = function(x, param_set) {
+  # Wrong! We forgot that classif.svm.cost_trafo is not always present!
+  x$classif.svm.cost = 2^x$classif.svm.cost_trafo
+  return(x)
+}
+
+instance3 = TuningInstance$new(
+  task = tsk,
+  learner = glrn,
+  resampling = cv5,
+  measures = msr("classif.ce"),
+  param_set = ps3,
+  terminator = term("evals", n_evals = 20)
+)
+
+
+tuner = TunerRandomSearch$new()
+tuner$tune(instance3)
+```
+Here the error is less helpful and even a `traceback()` does not hint you directly towards the `trafo` function that is the cause of the error.
+If you encounter an error like this it makes sense to use `browser()` inside the `tafo` function or set a breakpoint in RStudio to see how the `x` looks like.
