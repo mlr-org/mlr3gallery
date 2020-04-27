@@ -1,0 +1,158 @@
+---
+title: mlr3 basics on "iris" - Hello World!
+slug: mlr3-basics-iris
+categories:
+  - mlr3
+  - basics
+description: |
+  This use case shows how to use the basic mlr3 package on the iris task, so it's our "Hello World" example. It assumes no prior knowledge in machine learning or mlr3.
+author:
+  - name: Bernd Bischl
+date: 03-18-2020
+output:
+  distill::distill_article:
+    self_contained: false
+    css: ../../custom.css
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  R.options = list(width = 80)
+)
+```
+
+
+This use case shows how to use the basic mlr3 package on the iris task, so it's our "Hello World" example.
+It assumes no prior knowledge in ML or mlr3.
+You can find most of the content here also in the [mlr3book](https://mlr3book.mlr-org.com/) in a more detailed way.
+Hence we will not make a lot of general comments here but keep it hands-on and short.
+
+The following operations are shown:
+
+* Creating tasks and learners
+* Training and predicting
+* Resampling / Cross-validation
+* Installing more learners from mlr3's GitHub learner org
+* Benchmarking, to compare multiple learners
+
+## Loading basic packages
+
+```{r}
+# tasks, train, predict, resample, benchmark
+library("mlr3")
+# about a dozen reasonable learners
+library("mlr3learners")
+```
+
+## Creating tasks and learners
+
+Lets work on the canonical, simple iris data set, and try out some ML algorithms.
+We will start by using a decision tree with default settings.
+
+```{r}
+# creates a mlr3 task from scratch, from a data.frame
+# 'target' names the column in the dataset we want to learn to predict
+task = TaskClassif$new(id = "iris", backend = iris, target = "Species")
+# in this case we could also take the iris example from mlr3's dictionary of shipped example tasks
+# 2 equivalent calls to create a task. The second is just sugar for the user.
+task = mlr_tasks$get("iris")
+task = tsk("iris")
+print(task)
+# create learner from dictionary of mlr3learners
+# 2 equivalent calls:
+learner1 = mlr_learners$get("classif.rpart")
+learner1 = lrn("classif.rpart")
+print(learner1)
+```
+
+## Train and predict
+
+Lets do usual ML operations: Train on some obervations, predict on others.
+
+```{r}
+# train learner on subset of task
+learner1$train(task, row_ids = 1:120)
+# this is what the decision tree looks like
+print(learner1$model)
+# predict using observations from task
+preds = learner1$predict(task, row_ids = 121:150)
+# predict using "new" observations from an external data.frame
+preds = learner1$predict_newdata(newdata = iris[121:150, ])
+print(preds)
+```
+
+## Evaluation
+
+Let's score our prediction object with some metrics.
+And take a deeper look by inspecting the confusion matrix.
+
+```{r}
+head(as.data.table(mlr_measures))
+s = preds$score(msr("classif.acc"))
+print(s)
+s = preds$score(msrs(c("classif.acc", "classif.ce")))
+print(s)
+cm = preds$confusion
+print(cm)
+```
+
+## Changing hyperpars
+
+The learner contains information about all parameters that can be configured, including data type, constraints, defaults, etc.
+We can change the hyperparameters either during construction of later through an active binding.
+
+```{r}
+print(learner1$param_set)
+learner2 = lrn("classif.rpart", predict_type = "prob", minsplit = 50)
+learner2$param_set$values$minsplit = 50
+```
+
+## Resampling
+
+Resampling simply repeats the train-predict-score loop and collects all results in a nice `data.table`.
+
+```{r, size = "tiny"}
+cv10 = rsmp("cv", folds = 10)
+r = resample(task, learner1, cv10)
+print(r)
+r$score(msrs(c("classif.acc", "classif.ce")))
+print(r$data)
+# get all predictions nicely concatenated in a table
+preds = r$prediction()
+print(preds)
+cm = preds$confusion
+print(cm)
+```
+
+## Populating the learner dictionary
+
+mlr3learners ships out with a dozen different popular learners.
+We can list them from the its dictionary.
+If we want more, we can load on extension package from mlr3's
+[learner-org](https://github.com/mlr-org/mlr3learners/wiki) on GitHub.
+Note how after the install the dictionary increases in size.
+
+```{r}
+head(as.data.table(mlr_learners)[, c("key", "packages")])
+# remotes::install_github("mlr3learners/mlr3learners.randomForest")
+library(mlr3learners.randomForest)
+print(as.data.table(mlr_learners)[, c("key", "packages")])
+```
+
+## Benchmarking multiple learners
+
+The `benchmark()` function can conveniently compare learners on the same dataset(s).
+
+```{r}
+learners = list(learner1, learner2, lrn("classif.randomForest"))
+bm_grid = benchmark_grid(task, learners, cv10)
+bm = benchmark(bm_grid)
+print(bm)
+print(bm$aggregate(measures = msrs(c("classif.acc", "classif.ce"))))
+```
+
+## Conclusion
+
+We left out a lot of details and other features.
+If you want to know more, read the [mlr3book](https://mlr3book.mlr-org.com/) and the documentation of the mentioned packages.
