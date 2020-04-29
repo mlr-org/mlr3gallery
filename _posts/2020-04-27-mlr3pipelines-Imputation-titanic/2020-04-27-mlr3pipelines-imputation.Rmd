@@ -17,7 +17,11 @@ output:
 ---
 
 This is the second post of the titanic use case series.
+You can find the first use case [here](/2020-03-12-intro-pipelines-titanic/).
+<!-- Need to fix hyperlink -->
 In this section we will focus on the usage of `mlr3pipelines`.
+Specifically, this section illustrates the different options when it comes to data imputation.
+Furthermore, the section on benchmarking shows how to visualize our and compare our results.
 Again, we need to take some prepatory steps: 
 
 ```{r, include = FALSE, warning = FALSE, message = FALSE}
@@ -232,15 +236,25 @@ We have improved even more!
 
 ## Benchmarking 
 
+To undertake benchmarking, we need to set up a benchmarking design.
+The first step is creating a list with the learners we used, namely the learners form the first and second part of this use case.
+
 ```{r}
 lrn_list <- list(
   lrn("classif.rpart", predict_type = "prob"),
   lrn("classif.ranger", predict_type = "prob")
 )
+```
+
+After having done that, we can set up our benchmark grid: 
+```{r}
 bm_design <- benchmark_grid(task = task_imputed, resamplings = rsmp("cv", folds = 10), learners = lrn_list)
 bmr <- benchmark(bm_design, store_models = TRUE)
 print(bmr)
 ```
+
+So, where do we go from here?
+We could for instance use a boxplot and compare the two: 
 
 ```{r}
 autoplot(bmr) + theme(axis.text.x = element_text(angle = 45, hjust = 1))
@@ -252,13 +266,15 @@ Further we can compare sensitivity and specificity:
 autoplot(bmr$clone()$filter(task_id = "titanic"), type = "roc")
 ```
 
-Anotehr feature is comparing the precision-recall: 
+Moreover, one can compare the the precision-recall: 
 
 ```{r}
 # Precision vs Recall
 ggplot2::autoplot(bmr, type = "prc")
 ```
 
+As one can see, there are various options when it comes to benchmarking and visualizing.
+You could have a look at some other use cases in our galary for inspiration.
 
 ## Future
 
