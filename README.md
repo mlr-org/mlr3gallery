@@ -13,8 +13,8 @@
    ````r
    ```{r setup, include=FALSE}
    knitr::opts_chunk$set(
-   echo = TRUE,
-   R.options = list(width = 80)
+     echo = TRUE,
+     R.options = list(width = 80)
    )
    ```
    ````
