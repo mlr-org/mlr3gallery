@@ -1,7 +1,7 @@
 # mlr3gallery
 
 <!-- badges: start -->
-[![R CMD Check via {tic}](https://github.com/pat-s/mlr3gallery/workflows/R%20CMD%20Check%20via%20{tic}/badge.svg?branch=master)](https://github.com/pat-s/mlr3gallery/actions)
+[![R CMD Check via {tic}](https://github.com/mlr-org/mlr3gallery/workflows/R%20CMD%20Check%20via%20{tic}/badge.svg?branch=master)](https://github.com/mlr-org/mlr3gallery/actions)
 <!-- badges: end -->
 
 ## Add a new post
@@ -13,8 +13,8 @@
    ````r
    ```{r setup, include=FALSE}
    knitr::opts_chunk$set(
-   echo = TRUE,
-   R.options = list(width = 80)
+     echo = TRUE,
+     R.options = list(width = 80)
    )
    ```
    ````
