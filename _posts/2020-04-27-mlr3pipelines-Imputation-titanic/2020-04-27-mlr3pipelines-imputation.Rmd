@@ -16,6 +16,10 @@ output:
     css: ../../custom.css
 ---
 
+This is the second post of the titanic use case series.
+In this section we will focus on the usage of `mlr3pipelines`.
+Again, we need to take some prepatory steps: 
+
 ```{r, include = FALSE, warning = FALSE, message = FALSE}
 # Just some preparation
 knitr::opts_chunk$set(
@@ -24,9 +28,19 @@ knitr::opts_chunk$set(
 )
 ```
 
+For the case that you are only tuning in for the second part, we need to load some packages: 
+The data is part of the `mlr3data` package.
 
-This is the second post of the titanic use case series.
-In this section we will focus on the usage of `mlr3pipelines`.
+```{r}
+library("mlr3")
+library("mlr3learners")
+library("mlr3pipelines")
+library("mlr3data")
+library("mlr3misc")
+library("ggplot2")
+library("mlr3viz")
+data("titanic")
+```
 
 ## Imputation
 
@@ -140,7 +154,7 @@ Additionally, we will make use of the `character` columns.
 Hence, we will re-select them:
 
 ```{r}
-task$col_roles$feature = c(task$feature_names, c("cabin", "name", "ticket"))
+task$col_roles$feature <- c(task$feature_names, c("cabin", "name", "ticket"))
 ```
 
 ```{r}
@@ -159,7 +173,7 @@ po_ftextract <- po("mutate", param_vals = list(
 Quickly checking what happens:
 
 ```{r}
-task_eng = po_ftextract$clone()$train(list(task))[[1]]
+task_eng <- po_ftextract$clone()$train(list(task))[[1]]
 task_eng$data()
 ```
 
@@ -214,54 +228,37 @@ agg_ranger <- res$aggregate(msr("classif.acc"))
 agg_ranger
 ```
 
-
 We have improved even more!
 
-## ROC and Benchmarking 
+## Benchmarking 
 
 ```{r}
-learner = lrn("classif.rpart", predict_type = "prob")
-pred = learner$train(task)$predict(task)
-C = pred$confusion
-print(C)
-
-# TPR vs FPR / Sensitivity vs (1 - Specificity)
-ggplot2::autoplot(pred, type = "roc")
+lrn_list <- list(
+  lrn("classif.rpart", predict_type = "prob"),
+  lrn("classif.ranger", predict_type = "prob")
+)
+bm_design <- benchmark_grid(task = task_imputed, resamplings = rsmp("cv", folds = 10), learners = lrn_list)
+bmr <- benchmark(bm_design, store_models = TRUE)
+print(bmr)
 ```
 
-Moreover, we can compare precision versus recall: 
+```{r}
+autoplot(bmr) + theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+Further we can compare sensitivity and specificity: 
+
+```{r}
+autoplot(bmr$clone()$filter(task_id = "titanic"), type = "roc")
+```
+
+Anotehr feature is comparing the precision-recall: 
 
 ```{r}
 # Precision vs Recall
-ggplot2::autoplot(pred, type = "prc")
+ggplot2::autoplot(bmr, type = "prc")
 ```
 
-```{r}
-lrn_list = list(
-  lrn("classif.log_reg", predict_type = "prob"),
-  lrn("classif.ranger", predict_type = "prob")
-)
-bm_design = benchmark_grid(task = task, resamplings = rsmp("cv", folds = 10), learners = lrn_list)
-bmr = benchmark(bm_design)
-```
-
-```{r}
-learners = list(learner1, learner2, lrn("classif.randomForest"))
-bm_grid = benchmark_grid(task, learners, cv10)
-bm = benchmark(bm_grid)
-print(bm)
-print(bm$aggregate(measures = msrs(c("classif.acc", "classif.ce"))))
-```
-
-
-```{r}
-#We can compare different measures.
-#We compare misclassification rate and AUC.
-
-msr_list = list(msr("classif.ranger"), msr("classif.acc"))
-performances = bmr$aggregate(msr_list)
-performances[, c("learner", "classif.ranger", "classif.acc")]
-```
 
 ## Future
 
@@ -271,4 +268,3 @@ But now you are left to yourself! There are many [kaggle kernels](https://www.ka
 available. This can be a great starter to find even better models.
 
 distill::create_blog()
-
