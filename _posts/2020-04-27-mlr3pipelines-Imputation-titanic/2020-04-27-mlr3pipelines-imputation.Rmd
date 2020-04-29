@@ -18,6 +18,29 @@ output:
 
 This is the second post of the titanic use case series.
 In this section we will focus on the usage of `mlr3pipelines`.
+Again, we need to take some prepatory steps: 
+
+```{r, include = FALSE, warning = FALSE, message = FALSE}
+# Just some preparation
+knitr::opts_chunk$set(
+  echo = TRUE,
+  R.options = list(width = 80)
+)
+```
+
+For the case that you are only tuning in for the second part, we need to load some packages: 
+The data is part of the `mlr3data` package.
+
+```{r}
+library("mlr3")
+library("mlr3learners")
+library("mlr3pipelines")
+library("mlr3data")
+library("mlr3misc")
+library("ggplot2")
+library("mlr3viz")
+data("titanic")
+```
 
 ## Imputation
 
@@ -117,8 +140,8 @@ glrn <- GraphLearner$new(gr$clone() %>>% po(learner))
 
 ```{r}
 res <- resample(task, glrn, rdesc, store_models = TRUE)
-agg <- res$aggregate(msr("classif.acc"))
-agg
+agg2 <- res$aggregate(msr("classif.acc"))
+agg2
 ```
 
 So our model has not improved heavily, currently it has an accuracy of  `r round(agg, 3)`.
@@ -205,31 +228,37 @@ agg_ranger <- res$aggregate(msr("classif.acc"))
 agg_ranger
 ```
 
-
-```{r}
-
-```
-
 We have improved even more!
 
-## ROC and Benchmarking 
+## Benchmarking 
 
 ```{r}
-learner = lrn("classif.rpart", predict_type = "prob")
-pred = learner$train(task)$predict(task)
-C = pred$confusion
-print(C)
-
-# TPR vs FPR / Sensitivity vs (1 - Specificity)
-ggplot2::autoplot(pred, type = "roc")
+lrn_list <- list(
+  lrn("classif.rpart", predict_type = "prob"),
+  lrn("classif.ranger", predict_type = "prob")
+)
+bm_design <- benchmark_grid(task = task_imputed, resamplings = rsmp("cv", folds = 10), learners = lrn_list)
+bmr <- benchmark(bm_design, store_models = TRUE)
+print(bmr)
 ```
 
-Moreover, we can compare precision versus recall: 
+```{r}
+autoplot(bmr) + theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+Further we can compare sensitivity and specificity: 
+
+```{r}
+autoplot(bmr$clone()$filter(task_id = "titanic"), type = "roc")
+```
+
+Anotehr feature is comparing the precision-recall: 
 
 ```{r}
 # Precision vs Recall
-ggplot2::autoplot(pred, type = "prc")
+ggplot2::autoplot(bmr, type = "prc")
 ```
+
 
 ## Future
 
@@ -237,4 +266,3 @@ In this case we have examined a number of different features, but there are many
 We could extract even more information from the different features and see what happens.
 But now you are left to yourself! There are many [kaggle kernels](https://www.kaggle.com/c/titanic) that treat the **Titanic Dataset**
 available. This can be a great starter to find even better models.
-
