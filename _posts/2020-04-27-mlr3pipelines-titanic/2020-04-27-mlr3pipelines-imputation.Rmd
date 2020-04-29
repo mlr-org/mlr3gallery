@@ -16,6 +16,15 @@ output:
     css: ../../custom.css
 ---
 
+```{r, include = FALSE, warning = FALSE, message = FALSE}
+# Just some preparation
+knitr::opts_chunk$set(
+  echo = TRUE,
+  R.options = list(width = 80)
+)
+```
+
+
 This is the second post of the titanic use case series.
 In this section we will focus on the usage of `mlr3pipelines`.
 
@@ -117,8 +126,8 @@ glrn <- GraphLearner$new(gr$clone() %>>% po(learner))
 
 ```{r}
 res <- resample(task, glrn, rdesc, store_models = TRUE)
-agg <- res$aggregate(msr("classif.acc"))
-agg
+agg2 <- res$aggregate(msr("classif.acc"))
+agg2
 ```
 
 So our model has not improved heavily, currently it has an accuracy of  `r round(agg, 3)`.
@@ -131,7 +140,7 @@ Additionally, we will make use of the `character` columns.
 Hence, we will re-select them:
 
 ```{r}
-task$col_roles$feature <- c(task$feature_names, c("cabin", "name", "ticket"))
+task$col_roles$feature = c(task$feature_names, c("cabin", "name", "ticket"))
 ```
 
 ```{r}
@@ -150,7 +159,7 @@ po_ftextract <- po("mutate", param_vals = list(
 Quickly checking what happens:
 
 ```{r}
-task_eng <- po_ftextract$clone()$train(list(task))[[1]]
+task_eng = po_ftextract$clone()$train(list(task))[[1]]
 task_eng$data()
 ```
 
@@ -206,10 +215,6 @@ agg_ranger
 ```
 
 
-```{r}
-
-```
-
 We have improved even more!
 
 ## ROC and Benchmarking 
@@ -231,10 +236,39 @@ Moreover, we can compare precision versus recall:
 ggplot2::autoplot(pred, type = "prc")
 ```
 
+```{r}
+lrn_list = list(
+  lrn("classif.log_reg", predict_type = "prob"),
+  lrn("classif.ranger", predict_type = "prob")
+)
+bm_design = benchmark_grid(task = task, resamplings = rsmp("cv", folds = 10), learners = lrn_list)
+bmr = benchmark(bm_design)
+```
+
+```{r}
+learners = list(learner1, learner2, lrn("classif.randomForest"))
+bm_grid = benchmark_grid(task, learners, cv10)
+bm = benchmark(bm_grid)
+print(bm)
+print(bm$aggregate(measures = msrs(c("classif.acc", "classif.ce"))))
+```
+
+
+```{r}
+#We can compare different measures.
+#We compare misclassification rate and AUC.
+
+msr_list = list(msr("classif.ranger"), msr("classif.acc"))
+performances = bmr$aggregate(msr_list)
+performances[, c("learner", "classif.ranger", "classif.acc")]
+```
+
 ## Future
 
 In this case we have examined a number of different features, but there are many more things to explore!
 We could extract even more information from the different features and see what happens.
 But now you are left to yourself! There are many [kaggle kernels](https://www.kaggle.com/c/titanic) that treat the **Titanic Dataset**
 available. This can be a great starter to find even better models.
+
+distill::create_blog()
 
