@@ -51,7 +51,7 @@
 <!--/radix_placeholder_rmarkdown_metadata-->
   
   <script type="text/json" id="radix-resource-manifest">
-  {"type":"character","attributes":{},"value":["2020-04-23-pipelines-selectors-branches_files/figure-html5/unnamed-chunk-10-1.png","2020-04-23-pipelines-selectors-branches_files/figure-html5/unnamed-chunk-11-1.png","2020-04-23-pipelines-selectors-branches_files/figure-html5/unnamed-chunk-13-1.png","2020-04-23-pipelines-selectors-branches_files/figure-html5/unnamed-chunk-14-1.png","2020-04-23-pipelines-selectors-branches_files/figure-html5/unnamed-chunk-7-1.png","2020-04-23-pipelines-selectors-branches_files/figure-html5/unnamed-chunk-9-1.png"]}
+  {"type":"character","attributes":{},"value":["2020-04-23-pipelines-selectors-branches_files/bowser-1.9.3/bowser.min.js","2020-04-23-pipelines-selectors-branches_files/distill-2.2.21/template.v2.js","2020-04-23-pipelines-selectors-branches_files/figure-html5/unnamed-chunk-10-1.png","2020-04-23-pipelines-selectors-branches_files/figure-html5/unnamed-chunk-11-1.png","2020-04-23-pipelines-selectors-branches_files/figure-html5/unnamed-chunk-13-1.png","2020-04-23-pipelines-selectors-branches_files/figure-html5/unnamed-chunk-14-1.png","2020-04-23-pipelines-selectors-branches_files/figure-html5/unnamed-chunk-7-1.png","2020-04-23-pipelines-selectors-branches_files/figure-html5/unnamed-chunk-9-1.png","2020-04-23-pipelines-selectors-branches_files/header-attrs-2.1/header-attrs.js","2020-04-23-pipelines-selectors-branches_files/jquery-1.11.3/jquery.min.js","2020-04-23-pipelines-selectors-branches_files/webcomponents-2.0.0/webcomponents.js"]}
   </script>
   <!--radix_placeholder_navigation_in_header-->
 
@@ -1334,10 +1334,17 @@ document.addEventListener('DOMContentLoaded', function() {
 </ol>
 <h2 id="prerequisites">Prerequisites</h2>
 <div class="layout-chunk" data-layout="l-body">
-
+<pre class="r"><code>
+library(mlr3)
+library(mlr3pipelines)
+library(mlr3tuning)
+library(paradox)</code></pre>
 </div>
 <p>The <a href="https://mlr3.mlr-org.com/reference/mlr_tasks_pima.html">Pima Indian Diabetes Classification Task</a> task will be used.</p>
 <div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+pima_tsk = tsk(&quot;pima&quot;)
+pima_tsk$data()</code></pre>
 <pre><code>
      diabetes age glucose insulin mass pedigree pregnant pressure triceps
   1:      pos  50     148      NA 33.6    0.627        6       72      35
@@ -1351,6 +1358,8 @@ document.addEventListener('DOMContentLoaded', function() {
 766:      neg  30     121     112 26.2    0.245        5       72      23
 767:      pos  47     126      NA 30.1    0.349        1       60      NA
 768:      neg  23      93      NA 30.4    0.315        1       70      31</code></pre>
+<pre class="r"><code>
+skimr::skim(pima_tsk$data())</code></pre>
 <table>
 <caption><span id="tab:unnamed-chunk-3">Table 1: </span>Data summary</caption>
 <tbody>
@@ -1543,6 +1552,8 @@ document.addEventListener('DOMContentLoaded', function() {
 <h2 id="selection-of-features-for-preprocessing-steps">Selection of features for preprocessing steps</h2>
 <p>Several features of the <code>pima</code> task have missing values:</p>
 <div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+pima_tsk$missings()</code></pre>
 <pre><code>
 diabetes      age  glucose  insulin     mass pedigree pregnant pressure  triceps 
        0        0        5      374       11        0        0       35      227 </code></pre>
@@ -1556,26 +1567,46 @@ diabetes      age  glucose  insulin     mass pedigree pregnant pressure  triceps
 <h3 id="consider-all-features-and-apply-the-preprocessing-step-only-to-certain-features">1. Consider all features and apply the preprocessing step only to certain features</h3>
 <p>Using the <code>affect_columns</code> argument of a <code>PipeOp</code> to define the variables on which a <code>PipeOp</code> will operate with an appropriate <a href="https://mlr3pipelines.mlr-org.com/reference/Selector.html"><code>selector</code></a> function:</p>
 <div class="layout-chunk" data-layout="l-body">
-
+<pre class="r"><code>
+# imputes values based on histogram
+hist_imp = po(&quot;imputehist&quot;, param_vals = list(affect_columns = selector_name(c(&quot;glucose&quot;, &quot;mass&quot;, &quot;pressure&quot;))))
+# imputes values using the median
+median_imp = po(&quot;imputemedian&quot;, param_vals = list(affect_columns = selector_name(c(&quot;insulin&quot;, &quot;triceps&quot;))))
+# adds an indicator column for each feature with missing values
+miss_ind = po(&quot;missind&quot;)</code></pre>
 </div>
 <p>When using <code>PipeOps</code> constructed in this way, they will perform the specified preprocessing step on the appropriate columns and pass the result to the subsequent steps:</p>
 <div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+# no missings in &quot;glucose&quot;, &quot;mass&quot; and &quot;pressure&quot;
+hist_imp$train(list(pima_tsk))[[1]]$missings()</code></pre>
 <pre><code>
 diabetes      age  insulin pedigree pregnant  triceps  glucose     mass pressure 
        0        0      374        0        0      227        0        0        0 </code></pre>
+<pre class="r"><code>
+# no missings in &quot;insulin&quot; and &quot;triceps&quot;
+median_imp$train(list(pima_tsk))[[1]]$missings()</code></pre>
 <pre><code>
 diabetes      age  glucose     mass pedigree pregnant pressure  insulin  triceps 
        0        0        5       11        0        0       35        0        0 </code></pre>
 </div>
 <p>We construct a pipeline that combines <code>hist_imp</code> and <code>median_imp</code>. Here, <code>hist_imp</code> will impute the features “glucose”, “mass” and “pressure”, and <code>median_imp</code> will impute “insulin” and “triceps”. In each preprocessing step, the final result is passed to next step. In the end, we obtain a data set without missing values:</p>
 <div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+# combine the two impuation methods
+impute_graph = hist_imp %&gt;&gt;% median_imp
+impute_graph$plot(html = FALSE)</code></pre>
 <p><img src="2020-04-23-pipelines-selectors-branches_files/figure-html5/unnamed-chunk-7-1.png" width="576" /></p>
+<pre class="r"><code>
+impute_graph$train(pima_tsk)[[1]]$missings()</code></pre>
 <pre><code>
 diabetes      age pedigree pregnant  glucose     mass pressure  insulin  triceps 
        0        0        0        0        0        0        0        0        0 </code></pre>
 </div>
 <p>The <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_missind.html"><code>missind</code></a> operator replaces features with missing values with a missing value indicator:</p>
 <div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+miss_ind$train(list(pima_tsk))[[1]]$data()</code></pre>
 <pre><code>
      diabetes missing_glucose missing_insulin missing_mass missing_pressure missing_triceps
   1:      pos         present         missing      present          present         present
@@ -1592,7 +1623,14 @@ diabetes      age pedigree pregnant  glucose     mass pressure  insulin  triceps
 </div>
 <p>Obviously, this step can not be apply to the already imputed data as there are no missing values. If we want to combine the previous two imputation steps with a third step that adds missing value indicators, we would need to <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_copy.html"><code>copy</code></a> the data two times and supply the first copy to <code>impute_graph</code> and the second copy to <code>miss_ind</code> using <a href="https://mlr3pipelines.mlr-org.com/reference/gunion.html"><code>gunion</code></a>. Finally, the two outputs can be combined with <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_featureunion.html"><code>featureunion</code></a>:</p>
 <div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+impute_missind = po(&quot;copy&quot;, 2) %&gt;&gt;%
+  gunion(list(impute_graph, miss_ind)) %&gt;&gt;%
+  po(&quot;featureunion&quot;)
+impute_missind$plot(html = FALSE)</code></pre>
 <p><img src="2020-04-23-pipelines-selectors-branches_files/figure-html5/unnamed-chunk-9-1.png" width="576" /></p>
+<pre class="r"><code>
+impute_missind$train(pima_tsk)[[1]]$data()</code></pre>
 <pre><code>
      diabetes age pedigree pregnant glucose mass pressure insulin triceps missing_glucose
   1:      pos  50    0.627        6     148 33.6       72     125      35         present
@@ -1622,7 +1660,16 @@ diabetes      age pedigree pregnant  glucose     mass pressure  insulin  triceps
 <h3 id="select-the-features-for-each-preprocessing-step-and-apply-the-preprocessing-steps-to-this-subset">2. Select the features for each preprocessing step and apply the preprocessing steps to this subset</h3>
 <p>We can use the <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_select.html"><code>select</code></a> <code>PipeOp</code> to select the appropriate features and then apply the desired impute <code>PipeOp</code> on them:</p>
 <div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+hist_imp2 = po(&quot;select&quot;,
+  selector = selector_name(c(&quot;glucose&quot;, &quot;mass&quot;, &quot;pressure&quot;)),
+  id = &quot;slct1&quot;) %&gt;&gt;% # unique id so we can combine it in a pipeline with other select PipeOps
+  po(&quot;imputehist&quot;)
+
+hist_imp2$plot(html = FALSE)  </code></pre>
 <p><img src="2020-04-23-pipelines-selectors-branches_files/figure-html5/unnamed-chunk-10-1.png" width="576" /></p>
+<pre class="r"><code>
+hist_imp2$train(pima_tsk)[[1]]$data()</code></pre>
 <pre><code>
      diabetes glucose mass pressure
   1:      pos     148 33.6       72
@@ -1636,6 +1683,11 @@ diabetes      age pedigree pregnant  glucose     mass pressure  insulin  triceps
 766:      neg     121 26.2       72
 767:      pos     126 30.1       60
 768:      neg      93 30.4       70</code></pre>
+<pre class="r"><code>
+median_imp2 = po(&quot;select&quot;, selector = selector_name(c(&quot;insulin&quot;, &quot;triceps&quot;)), id = &quot;slct2&quot;) %&gt;&gt;%
+  po(&quot;imputemedian&quot;)
+
+median_imp2$train(pima_tsk)[[1]]$data()</code></pre>
 <pre><code>
      diabetes insulin triceps
   1:      pos     125      35
@@ -1652,7 +1704,20 @@ diabetes      age pedigree pregnant  glucose     mass pressure  insulin  triceps
 </div>
 <p>To reproduce the result of the fist example (1.), we need to copy the data four times and apply <code>hist_imp2</code>, <code>median_imp2</code> and <code>miss_ind</code> on each of the three copies. The fourth copy is required to select the features without missing values and to append it to the final result. We can do this as follows:</p>
 <div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+other_features = pima_tsk$feature_names[pima_tsk$missings()[-1] == 0]
+
+impute_missind2 = po(&quot;copy&quot;, 4) %&gt;&gt;%
+  gunion(list(hist_imp2,
+    median_imp2,
+    miss_ind,
+    po(&quot;select&quot;, selector = selector_name(other_features), id = &quot;slct3&quot;))) %&gt;&gt;%
+  po(&quot;featureunion&quot;)
+
+impute_missind2$plot(html = FALSE)</code></pre>
 <p><img src="2020-04-23-pipelines-selectors-branches_files/figure-html5/unnamed-chunk-11-1.png" width="576" /></p>
+<pre class="r"><code>
+impute_missind2$train(pima_tsk)[[1]]$data()</code></pre>
 <pre><code>
      diabetes glucose mass pressure insulin triceps missing_glucose missing_insulin missing_mass
   1:      pos     148 33.6       72     125      35         present         missing      present
@@ -1681,6 +1746,14 @@ diabetes      age pedigree pregnant  glucose     mass pressure  insulin  triceps
 </div>
 <p>Note that when there is one input channel, it is automatically copied as many times as needed for the downstream <code>PipeOps</code>. In other words, the code above works also without <code>po("copy", 4)</code>:</p>
 <div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+impute_missind3 = gunion(list(hist_imp2,
+  median_imp2,
+  miss_ind,
+  po(&quot;select&quot;, selector = selector_name(other_features), id = &quot;slct3&quot;))) %&gt;&gt;%
+  po(&quot;featureunion&quot;)
+
+impute_missind3$train(pima_tsk)[[1]]$data()</code></pre>
 <pre><code>
      diabetes glucose mass pressure insulin triceps missing_glucose missing_insulin missing_mass
   1:      pos     148 33.6       72     125      35         present         missing      present
@@ -1711,15 +1784,34 @@ diabetes      age pedigree pregnant  glucose     mass pressure  insulin  triceps
 <h2 id="branching">Branching</h2>
 <p>We can not know if the combination of a learner with this preprocessing graph will benefit from the imputation steps and the added missing value indicators. Maybe it would have been better to just use <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_imputemedian.html"><code>imputemedian</code></a> on all the variables. We could investigate this assumption by adding an alternative path to the graph with the mentioned <code>imputemedian</code>. This is possible using the <a href="https://mlr3pipelines.mlr-org.com/reference/branch.html">“branch”</a> <code>PipeOp</code>:</p>
 <div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+median_imp3 = po(&quot;imputemedian&quot;, id = &quot;simple_median&quot;) # add the id so it does not clash with `median_imp` 
+
+branches = c(&quot;impute_missind&quot;, &quot;simple_median&quot;) # names of the branches
+
+graph_branch = po(&quot;branch&quot;, branches) %&gt;&gt;%
+  gunion(list(impute_missind, median_imp3)) %&gt;&gt;%
+  po(&quot;unbranch&quot;)
+
+graph_branch$plot(html = FALSE)</code></pre>
 <p><img src="2020-04-23-pipelines-selectors-branches_files/figure-html5/unnamed-chunk-13-1.png" width="672" /></p>
 </div>
 <h2 id="tuning-the-pipeline">Tuning the pipeline</h2>
 <p>To finalize the graph, we combine it with a rpart learner:</p>
 <div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+rpart_lrn = lrn(&quot;classif.rpart&quot;)
+
+grph = graph_branch %&gt;&gt;%
+  rpart_lrn
+
+grph$plot(html = FALSE)</code></pre>
 <p><img src="2020-04-23-pipelines-selectors-branches_files/figure-html5/unnamed-chunk-14-1.png" width="672" /></p>
 </div>
 <p>To define the parameters to be tuned, we first check the available ones in the graph:</p>
 <div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+grph$param_set</code></pre>
 <pre><code>
 ParamSet: 
                               id    class lower upper                       levels     default
@@ -1759,76 +1851,104 @@ ParamSet:
 </div>
 <p>We decide to jointly tune the “branch.selection”, “classif.rpart.cp” and “classif.rpart.minbucket” hyperparameters:</p>
 <div class="layout-chunk" data-layout="l-body">
-
+<pre class="r"><code>
+ps = ParamSet$new(
+  list(
+    ParamFct$new(&quot;branch.selection&quot;, levels = c(&quot;impute_missind&quot;, &quot;simple_median&quot;)),
+    ParamDbl$new(&quot;classif.rpart.cp&quot;, 0.001, 0.1),
+    ParamInt$new(&quot;classif.rpart.minbucket&quot;, 1, 10)
+  ))</code></pre>
 </div>
 <p>In order to tune the graph, it needs to be converted to a learner:</p>
 <div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+grph_lrn =  GraphLearner$new(grph)
+
+cv3 = rsmp(&quot;cv&quot;, folds = 3)
+
+set.seed(123) # for reproducibility of the folds
+cv3$instantiate(pima_tsk) # to generate folds for cross validation
+
+instance = TuningInstance$new(
+  task = pima_tsk,
+  learner = grph_lrn,
+  resampling = rsmp(&quot;cv&quot;, folds = 3),
+  measures = msr(&quot;classif.ce&quot;),
+  param_set = ps,
+  terminator = term(&quot;evals&quot;, n_evals = 5)
+)
+
+tuner = TunerRandomSearch$new()
+set.seed(321)
+tuner$tune(instance)</code></pre>
 <pre><code>
-INFO  [17:03:39.911] Starting to tune 3 parameters with &#39;&lt;TunerRandomSearch&gt;&#39; and &#39;&lt;TerminatorEvals&gt;&#39; 
-INFO  [17:03:39.939] Terminator settings: n_evals=5 
-INFO  [17:03:39.974] Evaluating 1 configurations 
-INFO  [17:03:39.976]  branch.selection classif.rpart.cp classif.rpart.minbucket 
-INFO  [17:03:39.976]     simple_median       0.09379127                       3 
-INFO  [17:03:40.301] Benchmark with 3 resampling iterations 
-INFO  [17:03:40.422] Applying learner &#39;branch.copy.simple_median.imputehist.missind.imputemedian.featureunion.unbranch.classif.rpart&#39; on task &#39;pima&#39; (iter 2/3) 
-INFO  [17:03:40.648] Applying learner &#39;branch.copy.simple_median.imputehist.missind.imputemedian.featureunion.unbranch.classif.rpart&#39; on task &#39;pima&#39; (iter 3/3) 
-INFO  [17:03:40.865] Applying learner &#39;branch.copy.simple_median.imputehist.missind.imputemedian.featureunion.unbranch.classif.rpart&#39; on task &#39;pima&#39; (iter 1/3) 
-INFO  [17:03:41.071] Finished benchmark 
-INFO  [17:03:41.082] Result of batch 1: 
-INFO  [17:03:41.086]  branch.selection classif.rpart.cp classif.rpart.minbucket classif.ce 
-INFO  [17:03:41.086]     simple_median       0.09379127                       3  0.2617188 
-INFO  [17:03:41.087] 1 configurations evaluated 
-INFO  [17:03:41.164] Evaluating 1 configurations 
-INFO  [17:03:41.165]  branch.selection classif.rpart.cp classif.rpart.minbucket 
-INFO  [17:03:41.165]    impute_missind       0.04578568                       3 
-INFO  [17:03:41.442] Benchmark with 3 resampling iterations 
-INFO  [17:03:41.449] Applying learner &#39;branch.copy.simple_median.imputehist.missind.imputemedian.featureunion.unbranch.classif.rpart&#39; on task &#39;pima&#39; (iter 1/3) 
-INFO  [17:03:41.782] Applying learner &#39;branch.copy.simple_median.imputehist.missind.imputemedian.featureunion.unbranch.classif.rpart&#39; on task &#39;pima&#39; (iter 2/3) 
-INFO  [17:03:42.173] Applying learner &#39;branch.copy.simple_median.imputehist.missind.imputemedian.featureunion.unbranch.classif.rpart&#39; on task &#39;pima&#39; (iter 3/3) 
-INFO  [17:03:42.511] Finished benchmark 
-INFO  [17:03:42.518] Result of batch 2: 
-INFO  [17:03:42.520]  branch.selection classif.rpart.cp classif.rpart.minbucket classif.ce 
-INFO  [17:03:42.520]    impute_missind       0.04578568                       3  0.2552083 
-INFO  [17:03:42.522] 2 configurations evaluated 
-INFO  [17:03:42.551] Evaluating 1 configurations 
-INFO  [17:03:42.554]  branch.selection classif.rpart.cp classif.rpart.minbucket 
-INFO  [17:03:42.554]     simple_median       0.03692127                       8 
-INFO  [17:03:42.837] Benchmark with 3 resampling iterations 
-INFO  [17:03:42.844] Applying learner &#39;branch.copy.simple_median.imputehist.missind.imputemedian.featureunion.unbranch.classif.rpart&#39; on task &#39;pima&#39; (iter 3/3) 
-INFO  [17:03:43.053] Applying learner &#39;branch.copy.simple_median.imputehist.missind.imputemedian.featureunion.unbranch.classif.rpart&#39; on task &#39;pima&#39; (iter 2/3) 
-INFO  [17:03:43.267] Applying learner &#39;branch.copy.simple_median.imputehist.missind.imputemedian.featureunion.unbranch.classif.rpart&#39; on task &#39;pima&#39; (iter 1/3) 
-INFO  [17:03:43.480] Finished benchmark 
-INFO  [17:03:43.490] Result of batch 3: 
-INFO  [17:03:43.493]  branch.selection classif.rpart.cp classif.rpart.minbucket classif.ce 
-INFO  [17:03:43.493]     simple_median       0.03692127                       8  0.2513021 
-INFO  [17:03:43.494] 3 configurations evaluated 
-INFO  [17:03:43.515] Evaluating 1 configurations 
-INFO  [17:03:43.517]  branch.selection classif.rpart.cp classif.rpart.minbucket 
-INFO  [17:03:43.517]    impute_missind       0.06364106                       5 
-INFO  [17:03:43.798] Benchmark with 3 resampling iterations 
-INFO  [17:03:43.805] Applying learner &#39;branch.copy.simple_median.imputehist.missind.imputemedian.featureunion.unbranch.classif.rpart&#39; on task &#39;pima&#39; (iter 3/3) 
-INFO  [17:03:44.165] Applying learner &#39;branch.copy.simple_median.imputehist.missind.imputemedian.featureunion.unbranch.classif.rpart&#39; on task &#39;pima&#39; (iter 1/3) 
-INFO  [17:03:44.525] Applying learner &#39;branch.copy.simple_median.imputehist.missind.imputemedian.featureunion.unbranch.classif.rpart&#39; on task &#39;pima&#39; (iter 2/3) 
-INFO  [17:03:44.884] Finished benchmark 
-INFO  [17:03:44.892] Result of batch 4: 
-INFO  [17:03:44.894]  branch.selection classif.rpart.cp classif.rpart.minbucket classif.ce 
-INFO  [17:03:44.894]    impute_missind       0.06364106                       5   0.265625 
-INFO  [17:03:44.895] 4 configurations evaluated 
-INFO  [17:03:44.919] Evaluating 1 configurations 
-INFO  [17:03:44.921]  branch.selection classif.rpart.cp classif.rpart.minbucket 
-INFO  [17:03:44.921]     simple_median       0.09899797                      10 
-INFO  [17:03:45.221] Benchmark with 3 resampling iterations 
-INFO  [17:03:45.228] Applying learner &#39;branch.copy.simple_median.imputehist.missind.imputemedian.featureunion.unbranch.classif.rpart&#39; on task &#39;pima&#39; (iter 2/3) 
-INFO  [17:03:45.448] Applying learner &#39;branch.copy.simple_median.imputehist.missind.imputemedian.featureunion.unbranch.classif.rpart&#39; on task &#39;pima&#39; (iter 3/3) 
-INFO  [17:03:45.674] Applying learner &#39;branch.copy.simple_median.imputehist.missind.imputemedian.featureunion.unbranch.classif.rpart&#39; on task &#39;pima&#39; (iter 1/3) 
-INFO  [17:03:45.900] Finished benchmark 
-INFO  [17:03:45.907] Result of batch 5: 
-INFO  [17:03:45.910]  branch.selection classif.rpart.cp classif.rpart.minbucket classif.ce 
-INFO  [17:03:45.910]     simple_median       0.09899797                      10  0.2617188 
-INFO  [17:03:45.911] 5 configurations evaluated 
-INFO  [17:03:45.936] Finished tuning after 5 evals 
-INFO  [17:03:45.978] Tuned x: branch.selection=simple_median, classif.rpart.cp=0.03692, classif.rpart.minbucket=8 
-INFO  [17:03:45.979] Tuned y: classif.ce=0.2513 </code></pre>
+INFO  [19:24:10.377] Starting to tune 3 parameters with &#39;&lt;TunerRandomSearch&gt;&#39; and &#39;&lt;TerminatorEvals&gt;&#39; 
+INFO  [19:24:10.399] Terminator settings: n_evals=5 
+INFO  [19:24:10.461] Evaluating 1 configurations 
+INFO  [19:24:10.462]  branch.selection classif.rpart.cp classif.rpart.minbucket 
+INFO  [19:24:10.462]     simple_median       0.09379127                       3 
+INFO  [19:24:10.760] Benchmark with 3 resampling iterations 
+INFO  [19:24:10.876] Applying learner &#39;branch.copy.simple_median.imputehist.missind.imputemedian.featureunion.unbranch.classif.rpart&#39; on task &#39;pima&#39; (iter 2/3) 
+INFO  [19:24:11.101] Applying learner &#39;branch.copy.simple_median.imputehist.missind.imputemedian.featureunion.unbranch.classif.rpart&#39; on task &#39;pima&#39; (iter 3/3) 
+INFO  [19:24:11.337] Applying learner &#39;branch.copy.simple_median.imputehist.missind.imputemedian.featureunion.unbranch.classif.rpart&#39; on task &#39;pima&#39; (iter 1/3) 
+INFO  [19:24:11.556] Finished benchmark 
+INFO  [19:24:11.568] Result of batch 1: 
+INFO  [19:24:11.570]  branch.selection classif.rpart.cp classif.rpart.minbucket classif.ce 
+INFO  [19:24:11.570]     simple_median       0.09379127                       3  0.2617188 
+INFO  [19:24:11.571] 1 configurations evaluated 
+INFO  [19:24:11.655] Evaluating 1 configurations 
+INFO  [19:24:11.657]  branch.selection classif.rpart.cp classif.rpart.minbucket 
+INFO  [19:24:11.657]    impute_missind       0.04578568                       3 
+INFO  [19:24:11.983] Benchmark with 3 resampling iterations 
+INFO  [19:24:11.993] Applying learner &#39;branch.copy.simple_median.imputehist.missind.imputemedian.featureunion.unbranch.classif.rpart&#39; on task &#39;pima&#39; (iter 1/3) 
+INFO  [19:24:12.405] Applying learner &#39;branch.copy.simple_median.imputehist.missind.imputemedian.featureunion.unbranch.classif.rpart&#39; on task &#39;pima&#39; (iter 2/3) 
+INFO  [19:24:12.779] Applying learner &#39;branch.copy.simple_median.imputehist.missind.imputemedian.featureunion.unbranch.classif.rpart&#39; on task &#39;pima&#39; (iter 3/3) 
+INFO  [19:24:13.169] Finished benchmark 
+INFO  [19:24:13.177] Result of batch 2: 
+INFO  [19:24:13.178]  branch.selection classif.rpart.cp classif.rpart.minbucket classif.ce 
+INFO  [19:24:13.178]    impute_missind       0.04578568                       3  0.2552083 
+INFO  [19:24:13.179] 2 configurations evaluated 
+INFO  [19:24:13.252] Evaluating 1 configurations 
+INFO  [19:24:13.254]  branch.selection classif.rpart.cp classif.rpart.minbucket 
+INFO  [19:24:13.254]     simple_median       0.03692127                       8 
+INFO  [19:24:13.582] Benchmark with 3 resampling iterations 
+INFO  [19:24:13.590] Applying learner &#39;branch.copy.simple_median.imputehist.missind.imputemedian.featureunion.unbranch.classif.rpart&#39; on task &#39;pima&#39; (iter 3/3) 
+INFO  [19:24:13.813] Applying learner &#39;branch.copy.simple_median.imputehist.missind.imputemedian.featureunion.unbranch.classif.rpart&#39; on task &#39;pima&#39; (iter 2/3) 
+INFO  [19:24:14.036] Applying learner &#39;branch.copy.simple_median.imputehist.missind.imputemedian.featureunion.unbranch.classif.rpart&#39; on task &#39;pima&#39; (iter 1/3) 
+INFO  [19:24:14.429] Finished benchmark 
+INFO  [19:24:14.437] Result of batch 3: 
+INFO  [19:24:14.440]  branch.selection classif.rpart.cp classif.rpart.minbucket classif.ce 
+INFO  [19:24:14.440]     simple_median       0.03692127                       8  0.2513021 
+INFO  [19:24:14.442] 3 configurations evaluated 
+INFO  [19:24:14.511] Evaluating 1 configurations 
+INFO  [19:24:14.513]  branch.selection classif.rpart.cp classif.rpart.minbucket 
+INFO  [19:24:14.513]    impute_missind       0.06364106                       5 
+INFO  [19:24:14.909] Benchmark with 3 resampling iterations 
+INFO  [19:24:14.924] Applying learner &#39;branch.copy.simple_median.imputehist.missind.imputemedian.featureunion.unbranch.classif.rpart&#39; on task &#39;pima&#39; (iter 3/3) 
+INFO  [19:24:15.321] Applying learner &#39;branch.copy.simple_median.imputehist.missind.imputemedian.featureunion.unbranch.classif.rpart&#39; on task &#39;pima&#39; (iter 1/3) 
+INFO  [19:24:15.773] Applying learner &#39;branch.copy.simple_median.imputehist.missind.imputemedian.featureunion.unbranch.classif.rpart&#39; on task &#39;pima&#39; (iter 2/3) 
+INFO  [19:24:16.182] Finished benchmark 
+INFO  [19:24:16.197] Result of batch 4: 
+INFO  [19:24:16.201]  branch.selection classif.rpart.cp classif.rpart.minbucket classif.ce 
+INFO  [19:24:16.201]    impute_missind       0.06364106                       5   0.265625 
+INFO  [19:24:16.203] 4 configurations evaluated 
+INFO  [19:24:16.281] Evaluating 1 configurations 
+INFO  [19:24:16.282]  branch.selection classif.rpart.cp classif.rpart.minbucket 
+INFO  [19:24:16.282]     simple_median       0.09899797                      10 
+INFO  [19:24:16.709] Benchmark with 3 resampling iterations 
+INFO  [19:24:16.725] Applying learner &#39;branch.copy.simple_median.imputehist.missind.imputemedian.featureunion.unbranch.classif.rpart&#39; on task &#39;pima&#39; (iter 2/3) 
+INFO  [19:24:17.022] Applying learner &#39;branch.copy.simple_median.imputehist.missind.imputemedian.featureunion.unbranch.classif.rpart&#39; on task &#39;pima&#39; (iter 3/3) 
+INFO  [19:24:17.273] Applying learner &#39;branch.copy.simple_median.imputehist.missind.imputemedian.featureunion.unbranch.classif.rpart&#39; on task &#39;pima&#39; (iter 1/3) 
+INFO  [19:24:17.845] Finished benchmark 
+INFO  [19:24:17.853] Result of batch 5: 
+INFO  [19:24:17.855]  branch.selection classif.rpart.cp classif.rpart.minbucket classif.ce 
+INFO  [19:24:17.855]     simple_median       0.09899797                      10  0.2617188 
+INFO  [19:24:17.856] 5 configurations evaluated 
+INFO  [19:24:17.927] Finished tuning after 5 evals 
+INFO  [19:24:17.970] Tuned x: branch.selection=simple_median, classif.rpart.cp=0.03692, classif.rpart.minbucket=8 
+INFO  [19:24:17.972] Tuned y: classif.ce=0.2513 </code></pre>
+<pre class="r"><code>
+instance$archive()</code></pre>
 <pre><code>
    nr batch_nr  resample_result task_id
 1:  1        1 &lt;ResampleResult&gt;    pima
@@ -1851,6 +1971,8 @@ INFO  [17:03:45.979] Tuned y: classif.ce=0.2513 </code></pre>
 </div>
 <p>The best performance in this short tuned experiment was achieved with the more complicated branch.</p>
 <div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+instance$result$params</code></pre>
 <pre><code>
 $branch.selection
 [1] &quot;simple_median&quot;
