@@ -1,5 +1,5 @@
 ---
-title: A pipeline for the titanic data set - Imputation 
+title: A pipeline for the titanic data set - Advanced 
 categories:
   - imputation
   - classification
@@ -19,7 +19,7 @@ output:
 This is the second post of the titanic use case series.
 You can find the first use case [here](/2020-03-12-intro-pipelines-titanic/).
 <!-- Need to fix hyperlink -->
-In this section we will focus on the usage of `mlr3pipelines`.
+In this section we will focus on more advanced usage of `mlr3pipelines`.
 Specifically, this section illustrates the different options when it comes to data imputation.
 Furthermore, the section on benchmarking shows how to visualize our and compare our results.
 Again, we need to take some prepatory steps: 
@@ -45,111 +45,6 @@ library("ggplot2")
 library("mlr3viz")
 data("titanic")
 ```
-
-## Imputation
-
-A very simple way to do this to just impute a constant value for each feature.
-We could i.e. impute every `character` or `factor` column  with `missing` and every numeric column with `-999`.
-And depending on the model, this might actually be fine.
-This approach has a few drawbacks though:
-
-* `-999` could be a real value in the data.
-* imputing `-999` skews the distribution of the data, which might result in bad models.
-
-As a result, instead of imputing a constant value, we will do two things:
-* Draw samples from each numeric features' histogram using `PipeOpImputeHist`
-* Add an additional column for each `variable` that indicates whether a value was missing or not.
-  If the information that a value was missing is important, this column contains this information.
-
-This imputation scheme is called 'imputation with constants' and is already implemented in `mlr3pipelines`.
-It can be done using `PipeOpImputeConstant`.
-
-Before imputation, our data looks as follows:
-
-```{r}
-task$missings()
-```
-
-
-Let's first deal with the categorical variables:
-
-```{r}
-po_newlvl <- po("imputenewlvl")
-task_newlvl <- po_newlvl$train(list(task))[[1]]
-```
-
-Note that we use the `PipeOp` in an unusual way, which is why the syntax does not look very clean.
-We'll learn how to use a full graph below.
-
-First, let's look at the result:
-
-```{r}
-task_newlvl$missings()
-```
-
-Cool! `embarked` does not have missing values anymore. 
-Note that `PipeOpImputeNewLvl` by default affects `character`, `factor` and `ordered` columns.
-
-For the `numeric` features we want to do two things, impute values and add an indicator column.
-In order to do this, we need a more complicated structure, a `Graph`.
-
-Our `po_indicator` creates the indicator column.
-We tell it to only do this for `numeric` and `integer` columns via its `param_vals`, and additionally tell it to create a numeric column (0 = "not missing", 1 = "missing").
-
-```{r}
-po_indicator <- po("missind",
-  param_vals = list(affect_columns = selector_type(c("numeric", "integer")), type = "numeric")
-)
-```
-
-Now we can simultaneously impute features from the histogram and create indicator columns.
-This can be achieved using the `gunion` function, which puts two operations in parallel:
-
-```{r}
-gr <- gunion(list(po_indicator, po("imputehist")))
-gr <- gr %>>% po("featureunion")
-```
-
-Afterwards, we `cbind` the resulting data using `po("featureunion")`, connecting the different operations using our **graph connector**: `%>>%`.
-We can now also connect the newlvl imputation:
-
-```{r}
-gr <- gr %>>% po("imputenewlvl")
-```
-
-and see what happens when we now train the whole **Graph**:
-
-```{r}
-task_imputed <- gr$clone()$train(task)[[1]]
-task_imputed$missings()
-```
-
-Awesome, now we do not have any missing values!
-
-```{r}
-autoplot(task_imputed)
-```
-
-We could now use `task_imputed` for resampling and see whether a **ranger** model does better.
-But this is dangerous! 
-If we preprocess all training data at once, data could leak through the different cross-validation folds.
-In order to do this properly, we have to process the training data in every fold separately.
-Luckily, this is automatically handled in our `Graph`, if we use it through a `GraphLearner`.
-
-We can simple append a `ranger` learner to the Graph and create a `GraphLearner` from this.
-
-```{r}
-glrn <- GraphLearner$new(gr$clone() %>>% po(learner))
-```
-
-```{r}
-res <- resample(task, glrn, rdesc, store_models = TRUE)
-agg2 <- res$aggregate(msr("classif.acc"))
-agg2
-```
-
-So our model has not improved heavily, currently it has an accuracy of  `r round(agg, 3)`.
-In order to improve more, we might need to do some feature engineering.
 
 ## Feature Engineering
 
