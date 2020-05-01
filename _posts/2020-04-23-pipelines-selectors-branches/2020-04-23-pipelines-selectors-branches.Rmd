@@ -28,8 +28,8 @@ For detailed overview check the [mlr3book](https://mlr3book.mlr-org.com/pipeline
 
 Recommended prior readings:
 
-- [mlr3pipelines tutorial - german credit](https://mlr3gallery.mlr-org.com/basics_pipelines_german_credit/)
-- [Impute missing variables](https://mlr3gallery.mlr-org.com/impute-missing-variables/) .  
+- [mlr3pipelines tutorial - german credit](https://mlr3gallery.mlr-org.com/posts/2020-03-11-mlr3pipelines-tutorial-german-credit/)
+- [Impute missing variables](https://mlr3gallery.mlr-org.com/posts/2020-01-30-impute-missing-levels/) .  
 
 This post covers:  
 
@@ -46,7 +46,7 @@ library(mlr3tuning)
 library(paradox)
 ```
 
-The [Pima Indian Diabetes Classification Task](https://mlr3.mlr-org.com/reference/mlr_tasks_pima.html) task will be used.
+The [Pima Indian Diabetes classification task](https://mlr3.mlr-org.com/reference/mlr_tasks_pima.html) will be used.
 
 ```{r}
 pima_tsk = tsk("pima")
@@ -62,7 +62,7 @@ Several features of the `pima` task have missing values:
 pima_tsk$missings()
 ```
 
-A common approach in such situations is to impute the missing values and to add a missing indicator column as explained in the [Impute missing variables](https://mlr3gallery.mlr-org.com/impute-missing-variables/) post.
+A common approach in such situations is to impute the missing values and to add a missing indicator column as explained in the [Impute missing variables](https://mlr3gallery.mlr-org.com/posts/2020-01-30-impute-missing-levels/) post.
 Suppose we want to use
 
 - [`imputehist`](https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_imputehist.html)  on features "glucose", "mass" and "pressure" which have only few missing values and
@@ -76,14 +76,16 @@ Using the `affect_columns` argument of a `PipeOp` to define the variables on whi
 
 ```{r}
 # imputes values based on histogram
-hist_imp = po("imputehist", param_vals = list(affect_columns = selector_name(c("glucose", "mass", "pressure"))))
+hist_imp = po("imputehist",
+              param_vals = list(affect_columns = selector_name(c("glucose", "mass", "pressure"))))
 # imputes values using the median
-median_imp = po("imputemedian", param_vals = list(affect_columns = selector_name(c("insulin", "triceps"))))
+median_imp = po("imputemedian",
+                param_vals = list(affect_columns = selector_name(c("insulin", "triceps"))))
 # adds an indicator column for each feature with missing values
 miss_ind = po("missind")
 ```
 
-When using `PipeOps` constructed in this way, they will perform the specified preprocessing step on the appropriate columns and pass the result to the subsequent steps:  
+When `PipeOp`s are constructed this way, they will perform the specified preprocessing step on the appropriate features and pass all the input features to the subsequent steps:
 
 ```{r}
 # no missings in "glucose", "mass" and "pressure"
@@ -94,7 +96,7 @@ median_imp$train(list(pima_tsk))[[1]]$missings()
 
 We construct a pipeline that combines `hist_imp` and `median_imp`.
 Here, `hist_imp` will impute the features "glucose", "mass" and "pressure", and `median_imp` will impute "insulin" and "triceps".
-In each preprocessing step, the final result is passed to next step. 
+In each preprocessing step, all the input features are passed to the next step. 
 In the end, we obtain a data set without missing values:  
 
 ```{r, fig.height = 6, fig.width = 6}
@@ -110,7 +112,7 @@ The [`missind`](https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_missind.
 miss_ind$train(list(pima_tsk))[[1]]$data()
 ```
 
-Obviously, this step can not be apply to the already imputed data as there are no missing values.
+Obviously, this step can not be applied to the already imputed data as there are no missing values.
 If we want to combine the previous two imputation steps with a third step that adds missing value indicators, we would need to [`copy`](https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_copy.html) the data two times and supply the first copy to `impute_graph` and the second copy to `miss_ind` using [`gunion`](https://mlr3pipelines.mlr-org.com/reference/gunion.html).
 Finally, the two outputs can be combined with [`featureunion`](https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_featureunion.html):  
 
@@ -161,7 +163,7 @@ impute_missind2$plot(html = FALSE)
 impute_missind2$train(pima_tsk)[[1]]$data()
 ```
 
-Note that when there is one input channel, it is automatically copied as many times as needed for the downstream `PipeOps`. 
+Note that when there is one input channel, it is automatically copied as many times as needed for the downstream `PipeOp`s. 
 In other words, the code above works also without `po("copy", 4)`:  
 
 ```{r}
@@ -251,7 +253,7 @@ tuner$tune(instance)
 instance$archive()
 ```
 
-The best performance in this short tuned experiment was achieved with the more complicated branch.  
+The best performance in this short tuned experiment was achieved with `r dQuote(instance$result$params$branch.selection)`.  
 
 ```{r}
 instance$result$params
@@ -259,4 +261,4 @@ instance$result$params
 
 ## Conclusion
 
-This post shows ways on how to specify features on which preprocessing steps are to be performed. In addition it shows how to create alternative paths in the learner graph. The preprocessing steps that can be used are not limited to imputation. Check the list of available [`PipeOps`](https://mlr3pipelines.mlr-org.com/reference/index.html).  
+This post shows ways on how to specify features on which preprocessing steps are to be performed. In addition it shows how to create alternative paths in the learner graph. The preprocessing steps that can be used are not limited to imputation. Check the list of available [`PipeOp`s](https://mlr3pipelines.mlr-org.com/reference/index.html).  
