@@ -7,7 +7,7 @@
 ## Add a new post
 
 1. Install `distill` via `install.packages("distill")`.
-1. Run `distill::create_blog()`.
+1. Run `distill::create_post()`.
 1. Add a setup chunk to your post
     
    ````r
