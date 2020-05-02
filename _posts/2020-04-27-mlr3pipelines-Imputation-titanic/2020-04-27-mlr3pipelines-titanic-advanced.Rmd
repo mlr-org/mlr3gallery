@@ -20,8 +20,8 @@ This is the second post of the titanic use case series.
 You can find the first use case [here](/2020-03-12-intro-pipelines-titanic/).
 <!-- Need to fix hyperlink -->
 In this section we will focus on more advanced usage of `mlr3pipelines`.
-Specifically, this section illustrates the different options when it comes to data imputation.
-Furthermore, the section on benchmarking shows how to visualize our and compare our results.
+Specifically, this section illustrates the different options when it comes to data imputation and feature engineering.
+Furthermore, the section on benchmarking shows how to visualize, benchmark and compare our results.
 Again, we need to take some prepatory steps: 
 
 ```{r, include = FALSE, warning = FALSE, message = FALSE}
@@ -149,6 +149,76 @@ agg2
 ```
 
 So our model has not improved heavily, currently it has an accuracy of  `r round(agg, 3)`.
+
+## Feature Engineering
+
+We will do this using `PipeOpMutate` in order to showcase the power of `mlr3pipelines`.
+Additionally, we will make use of the `character` columns.
+Hence, we will re-select them:
+
+```{r}
+task$col_roles$feature <- c(task$feature_names, c("cabin", "name", "ticket"))
+```
+
+```{r}
+library("stringi")
+po_ftextract <- po("mutate", param_vals = list(
+  mutation = list(
+    fare_per_person = ~ fare / (parch + sib_sp + 1),
+    deck = ~ factor(stri_sub(cabin, 1, 1)),
+    title = ~ factor(stri_match(name, regex = ", (.*)\\.")[, 2]),
+    surname = ~ factor(stri_match(name, regex = "(.*),")[, 2]),
+    ticket_prefix = ~ factor(stri_replace_all_fixed(stri_trim(stri_match(ticket, regex = "(.*) ")[, 2]), ".", ""))
+  )
+))
+```
+
+Quickly checking what happens:
+
+```{r}
+task_eng <- po_ftextract$clone()$train(list(task))[[1]]
+task_eng$data()
+```
+
+```{r}
+autoplot(task_eng$clone()$select(c("sex", "age")), type = "pairs")
+```
+
+Now we can put everything together again, we concatenate our new `PipeOp` with the `Graph` created above and use `PipeOpSelect` in order to de-select the `character` features we used for feature extraction.
+Additionally, we collapse the 'surname', so only surnames that make up more than 0.6 \% of the data are kept.
+
+In summary we do the following: 
+
+* `mutate`: The `po_ftextract` we defined above extracts additional features from the data.
+* `collapsefactors`: Removes factor levels that make up less then 3 \% of the data.
+* `select`: Drops `character` columns.
+* `gunion`: Puts two `PipeOp`s in parallel.
+  * `missind`: `po_indicator` adds a column for each numeric with the info whether the value is NA or not.
+  * `imputehist`: Imputes numeric and integer columns by sampling from the histogram.
+* `featureunion`: Cbind's parallel data streams.
+* `imputenewlvl`: Imputes factor and ordered columns.
+* `fixfactors`: Removes empty factor levels and removes factor levels that do not exist during training.
+* `imputesample`: In some cases, if missing factor levels do not occur during training but only while predicting, `imputenewlvl` does not create a new level. For those, we sample a random value.
+* `learner`: Appends a learner to the `Graph`.
+
+The full graph we created is the following:
+
+```{r}
+learner <- lrn("classif.ranger")
+learner$param_set$values <- list(num.trees = 500, min.node.size = 4)
+```
+
+```{r}
+gr_final <- po_ftextract %>>%
+  po("collapsefactors", param_vals = list(no_collapse_above_prevalence = 0.03)) %>>%
+  po("select", param_vals = list(selector = selector_invert(selector_type("character")))) %>>%
+  gunion(list(po_indicator, po("imputehist"))) %>>%
+  po("featureunion") %>>%
+  po("imputenewlvl") %>>%
+  po("fixfactors") %>>%
+  po("imputesample") %>>%
+  po(learner)
+```
 
 ## Evaluation 
 
