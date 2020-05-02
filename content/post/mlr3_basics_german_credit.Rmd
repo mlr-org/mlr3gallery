@@ -78,26 +78,29 @@ A detailed description (and manual download) can be found at the [UCI repository
 As the `"GermanCredit"` data set is frequently used within `r mlr_pkg("mlr3")`, there is a task already existing just for this purpose.
 
 - Goal is to classify people by their credit risk (**good** or **bad**) using 20 features:
-  - `checking_status:          status/balance of checking account at this bank`
-  - `duration:                 duration of the credit in months`
-  - `credit_history:           past credit history of applicant at this bank`
-  - `purpose:                  reason customer is applying for a loan`
-  - `credit_amount:            amount asked by applicant`
-  - `savings_status:           savings accounts/bonds at this bank`
-  - `employment:               present employment since`
-  - `installment_commitment:   installment rate in percentage of disposable income`
-  - `personal_status:          combination of sex and personal status of applicant`
-  - `other_parties:            other debtors/guarantors present?`
-  - `residence_since:          present residence since`
-  - `property_magnitude:       properties that applicant has`
-  - `age:                      age in years`
-  - `other_payment_plans:      other installment plans the applicant is paying`
-  - `housing:                  type of apartment: rented, owned, for free / no payment`
-  - `existing_credits:         number of existing credits at this bank`
-  - `job:                      current job information`
-  - `num_dependents:           number of people being liable to provide maintenance`
-  - `own_telephone:            is there any telephone registered for this customer?`
-  - `foreign_worker:           is applicant foreign worker?`
+
+| Feature Name             | Description                                            |
+| ------------------------ | ------------------------------------------------------ |
+| `checking_status`        | status/balance of checking account at this bank        |
+| `duration`               | duration of the credit in months                       |
+| `credit_history`         | past credit history of applicant at this bank          |
+| `purpose`                | reason customer is applying for a loan                 |
+| `credit_amount`          | amount asked by applicant                              |
+| `savings_status`         | savings accounts/bonds at this bank                    |
+| `employment`             | present employment since                               |
+| `installment_commitment` | installment rate in percentage of disposable income    |
+| `personal_status`        | combination of sex and personal status of applicant    |
+| `other_parties`          | other debtors/guarantors present?                      |
+| `residence_since`        | present residence since                                |
+| `property_magnitude`     | properties that applicant has                          |
+| `age`                    | age in years                                           |
+| `other_payment_plans`    | other installment plans the applicant is paying        |
+| `housing`                | type of apartment rented, owned, for free / no payment |
+| `existing_credits`       | number of existing credits at this bank                |
+| `job`                    | current job information                                |
+| `num_dependents`         | number of people being liable to provide maintenance   |
+| `own_telephone`          | is there any telephone registered for this customer?   |
+| `foreign_worker`         | is applicant foreign worker?                           |
 
 ### Importing the Data
 
@@ -137,7 +140,7 @@ skimr::skim(credit)
 library(mlr3misc)
 credit_short = map_dtc(credit, function(x) {
   if (is.factor(x) || is.character(x)) {
-    levels(x) = abbreviate(stringr::str_trunc(levels(x), 16) , 12)
+    levels(x) = abbreviate(stringr::str_trunc(levels(x), 16), 12)
   }
   x
 })
@@ -407,7 +410,7 @@ Numerous resampling methods (cross-validation, bootstrap) repeat the splitting p
 We need to specify the resampling strategy using the `rsmp()` function:
 
 ```{r}
-resampling = rsmp("holdout", ratio = 2/3)
+resampling = rsmp("holdout", ratio = 2 / 3)
 print(resampling)
 ```
 
@@ -504,7 +507,7 @@ So only uncomment it locally!
 # future::plan("multiprocess")
 ```
 
-```{r} 
+```{r}
 bmr = benchmark(bm_design)
 ```
 
@@ -667,35 +670,35 @@ class(pred_rf)
 
 ### mlr3 and its Extensions
 
-| Package | Functionality |
-| :-      | :---------------------------------------------------------------------------- |
-| `mlr3`  | Framework for machine learning: `Task`, `Learner`, `resample()` and `benchmark()` |
-| `mlr3learners` | Concrete `Learner`s for many popular machine learning implementations |
-| `mlr3pipelines` | Dataflow programming of machine learning workflows. |
-| `mlr3tuning` | Hyperparameter tuning for machine learning algorithms. |
-| `mlr3filter` | Feature filtering |
-| `mlr3viz` | Visualisations and plots |
-| `paradox` | Auxiliary package providing (hyper)parameter handling |
-| `mlr3misc` | Auxiliary functions |
+| Package         | Functionality                                                                     |
+| :-------------- | :-------------------------------------------------------------------------------- |
+| `mlr3`          | Framework for machine learning: `Task`, `Learner`, `resample()` and `benchmark()` |
+| `mlr3learners`  | Concrete `Learner`s for many popular machine learning implementations             |
+| `mlr3pipelines` | Dataflow programming of machine learning workflows.                               |
+| `mlr3tuning`    | Hyperparameter tuning for machine learning algorithms.                            |
+| `mlr3filter`    | Feature filtering                                                                 |
+| `mlr3viz`       | Visualisations and plots                                                          |
+| `paradox`       | Auxiliary package providing (hyper)parameter handling                             |
+| `mlr3misc`      | Auxiliary functions        
 
 ### Packages
 
 The non-`mlr3` packages we use:
 
-| Package | Reason       |
-| :-      | :------------------------------------------------------------------------- |
-| `remotes` | We use this only to be able to do `remotes::install_github()`. This enables us to install packages from GitHub that are not on CRAN yet. |
-| `data.table` | This provides a more efficient and versatile replacement for the `data.frame` datatype built into R. [Intro vignette](https://cran.r-project.org/web/packages/data.table/vignettes/datatable-intro.html) |
-| `ggplot2` | A very powerful plotting tool. [Overview with link to "cheat sheets"](https://ggplot2.tidyverse.org/) |
-| `callr` | Encapsulating function calls in external R sessions. [GitHub page](https://github.com/r-lib/callr#readme) |
-| `future` | Parallelization to make use of multicore functionality. [GitHub page](https://github.com/HenrikBengtsson/future) |
-| `skimr` | Plotting data summaries for exploratory data analysis. [Vignette](https://cran.r-project.org/web/packages/skimr/vignettes/Using_skimr.html) |
-| `DataExplorer` | Plotting data for exploratory data analysis. [Vignette](https://cran.r-project.org/web/packages/DataExplorer/vignettes/dataexplorer-intro.html) |
-| `rpart.plot` | Plotting CART trees. [Website](http://www.milbo.org/rpart-plot/) |
-| `precrec` | Plotting AUC curves. [Vignette](https://cran.r-project.org/web/packages/precrec/vignettes/introduction.html) |
-| `glmnet` | Provides the `"*.glmnet"` `Learner`s. Penalized regression is often surprisingly powerful, especially in high-dimensional settings. |
-| `kknn` | Provides the `"*.kknn"` `Learner`s. k-nearest neighbor classification / regression is a classical machine learning technique. |
-| `MASS` | Provides the `"*.lda"` and `"*.qda"` `Learner`s. |
-| `ranger` | Provides the `"*.ranger"` `Learner`s. This is an implementation of the powerful "Random Forest" algorithm, which often works very well, even without parameter tuning. |
-| `xgboost` | Provides the `"*.xgboost"` `Learner`s. Gradient boosting is often among the best performing machine learning methods, although it may require parameter tuning. |
-| `e1071` | Provides the `"*.svm"` and `"classif.naive_bayes"` `Learner`s. SVMs (support vector machines) perform well, but are very dependent on correctly chosen kernel parameters. |
+| Package         | Reason                                                                                                                                                                   |
+| :-------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `remotes`       | We use this only to be able to do `remotes::install_github()`. This enables us to install packages from GitHub that are not on CRAN yet.                                 |
+| `data.table`    | This provides a more efficient and versatile replacement for the `data.frame` datatype built into R. [Intro vignette](https://cran.r-project.org/web/packages/data.table/vignettes/datatable-intro.html) |
+| `ggplot2`       | A very powerful plotting tool. [Overview with link to "cheat sheets"](https://ggplot2.tidyverse.org/)                                                                    |
+| `callr`         | Encapsulating function calls in external R sessions. [GitHub page](https://github.com/r-lib/callr#readme)                                                                |
+| `future`        | Parallelization to make use of multicore functionality. [GitHub page](https://github.com/HenrikBengtsson/future)                                                         |
+| `skimr`         | Plotting data summaries for exploratory data analysis. [Vignette](https://cran.r-project.org/web/packages/skimr/vignettes/Using_skimr.html)                              |
+| `DataExplorer`  | Plotting data for exploratory data analysis. [Vignette](https://cran.r-project.org/web/packages/DataExplorer/vignettes/dataexplorer-intro.html)                          |
+| `rpart.plot`    | Plotting CART trees. [Website](http://www.milbo.org/rpart-plot/)                                                                                                         |
+| `precrec`       | Plotting AUC curves. [Vignette](https://cran.r-project.org/web/packages/precrec/vignettes/introduction.html)                                                             |
+| `glmnet`        | Provides the `"*.glmnet"` `Learner`s. Penalized regression is often surprisingly powerful, especially in high-dimensional settings.                                      |
+| `kknn`          | Provides the `"*.kknn"` `Learner`s. k-nearest neighbor classification / regression is a classical machine learning technique.                                            |
+| `MASS`          | Provides the `"*.lda"` and `"*.qda"` `Learner`s.                                                                                                                         |
+| `ranger`        | Provides the `"*.ranger"` `Learner`s. This is an implementation of the powerful "Random Forest" algorithm, which often works very well, even without parameter tuning.   |
+| `xgboost`       | Provides the `"*.xgboost"` `Learner`s. Gradient boosting is often among the best performing machine learning methods, although it may require parameter tuning.          |
+| `e1071`         | Provides the `"*.svm"` and `"classif.naive_bayes"` `Learner`s. SVMs (support vector machines) perform well, but are very dependent on correctly chosen kernel parameters.|
