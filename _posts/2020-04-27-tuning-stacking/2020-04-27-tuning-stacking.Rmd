@@ -9,7 +9,7 @@ author:
   - name: Giuseppe Casalicchio
 date: 04-27-2020
 description: |
-  This tutorial explains how create and tune a multilevel stacking model using the mlr3pipelines package.
+  This tutorial explains how to create and tune a multilevel stacking model using the mlr3pipelines package.
 output:
   distill::distill_article:
     self_contained: false
@@ -45,7 +45,7 @@ However, we additionally explain how to tune the hyperparameters of the whole en
 
 In our stacking example, we proceed as follows:
 
-1. **Level 0:** Based on the input data, we train three learners (`rpart`, `glmnet` and `lda`) on a sparser feature space obtained using different feature filter from [mlr3filters](https://mlr3filters.mlr-org.com/) to obtain slightly decorrelated predictions.
+1. **Level 0:** Based on the input data, we train three learners (`rpart`, `glmnet` and `lda`) on a sparser feature space obtained using different feature filter methods from [mlr3filters](https://mlr3filters.mlr-org.com/) to obtain slightly decorrelated predictions.
 The test set predictions of these learners are attached to the original data (used in level 0) and will serve as input for the learners in level 1. 
 2. **Level 1:** We transform this extended data using PCA, on which we then train additional three learners (`rpart`, `glmnet` and `lda`). 
 The test set predictions of the level 1 learners are attached to input data used in level 1.
@@ -63,7 +63,7 @@ library(paradox)
 library(glmnet)
 ```
 
-For the stacking example, we use the sonar task:
+For the stacking example, we use the [sonar classification task](https://mlr3.mlr-org.com/reference/mlr_tasks_sonar.html):
 
 ```{r task}
 sonar_task = tsk("sonar")
@@ -94,8 +94,8 @@ A sparser representation of the input data in level 0 is obtained using the foll
 
 ```{r filt}
 anova = po("filter", flt("anova"), id = "filt1")
-mrmr = po("filter", flt("mrmr") , id = "filt2")
-find_cor = po("filter", flt("find_correlation") , id = "filt3")
+mrmr = po("filter", flt("mrmr"), id = "filt2")
+find_cor = po("filter", flt("find_correlation"), id = "filt3")
 ```
 
 To summarize these steps into level 0, we use the [gunion](https://mlr3pipelines.mlr-org.com/reference/gunion.html) function. 
@@ -146,7 +146,7 @@ We can have a look at the graph from level 1:
 level1$plot(html = FALSE)
 ```
 
-The out-of-bag predictions of the level 1 learner are attached to the input data from level 1 and a final ranger learner will be trained:  
+The out-of-bag predictions of the level 1 learners are attached to the input data from level 1 and a final ranger learner will be trained:  
 
 ```{r lrn8, fig.width=6, fig.height = 7}
 ranger_lrn = lrn("classif.ranger", predict_type = "prob")
