@@ -1,0 +1,1616 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1"/>
+  <meta name="generator" content="distill" />
+
+  <style type="text/css">
+  /* Hide doc at startup (prevent jankiness while JS renders/transforms) */
+  body {
+    visibility: hidden;
+  }
+  </style>
+
+ <!--radix_placeholder_import_source-->
+ <!--/radix_placeholder_import_source-->
+
+  <!--radix_placeholder_meta_tags-->
+  <title>mlr3tuning tutorial - german credit</title>
+
+  <meta property="description" itemprop="description" content="We evaluate all algorithms using 10-fold cross-validation. We use a fixed train-test split, i.e. the same splits for each evaluation. Otherwise, some evaluation could get unusually &quot;hard&quot; splits, which would make comparisons unfair."/>
+
+
+  <!--  https://schema.org/Article -->
+  <meta property="article:published" itemprop="datePublished" content="2020-03-11"/>
+  <meta property="article:created" itemprop="dateCreated" content="2020-03-11"/>
+  <meta name="article:author" content="Martin Binder"/>
+  <meta name="article:author" content="Florian Pfisterer"/>
+
+  <!--  https://developers.facebook.com/docs/sharing/webmasters#markup -->
+  <meta property="og:title" content="mlr3tuning tutorial - german credit"/>
+  <meta property="og:type" content="article"/>
+  <meta property="og:description" content="We evaluate all algorithms using 10-fold cross-validation. We use a fixed train-test split, i.e. the same splits for each evaluation. Otherwise, some evaluation could get unusually &quot;hard&quot; splits, which would make comparisons unfair."/>
+  <meta property="og:locale" content="en_US"/>
+
+  <!--  https://dev.twitter.com/cards/types/summary -->
+  <meta property="twitter:card" content="summary"/>
+  <meta property="twitter:title" content="mlr3tuning tutorial - german credit"/>
+  <meta property="twitter:description" content="We evaluate all algorithms using 10-fold cross-validation. We use a fixed train-test split, i.e. the same splits for each evaluation. Otherwise, some evaluation could get unusually &quot;hard&quot; splits, which would make comparisons unfair."/>
+
+  <!--/radix_placeholder_meta_tags-->
+  <!--radix_placeholder_rmarkdown_metadata-->
+
+  <script type="text/json" id="radix-rmarkdown-metadata">
+  {"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["title","author","date","description","categories","output"]}},"value":[{"type":"character","attributes":{},"value":["mlr3tuning tutorial - german credit"]},{"type":"list","attributes":{},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name"]}},"value":[{"type":"character","attributes":{},"value":["Martin Binder"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name"]}},"value":[{"type":"character","attributes":{},"value":["Florian Pfisterer"]}]}]},{"type":"character","attributes":{},"value":["03-11-2020"]},{"type":"character","attributes":{},"value":["We evaluate all algorithms using 10-fold cross-validation. We use a fixed train-test split, i.e. the same splits for each evaluation. Otherwise, some evaluation could get unusually \"hard\" splits, which would make comparisons unfair.\n"]},{"type":"character","attributes":{},"value":["tuning","imputation","filter"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["distill::distill_article"]}},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["self_contained","css"]}},"value":[{"type":"logical","attributes":{},"value":[false]},{"type":"character","attributes":{},"value":["../../custom.css"]}]}]}]}
+  </script>
+  <!--/radix_placeholder_rmarkdown_metadata-->
+  
+  <script type="text/json" id="radix-resource-manifest">
+  {"type":"character","attributes":{},"value":["2020-03-11-mlr3tuning_tutorial_german_credit_files/bowser-1.9.3/bowser.min.js","2020-03-11-mlr3tuning_tutorial_german_credit_files/distill-2.2.21/template.v2.js","2020-03-11-mlr3tuning_tutorial_german_credit_files/figure-html5/unnamed-chunk-16-1.png","2020-03-11-mlr3tuning_tutorial_german_credit_files/figure-html5/unnamed-chunk-22-1.png","2020-03-11-mlr3tuning_tutorial_german_credit_files/figure-html5/unnamed-chunk-23-1.png","2020-03-11-mlr3tuning_tutorial_german_credit_files/figure-html5/unnamed-chunk-29-1.png","2020-03-11-mlr3tuning_tutorial_german_credit_files/figure-html5/unnamed-chunk-30-1.png","2020-03-11-mlr3tuning_tutorial_german_credit_files/figure-html5/unnamed-chunk-31-1.png","2020-03-11-mlr3tuning_tutorial_german_credit_files/figure-html5/unnamed-chunk-32-1.png","2020-03-11-mlr3tuning_tutorial_german_credit_files/header-attrs-2.1/header-attrs.js","2020-03-11-mlr3tuning_tutorial_german_credit_files/jquery-1.11.3/jquery.min.js","2020-03-11-mlr3tuning_tutorial_german_credit_files/webcomponents-2.0.0/webcomponents.js"]}
+  </script>
+  <!--radix_placeholder_navigation_in_header-->
+  <!--/radix_placeholder_navigation_in_header-->
+  <!--radix_placeholder_distill-->
+
+  <style type="text/css">
+
+  body {
+    background-color: white;
+  }
+
+  .pandoc-table {
+    width: 100%;
+  }
+
+  .pandoc-table>caption {
+    margin-bottom: 10px;
+  }
+
+  .pandoc-table th:not([align]) {
+    text-align: left;
+  }
+
+  .pagedtable-footer {
+    font-size: 15px;
+  }
+
+  .html-widget {
+    margin-bottom: 2.0em;
+  }
+
+  .l-screen-inset {
+    padding-right: 16px;
+  }
+
+  .l-screen .caption {
+    margin-left: 10px;
+  }
+
+  .shaded {
+    background: rgb(247, 247, 247);
+    padding-top: 20px;
+    padding-bottom: 20px;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  }
+
+  .shaded .html-widget {
+    margin-bottom: 0;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+  }
+
+  .shaded .shaded-content {
+    background: white;
+  }
+
+  .text-output {
+    margin-top: 0;
+    line-height: 1.5em;
+  }
+
+  .hidden {
+    display: none !important;
+  }
+
+  d-article {
+    padding-bottom: 30px;
+  }
+
+  d-appendix {
+    padding-top: 30px;
+  }
+
+  d-article>p>img {
+    width: 100%;
+  }
+
+  d-article iframe {
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    margin-bottom: 2.0em;
+    width: 100%;
+  }
+
+  figure img.external {
+    background: white;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    box-shadow: 0 1px 8px rgba(0, 0, 0, 0.1);
+    padding: 18px;
+    box-sizing: border-box;
+  }
+
+  /* CSS for table of contents */
+
+  .d-toc {
+    color: rgba(0,0,0,0.8);
+    font-size: 0.8em;
+    line-height: 1em;
+  }
+
+  .d-toc-header {
+    font-size: 0.6rem;
+    font-weight: 400;
+    color: rgba(0, 0, 0, 0.5);
+    text-transform: uppercase;
+    margin-top: 0;
+    margin-bottom: 1.3em;
+  }
+
+  .d-toc a {
+    border-bottom: none;
+  }
+
+  .d-toc ul {
+    padding-left: 0;
+  }
+
+  .d-toc li>ul {
+    padding-top: 0.8em;
+    padding-left: 16px;
+    margin-bottom: 0.6em;
+  }
+
+  .d-toc ul,
+  .d-toc li {
+    list-style-type: none;
+  }
+
+  .d-toc li {
+    margin-bottom: 0.9em;
+  }
+
+  .d-toc-separator {
+    margin-top: 20px;
+    margin-bottom: 2em;
+  }
+
+  .d-article-with-toc {
+    border-top: none;
+    padding-top: 0;
+  }
+
+
+
+  /* Tweak code blocks (note that this CSS is repeated above in an injection
+     into the d-code shadow dom) */
+
+  d-code {
+    overflow-x: auto !important;
+  }
+
+  pre.d-code code.d-code {
+    padding-left: 10px;
+    font-size: 12px;
+    border-left: 2px solid rgba(0,0,0,0.1);
+  }
+
+  pre.text-output {
+
+    font-size: 12px;
+    color: black;
+    background: none;
+    font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+    text-align: left;
+    white-space: pre;
+    word-spacing: normal;
+    word-break: normal;
+    word-wrap: normal;
+    line-height: 1.5;
+
+    -moz-tab-size: 4;
+    -o-tab-size: 4;
+    tab-size: 4;
+
+    -webkit-hyphens: none;
+    -moz-hyphens: none;
+    -ms-hyphens: none;
+    hyphens: none;
+  }
+
+  @media(min-width: 768px) {
+
+  d-code {
+    overflow-x: visible !important;
+  }
+
+  pre.d-code code.d-code  {
+      padding-left: 18px;
+      font-size: 14px;
+  }
+  pre.text-output {
+    font-size: 14px;
+  }
+  }
+
+  /* Figure */
+
+  .figure {
+    position: relative;
+    margin-bottom: 2.5em;
+    margin-top: 1.5em;
+  }
+
+  .figure img {
+    width: 100%;
+  }
+
+  .figure .caption {
+    color: rgba(0, 0, 0, 0.6);
+    font-size: 12px;
+    line-height: 1.5em;
+  }
+
+  .figure img.external {
+    background: white;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    box-shadow: 0 1px 8px rgba(0, 0, 0, 0.1);
+    padding: 18px;
+    box-sizing: border-box;
+  }
+
+  .figure .caption a {
+    color: rgba(0, 0, 0, 0.6);
+  }
+
+  .figure .caption b,
+  .figure .caption strong, {
+    font-weight: 600;
+    color: rgba(0, 0, 0, 1.0);
+  }
+
+
+
+  /* Tweak 1000px media break to show more text */
+
+  @media(min-width: 1000px) {
+    .base-grid,
+    distill-header,
+    d-title,
+    d-abstract,
+    d-article,
+    d-appendix,
+    distill-appendix,
+    d-byline,
+    d-footnote-list,
+    d-citation-list,
+    distill-footer {
+      grid-template-columns: [screen-start] 1fr [page-start kicker-start] 80px [middle-start] 50px [text-start kicker-end] 65px 65px 65px 65px 65px 65px 65px 65px [text-end gutter-start] 65px [middle-end] 65px [page-end gutter-end] 1fr [screen-end];
+      grid-column-gap: 16px;
+    }
+
+    .grid {
+      grid-column-gap: 16px;
+    }
+
+    d-article {
+      font-size: 1.06rem;
+      line-height: 1.7em;
+    }
+    figure .caption, .figure .caption, figure figcaption {
+      font-size: 13px;
+    }
+  }
+
+  @media(min-width: 1180px) {
+    .base-grid,
+    distill-header,
+    d-title,
+    d-abstract,
+    d-article,
+    d-appendix,
+    distill-appendix,
+    d-byline,
+    d-footnote-list,
+    d-citation-list,
+    distill-footer {
+      grid-template-columns: [screen-start] 1fr [page-start kicker-start] 60px [middle-start] 60px [text-start kicker-end] 60px 60px 60px 60px 60px 60px 60px 60px [text-end gutter-start] 60px [middle-end] 60px [page-end gutter-end] 1fr [screen-end];
+      grid-column-gap: 32px;
+    }
+
+    .grid {
+      grid-column-gap: 32px;
+    }
+  }
+
+
+  /* Get the citation styles for the appendix (not auto-injected on render since
+     we do our own rendering of the citation appendix) */
+
+  d-appendix .citation-appendix,
+  .d-appendix .citation-appendix {
+    font-size: 11px;
+    line-height: 15px;
+    border-left: 1px solid rgba(0, 0, 0, 0.1);
+    padding-left: 18px;
+    border: 1px solid rgba(0,0,0,0.1);
+    background: rgba(0, 0, 0, 0.02);
+    padding: 10px 18px;
+    border-radius: 3px;
+    color: rgba(150, 150, 150, 1);
+    overflow: hidden;
+    margin-top: -12px;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+  }
+
+
+  /* Social footer */
+
+  .social_footer {
+    margin-top: 30px;
+    margin-bottom: 0;
+    color: rgba(0,0,0,0.67);
+  }
+
+  .disqus-comments {
+    margin-right: 30px;
+  }
+
+  .disqus-comment-count {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.4);
+    cursor: pointer;
+  }
+
+  #disqus_thread {
+    margin-top: 30px;
+  }
+
+  .article-sharing a {
+    border-bottom: none;
+    margin-right: 8px;
+  }
+
+  .article-sharing a:hover {
+    border-bottom: none;
+  }
+
+  .sidebar-section.subscribe {
+    font-size: 12px;
+    line-height: 1.6em;
+  }
+
+  .subscribe p {
+    margin-bottom: 0.5em;
+  }
+
+
+  .article-footer .subscribe {
+    font-size: 15px;
+    margin-top: 45px;
+  }
+
+
+  /* Improve display for browsers without grid (IE/Edge <= 15) */
+
+  .downlevel {
+    line-height: 1.6em;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", Arial, sans-serif;
+    margin: 0;
+  }
+
+  .downlevel .d-title {
+    padding-top: 6rem;
+    padding-bottom: 1.5rem;
+  }
+
+  .downlevel .d-title h1 {
+    font-size: 50px;
+    font-weight: 700;
+    line-height: 1.1em;
+    margin: 0 0 0.5rem;
+  }
+
+  .downlevel .d-title p {
+    font-weight: 300;
+    font-size: 1.2rem;
+    line-height: 1.55em;
+    margin-top: 0;
+  }
+
+  .downlevel .d-byline {
+    padding-top: 0.8em;
+    padding-bottom: 0.8em;
+    font-size: 0.8rem;
+    line-height: 1.8em;
+  }
+
+  .downlevel .section-separator {
+    border: none;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+  }
+
+  .downlevel .d-article {
+    font-size: 1.06rem;
+    line-height: 1.7em;
+    padding-top: 1rem;
+    padding-bottom: 2rem;
+  }
+
+
+  .downlevel .d-appendix {
+    padding-left: 0;
+    padding-right: 0;
+    max-width: none;
+    font-size: 0.8em;
+    line-height: 1.7em;
+    margin-bottom: 0;
+    color: rgba(0,0,0,0.5);
+    padding-top: 40px;
+    padding-bottom: 48px;
+  }
+
+  .downlevel .footnotes ol {
+    padding-left: 13px;
+  }
+
+  .downlevel .base-grid,
+  .downlevel .distill-header,
+  .downlevel .d-title,
+  .downlevel .d-abstract,
+  .downlevel .d-article,
+  .downlevel .d-appendix,
+  .downlevel .distill-appendix,
+  .downlevel .d-byline,
+  .downlevel .d-footnote-list,
+  .downlevel .d-citation-list,
+  .downlevel .distill-footer,
+  .downlevel .appendix-bottom,
+  .downlevel .posts-container {
+    padding-left: 40px;
+    padding-right: 40px;
+  }
+
+  @media(min-width: 768px) {
+    .downlevel .base-grid,
+    .downlevel .distill-header,
+    .downlevel .d-title,
+    .downlevel .d-abstract,
+    .downlevel .d-article,
+    .downlevel .d-appendix,
+    .downlevel .distill-appendix,
+    .downlevel .d-byline,
+    .downlevel .d-footnote-list,
+    .downlevel .d-citation-list,
+    .downlevel .distill-footer,
+    .downlevel .appendix-bottom,
+    .downlevel .posts-container {
+    padding-left: 150px;
+    padding-right: 150px;
+    max-width: 900px;
+  }
+  }
+
+  .downlevel pre code {
+    display: block;
+    border-left: 2px solid rgba(0, 0, 0, .1);
+    padding: 0 0 0 20px;
+    font-size: 14px;
+  }
+
+  .downlevel code, .downlevel pre {
+    color: black;
+    background: none;
+    font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+    text-align: left;
+    white-space: pre;
+    word-spacing: normal;
+    word-break: normal;
+    word-wrap: normal;
+    line-height: 1.5;
+
+    -moz-tab-size: 4;
+    -o-tab-size: 4;
+    tab-size: 4;
+
+    -webkit-hyphens: none;
+    -moz-hyphens: none;
+    -ms-hyphens: none;
+    hyphens: none;
+  }
+
+  </style>
+
+  <script type="application/javascript">
+
+  function is_downlevel_browser() {
+    if (bowser.isUnsupportedBrowser({ msie: "12", msedge: "16"},
+                                   window.navigator.userAgent)) {
+      return true;
+    } else {
+      return window.load_distill_framework === undefined;
+    }
+  }
+
+  // show body when load is complete
+  function on_load_complete() {
+
+    // set body to visible
+    document.body.style.visibility = 'visible';
+
+    // force redraw for leaflet widgets
+    if (window.HTMLWidgets) {
+      var maps = window.HTMLWidgets.findAll(".leaflet");
+      $.each(maps, function(i, el) {
+        var map = this.getMap();
+        map.invalidateSize();
+        map.eachLayer(function(layer) {
+          if (layer instanceof L.TileLayer)
+            layer.redraw();
+        });
+      });
+    }
+
+    // trigger 'shown' so htmlwidgets resize
+    $('d-article').trigger('shown');
+  }
+
+  function init_distill() {
+
+    init_common();
+
+    // create front matter
+    var front_matter = $('<d-front-matter></d-front-matter>');
+    $('#distill-front-matter').wrap(front_matter);
+
+    // create d-title
+    $('.d-title').changeElementType('d-title');
+
+    // create d-byline
+    var byline = $('<d-byline></d-byline>');
+    $('.d-byline').replaceWith(byline);
+
+    // create d-article
+    var article = $('<d-article></d-article>');
+    $('.d-article').wrap(article).children().unwrap();
+
+    // move posts container into article
+    $('.posts-container').appendTo($('d-article'));
+
+    // create d-appendix
+    $('.d-appendix').changeElementType('d-appendix');
+
+    // create d-bibliography
+    var bibliography = $('<d-bibliography></d-bibliography>');
+    $('#distill-bibliography').wrap(bibliography);
+
+    // flag indicating that we have appendix items
+    var appendix = $('.appendix-bottom').children('h3').length > 0;
+
+    // replace citations with <d-cite>
+    $('.citation').each(function(i, val) {
+      appendix = true;
+      var cites = $(this).attr('data-cites').split(" ");
+      var dt_cite = $('<d-cite></d-cite>');
+      dt_cite.attr('key', cites.join());
+      $(this).replaceWith(dt_cite);
+    });
+    // remove refs
+    $('#refs').remove();
+
+    // replace footnotes with <d-footnote>
+    $('.footnote-ref').each(function(i, val) {
+      appendix = true;
+      var href = $(this).attr('href');
+      var id = href.replace('#', '');
+      var fn = $('#' + id);
+      var fn_p = $('#' + id + '>p');
+      fn_p.find('.footnote-back').remove();
+      var text = fn_p.html();
+      var dtfn = $('<d-footnote></d-footnote>');
+      dtfn.html(text);
+      $(this).replaceWith(dtfn);
+    });
+    // remove footnotes
+    $('.footnotes').remove();
+
+    $('h1.appendix, h2.appendix').each(function(i, val) {
+      $(this).changeElementType('h3');
+    });
+    $('h3.appendix').each(function(i, val) {
+      var id = $(this).attr('id');
+      $('.d-toc a[href="#' + id + '"]').parent().remove();
+      appendix = true;
+      $(this).nextUntil($('h1, h2, h3')).addBack().appendTo($('d-appendix'));
+    });
+
+    // show d-appendix if we have appendix content
+    $("d-appendix").css('display', appendix ? 'grid' : 'none');
+
+    // replace code blocks with d-code
+    $('pre>code').each(function(i, val) {
+      var code = $(this);
+      var pre = code.parent();
+      var clz = "";
+      var language = pre.attr('class');
+      if (language) {
+        // map unknown languages to "clike" (without this they just dissapear)
+        if ($.inArray(language, ["bash", "clike", "css", "go", "html",
+                                 "javascript", "js", "julia", "lua", "markdown",
+                                 "markup", "mathml", "python", "svg", "xml"]) == -1)
+          language = "clike";
+        language = ' language="' + language + '"';
+        var dt_code = $('<d-code block' + language + clz + '></d-code>');
+        dt_code.text(code.text());
+        pre.replaceWith(dt_code);
+      } else {
+        code.addClass('text-output').unwrap().changeElementType('pre');
+      }
+    });
+
+    // localize layout chunks to just output
+    $('.layout-chunk').each(function(i, val) {
+
+      // capture layout
+      var layout = $(this).attr('data-layout');
+
+      // apply layout to markdown level block elements
+      var elements = $(this).children().not('d-code, pre.text-output, script');
+      elements.each(function(i, el) {
+        var layout_div = $('<div class="' + layout + '"></div>');
+        if (layout_div.hasClass('shaded')) {
+          var shaded_content = $('<div class="shaded-content"></div>');
+          $(this).wrap(shaded_content);
+          $(this).parent().wrap(layout_div);
+        } else {
+          $(this).wrap(layout_div);
+        }
+      });
+
+
+      // unwrap the layout-chunk div
+      $(this).children().unwrap();
+    });
+
+    // load distill framework
+    load_distill_framework();
+
+    // wait for window.distillRunlevel == 4 to do post processing
+    function distill_post_process() {
+
+      if (!window.distillRunlevel || window.distillRunlevel < 4)
+        return;
+
+      // hide author/affiliations entirely if we have no authors
+      var front_matter = JSON.parse($("#distill-front-matter").html());
+      var have_authors = front_matter.authors && front_matter.authors.length > 0;
+      if (!have_authors)
+        $('d-byline').addClass('hidden');
+
+      // table of contents
+      if (have_authors) // adjust border if we are in authors
+        $('.d-toc').parent().addClass('d-article-with-toc');
+
+      // strip links that point to #
+      $('.authors-affiliations').find('a[href="#"]').removeAttr('href');
+
+      // hide elements of author/affiliations grid that have no value
+      function hide_byline_column(caption) {
+        $('d-byline').find('h3:contains("' + caption + '")').parent().css('visibility', 'hidden');
+      }
+
+      // affiliations
+      var have_affiliations = false;
+      for (var i = 0; i<front_matter.authors.length; ++i) {
+        var author = front_matter.authors[i];
+        if (author.affiliation !== "&nbsp;") {
+          have_affiliations = true;
+          break;
+        }
+      }
+      if (!have_affiliations)
+        $('d-byline').find('h3:contains("Affiliations")').css('visibility', 'hidden');
+
+      // published date
+      if (!front_matter.publishedDate)
+        hide_byline_column("Published");
+
+      // document object identifier
+      var doi = $('d-byline').find('h3:contains("DOI")');
+      var doi_p = doi.next().empty();
+      if (!front_matter.doi) {
+        // if we have a citation and valid citationText then link to that
+        if ($('#citation').length > 0 && front_matter.citationText) {
+          doi.html('Citation');
+          $('<a href="#citation"></a>')
+            .text(front_matter.citationText)
+            .appendTo(doi_p);
+        } else {
+          hide_byline_column("DOI");
+        }
+      } else {
+        $('<a></a>')
+           .attr('href', "https://doi.org/" + front_matter.doi)
+           .html(front_matter.doi)
+           .appendTo(doi_p);
+      }
+
+       // change plural form of authors/affiliations
+      if (front_matter.authors.length === 1) {
+        var grid = $('.authors-affiliations');
+        grid.children('h3:contains("Authors")').text('Author');
+        grid.children('h3:contains("Affiliations")').text('Affiliation');
+      }
+
+      // inject pre code styles (can't do this with a global stylesheet b/c a shadow root is used)
+      $('d-code').each(function(i, val) {
+        var style = document.createElement('style');
+        style.innerHTML = 'pre code { padding-left: 10px; font-size: 12px; border-left: 2px solid rgba(0,0,0,0.1); } ' +
+                          '@media(min-width: 768px) { pre code { padding-left: 18px; font-size: 14px; } }';
+        if (this.shadowRoot)
+          this.shadowRoot.appendChild(style);
+      });
+
+      // move appendix-bottom entries to the bottom
+      $('.appendix-bottom').appendTo('d-appendix').children().unwrap();
+      $('.appendix-bottom').remove();
+
+      // clear polling timer
+      clearInterval(tid);
+
+      // show body now that everything is ready
+      on_load_complete();
+    }
+
+    var tid = setInterval(distill_post_process, 50);
+    distill_post_process();
+
+  }
+
+  function init_downlevel() {
+
+    init_common();
+
+     // insert hr after d-title
+    $('.d-title').after($('<hr class="section-separator"/>'));
+
+    // check if we have authors
+    var front_matter = JSON.parse($("#distill-front-matter").html());
+    var have_authors = front_matter.authors && front_matter.authors.length > 0;
+
+    // manage byline/border
+    if (!have_authors)
+      $('.d-byline').remove();
+    $('.d-byline').after($('<hr class="section-separator"/>'));
+    $('.d-byline a').remove();
+
+    // remove toc
+    $('.d-toc-header').remove();
+    $('.d-toc').remove();
+    $('.d-toc-separator').remove();
+
+    // move appendix elements
+    $('h1.appendix, h2.appendix').each(function(i, val) {
+      $(this).changeElementType('h3');
+    });
+    $('h3.appendix').each(function(i, val) {
+      $(this).nextUntil($('h1, h2, h3')).addBack().appendTo($('.d-appendix'));
+    });
+
+
+    // inject headers into references and footnotes
+    var refs_header = $('<h3></h3>');
+    refs_header.text('References');
+    $('#refs').prepend(refs_header);
+
+    var footnotes_header = $('<h3></h3');
+    footnotes_header.text('Footnotes');
+    $('.footnotes').children('hr').first().replaceWith(footnotes_header);
+
+    // move appendix-bottom entries to the bottom
+    $('.appendix-bottom').appendTo('.d-appendix').children().unwrap();
+    $('.appendix-bottom').remove();
+
+    // remove appendix if it's empty
+    if ($('.d-appendix').children().length === 0)
+      $('.d-appendix').remove();
+
+    // prepend separator above appendix
+    $('.d-appendix').before($('<hr class="section-separator" style="clear: both"/>'));
+
+    // trim code
+    $('pre>code').each(function(i, val) {
+      $(this).html($.trim($(this).html()));
+    });
+
+    // move posts-container right before article
+    $('.posts-container').insertBefore($('.d-article'));
+
+    $('body').addClass('downlevel');
+
+    on_load_complete();
+  }
+
+
+  function init_common() {
+
+    // jquery plugin to change element types
+    (function($) {
+      $.fn.changeElementType = function(newType) {
+        var attrs = {};
+
+        $.each(this[0].attributes, function(idx, attr) {
+          attrs[attr.nodeName] = attr.nodeValue;
+        });
+
+        this.replaceWith(function() {
+          return $("<" + newType + "/>", attrs).append($(this).contents());
+        });
+      };
+    })(jQuery);
+
+    // prevent underline for linked images
+    $('a > img').parent().css({'border-bottom' : 'none'});
+
+    // mark non-body figures created by knitr chunks as 100% width
+    $('.layout-chunk').each(function(i, val) {
+      var figures = $(this).find('img, .html-widget');
+      if ($(this).attr('data-layout') !== "l-body") {
+        figures.css('width', '100%');
+      } else {
+        figures.css('max-width', '100%');
+        figures.filter("[width]").each(function(i, val) {
+          var fig = $(this);
+          fig.css('width', fig.attr('width') + 'px');
+        });
+
+      }
+    });
+
+    // auto-append index.html to post-preview links in file: protocol
+    // and in rstudio ide preview
+    $('.post-preview').each(function(i, val) {
+      if (window.location.protocol === "file:")
+        $(this).attr('href', $(this).attr('href') + "index.html");
+    });
+
+    // get rid of index.html references in header
+    if (window.location.protocol !== "file:") {
+      $('.distill-site-header a[href]').each(function(i,val) {
+        $(this).attr('href', $(this).attr('href').replace("index.html", "./"));
+      });
+    }
+
+    // add class to pandoc style tables
+    $('tr.header').parent('thead').parent('table').addClass('pandoc-table');
+    $('.kable-table').children('table').addClass('pandoc-table');
+
+    // add figcaption style to table captions
+    $('caption').parent('table').addClass("figcaption");
+
+    // initialize posts list
+    if (window.init_posts_list)
+      window.init_posts_list();
+
+    // implmement disqus comment link
+    $('.disqus-comment-count').click(function() {
+      window.headroom_prevent_pin = true;
+      $('#disqus_thread').toggleClass('hidden');
+      if (!$('#disqus_thread').hasClass('hidden')) {
+        var offset = $(this).offset();
+        $(window).resize();
+        $('html, body').animate({
+          scrollTop: offset.top - 35
+        });
+      }
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    if (is_downlevel_browser())
+      init_downlevel();
+    else
+      window.addEventListener('WebComponentsReady', init_distill);
+  });
+
+  </script>
+
+  <!--/radix_placeholder_distill-->
+  <script src="2020-03-11-mlr3tuning_tutorial_german_credit_files/header-attrs-2.1/header-attrs.js"></script>
+  <script src="2020-03-11-mlr3tuning_tutorial_german_credit_files/jquery-1.11.3/jquery.min.js"></script>
+  <script src="2020-03-11-mlr3tuning_tutorial_german_credit_files/bowser-1.9.3/bowser.min.js"></script>
+  <script src="2020-03-11-mlr3tuning_tutorial_german_credit_files/webcomponents-2.0.0/webcomponents.js"></script>
+  <script src="2020-03-11-mlr3tuning_tutorial_german_credit_files/distill-2.2.21/template.v2.js"></script>
+  <!--radix_placeholder_site_in_header-->
+  <!--/radix_placeholder_site_in_header-->
+
+  <link rel="stylesheet" href="../../custom.css" type="text/css"/>
+
+</head>
+
+<body>
+
+<!--radix_placeholder_front_matter-->
+
+<script id="distill-front-matter" type="text/json">
+{"title":"mlr3tuning tutorial - german credit","description":"We evaluate all algorithms using 10-fold cross-validation. We use a fixed train-test split, i.e. the same splits for each evaluation. Otherwise, some evaluation could get unusually \"hard\" splits, which would make comparisons unfair.","authors":[{"author":"Martin Binder","authorURL":"#","affiliation":"&nbsp;","affiliationURL":"#"},{"author":"Florian Pfisterer","authorURL":"#","affiliation":"&nbsp;","affiliationURL":"#"}],"publishedDate":"2020-03-11T00:00:00.000+01:00","citationText":"Binder & Pfisterer, 2020"}
+</script>
+
+<!--/radix_placeholder_front_matter-->
+<!--radix_placeholder_navigation_before_body-->
+<!--/radix_placeholder_navigation_before_body-->
+<!--radix_placeholder_site_before_body-->
+<!--/radix_placeholder_site_before_body-->
+
+<div class="d-title">
+<h1>mlr3tuning tutorial - german credit</h1>
+<p><p>We evaluate all algorithms using 10-fold cross-validation. We use a fixed train-test split, i.e. the same splits for each evaluation. Otherwise, some evaluation could get unusually “hard” splits, which would make comparisons unfair.</p></p>
+</div>
+
+<div class="d-byline">
+  Martin Binder  
+  
+,   Florian Pfisterer  
+  
+<br/>03-11-2020
+</div>
+
+<div class="d-article">
+<h2 id="intro">Intro</h2>
+<p>This is the second part in a serial of tutorials. The other parts of this series can be found here:</p>
+<ul>
+<li><a href="/basics_german_credit/">Part I - Basics</a></li>
+<li><a href="/basics_pipelines_german_credit/">Part III - Pipelines</a></li>
+</ul>
+<p>In this case we will continue working with the <strong>German Credit Dataset</strong>. Yesterday we peeked into the data set by using and comparing some learners with ther default parameters. We will now see how to:</p>
+<ul>
+<li>Tune hyperparameters for a given problem</li>
+<li>Perform nested resampling</li>
+<li>Adjust decision thresholds</li>
+</ul>
+<h2 id="prerequisites">Prerequisites</h2>
+<p>We expect you have installed all packages from day 1. If not, load the day 1 script and run the <strong>Prerequisites</strong> install chunk.</p>
+<p>Load the packages we are going to use:</p>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+library(&quot;data.table&quot;)
+library(&quot;mlr3&quot;)
+library(&quot;mlr3learners&quot;)
+library(&quot;mlr3tuning&quot;)
+library(&quot;ggplot2&quot;)</code></pre>
+</div>
+<p>We use the same data as in the earlier blog posts.</p>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+task = tsk(&quot;german_credit&quot;)</code></pre>
+</div>
+<p>Also, because tuning often takes a long time, we want to make more efficient use of our multicore CPUs. Don’t do this on rstudio cloud, however.</p>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+# future::plan(&quot;multiprocess&quot;)</code></pre>
+</div>
+<h3 id="evaluation">Evaluation</h3>
+<p>We evaluate all algorithms using 10-fold cross-validation. We use a <em>fixed</em> train-test split, i.e. the same splits for each evaluation. Otherwise, some evaluation could get unusually “hard” splits, which would make comparisons unfair.</p>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+set.seed(8008135)
+cv10_instance = rsmp(&quot;cv&quot;, folds = 10)
+## fix the train-test splits using the $instantiate() method
+cv10_instance$instantiate(task)
+## have a look at the test set instances per fold
+cv10_instance$instance</code></pre>
+<pre><code>
+      row_id fold
+   1:      5    1
+   2:     20    1
+   3:     28    1
+   4:     35    1
+   5:     37    1
+  ---            
+ 996:    936   10
+ 997:    950   10
+ 998:    963   10
+ 999:    985   10
+1000:    994   10</code></pre>
+</div>
+<h2 id="simple-parameter-tuning">Simple Parameter Tuning</h2>
+<ul>
+<li>Use the <code>paradox</code> package for search space definition of the hyperparameters</li>
+<li>Use the <code>mlr3tuning</code> package for tuning the hyperparameters</li>
+</ul>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+library(&quot;mlr3tuning&quot;)
+library(&quot;paradox&quot;)</code></pre>
+</div>
+<h3 id="search-space-and-problem-definition">Search Space and Problem Definition</h3>
+<ul>
+<li>First need to decide what <code>Learner</code> to optimize. We will use <code>"classif.kknn"</code>, the “kernelized” k-nearest neighbor classifier. <!-- - (We could also try to optimize multiple `Learner`s simultaneously, i.e. choose the `Learner` to use automatically. Look into mlr3pipelines if you want to do that. --></li>
+<li>We will use <code>kknn</code> as a normal kNN without weighting first (i.e., use the <code>rectangular</code> kernel):</li>
+</ul>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+knn = lrn(&quot;classif.kknn&quot;, predict_type = &quot;prob&quot;)
+## use rectangular kernel for normal kNN
+knn$param_set$values$kernel = &quot;rectangular&quot;</code></pre>
+</div>
+<ul>
+<li>Then we decide what parameters we optimize over. What are our options?</li>
+</ul>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+knn$param_set</code></pre>
+<pre><code>
+ParamSet: 
+         id    class lower upper
+1:        k ParamInt     1   Inf
+2: distance ParamDbl     0   Inf
+3:   kernel ParamFct    NA    NA
+4:    scale ParamLgl    NA    NA
+5:  ykernel ParamUty    NA    NA
+                                                           levels default
+1:                                                                      7
+2:                                                                      2
+3: rectangular,triangular,epanechnikov,biweight,triweight,cos,... optimal
+4:                                                     TRUE,FALSE    TRUE
+5:                                                                       
+         value
+1:            
+2:            
+3: rectangular
+4:            
+5:            </code></pre>
+</div>
+<ul>
+<li>We first tune the <code>k</code> parameter from 3 to 20 and the <code>distance</code> function (either L1 or L2). To do so, we use the <code>paradox</code> package to define a search space (see <a href="#very-quick-paradox-primer">Appendix</a> for a short list of possible parameter types).</li>
+</ul>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+searchspace = ParamSet$new(list(
+  ParamInt$new(&quot;k&quot;, lower = 3, upper = 20),
+  ParamInt$new(&quot;distance&quot;, lower = 1, upper = 2)
+))</code></pre>
+</div>
+<ul>
+<li>We define a “tuning instance” that represents the problem we are trying to optimize.
+<ul>
+<li>What is the task we are optimizing for?</li>
+<li>What learner are we using?</li>
+<li>How do we do resampling?</li>
+<li>What is the performance measure?</li>
+<li>What is the search space (“parameter set”)?</li>
+<li>When are we done searching? (Disregard this for now).</li>
+</ul></li>
+</ul>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+instance_grid = TuningInstance$new(
+  task = task,
+  learner = knn,
+  resampling = cv10_instance,
+  measures = msr(&quot;classif.ce&quot;),
+  param_set = searchspace,
+  terminator = term(&quot;none&quot;)
+)</code></pre>
+</div>
+<h3 id="grid-search">Grid Search</h3>
+<ul>
+<li>A simple tuning method is to try all possible combinations of parameters: <strong>Grid Search</strong>
+<ul>
+<li>Pro: Very intuitive and simple</li>
+<li>Con: Inefficient if the search space is large</li>
+</ul></li>
+<li>We get the <code>"grid_search"</code> tuner for this</li>
+</ul>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+set.seed(1)
+tuner_grid = tnr(&quot;grid_search&quot;, resolution = 18, batch_size = 36)</code></pre>
+</div>
+<ul>
+<li>Tuning works by calling <code>$tune()</code>. Note that it <em>modifies</em> our “tuning instance”–the result can be found in the <code>instance</code> object.</li>
+</ul>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+## empty instance object:
+instance_grid$result</code></pre>
+<pre><code>
+$tune_x
+NULL
+
+$params
+$params$kernel
+[1] &quot;rectangular&quot;
+
+
+$perf
+NULL</code></pre>
+<pre class="r"><code>
+## now run tuning:
+tuner_grid$tune(instance_grid)</code></pre>
+</div>
+<ul>
+<li>The result can be found in the <code>$result</code> slot. We can also plot the performance.</li>
+</ul>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+instance_grid$result</code></pre>
+<pre><code>
+$tune_x
+$tune_x$k
+[1] 9
+
+$tune_x$distance
+[1] 2
+
+
+$params
+$params$kernel
+[1] &quot;rectangular&quot;
+
+$params$k
+[1] 9
+
+$params$distance
+[1] 2
+
+
+$perf
+classif.ce 
+     0.249 </code></pre>
+</div>
+<ul>
+<li>We can look at the “archive” of evaluated configurations</li>
+<li>We expand the “params” (the parameters that the <code>Learner</code> actually saw)</li>
+</ul>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+perfdata = instance_grid$archive(&quot;params&quot;)
+perfdata[, c(&quot;nr&quot;, &quot;k&quot;, &quot;distance&quot;, &quot;classif.ce&quot;)]</code></pre>
+<pre><code>
+    nr  k distance classif.ce
+ 1:  1  3        1      0.276
+ 2:  2  3        2      0.267
+ 3:  3  4        1      0.290
+ 4:  4  4        2      0.286
+ 5:  5  5        1      0.268
+ 6:  6  5        2      0.274
+ 7:  7  6        1      0.268
+ 8:  8  6        2      0.274
+ 9:  9  7        1      0.261
+10: 10  7        2      0.262
+11: 11  8        1      0.273
+12: 12  8        2      0.260
+13: 13  9        1      0.264
+14: 14  9        2      0.249
+15: 15 10        1      0.263
+16: 16 10        2      0.259
+17: 17 11        1      0.255
+18: 18 11        2      0.252
+19: 19 12        1      0.273
+20: 20 12        2      0.252
+21: 21 13        1      0.262
+22: 22 13        2      0.255
+23: 23 14        1      0.261
+24: 24 14        2      0.253
+25: 25 15        1      0.260
+26: 26 15        2      0.252
+27: 27 16        1      0.263
+28: 28 16        2      0.258
+29: 29 17        1      0.267
+30: 30 17        2      0.266
+31: 31 18        1      0.274
+32: 32 18        2      0.268
+33: 33 19        1      0.270
+34: 34 19        2      0.269
+35: 35 20        1      0.265
+36: 36 20        2      0.270
+    nr  k distance classif.ce</code></pre>
+</div>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+ggplot(perfdata, aes(x = k, y = classif.ce, color = as.factor(distance))) +
+  geom_line() + geom_point(size = 3)</code></pre>
+<p><img src="2020-03-11-mlr3tuning_tutorial_german_credit_files/figure-html5/unnamed-chunk-16-1.png" width="624" /></p>
+</div>
+<ul>
+<li>Euclidean distance (<code>distance</code> = 2) seems to work better, but there is much randomness introduced by the resampling instance, so you may see a different result!</li>
+<li><code>k</code> between 10 and 15 perform well</li>
+</ul>
+<h3 id="random-search-and-transformation">Random Search and Transformation</h3>
+<ul>
+<li>Let’s look at a larger search space. In fact, how about we tune <em>all</em> available parameters and limit <code>k</code> to large values (50).</li>
+<li><strong>Problem 1</strong>: The difference in performance between <code>k</code> = 3 and <code>k</code> = 4 is probably larger than the difference between <code>k</code> = 49 and <code>k</code> = 50.
+<ul>
+<li>We will use a <strong>transformation function</strong> for <code>k</code> and sample values on the log-space.</li>
+<li>To do so, we define the range for <code>k</code> from <code>log(3)</code> to <code>log(50)</code> and exponentiate in the transformation.</li>
+<li>For <code>k</code>, we must use <code>ParamDbl</code> instead of <code>ParamInt</code> now!</li>
+</ul></li>
+</ul>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+large_searchspace = ParamSet$new(list(
+  ParamDbl$new(&quot;k&quot;, lower = log(3), upper = log(50)),
+  ParamDbl$new(&quot;distance&quot;, lower = 1, upper = 3),
+  ParamFct$new(&quot;kernel&quot;, c(&quot;rectangular&quot;, &quot;gaussian&quot;, &quot;rank&quot;, &quot;optimal&quot;)),
+  ParamLgl$new(&quot;scale&quot;)
+))
+
+large_searchspace$trafo = function(x, param_set) {
+  x$k = round(exp(x$k))
+  x
+}</code></pre>
+</div>
+<ul>
+<li><strong>Problem 2</strong>: Using grid search will take a long time.
+<ul>
+<li>Even trying out three different values for <code>k</code>, <code>distance</code>, <code>kernel</code>, and the two values for <code>scale</code> will take 54 evaluations.</li>
+<li>We use a different search algorithm: <strong>Random Search</strong></li>
+<li>The <em>tuning instance</em> must now contain a <em>termination criterion</em>: When do we stop?</li>
+</ul></li>
+</ul>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+tuner_random = tnr(&quot;random_search&quot;, batch_size = 36)
+
+instance_random = TuningInstance$new(
+  task = task,
+  learner = knn,
+  resampling = cv10_instance,
+  measures = msr(&quot;classif.ce&quot;),
+  param_set = large_searchspace,
+  terminator = term(&quot;evals&quot;, n_evals = 36)
+)</code></pre>
+</div>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+tuner_random$tune(instance_random)
+instance_random$result</code></pre>
+<pre><code>
+$tune_x
+$tune_x$k
+[1] 2.883326
+
+$tune_x$distance
+[1] 2.210032
+
+$tune_x$kernel
+[1] &quot;rank&quot;
+
+$tune_x$scale
+[1] TRUE
+
+
+$params
+$params$kernel
+[1] &quot;rank&quot;
+
+$params$k
+[1] 18
+
+$params$distance
+[1] 2.210032
+
+$params$scale
+[1] TRUE
+
+
+$perf
+classif.ce 
+     0.252 </code></pre>
+</div>
+<ul>
+<li>We can get the “archive” in two ways: expand the <code>"tune_x"</code> parameters (the points we sampled on the search space, before transformation):</li>
+</ul>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+perfdata = instance_random$archive(&quot;tune_x&quot;)
+perfdata[, c(&quot;k&quot;, &quot;distance&quot;, &quot;kernel&quot;, &quot;scale&quot;, &quot;classif.ce&quot;)]</code></pre>
+<pre><code>
+           k distance      kernel scale classif.ce
+ 1: 2.161569 2.640253    gaussian FALSE      0.312
+ 2: 2.627261 1.073312        rank  TRUE      0.258
+ 3: 3.312797 2.251166 rectangular FALSE      0.294
+ 4: 1.999786 1.866958        rank FALSE      0.347
+ 5: 3.456359 1.713852     optimal  TRUE      0.258
+ 6: 3.907720 2.547335    gaussian FALSE      0.293
+ 7: 1.699115 1.346904 rectangular  TRUE      0.274
+ 8: 2.328907 1.986418 rectangular FALSE      0.323
+ 9: 2.164135 2.474378    gaussian FALSE      0.310
+10: 3.815176 2.022002    gaussian  TRUE      0.274
+11: 2.902336 1.950174 rectangular FALSE      0.307
+12: 3.366602 2.175800    gaussian FALSE      0.296
+13: 3.684312 2.145075        rank FALSE      0.294
+14: 1.263541 2.309835        rank  TRUE      0.277
+15: 2.442418 2.730251        rank FALSE      0.307
+16: 3.059230 1.793693    gaussian FALSE      0.298
+17: 1.224292 2.920232 rectangular FALSE      0.368
+18: 3.227954 1.761755     optimal FALSE      0.303
+19: 2.763233 1.340177        rank FALSE      0.307
+20: 2.533847 1.463210    gaussian  TRUE      0.254
+21: 2.371967 2.899840 rectangular  TRUE      0.262
+22: 1.170304 1.167016 rectangular  TRUE      0.268
+23: 3.804673 1.386088        rank FALSE      0.291
+24: 3.877214 1.149391 rectangular  TRUE      0.274
+25: 2.883326 2.210032        rank  TRUE      0.252
+26: 2.295835 1.431686 rectangular  TRUE      0.260
+27: 1.848740 2.175975     optimal  TRUE      0.270
+28: 1.325287 1.457795     optimal FALSE      0.398
+29: 2.027436 1.781850 rectangular  TRUE      0.258
+30: 3.613942 1.695812        rank FALSE      0.295
+31: 1.961416 2.836759        rank FALSE      0.341
+32: 2.230796 1.224078     optimal FALSE      0.347
+33: 2.712923 1.509952    gaussian FALSE      0.307
+34: 2.778186 1.373248        rank FALSE      0.305
+35: 2.702305 2.491087 rectangular FALSE      0.303
+36: 1.712136 2.865938        rank  TRUE      0.265
+           k distance      kernel scale classif.ce</code></pre>
+</div>
+<ul>
+<li>Or look at the <code>"params"</code> parameters (the points the <code>Learner</code> was used with—these are the <code>exp()</code>’d parameters, after transformation of the sampled points):</li>
+</ul>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+perfdata = instance_random$archive(&quot;params&quot;)
+perfdata[, c(&quot;k&quot;, &quot;distance&quot;, &quot;kernel&quot;, &quot;scale&quot;, &quot;classif.ce&quot;)]</code></pre>
+<pre><code>
+     k distance      kernel scale classif.ce
+ 1:  9 2.640253    gaussian FALSE      0.312
+ 2: 14 1.073312        rank  TRUE      0.258
+ 3: 27 2.251166 rectangular FALSE      0.294
+ 4:  7 1.866958        rank FALSE      0.347
+ 5: 32 1.713852     optimal  TRUE      0.258
+ 6: 50 2.547335    gaussian FALSE      0.293
+ 7:  5 1.346904 rectangular  TRUE      0.274
+ 8: 10 1.986418 rectangular FALSE      0.323
+ 9:  9 2.474378    gaussian FALSE      0.310
+10: 45 2.022002    gaussian  TRUE      0.274
+11: 18 1.950174 rectangular FALSE      0.307
+12: 29 2.175800    gaussian FALSE      0.296
+13: 40 2.145075        rank FALSE      0.294
+14:  4 2.309835        rank  TRUE      0.277
+15: 12 2.730251        rank FALSE      0.307
+16: 21 1.793693    gaussian FALSE      0.298
+17:  3 2.920232 rectangular FALSE      0.368
+18: 25 1.761755     optimal FALSE      0.303
+19: 16 1.340177        rank FALSE      0.307
+20: 13 1.463210    gaussian  TRUE      0.254
+21: 11 2.899840 rectangular  TRUE      0.262
+22:  3 1.167016 rectangular  TRUE      0.268
+23: 45 1.386088        rank FALSE      0.291
+24: 48 1.149391 rectangular  TRUE      0.274
+25: 18 2.210032        rank  TRUE      0.252
+26: 10 1.431686 rectangular  TRUE      0.260
+27:  6 2.175975     optimal  TRUE      0.270
+28:  4 1.457795     optimal FALSE      0.398
+29:  8 1.781850 rectangular  TRUE      0.258
+30: 37 1.695812        rank FALSE      0.295
+31:  7 2.836759        rank FALSE      0.341
+32:  9 1.224078     optimal FALSE      0.347
+33: 15 1.509952    gaussian FALSE      0.307
+34: 16 1.373248        rank FALSE      0.305
+35: 15 2.491087 rectangular FALSE      0.303
+36:  6 2.865938        rank  TRUE      0.265
+     k distance      kernel scale classif.ce</code></pre>
+</div>
+<p>Let’s look at some plots of performance by parameter. - The following suggests that <code>scale</code> has a strong influence on performance.</p>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+ggplot(perfdata, aes(x = k, y = classif.ce, color = scale)) +
+  geom_point(size = 3) + geom_line()</code></pre>
+<p><img src="2020-03-11-mlr3tuning_tutorial_german_credit_files/figure-html5/unnamed-chunk-22-1.png" width="624" /></p>
+</div>
+<ul>
+<li>As for the kernel, there does not seem to be a strong influence:</li>
+</ul>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+ggplot(perfdata, aes(x = k, y = classif.ce, color = kernel)) +
+  geom_point(size = 3) + geom_line()</code></pre>
+<p><img src="2020-03-11-mlr3tuning_tutorial_german_credit_files/figure-html5/unnamed-chunk-23-1.png" width="624" /></p>
+</div>
+<h2 id="nested-resampling">Nested Resampling</h2>
+<p>What performance do we expect from our tuned method? Naive evaluation:</p>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+instance_random$result$perf</code></pre>
+<pre><code>
+classif.ce 
+     0.252 </code></pre>
+<pre class="r"><code>
+instance_grid$result$perf</code></pre>
+<pre><code>
+classif.ce 
+     0.249 </code></pre>
+</div>
+<ul>
+<li>Problem: <em>overtuning</em>:
+<ul>
+<li>The more we search, the more our result is likely to just be “lucky” on your training data</li>
+<li>Imagine predicting random values and “tuning” the seed value. If we try enough seeds we may get good (tuning set) performance!</li>
+<li>Different search spaces or search methods may introduce different amounts of randomness, so even the comparison is flawed!</li>
+</ul></li>
+<li>Solution: Nested Resampling</li>
+</ul>
+<p>The <code>mlr3tuning</code> package provides an <code>AutoTuner</code> that acts like our tuning method is actually a <code>Learner</code>!</p>
+<ul>
+<li><code>$train()</code> method:
+<ul>
+<li>Tune hyperparameters on the training data, using a resampling strategy (below 5 fold CV).</li>
+<li>Train a model with optimal hyperparameters on whole training data.</li>
+</ul></li>
+<li><code>$predict()</code> method: use model trained on the whole training data as model.</li>
+<li>This is just the workflow we use when tuning hyperparameters: Find the best parameters and use them for training.</li>
+<li>The <code>AutoTuner</code> does exactly this.</li>
+</ul>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+grid_auto = AutoTuner$new(
+  learner = knn,
+  resampling = rsmp(&quot;cv&quot;, folds = 5), # we can NOT use fixed resampling here
+  measures = msr(&quot;classif.ce&quot;),
+  tune_ps = searchspace,
+  terminator = term(&quot;none&quot;),
+  tuner = tnr(&quot;grid_search&quot;, resolution = 18)
+)</code></pre>
+</div>
+<ul>
+<li>The autotuner behaves just like a <code>Learner</code>. It can be used to combine the steps of hyperparameter tuning and model fitting, but is especially useful for resampling and fair comparison of performance through benchmarking.</li>
+</ul>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+resample(task, grid_auto, cv10_instance)$aggregate()</code></pre>
+</div>
+<ul>
+<li>Essentially this is the performance of a “knn with optimal hyperparameters found by grid search”</li>
+</ul>
+<h2 id="appendix">Appendix</h2>
+<h3 id="example-tuning-with-larger-budget">Example: Tuning With Larger Budget</h3>
+<p>It is always interesting to look at what could have been. The following dataset contains an optimization run result with 3600 evaluations–more than above by a factor of 100.</p>
+<div class="layout-chunk" data-layout="l-body">
+
+</div>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+perfdata # obtained from mlr-outreach github repository</code></pre>
+<pre><code>
+        nr batch_nr    task_id   learner_id resampling_id iters warnings errors
+   1:    1        1 new_credit classif.kknn            cv    10        0      0
+   2:    2        1 new_credit classif.kknn            cv    10        0      0
+   3:    3        1 new_credit classif.kknn            cv    10        0      0
+   4:    4        1 new_credit classif.kknn            cv    10        0      0
+   5:    5        1 new_credit classif.kknn            cv    10        0      0
+  ---                                                                          
+3596: 3596        1 new_credit classif.kknn            cv    10        0      0
+3597: 3597        1 new_credit classif.kknn            cv    10        0      0
+3598: 3598        1 new_credit classif.kknn            cv    10        0      0
+3599: 3599        1 new_credit classif.kknn            cv    10        0      0
+3600: 3600        1 new_credit classif.kknn            cv    10        0      0
+      classif.ce tune_x      kernel  k distance scale
+   1:      0.348 &lt;list&gt;        rank  6 1.069610 FALSE
+   2:      0.297 &lt;list&gt;        rank 40 1.077027 FALSE
+   3:      0.321 &lt;list&gt;    gaussian 10 2.890817 FALSE
+   4:      0.256 &lt;list&gt;        rank  5 2.541628  TRUE
+   5:      0.299 &lt;list&gt;     optimal 45 2.921566 FALSE
+  ---                                                
+3596:      0.297 &lt;list&gt; rectangular 30 1.185884 FALSE
+3597:      0.342 &lt;list&gt;        rank  7 1.678671 FALSE
+3598:      0.311 &lt;list&gt;     optimal 22 1.688389 FALSE
+3599:      0.273 &lt;list&gt; rectangular 28 1.940716  TRUE
+3600:      0.351 &lt;list&gt;        rank  3 2.683639 FALSE</code></pre>
+</div>
+<ul>
+<li>The scale effect is just as visible.</li>
+</ul>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+ggplot(perfdata, aes(x = k, y = classif.ce, color = scale)) +
+  geom_point(size = 2, alpha = 0.3)</code></pre>
+<p><img src="2020-03-11-mlr3tuning_tutorial_german_credit_files/figure-html5/unnamed-chunk-29-1.png" width="624" /></p>
+</div>
+<ul>
+<li>There seems to be a pattern by kernel as well…</li>
+</ul>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+ggplot(perfdata, aes(x = k, y = classif.ce, color = kernel)) +
+  geom_point(size = 2, alpha = 0.3)</code></pre>
+<p><img src="2020-03-11-mlr3tuning_tutorial_german_credit_files/figure-html5/unnamed-chunk-30-1.png" width="624" /></p>
+</div>
+<ul>
+<li>In fact, if we zoom in to <code>(5, 30)</code> x <code>(0.2, 0.3)</code> and do loess smoothing we see that different kernels have their optimum at different <code>k</code>.</li>
+</ul>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+ggplot(perfdata, aes(x = k, y = classif.ce, color = kernel,
+  group = interaction(kernel, scale))) +
+  geom_point(size = 2, alpha = 0.3) + geom_smooth() +
+  xlim(5, 30) + ylim(0.2, 0.3)</code></pre>
+<p><img src="2020-03-11-mlr3tuning_tutorial_german_credit_files/figure-html5/unnamed-chunk-31-1.png" width="624" /></p>
+</div>
+<ul>
+<li>What about the <code>distance</code> parameter? If we select all results with <code>k</code> between 10 and 20 and plot distance and kernel we see an approximate relationship</li>
+</ul>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+ggplot(perfdata[k &gt; 10 &amp; k &lt; 20 &amp; scale == TRUE],
+  aes(x = distance, y = classif.ce, color = kernel)) +
+  geom_point(size = 2) + geom_smooth()</code></pre>
+<p><img src="2020-03-11-mlr3tuning_tutorial_german_credit_files/figure-html5/unnamed-chunk-32-1.png" width="624" /></p>
+</div>
+<ul>
+<li>Observations:
+<ul>
+<li>The <code>scale</code> makes a lot of difference</li>
+<li>The <code>distance</code> seems to make the least difference</li>
+<li>Had we done grid search, we would have wasted a lot of evaluations on trying different <code>distance</code> values that usually give similar results. This is why random search works well.</li>
+<li>An even more intelligent approach would be to observe that <code>scale = FALSE</code> performs badly and not try out so many points with that one.</li>
+</ul></li>
+</ul>
+<h3 id="very-quick-paradox-primer">Very quick <code>paradox</code> primer</h3>
+<p>Initialization:</p>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+ParamSet$new(list( &lt;PARAMETERS&gt; ))</code></pre>
+</div>
+<p>Possible parameter types:</p>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+## - logical (values TRUE, FALSE)
+ParamLgl$new(&quot;parameter_id&quot;)
+## - factorial (discrete values from a list of &#39;levels&#39;)
+ParamFct$new(&quot;parameter_id&quot;, c(&quot;value1&quot;, &quot;value2&quot;, &quot;value3&quot;))
+## - integer (from &#39;lower&#39; to &#39;upper&#39; bound)
+ParamInt$new(&quot;parameter_id&quot;, lower = 0, upper = 10)
+## - numeric (from &#39;lower&#39; to &#39;upper&#39; bound)
+## - unfortunately named after the storage type, &quot;double precision floating point&quot;
+ParamDbl$new(&quot;parameter_id&quot;, lower = 0, upper = 10)
+
+## Also possible: &quot;untyped&quot;, but we can not tune with this!
+ParamUty$new(&quot;parameter_id&quot;)</code></pre>
+</div>
+<p>So an example parameter set with one logical parameter <code>"flag"</code> and one integer parameter <code>"count"</code>:</p>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+ParamSet$new(list(
+  ParamLgl$new(&quot;flag&quot;),
+  ParamInt$new(&quot;count&quot;, lower = 0, upper = 10)
+))</code></pre>
+<pre><code>
+ParamSet: 
+      id    class lower upper      levels     default value
+1:  flag ParamLgl    NA    NA  TRUE,FALSE &lt;NoDefault&gt;      
+2: count ParamInt     0    10             &lt;NoDefault&gt;      </code></pre>
+</div>
+<p>See the <a href="https://mlr3book.mlr-org.com/paradox.html">online vignette</a> of <code>paradox</code> for a more complete introduction.</p>
+<!--radix_placeholder_article_footer-->
+<!--/radix_placeholder_article_footer-->
+</div>
+
+<div class="d-appendix">
+</div>
+
+
+<!--radix_placeholder_site_after_body-->
+<!--/radix_placeholder_site_after_body-->
+<!--radix_placeholder_appendices-->
+<div class="appendix-bottom"></div>
+<!--/radix_placeholder_appendices-->
+<!--radix_placeholder_navigation_after_body-->
+<!--/radix_placeholder_navigation_after_body-->
+
+</body>
+
+</html>
