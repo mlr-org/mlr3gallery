@@ -173,6 +173,10 @@ glrn <- GraphLearner$new(gr$clone() %>>%
   po(learner))
 ```
 
+We needed to use the following commands for the Graph:
+* `fixfactors`: Removes empty factor levels and removes factor levels that do not exist during training.
+* `imputesample`: In some cases, if missing factor levels do not occur during training but only while predicting, `imputenewlvl` does not create a new level. For those, we sample a random value.
+
 ```{r}
 res <- resample(task, glrn, rdesc, store_models = TRUE)
 agg <- res$aggregate(msr("classif.acc"))
@@ -277,7 +281,7 @@ lrn_list <- list(
 ```
 
 After having done that, we can set up our benchmark grid: 
-
+?lrn
 Now we can define our benchmark design.
 This is done to ensure exhaustive and consistent resampling for all learners.
 This step is needed to execute over the same train/test split for each task.
@@ -296,7 +300,7 @@ autoplot(bmr) + theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
 Further we are able to compare sensitivity and specificity.
-Here we need to ensure that the benchmark results (bmr) only contain a single 'Task':
+Here we need to ensure that the benchmark results only contain a single Task:
 
 ```{r}
 autoplot(bmr$clone()$filter(task_id = "titanic"), type = "roc")
