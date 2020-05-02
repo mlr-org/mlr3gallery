@@ -1345,8 +1345,8 @@ document.addEventListener('DOMContentLoaded', function() {
 <p><a href="https://mlr3pipelines.mlr-org.com/">mlr3pipelines</a> offers a very flexible way to create data preprocessing steps. This is achieved by a modular approach using <a href="https://mlr3pipelines.mlr-org.com/reference/PipeOp.html"><code>PipeOps</code></a>. For detailed overview check the <a href="https://mlr3book.mlr-org.com/pipelines.html">mlr3book</a>.</p>
 <p>Recommended prior readings:</p>
 <ul>
-<li><a href="https://mlr3gallery.mlr-org.com/basics_pipelines_german_credit/">mlr3pipelines tutorial - german credit</a></li>
-<li><a href="https://mlr3gallery.mlr-org.com/impute-missing-variables/">Impute missing variables</a> .</li>
+<li><a href="https://mlr3gallery.mlr-org.com/posts/2020-03-11-basics-german-credit/">mlr3pipelines tutorial - german credit</a></li>
+<li><a href="https://mlr3gallery.mlr-org.com/posts/2020-01-30-impute-missing-levels/">Impute missing variables</a> .</li>
 </ul>
 <p>This post covers:</p>
 <ol type="1">
@@ -1580,7 +1580,7 @@ pima_tsk$missings()</code></pre>
 diabetes      age  glucose  insulin     mass pedigree pregnant pressure  triceps 
        0        0        5      374       11        0        0       35      227 </code></pre>
 </div>
-<p>A common approach in such situations is to impute the missing values and to add a missing indicator column as explained in the <a href="https://mlr3gallery.mlr-org.com/impute-missing-variables/">Impute missing variables</a> post. Suppose we want to use</p>
+<p>A common approach in such situations is to impute the missing values and to add a missing indicator column as explained in the <a href="https://mlr3gallery.mlr-org.com/posts/2020-01-30-impute-missing-levels/">Impute missing variables</a> post. Suppose we want to use</p>
 <ul>
 <li><a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_imputehist.html"><code>imputehist</code></a> on features “glucose”, “mass” and “pressure” which have only few missing values and</li>
 <li><a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_imputemedian.html"><code>imputemedian</code></a> on features “insulin” and “triceps” which have much more missing values.</li>
@@ -1904,71 +1904,71 @@ tuner = TunerRandomSearch$new()
 set.seed(321)
 tuner$tune(instance)</code></pre>
 <pre><code>
-INFO  [19:24:10.377] Starting to tune 3 parameters with &#39;&lt;TunerRandomSearch&gt;&#39; and &#39;&lt;TerminatorEvals&gt;&#39; 
-INFO  [19:24:10.399] Terminator settings: n_evals=5 
-INFO  [19:24:10.461] Evaluating 1 configurations 
-INFO  [19:24:10.462]  branch.selection classif.rpart.cp classif.rpart.minbucket 
-INFO  [19:24:10.462]     simple_median       0.09379127                       3 
-INFO  [19:24:10.760] Benchmark with 3 resampling iterations 
-INFO  [19:24:10.876] Applying learner &#39;branch.copy.simple_median.imputehist.missind.imputemedian.featureunion.unbranch.classif.rpart&#39; on task &#39;pima&#39; (iter 2/3) 
-INFO  [19:24:11.101] Applying learner &#39;branch.copy.simple_median.imputehist.missind.imputemedian.featureunion.unbranch.classif.rpart&#39; on task &#39;pima&#39; (iter 3/3) 
-INFO  [19:24:11.337] Applying learner &#39;branch.copy.simple_median.imputehist.missind.imputemedian.featureunion.unbranch.classif.rpart&#39; on task &#39;pima&#39; (iter 1/3) 
-INFO  [19:24:11.556] Finished benchmark 
-INFO  [19:24:11.568] Result of batch 1: 
-INFO  [19:24:11.570]  branch.selection classif.rpart.cp classif.rpart.minbucket classif.ce 
-INFO  [19:24:11.570]     simple_median       0.09379127                       3  0.2617188 
-INFO  [19:24:11.571] 1 configurations evaluated 
-INFO  [19:24:11.655] Evaluating 1 configurations 
-INFO  [19:24:11.657]  branch.selection classif.rpart.cp classif.rpart.minbucket 
-INFO  [19:24:11.657]    impute_missind       0.04578568                       3 
-INFO  [19:24:11.983] Benchmark with 3 resampling iterations 
-INFO  [19:24:11.993] Applying learner &#39;branch.copy.simple_median.imputehist.missind.imputemedian.featureunion.unbranch.classif.rpart&#39; on task &#39;pima&#39; (iter 1/3) 
-INFO  [19:24:12.405] Applying learner &#39;branch.copy.simple_median.imputehist.missind.imputemedian.featureunion.unbranch.classif.rpart&#39; on task &#39;pima&#39; (iter 2/3) 
-INFO  [19:24:12.779] Applying learner &#39;branch.copy.simple_median.imputehist.missind.imputemedian.featureunion.unbranch.classif.rpart&#39; on task &#39;pima&#39; (iter 3/3) 
-INFO  [19:24:13.169] Finished benchmark 
-INFO  [19:24:13.177] Result of batch 2: 
-INFO  [19:24:13.178]  branch.selection classif.rpart.cp classif.rpart.minbucket classif.ce 
-INFO  [19:24:13.178]    impute_missind       0.04578568                       3  0.2552083 
-INFO  [19:24:13.179] 2 configurations evaluated 
-INFO  [19:24:13.252] Evaluating 1 configurations 
-INFO  [19:24:13.254]  branch.selection classif.rpart.cp classif.rpart.minbucket 
-INFO  [19:24:13.254]     simple_median       0.03692127                       8 
-INFO  [19:24:13.582] Benchmark with 3 resampling iterations 
-INFO  [19:24:13.590] Applying learner &#39;branch.copy.simple_median.imputehist.missind.imputemedian.featureunion.unbranch.classif.rpart&#39; on task &#39;pima&#39; (iter 3/3) 
-INFO  [19:24:13.813] Applying learner &#39;branch.copy.simple_median.imputehist.missind.imputemedian.featureunion.unbranch.classif.rpart&#39; on task &#39;pima&#39; (iter 2/3) 
-INFO  [19:24:14.036] Applying learner &#39;branch.copy.simple_median.imputehist.missind.imputemedian.featureunion.unbranch.classif.rpart&#39; on task &#39;pima&#39; (iter 1/3) 
-INFO  [19:24:14.429] Finished benchmark 
-INFO  [19:24:14.437] Result of batch 3: 
-INFO  [19:24:14.440]  branch.selection classif.rpart.cp classif.rpart.minbucket classif.ce 
-INFO  [19:24:14.440]     simple_median       0.03692127                       8  0.2513021 
-INFO  [19:24:14.442] 3 configurations evaluated 
-INFO  [19:24:14.511] Evaluating 1 configurations 
-INFO  [19:24:14.513]  branch.selection classif.rpart.cp classif.rpart.minbucket 
-INFO  [19:24:14.513]    impute_missind       0.06364106                       5 
-INFO  [19:24:14.909] Benchmark with 3 resampling iterations 
-INFO  [19:24:14.924] Applying learner &#39;branch.copy.simple_median.imputehist.missind.imputemedian.featureunion.unbranch.classif.rpart&#39; on task &#39;pima&#39; (iter 3/3) 
-INFO  [19:24:15.321] Applying learner &#39;branch.copy.simple_median.imputehist.missind.imputemedian.featureunion.unbranch.classif.rpart&#39; on task &#39;pima&#39; (iter 1/3) 
-INFO  [19:24:15.773] Applying learner &#39;branch.copy.simple_median.imputehist.missind.imputemedian.featureunion.unbranch.classif.rpart&#39; on task &#39;pima&#39; (iter 2/3) 
-INFO  [19:24:16.182] Finished benchmark 
-INFO  [19:24:16.197] Result of batch 4: 
-INFO  [19:24:16.201]  branch.selection classif.rpart.cp classif.rpart.minbucket classif.ce 
-INFO  [19:24:16.201]    impute_missind       0.06364106                       5   0.265625 
-INFO  [19:24:16.203] 4 configurations evaluated 
-INFO  [19:24:16.281] Evaluating 1 configurations 
-INFO  [19:24:16.282]  branch.selection classif.rpart.cp classif.rpart.minbucket 
-INFO  [19:24:16.282]     simple_median       0.09899797                      10 
-INFO  [19:24:16.709] Benchmark with 3 resampling iterations 
-INFO  [19:24:16.725] Applying learner &#39;branch.copy.simple_median.imputehist.missind.imputemedian.featureunion.unbranch.classif.rpart&#39; on task &#39;pima&#39; (iter 2/3) 
-INFO  [19:24:17.022] Applying learner &#39;branch.copy.simple_median.imputehist.missind.imputemedian.featureunion.unbranch.classif.rpart&#39; on task &#39;pima&#39; (iter 3/3) 
-INFO  [19:24:17.273] Applying learner &#39;branch.copy.simple_median.imputehist.missind.imputemedian.featureunion.unbranch.classif.rpart&#39; on task &#39;pima&#39; (iter 1/3) 
-INFO  [19:24:17.845] Finished benchmark 
-INFO  [19:24:17.853] Result of batch 5: 
-INFO  [19:24:17.855]  branch.selection classif.rpart.cp classif.rpart.minbucket classif.ce 
-INFO  [19:24:17.855]     simple_median       0.09899797                      10  0.2617188 
-INFO  [19:24:17.856] 5 configurations evaluated 
-INFO  [19:24:17.927] Finished tuning after 5 evals 
-INFO  [19:24:17.970] Tuned x: branch.selection=simple_median, classif.rpart.cp=0.03692, classif.rpart.minbucket=8 
-INFO  [19:24:17.972] Tuned y: classif.ce=0.2513 </code></pre>
+INFO  [11:00:10.722] Starting to tune 3 parameters with &#39;&lt;TunerRandomSearch&gt;&#39; and &#39;&lt;TerminatorEvals&gt;&#39; 
+INFO  [11:00:10.757] Terminator settings: n_evals=5 
+INFO  [11:00:10.799] Evaluating 1 configurations 
+INFO  [11:00:10.801]  branch.selection classif.rpart.cp classif.rpart.minbucket 
+INFO  [11:00:10.801]     simple_median       0.09379127                       3 
+INFO  [11:00:11.238] Benchmark with 3 resampling iterations 
+INFO  [11:00:11.420] Applying learner &#39;branch.copy.simple_median.imputehist.missind.imputemedian.featureunion.unbranch.classif.rpart&#39; on task &#39;pima&#39; (iter 2/3) 
+INFO  [11:00:11.717] Applying learner &#39;branch.copy.simple_median.imputehist.missind.imputemedian.featureunion.unbranch.classif.rpart&#39; on task &#39;pima&#39; (iter 3/3) 
+INFO  [11:00:11.981] Applying learner &#39;branch.copy.simple_median.imputehist.missind.imputemedian.featureunion.unbranch.classif.rpart&#39; on task &#39;pima&#39; (iter 1/3) 
+INFO  [11:00:12.236] Finished benchmark 
+INFO  [11:00:12.251] Result of batch 1: 
+INFO  [11:00:12.253]  branch.selection classif.rpart.cp classif.rpart.minbucket classif.ce 
+INFO  [11:00:12.253]     simple_median       0.09379127                       3  0.2617188 
+INFO  [11:00:12.255] 1 configurations evaluated 
+INFO  [11:00:12.355] Evaluating 1 configurations 
+INFO  [11:00:12.357]  branch.selection classif.rpart.cp classif.rpart.minbucket 
+INFO  [11:00:12.357]    impute_missind       0.04578568                       3 
+INFO  [11:00:12.708] Benchmark with 3 resampling iterations 
+INFO  [11:00:12.715] Applying learner &#39;branch.copy.simple_median.imputehist.missind.imputemedian.featureunion.unbranch.classif.rpart&#39; on task &#39;pima&#39; (iter 1/3) 
+INFO  [11:00:13.071] Applying learner &#39;branch.copy.simple_median.imputehist.missind.imputemedian.featureunion.unbranch.classif.rpart&#39; on task &#39;pima&#39; (iter 2/3) 
+INFO  [11:00:13.528] Applying learner &#39;branch.copy.simple_median.imputehist.missind.imputemedian.featureunion.unbranch.classif.rpart&#39; on task &#39;pima&#39; (iter 3/3) 
+INFO  [11:00:13.937] Finished benchmark 
+INFO  [11:00:13.945] Result of batch 2: 
+INFO  [11:00:13.947]  branch.selection classif.rpart.cp classif.rpart.minbucket classif.ce 
+INFO  [11:00:13.947]    impute_missind       0.04578568                       3  0.2552083 
+INFO  [11:00:13.948] 2 configurations evaluated 
+INFO  [11:00:13.976] Evaluating 1 configurations 
+INFO  [11:00:13.978]  branch.selection classif.rpart.cp classif.rpart.minbucket 
+INFO  [11:00:13.978]     simple_median       0.03692127                       8 
+INFO  [11:00:14.256] Benchmark with 3 resampling iterations 
+INFO  [11:00:14.265] Applying learner &#39;branch.copy.simple_median.imputehist.missind.imputemedian.featureunion.unbranch.classif.rpart&#39; on task &#39;pima&#39; (iter 3/3) 
+INFO  [11:00:14.546] Applying learner &#39;branch.copy.simple_median.imputehist.missind.imputemedian.featureunion.unbranch.classif.rpart&#39; on task &#39;pima&#39; (iter 2/3) 
+INFO  [11:00:14.798] Applying learner &#39;branch.copy.simple_median.imputehist.missind.imputemedian.featureunion.unbranch.classif.rpart&#39; on task &#39;pima&#39; (iter 1/3) 
+INFO  [11:00:15.040] Finished benchmark 
+INFO  [11:00:15.047] Result of batch 3: 
+INFO  [11:00:15.049]  branch.selection classif.rpart.cp classif.rpart.minbucket classif.ce 
+INFO  [11:00:15.049]     simple_median       0.03692127                       8  0.2513021 
+INFO  [11:00:15.050] 3 configurations evaluated 
+INFO  [11:00:15.070] Evaluating 1 configurations 
+INFO  [11:00:15.071]  branch.selection classif.rpart.cp classif.rpart.minbucket 
+INFO  [11:00:15.071]    impute_missind       0.06364106                       5 
+INFO  [11:00:15.386] Benchmark with 3 resampling iterations 
+INFO  [11:00:15.396] Applying learner &#39;branch.copy.simple_median.imputehist.missind.imputemedian.featureunion.unbranch.classif.rpart&#39; on task &#39;pima&#39; (iter 3/3) 
+INFO  [11:00:15.780] Applying learner &#39;branch.copy.simple_median.imputehist.missind.imputemedian.featureunion.unbranch.classif.rpart&#39; on task &#39;pima&#39; (iter 1/3) 
+INFO  [11:00:16.136] Applying learner &#39;branch.copy.simple_median.imputehist.missind.imputemedian.featureunion.unbranch.classif.rpart&#39; on task &#39;pima&#39; (iter 2/3) 
+INFO  [11:00:16.493] Finished benchmark 
+INFO  [11:00:16.501] Result of batch 4: 
+INFO  [11:00:16.503]  branch.selection classif.rpart.cp classif.rpart.minbucket classif.ce 
+INFO  [11:00:16.503]    impute_missind       0.06364106                       5   0.265625 
+INFO  [11:00:16.505] 4 configurations evaluated 
+INFO  [11:00:16.531] Evaluating 1 configurations 
+INFO  [11:00:16.532]  branch.selection classif.rpart.cp classif.rpart.minbucket 
+INFO  [11:00:16.532]     simple_median       0.09899797                      10 
+INFO  [11:00:16.831] Benchmark with 3 resampling iterations 
+INFO  [11:00:16.838] Applying learner &#39;branch.copy.simple_median.imputehist.missind.imputemedian.featureunion.unbranch.classif.rpart&#39; on task &#39;pima&#39; (iter 2/3) 
+INFO  [11:00:17.057] Applying learner &#39;branch.copy.simple_median.imputehist.missind.imputemedian.featureunion.unbranch.classif.rpart&#39; on task &#39;pima&#39; (iter 3/3) 
+INFO  [11:00:17.320] Applying learner &#39;branch.copy.simple_median.imputehist.missind.imputemedian.featureunion.unbranch.classif.rpart&#39; on task &#39;pima&#39; (iter 1/3) 
+INFO  [11:00:17.534] Finished benchmark 
+INFO  [11:00:17.547] Result of batch 5: 
+INFO  [11:00:17.549]  branch.selection classif.rpart.cp classif.rpart.minbucket classif.ce 
+INFO  [11:00:17.549]     simple_median       0.09899797                      10  0.2617188 
+INFO  [11:00:17.551] 5 configurations evaluated 
+INFO  [11:00:17.581] Finished tuning after 5 evals 
+INFO  [11:00:17.612] Tuned x: branch.selection=simple_median, classif.rpart.cp=0.03692, classif.rpart.minbucket=8 
+INFO  [11:00:17.613] Tuned y: classif.ce=0.2513 </code></pre>
 <pre class="r"><code>
 instance$archive()</code></pre>
 <pre><code>
