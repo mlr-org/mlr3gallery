@@ -8,7 +8,7 @@ categories:
 author:
   - name: Florian Pfisterer
 description: |
-  This post shows how to build a Graph using the mlr3pipelines package on the "titanic" dataset.
+  This post shows how to build a Graph using the mlr3pipelines package on the "titanic" dataset. Moreover, feature engineering, data imputation and benchmarking are covered.
 date: 04-27-2020
 output:
   distill::distill_article:
@@ -21,7 +21,7 @@ You can find the first use case [here](/2020-03-12-intro-pipelines-titanic/).
 <!-- Need to fix hyperlink -->
 In this section we will focus on more advanced usage of `mlr3pipelines`.
 Specifically, this section illustrates the different options when it comes to data imputation and feature engineering.
-Furthermore, the section on benchmarking shows how to visualize, benchmark and compare our results.
+Furthermore, the section on benchmarking shows how to benchmark, visualize and compare our results.
 Again, we need to take some prepatory steps: 
 
 ```{r, include = FALSE, warning = FALSE, message = FALSE}
@@ -246,6 +246,11 @@ lrn_list <- list(
 ```
 
 After having done that, we can set up our benchmark grid: 
+
+Now we can define our benchmark design.
+This is done to ensure exhaustive and consistent resampling for all learners.
+This step is needed to execute over the same train/test split for each task.
+
 ```{r}
 bm_design <- benchmark_grid(task = task_imputed, resamplings = rsmp("cv", folds = 10), learners = lrn_list)
 bmr <- benchmark(bm_design, store_models = TRUE)
@@ -253,13 +258,14 @@ print(bmr)
 ```
 
 So, where do we go from here?
-We could for instance use a boxplot and compare the two: 
+We could for instance use a boxplot: 
 
 ```{r}
 autoplot(bmr) + theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
-Further we are able to compare sensitivity and specificity: 
+Further we are able to compare sensitivity and specificity.
+Here we need to ensure that the benchmark results (bmr) only contain a single 'Task':
 
 ```{r}
 autoplot(bmr$clone()$filter(task_id = "titanic"), type = "roc")
@@ -273,7 +279,7 @@ ggplot2::autoplot(bmr, type = "prc")
 ```
 
 As one can see, there are various options when it comes to benchmarking and visualizing.
-You could have a look at some other use cases in our galary for inspiration.
+You could have a look at some other use cases in our gallery for inspiration.
 
 ## Future
 
