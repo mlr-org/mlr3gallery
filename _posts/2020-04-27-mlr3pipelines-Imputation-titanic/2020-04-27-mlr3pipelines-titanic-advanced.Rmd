@@ -46,6 +46,27 @@ library("mlr3viz")
 data("titanic")
 ```
 
+As in the basics chapter, we use the titanic data set.
+To recap we have undertaken the following steps:
+
+```{r}
+# splitting the data set
+titanic_train <- titanic[1:891, ]
+titanic_test <- titanic[892:1309, ]
+
+# setting up the task 
+task <- TaskClassif$new("titanic", titanic_train, target = "survived", positive = "1")
+task$select(cols = setdiff(task$feature_names, c("cabin", "name", "ticket")))
+
+# setting up the learner
+learner <- lrn("classif.rpart")
+
+#setting up our resampling method
+rdesc <- rsmp("cv", folds = 3L)$instantiate(task)
+res <- resample(task, learner, rdesc, store_models = TRUE)
+
+```
+
 ## Imputation
 
 A very simple way to do this to just impute a constant value for each feature.
@@ -64,6 +85,8 @@ As a result, instead of imputing a constant value, we will do two things:
 This imputation scheme is called 'imputation with constants' and is already implemented in `mlr3pipelines`.
 It can be done using `PipeOpImputeConstant`.
 
+Remember that we are trying to optimize our predictive power by using a random forest model ('classif.ranger').
+Now, random forest models do not naturally handle missing values which is the reason why we need imputation.
 Before imputation, our data looks as follows:
 
 ```{r}
@@ -143,9 +166,9 @@ glrn <- GraphLearner$new(gr$clone() %>>% po(learner))
 ```
 
 ```{r}
-res <- resample(task, glrn, rdesc, store_models = TRUE)
-agg2 <- res$aggregate(msr("classif.acc"))
-agg2
+res <- resample(task_newlvl, glrn, rdesc, store_models = TRUE)
+agg <- res$aggregate(msr("classif.acc"))
+agg
 ```
 
 So our model has not improved heavily, currently it has an accuracy of  `r round(agg, 3)`.
