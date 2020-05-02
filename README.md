@@ -7,7 +7,7 @@
 ## Add a new post
 
 1. Install `distill` via `install.packages("distill")`.
-1. Run `distill::create_blog()`.
+1. Run `distill::create_post()`.
 1. Add a setup chunk to your post
     
    ````r
@@ -24,7 +24,8 @@
    The website can be previewed using `rmarkdown::render_site()` and `pkgdown::preview_site()` or (when using RStudio) by clicking on "Build Website" in the "Build" pane.
 1. Apply the [mlr-style](https://github.com/mlr-org/mlr3/wiki/Style-Guide#styler-mlr-style) to the post.
 1. Check if everything looks good.
-1. Open Pull Request for review (the `docs/` directory needs to be included - this is the directory that is going to be served via gh-pages)
+1. Open a Pull Request for review (the `docs/` directory needs to be included - this is the directory that is going to be served via gh-pages).
+   This includes **all figures** and other auxillary files.
 
 ## CI
 
