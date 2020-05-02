@@ -30,6 +30,11 @@ knitr::opts_chunk$set(
   echo = TRUE,
   R.options = list(width = 80)
 )
+if (require("data.table")) data.table::setDTthreads(1)
+options(width = 90)
+set.seed(8008135)
+lgr::get_logger("mlr3")$set_threshold("warn")
+library(skimr)
 ```
 
 For the case that you are only tuning in for the second part, we need to load some packages: 
@@ -162,11 +167,14 @@ Luckily, this is automatically handled in our `Graph`, if we use it through a `G
 We can simple append a `ranger` learner to the Graph and create a `GraphLearner` from this.
 
 ```{r}
-glrn <- GraphLearner$new(gr$clone() %>>% po(learner))
+glrn <- GraphLearner$new(gr$clone() %>>% 
+  po("imputesample") %>>%
+  po("fixfactors") %>>%
+  po(learner))
 ```
 
 ```{r}
-res <- resample(task_newlvl, glrn, rdesc, store_models = TRUE)
+res <- resample(task, glrn, rdesc, store_models = TRUE)
 agg <- res$aggregate(msr("classif.acc"))
 agg
 ```
