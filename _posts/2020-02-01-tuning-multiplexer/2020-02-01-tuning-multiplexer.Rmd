@@ -1,9 +1,10 @@
 ---
-title: Tuning Over Multiple Learners (Tuning Multiplexer)
-categories: 
+title: Tuning Over Multiple Learners
+categories:
  - tuning
 author:
   - name: Jakob Richter
+  - name: Bernd Bischl
 date: 02-01-2020
 description: |
   This use case shows how to tune over multiple learners for a single task.
@@ -14,29 +15,36 @@ output:
 ---
 
 This use case shows how to tune over multiple learners for a single task.
-Following tasks are illustrated:
+You will learn the following:
 
-* Build a pipeline that can switch between multiple learners.
-* Define the hyperparameter search space for the pipeline.
-  - Define transformations for single hyperparameters.
-  - Define a hierarchical order of the hyperparameters.
-* Run a random search.
+* Build a pipeline that can switch between multiple learners
+* Define the hyperparameter search space for the pipeline
+* Run a random or grid search (or any other tuner, always works the same)
+* Run nested resampling for unbiased performance estimates
 
-## Build the Pipeline
+This is a more advanced use case. What should you know before:
 
-The pipeline just has a single purpose in this example: It should allow us to switch between different learners.
-In the end we will have a so called Piped Learner that uses either an SVM or an random forest (as implemented in the R-package ranger) to train a model, depending on the hyperparameter setting.
+* mlr3 basics
+* mlr3tuning basics, and AutoTuner
+* mlr3pipelines, especially branching
 
-First we will define the learners that we are going to use in a named list.
-The names are needed to control which learner to use in the pipeline.
-They can also be different from the learner id to allow multiple learners with the same id but possible different settings.
-We also have to set the `type` hyperparameter of the SVM at this stage already to be able to tune over the `cost` parameter.
+
+## The Setup
+Assume, you are given some ML task and what to compare a couple of learners, probably because you want to select the best of them at the end of the analysis.
+That's a super standard scenario, it actually sounds so common that you might wonder: Why an (advanced) blog post about this? With pipelines?
+We will consider 2 subcases a) Running the learners in their default, so without tuning b) with tuning.
+
+Let's load some packages and define our learners.
 
 ```{r}
 knitr::opts_chunk$set(
   echo = TRUE,
   R.options = list(width = 80)
 )
+```
+
+
+```{r}
 set.seed(1)
 library(mlr3)
 library(mlr3tuning)
@@ -46,176 +54,195 @@ library(paradox)
 lgr::get_logger("mlr3")$set_threshold("warn")
 lgr::get_logger("mlr3tuning")$set_threshold("warn")
 
-
 learns = list(
-  lrn("classif.svm", type = "C-classification"),
-  lrn("classif.ranger")
+  lrn("classif.xgboost", id = "xgb"),
+  lrn("classif.ranger", id = "rf")
 )
-names(learns) = mlr3misc::map(learns, "id") # does the same as purrr::map
+learns_ids = sapply(learns, function(x) x$id)
+
+task = tsk("sonar") # some random data for this demo
+cv1 = rsmp("cv", folds = 2) # inner loop for nested CV
+cv2 = rsmp("cv", folds = 5) # outer loop for nested CV
+
 ```
 
+## Default Params
+
+### The Benchmark-Table Approach
+Assume we don't want to perform tuning and or with running all learner in their respective defaults.
+Simply run benchmark on the learners and the tasks. That tabulates our results nicely and shows us what works best.
+
+
+```{r}
+bg = benchmark_grid(task, learns, cv2)
+b = benchmark(bg)
+b$aggregate(measures = msr("classif.ce"))
+```
+
+### The Pipelines Approach
+
+Ok, why would we ever want to change the simple approach above - and use pipelines / tuning for this?
+Three reasons:
+a) What we are doing with `benchmark `is actually statistically flawed, insofar if we report the error of the numerically best method from the benchmark table as its estimated future performance. If we do that we have "optimized on the CV" (we basically ran a grid search over our learners!) and we know that this is will produce optimistically biased results. NB: This is a somewhat ridiculous criticism if we are going over only a handful of options, and the bias will be very small. But it will be noticeable if we do this over hundreds of learners, so it is important to understand the underlying problem. This is a somewhat subtle point, and this gallery post is more about technical hints for mlr3, so we will stop this discussion here.
+b) For some tuning algorithms, you might have a chance to more efficiently select from the set of algorithms than running the full benchmark. Because of the categorical nature of the problem, you will not be able to learn stuff like "If learner A works bad, I don't have to try learner B", but you can potentially save some resampling iterations. Assume you have so select from 100 candidates, experiments are expensive, and you use a 20-fold CV. If learner A has super-bad results in the first 5 folds of the CV, you might already want to stop here. "Racing" would be such a tuning algorithm.
+c) It helps us to foreshadow what comes later in this post where we tune the learners.
+
+
+The pipeline just has a single purpose in this example:
+It should allow us to switch between different learners, depending on a hyperparameter.
 The pipe consists of three elements:
-The `branch` operator will pipe the incoming data to one of the following elements depending on how the `branch.selection` parameter is set.
-The second element consists of our learners.
-Using `lapply(learns, po)` we convert them to single pipe operators.
-`gunion` combines them in an unconnected manner, so that they can be used after a branching.
-Naturally, one of the learner models has to be the end result of the graph.
-`unbranch` takes care of that.
+
+* `branch` pipes incoming data to one of the following elements, on different data channels. We can name these channel on construction with `options`.
+* our learners (combined with `gunion`)
+* `unbranch` combines the forked paths at the end.
 
 ```{r}
 pipe =
-  po("branch", names(learns)) %>>%
-  gunion(unname(lapply(learns, po))) %>>%
+  po("branch", options = learns_ids) %>>%
+  gunion(lapply(learns, po)) %>>%
   po("unbranch")
-
 pipe$plot()
 ```
 
-## Define the Search Space
+The pipeline has now quite a lot of available hyperparams. It includes all hyperparams from all contained learnrs. But as we don't tune them here (yet), we don't care (yet).  But the first hyperparam is special.
+`branch.selection` controls over which (named) branching channel our data flows.
 
-First we want to get a glance of all the hyperparameters we could tune over.
-The pipe has a combined parameter set of all learners that is so big, so we have to use a trick to get an overview.
+```{r}
+pipe$param_set$ids()
+pipe$param_set$params$branch.selection
+```
+
+We can now tune over this pipeline, and probably running grid search seems a good idea to "touch" every
+available learner.
+NB: We have now written down in (much more complicated code) what we did before with `benchmark`.
+
+```{r}
+glrn = GraphLearner$new(pipe, id = "g") # connect pipe to mlr3
+ps = ParamSet$new(list(
+  ParamFct$new("branch.selection", levels = c("rf", "xgb"))
+))
+instance = TuningInstance$new(
+  task = task,
+  learner = glrn,
+  resampling = cv1,
+  measures = msr("classif.ce"),
+  param_set = ps,
+  terminator = term("none")
+)
+tuner = tnr("grid_search")
+tuner$tune(instance)
+instance$archive(unnest = "tune_x")
+instance$result
+```
+
+But: Via this approach we can now get unbiased performance results via nested resampling and using the AutoTuner (which would make much more sense if we would select from 100 models and not 2).
+
+```{r}
+at = AutoTuner$new(
+  learner = glrn,
+  resampling = cv1,
+  measures = msr("classif.ce"),
+  tune_ps = ps,
+  terminator = term("none"),
+  tuner = tuner
+)
+rr = resample(task, at, cv2, store_models = TRUE)
+# access 1st inner tuning result
+ll = rr$data$learner[[1]]
+ll$tuning_result
+ll$archive(unnest = "tune_x")
+```
+
+## Model-Selection and Tuning with Pipelines
+
+Now let's select from our given set of models and tune their hyperparameters at the some point in time.
+One way to do this is define a search space for each individual learner, wrap them all with the `AutoTuner`, then call `benchmark` on them. As this is pretty standard, we will skip this here, and show an even neater option, where you can tune over models and hyperparameters in one go. If you have quite a large space of potential learners and combine this with an efficient tuning algorithm, this can save quite some time in tuning as you can learn during optimization which options work best and focus on them. NB: Many AutoML systems work in a very similar way.
+
+### Define the Search Space
+
+Remember, that the pipeline contains a joint set of all contained hyperparameters.
+Prefixed with the respective PipeOp ID, to make names unique.
 
 ```{r}
 as.data.table(pipe$param_set)[,1:4]
 ```
 
-We decide to tune the `mtry` parameter of the random forest (`ranger`) and the `cost` parameter of the SVM.
-Additionally we tune the pipe parameter that chooses whether to use `ranger` or `svm` to build the model.
-We have to manually specify the numerical parameters with boundaries.
-The categorical parameter of the branch selection can be directly copied.
+We decide to tune the `mtry` parameter of the random forest and the `nrounds` parameter of xgboost.
+Additionally we tune branching parameter that selects our learner.
 
-We know that the `cost` parameter is more sensitive to changes below 1.
-To reflect that, we will use a transformation, so that evenly distributed values between -10 and 10 are transformed to values between $2^{-10}$ and $2^{10}$.
-
-Additionally we have to reflect the hierarchical order of the parameter sets.
+Additionally we have to reflect the hierarchical order of the parameter sets
+(admittedly, this is somewhat inconvenient).
 We can only set the `mtry` value if the pipe is configured to use the random forest (`ranger`).
-The same applies to the `cost_trafo` parameter of the SVM.
+The same applies for the xgboost parameter.
 
 ```{r}
 ps = ParamSet$new(list(
-  pipe$param_set$params$branch.selection$clone(), # ParamFct can be copied.
-  ParamInt$new("classif.ranger.mtry", lower = 1L, upper = 20L),
-  ParamDbl$new("classif.svm.cost_trafo", lower = -10, upper = 10)
+  ParamFct$new("branch.selection", levels = c("rf", "xgb")),
+  # more complicated, but programmtic way for the above:
+  # pipe$param_set$params$branch.selection$clone()
+  ParamInt$new("rf.mtry", lower = 1L, upper = 20L),
+  ParamInt$new("xgb.nrounds", lower = 1, upper = 500)
 ))
 
-ps$trafo = function(x, param_set) {
-  # we only do the trafo if branch.selection == "classif.svm",
-  # yes we could also write that in the if statement
-  if (!is.null(x$classif.svm.cost_trafo)) {
-    x$classif.svm.cost = 2^x$classif.svm.cost_trafo
-    x$classif.svm.cost_trafo = NULL
-  }
-  return(x)
-}
-
-ps$add_dep("classif.ranger.mtry", "branch.selection", CondEqual$new("classif.ranger"))
-ps$add_dep("classif.svm.cost_trafo", "branch.selection", CondEqual$new("classif.svm"))
+# FIXME this seems pretty inconvenient
+ps$add_dep("rf.mtry", "branch.selection", CondEqual$new("rf"))
+ps$add_dep("xgb.nrounds", "branch.selection", CondEqual$new("xgb"))
 ```
 
-## Tune the Pipeline with a Random Search
+### Tune the Pipeline with a Random Search
 
-First, we need to build a `Learner` object from the pipe.
-Afterwards we can [tune](https://mlr3book.mlr-org.com/tuning.html) it like every other learner.
+Very similar code as before, we just swap out the search space.
+And now use random search.
 
 ```{r}
-glrn = GraphLearner$new(pipe)
-tsk = tsk("sonar")
-cv5 = rsmp("cv", folds = 5)
-cv5$instantiate(tsk)
-# not a must, but ensures that all evals are on the same exact split
-
 instance = TuningInstance$new(
-  task = tsk,
+  task = task,
   learner = glrn,
-  resampling = cv5,
+  resampling = cv1,
   measures = msr("classif.ce"),
   param_set = ps,
-  terminator = term("evals", n_evals = 20)
+  terminator = term("evals", n_evals = 10)
 )
-
-tuner = TunerRandomSearch$new()
+tuner = tnr("random_search")
 tuner$tune(instance)
+instance$archive(unnest = "tune_x")
 instance$result
 ```
-
 
 The following shows a quick way to visualize the tuning results.
 
 ```{r}
-
-# resdf = instance$archive(unnest = "params") #this unnests the transformed values
-resdf = instance$archive(unnest = "tune_x") #this unnests the tuner search space values
-resdf = tidyr::pivot_longer(
-  resdf,
-  c("classif.ranger.mtry", "classif.svm.cost_trafo"),
-  values_drop_na = TRUE)
+resdf = instance$archive(unnest = "tune_x")
+resdf = reshape(resdf,
+  varying = c("xgb.nrounds","rf.mtry"),
+  v.name = "param_value",
+  timevar = "param",
+  times = c("xgb.nrounds","rf.mtry"),
+  direction="long")
 library(ggplot2)
-g = ggplot(resdf, aes(x = value, y = classif.ce))
+g = ggplot(resdf, aes(x = param_value, y = classif.ce))
 g = g + geom_point()
-g = g + facet_grid(~name, scales = "free")
+g = g + facet_grid(~param, scales = "free")
 g
 ```
 
-## Possible Errors
+Nested resampling, now really needed:
 
-In the beginning we had to set `type = "C-classification")` for the learner.
-Here is what happens if we forget to do that (some objects are taken from above):
-
-```{r, error = TRUE}
-learns2 = list(
-  lrn("classif.svm"),
-  lrn("classif.ranger")
-)
-names(learns2) = mlr3misc::map(learns, "id")
-
-pipe2 =
-  po("branch", names(learns2)) %>>%
-  gunion(unname(lapply(learns2, po))) %>>%
-  po("unbranch")
-
-glrn2 = GraphLearner$new(pipe2)
-
-instance2 = TuningInstance$new(
-  task = tsk,
-  learner = glrn2,
-  resampling = cv5,
-  measures = msr("classif.ce"),
-  param_set = ps, #same param set as above
-  terminator = term("evals", n_evals = 20)
-)
-
-
-tuner = TunerRandomSearch$new()
-tuner$tune(instance2)
-```
-
-So this error tells me that the `type` parameter for the learner is not set but to set the parameter `cost`, `type` has to be set to `"C-classification"`.
-The easiest point to do so is before the construction of the pipe.
-
-
-Another problem that might occur is a wrong definition of the transformation function in the parameter set.
-
-```{r, error = TRUE}
-ps3 = ps$clone(deep = TRUE)
-ps3$trafo = function(x, param_set) {
-  # Wrong! We forgot that classif.svm.cost_trafo is not always present!
-  x$classif.svm.cost = 2^x$classif.svm.cost_trafo
-  return(x)
-}
-
-instance3 = TuningInstance$new(
-  task = tsk,
+```{r}
+at = AutoTuner$new(
   learner = glrn,
-  resampling = cv5,
+  resampling = cv1,
   measures = msr("classif.ce"),
-  param_set = ps3,
-  terminator = term("evals", n_evals = 20)
+  tune_ps = ps,
+  terminator = term("evals", n_evals = 10),
+  tuner = tuner
 )
-
-
-tuner = TunerRandomSearch$new()
-tuner$tune(instance3)
+rr = resample(task, at, cv2, store_models = TRUE)
+# access 1st inner tuning result
+ll = rr$data$learner[[1]]
+ll$tuning_result
+ll$archive(unnest = "tune_x")
 ```
-Here the error is less helpful and even a `traceback()` does not hint you directly towards the `trafo` function that is the cause of the error.
-If you encounter an error like this it makes sense to use `browser()` inside the `tafo` function or set a breakpoint in RStudio to see how the `x` looks like.
+
+
+

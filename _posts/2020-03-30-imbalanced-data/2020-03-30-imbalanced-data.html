@@ -41,15 +41,17 @@
   <meta property="twitter:description" content="This use case compares different approaches to handle class imbalance for the optdigits (https://www.openml.org/d/980) binary classification data set using the mlr3 package."/>
 
   <!--/radix_placeholder_meta_tags-->
+  
+  <meta name="citation_reference" content="citation_title=SMOTE: Synthetic Minority Over-sampling Technique;citation_publication_date=2002;citation_publisher=AI Access Foundation;citation_volume=16;citation_doi=10.1613/jair.953;citation_author=N. V. Chawla;citation_author=K. W. Bowyer;citation_author=L. O. Hall;citation_author=W. P. Kegelmeyer"/>
   <!--radix_placeholder_rmarkdown_metadata-->
 
   <script type="text/json" id="radix-rmarkdown-metadata">
-  {"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["title","categories","author","date","description","output"]}},"value":[{"type":"character","attributes":{},"value":["Imbalanced data handling with mlr3"]},{"type":"character","attributes":{},"value":["imbalanced data","tuning"]},{"type":"list","attributes":{},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name"]}},"value":[{"type":"character","attributes":{},"value":["Giuseppe Casalicchio"]}]}]},{"type":"character","attributes":{},"value":["03-30-2020"]},{"type":"character","attributes":{},"value":["This use case compares different approaches to handle class imbalance for the optdigits (https://www.openml.org/d/980) binary classification data set using the mlr3 package.\n"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["distill::distill_article"]}},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["self_contained","css"]}},"value":[{"type":"logical","attributes":{},"value":[false]},{"type":"character","attributes":{},"value":["../../custom.css"]}]}]}]}
+  {"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["title","categories","author","date","description","output","bibliography"]}},"value":[{"type":"character","attributes":{},"value":["Imbalanced data handling with mlr3"]},{"type":"character","attributes":{},"value":["classification","imbalanced data","tuning"]},{"type":"list","attributes":{},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name"]}},"value":[{"type":"character","attributes":{},"value":["Giuseppe Casalicchio"]}]}]},{"type":"character","attributes":{},"value":["03-30-2020"]},{"type":"character","attributes":{},"value":["This use case compares different approaches to handle class imbalance for the optdigits (https://www.openml.org/d/980) binary classification data set using the mlr3 package.\n"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["distill::distill_article"]}},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["self_contained","css"]}},"value":[{"type":"logical","attributes":{},"value":[false]},{"type":"character","attributes":{},"value":["../../custom.css"]}]}]},{"type":"character","attributes":{},"value":["biblio.bib"]}]}
   </script>
   <!--/radix_placeholder_rmarkdown_metadata-->
   
   <script type="text/json" id="radix-resource-manifest">
-  {"type":"character","attributes":{},"value":["2020-03-30-imbalanced-data_files/bowser-1.9.3/bowser.min.js","2020-03-30-imbalanced-data_files/distill-2.2.21/template.v2.js","2020-03-30-imbalanced-data_files/figure-html5/unnamed-chunk-10-1.png","2020-03-30-imbalanced-data_files/figure-html5/unnamed-chunk-11-1.png","2020-03-30-imbalanced-data_files/figure-html5/unnamed-chunk-12-1.png","2020-03-30-imbalanced-data_files/header-attrs-2.1/header-attrs.js","2020-03-30-imbalanced-data_files/jquery-1.11.3/jquery.min.js","2020-03-30-imbalanced-data_files/webcomponents-2.0.0/webcomponents.js"]}
+  {"type":"character","attributes":{},"value":["2020-03-30-imbalanced-data_files/bowser-1.9.3/bowser.min.js","2020-03-30-imbalanced-data_files/distill-2.2.21/template.v2.js","2020-03-30-imbalanced-data_files/figure-html5/unnamed-chunk-10-1.png","2020-03-30-imbalanced-data_files/figure-html5/unnamed-chunk-11-1.png","2020-03-30-imbalanced-data_files/figure-html5/unnamed-chunk-12-1.png","2020-03-30-imbalanced-data_files/header-attrs-2.1/header-attrs.js","2020-03-30-imbalanced-data_files/jquery-1.11.3/jquery.min.js","2020-03-30-imbalanced-data_files/webcomponents-2.0.0/webcomponents.js","biblio.bib"]}
   </script>
   <!--radix_placeholder_navigation_in_header-->
   <!--/radix_placeholder_navigation_in_header-->
@@ -966,7 +968,7 @@
 
 <div class="d-article">
 <h1 id="intro">Intro</h1>
-<p>This use case compares different approaches to handle class imbalance for the <a href="https://www.openml.org/d/980"><code>optdigits</code></a> binary classification data set using the mlr3 package. We mainly focus on undersampling the majority class, oversampling the minority class, and the SMOTE imbalance correction that enriches the minority class with synthetic data. The use case requires prior knowledge in basic ML concepts (issues imbalanced data, hyperparameter tuning, nested cross-validation). The R packages <code>mlr3</code>, <code>mlr3pipelines</code> and <code>mlr3tuning</code> will be used. You can find most of the content here also in the <a href="https://mlr3book.mlr-org.com/">mlr3book</a> explained in a more detailed way.</p>
+<p>This use case compares different approaches to handle class imbalance for the <a href="https://www.openml.org/d/980"><code>optdigits</code></a> binary classification data set using the mlr3 package. We mainly focus on undersampling the majority class, oversampling the minority class, and the SMOTE imbalance correction <span class="citation" data-cites="smote">(Chawla et al. <a href="#ref-smote" role="doc-biblioref">2002</a>)</span> that enriches the minority class with synthetic data. The use case requires prior knowledge in basic ML concepts (issues imbalanced data, hyperparameter tuning, nested cross-validation). The R packages <code>mlr3</code>, <code>mlr3pipelines</code> and <code>mlr3tuning</code> will be used. You can find most of the content here also in the <a href="https://mlr3book.mlr-org.com/">mlr3book</a> explained in a more detailed way.</p>
 <p>These steps are performed:</p>
 <ul>
 <li>Retrieve data sets from <code>OpenML</code></li>
@@ -2112,6 +2114,7 @@ design = benchmark_grid(
 print(design)</code></pre>
 <pre><code>
             task     learner          resampling
+          &lt;list&gt;      &lt;list&gt;              &lt;list&gt;
 1: &lt;TaskClassif&gt; &lt;AutoTuner&gt; &lt;ResamplingHoldout&gt;
 2: &lt;TaskClassif&gt; &lt;AutoTuner&gt; &lt;ResamplingHoldout&gt;
 3: &lt;TaskClassif&gt; &lt;AutoTuner&gt; &lt;ResamplingHoldout&gt;</code></pre>
@@ -2124,14 +2127,16 @@ bmr = benchmark(design, store_models = TRUE)</code></pre>
 <pre class="r"><code>
 bmr$aggregate(measure)</code></pre>
 <pre><code>
-   nr  resample_result   task_id                       learner_id resampling_id
-1:  1 &lt;ResampleResult&gt; optdigits undersample.classif.ranger.tuned       holdout
-2:  2 &lt;ResampleResult&gt; optdigits  oversample.classif.ranger.tuned       holdout
-3:  3 &lt;ResampleResult&gt; optdigits       smote.classif.ranger.tuned       holdout
-   iters classif.fbeta
-1:     1     0.9627792
-2:     1     0.9569620
-3:     1     0.9625935</code></pre>
+      nr  resample_result   task_id                       learner_id
+   &lt;int&gt;           &lt;list&gt;    &lt;char&gt;                           &lt;char&gt;
+1:     1 &lt;ResampleResult&gt; optdigits undersample.classif.ranger.tuned
+2:     2 &lt;ResampleResult&gt; optdigits  oversample.classif.ranger.tuned
+3:     3 &lt;ResampleResult&gt; optdigits       smote.classif.ranger.tuned
+   resampling_id iters classif.fbeta
+          &lt;char&gt; &lt;int&gt;         &lt;num&gt;
+1:       holdout     1     0.9601990
+2:       holdout     1     0.9622166
+3:       holdout     1     0.9571788</code></pre>
 <pre class="r"><code>
 # one value per boxplot since we used holdout as outer resampling
 autoplot(bmr, measure = measure)</code></pre>
@@ -2166,6 +2171,11 @@ ggarrange(utune_gg, otune_gg, stune_gg, common.legend = TRUE, nrow = 1)</code></
 <p>The results show that oversampling the minority class (for simple oversampling as well as for SMOTE) and undersampling the majority class yield a better performance for this specific data set.</p>
 <h2 id="conclusion">Conclusion</h2>
 <p>In this post, we tuned and compared 5 different settings of sampling ratios for the undersampling method, the oversampling method and different SMOTE variants (using different values of <code>K</code> nearest neighbors during the sampling process). If you want to know more, read the <a href="https://mlr3book.mlr-org.com/">mlr3book</a> and the documentation of the mentioned packages.</p>
+<div id="refs" class="references hanging-indent" role="doc-bibliography">
+<div id="ref-smote">
+<p>Chawla, N. V., K. W. Bowyer, L. O. Hall, and W. P. Kegelmeyer. 2002. “SMOTE: Synthetic Minority over-Sampling Technique.” <em>Journal of Artificial Intelligence Research</em> 16 (June): 321–57. <a href="https://doi.org/10.1613/jair.953">https://doi.org/10.1613/jair.953</a>.</p>
+</div>
+</div>
 <!--radix_placeholder_article_footer-->
 <!--/radix_placeholder_article_footer-->
 </div>
@@ -2178,6 +2188,20 @@ ggarrange(utune_gg, otune_gg, stune_gg, common.legend = TRUE, nrow = 1)</code></
 <!--/radix_placeholder_site_after_body-->
 <!--radix_placeholder_appendices-->
 <div class="appendix-bottom"></div>
+<script id="distill-bibliography" type="text/bibtex">
+@article{smote,
+  doi = {10.1613/jair.953},
+  url = {https://doi.org/10.1613/jair.953},
+  year = {2002},
+  month = jun,
+  publisher = {{AI} Access Foundation},
+  volume = {16},
+  pages = {321--357},
+  author = {N. V. Chawla and K. W. Bowyer and L. O. Hall and W. P. Kegelmeyer},
+  title = {{SMOTE}: Synthetic Minority Over-sampling Technique},
+  journal = {Journal of Artificial Intelligence Research}
+}
+</script>
 <!--/radix_placeholder_appendices-->
 <!--radix_placeholder_navigation_after_body-->
 <!--/radix_placeholder_navigation_after_body-->

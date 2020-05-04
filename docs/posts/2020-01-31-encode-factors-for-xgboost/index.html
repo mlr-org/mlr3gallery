@@ -19,10 +19,11 @@
  <!--/radix_placeholder_import_source-->
 
   <!--radix_placeholder_meta_tags-->
-<title>mlr3 Use Cases: Encode factor levels for xgboost</title>
+<title>mlr3gallery: Encode factor levels for xgboost</title>
 
 <meta property="description" itemprop="description" content="The package &quot;xgboost&quot; unfortunately does not support handling of categorical features. Therefore it is required to manually convert factor columns to numerical dummy features. We show how to use &quot;mlr3pipelines&quot; to augment the &quot;mlr_learners_classif.xgboost&quot; learner with an automatic factor encoding."/>
 
+<link rel="canonical" href="https://mlr3gallery.mlr-org.com/posts/2020-01-31-encode-factors-for-xgboost/"/>
 
 <!--  https://schema.org/Article -->
 <meta property="article:published" itemprop="datePublished" content="2020-01-31"/>
@@ -30,22 +31,30 @@
 <meta name="article:author" content="Michel Lang"/>
 
 <!--  https://developers.facebook.com/docs/sharing/webmasters#markup -->
-<meta property="og:title" content="mlr3 Use Cases: Encode factor levels for xgboost"/>
+<meta property="og:title" content="mlr3gallery: Encode factor levels for xgboost"/>
 <meta property="og:type" content="article"/>
 <meta property="og:description" content="The package &quot;xgboost&quot; unfortunately does not support handling of categorical features. Therefore it is required to manually convert factor columns to numerical dummy features. We show how to use &quot;mlr3pipelines&quot; to augment the &quot;mlr_learners_classif.xgboost&quot; learner with an automatic factor encoding."/>
+<meta property="og:url" content="https://mlr3gallery.mlr-org.com/posts/2020-01-31-encode-factors-for-xgboost/"/>
 <meta property="og:locale" content="en_US"/>
-<meta property="og:site_name" content="mlr3 Use Cases"/>
+<meta property="og:site_name" content="mlr3gallery"/>
 
 <!--  https://dev.twitter.com/cards/types/summary -->
 <meta property="twitter:card" content="summary"/>
-<meta property="twitter:title" content="mlr3 Use Cases: Encode factor levels for xgboost"/>
+<meta property="twitter:title" content="mlr3gallery: Encode factor levels for xgboost"/>
 <meta property="twitter:description" content="The package &quot;xgboost&quot; unfortunately does not support handling of categorical features. Therefore it is required to manually convert factor columns to numerical dummy features. We show how to use &quot;mlr3pipelines&quot; to augment the &quot;mlr_learners_classif.xgboost&quot; learner with an automatic factor encoding."/>
+<meta property="twitter:url" content="https://mlr3gallery.mlr-org.com/posts/2020-01-31-encode-factors-for-xgboost/"/>
 
+<!--  https://scholar.google.com/intl/en/scholar/inclusion.html#indexing -->
+<meta name="citation_title" content="mlr3gallery: Encode factor levels for xgboost"/>
+<meta name="citation_fulltext_html_url" content="https://mlr3gallery.mlr-org.com/posts/2020-01-31-encode-factors-for-xgboost/"/>
+<meta name="citation_online_date" content="2020/01/31"/>
+<meta name="citation_publication_date" content="2020/01/31"/>
+<meta name="citation_author" content="Michel Lang"/>
 <!--/radix_placeholder_meta_tags-->
   <!--radix_placeholder_rmarkdown_metadata-->
 
 <script type="text/json" id="radix-rmarkdown-metadata">
-{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["title","categories","author","date","description","output"]}},"value":[{"type":"character","attributes":{},"value":["Encode factor levels for xgboost"]},{"type":"character","attributes":{},"value":["classification","mlr3pipelines","factor encoding"]},{"type":"list","attributes":{},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name"]}},"value":[{"type":"character","attributes":{},"value":["Michel Lang"]}]}]},{"type":"character","attributes":{},"value":["01-31-2020"]},{"type":"character","attributes":{},"value":["The package \"xgboost\" unfortunately does not support handling of categorical features. Therefore it is required to manually convert factor columns to numerical dummy features. We show how to use \"mlr3pipelines\" to augment the \"mlr_learners_classif.xgboost\" learner with an automatic factor encoding."]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["distill::distill_article"]}},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["self_contained","css"]}},"value":[{"type":"logical","attributes":{},"value":[false]},{"type":"character","attributes":{},"value":["../../custom.css"]}]}]}]}
+{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["title","categories","author","date","description","output","citation_url","canonical_url"]}},"value":[{"type":"character","attributes":{},"value":["Encode factor levels for xgboost"]},{"type":"character","attributes":{},"value":["classification","mlr3pipelines","factor encoding"]},{"type":"list","attributes":{},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name"]}},"value":[{"type":"character","attributes":{},"value":["Michel Lang"]}]}]},{"type":"character","attributes":{},"value":["01-31-2020"]},{"type":"character","attributes":{},"value":["The package \"xgboost\" unfortunately does not support handling of categorical features. Therefore it is required to manually convert factor columns to numerical dummy features. We show how to use \"mlr3pipelines\" to augment the \"mlr_learners_classif.xgboost\" learner with an automatic factor encoding."]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["distill::distill_article"]}},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["self_contained","css"]}},"value":[{"type":"logical","attributes":{},"value":[false]},{"type":"character","attributes":{},"value":["../../custom.css"]}]}]},{"type":"character","attributes":{},"value":["https://mlr3gallery.mlr-org.com/posts/2020-01-31-encode-factors-for-xgboost/"]},{"type":"character","attributes":{},"value":["https://mlr3gallery.mlr-org.com/posts/2020-01-31-encode-factors-for-xgboost/"]}]}
 </script>
 <!--/radix_placeholder_rmarkdown_metadata-->
   
@@ -1290,9 +1299,15 @@ document.addEventListener('DOMContentLoaded', function() {
 <header class="header header--fixed" role="banner">
 <nav class="distill-site-nav distill-site-header">
 <div class="nav-left">
-<a href="../../index.html" class="title">mlr3 Use Cases</a>
+<a class="logo" href="https://mlr3.mlr-org.com">
+<img src="../../images/logo.png"/>
+</a>
+<a href="../../index.html" class="title">mlr3gallery</a>
 </div>
 <div class="nav-right">
+<a href="https://github.com/mlr-org/mlr3gallery">
+<i class="fab fa-github"></i>
+</a>
 <a href="javascript:void(0);" class="nav-toggle">&#9776;</a>
 </div>
 </nav>
@@ -1473,7 +1488,18 @@ classif.ce
 <!--radix_placeholder_site_after_body-->
 <!--/radix_placeholder_site_after_body-->
 <!--radix_placeholder_appendices-->
-<div class="appendix-bottom"></div>
+<div class="appendix-bottom">
+  <h3 id="citation">Citation</h3>
+  <p>For attribution, please cite this work as</p>
+  <pre class="citation-appendix short">Lang (2020, Jan. 31). mlr3gallery: Encode factor levels for xgboost. Retrieved from https://mlr3gallery.mlr-org.com/posts/2020-01-31-encode-factors-for-xgboost/</pre>
+  <p>BibTeX citation</p>
+  <pre class="citation-appendix long">@misc{lang2020encode,
+  author = {Lang, Michel},
+  title = {mlr3gallery: Encode factor levels for xgboost},
+  url = {https://mlr3gallery.mlr-org.com/posts/2020-01-31-encode-factors-for-xgboost/},
+  year = {2020}
+}</pre>
+</div>
 <!--/radix_placeholder_appendices-->
 <!--radix_placeholder_navigation_after_body-->
 <!--/radix_placeholder_navigation_after_body-->
