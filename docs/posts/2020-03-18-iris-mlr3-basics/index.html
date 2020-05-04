@@ -1476,7 +1476,19 @@ learner2$param_set$values$minsplit = 50</code></pre>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
 cv10 = rsmp(&quot;cv&quot;, folds = 10)
-r = resample(task, learner1, cv10)
+r = resample(task, learner1, cv10)</code></pre>
+<pre><code>
+INFO  [23:13:02.733] Applying learner &#39;classif.rpart&#39; on task &#39;iris&#39; (iter 1/10) 
+INFO  [23:13:02.767] Applying learner &#39;classif.rpart&#39; on task &#39;iris&#39; (iter 2/10) 
+INFO  [23:13:02.790] Applying learner &#39;classif.rpart&#39; on task &#39;iris&#39; (iter 5/10) 
+INFO  [23:13:02.805] Applying learner &#39;classif.rpart&#39; on task &#39;iris&#39; (iter 7/10) 
+INFO  [23:13:02.819] Applying learner &#39;classif.rpart&#39; on task &#39;iris&#39; (iter 8/10) 
+INFO  [23:13:02.833] Applying learner &#39;classif.rpart&#39; on task &#39;iris&#39; (iter 9/10) 
+INFO  [23:13:02.847] Applying learner &#39;classif.rpart&#39; on task &#39;iris&#39; (iter 3/10) 
+INFO  [23:13:02.869] Applying learner &#39;classif.rpart&#39; on task &#39;iris&#39; (iter 4/10) 
+INFO  [23:13:02.883] Applying learner &#39;classif.rpart&#39; on task &#39;iris&#39; (iter 10/10) 
+INFO  [23:13:02.896] Applying learner &#39;classif.rpart&#39; on task &#39;iris&#39; (iter 6/10) </code></pre>
+<pre class="r"><code>
 print(r)</code></pre>
 <pre><code>
 &lt;ResampleResult&gt; of 10 iterations
@@ -1500,15 +1512,15 @@ r$score(msrs(c(&quot;classif.acc&quot;, &quot;classif.ce&quot;)))</code></pre>
 10: &lt;TaskClassif&gt;    iris &lt;LearnerClassifRpart&gt; classif.rpart &lt;ResamplingCV&gt;
     resampling_id iteration prediction classif.acc classif.ce
  1:            cv         1     &lt;list&gt;   1.0000000 0.00000000
- 2:            cv         2     &lt;list&gt;   0.8666667 0.13333333
- 3:            cv         3     &lt;list&gt;   0.9333333 0.06666667
- 4:            cv         4     &lt;list&gt;   1.0000000 0.00000000
- 5:            cv         5     &lt;list&gt;   0.8666667 0.13333333
- 6:            cv         6     &lt;list&gt;   1.0000000 0.00000000
- 7:            cv         7     &lt;list&gt;   1.0000000 0.00000000
- 8:            cv         8     &lt;list&gt;   0.9333333 0.06666667
- 9:            cv         9     &lt;list&gt;   0.8666667 0.13333333
-10:            cv        10     &lt;list&gt;   0.9333333 0.06666667</code></pre>
+ 2:            cv         2     &lt;list&gt;   0.9333333 0.06666667
+ 3:            cv         3     &lt;list&gt;   0.7333333 0.26666667
+ 4:            cv         4     &lt;list&gt;   0.9333333 0.06666667
+ 5:            cv         5     &lt;list&gt;   1.0000000 0.00000000
+ 6:            cv         6     &lt;list&gt;   0.8666667 0.13333333
+ 7:            cv         7     &lt;list&gt;   0.9333333 0.06666667
+ 8:            cv         8     &lt;list&gt;   0.8666667 0.13333333
+ 9:            cv         9     &lt;list&gt;   1.0000000 0.00000000
+10:            cv        10     &lt;list&gt;   1.0000000 0.00000000</code></pre>
 <pre class="r"><code>
 print(r$data)</code></pre>
 <pre><code>
@@ -1529,14 +1541,14 @@ preds = r$prediction()
 print(preds)</code></pre>
 <pre><code>
 &lt;PredictionClassif&gt; for 150 observations:
-    row_id     truth   response
-         1    setosa     setosa
-        30    setosa     setosa
-        42    setosa     setosa
----                            
-       134 virginica versicolor
-       143 virginica  virginica
-       145 virginica  virginica</code></pre>
+    row_id     truth  response
+        27    setosa    setosa
+        28    setosa    setosa
+        31    setosa    setosa
+---                           
+       115 virginica virginica
+       121 virginica virginica
+       125 virginica virginica</code></pre>
 <pre class="r"><code>
 cm = preds$confusion
 print(cm)</code></pre>
@@ -1544,8 +1556,8 @@ print(cm)</code></pre>
             truth
 response     setosa versicolor virginica
   setosa         50          0         0
-  versicolor      0         46         5
-  virginica       0          4        45</code></pre>
+  versicolor      0         45         6
+  virginica       0          5        44</code></pre>
 </div>
 <h2 id="populating-the-learner-dictionary">Populating the learner dictionary</h2>
 <p>mlr3learners ships out with a dozen different popular learners. We can list them from the its dictionary. If we want more, we can load on extension package from mlr3’s <a href="https://github.com/mlr-org/mlr3learners/wiki">learner-org</a> on GitHub. Note how after the install the dictionary increases in size.</p>
@@ -1561,8 +1573,8 @@ head(as.data.table(mlr_learners)[, c(&quot;key&quot;, &quot;packages&quot;)])</c
 5:        classif.kknn     kknn
 6:         classif.lda     MASS</code></pre>
 <pre class="r"><code>
-# remotes::install_github(&quot;mlr3learners/mlr3learners.randomForest&quot;)
-library(mlr3learners.randomForest)
+# remotes::install_github(&quot;mlr3learners/mlr3learners.randomforest&quot;)
+library(mlr3learners.randomforest)
 print(as.data.table(mlr_learners)[, c(&quot;key&quot;, &quot;packages&quot;)])</code></pre>
 <pre><code>
                      key     packages
@@ -1600,7 +1612,41 @@ print(as.data.table(mlr_learners)[, c(&quot;key&quot;, &quot;packages&quot;)])</
 <pre class="r"><code>
 learners = list(learner1, learner2, lrn(&quot;classif.randomForest&quot;))
 bm_grid = benchmark_grid(task, learners, cv10)
-bm = benchmark(bm_grid)
+bm = benchmark(bm_grid)</code></pre>
+<pre><code>
+INFO  [23:13:04.452] Benchmark with 30 resampling iterations 
+INFO  [23:13:04.459] Applying learner &#39;classif.randomForest&#39; on task &#39;iris&#39; (iter 7/10) 
+INFO  [23:13:04.523] Applying learner &#39;classif.randomForest&#39; on task &#39;iris&#39; (iter 5/10) 
+INFO  [23:13:04.570] Applying learner &#39;classif.rpart&#39; on task &#39;iris&#39; (iter 1/10) 
+INFO  [23:13:04.594] Applying learner &#39;classif.randomForest&#39; on task &#39;iris&#39; (iter 6/10) 
+INFO  [23:13:04.639] Applying learner &#39;classif.randomForest&#39; on task &#39;iris&#39; (iter 1/10) 
+INFO  [23:13:04.681] Applying learner &#39;classif.rpart&#39; on task &#39;iris&#39; (iter 8/10) 
+INFO  [23:13:04.695] Applying learner &#39;classif.rpart&#39; on task &#39;iris&#39; (iter 4/10) 
+INFO  [23:13:04.709] Applying learner &#39;classif.rpart&#39; on task &#39;iris&#39; (iter 1/10) 
+INFO  [23:13:04.725] Applying learner &#39;classif.rpart&#39; on task &#39;iris&#39; (iter 2/10) 
+INFO  [23:13:04.756] Applying learner &#39;classif.randomForest&#39; on task &#39;iris&#39; (iter 10/10) 
+INFO  [23:13:04.828] Applying learner &#39;classif.rpart&#39; on task &#39;iris&#39; (iter 3/10) 
+INFO  [23:13:04.845] Applying learner &#39;classif.rpart&#39; on task &#39;iris&#39; (iter 3/10) 
+INFO  [23:13:04.861] Applying learner &#39;classif.rpart&#39; on task &#39;iris&#39; (iter 8/10) 
+INFO  [23:13:04.879] Applying learner &#39;classif.rpart&#39; on task &#39;iris&#39; (iter 9/10) 
+INFO  [23:13:04.899] Applying learner &#39;classif.randomForest&#39; on task &#39;iris&#39; (iter 9/10) 
+INFO  [23:13:04.940] Applying learner &#39;classif.rpart&#39; on task &#39;iris&#39; (iter 10/10) 
+INFO  [23:13:04.958] Applying learner &#39;classif.rpart&#39; on task &#39;iris&#39; (iter 4/10) 
+INFO  [23:13:04.973] Applying learner &#39;classif.rpart&#39; on task &#39;iris&#39; (iter 7/10) 
+INFO  [23:13:04.992] Applying learner &#39;classif.rpart&#39; on task &#39;iris&#39; (iter 6/10) 
+INFO  [23:13:05.008] Applying learner &#39;classif.randomForest&#39; on task &#39;iris&#39; (iter 4/10) 
+INFO  [23:13:05.049] Applying learner &#39;classif.randomForest&#39; on task &#39;iris&#39; (iter 2/10) 
+INFO  [23:13:05.108] Applying learner &#39;classif.rpart&#39; on task &#39;iris&#39; (iter 2/10) 
+INFO  [23:13:05.134] Applying learner &#39;classif.rpart&#39; on task &#39;iris&#39; (iter 10/10) 
+INFO  [23:13:05.155] Applying learner &#39;classif.rpart&#39; on task &#39;iris&#39; (iter 7/10) 
+INFO  [23:13:05.177] Applying learner &#39;classif.rpart&#39; on task &#39;iris&#39; (iter 9/10) 
+INFO  [23:13:05.199] Applying learner &#39;classif.rpart&#39; on task &#39;iris&#39; (iter 6/10) 
+INFO  [23:13:05.220] Applying learner &#39;classif.randomForest&#39; on task &#39;iris&#39; (iter 8/10) 
+INFO  [23:13:05.269] Applying learner &#39;classif.rpart&#39; on task &#39;iris&#39; (iter 5/10) 
+INFO  [23:13:05.291] Applying learner &#39;classif.rpart&#39; on task &#39;iris&#39; (iter 5/10) 
+INFO  [23:13:05.315] Applying learner &#39;classif.randomForest&#39; on task &#39;iris&#39; (iter 3/10) 
+INFO  [23:13:05.385] Finished benchmark </code></pre>
+<pre class="r"><code>
 print(bm)</code></pre>
 <pre><code>
 &lt;BenchmarkResult&gt; of 30 rows with 3 resampling runs
@@ -1616,9 +1662,9 @@ print(bm$aggregate(measures = msrs(c(&quot;classif.acc&quot;, &quot;classif.ce&q
 2:  2 &lt;ResampleResult&gt;    iris        classif.rpart            cv    10
 3:  3 &lt;ResampleResult&gt;    iris classif.randomForest            cv    10
    classif.acc classif.ce
-1:        0.94       0.06
-2:        0.94       0.06
-3:        0.96       0.04</code></pre>
+1:   0.9333333 0.06666667
+2:   0.9400000 0.06000000
+3:   0.9533333 0.04666667</code></pre>
 </div>
 <h2 id="conclusion">Conclusion</h2>
 <p>We left out a lot of details and other features. If you want to know more, read the <a href="https://mlr3book.mlr-org.com/">mlr3book</a> and the documentation of the mentioned packages.</p>
