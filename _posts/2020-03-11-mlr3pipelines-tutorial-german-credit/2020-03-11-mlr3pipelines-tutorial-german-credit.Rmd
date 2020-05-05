@@ -9,7 +9,7 @@ author:
   - name: Florian Pfisterer
 date: 03-11-2020
 description: |
-  In this tutorial we will continue working with the German Credit Dataset. We already used different Learners on it in previous posts and tried to optimize their hyperparameters. To make things interesting, we introduce missing values into the dataset.
+  In this use case we will continue working with the German Credit Dataset. We already used different Learners on it in previous posts and tried to optimize their hyperparameters. To make things interesting, we artificially introduce missing values into the dataset.
 output:
   distill::distill_article:
     self_contained: false
@@ -29,18 +29,21 @@ lgr::get_logger("mlr3")$set_threshold("warn")
 
 ## Intro
 
-This is the third part in a serial of tutorials.
+This is the third part in a serial of use cases with the German Credit data.
 The other parts of this series can be found here:
 
 * [Part I - Basics](/basics_german_credit/)
 * [Part II - Tuning](/basics_tuning_german_credit/)
 
-In this tutorial we will continue working with the **German Credit Dataset**. We already used different `Learner`s on it and tried to optimize their hyperparameters. Now we will
-
-- preprocess the data as an integrated step of the model fitting process
-- tune the preprocessing parameters
-- use multiple `Learners` in an *ensemble* model
-- see some techniques that make `Learner`s able to tackle challenging datasets that they could not handle otherwise.
+In this tutorial we will continue working with the **German Credit Dataset**. 
+We already used different `Learner`s on it and tried to optimize their hyperparameters. 
+Now we will do four additional things.
+First, we preprocess the data as an integrated step of the model fitting process.
+The integration is important because...
+Then, we tune the associated preprocessing parameters.
+Third, we combine multiple `Learners` in an *ensemble* model.
+Last, we discuss some techniques that make `Learner`s able to tackle _challenging_ datasets that they could not handle otherwise.
+(We are going to outline what challenging means in particular later on.)
 
 ## Prerequisites
 
@@ -57,7 +60,8 @@ library("ggplot2")
 theme_set(theme_light())
 ```
 
-We use the same data as in the mlr3_basics_german_credit example, but will restrict ourselves to the *numerical features*. To make things interesting, we introduce *missing values* in the dataset.
+We use the same data as in the mlr3_basics_german_credit example, but will restrict ourselves to the *numerical features*. 
+To make things interesting or to make it a bit harder for our learners, we introduce *missing values* in the dataset.
 
 ```{r, message=FALSE}
 task = tsk("german_credit")
@@ -73,14 +77,14 @@ credit$credit_risk = credit_full$credit_risk
 task = TaskClassif$new("GermanCredit", credit, "credit_risk")
 ```
 
-- We instantiate a resampling instance for this task to be able to compare resampling performance.
+We instantiate a resampling instance for this task to be able to compare resampling performance.
 
 ```{r}
 set.seed(20191101)
 cv10_instance = rsmp("cv")$instantiate(task)
 ```
 
-Uncomment the following line if you are running this locally (i.e. not on RStudio Cloud).
+You can uncomment the following line if you are running this locally (i.e. __not__ on RStudio Cloud).
 
 ```{r, warning=FALSE}
 # future::plan("multiprocess")
