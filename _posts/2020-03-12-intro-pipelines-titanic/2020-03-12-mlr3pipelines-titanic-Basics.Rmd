@@ -1,0 +1,164 @@
+---
+title: A pipeline for the titanic data set - Basics
+categories:
+  - imputation
+  - classification
+  - mlr3pipelines
+  - feature engineering
+author:
+  - name: Florian Pfisterer
+description: |
+  This post shows how to build a Graph using the mlr3pipelines package on the "titanic" dataset.
+date: 03-12-2020
+output:
+  distill::distill_article:
+    self_contained: false
+    css: ../../custom.css
+---
+
+```{r, include = FALSE, warning = FALSE, message = FALSE}
+# Just some preparation
+knitr::opts_chunk$set(
+  echo = TRUE,
+  R.options = list(width = 80)
+)
+if (require("data.table")) data.table::setDTthreads(1)
+options(width = 90)
+set.seed(8008135)
+lgr::get_logger("mlr3")$set_threshold("warn")
+library(skimr)
+```
+
+## Intro
+
+First of all we are going to load required packages and the data. 
+The data is part of the `mlr3data` package.
+
+```{r}
+library("mlr3")
+library("mlr3learners")
+library("mlr3pipelines")
+library("mlr3data")
+library("mlr3misc")
+library("mlr3viz")
+data("titanic")
+```
+
+The titanic data is very interesting to analyze, even though it is part of many tutorials 
+and showcases. 
+This is because it requires many steps often required in real-world applications of machine 
+learning techniques, such as **missing value imputation**, **handling factors** and others.
+
+Following features are illustrated in this use case section:
+  
+* Summarizing the data set
+* Visualizing data
+* Splitting data into train and test data sets
+* Defining a task and a learner
+
+In order to obtain solutions comparable to official leaderboards, such as the ones available from CRAN, we split the data into train and test set before doing any further analysis.
+Here we are using the predefined split used by Kaggle. 
+
+```{r}
+titanic_train <- titanic[1:891, ]
+titanic_test <- titanic[892:1309, ]
+```
+
+## Exploratory Data Analysis
+
+With the dataset, we get an explanation of the meanings of the different variables:
+
+```
+survived        Survival
+                (0 = No; 1 = Yes)
+pclass          Passenger Class
+                (1 = 1st; 2 = 2nd; 3 = 3rd)
+name            Name
+sex             Sex
+age             Age
+sibsp           Number of Siblings/Spouses Aboard
+parch           Number of Parents/Children Aboard
+ticket          Ticket Number
+fare            Passenger Fare
+cabin           Cabin
+embarked        Port of Embarkation
+                (C = Cherbourg; Q = Queenstown; S = Southampton)
+```
+
+We can use the `skimr` package in order to get a first overview of the data:
+
+```{r, R.options=list(width = 120)}
+skimr::skim(titanic_train)
+skimr::skim(titanic_test)
+```
+
+Here we can also inspect the data for differences in the train and test set. 
+This might be important, as shifts in the data distribution often make our models unreliable.
+
+```{r, out.width="100%", fig.height=7}
+DataExplorer::plot_bar(titanic_train, nrow = 5, ncol = 3)
+```
+
+```{r, out.width="100%", fig.height=4, warning=FALSE}
+DataExplorer::plot_histogram(titanic_train, nrow = 2, ncol = 3)
+DataExplorer::plot_boxplot(titanic_train, by = "survived", nrow = 2, ncol = 3)
+```
+
+We can now create a `Task` from our data. 
+As we want to classify whether the person survived or not, we will create a 
+`TaskClassif`. We'll ignore the 'titanic_test' data for now and come back to it later.
+
+## A first model
+
+```{r}
+task <- TaskClassif$new("titanic", titanic_train, target = "survived", positive = "1")
+task
+```
+
+Our `Task` currently has $3$ features of type `character`, which we don't really know how  to handle:
+"Cabin", "Name", "Ticket" and "PassengerId".
+Additionally, from our `skim` of the data, we have seen, that they have many unique values (up to 891).
+
+We'll drop them for now and see how we can deal with them later on.
+
+```{r}
+task$select(cols = setdiff(task$feature_names, c("cabin", "name", "ticket")))
+```
+
+Additionally, we create a resampling instance that allows to compare data.
+
+```{r}
+rdesc <- rsmp("cv", folds = 3L)$instantiate(task)
+```
+
+To get a first impression of what performance we can fit a simple decision tree:
+
+```{r}
+learner <- mlr_learners$get("classif.rpart")
+# or shorter:
+learner <- lrn("classif.rpart")
+
+res <- resample(task, learner, rdesc, store_models = TRUE)
+agg <- res$aggregate(msr("classif.acc"))
+agg
+```
+
+So our model should have a minimal accuracy of `r round(agg, 3)` in order to improve over the simple decision tree.
+In order to improve more, we might need to do some feature engineering.
+
+#Optimizing the model 
+
+If we now try to fit a 'ranger' random forest model, we will get an error, 
+as 'ranger' models can not naturally handle missing values.
+
+```{r, error = TRUE}
+learner <- lrn("classif.ranger")
+learner$param_set$values <- list(num.trees = 250, min.node.size = 4)
+res <- resample(task, learner, rdesc, store_models = TRUE)
+```
+
+This means we have to find a way to impute the missing values.
+To learn how to use more advanced commands of the mlr3pipelines package see:
+* [Part II - Pipelines](/2020-04-27-mlr3pipelines-titanic-advanced/)
+
+<!-- Note that the link here needs to be fixed -->
