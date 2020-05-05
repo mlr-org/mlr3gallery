@@ -13,4 +13,4 @@ get_stage("before_deploy") %>%
 get_stage("deploy") %>%
   add_code_step(rmarkdown::render_site()) %>%
   add_code_step(writeLines("mlr3gallery.mlr-org.com", "docs/CNAME")) %>%
-  add_step(step_do_push_deploy(path = "."), force = TRUE)
+  add_step(step_do_push_deploy(path = ".", force = TRUE))
