@@ -27,7 +27,7 @@ set.seed(20191101)
 lgr::get_logger("mlr3")$set_threshold("warn")
 ```
 
-## Intro
+## Outline
 
 This is the third part in a serial of use cases with the German Credit data.
 The other parts of this series can be found here:
@@ -39,7 +39,7 @@ In this tutorial we will continue working with the **German Credit Dataset**.
 We already used different `Learner`s on it and tried to optimize their hyperparameters. 
 Now we will do four additional things.
 First, we preprocess the data as an integrated step of the model fitting process.
-The integration is important because...
+The integration may be important because...
 Then, we tune the associated preprocessing parameters.
 Third, we combine multiple `Learners` in an *ensemble* model.
 Last, we discuss some techniques that make `Learner`s able to tackle _challenging_ datasets that they could not handle otherwise.
@@ -92,15 +92,16 @@ You can uncomment the following line if you are running this locally (i.e. __not
 
 ## Intro
 
-In this tutorial we will take a look at composite machine learning algorithms that may incorporate data preprocessing or the combination of multiple `Learner`s ("ensemble methods").
+In this use case we will take a look at composite machine learning algorithms that may incorporate data preprocessing or the combination of multiple `Learner`s ("ensemble methods").
 
-- The package we use is **mlr3pipelines**, which enables us to chain "`PipeOp`" objects into data flow graphs. Load the package using
+We use the **mlr3pipelines** that enables us to chain "`PipeOp`" objects into data flow graphs. 
+Load the package using
 
 ```{r}
 library("mlr3pipelines")
 ```
 
-- Available `PipeOp`s are enumareted in the `mlr_pipeops` dictionary.
+Available `PipeOp`s are enumareted in the `mlr_pipeops` dictionary:
 
 ```{r}
 mlr_pipeops
@@ -108,22 +109,26 @@ mlr_pipeops
 
 ## Missing Value Imputation
 
-- Trying to train a Random Forest fails because the model can not handle missing values.
+We introduced missing values into our data.
+While some machine learning learners can deal with missing value, many cannot.
+Trying to train a Random Forest fails because of this.
 
 ```{r, error = TRUE}
 ranger = lrn("classif.ranger")
 ranger$train(task)
 ```
 
-- We can impute using a `PipeOp`. What are the imputation `PipeOp`s?
+We can perform imputation using a `PipeOp`. 
+To find out what are the imputation `PipeOp`s that are available we do the following:
 
 ```{r}
 mlr_pipeops$keys("^impute")
 ```
 
-
-- We choose to impute numeric features by their median. If we had factorial features, we could also add an imputer for them, e.g. `po("imputenewlvl")`.
-- Let's use the `PipeOp` itself to create an imputed task. This shows us how the `PipeOp` works.
+We choose to impute numeric features by their mean. 
+If there were missing values of factorial features, we could also (or actually we would need to) add a separate imputer for them, e.g. `po("imputenewlvl")`.
+Let's use the `PipeOp` itself to create an imputed task. 
+This shows us how the `PipeOp` works.
 
 ```{r}
 imputer = po("imputemean")
@@ -133,13 +138,18 @@ task_imputed = imputer$train(list(task))[[1]]
 task_imputed$head() # no missing values
 ```
 
-- The `$state$model` slot contains the medians of all columns. The `PipeOp` needs to remember these to impute missing values in new data during the `$predict()` phase.
+The `$state$model` slot contains the medians of all columns. 
+The `PipeOp` needs to remember these for the `$predict()` phase.
+We do not only need complete data for modeling but also for prediction.
+Using the same imputation heuristic for both is the most consistent strategy.
+This way the imputation strategy can, in fact, be seen as a part of the complete learner (which could be tuned).
 
 ```{r}
 imputer$state$model
 ```
 
-- If we used the imputed task for resampling, we would leak information from the test set into the training set. Therefore it is mandatory to attach the imputation operator to the `Learner` itself, creating a `GraphLearner`.
+If we used the imputed task for resampling, we would _leak_ information from the test set into the training set.
+Therefore, it is mandatory to attach the imputation operator to the `Learner` itself, creating a `GraphLearner`.
 
 ```{r}
 imp_ranger = GraphLearner$new(po("imputemean") %>>% ranger)
@@ -147,7 +157,7 @@ imp_ranger = GraphLearner$new(po("imputemean") %>>% ranger)
 imp_ranger$train(task) # runs without error: training succeeds
 ```
 
-- This can be used for resampling.
+This graph learner can be used for resampling -- like an ordinary learner.
 
 ```{r}
 rr = resample(task, imp_ranger, cv10_instance)
@@ -156,24 +166,29 @@ rr$aggregate()
 
 ## Feature Filtering
 
-- Sometimes having fewer features is desirable (interpretability, cost of acquiring data, possibly even better performance)
-- Use *feature filter* to preferentially keep features with most information
+Typically, sparse models, i.e. having models with few(er) features, is desirable.
+This is due to a variety of reasons.
+Some of them are an enhanced interpretability or decreased costs of acquiring data.
+Furthermore, sparse models may actually be associated with increased performance (especially if overfitting is anticipated).
+We can use *feature filter* to only keep these features with the most _information_.
 
 ```{r}
 library("mlr3filters")
 mlr_filters
 ```
 
-- We use the `"anova"` filter. It uses an F-test for values in different target classes (equivalent to a t-test in the binary classification case).
+We apply the `"anova"` filter. 
+It makes use of a F-test for values in different target classes (equivalent to a t-test in the binary classification case).
 
 ```{r}
 filter = flt("anova")
 filter$calculate(task_imputed)$scores
 ```
 
-- What is the tradeoff between features and performance? Let's find out by tuning.
-- We incorporate our filtering in the pipeline using the `"filter"` `PipeOp`
-- We remember that we also need to do imputation.
+Making use of these filter, you may wonder at which costs the reduction of the feature space comes.
+We can investigate the trade-off between features and performance by tuning.
+We incorporate our filtering strategy in the pipeline using the `"filter"` `PipeOp`.
+Like before, we need to perform imputation as the filter also relies on complete data.
 
 ```{r}
 fpipe = po("imputemean") %>>% po("filter", filter, filter.nfeat = 3)
@@ -181,7 +196,8 @@ fpipe = po("imputemean") %>>% po("filter", filter, filter.nfeat = 3)
 fpipe$train(task)[[1]]$head()
 ```
 
-- We are going to tune over the `anova.filter.nfeat` parameter; it regulates how many features are kept by the filter.
+We tune over the `anova.filter.nfeat` parameter.
+It steers how many features are kept by the filter and eventually used by the learner.
 
 ```{r}
 library("paradox")
@@ -190,8 +206,9 @@ searchspace = ParamSet$new(list(
 ))
 ```
 
-- Because this is only one parameter, we will use grid search. 
-For higher dimensions, random search is more appropriate.
+The problem is one-dimensional (i.e. only one parameter is tuned).
+Thus, we make use of grid search. 
+For higher dimensions, strategies like random search are more appropriate.
 
 ```{r}
 inst = TuningInstance$new(
@@ -201,13 +218,15 @@ inst = TuningInstance$new(
 tuner = tnr("grid_search")
 ```
 
-- Tuning may take a while...
+The tuning procedure may take some time.
 
 ```{r, warning = FALSE}
 tuner$tune(inst)
 ```
 
-- If we plot the performance over the number of features, we see the possible tradeoffs between sparsity and predictive performance.
+We can plot the performance against the number of features.
+If we do so, we see the possible trade-off between sparsity and predictive performance.
+While in this setting sparisty looks desirable, there should be at least two features which are used.
 
 ```{r}
 arx = inst$archive("params")
@@ -216,10 +235,11 @@ ggplot(arx, aes(x = anova.filter.nfeat, y = classif.ce)) + geom_line()
 
 ## Stacking
 
-- We build a model on the predictions of learners
-- This needs the `"learner_cv"` PipeOp, because predictions need to be available during training already
-  - the `"learner_cv"` PipeOp performs cross-validation during the training phase and emits the cross validated predictions.
-- We use `"prob"` prediction because it carries more information than response prediction
+We want to build a model that is based on the predictions of other learners.
+This means that we are in the state that we need predictions already during training.
+This is a very specific case which is luckily handled by the `"learner_cv"` PipeOp.
+The `"learner_cv"` PipeOp performs cross-validation during the training phase and returns the cross validated predictions.
+We use `"prob"` predictions because they carry more information than response prediction.
 
 ```{r}
 stackgraph = po("imputemean") %>>%
@@ -229,10 +249,11 @@ stackgraph = po("imputemean") %>>%
   po("featureunion") %>>% lrn("classif.log_reg")
 ```
 
-- What does this `Graph` look like? We can plot it!
+We build a pretty complex graph `Graph` already.
+In order not to lose the overview, we suggest plotting complex graphs from time to time.
 
 ```{r}
-stackgraph$plot()
+stackgraph$plot(html = TRUE)
 ```
 
 ```{r, warning = FALSE}
@@ -240,7 +261,8 @@ rr = resample(task, stackgraph, cv10_instance, store_model = TRUE)
 rr$aggregate()
 ```
 
-- Compare this to performance of individual `Learner`s. Note, however, that the difference is smaller than the variation in CV estimate.
+We compare the perfomance of the stacked learner to performance of the individual `Learner`s. 
+The stacked learner, the random forest and the logistic regression seem to have negligable difference in their cross-validated `mmce` only.
 
 ```{r, warning = FALSE}
 bmr = benchmark(data.table(
@@ -253,7 +275,7 @@ bmr = benchmark(data.table(
 bmr$aggregate()[, c("learner_id", "classif.ce")]
 ```
 
-- If we train the stacked `Learner` and look into the model, we can see how "important" each of the stacked models is
+If we train the stacked `Learner` and look into the model, we can see how "important" each part of the stacked models is.
 
 ```{r}
 stackgraph$train(task)
