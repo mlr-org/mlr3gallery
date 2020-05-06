@@ -1330,6 +1330,10 @@ document.addEventListener('DOMContentLoaded', function() {
 <div class="d-article">
 <h2 id="goals-and-prerequisites">Goals and Prerequisites</h2>
 <p>This use case shows how to use the basic mlr3 package on the iris task, so it’s our “Hello World” example. It assumes no prior knowledge in ML or mlr3. You can find most of the content here also in the <a href="https://mlr3book.mlr-org.com/">mlr3book</a> in a more detailed way. Hence we will not make a lot of general comments, but keep it hands-on and short.</p>
+<<<<<<< HEAD
+=======
+<p>test</p>
+>>>>>>> ab9a565... Deploy from local build [ci skip]
 <p>The following operations are shown:</p>
 <ul>
 <li>Creating tasks and learners</li>
@@ -1394,11 +1398,19 @@ n= 120
 node), split, n, loss, yval, (yprob)
       * denotes terminal node
 
+<<<<<<< HEAD
 1) root 120 70 setosa (0.41667 0.41667 0.16667)  
   2) Petal.Length&lt; 2.45 50  0 setosa (1.00000 0.00000 0.00000) *
   3) Petal.Length&gt;=2.45 70 20 versicolor (0.00000 0.71429 0.28571)  
     6) Petal.Length&lt; 4.95 49  1 versicolor (0.00000 0.97959 0.02041) *
     7) Petal.Length&gt;=4.95 21  2 virginica (0.00000 0.09524 0.90476) *</code></pre>
+=======
+1) root 120 70 setosa (0.41666667 0.41666667 0.16666667)  
+  2) Petal.Length&lt; 2.45 50  0 setosa (1.00000000 0.00000000 0.00000000) *
+  3) Petal.Length&gt;=2.45 70 20 versicolor (0.00000000 0.71428571 0.28571429)  
+    6) Petal.Length&lt; 4.95 49  1 versicolor (0.00000000 0.97959184 0.02040816) *
+    7) Petal.Length&gt;=4.95 21  2 virginica (0.00000000 0.09523810 0.90476190) *</code></pre>
+>>>>>>> ab9a565... Deploy from local build [ci skip]
 <pre class="r"><code>
 # predict using observations from task
 preds = learner1$predict(task, row_ids = 121:150)
@@ -1434,13 +1446,21 @@ s = preds$score(msr(&quot;classif.acc&quot;))
 print(s)</code></pre>
 <pre><code>
 classif.acc 
+<<<<<<< HEAD
      0.8333 </code></pre>
+=======
+  0.8333333 </code></pre>
+>>>>>>> ab9a565... Deploy from local build [ci skip]
 <pre class="r"><code>
 s = preds$score(msrs(c(&quot;classif.acc&quot;, &quot;classif.ce&quot;)))
 print(s)</code></pre>
 <pre><code>
 classif.acc  classif.ce 
+<<<<<<< HEAD
      0.8333      0.1667 </code></pre>
+=======
+  0.8333333   0.1666667 </code></pre>
+>>>>>>> ab9a565... Deploy from local build [ci skip]
 <pre class="r"><code>
 cm = preds$confusion
 print(cm)</code></pre>
@@ -1479,6 +1499,7 @@ learner2$param_set$values$minsplit = 50</code></pre>
 cv10 = rsmp(&quot;cv&quot;, folds = 10)
 r = resample(task, learner1, cv10)</code></pre>
 <pre><code>
+<<<<<<< HEAD
 INFO  [09:47:21.382] Applying learner &#39;classif.rpart&#39; on task &#39;iris&#39; (iter 7/10) 
 INFO  [09:47:21.416] Applying learner &#39;classif.rpart&#39; on task &#39;iris&#39; (iter 3/10) 
 INFO  [09:47:21.436] Applying learner &#39;classif.rpart&#39; on task &#39;iris&#39; (iter 8/10) 
@@ -1489,6 +1510,18 @@ INFO  [09:47:21.494] Applying learner &#39;classif.rpart&#39; on task &#39;iris&
 INFO  [09:47:21.510] Applying learner &#39;classif.rpart&#39; on task &#39;iris&#39; (iter 5/10) 
 INFO  [09:47:21.524] Applying learner &#39;classif.rpart&#39; on task &#39;iris&#39; (iter 1/10) 
 INFO  [09:47:21.537] Applying learner &#39;classif.rpart&#39; on task &#39;iris&#39; (iter 6/10) </code></pre>
+=======
+INFO  [08:04:33.694] Applying learner &#39;classif.rpart&#39; on task &#39;iris&#39; (iter 9/10) 
+INFO  [08:04:33.728] Applying learner &#39;classif.rpart&#39; on task &#39;iris&#39; (iter 4/10) 
+INFO  [08:04:33.752] Applying learner &#39;classif.rpart&#39; on task &#39;iris&#39; (iter 3/10) 
+INFO  [08:04:33.766] Applying learner &#39;classif.rpart&#39; on task &#39;iris&#39; (iter 2/10) 
+INFO  [08:04:33.779] Applying learner &#39;classif.rpart&#39; on task &#39;iris&#39; (iter 8/10) 
+INFO  [08:04:33.794] Applying learner &#39;classif.rpart&#39; on task &#39;iris&#39; (iter 1/10) 
+INFO  [08:04:33.810] Applying learner &#39;classif.rpart&#39; on task &#39;iris&#39; (iter 6/10) 
+INFO  [08:04:33.828] Applying learner &#39;classif.rpart&#39; on task &#39;iris&#39; (iter 7/10) 
+INFO  [08:04:33.842] Applying learner &#39;classif.rpart&#39; on task &#39;iris&#39; (iter 5/10) 
+INFO  [08:04:33.855] Applying learner &#39;classif.rpart&#39; on task &#39;iris&#39; (iter 10/10) </code></pre>
+>>>>>>> ab9a565... Deploy from local build [ci skip]
 <pre class="r"><code>
 print(r)</code></pre>
 <pre><code>
@@ -1512,6 +1545,7 @@ r$score(msrs(c(&quot;classif.acc&quot;, &quot;classif.ce&quot;)))</code></pre>
  9: &lt;TaskClassif&gt;    iris &lt;LearnerClassifRpart&gt; classif.rpart &lt;ResamplingCV&gt;
 10: &lt;TaskClassif&gt;    iris &lt;LearnerClassifRpart&gt; classif.rpart &lt;ResamplingCV&gt;
     resampling_id iteration prediction classif.acc classif.ce
+<<<<<<< HEAD
  1:            cv         1     &lt;list&gt;   0.9333333 0.06666667
  2:            cv         2     &lt;list&gt;   0.9333333 0.06666667
  3:            cv         3     &lt;list&gt;   0.8666667 0.13333333
@@ -1522,6 +1556,18 @@ r$score(msrs(c(&quot;classif.acc&quot;, &quot;classif.ce&quot;)))</code></pre>
  8:            cv         8     &lt;list&gt;   1.0000000 0.00000000
  9:            cv         9     &lt;list&gt;   0.9333333 0.06666667
 10:            cv        10     &lt;list&gt;   1.0000000 0.00000000</code></pre>
+=======
+ 1:            cv         1     &lt;list&gt;   1.0000000 0.00000000
+ 2:            cv         2     &lt;list&gt;   1.0000000 0.00000000
+ 3:            cv         3     &lt;list&gt;   1.0000000 0.00000000
+ 4:            cv         4     &lt;list&gt;   0.8666667 0.13333333
+ 5:            cv         5     &lt;list&gt;   1.0000000 0.00000000
+ 6:            cv         6     &lt;list&gt;   0.9333333 0.06666667
+ 7:            cv         7     &lt;list&gt;   1.0000000 0.00000000
+ 8:            cv         8     &lt;list&gt;   0.8666667 0.13333333
+ 9:            cv         9     &lt;list&gt;   1.0000000 0.00000000
+10:            cv        10     &lt;list&gt;   0.8000000 0.20000000</code></pre>
+>>>>>>> ab9a565... Deploy from local build [ci skip]
 <pre class="r"><code>
 print(r$data)</code></pre>
 <pre><code>
@@ -1542,6 +1588,7 @@ preds = r$prediction()
 print(preds)</code></pre>
 <pre><code>
 &lt;PredictionClassif&gt; for 150 observations:
+<<<<<<< HEAD
     row_id     truth  response
         24    setosa    setosa
         36    setosa    setosa
@@ -1550,6 +1597,16 @@ print(preds)</code></pre>
        127 virginica virginica
        129 virginica virginica
        138 virginica virginica</code></pre>
+=======
+    row_id     truth   response
+         6    setosa     setosa
+        10    setosa     setosa
+        13    setosa     setosa
+---                            
+       122 virginica  virginica
+       135 virginica  virginica
+       139 virginica versicolor</code></pre>
+>>>>>>> ab9a565... Deploy from local build [ci skip]
 <pre class="r"><code>
 cm = preds$confusion
 print(cm)</code></pre>
@@ -1557,8 +1614,13 @@ print(cm)</code></pre>
             truth
 response     setosa versicolor virginica
   setosa         50          0         0
+<<<<<<< HEAD
   versicolor      0         45         5
   virginica       0          5        45</code></pre>
+=======
+  versicolor      0         47         5
+  virginica       0          3        45</code></pre>
+>>>>>>> ab9a565... Deploy from local build [ci skip]
 </div>
 <h2 id="populating-the-learner-dictionary">Populating the learner dictionary</h2>
 <p>mlr3learners ships out with a dozen different popular learners. We can list them from the dictionary. If we want more, we can load an extension package from mlr3’s <a href="https://github.com/mlr-org/mlr3learners/wiki">learner-org</a> on GitHub. Note how after the install the dictionary increases in size.</p>
@@ -1567,18 +1629,28 @@ response     setosa versicolor virginica
 head(as.data.table(mlr_learners)[, c(&quot;key&quot;, &quot;packages&quot;)])</code></pre>
 <pre><code>
                    key packages
+<<<<<<< HEAD
 1:       classif.debug         
 2: classif.featureless         
 3:      classif.glmnet   glmnet
 4:        classif.kknn     kknn
 5:         classif.lda     MASS
 6:     classif.log_reg    stats</code></pre>
+=======
+1:   classif.cv_glmnet   glmnet
+2:       classif.debug         
+3: classif.featureless         
+4:      classif.glmnet   glmnet
+5:        classif.kknn     kknn
+6:         classif.lda     MASS</code></pre>
+>>>>>>> ab9a565... Deploy from local build [ci skip]
 <pre class="r"><code>
 # remotes::install_github(&quot;mlr3learners/mlr3learners.randomforest&quot;)
 library(mlr3learners.randomforest)
 print(as.data.table(mlr_learners)[, c(&quot;key&quot;, &quot;packages&quot;)])</code></pre>
 <pre><code>
                      key     packages
+<<<<<<< HEAD
  1:        classif.debug             
  2:  classif.featureless             
  3:       classif.glmnet       glmnet
@@ -1603,6 +1675,34 @@ print(as.data.table(mlr_learners)[, c(&quot;key&quot;, &quot;packages&quot;)])</
 22:           regr.rpart        rpart
 23:             regr.svm        e1071
 24:         regr.xgboost      xgboost
+=======
+ 1:    classif.cv_glmnet       glmnet
+ 2:        classif.debug             
+ 3:  classif.featureless             
+ 4:       classif.glmnet       glmnet
+ 5:         classif.kknn         kknn
+ 6:          classif.lda         MASS
+ 7:      classif.log_reg        stats
+ 8:     classif.multinom         nnet
+ 9:  classif.naive_bayes        e1071
+10:          classif.qda         MASS
+11: classif.randomForest randomForest
+12:       classif.ranger       ranger
+13:        classif.rpart        rpart
+14:          classif.svm        e1071
+15:      classif.xgboost      xgboost
+16:       regr.cv_glmnet       glmnet
+17:     regr.featureless        stats
+18:          regr.glmnet       glmnet
+19:            regr.kknn         kknn
+20:              regr.km  DiceKriging
+21:              regr.lm        stats
+22:    regr.randomForest randomForest
+23:          regr.ranger       ranger
+24:           regr.rpart        rpart
+25:             regr.svm        e1071
+26:         regr.xgboost      xgboost
+>>>>>>> ab9a565... Deploy from local build [ci skip]
                      key     packages</code></pre>
 </div>
 <h2 id="benchmarking-multiple-learners">Benchmarking multiple learners</h2>
@@ -1613,6 +1713,7 @@ learners = list(learner1, learner2, lrn(&quot;classif.randomForest&quot;))
 bm_grid = benchmark_grid(task, learners, cv10)
 bm = benchmark(bm_grid)</code></pre>
 <pre><code>
+<<<<<<< HEAD
 INFO  [09:47:22.950] Benchmark with 30 resampling iterations 
 INFO  [09:47:22.957] Applying learner &#39;classif.rpart&#39; on task &#39;iris&#39; (iter 1/10) 
 INFO  [09:47:22.973] Applying learner &#39;classif.randomForest&#39; on task &#39;iris&#39; (iter 6/10) 
@@ -1645,6 +1746,40 @@ INFO  [09:47:23.663] Applying learner &#39;classif.rpart&#39; on task &#39;iris&
 INFO  [09:47:23.677] Applying learner &#39;classif.rpart&#39; on task &#39;iris&#39; (iter 9/10) 
 INFO  [09:47:23.692] Applying learner &#39;classif.rpart&#39; on task &#39;iris&#39; (iter 2/10) 
 INFO  [09:47:23.736] Finished benchmark </code></pre>
+=======
+INFO  [08:04:35.423] Benchmark with 30 resampling iterations 
+INFO  [08:04:35.430] Applying learner &#39;classif.rpart&#39; on task &#39;iris&#39; (iter 9/10) 
+INFO  [08:04:35.445] Applying learner &#39;classif.randomForest&#39; on task &#39;iris&#39; (iter 5/10) 
+INFO  [08:04:35.497] Applying learner &#39;classif.rpart&#39; on task &#39;iris&#39; (iter 8/10) 
+INFO  [08:04:35.512] Applying learner &#39;classif.rpart&#39; on task &#39;iris&#39; (iter 6/10) 
+INFO  [08:04:35.544] Applying learner &#39;classif.rpart&#39; on task &#39;iris&#39; (iter 10/10) 
+INFO  [08:04:35.559] Applying learner &#39;classif.randomForest&#39; on task &#39;iris&#39; (iter 7/10) 
+INFO  [08:04:35.604] Applying learner &#39;classif.rpart&#39; on task &#39;iris&#39; (iter 4/10) 
+INFO  [08:04:35.621] Applying learner &#39;classif.rpart&#39; on task &#39;iris&#39; (iter 6/10) 
+INFO  [08:04:35.644] Applying learner &#39;classif.randomForest&#39; on task &#39;iris&#39; (iter 6/10) 
+INFO  [08:04:35.695] Applying learner &#39;classif.rpart&#39; on task &#39;iris&#39; (iter 2/10) 
+INFO  [08:04:35.716] Applying learner &#39;classif.randomForest&#39; on task &#39;iris&#39; (iter 2/10) 
+INFO  [08:04:35.779] Applying learner &#39;classif.rpart&#39; on task &#39;iris&#39; (iter 4/10) 
+INFO  [08:04:35.797] Applying learner &#39;classif.rpart&#39; on task &#39;iris&#39; (iter 10/10) 
+INFO  [08:04:35.817] Applying learner &#39;classif.rpart&#39; on task &#39;iris&#39; (iter 5/10) 
+INFO  [08:04:35.837] Applying learner &#39;classif.randomForest&#39; on task &#39;iris&#39; (iter 3/10) 
+INFO  [08:04:35.882] Applying learner &#39;classif.randomForest&#39; on task &#39;iris&#39; (iter 10/10) 
+INFO  [08:04:35.937] Applying learner &#39;classif.rpart&#39; on task &#39;iris&#39; (iter 1/10) 
+INFO  [08:04:35.962] Applying learner &#39;classif.randomForest&#39; on task &#39;iris&#39; (iter 4/10) 
+INFO  [08:04:36.014] Applying learner &#39;classif.rpart&#39; on task &#39;iris&#39; (iter 1/10) 
+INFO  [08:04:36.036] Applying learner &#39;classif.rpart&#39; on task &#39;iris&#39; (iter 9/10) 
+INFO  [08:04:36.060] Applying learner &#39;classif.rpart&#39; on task &#39;iris&#39; (iter 5/10) 
+INFO  [08:04:36.083] Applying learner &#39;classif.randomForest&#39; on task &#39;iris&#39; (iter 8/10) 
+INFO  [08:04:36.137] Applying learner &#39;classif.randomForest&#39; on task &#39;iris&#39; (iter 1/10) 
+INFO  [08:04:36.190] Applying learner &#39;classif.rpart&#39; on task &#39;iris&#39; (iter 3/10) 
+INFO  [08:04:36.211] Applying learner &#39;classif.rpart&#39; on task &#39;iris&#39; (iter 7/10) 
+INFO  [08:04:36.233] Applying learner &#39;classif.rpart&#39; on task &#39;iris&#39; (iter 2/10) 
+INFO  [08:04:36.258] Applying learner &#39;classif.randomForest&#39; on task &#39;iris&#39; (iter 9/10) 
+INFO  [08:04:36.321] Applying learner &#39;classif.rpart&#39; on task &#39;iris&#39; (iter 7/10) 
+INFO  [08:04:36.349] Applying learner &#39;classif.rpart&#39; on task &#39;iris&#39; (iter 8/10) 
+INFO  [08:04:36.374] Applying learner &#39;classif.rpart&#39; on task &#39;iris&#39; (iter 3/10) 
+INFO  [08:04:36.426] Finished benchmark </code></pre>
+>>>>>>> ab9a565... Deploy from local build [ci skip]
 <pre class="r"><code>
 print(bm)</code></pre>
 <pre><code>
@@ -1661,9 +1796,15 @@ print(bm$aggregate(measures = msrs(c(&quot;classif.acc&quot;, &quot;classif.ce&q
 2:  2 &lt;ResampleResult&gt;    iris        classif.rpart            cv    10
 3:  3 &lt;ResampleResult&gt;    iris classif.randomForest            cv    10
    classif.acc classif.ce
+<<<<<<< HEAD
 1:        0.92       0.08
 2:        0.92       0.08
 3:        0.96       0.04</code></pre>
+=======
+1:   0.9200000 0.08000000
+2:   0.9266667 0.07333333
+3:   0.9466667 0.05333333</code></pre>
+>>>>>>> ab9a565... Deploy from local build [ci skip]
 </div>
 <h2 id="conclusion">Conclusion</h2>
 <p>We left out a lot of details and other features. If you want to know more, read the <a href="https://mlr3book.mlr-org.com/">mlr3book</a> and the documentation of the mentioned packages.</p>
