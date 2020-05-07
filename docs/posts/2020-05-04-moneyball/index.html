@@ -1,0 +1,1723 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1"/>
+  <meta name="generator" content="distill" />
+
+  <style type="text/css">
+  /* Hide doc at startup (prevent jankiness while JS renders/transforms) */
+  body {
+    visibility: hidden;
+  }
+  </style>
+
+ <!--radix_placeholder_import_source-->
+ <!--/radix_placeholder_import_source-->
+
+  <!--radix_placeholder_meta_tags-->
+<title>mlr3gallery: mlr3 and OpenML - Moneyball use case</title>
+
+<meta property="description" itemprop="description" content=""/>
+
+<link rel="canonical" href="https://mlr3gallery.mlr-org.com/posts/2020-05-04-moneyball/"/>
+
+<!--  https://schema.org/Article -->
+<meta property="article:published" itemprop="datePublished" content="2020-05-04"/>
+<meta property="article:created" itemprop="dateCreated" content="2020-05-04"/>
+<meta name="article:author" content="Philipp Kopper"/>
+
+<!--  https://developers.facebook.com/docs/sharing/webmasters#markup -->
+<meta property="og:title" content="mlr3gallery: mlr3 and OpenML - Moneyball use case"/>
+<meta property="og:type" content="article"/>
+<meta property="og:description" content=""/>
+<meta property="og:url" content="https://mlr3gallery.mlr-org.com/posts/2020-05-04-moneyball/"/>
+<meta property="og:locale" content="en_US"/>
+<meta property="og:site_name" content="mlr3gallery"/>
+
+<!--  https://dev.twitter.com/cards/types/summary -->
+<meta property="twitter:card" content="summary"/>
+<meta property="twitter:title" content="mlr3gallery: mlr3 and OpenML - Moneyball use case"/>
+<meta property="twitter:description" content=""/>
+<meta property="twitter:url" content="https://mlr3gallery.mlr-org.com/posts/2020-05-04-moneyball/"/>
+
+<!--  https://scholar.google.com/intl/en/scholar/inclusion.html#indexing -->
+<meta name="citation_title" content="mlr3gallery: mlr3 and OpenML - Moneyball use case"/>
+<meta name="citation_fulltext_html_url" content="https://mlr3gallery.mlr-org.com/posts/2020-05-04-moneyball/"/>
+<meta name="citation_online_date" content="2020/05/04"/>
+<meta name="citation_publication_date" content="2020/05/04"/>
+<meta name="citation_author" content="Philipp Kopper"/>
+<!--/radix_placeholder_meta_tags-->
+  <!--radix_placeholder_rmarkdown_metadata-->
+
+<script type="text/json" id="radix-rmarkdown-metadata">
+{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["title","categories","author","date","description","output","citation_url","canonical_url"]}},"value":[{"type":"character","attributes":{},"value":["mlr3 and OpenML - Moneyball use case"]},{"type":"character","attributes":{},"value":["imputation","regression","feature importance"]},{"type":"list","attributes":{},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name"]}},"value":[{"type":"character","attributes":{},"value":["Philipp Kopper"]}]}]},{"type":"character","attributes":{},"value":["05-04-2020"]},{"type":"character","attributes":{},"value":[""]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["distill::distill_article"]}},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["self_contained","css"]}},"value":[{"type":"logical","attributes":{},"value":[false]},{"type":"character","attributes":{},"value":["../../custom.css"]}]}]},{"type":"character","attributes":{},"value":["https://mlr3gallery.mlr-org.com/posts/2020-05-04-moneyball/"]},{"type":"character","attributes":{},"value":["https://mlr3gallery.mlr-org.com/posts/2020-05-04-moneyball/"]}]}
+</script>
+<!--/radix_placeholder_rmarkdown_metadata-->
+  
+  <script type="text/json" id="radix-resource-manifest">
+  {"type":"NULL"}
+  </script>
+  <!--radix_placeholder_navigation_in_header-->
+
+<script type="application/javascript">
+
+  window.headroom_prevent_pin = false;
+
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+
+    // initialize headroom for banner
+    var header = $('header').get(0);
+    var headerHeight = header.offsetHeight;
+    var headroom = new Headroom(header, {
+      onPin : function() {
+        if (window.headroom_prevent_pin) {
+          window.headroom_prevent_pin = false;
+          headroom.unpin();
+        }
+      }
+    });
+    headroom.init();
+    if(window.location.hash)
+      headroom.unpin();
+    $(header).addClass('headroom--transition');
+
+    // offset scroll location for banner on hash change
+    // (see: https://github.com/WickyNilliams/headroom.js/issues/38)
+    window.addEventListener("hashchange", function(event) {
+      window.scrollTo(0, window.pageYOffset - (headerHeight + 25));
+    });
+
+    // responsive menu
+    $('.distill-site-header').each(function(i, val) {
+      var topnav = $(this);
+      var toggle = topnav.find('.nav-toggle');
+      toggle.on('click', function() {
+        topnav.toggleClass('responsive');
+      });
+    });
+
+    // nav dropdowns
+    $('.nav-dropbtn').click(function(e) {
+      $(this).next('.nav-dropdown-content').toggleClass('nav-dropdown-active');
+      $(this).parent().siblings('.nav-dropdown')
+         .children('.nav-dropdown-content').removeClass('nav-dropdown-active');
+    });
+    $("body").click(function(e){
+      $('.nav-dropdown-content').removeClass('nav-dropdown-active');
+    });
+    $(".nav-dropdown").click(function(e){
+      e.stopPropagation();
+    });
+  });
+</script>
+
+<style type="text/css">
+
+/* Theme (user-documented overrideables for nav appearance) */
+
+.distill-site-nav {
+  color: rgba(255, 255, 255, 0.8);
+  background-color: #455a64;
+  font-size: 15px;
+  font-weight: 300;
+}
+
+.distill-site-nav a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.distill-site-nav a:hover {
+  color: white;
+}
+
+@media print {
+  .distill-site-nav {
+    display: none;
+  }
+}
+
+.distill-site-header {
+
+}
+
+.distill-site-footer {
+
+}
+
+
+/* Site Header */
+
+.distill-site-header {
+  width: 100%;
+  box-sizing: border-box;
+  z-index: 3;
+}
+
+.distill-site-header .nav-left {
+  display: inline-block;
+  margin-left: 8px;
+}
+
+@media screen and (max-width: 768px) {
+  .distill-site-header .nav-left {
+    margin-left: 0;
+  }
+}
+
+
+.distill-site-header .nav-right {
+  float: right;
+  margin-right: 8px;
+}
+
+.distill-site-header a,
+.distill-site-header .title {
+  display: inline-block;
+  text-align: center;
+  padding: 14px 10px 14px 10px;
+}
+
+.distill-site-header .title {
+  font-size: 18px;
+}
+
+.distill-site-header .logo {
+  padding: 0;
+}
+
+.distill-site-header .logo img {
+  display: none;
+  max-height: 20px;
+  width: auto;
+  margin-bottom: -4px;
+}
+
+.distill-site-header .nav-image img {
+  max-height: 18px;
+  width: auto;
+  display: inline-block;
+  margin-bottom: -3px;
+}
+
+
+
+@media screen and (min-width: 1000px) {
+  .distill-site-header .logo img {
+    display: inline-block;
+  }
+  .distill-site-header .nav-left {
+    margin-left: 20px;
+  }
+  .distill-site-header .nav-right {
+    margin-right: 20px;
+  }
+  .distill-site-header .title {
+    padding-left: 12px;
+  }
+}
+
+
+.distill-site-header .nav-toggle {
+  display: none;
+}
+
+.nav-dropdown {
+  display: inline-block;
+  position: relative;
+}
+
+.nav-dropdown .nav-dropbtn {
+  border: none;
+  outline: none;
+  color: rgba(255, 255, 255, 0.8);
+  padding: 16px 10px;
+  background-color: transparent;
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  margin: 0;
+  margin-top: 1px;
+  z-index: 2;
+}
+
+.nav-dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: white;
+  min-width: 200px;
+  border: 1px solid rgba(0,0,0,0.15);
+  border-radius: 4px;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.1);
+  z-index: 1;
+  margin-top: 2px;
+  white-space: nowrap;
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+.nav-dropdown-content hr {
+  margin-top: 4px;
+  margin-bottom: 4px;
+  border: none;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.nav-dropdown-active {
+  display: block;
+}
+
+.nav-dropdown-content a, .nav-dropdown-content .nav-dropdown-header {
+  color: black;
+  padding: 6px 24px;
+  text-decoration: none;
+  display: block;
+  text-align: left;
+}
+
+.nav-dropdown-content .nav-dropdown-header {
+  display: block;
+  padding: 5px 24px;
+  padding-bottom: 0;
+  text-transform: uppercase;
+  font-size: 14px;
+  color: #999999;
+  white-space: nowrap;
+}
+
+.nav-dropdown:hover .nav-dropbtn {
+  color: white;
+}
+
+.nav-dropdown-content a:hover {
+  background-color: #ddd;
+  color: black;
+}
+
+.nav-right .nav-dropdown-content {
+  margin-left: -45%;
+  right: 0;
+}
+
+@media screen and (max-width: 768px) {
+  .distill-site-header a, .distill-site-header .nav-dropdown  {display: none;}
+  .distill-site-header a.nav-toggle {
+    float: right;
+    display: block;
+  }
+  .distill-site-header .title {
+    margin-left: 0;
+  }
+  .distill-site-header .nav-right {
+    margin-right: 0;
+  }
+  .distill-site-header {
+    overflow: hidden;
+  }
+  .nav-right .nav-dropdown-content {
+    margin-left: 0;
+  }
+}
+
+
+@media screen and (max-width: 768px) {
+  .distill-site-header.responsive {position: relative;}
+  .distill-site-header.responsive a.nav-toggle {
+    position: absolute;
+    right: 0;
+    top: 0;
+  }
+  .distill-site-header.responsive a,
+  .distill-site-header.responsive .nav-dropdown {
+    display: block;
+    text-align: left;
+  }
+  .distill-site-header.responsive .nav-left,
+  .distill-site-header.responsive .nav-right {
+    width: 100%;
+  }
+  .distill-site-header.responsive .nav-dropdown {float: none;}
+  .distill-site-header.responsive .nav-dropdown-content {position: relative;}
+  .distill-site-header.responsive .nav-dropdown .nav-dropbtn {
+    display: block;
+    width: 100%;
+    text-align: left;
+  }
+}
+
+/* Site Footer */
+
+.distill-site-footer {
+  width: 100%;
+  overflow: hidden;
+  box-sizing: border-box;
+  z-index: 3;
+  margin-top: 30px;
+  padding-top: 30px;
+  padding-bottom: 30px;
+  text-align: center;
+}
+
+/* Headroom */
+
+d-title {
+  padding-top: 6rem;
+}
+
+@media print {
+  d-title {
+    padding-top: 4rem;
+  }
+}
+
+.headroom {
+  z-index: 1000;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+}
+
+.headroom--transition {
+  transition: all .4s ease-in-out;
+}
+
+.headroom--unpinned {
+  top: -100px;
+}
+
+.headroom--pinned {
+  top: 0;
+}
+
+</style>
+
+<link href="../../site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet"/>
+<link href="../../site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet"/>
+<script src="../../site_libs/headroom-0.9.4/headroom.min.js"></script>
+<!--/radix_placeholder_navigation_in_header-->
+  <!--radix_placeholder_distill-->
+
+<style type="text/css">
+
+body {
+  background-color: white;
+}
+
+.pandoc-table {
+  width: 100%;
+}
+
+.pandoc-table>caption {
+  margin-bottom: 10px;
+}
+
+.pandoc-table th:not([align]) {
+  text-align: left;
+}
+
+.pagedtable-footer {
+  font-size: 15px;
+}
+
+.html-widget {
+  margin-bottom: 2.0em;
+}
+
+.l-screen-inset {
+  padding-right: 16px;
+}
+
+.l-screen .caption {
+  margin-left: 10px;
+}
+
+.shaded {
+  background: rgb(247, 247, 247);
+  padding-top: 20px;
+  padding-bottom: 20px;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.shaded .html-widget {
+  margin-bottom: 0;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.shaded .shaded-content {
+  background: white;
+}
+
+.text-output {
+  margin-top: 0;
+  line-height: 1.5em;
+}
+
+.hidden {
+  display: none !important;
+}
+
+d-article {
+  padding-bottom: 30px;
+}
+
+d-appendix {
+  padding-top: 30px;
+}
+
+d-article>p>img {
+  width: 100%;
+}
+
+d-article iframe {
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  margin-bottom: 2.0em;
+  width: 100%;
+}
+
+figure img.external {
+  background: white;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.1);
+  padding: 18px;
+  box-sizing: border-box;
+}
+
+/* CSS for table of contents */
+
+.d-toc {
+  color: rgba(0,0,0,0.8);
+  font-size: 0.8em;
+  line-height: 1em;
+}
+
+.d-toc-header {
+  font-size: 0.6rem;
+  font-weight: 400;
+  color: rgba(0, 0, 0, 0.5);
+  text-transform: uppercase;
+  margin-top: 0;
+  margin-bottom: 1.3em;
+}
+
+.d-toc a {
+  border-bottom: none;
+}
+
+.d-toc ul {
+  padding-left: 0;
+}
+
+.d-toc li>ul {
+  padding-top: 0.8em;
+  padding-left: 16px;
+  margin-bottom: 0.6em;
+}
+
+.d-toc ul,
+.d-toc li {
+  list-style-type: none;
+}
+
+.d-toc li {
+  margin-bottom: 0.9em;
+}
+
+.d-toc-separator {
+  margin-top: 20px;
+  margin-bottom: 2em;
+}
+
+.d-article-with-toc {
+  border-top: none;
+  padding-top: 0;
+}
+
+
+
+/* Tweak code blocks (note that this CSS is repeated above in an injection
+   into the d-code shadow dom) */
+
+d-code {
+  overflow-x: auto !important;
+}
+
+pre.d-code code.d-code {
+  padding-left: 10px;
+  font-size: 12px;
+  border-left: 2px solid rgba(0,0,0,0.1);
+}
+
+pre.text-output {
+
+  font-size: 12px;
+  color: black;
+  background: none;
+  font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+  text-align: left;
+  white-space: pre;
+  word-spacing: normal;
+  word-break: normal;
+  word-wrap: normal;
+  line-height: 1.5;
+
+  -moz-tab-size: 4;
+  -o-tab-size: 4;
+  tab-size: 4;
+
+  -webkit-hyphens: none;
+  -moz-hyphens: none;
+  -ms-hyphens: none;
+  hyphens: none;
+}
+
+@media(min-width: 768px) {
+
+d-code {
+  overflow-x: visible !important;
+}
+
+pre.d-code code.d-code  {
+    padding-left: 18px;
+    font-size: 14px;
+}
+pre.text-output {
+  font-size: 14px;
+}
+}
+
+/* Figure */
+
+.figure {
+  position: relative;
+  margin-bottom: 2.5em;
+  margin-top: 1.5em;
+}
+
+.figure img {
+  width: 100%;
+}
+
+.figure .caption {
+  color: rgba(0, 0, 0, 0.6);
+  font-size: 12px;
+  line-height: 1.5em;
+}
+
+.figure img.external {
+  background: white;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.1);
+  padding: 18px;
+  box-sizing: border-box;
+}
+
+.figure .caption a {
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.figure .caption b,
+.figure .caption strong, {
+  font-weight: 600;
+  color: rgba(0, 0, 0, 1.0);
+}
+
+
+
+/* Tweak 1000px media break to show more text */
+
+@media(min-width: 1000px) {
+  .base-grid,
+  distill-header,
+  d-title,
+  d-abstract,
+  d-article,
+  d-appendix,
+  distill-appendix,
+  d-byline,
+  d-footnote-list,
+  d-citation-list,
+  distill-footer {
+    grid-template-columns: [screen-start] 1fr [page-start kicker-start] 80px [middle-start] 50px [text-start kicker-end] 65px 65px 65px 65px 65px 65px 65px 65px [text-end gutter-start] 65px [middle-end] 65px [page-end gutter-end] 1fr [screen-end];
+    grid-column-gap: 16px;
+  }
+
+  .grid {
+    grid-column-gap: 16px;
+  }
+
+  d-article {
+    font-size: 1.06rem;
+    line-height: 1.7em;
+  }
+  figure .caption, .figure .caption, figure figcaption {
+    font-size: 13px;
+  }
+}
+
+@media(min-width: 1180px) {
+  .base-grid,
+  distill-header,
+  d-title,
+  d-abstract,
+  d-article,
+  d-appendix,
+  distill-appendix,
+  d-byline,
+  d-footnote-list,
+  d-citation-list,
+  distill-footer {
+    grid-template-columns: [screen-start] 1fr [page-start kicker-start] 60px [middle-start] 60px [text-start kicker-end] 60px 60px 60px 60px 60px 60px 60px 60px [text-end gutter-start] 60px [middle-end] 60px [page-end gutter-end] 1fr [screen-end];
+    grid-column-gap: 32px;
+  }
+
+  .grid {
+    grid-column-gap: 32px;
+  }
+}
+
+
+/* Get the citation styles for the appendix (not auto-injected on render since
+   we do our own rendering of the citation appendix) */
+
+d-appendix .citation-appendix,
+.d-appendix .citation-appendix {
+  font-size: 11px;
+  line-height: 15px;
+  border-left: 1px solid rgba(0, 0, 0, 0.1);
+  padding-left: 18px;
+  border: 1px solid rgba(0,0,0,0.1);
+  background: rgba(0, 0, 0, 0.02);
+  padding: 10px 18px;
+  border-radius: 3px;
+  color: rgba(150, 150, 150, 1);
+  overflow: hidden;
+  margin-top: -12px;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+
+/* Social footer */
+
+.social_footer {
+  margin-top: 30px;
+  margin-bottom: 0;
+  color: rgba(0,0,0,0.67);
+}
+
+.disqus-comments {
+  margin-right: 30px;
+}
+
+.disqus-comment-count {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.4);
+  cursor: pointer;
+}
+
+#disqus_thread {
+  margin-top: 30px;
+}
+
+.article-sharing a {
+  border-bottom: none;
+  margin-right: 8px;
+}
+
+.article-sharing a:hover {
+  border-bottom: none;
+}
+
+.sidebar-section.subscribe {
+  font-size: 12px;
+  line-height: 1.6em;
+}
+
+.subscribe p {
+  margin-bottom: 0.5em;
+}
+
+
+.article-footer .subscribe {
+  font-size: 15px;
+  margin-top: 45px;
+}
+
+
+/* Improve display for browsers without grid (IE/Edge <= 15) */
+
+.downlevel {
+  line-height: 1.6em;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", Arial, sans-serif;
+  margin: 0;
+}
+
+.downlevel .d-title {
+  padding-top: 6rem;
+  padding-bottom: 1.5rem;
+}
+
+.downlevel .d-title h1 {
+  font-size: 50px;
+  font-weight: 700;
+  line-height: 1.1em;
+  margin: 0 0 0.5rem;
+}
+
+.downlevel .d-title p {
+  font-weight: 300;
+  font-size: 1.2rem;
+  line-height: 1.55em;
+  margin-top: 0;
+}
+
+.downlevel .d-byline {
+  padding-top: 0.8em;
+  padding-bottom: 0.8em;
+  font-size: 0.8rem;
+  line-height: 1.8em;
+}
+
+.downlevel .section-separator {
+  border: none;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.downlevel .d-article {
+  font-size: 1.06rem;
+  line-height: 1.7em;
+  padding-top: 1rem;
+  padding-bottom: 2rem;
+}
+
+
+.downlevel .d-appendix {
+  padding-left: 0;
+  padding-right: 0;
+  max-width: none;
+  font-size: 0.8em;
+  line-height: 1.7em;
+  margin-bottom: 0;
+  color: rgba(0,0,0,0.5);
+  padding-top: 40px;
+  padding-bottom: 48px;
+}
+
+.downlevel .footnotes ol {
+  padding-left: 13px;
+}
+
+.downlevel .base-grid,
+.downlevel .distill-header,
+.downlevel .d-title,
+.downlevel .d-abstract,
+.downlevel .d-article,
+.downlevel .d-appendix,
+.downlevel .distill-appendix,
+.downlevel .d-byline,
+.downlevel .d-footnote-list,
+.downlevel .d-citation-list,
+.downlevel .distill-footer,
+.downlevel .appendix-bottom,
+.downlevel .posts-container {
+  padding-left: 40px;
+  padding-right: 40px;
+}
+
+@media(min-width: 768px) {
+  .downlevel .base-grid,
+  .downlevel .distill-header,
+  .downlevel .d-title,
+  .downlevel .d-abstract,
+  .downlevel .d-article,
+  .downlevel .d-appendix,
+  .downlevel .distill-appendix,
+  .downlevel .d-byline,
+  .downlevel .d-footnote-list,
+  .downlevel .d-citation-list,
+  .downlevel .distill-footer,
+  .downlevel .appendix-bottom,
+  .downlevel .posts-container {
+  padding-left: 150px;
+  padding-right: 150px;
+  max-width: 900px;
+}
+}
+
+.downlevel pre code {
+  display: block;
+  border-left: 2px solid rgba(0, 0, 0, .1);
+  padding: 0 0 0 20px;
+  font-size: 14px;
+}
+
+.downlevel code, .downlevel pre {
+  color: black;
+  background: none;
+  font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+  text-align: left;
+  white-space: pre;
+  word-spacing: normal;
+  word-break: normal;
+  word-wrap: normal;
+  line-height: 1.5;
+
+  -moz-tab-size: 4;
+  -o-tab-size: 4;
+  tab-size: 4;
+
+  -webkit-hyphens: none;
+  -moz-hyphens: none;
+  -ms-hyphens: none;
+  hyphens: none;
+}
+
+</style>
+
+<script type="application/javascript">
+
+function is_downlevel_browser() {
+  if (bowser.isUnsupportedBrowser({ msie: "12", msedge: "16"},
+                                 window.navigator.userAgent)) {
+    return true;
+  } else {
+    return window.load_distill_framework === undefined;
+  }
+}
+
+// show body when load is complete
+function on_load_complete() {
+
+  // set body to visible
+  document.body.style.visibility = 'visible';
+
+  // force redraw for leaflet widgets
+  if (window.HTMLWidgets) {
+    var maps = window.HTMLWidgets.findAll(".leaflet");
+    $.each(maps, function(i, el) {
+      var map = this.getMap();
+      map.invalidateSize();
+      map.eachLayer(function(layer) {
+        if (layer instanceof L.TileLayer)
+          layer.redraw();
+      });
+    });
+  }
+
+  // trigger 'shown' so htmlwidgets resize
+  $('d-article').trigger('shown');
+}
+
+function init_distill() {
+
+  init_common();
+
+  // create front matter
+  var front_matter = $('<d-front-matter></d-front-matter>');
+  $('#distill-front-matter').wrap(front_matter);
+
+  // create d-title
+  $('.d-title').changeElementType('d-title');
+
+  // create d-byline
+  var byline = $('<d-byline></d-byline>');
+  $('.d-byline').replaceWith(byline);
+
+  // create d-article
+  var article = $('<d-article></d-article>');
+  $('.d-article').wrap(article).children().unwrap();
+
+  // move posts container into article
+  $('.posts-container').appendTo($('d-article'));
+
+  // create d-appendix
+  $('.d-appendix').changeElementType('d-appendix');
+
+  // create d-bibliography
+  var bibliography = $('<d-bibliography></d-bibliography>');
+  $('#distill-bibliography').wrap(bibliography);
+
+  // flag indicating that we have appendix items
+  var appendix = $('.appendix-bottom').children('h3').length > 0;
+
+  // replace citations with <d-cite>
+  $('.citation').each(function(i, val) {
+    appendix = true;
+    var cites = $(this).attr('data-cites').split(" ");
+    var dt_cite = $('<d-cite></d-cite>');
+    dt_cite.attr('key', cites.join());
+    $(this).replaceWith(dt_cite);
+  });
+  // remove refs
+  $('#refs').remove();
+
+  // replace footnotes with <d-footnote>
+  $('.footnote-ref').each(function(i, val) {
+    appendix = true;
+    var href = $(this).attr('href');
+    var id = href.replace('#', '');
+    var fn = $('#' + id);
+    var fn_p = $('#' + id + '>p');
+    fn_p.find('.footnote-back').remove();
+    var text = fn_p.html();
+    var dtfn = $('<d-footnote></d-footnote>');
+    dtfn.html(text);
+    $(this).replaceWith(dtfn);
+  });
+  // remove footnotes
+  $('.footnotes').remove();
+
+  $('h1.appendix, h2.appendix').each(function(i, val) {
+    $(this).changeElementType('h3');
+  });
+  $('h3.appendix').each(function(i, val) {
+    var id = $(this).attr('id');
+    $('.d-toc a[href="#' + id + '"]').parent().remove();
+    appendix = true;
+    $(this).nextUntil($('h1, h2, h3')).addBack().appendTo($('d-appendix'));
+  });
+
+  // show d-appendix if we have appendix content
+  $("d-appendix").css('display', appendix ? 'grid' : 'none');
+
+  // replace code blocks with d-code
+  $('pre>code').each(function(i, val) {
+    var code = $(this);
+    var pre = code.parent();
+    var clz = "";
+    var language = pre.attr('class');
+    if (language) {
+      // map unknown languages to "clike" (without this they just dissapear)
+      if ($.inArray(language, ["bash", "clike", "css", "go", "html",
+                               "javascript", "js", "julia", "lua", "markdown",
+                               "markup", "mathml", "python", "svg", "xml"]) == -1)
+        language = "clike";
+      language = ' language="' + language + '"';
+      var dt_code = $('<d-code block' + language + clz + '></d-code>');
+      dt_code.text(code.text());
+      pre.replaceWith(dt_code);
+    } else {
+      code.addClass('text-output').unwrap().changeElementType('pre');
+    }
+  });
+
+  // localize layout chunks to just output
+  $('.layout-chunk').each(function(i, val) {
+
+    // capture layout
+    var layout = $(this).attr('data-layout');
+
+    // apply layout to markdown level block elements
+    var elements = $(this).children().not('d-code, pre.text-output, script');
+    elements.each(function(i, el) {
+      var layout_div = $('<div class="' + layout + '"></div>');
+      if (layout_div.hasClass('shaded')) {
+        var shaded_content = $('<div class="shaded-content"></div>');
+        $(this).wrap(shaded_content);
+        $(this).parent().wrap(layout_div);
+      } else {
+        $(this).wrap(layout_div);
+      }
+    });
+
+
+    // unwrap the layout-chunk div
+    $(this).children().unwrap();
+  });
+
+  // load distill framework
+  load_distill_framework();
+
+  // wait for window.distillRunlevel == 4 to do post processing
+  function distill_post_process() {
+
+    if (!window.distillRunlevel || window.distillRunlevel < 4)
+      return;
+
+    // hide author/affiliations entirely if we have no authors
+    var front_matter = JSON.parse($("#distill-front-matter").html());
+    var have_authors = front_matter.authors && front_matter.authors.length > 0;
+    if (!have_authors)
+      $('d-byline').addClass('hidden');
+
+    // table of contents
+    if (have_authors) // adjust border if we are in authors
+      $('.d-toc').parent().addClass('d-article-with-toc');
+
+    // strip links that point to #
+    $('.authors-affiliations').find('a[href="#"]').removeAttr('href');
+
+    // hide elements of author/affiliations grid that have no value
+    function hide_byline_column(caption) {
+      $('d-byline').find('h3:contains("' + caption + '")').parent().css('visibility', 'hidden');
+    }
+
+    // affiliations
+    var have_affiliations = false;
+    for (var i = 0; i<front_matter.authors.length; ++i) {
+      var author = front_matter.authors[i];
+      if (author.affiliation !== "&nbsp;") {
+        have_affiliations = true;
+        break;
+      }
+    }
+    if (!have_affiliations)
+      $('d-byline').find('h3:contains("Affiliations")').css('visibility', 'hidden');
+
+    // published date
+    if (!front_matter.publishedDate)
+      hide_byline_column("Published");
+
+    // document object identifier
+    var doi = $('d-byline').find('h3:contains("DOI")');
+    var doi_p = doi.next().empty();
+    if (!front_matter.doi) {
+      // if we have a citation and valid citationText then link to that
+      if ($('#citation').length > 0 && front_matter.citationText) {
+        doi.html('Citation');
+        $('<a href="#citation"></a>')
+          .text(front_matter.citationText)
+          .appendTo(doi_p);
+      } else {
+        hide_byline_column("DOI");
+      }
+    } else {
+      $('<a></a>')
+         .attr('href', "https://doi.org/" + front_matter.doi)
+         .html(front_matter.doi)
+         .appendTo(doi_p);
+    }
+
+     // change plural form of authors/affiliations
+    if (front_matter.authors.length === 1) {
+      var grid = $('.authors-affiliations');
+      grid.children('h3:contains("Authors")').text('Author');
+      grid.children('h3:contains("Affiliations")').text('Affiliation');
+    }
+
+    // inject pre code styles (can't do this with a global stylesheet b/c a shadow root is used)
+    $('d-code').each(function(i, val) {
+      var style = document.createElement('style');
+      style.innerHTML = 'pre code { padding-left: 10px; font-size: 12px; border-left: 2px solid rgba(0,0,0,0.1); } ' +
+                        '@media(min-width: 768px) { pre code { padding-left: 18px; font-size: 14px; } }';
+      if (this.shadowRoot)
+        this.shadowRoot.appendChild(style);
+    });
+
+    // move appendix-bottom entries to the bottom
+    $('.appendix-bottom').appendTo('d-appendix').children().unwrap();
+    $('.appendix-bottom').remove();
+
+    // clear polling timer
+    clearInterval(tid);
+
+    // show body now that everything is ready
+    on_load_complete();
+  }
+
+  var tid = setInterval(distill_post_process, 50);
+  distill_post_process();
+
+}
+
+function init_downlevel() {
+
+  init_common();
+
+   // insert hr after d-title
+  $('.d-title').after($('<hr class="section-separator"/>'));
+
+  // check if we have authors
+  var front_matter = JSON.parse($("#distill-front-matter").html());
+  var have_authors = front_matter.authors && front_matter.authors.length > 0;
+
+  // manage byline/border
+  if (!have_authors)
+    $('.d-byline').remove();
+  $('.d-byline').after($('<hr class="section-separator"/>'));
+  $('.d-byline a').remove();
+
+  // remove toc
+  $('.d-toc-header').remove();
+  $('.d-toc').remove();
+  $('.d-toc-separator').remove();
+
+  // move appendix elements
+  $('h1.appendix, h2.appendix').each(function(i, val) {
+    $(this).changeElementType('h3');
+  });
+  $('h3.appendix').each(function(i, val) {
+    $(this).nextUntil($('h1, h2, h3')).addBack().appendTo($('.d-appendix'));
+  });
+
+
+  // inject headers into references and footnotes
+  var refs_header = $('<h3></h3>');
+  refs_header.text('References');
+  $('#refs').prepend(refs_header);
+
+  var footnotes_header = $('<h3></h3');
+  footnotes_header.text('Footnotes');
+  $('.footnotes').children('hr').first().replaceWith(footnotes_header);
+
+  // move appendix-bottom entries to the bottom
+  $('.appendix-bottom').appendTo('.d-appendix').children().unwrap();
+  $('.appendix-bottom').remove();
+
+  // remove appendix if it's empty
+  if ($('.d-appendix').children().length === 0)
+    $('.d-appendix').remove();
+
+  // prepend separator above appendix
+  $('.d-appendix').before($('<hr class="section-separator" style="clear: both"/>'));
+
+  // trim code
+  $('pre>code').each(function(i, val) {
+    $(this).html($.trim($(this).html()));
+  });
+
+  // move posts-container right before article
+  $('.posts-container').insertBefore($('.d-article'));
+
+  $('body').addClass('downlevel');
+
+  on_load_complete();
+}
+
+
+function init_common() {
+
+  // jquery plugin to change element types
+  (function($) {
+    $.fn.changeElementType = function(newType) {
+      var attrs = {};
+
+      $.each(this[0].attributes, function(idx, attr) {
+        attrs[attr.nodeName] = attr.nodeValue;
+      });
+
+      this.replaceWith(function() {
+        return $("<" + newType + "/>", attrs).append($(this).contents());
+      });
+    };
+  })(jQuery);
+
+  // prevent underline for linked images
+  $('a > img').parent().css({'border-bottom' : 'none'});
+
+  // mark non-body figures created by knitr chunks as 100% width
+  $('.layout-chunk').each(function(i, val) {
+    var figures = $(this).find('img, .html-widget');
+    if ($(this).attr('data-layout') !== "l-body") {
+      figures.css('width', '100%');
+    } else {
+      figures.css('max-width', '100%');
+      figures.filter("[width]").each(function(i, val) {
+        var fig = $(this);
+        fig.css('width', fig.attr('width') + 'px');
+      });
+
+    }
+  });
+
+  // auto-append index.html to post-preview links in file: protocol
+  // and in rstudio ide preview
+  $('.post-preview').each(function(i, val) {
+    if (window.location.protocol === "file:")
+      $(this).attr('href', $(this).attr('href') + "index.html");
+  });
+
+  // get rid of index.html references in header
+  if (window.location.protocol !== "file:") {
+    $('.distill-site-header a[href]').each(function(i,val) {
+      $(this).attr('href', $(this).attr('href').replace("index.html", "./"));
+    });
+  }
+
+  // add class to pandoc style tables
+  $('tr.header').parent('thead').parent('table').addClass('pandoc-table');
+  $('.kable-table').children('table').addClass('pandoc-table');
+
+  // add figcaption style to table captions
+  $('caption').parent('table').addClass("figcaption");
+
+  // initialize posts list
+  if (window.init_posts_list)
+    window.init_posts_list();
+
+  // implmement disqus comment link
+  $('.disqus-comment-count').click(function() {
+    window.headroom_prevent_pin = true;
+    $('#disqus_thread').toggleClass('hidden');
+    if (!$('#disqus_thread').hasClass('hidden')) {
+      var offset = $(this).offset();
+      $(window).resize();
+      $('html, body').animate({
+        scrollTop: offset.top - 35
+      });
+    }
+  });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  if (is_downlevel_browser())
+    init_downlevel();
+  else
+    window.addEventListener('WebComponentsReady', init_distill);
+});
+
+</script>
+
+<!--/radix_placeholder_distill-->
+  <script src="../../site_libs/htmlwidgets-1.5.1/htmlwidgets.js"></script>
+  <link href="../../site_libs/vis-4.20.1/vis.css" rel="stylesheet" />
+  <script src="../../site_libs/vis-4.20.1/vis.min.js"></script>
+  <script src="../../site_libs/visNetwork-binding-2.0.9/visNetwork.js"></script>
+  <script src="../../site_libs/jquery-1.11.3/jquery.min.js"></script>
+  <script src="../../site_libs/bowser-1.9.3/bowser.min.js"></script>
+  <script src="../../site_libs/webcomponents-2.0.0/webcomponents.js"></script>
+  <script src="../../site_libs/distill-2.2.21/template.v2.js"></script>
+  <!--radix_placeholder_site_in_header-->
+<!--/radix_placeholder_site_in_header-->
+
+  <link rel="stylesheet" href="../../custom.css" type="text/css"/>
+
+</head>
+
+<body>
+
+<!--radix_placeholder_front_matter-->
+
+<script id="distill-front-matter" type="text/json">
+{"title":"mlr3 and OpenML - Moneyball use case","description":"","authors":[{"author":"Philipp Kopper","authorURL":"#","affiliation":"&nbsp;","affiliationURL":"#"}],"publishedDate":"2020-05-04T00:00:00.000+00:00","citationText":"Kopper, 2020"}
+</script>
+
+<!--/radix_placeholder_front_matter-->
+<!--radix_placeholder_navigation_before_body-->
+<header class="header header--fixed" role="banner">
+<nav class="distill-site-nav distill-site-header">
+<div class="nav-left">
+<a class="logo" href="https://mlr3.mlr-org.com">
+<img src="../../images/logo.png"/>
+</a>
+<a href="../../index.html" class="title">mlr3gallery</a>
+</div>
+<div class="nav-right">
+<a href="https://github.com/mlr-org/mlr3gallery">
+<i class="fab fa-github"></i>
+</a>
+<a href="javascript:void(0);" class="nav-toggle">&#9776;</a>
+</div>
+</nav>
+</header>
+<!--/radix_placeholder_navigation_before_body-->
+<!--radix_placeholder_site_before_body-->
+<!--/radix_placeholder_site_before_body-->
+
+<div class="d-title">
+<h1>mlr3 and OpenML - Moneyball use case</h1>
+
+</div>
+
+<div class="d-byline">
+  Philipp Kopper  
+  
+<br/>05-04-2020
+</div>
+
+<div class="d-article">
+<p>This use case shows how to easily work with datasets available via <a href="https://www.openml.org/">OpenML</a> into an mlr3 workflow.</p>
+<p>The following operations are illustrated:</p>
+<ul>
+<li>Creating tasks and learners</li>
+<li>Imputation for missing values</li>
+<li>Training and predicting</li>
+<li>Resampling / Cross-validation</li>
+</ul>
+<h2 id="loading-basic-packages">Loading basic packages</h2>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+# tasks, train, predict, resample, benchmark
+library(&quot;mlr3&quot;)
+# about a dozen reasonable learners
+library(&quot;mlr3learners&quot;)
+# Pipelines
+library(&quot;mlr3pipelines&quot;)
+# lots of measures for evaluation
+library(&quot;mlr3measures&quot;)
+# Retreiving the data
+library(&quot;OpenML&quot;)</code></pre>
+</div>
+<h2 id="retrieving-the-data-from-openml">Retrieving the data from OpenML</h2>
+<p>We can use the <code>OpenML</code> package to retrieve data (and more) straight away. <code>OpenML</code> is … Typically, you can retrieve the data with an <code>id</code>. The <code>id</code> can be found on <a href="https://www.openml.org/">OpenML</a>. We choose the <code>41021</code>as our <code>oml_id</code>. The related web page can be accessed <a href="https://www.openml.org/d/41021">here</a>. This data set was uploaded by <a href="https://www.openml.org/u/2">Joaquin Vanschoren</a>.</p>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+oml_id = 41021
+oml_dat = getOMLDataSet(data.id = oml_id)</code></pre>
+</div>
+<p>The description indicates that the data set is associated with baseball or more precisely the story of <a href="https://www.imdb.com/title/tt1210166/">Moneyball</a>.</p>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+oml_dat</code></pre>
+<pre><code>
+Data Set &#39;Moneyball&#39; :: (Version = 2, OpenML ID = 41021)
+  Default Target Attribute: RS</code></pre>
+</div>
+<p>However, the description within the <code>OpenML</code> object is not very detailed. The previously referenced <a href="https://www.openml.org/d/41021">page</a> however states the following:</p>
+<p>In the early 2000s, Billy Beane and Paul DePodesta worked for the Oakland Athletics. During their work there, they disrupted the game of baseball. They didn’t do it using a bat or glove, and they certainly didn’t do it by throwing money at the issue; in fact, money was the issue. They didn’t have enough of it, but they were still expected to keep up with teams that had more substantial endorsements. This is where Statistics came riding down the hillside on a white horse to save the day. This data set contains some of the information that was available to Beane and DePodesta in the early 2000s, and it can be used to better understand their methods.</p>
+<p>This data set contains a set of variables that Beane and DePodesta emphasized in their work. They determined that statistics like on-base percentage (OBP) and slugging percentage (SLG) were very important when it came to scoring runs, however, they were largely undervalued by most scouts at the time. This translated to a gold mine for Beane and DePodesta. Since these players weren’t being looked at by other teams, they could recruit these players on a small budget. The variables are as follows:</p>
+<ul>
+<li>Team</li>
+<li>League</li>
+<li>Year</li>
+<li>Runs Scored (RS)</li>
+<li>Runs Allowed (RA)</li>
+<li>Wins (W)</li>
+<li>On-Base Percentage (OBP)</li>
+<li>Slugging Percentage (SLG)</li>
+<li>Batting Average (BA)</li>
+<li>Playoffs (binary)</li>
+<li>RankSeason</li>
+<li>RankPlayoffs</li>
+<li>Games Played (G)</li>
+<li>Opponent On-Base Percentage (OOBP)</li>
+<li>Opponent Slugging Percentage (OSLG)</li>
+</ul>
+<p>While Beane and DePodesta defined most of these statistics and measures for individual players, this data set is on the team level.</p>
+<p>These statistics seem very informative if you are into baseball. If baseball of rather obscure to you, simply take these features as given or give this <a href="https://en.wikipedia.org/wiki/Baseball_statistics">article</a> a quick read.</p>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+data = oml_dat$data
+summary(data)</code></pre>
+<pre><code>
+      Team     League        Year            RS               RA        
+ BAL    : 47   AL:616   Min.   :1962   Min.   : 463.0   Min.   : 472.0  
+ BOS    : 47   NL:616   1st Qu.:1977   1st Qu.: 652.0   1st Qu.: 649.8  
+ CHC    : 47            Median :1989   Median : 711.0   Median : 709.0  
+ CHW    : 47            Mean   :1989   Mean   : 715.1   Mean   : 715.1  
+ CIN    : 47            3rd Qu.:2002   3rd Qu.: 775.0   3rd Qu.: 774.2  
+ CLE    : 47            Max.   :2012   Max.   :1009.0   Max.   :1103.0  
+ (Other):950                                                            
+       W              OBP              SLG               BA         Playoffs
+ Min.   : 40.0   Min.   :0.2770   Min.   :0.3010   Min.   :0.2140   0:988   
+ 1st Qu.: 73.0   1st Qu.:0.3170   1st Qu.:0.3750   1st Qu.:0.2510   1:244   
+ Median : 81.0   Median :0.3260   Median :0.3960   Median :0.2600           
+ Mean   : 80.9   Mean   :0.3263   Mean   :0.3973   Mean   :0.2593           
+ 3rd Qu.: 89.0   3rd Qu.:0.3370   3rd Qu.:0.4210   3rd Qu.:0.2680           
+ Max.   :116.0   Max.   :0.3730   Max.   :0.4910   Max.   :0.2940           
+                                                                            
+   RankSeason  RankPlayoffs       G            OOBP             OSLG       
+ 2      : 53   1   : 47     162    :954   Min.   :0.2940   Min.   :0.3460  
+ 1      : 52   2   : 47     161    :139   1st Qu.:0.3210   1st Qu.:0.4010  
+ 3      : 44   3   : 80     163    : 93   Median :0.3310   Median :0.4190  
+ 4      : 44   4   : 68     160    : 23   Mean   :0.3323   Mean   :0.4197  
+ 5      : 21   5   :  2     159    : 10   3rd Qu.:0.3430   3rd Qu.:0.4380  
+ (Other): 30   NA&#39;s:988     164    : 10   Max.   :0.3840   Max.   :0.4990  
+ NA&#39;s   :988                (Other):  3   NA&#39;s   :812      NA&#39;s   :812     </code></pre>
+</div>
+<p>The summary shows how this data we are dealing with looks like: Some data is missing, however, this has structural reasons. There are <span class="math inline">\(39\)</span> teams with each maximally <span class="math inline">\(47\)</span> years (<span class="math inline">\(1962\)</span> - <span class="math inline">\(2012\)</span>). For <span class="math inline">\(988\)</span> cases the information on <code>RankSeason</code> and <code>RankPlayoffs</code> is missing. This is since these simply did not reach the playoffs and hence have no reported rank.</p>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+summary(data[data$Playoffs == 0, c(&quot;RankSeason&quot;, &quot;RankPlayoffs&quot;)])</code></pre>
+<pre><code>
+   RankSeason  RankPlayoffs
+ 1      :  0   1   :  0    
+ 2      :  0   2   :  0    
+ 3      :  0   3   :  0    
+ 4      :  0   4   :  0    
+ 5      :  0   5   :  0    
+ (Other):  0   NA&#39;s:988    
+ NA&#39;s   :988               </code></pre>
+</div>
+<p>On the other hand, <code>OOBP</code> and <code>OSLG</code> have <span class="math inline">\(812\)</span> missing values. It seems as if these measures were not available before <span class="math inline">\(1998\)</span>.</p>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+summary(data[is.na(data$OOBP), &quot;Year&quot;])</code></pre>
+<pre><code>
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+   1962    1971    1980    1980    1989    1998 </code></pre>
+</div>
+<p>We seem to have a missing data problem. Typically, in this case, we have three options: They are:</p>
+<ul>
+<li><p>Complete case analysis: Exclude all observation with missing values.</p></li>
+<li><p>Complete feature analysis: Exclude all features with missing values.</p></li>
+<li><p>Missing value imputation: Use a model to “guess” the missing values (based on the underlying distribution of the data.</p></li>
+</ul>
+<p>Usually, missing value imputation is preferred over the first two. However, in machine learning, one can try out all options and see which performs best for the underlying problem. For now, we limit ourselves to a rather simple imputation technique, imputation by randomly sampling from the univariate distribution. Note that this does not take the multivariate distribution into account properly and that there are more elaborate approaches. We only aim to impute <code>OOBP</code> and <code>OSLG</code>. For the other missing (categorical) features, we simply add a new level which indicates that information is missing (i.e. all missing values belong to.</p>
+<p>It is important to note that in this case here the vast majority of information on the features is missing. In this case, imputation is performed to not throw away the existing information of the features.</p>
+<p><code>mlr3</code> has some solutions for that within the <code>mlr3pipelines</code> package. We start with an easy graph which only performs numeric imputation. We create a graph that copies the data. After this gateway, the data is simply passed through for the first node. On the other one numeric imputation is performed. The results are combined via the <code>featureunion</code> <code>PipeOp</code>. We end up with a data set where all numeric features are imputed.</p>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+nop = po(&quot;nop&quot;)
+imp_num = po(&quot;imputehist&quot;, param_vals = list(affect_columns = selector_type(&quot;numeric&quot;)))
+graph = po(&quot;copy&quot;, 2) %&gt;&gt;% gunion(list(nop, imp_num)) %&gt;&gt;% po(&quot;featureunion&quot;)</code></pre>
+</div>
+<p>We can visualise the preprocessing graph by its own <code>plot</code> method:</p>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+graph$plot(html = TRUE)</code></pre>
+<div id="htmlwidget-bba3639a95909a80f23e" style="width:50%;height:400px;" class="visNetwork html-widget"></div>
+<script type="application/json" data-for="htmlwidget-bba3639a95909a80f23e">{"x":{"nodes":{"id":["copy","nop","imputehist","<INPUT>","featureunion","<OUTPUT>"],"label":["copy","nop","imputehist","<INPUT>","featureunion","<OUTPUT>"],"shape":["box","box","box","database","box","ellipse"],"color":["lightblue","lightblue","lightblue","rgba(0,204,102,0.2)","lightblue","rgba(255,51,51,0.2)"],"value":[1,1,1,0.8,1,0.8],"title":["<p>PipeOp: <b>copy<\/b> (not trained)<br>values: <b>list()<\/b><br>Input channels <b>name [train type, predict type]<\/b>:<br>  input [*,*]<br>Output channels <b>name [train type, predict type]<\/b>:<br>  output1 [*,*], output2 [*,*]<\/p>","<p>PipeOp: <b>nop<\/b> (not trained)<br>values: <b>list()<\/b><br>Input channels <b>name [train type, predict type]<\/b>:<br>  input [*,*]<br>Output channels <b>name [train type, predict type]<\/b>:<br>  output [*,*]<\/p>","<p>PipeOp: <b>imputehist<\/b> (not trained)<br>values: <b>affect_columns=<Selector><\/b><br>Input channels <b>name [train type, predict type]<\/b>:<br>  input [Task,Task]<br>Output channels <b>name [train type, predict type]<\/b>:<br>  output [Task,Task]<\/p>","<p>Input:<br>Name: copy.input<br>Train: *<br>Predict: *<\/p>","<p>PipeOp: <b>featureunion<\/b> (not trained)<br>values: <b>list()<\/b><br>Input channels <b>name [train type, predict type]<\/b>:<br>  ... [Task,Task]<br>Output channels <b>name [train type, predict type]<\/b>:<br>  output [Task,Task]<\/p>","<p>Output:<br>Name: featureunion.output<br>Train: Task<br>Predict: Task<\/p>"],"x":[0,-1,1,0,0,0],"y":[-0.5,0,0,-1,0.5,1]},"edges":{"from":["copy","copy","nop","imputehist","<INPUT>","featureunion"],"to":["nop","imputehist","featureunion","featureunion","copy","<OUTPUT>"],"color":["lightblue","lightblue","lightblue","lightblue","lightblue","lightblue"]},"nodesToDataframe":true,"edgesToDataframe":true,"options":{"width":"100%","height":"100%","nodes":{"shape":"dot","physics":false},"manipulation":{"enabled":false},"edges":{"arrows":"to","smooth":{"enabled":false,"forceDirection":"vertical"}},"physics":{"stabilization":false}},"groups":null,"width":"50%","height":"400px","idselection":{"enabled":false},"byselection":{"enabled":false},"main":null,"submain":null,"footer":null,"background":"rgba(0, 0, 0, 0)","igraphlayout":{"type":"full"}},"evals":[],"jsHooks":[]}</script>
+</div>
+<p>We still have to append the second imputation job for factors. We pretty much construct the same pipeline again only for factors. However, we have to make sure that the operator <code>id</code>s are unique.</p>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+nop2 = po(&quot;nop&quot;, id = &quot;nop2&quot;)
+imp_fct = po(&quot;imputenewlvl&quot;, param_vals = list(affect_columns = selector_type(&quot;factor&quot;)))
+graph = graph %&gt;&gt;% po(&quot;copy&quot;, 2, id = &quot;copy2&quot;) %&gt;&gt;% gunion(list(nop2, imp_fct)) %&gt;&gt;%
+  po(&quot;featureunion&quot;, id = &quot;featureunion2&quot;)
+graph$plot(html = TRUE)</code></pre>
+<div id="htmlwidget-29b0ba86fc4324fd404b" style="width:50%;height:400px;" class="visNetwork html-widget"></div>
+<script type="application/json" data-for="htmlwidget-29b0ba86fc4324fd404b">{"x":{"nodes":{"id":["copy","nop","imputehist","featureunion","copy2","nop2","imputenewlvl","<INPUT>","featureunion2","<OUTPUT>"],"label":["copy","nop","imputehist","featureunion","copy2","nop2","imputenewlvl","<INPUT>","featureunion2","<OUTPUT>"],"shape":["box","box","box","box","box","box","box","database","box","ellipse"],"color":["lightblue","lightblue","lightblue","lightblue","lightblue","lightblue","lightblue","rgba(0,204,102,0.2)","lightblue","rgba(255,51,51,0.2)"],"value":[1,1,1,1,1,1,1,0.8,1,0.8],"title":["<p>PipeOp: <b>copy<\/b> (not trained)<br>values: <b>list()<\/b><br>Input channels <b>name [train type, predict type]<\/b>:<br>  input [*,*]<br>Output channels <b>name [train type, predict type]<\/b>:<br>  output1 [*,*], output2 [*,*]<\/p>","<p>PipeOp: <b>nop<\/b> (not trained)<br>values: <b>list()<\/b><br>Input channels <b>name [train type, predict type]<\/b>:<br>  input [*,*]<br>Output channels <b>name [train type, predict type]<\/b>:<br>  output [*,*]<\/p>","<p>PipeOp: <b>imputehist<\/b> (not trained)<br>values: <b>affect_columns=<Selector><\/b><br>Input channels <b>name [train type, predict type]<\/b>:<br>  input [Task,Task]<br>Output channels <b>name [train type, predict type]<\/b>:<br>  output [Task,Task]<\/p>","<p>PipeOp: <b>featureunion<\/b> (not trained)<br>values: <b>list()<\/b><br>Input channels <b>name [train type, predict type]<\/b>:<br>  ... [Task,Task]<br>Output channels <b>name [train type, predict type]<\/b>:<br>  output [Task,Task]<\/p>","<p>PipeOp: <b>copy2<\/b> (not trained)<br>values: <b>list()<\/b><br>Input channels <b>name [train type, predict type]<\/b>:<br>  input [*,*]<br>Output channels <b>name [train type, predict type]<\/b>:<br>  output1 [*,*], output2 [*,*]<\/p>","<p>PipeOp: <b>nop2<\/b> (not trained)<br>values: <b>list()<\/b><br>Input channels <b>name [train type, predict type]<\/b>:<br>  input [*,*]<br>Output channels <b>name [train type, predict type]<\/b>:<br>  output [*,*]<\/p>","<p>PipeOp: <b>imputenewlvl<\/b> (not trained)<br>values: <b>affect_columns=<Selector><\/b><br>Input channels <b>name [train type, predict type]<\/b>:<br>  input [Task,Task]<br>Output channels <b>name [train type, predict type]<\/b>:<br>  output [Task,Task]<\/p>","<p>Input:<br>Name: copy.input<br>Train: *<br>Predict: *<\/p>","<p>PipeOp: <b>featureunion2<\/b> (not trained)<br>values: <b>list()<\/b><br>Input channels <b>name [train type, predict type]<\/b>:<br>  ... [Task,Task]<br>Output channels <b>name [train type, predict type]<\/b>:<br>  output [Task,Task]<\/p>","<p>Output:<br>Name: featureunion2.output<br>Train: Task<br>Predict: Task<\/p>"],"x":[0,-1,1,0,0,-1,1,0,0,0],"y":[-0.714285714285714,-0.428571428571429,-0.428571428571429,-0.142857142857143,0.142857142857143,0.428571428571429,0.428571428571429,-1,0.714285714285714,1]},"edges":{"from":["copy","copy","nop","imputehist","featureunion","copy2","copy2","nop2","imputenewlvl","<INPUT>","featureunion2"],"to":["nop","imputehist","featureunion","featureunion","copy2","nop2","imputenewlvl","featureunion2","featureunion2","copy","<OUTPUT>"],"color":["lightblue","lightblue","lightblue","lightblue","lightblue","lightblue","lightblue","lightblue","lightblue","lightblue","lightblue"]},"nodesToDataframe":true,"edgesToDataframe":true,"options":{"width":"100%","height":"100%","nodes":{"shape":"dot","physics":false},"manipulation":{"enabled":false},"edges":{"arrows":"to","smooth":{"enabled":false,"forceDirection":"vertical"}},"physics":{"stabilization":false}},"groups":null,"width":"50%","height":"400px","idselection":{"enabled":false},"byselection":{"enabled":false},"main":null,"submain":null,"footer":null,"background":"rgba(0, 0, 0, 0)","igraphlayout":{"type":"full"}},"evals":[],"jsHooks":[]}</script>
+</div>
+<p>So far we only prepared the pipeline without actually modeling. Before we come to this step, we perform a last preprocessing step manually. Namely, we make <code>G</code> (games played) a numerical feature.</p>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+data$G = as.numeric(data$G)</code></pre>
+</div>
+<p>Additionally, the row names (starting with <span class="math inline">\(0\)</span>) are changed.</p>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+rownames(data) &lt;- 1:nrow(data)</code></pre>
+</div>
+<h2 id="creating-tasks-and-learners">Creating tasks and learners</h2>
+<p>The fact that there is missing data does not affect the <code>task</code> definition. The <code>task</code> determines what is the problem to be solved by machine learning. We want to explain the Runs Scored (RS). RS is an important measure as a run is equivalent to a ‘point’ scored in other sports. Naturally, the aim of a coach should be to maximise runs scored and minimise runs allowed. As runs scored and runs allowed are both legitimate targets we ignore the runs allowed here. The task is defined by:</p>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+# creates a `mlr3` task from scratch, from a data.frame
+# &#39;target&#39; names the column in the dataset we want to learn to predict
+task = TaskRegr$new(id = &quot;moneyball&quot;, backend = data, target = &quot;RS&quot;)
+task$missings()</code></pre>
+<pre><code>
+          RS           BA            G       League          OBP         OOBP 
+           0            0            0            0            0          812 
+        OSLG     Playoffs           RA RankPlayoffs   RankSeason          SLG 
+         812            0            0          988          988            0 
+        Team            W         Year 
+           0            0            0 </code></pre>
+</div>
+<p>The <code>missings</code> method indicates what we already knew: our missing values. Missing values are not always a problem. Some learners can deal with them pretty well. However, we want to use a random forest for our task.</p>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+# creates a learner
+test_lrn = LearnerRegrRanger$new()
+# displays the properties
+test_lrn$properties</code></pre>
+<pre><code>
+[1] &quot;importance&quot; &quot;oob_error&quot;  &quot;weights&quot;   </code></pre>
+</div>
+<p>Typically, in <code>mlr3</code> the <code>properties</code> method would tell us whether missing values are a problem to this learner or not. As it is not listed here, the random forest cannot deal with missing values.</p>
+<p>As we aim to use imputation beforehand, we incorporate it into the learner. Our selected learner is going to be a random forest from the <code>ranger</code> package. One can allow the embedding of the preprocessing (imputation) into a learner by creating <code>new</code> (method) <code>PipeOpLearner</code> (R6 class). This special <code>learner</code> can be put into a graph together with the <code>imputer</code> via the <code>new</code> method of the <code>GraphLearner</code> class.</p>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+# creates a normal learner however allows further embedding of PipeOp&#39;s.
+polrn = PipeOpLearner$new(mlr_learners$get(&quot;regr.ranger&quot;))
+# sets number of trees to 1000, importance is for later
+polrn$param_set$values = list(num.trees = 1000, importance = &quot;permutation&quot;)
+# the final learner is a graph consisting of the imputer and the normal learner.
+lrn = GraphLearner$new(graph = graph %&gt;&gt;% polrn)</code></pre>
+</div>
+<p>The final graph looks like the following:</p>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+plot(graph %&gt;&gt;% polrn, html = TRUE)</code></pre>
+<div id="htmlwidget-d93681cd04f861c1028b" style="width:50%;height:400px;" class="visNetwork html-widget"></div>
+<script type="application/json" data-for="htmlwidget-d93681cd04f861c1028b">{"x":{"nodes":{"id":["copy","nop","imputehist","featureunion","copy2","nop2","imputenewlvl","featureunion2","<INPUT>","regr.ranger","<OUTPUT>"],"label":["copy","nop","imputehist","featureunion","copy2","nop2","imputenewlvl","featureunion2","<INPUT>","regr.ranger","<OUTPUT>"],"shape":["box","box","box","box","box","box","box","box","database","box","ellipse"],"color":["lightblue","lightblue","lightblue","lightblue","lightblue","lightblue","lightblue","lightblue","rgba(0,204,102,0.2)","lightblue","rgba(255,51,51,0.2)"],"value":[1,1,1,1,1,1,1,1,0.8,1,0.8],"title":["<p>PipeOp: <b>copy<\/b> (not trained)<br>values: <b>list()<\/b><br>Input channels <b>name [train type, predict type]<\/b>:<br>  input [*,*]<br>Output channels <b>name [train type, predict type]<\/b>:<br>  output1 [*,*], output2 [*,*]<\/p>","<p>PipeOp: <b>nop<\/b> (not trained)<br>values: <b>list()<\/b><br>Input channels <b>name [train type, predict type]<\/b>:<br>  input [*,*]<br>Output channels <b>name [train type, predict type]<\/b>:<br>  output [*,*]<\/p>","<p>PipeOp: <b>imputehist<\/b> (not trained)<br>values: <b>affect_columns=<Selector><\/b><br>Input channels <b>name [train type, predict type]<\/b>:<br>  input [Task,Task]<br>Output channels <b>name [train type, predict type]<\/b>:<br>  output [Task,Task]<\/p>","<p>PipeOp: <b>featureunion<\/b> (not trained)<br>values: <b>list()<\/b><br>Input channels <b>name [train type, predict type]<\/b>:<br>  ... [Task,Task]<br>Output channels <b>name [train type, predict type]<\/b>:<br>  output [Task,Task]<\/p>","<p>PipeOp: <b>copy2<\/b> (not trained)<br>values: <b>list()<\/b><br>Input channels <b>name [train type, predict type]<\/b>:<br>  input [*,*]<br>Output channels <b>name [train type, predict type]<\/b>:<br>  output1 [*,*], output2 [*,*]<\/p>","<p>PipeOp: <b>nop2<\/b> (not trained)<br>values: <b>list()<\/b><br>Input channels <b>name [train type, predict type]<\/b>:<br>  input [*,*]<br>Output channels <b>name [train type, predict type]<\/b>:<br>  output [*,*]<\/p>","<p>PipeOp: <b>imputenewlvl<\/b> (not trained)<br>values: <b>affect_columns=<Selector><\/b><br>Input channels <b>name [train type, predict type]<\/b>:<br>  input [Task,Task]<br>Output channels <b>name [train type, predict type]<\/b>:<br>  output [Task,Task]<\/p>","<p>PipeOp: <b>featureunion2<\/b> (not trained)<br>values: <b>list()<\/b><br>Input channels <b>name [train type, predict type]<\/b>:<br>  ... [Task,Task]<br>Output channels <b>name [train type, predict type]<\/b>:<br>  output [Task,Task]<\/p>","<p>Input:<br>Name: copy.input<br>Train: *<br>Predict: *<\/p>","<p>PipeOp: <b>regr.ranger<\/b> (not trained)<br>values: <b>num.trees=1000, importance=permutation<\/b><br>Input channels <b>name [train type, predict type]<\/b>:<br>  input [TaskRegr,TaskRegr]<br>Output channels <b>name [train type, predict type]<\/b>:<br>  output [NULL,PredictionRegr]<\/p>","<p>Output:<br>Name: regr.ranger.output<br>Train: NULL<br>Predict: PredictionRegr<\/p>"],"x":[0,-1,1,0,0,-1,1,0,0,0,0],"y":[-0.75,-0.5,-0.5,-0.25,0,0.25,0.25,0.5,-1,0.75,1]},"edges":{"from":["copy","copy","nop","imputehist","featureunion","copy2","copy2","nop2","imputenewlvl","featureunion2","<INPUT>","regr.ranger"],"to":["nop","imputehist","featureunion","featureunion","copy2","nop2","imputenewlvl","featureunion2","featureunion2","regr.ranger","copy","<OUTPUT>"],"color":["lightblue","lightblue","lightblue","lightblue","lightblue","lightblue","lightblue","lightblue","lightblue","lightblue","lightblue","lightblue"]},"nodesToDataframe":true,"edgesToDataframe":true,"options":{"width":"100%","height":"100%","nodes":{"shape":"dot","physics":false},"manipulation":{"enabled":false},"edges":{"arrows":"to","smooth":{"enabled":false,"forceDirection":"vertical"}},"physics":{"stabilization":false}},"groups":null,"width":"50%","height":"400px","idselection":{"enabled":false},"byselection":{"enabled":false},"main":null,"submain":null,"footer":null,"background":"rgba(0, 0, 0, 0)","igraphlayout":{"type":"full"}},"evals":[],"jsHooks":[]}</script>
+</div>
+<h2 id="train-and-predict">Train and predict</h2>
+<p>To get a feeling of how our model performs we simply train the <code>learner</code> on a subset of the data and predict the hold-out data.</p>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+# defines the training and testing data; 95% is used for training
+train_set = sample(task$nrow, 0.95 * task$nrow)
+test_set = setdiff(seq_len(task$nrow), train_set)
+# train learner on subset of task
+lrn$train(task, row_ids = train_set)
+# predict using held out observations
+preds = lrn$predict(task, row_ids = test_set)
+print(preds)</code></pre>
+<pre><code>
+&lt;PredictionRegr&gt; for 62 observations:
+    row_id truth response
+         9   758 775.4221
+        20   713 699.8311
+        44   667 685.1042
+---                      
+      1086   645 631.4202
+      1123   533 539.4036
+      1157   647 649.2306</code></pre>
+</div>
+<p>Viewing the predicted values it seems like the model predicts reasonable values that are fairly close to the truth.</p>
+<h2 id="evaluation-resampling">Evaluation &amp; Resampling</h2>
+<p>While the prediction indicated that the model is doing what it is supposed to, we want to have a more systematic understanding of the model performance. That means we want to know by how much our model is away from the truth on average. Cross-validation investigates this question. In <code>mlr3</code> ten-fold cross-validation is constructed as follows:</p>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+cv10 = rsmp(&quot;cv&quot;, folds = 10)
+r = resample(task, lrn, cv10)</code></pre>
+</div>
+<p>We choose some of the performance measures provided by:</p>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+mlr_measures</code></pre>
+<pre><code>
+&lt;DictionaryMeasure&gt; with 53 stored values
+Keys: classif.acc, classif.auc, classif.bacc, classif.bbrier,
+  classif.ce, classif.costs, classif.dor, classif.fbeta, classif.fdr,
+  classif.fn, classif.fnr, classif.fomr, classif.fp, classif.fpr,
+  classif.logloss, classif.mbrier, classif.mcc, classif.npv,
+  classif.ppv, classif.precision, classif.recall, classif.sensitivity,
+  classif.specificity, classif.tn, classif.tnr, classif.tp,
+  classif.tpr, debug, oob_error, regr.bias, regr.ktau, regr.mae,
+  regr.mape, regr.maxae, regr.medae, regr.medse, regr.mse, regr.msle,
+  regr.pbias, regr.rae, regr.rmse, regr.rmsle, regr.rrse, regr.rse,
+  regr.rsq, regr.sae, regr.smape, regr.srho, regr.sse,
+  selected_features, time_both, time_predict, time_train</code></pre>
+</div>
+<p>We choose the mean absolute error (<code>regr.mae</code>) and the mean squared error (<code>regr.mse</code>).</p>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+scores = r$score(msrs(c(&quot;regr.mae&quot;, &quot;regr.mse&quot;)))
+scores</code></pre>
+<pre><code>
+          task   task_id        learner
+ 1: &lt;TaskRegr&gt; moneyball &lt;GraphLearner&gt;
+ 2: &lt;TaskRegr&gt; moneyball &lt;GraphLearner&gt;
+ 3: &lt;TaskRegr&gt; moneyball &lt;GraphLearner&gt;
+ 4: &lt;TaskRegr&gt; moneyball &lt;GraphLearner&gt;
+ 5: &lt;TaskRegr&gt; moneyball &lt;GraphLearner&gt;
+ 6: &lt;TaskRegr&gt; moneyball &lt;GraphLearner&gt;
+ 7: &lt;TaskRegr&gt; moneyball &lt;GraphLearner&gt;
+ 8: &lt;TaskRegr&gt; moneyball &lt;GraphLearner&gt;
+ 9: &lt;TaskRegr&gt; moneyball &lt;GraphLearner&gt;
+10: &lt;TaskRegr&gt; moneyball &lt;GraphLearner&gt;
+                                                                            learner_id
+ 1: copy.nop.imputehist.featureunion.copy2.nop2.imputenewlvl.featureunion2.regr.ranger
+ 2: copy.nop.imputehist.featureunion.copy2.nop2.imputenewlvl.featureunion2.regr.ranger
+ 3: copy.nop.imputehist.featureunion.copy2.nop2.imputenewlvl.featureunion2.regr.ranger
+ 4: copy.nop.imputehist.featureunion.copy2.nop2.imputenewlvl.featureunion2.regr.ranger
+ 5: copy.nop.imputehist.featureunion.copy2.nop2.imputenewlvl.featureunion2.regr.ranger
+ 6: copy.nop.imputehist.featureunion.copy2.nop2.imputenewlvl.featureunion2.regr.ranger
+ 7: copy.nop.imputehist.featureunion.copy2.nop2.imputenewlvl.featureunion2.regr.ranger
+ 8: copy.nop.imputehist.featureunion.copy2.nop2.imputenewlvl.featureunion2.regr.ranger
+ 9: copy.nop.imputehist.featureunion.copy2.nop2.imputenewlvl.featureunion2.regr.ranger
+10: copy.nop.imputehist.featureunion.copy2.nop2.imputenewlvl.featureunion2.regr.ranger
+        resampling resampling_id iteration prediction regr.mae regr.mse
+ 1: &lt;ResamplingCV&gt;            cv         1     &lt;list&gt; 19.69168 615.1650
+ 2: &lt;ResamplingCV&gt;            cv         2     &lt;list&gt; 18.44454 568.5361
+ 3: &lt;ResamplingCV&gt;            cv         3     &lt;list&gt; 22.14570 786.0772
+ 4: &lt;ResamplingCV&gt;            cv         4     &lt;list&gt; 18.59012 572.5831
+ 5: &lt;ResamplingCV&gt;            cv         5     &lt;list&gt; 21.35074 697.4593
+ 6: &lt;ResamplingCV&gt;            cv         6     &lt;list&gt; 18.20498 489.9449
+ 7: &lt;ResamplingCV&gt;            cv         7     &lt;list&gt; 19.10525 593.4030
+ 8: &lt;ResamplingCV&gt;            cv         8     &lt;list&gt; 18.56130 649.4446
+ 9: &lt;ResamplingCV&gt;            cv         9     &lt;list&gt; 19.34960 569.1173
+10: &lt;ResamplingCV&gt;            cv        10     &lt;list&gt; 19.08813 605.0839</code></pre>
+</div>
+<p>We can also compute now by how much our model was on average wrong when predicting the runs scored.</p>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+mean(scores$regr.mae)</code></pre>
+<pre><code>
+[1] 19.4532</code></pre>
+</div>
+<p>That seems not too bad. Considering that on average approximately 715 runs per team per season have been scored.</p>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+mean(data$RS)</code></pre>
+<pre><code>
+[1] 715.082</code></pre>
+</div>
+<h2 id="performance-boost-of-imputation">Performance boost of imputation</h2>
+<p>To assess if imputation was beneficial, we can compare our current learner with a learner which ignores the missing features. Normally, one would set up a benchmark for this. However, we want to keep things short in this use case. Thus, we only set up the alternative learner (with identical hyperparameters) and compare the 10-fold-cross-validated mean absolute error.</p>
+<p>We can easily ignore features by a specific <code>PipeOp</code> As we are mostly interested in the numeric imputation we leave the remaining graph as it is.</p>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+nop = po(&quot;nop&quot;)
+imp_fct = po(&quot;imputenewlvl&quot;, param_vals = list(affect_columns = selector_type(&quot;factor&quot;)))
+graph2 = po(&quot;copy&quot;, 2) %&gt;&gt;% gunion(list(nop, imp_fct)) %&gt;&gt;% po(&quot;featureunion&quot;)</code></pre>
+</div>
+<p>Subsequently, we add the <code>PipeOpSelect</code> <code>PipeOp</code> to the pipeline.</p>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+feature_names = colnames(data)[apply(!is.na(data), 2, all)]
+feature_names = c(
+  feature_names[feature_names %in% task$feature_names],
+  &quot;RankSeason&quot;, &quot;RankPlayoffs&quot;)
+na_select = po(&quot;select&quot;)
+na_select$param_set$values$selector = selector_name(feature_names)
+graph2 = graph2 %&gt;&gt;% na_select
+graph2$plot(html = TRUE)</code></pre>
+<div id="htmlwidget-ae3c478ff76c7a34b8d7" style="width:50%;height:400px;" class="visNetwork html-widget"></div>
+<script type="application/json" data-for="htmlwidget-ae3c478ff76c7a34b8d7">{"x":{"nodes":{"id":["copy","nop","imputenewlvl","featureunion","<INPUT>","select","<OUTPUT>"],"label":["copy","nop","imputenewlvl","featureunion","<INPUT>","select","<OUTPUT>"],"shape":["box","box","box","box","database","box","ellipse"],"color":["lightblue","lightblue","lightblue","lightblue","rgba(0,204,102,0.2)","lightblue","rgba(255,51,51,0.2)"],"value":[1,1,1,1,0.8,1,0.8],"title":["<p>PipeOp: <b>copy<\/b> (not trained)<br>values: <b>list()<\/b><br>Input channels <b>name [train type, predict type]<\/b>:<br>  input [*,*]<br>Output channels <b>name [train type, predict type]<\/b>:<br>  output1 [*,*], output2 [*,*]<\/p>","<p>PipeOp: <b>nop<\/b> (not trained)<br>values: <b>list()<\/b><br>Input channels <b>name [train type, predict type]<\/b>:<br>  input [*,*]<br>Output channels <b>name [train type, predict type]<\/b>:<br>  output [*,*]<\/p>","<p>PipeOp: <b>imputenewlvl<\/b> (not trained)<br>values: <b>affect_columns=<Selector><\/b><br>Input channels <b>name [train type, predict type]<\/b>:<br>  input [Task,Task]<br>Output channels <b>name [train type, predict type]<\/b>:<br>  output [Task,Task]<\/p>","<p>PipeOp: <b>featureunion<\/b> (not trained)<br>values: <b>list()<\/b><br>Input channels <b>name [train type, predict type]<\/b>:<br>  ... [Task,Task]<br>Output channels <b>name [train type, predict type]<\/b>:<br>  output [Task,Task]<\/p>","<p>Input:<br>Name: copy.input<br>Train: *<br>Predict: *<\/p>","<p>PipeOp: <b>select<\/b> (not trained)<br>values: <b>selector=<Selector><\/b><br>Input channels <b>name [train type, predict type]<\/b>:<br>  input [Task,Task]<br>Output channels <b>name [train type, predict type]<\/b>:<br>  output [Task,Task]<\/p>","<p>Output:<br>Name: select.output<br>Train: Task<br>Predict: Task<\/p>"],"x":[0,-1,1,0,0,0,0],"y":[-0.6,-0.2,-0.2,0.2,-1,0.6,1]},"edges":{"from":["copy","copy","nop","imputenewlvl","featureunion","<INPUT>","select"],"to":["nop","imputenewlvl","featureunion","featureunion","select","copy","<OUTPUT>"],"color":["lightblue","lightblue","lightblue","lightblue","lightblue","lightblue","lightblue"]},"nodesToDataframe":true,"edgesToDataframe":true,"options":{"width":"100%","height":"100%","nodes":{"shape":"dot","physics":false},"manipulation":{"enabled":false},"edges":{"arrows":"to","smooth":{"enabled":false,"forceDirection":"vertical"}},"physics":{"stabilization":false}},"groups":null,"width":"50%","height":"400px","idselection":{"enabled":false},"byselection":{"enabled":false},"main":null,"submain":null,"footer":null,"background":"rgba(0, 0, 0, 0)","igraphlayout":{"type":"full"}},"evals":[],"jsHooks":[]}</script>
+</div>
+<p>Now we complete the learner and apply resampling as before.</p>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+lrn2 = GraphLearner$new(graph = graph2 %&gt;&gt;% polrn)
+r2 = resample(task, lrn2, cv10)
+scores2 = r2$score(msrs(c(&quot;regr.mae&quot;, &quot;regr.mse&quot;)))
+mean(scores2$regr.mae)</code></pre>
+<pre><code>
+[1] 19.01394</code></pre>
+</div>
+<p>Surprisingly, the performance seems to be approximately the same. That means that the imputed features seem not very helpful. We can use the <code>variable.importance</code> of the random forest.</p>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+sort(lrn$model$regr.ranger$model$variable.importance)</code></pre>
+<pre><code>
+           G         Team       League         OSLG         OOBP     Playoffs 
+     7.62314     18.35732     27.81114     37.70910     38.09588     90.66133 
+RankPlayoffs   RankSeason         Year           RA            W           BA 
+   100.91821    132.74766    248.28325    514.23706    742.00616    912.38213 
+         OBP          SLG 
+  2444.73968   3470.12230 </code></pre>
+</div>
+<p>We see that according to this the left out <code>OOBP</code> and <code>OSLG</code> seem to have solely rudimentary explanatory power. This may be because there were simply too many instances or because the features are themselves not very powerful.</p>
+<h2 id="conclusion">Conclusion</h2>
+<p>So, to sum up, what we have learned: We can access very cool data straight away with the <code>OpenML</code> package. (We are working on a better direct implementation into <code>mlr3</code> at the moment.) We can even work with missing data very well in <code>mlr3</code>. Nevertheless, we discovered that sometimes imputation does not lead to the intended goals. We also learned how to use some <code>PipeOp</code>s from the <code>mlr3pipelines</code> package.</p>
+<p>But most importantly, we found a way to predict the runs scored of MLB teams.</p>
+<p>If you want to know more, read the <a href="https://mlr3book.mlr-org.com/">mlr3book</a> and the documentation of the mentioned packages.</p>
+<!--radix_placeholder_article_footer-->
+<!--/radix_placeholder_article_footer-->
+</div>
+
+<div class="d-appendix">
+</div>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+<!--radix_placeholder_site_after_body-->
+<!--/radix_placeholder_site_after_body-->
+<!--radix_placeholder_appendices-->
+<div class="appendix-bottom">
+  <h3 id="citation">Citation</h3>
+  <p>For attribution, please cite this work as</p>
+  <pre class="citation-appendix short">Kopper (2020, May 4). mlr3gallery: mlr3 and OpenML - Moneyball use case. Retrieved from https://mlr3gallery.mlr-org.com/posts/2020-05-04-moneyball/</pre>
+  <p>BibTeX citation</p>
+  <pre class="citation-appendix long">@misc{kopper2020mlr3,
+  author = {Kopper, Philipp},
+  title = {mlr3gallery: mlr3 and OpenML - Moneyball use case},
+  url = {https://mlr3gallery.mlr-org.com/posts/2020-05-04-moneyball/},
+  year = {2020}
+}</pre>
+</div>
+<!--/radix_placeholder_appendices-->
+<!--radix_placeholder_navigation_after_body-->
+<!--/radix_placeholder_navigation_after_body-->
+
+</body>
+
+</html>
