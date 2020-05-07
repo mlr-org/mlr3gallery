@@ -275,7 +275,9 @@ bmr = benchmark(data.table(
 bmr$aggregate()[, c("learner_id", "classif.ce")]
 ```
 
-If we train the stacked `Learner` and look into the model, we can see how "important" each part of the stacked models is.
+The stacked `Learner` is a logistic regression.
+Hence, the model output already tells us a lot on the importance of the features, or in this case the parts of the stacked learner.
+If we train the stacked `Learner` and look into the model (the logistic regression), we can see how "important" each part of the stacked models is.
 
 ```{r}
 stackgraph$train(task)
@@ -283,20 +285,24 @@ stackgraph$train(task)
 summary(stackgraph$pipeops$classif.log_reg$state$model)
 ```
 
-- The Random Forest (`ranger`) contributes more to the outcome, as one would expect, because it is generally a stronger model.
+The Random Forest (`ranger`) contributes more to the outcome.
+This is not surprising because it is generally a _stronger_ model.
 
 ## Robustify: Preventing new Prediction Factor Levels and other Problems
 
-- Let's shift contexts: We take the full German Credit dataset.
+Now we shift the context: 
+We take the complete German Credit dataset.
 
 ```{r, message=FALSE}
-
 task = tsk("german_credit")
 
 task$head()
 ```
 
-- When training with a small datasset, or datasets with many factor levels, it is possible that not all possible factor levels are visible to the `Learner` during training. Prediction then fails because the `Learner` does not know how to handle unseen factor levels.
+There is a potential practical problem for both, small data sets and data sets with covariates having many factor levels.
+It may occur that not all possible factor levels have been used by the `Learner` during training. 
+This happens because these rare instances are simply not sampled.
+Prediction then fails because the `Learner` does not know how to handle unseen factor levels.
 
 ```{r, error = TRUE, warning = FALSE}
 logreg = lrn("classif.log_reg")
@@ -304,19 +310,20 @@ logreg$train(task$clone()$filter(1:30))
 logreg$predict(task)
 ```
 
-- Many `Learner`s can not handle new levels during prediction $\Rightarrow$ we use the `"fixfactors"` `PipeOp` to prevent that
-- `"fixfactors"` introduces `NA` values; we may need to impute afterwards.
-  - $\Rightarrow$ We use `"imputesample"`, but with `affect_cols` set to only *factorial* features.
-
-- Columns that are all-constant may also be a problem:
+Not only logistic regression but also many other `Learner`s cannot handle new levels during prediction.
+Thus, we use the `"fixfactors"` `PipeOp` to prevent that.
+`"fixfactors"` introduces `NA` values.
+This means that we may need to impute afterwards.
+To solve this issue we use `"imputesample"`, but with `affect_cols` set to only *factorial* features.
 
 ```{r, error = TRUE, warning = FALSE}
 logreg = lrn("classif.log_reg")
 logreg$train(task$clone()$filter(1:2))
 ```
 
-- This can be fixed using `"removeconstants"`
-- We get the following robustification pipeline:
+We observet that columns that are all-constant may also be a problem.
+This can be fixed using `"removeconstants"`
+We get the following robustification pipeline:
 
 ```{r}
 robustify = po("fixfactors") %>>%
@@ -326,8 +333,8 @@ robustify = po("fixfactors") %>>%
 robustify$plot()
 ```
 
-- This works even in very pathological conditions.
-- You may need to combine it with imputation if the data could have missing values.
+This robust learner works even in very pathological conditions.
+You may need to combine it with imputation if the data may have missing values.
 
 ```{r, warning = FALSE}
 roblogreg = GraphLearner$new(robustify %>>% logreg)
@@ -338,16 +345,18 @@ roblogreg$predict(task)
 
 ## Encoding Categorical Features
 
-Some `Learner`s, even important ones like `xgboost`, can not handle categorical features.
+There are many more technical issues which may result in errors when training (or predicting) which we have not presented yet.
+Most of these, however, can be easily handled by `PipeOp`s.
+For example, some `Learner`s, even frequently used ones like `xgboost`, cannot deal with categorical features.
 
 ```{r, error = TRUE}
 xgb = lrn("classif.xgboost")
 xgb$train(task)
 ```
 
-- Use `po("encode")`, or `po("encodeimpact")` to perform factor encoding.
-  - `"encode"` does one-hot encoding or similar
-  - `"encodeimpact"` does impact-encoding, which may work better for features with many factor levels
+To overcome this problem we can use, for instance, `po("encode")`, or `po("encodeimpact")` to perform factor encoding.
+`"encode"` does one-hot encoding (or similar).
+`"encodeimpact"` does impact-encoding, which may work better for features with many factor levels.
 
 ```{r}
 xgb_all = GraphLearner$new(po("encode") %>>% xgb)
@@ -355,12 +364,21 @@ xgb_all = GraphLearner$new(po("encode") %>>% xgb)
 xgb_all$train(task) # runs without error
 ```
 
-## Your Ideas!
+## Your Ideas
 
-- Try different methods for preprocessing and training
-- Some hints:
-  - It is not allowed to have two `PipeOp`s with the same `ID` in a `Graph`. Initialize a `PipeOp` with `po("...", id = "xyz")` to change its ID on construction
-  - If you build large `Graph`s involving complicated optimizations, like too many `"learner_cv"`, then they may need a long time to train
-  - Use the `affect_columns` parameter if you want a `PipeOp` to only operate on part of the data. Use `po("select")` if you want to remove certain columns (possibly only along a single branch of multiple parallel branches). Both take `selector_XXX()` arguments, e.g. `selector_type("integer")`
-  - You may get the best performance if you actually inspect the features and see what kind of transformations work best for them.
-  - See what `PipeOp`s are available by inspecting `mlr_pipeops$keys()`, and get help about them using `?mlr_pipeops_XXX`.
+There are various possibilities for preprocessing with `PipeOp`s.
+You can try different methods for preprocessing and training.
+Feel free to discover this variety by yourself!
+There are only a few hints that help when working with `PipeOp`s.
+
+It is not allowed to have two `PipeOp`s with the same `ID` in a `Graph`. 
+Initialize a `PipeOp` with `po("...", id = "xyz")` to change its ID on construction.
+
+If you build large `Graph`s involving complicated optimizations, like many `"learner_cv"`, they may need a long time to train.
+
+Use the `affect_columns` parameter if you want a `PipeOp` to only operate on part of the data. 
+Use `po("select")` if you want to remove certain columns (possibly only along a single branch of multiple parallel branches). Both take `selector_XXX()` arguments, e.g. `selector_type("integer")`
+
+You may get the best performance if you actually inspect the features and see what kind of transformations work best for them (know your data!).
+
+See what `PipeOp`s are available by inspecting `mlr_pipeops$keys()`, and get help about them using `?mlr_pipeops_XXX`.
