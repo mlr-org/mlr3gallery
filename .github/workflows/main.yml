@@ -10,6 +10,7 @@ name: R CMD Check via {tic}
 
 jobs:
   R-CMD-check:
+    if: "! contains(toJSON(github.event.commits.*.message), '[ci skip]')"
     runs-on: ${{ matrix.config.os }}
 
     name: ${{ matrix.config.os }} (${{ matrix.config.r }})
@@ -134,7 +135,7 @@ jobs:
 
       - name: "[Stage] Install"
         if: matrix.config.os != 'macOS-latest' || matrix.config.r != 'devel'
-        run: Rscript -e "remotes::install_github('ropensci/tic')" -e "print(tic::dsl_load())" -e "tic::prepare_all_stages()" -e "tic::before_install()" -e "tic::install()"
+        run: Rscript -e "remotes::install_github('ropensci/tic@no-ahead-behind')" -e "print(tic::dsl_load())" -e "tic::prepare_all_stages()" -e "tic::before_install()" -e "tic::install()"
 
       # macOS devel needs its own stage because we need to work with an options to suppress the usage of binaries
       - name: "[Stage] Prepare & Install (macOS-devel)"
@@ -156,3 +157,13 @@ jobs:
         with:
           name: ${{ runner.os }}-r${{ matrix.config.r }}-results
           path: check
+
+      - name: "[Stage] Before Deploy"
+        run: |
+          Rscript -e "tic::before_deploy()"
+
+      - name: "[Stage] Deploy"
+        run: Rscript -e "tic::deploy()"
+
+      - name: "[Stage] After Deploy"
+        run: Rscript -e "tic::after_deploy()"

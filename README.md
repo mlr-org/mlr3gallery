@@ -18,14 +18,14 @@
    )
    ```
    ````
-1. Write the post and select appropriate categories.
+1. Write the post and select appropriate categories. Tags are not available.
 1. Add required packages to DESCRIPTION file via `usethis::use_package(<package>)`.
-1. Render the post (`rmarkdown::render(<post>)`.
-   The website can be previewed using `rmarkdown::render_site()` and `pkgdown::preview_site()` or (when using RStudio) by clicking on "Build Website" in the "Build" pane.
+1. Preview locally using `rmarkdown::render_site()` and `pkgdown::preview_site()` or (when using RStudio) by clicking on "Build Website" in the "Build" pane.
 1. Apply the [mlr-style](https://github.com/mlr-org/mlr3/wiki/Style-Guide#styler-mlr-style) to the post.
-1. Check if everything looks good.
-1. Open a Pull Request for review (the `docs/` directory needs to be included - this is the directory that is going to be served via gh-pages).
-   This includes **all figures** and other auxillary files.
+1. Open a Pull request and commit only the Rmd file and external images.
+1. Now CI deploys a preview of the site including the new Rmd. 
+   All auxillary files will be deployed automatically.
+   The preview is available in the Checks menu within the PR.
 
 ## CI
 
