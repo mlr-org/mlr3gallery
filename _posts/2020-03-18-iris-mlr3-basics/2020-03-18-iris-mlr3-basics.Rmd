@@ -5,7 +5,7 @@ categories:
   - mlr3
   - basics
 description: |
-  This use case shows how to use the basic mlr3 package on the iris task, so it's our "Hello World" example. It assumes no prior knowledge in machine learning or mlr3.
+  Basic ML operations on iris: Train, predict, score, resample and benchmark. A simple, hands-on intro to mlr3.
 author:
   - name: Bernd Bischl
 date: 03-18-2020
@@ -22,11 +22,12 @@ knitr::opts_chunk$set(
 )
 ```
 
+## Goals and Prerequisites
 
 This use case shows how to use the basic mlr3 package on the iris task, so it's our "Hello World" example.
 It assumes no prior knowledge in ML or mlr3.
 You can find most of the content here also in the [mlr3book](https://mlr3book.mlr-org.com/) in a more detailed way.
-Hence we will not make a lot of general comments here but keep it hands-on and short.
+Hence we will not make a lot of general comments, but keep it hands-on and short.
 
 The following operations are shown:
 
@@ -47,11 +48,11 @@ library("mlr3learners")
 
 ## Creating tasks and learners
 
-Lets work on the canonical, simple iris data set, and try out some ML algorithms.
+Let's work on the canonical, simple iris data set, and try out some ML algorithms.
 We will start by using a decision tree with default settings.
 
 ```{r}
-# creates a mlr3 task from scratch, from a data.frame
+# creates mlr3 task from scratch, from a data.frame
 # 'target' names the column in the dataset we want to learn to predict
 task = TaskClassif$new(id = "iris", backend = iris, target = "Species")
 # in this case we could also take the iris example from mlr3's dictionary of shipped example tasks
@@ -68,7 +69,7 @@ print(learner1)
 
 ## Train and predict
 
-Lets do usual ML operations: Train on some obervations, predict on others.
+Now the usual ML operations: Train on some observations, predict on others.
 
 ```{r}
 # train learner on subset of task
@@ -128,15 +129,15 @@ print(cm)
 ## Populating the learner dictionary
 
 mlr3learners ships out with a dozen different popular learners.
-We can list them from the its dictionary.
-If we want more, we can load on extension package from mlr3's
+We can list them from the dictionary.
+If we want more, we can load an extension package from mlr3's
 [learner-org](https://github.com/mlr-org/mlr3learners/wiki) on GitHub.
 Note how after the install the dictionary increases in size.
 
 ```{r}
 head(as.data.table(mlr_learners)[, c("key", "packages")])
-# remotes::install_github("mlr3learners/mlr3learners.randomForest")
-library(mlr3learners.randomForest)
+# remotes::install_github("mlr3learners/mlr3learners.randomforest")
+library(mlr3learners.randomforest)
 print(as.data.table(mlr_learners)[, c("key", "packages")])
 ```
 

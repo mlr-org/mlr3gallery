@@ -1,0 +1,365 @@
+---
+title: mlr3 and OpenML - Moneyball use case
+categories: 
+  - imputation
+  - regression
+  - feature importance
+author:
+  - name: Philipp Kopper
+date: 05-04-2020
+description: |
+  This use case shows how to make use of OpenML data and how to impute missing values in a ML problem.
+output:
+  distill::distill_article:
+    self_contained: false
+    css: ../../custom.css
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  R.options = list(width = 80)
+)
+library(mlr3book)
+library(mlr3)
+lgr::get_logger("mlr3")$set_threshold("warn")
+```
+
+This use case shows how to easily work with datasets available via [OpenML](https://www.openml.org/) into an mlr3 workflow.
+
+The following operations are illustrated:
+
+* Creating tasks and learners
+* Imputation for missing values
+* Training and predicting
+* Resampling / Cross-validation
+
+## Loading basic packages
+
+```{r}
+# tasks, train, predict, resample, benchmark
+library("mlr3")
+# about a dozen reasonable learners
+library("mlr3learners")
+# Pipelines
+library("mlr3pipelines")
+# lots of measures for evaluation
+library("mlr3measures")
+# Retreiving the data
+library("OpenML")
+```
+
+## Retrieving the data from OpenML
+
+We can use the `OpenML` package to retrieve data (and more) straight away.
+`OpenML` is is an inclusive movement to build an open, organized, online ecosystem for machine learning.
+Typically, you can retrieve the data with an `id`.
+The `id` can be found on [OpenML](https://www.openml.org/).
+We choose the `41021`as our `oml_id`.
+The related web page can be accessed [here](https://www.openml.org/d/41021).
+This data set was uploaded by [Joaquin Vanschoren](https://www.openml.org/u/2).
+
+```{r}
+oml_id = 41021
+oml_dat = getOMLDataSet(data.id = oml_id)
+```
+
+The description indicates that the data set is associated with baseball or more precisely the story of [Moneyball](https://www.imdb.com/title/tt1210166/).
+
+```{r}
+oml_dat
+```
+
+However, the description within the `OpenML` object is not very detailed.
+The previously referenced [page](https://www.openml.org/d/41021) however states the following:
+
+In the early 2000s, Billy Beane and Paul DePodesta worked for the Oakland Athletics. 
+During their work there, they disrupted the game of baseball. 
+They didn't do it using a bat or glove, and they certainly didn't do it by throwing money at the issue; in fact, money was the issue. 
+They didn't have enough of it, but they were still expected to keep up with teams that had more substantial endorsements. 
+This is where Statistics came riding down the hillside on a white horse to save the day. 
+This data set contains some of the information that was available to Beane and DePodesta in the early 2000s, and it can be used to better understand their methods.
+
+This data set contains a set of variables that Beane and DePodesta emphasized in their work. 
+They determined that statistics like on-base percentage (OBP) and slugging percentage (SLG) were very important when it came to scoring runs, however, they were largely undervalued by most scouts at the time. 
+This translated to a gold mine for Beane and DePodesta. 
+Since these players weren't being looked at by other teams, they could recruit these players on a small budget. 
+The variables are as follows:
+
+* Team
+* League
+* Year
+* Runs Scored (RS)
+* Runs Allowed (RA)
+* Wins (W)
+* On-Base Percentage (OBP)
+* Slugging Percentage (SLG)
+* Batting Average (BA)
+* Playoffs (binary)
+* RankSeason
+* RankPlayoffs
+* Games Played (G)
+* Opponent On-Base Percentage (OOBP)
+* Opponent Slugging Percentage (OSLG)
+
+While Beane and DePodesta defined most of these statistics and measures for individual players, this data set is on the team level.
+
+These statistics seem very informative if you are into baseball.
+If baseball of rather obscure to you, simply take these features as given or give this [article](https://en.wikipedia.org/wiki/Baseball_statistics) a quick read.
+
+```{r}
+data = oml_dat$data
+summary(data)
+```
+
+The summary shows how this data we are dealing with looks like:
+Some data is missing, however, this has structural reasons.
+There are $39$ teams with each maximally $47$ years ($1962$ - $2012$).
+For $988$ cases the information on `RankSeason` and `RankPlayoffs` is missing.
+This is since these simply did not reach the playoffs and hence have no reported rank.
+
+```{r} 
+summary(data[data$Playoffs == 0, c("RankSeason", "RankPlayoffs")])
+```
+
+On the other hand, `OOBP` and `OSLG` have $812$ missing values.
+It seems as if these measures were not available before $1998$.
+
+```{r} 
+summary(data[is.na(data$OOBP), "Year"])
+```
+
+We seem to have a missing data problem.
+Typically, in this case, we have three options:
+They are:
+
+* Complete case analysis: Exclude all observation with missing values.
+
+* Complete feature analysis: Exclude all features with missing values.
+
+* Missing value imputation: Use a model to "guess" the missing values (based on the underlying distribution of the data.
+
+Usually, missing value imputation is preferred over the first two.
+However, in machine learning, one can try out all options and see which performs best for the underlying problem.
+For now, we limit ourselves to a rather simple imputation technique, imputation by randomly sampling from the univariate distribution.
+Note that this does not take the multivariate distribution into account properly and that there are more elaborate approaches.
+We only aim to impute `OOBP` and `OSLG`. 
+For the other missing (categorical) features, we simply add a new level which indicates that information is missing (i.e. all missing values belong to.
+
+It is important to note that in this case here the vast majority of information on the features is missing.
+In this case, imputation is performed to not throw away the existing information of the features.
+
+`mlr3` has some solutions for that within the `mlr3pipelines` package.
+We start with an easy graph which only performs numeric imputation.
+We create a graph that copies the data.
+After this gateway, the data is simply passed through for the first node. 
+On the other one numeric imputation is performed.
+The results are combined via the `featureunion` `PipeOp`.
+We end up with a data set where all numeric features are imputed.
+
+```{r}
+nop = po("nop")
+imp_num = po("imputehist", param_vals = list(affect_columns = selector_type("numeric")))
+graph = po("copy", 2) %>>% gunion(list(nop, imp_num)) %>>% po("featureunion")
+```
+
+We can visualise the preprocessing graph by its own `plot` method:
+
+```{r}
+graph$plot(html = TRUE)
+```
+
+We still have to append the second imputation job for factors.
+We pretty much construct the same pipeline again only for factors.
+However, we have to make sure that the operator `id`s are unique.
+
+```{r}
+nop2 = po("nop", id = "nop2")
+imp_fct = po("imputenewlvl", param_vals = list(affect_columns = selector_type("factor")))
+graph = graph %>>% po("copy", 2, id = "copy2") %>>% gunion(list(nop2, imp_fct)) %>>%
+  po("featureunion", id = "featureunion2")
+graph$plot(html = TRUE)
+```
+
+So far we only prepared the pipeline without actually modeling.
+Before we come to this step, we perform a last preprocessing step manually.
+Namely, we make `G` (games played) a numerical feature.
+
+```{r}
+data$G = as.numeric(data$G)
+```
+
+Additionally, the row names (starting with $0$) are changed. 
+
+```{r}
+rownames(data) <- 1:nrow(data)
+```
+
+## Creating tasks and learners
+
+The fact that there is missing data does not affect the `task` definition.
+The `task` determines what is the problem to be solved by machine learning.
+We want to explain the Runs Scored (RS).
+RS is an important measure as a run is equivalent to a 'point' scored in other sports.
+Naturally, the aim of a coach should be to maximise runs scored and minimise runs allowed.
+As runs scored and runs allowed are both legitimate targets we ignore the runs allowed here.
+The task is defined by:
+
+```{r}
+# creates a `mlr3` task from scratch, from a data.frame
+# 'target' names the column in the dataset we want to learn to predict
+task = TaskRegr$new(id = "moneyball", backend = data, target = "RS")
+task$missings()
+```
+
+The `missings` method indicates what we already knew: our missing values.
+Missing values are not always a problem. 
+Some learners can deal with them pretty well.
+However, we want to use a random forest for our task.
+
+```{r}
+# creates a learner
+test_lrn = LearnerRegrRanger$new()
+# displays the properties
+test_lrn$properties
+```
+
+Typically, in `mlr3` the `properties` method would tell us whether missing values are a problem to this learner or not.
+As it is not listed here, the random forest cannot deal with missing values.
+
+As we aim to use imputation beforehand, we incorporate it into the learner.
+Our selected learner is going to be a random forest from the `ranger` package.
+One can allow the embedding of the preprocessing (imputation) into a learner by creating `new` (method) `PipeOpLearner` (R6 class).
+This special `learner` can be put into a graph together with the `imputer` via the `new` method of the `GraphLearner` class.
+
+```{r}
+# creates a normal learner however allows further embedding of PipeOp's.
+polrn = PipeOpLearner$new(mlr_learners$get("regr.ranger"))
+# sets number of trees to 1000, importance is for later
+polrn$param_set$values = list(num.trees = 1000, importance = "permutation")
+# the final learner is a graph consisting of the imputer and the normal learner.
+lrn = GraphLearner$new(graph = graph %>>% polrn)
+```
+
+The final graph looks like the following: 
+
+```{r}
+plot(graph %>>% polrn, html = TRUE)
+```
+
+## Train and predict
+
+To get a feeling of how our model performs we simply train the `learner` on a subset of the data and predict the hold-out data.
+
+```{r}
+# defines the training and testing data; 95% is used for training
+train_set = sample(task$nrow, 0.95 * task$nrow)
+test_set = setdiff(seq_len(task$nrow), train_set)
+# train learner on subset of task
+lrn$train(task, row_ids = train_set)
+# predict using held out observations
+preds = lrn$predict(task, row_ids = test_set)
+print(preds)
+```
+
+Viewing the predicted values it seems like the model predicts reasonable values that are fairly close to the truth.
+
+## Evaluation & Resampling
+
+While the prediction indicated that the model is doing what it is supposed to, we want to have a more systematic understanding of the model performance.
+That means we want to know by how much our model is away from the truth on average.
+Cross-validation investigates this question.
+In `mlr3` ten-fold cross-validation is constructed as follows:
+
+```{r, size = "tiny"}
+cv10 = rsmp("cv", folds = 10)
+r = resample(task, lrn, cv10)
+```
+
+We choose some of the performance measures provided by:
+
+```{r, size = "tiny"}
+mlr_measures
+```
+
+We choose the mean absolute error (`regr.mae`) and the mean squared error (`regr.mse`).
+
+```{r}
+scores = r$score(msrs(c("regr.mae", "regr.mse")))
+scores
+```
+
+We can also compute now by how much our model was on average wrong when predicting the runs scored.
+
+```{r}
+mean(scores$regr.mae)
+```
+
+That seems not too bad.
+Considering that on average approximately 715 runs per team per season have been scored.
+
+```{r}
+mean(data$RS)
+```
+
+## Performance boost of imputation
+
+To assess if imputation was beneficial, we can compare our current learner with a learner which ignores the missing features.
+Normally, one would set up a benchmark for this.
+However, we want to keep things short in this use case.
+Thus, we only set up the alternative learner (with identical hyperparameters) and compare the 10-fold-cross-validated mean absolute error.
+
+We can easily ignore features by a specific `PipeOp`
+As we are mostly interested in the numeric imputation we leave the remaining graph as it is.
+
+```{r}
+nop = po("nop")
+imp_fct = po("imputenewlvl", param_vals = list(affect_columns = selector_type("factor")))
+graph2 = po("copy", 2) %>>% gunion(list(nop, imp_fct)) %>>% po("featureunion")
+```
+
+Subsequently, we add the `PipeOpSelect` `PipeOp` to the pipeline.
+
+```{r}
+feature_names = colnames(data)[apply(!is.na(data), 2, all)]
+feature_names = c(
+  feature_names[feature_names %in% task$feature_names],
+  "RankSeason", "RankPlayoffs")
+na_select = po("select")
+na_select$param_set$values$selector = selector_name(feature_names)
+graph2 = graph2 %>>% na_select
+graph2$plot(html = TRUE)
+```
+
+Now we complete the learner and apply resampling as before.
+
+```{r}
+lrn2 = GraphLearner$new(graph = graph2 %>>% polrn)
+r2 = resample(task, lrn2, cv10)
+scores2 = r2$score(msrs(c("regr.mae", "regr.mse")))
+mean(scores2$regr.mae)
+```
+
+Surprisingly, the performance seems to be approximately the same.
+That means that the imputed features seem not very helpful.
+We can use the `variable.importance` of the random forest.
+
+```{r}
+sort(lrn$model$regr.ranger$model$variable.importance)
+```
+
+We see that according to this the left out `OOBP` and `OSLG` seem to have solely rudimentary explanatory power.
+This may be because there were simply too many instances or because the features are themselves not very powerful.
+
+## Conclusion
+
+So, to sum up, what we have learned:
+We can access very cool data straight away with the `OpenML` package.
+(We are working on a better direct implementation into `mlr3` at the moment.)
+We can even work with missing data very well in `mlr3`.
+Nevertheless, we discovered that sometimes imputation does not lead to the intended goals.
+We also learned how to use some `PipeOp`s from the `mlr3pipelines` package.
+
+But most importantly, we found a way to predict the runs scored of MLB teams.
+
+If you want to know more, read the [mlr3book](https://mlr3book.mlr-org.com/) and the documentation of the mentioned packages.
