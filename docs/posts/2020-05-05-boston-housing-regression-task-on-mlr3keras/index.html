@@ -1338,12 +1338,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
 <div class="d-article">
 <h1 id="intro">Intro</h1>
-<p>This use case shows how to use <code>gh_pkg("mlr3keras")</code> on simple <a href="https://www.cs.toronto.edu/~delve/data/boston/bostonDetail.html">Boston Housing Regression Task</a>. Therefore, the Code from <a href="https://keras.rstudio.com/articles/tutorial_basic_regression.html">Keras Basic Regression Tutorial</a> is translated to <code>gh_pkg("mlr-org/mlr3keras")</code> respectively <code>gh_pkg("mlr-org/mlr3keras")</code> syntax. Moreover, this use case extends the tutorial mentioned above by</p>
+<p>This use case shows how to use <a href="https://github.com/mlr-org/mlr3keras">mlr3keras</a> on simple <a href="https://www.cs.toronto.edu/~delve/data/boston/bostonDetail.html">Boston Housing Regression Task</a>. Therefore, the Code from <a href="https://keras.rstudio.com/articles/tutorial_basic_regression.html">Keras Basic Regression Tutorial</a> is translated to <a href="https://github.com/mlr-org/mlr3keras">mlr3keras</a> respectively <a href="https://github.com/mlr-org/mlr3keras">mlr3keras</a> syntax. Moreover, this use case extends the tutorial mentioned above by</p>
 <ul>
 <li>giving an introduction to callbacks and how they can be used</li>
-<li>applying reproducability to <code>gh_pkg("mlr-org/mlr3keras")</code></li>
+<li>generating reproducible results with <a href="https://github.com/mlr-org/mlr3keras">mlr3keras</a></li>
 </ul>
-<p>As <code>gh_pkg("mlr-org/mlr3keras")</code> is still under heavy development, this place might be a good way to look for currently working aspects of the package.</p>
+<p>As <a href="https://github.com/mlr-org/mlr3keras">mlr3keras</a> is still under heavy development, this place might be a good way to look for currently working aspects of the package.</p>
 <h2 id="prerequisites">Prerequisites</h2>
 <p>This tutorial assumes familiarity with the basics of <a href="https://mlr3pipelines.mlr-org.com">mlr3pipelines</a>. Consult the <a href="https://mlr3book.mlr-org.com/pipelines.html">mlr3book</a> if some aspects are not fully understandable.</p>
 <div class="layout-chunk" data-layout="l-body">
@@ -1353,18 +1353,15 @@ library(mlr3keras)
 library(mlr3pipelines)
 library(keras)
 library(reticulate)
-library(ggplot2)</code></pre>
+library(ggplot2)
+source(&quot;reset_random_seeds.R&quot;)</code></pre>
 </div>
 <h1 id="basic-regression-task---boston-housing-prices">Basic Regression Task - Boston Housing Prices</h1>
 <p>In this use case we build a model that predicts the Median value of owner-occupied homes in Boston in $1000’s (<code>medv</code>).</p>
 <p>The <a href="https://mlr3.mlr-org.com/reference/mlr_tasks_boston_housing.html"><code>Boston Housing Task</code></a> is accessible directly from <code>mlr3tasks</code>.</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
-boston_task = tsk(&quot;boston_housing&quot;)</code></pre>
-</div>
-<p>This data set is much smaller than the others we’ve worked with so far: it has 506 total examples that are split between 404 training examples and 102 test examples:</p>
-<div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
+boston_task = tsk(&quot;boston_housing&quot;)
 paste(
   &quot;This data set contains&quot;, boston_task$nrow, &quot;observations and&quot;, 
   boston_task$ncol - 1, &quot;features.&quot;
@@ -1372,8 +1369,8 @@ paste(
 <pre><code>
 [1] &quot;This data set contains 506 observations and 18 features.&quot;</code></pre>
 </div>
-<h2 id="feature-slection">Feature slection</h2>
-<p>Keras regression learner only supports numeric features. Consequentely we drop all non-numeric features from <code>boston_task</code>.</p>
+<h2 id="feature-selection">Feature selection</h2>
+<p>Keras regression learner only supports numeric features. Consequently we drop all non-numeric features from <code>boston_task</code>.</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
 boston_task$select(subset(boston_task$feature_types, type == &quot;numeric&quot;)$id)
@@ -1388,7 +1385,7 @@ boston_task$head(n = 3)</code></pre>
 2:    17.8 6.421  0
 3:    17.8 7.185  0</code></pre>
 </div>
-<p>Now the dataset contains 13 different numeric features:</p>
+<p>Now the data set contains 13 different numeric features:</p>
 <ul>
 <li><code>crim</code> - per capita crime rate by town</li>
 <li><code>zn</code> - proportion of residential land zoned for lots over 25,000 sq.ft.</li>
@@ -1404,28 +1401,25 @@ boston_task$head(n = 3)</code></pre>
 <li><code>lon</code> - a numeric vector of tract point longitudes in decimal degrees</li>
 <li><code>lat</code> - a numeric vector of tract point latitudes in decimal degrees</li>
 </ul>
-<p>Notice that each one of these input data features is stored using a different scale. In this case it’s recommended to normalize features. Although the model might converge without feature normalization, it makes training more difficult, and it makes the resulting model more dependant on the choice of units used in the input. We create a <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_scale.html"><code>PipeOpScale</code></a> that is going to be connected to ther learner later on when it comes to training.</p>
+<p>Notice that each one of these input data features is stored using a different scale. In this case it’s recommended to normalize features. Although the model might converge without feature normalization, it makes training more difficult, and it makes the resulting model more dependent on the choice of units used in the input. We create a <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_scale.html"><code>PipeOpScale</code></a> that is going to be connected to the learner before training.</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
 po_scale = PipeOpScale$new()</code></pre>
 </div>
 <h1 id="create-the-model">Create the model</h1>
-<p>For this use case we create a sequential modell, a linear stack of layers. In the input layer the shape of our input data is defined. Input is analized by two densely connected hidden layers. A final denselayer returns a single continous estimation value for the observations target.</p>
-<p>As creation of models is very convenient and intuitive in <a href="https://keras.rstudio.com/">keras</a>, <code>gh_pkg("mlr-org/mlr3keras")</code> relies on this syntax for model creation. Wrapping our model in a function <code>build_modell</code> has several advantages:</p>
+<p>As creation of models is very convenient and intuitive in <a href="https://keras.rstudio.com/">keras</a>, <a href="https://github.com/mlr-org/mlr3keras">mlr3keras</a> relies on this syntax for model creation.<br />
+We wrap our model in a function <code>build_modell</code>. That has several advantages:</p>
 <ul>
-<li>Each new learner needs a seperately build modell, if you aim to train a whole new modell! Cloning the learner is not sufficient in this case and will lead to continue training ione and the same model in a new learner. You might notice a flat history curve in such cases.</li>
+<li>Each new learner needs a separately build model, if you aim to train a whole new model! Cloning the learner is not sufficient in this case and will lead to continue training one and the same model in a new learner. You might notice a flat history curve in such cases.</li>
 <li>In case of more complex models, a function makes a model a tunable hyperparameter.</li>
-<li>You can easily build models with reproducable and comparable results by assigning a seed to the <code>build_model</code>. Note, that seed setting is not trivial in this case. If you are intrested in more details, see chapter <a href="#reproducability"><strong>??</strong></a><a href="#reproducability">Reproducability</a>.</li>
+<li>You can easily build models with reproducible and comparable results by assigning a seed to the <code>build_model</code>. Note, that seed setting is not trivial in this case. If you are interested in more details, see chapter <a href="#set-seed"><strong>??</strong></a>.</li>
 </ul>
-<div class="layout-chunk" data-layout="l-body">
-
-</div>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
 build_model = function(seed = TRUE) {
   
   checkmate::assert_logical(seed, len = 1, all.missing = FALSE)
-  if (seed)  reset_random_seeds()
+  if (seed)  reset_random_seeds(123)
   
   model = keras_model_sequential() %&gt;%
     layer_dense(units = 64, activation = &quot;relu&quot;,
@@ -1460,8 +1454,9 @@ Trainable params: 5,121
 Non-trainable params: 0
 ________________________________________________________________________________</code></pre>
 </div>
+<p>For this use case we create a sequential model, a linear stack of three layers. The shape of our input data is defined in the input layer. Input is analyzed by two densely connected hidden layers. A final denselayer returns a single continuous estimation value for the observations target.</p>
 <h1 id="learner">Learner</h1>
-<h2 id="define-hyperparameters">Define hyperparameters</h2>
+<h3 id="define-hyperparameters">Define hyperparameters</h3>
 <p>Heading back to <code>mlr_pkg("mlr3")</code> syntax we set up the keras regression learner like any other and define hyperparameters. Note that the compiled <code>model</code> defined in the previous chapter is such a hyperparameter. That makes <code>regr.keras</code> learner easily tunable over different models. For more information about tuning see <a href="https://mlr3book.mlr-org.com/optimization.html">mlr3 manual</a>.</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
@@ -1472,8 +1467,8 @@ learner$param_set$values$model = model
 learner$param_set$values$validation_split = 0.2</code></pre>
 </div>
 <h3 id="callbacks">Callbacks</h3>
-<p>Another hypereparameter is <code>callback</code>. A <code>callback</code> is a set of functions, bundeled in a list that can be used to explore specified progress stages during training. Accordingly a defined <code>callback</code> function is called at its’ specified stage of training to monitor or display specified model parameters at this stage. The history callback for example is applied to each training progress of a modell by default. It stores the training history in a <code>history</code> slot of its’ concerning modell object. For a list of all implemented callbacks see <a href="https://keras.io/callbacks/">Keras Callbacks</a>.</p>
-<p>In our first learner we want to reduce information about training progress to a single dot printed out at the end of each applied epoch. Therefore we create a <code>LambdaCallback</code> that apllied at each eochs end.</p>
+<p>Another hypereparameter is <code>callback</code>. A <code>callback</code> is a set of functions, bundled in a list that can be used to explore specified progress stages during training. Accordingly a defined <code>callback</code> function is called at its’ specified stage of training to monitor or display specified model parameters at this stage. The history callback for example is applied to each training progress of a model by default. It stores the training history in a <code>history</code> slot of its’ concerning model object. For a list of all implemented callbacks see <a href="https://keras.io/callbacks/">Keras Callbacks</a>.</p>
+<p>In our first learner we want to reduce information about training progress to a single dot printed out at the end of each applied epoch. Therefore we create a <code>LambdaCallback</code> that applied at each epochs end.</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
 print_dot_callback &lt;- callback_lambda(
@@ -1494,13 +1489,13 @@ learner$param_set$values$callbacks = list(print_dot_callback)</code></pre>
 <li><code>LogMetrics</code>: Batch-wise Metrics Logger Callback</li>
 <li><code>SetLogLR</code>: Batch-wise Metrics Setter Callback</li>
 </ul>
-<p>Initialize and early stopping for instance like this:</p>
+<p>Initialize early stopping like this:</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
 early_stop &lt;- callback_early_stopping(monitor = &quot;val_loss&quot;, patience = 20) # keras syntax
 # early_stop &lt;- cb_es(monitor = &quot;val_loss&quot;, patience = 20) # mlr3 syntax</code></pre>
 </div>
-<h2 id="set-up-the-learner">Set Up the Learner</h2>
+<h3 id="set-up-the-learner">Set Up the Learner</h3>
 <p>We initialize our learner. Note, that we clone the <code>R6</code> object <code>keras_500</code> learner to a second object <code>keras_es</code> that we will use later on.</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
@@ -1508,11 +1503,12 @@ keras500 = GraphLearner$new(po_scale %&gt;&gt;% learner)
 keras_es = keras500$clone(deep = TRUE)</code></pre>
 </div>
 <h1 id="training">Training</h1>
-<p>Before we train the learner we devide observations randomly into train and test set. The training set contains 404 observations and the test set 102. Now we can train our learner, using the <code>training_id</code>. Reminder: We set in <code>callback</code>, each <code>epoch</code> is represented by a dot.</p>
+<p>Before we train the learner we divide observations randomly into train and test set. The training set contains 404 observations and the test set 102. Now we can train our learner, using the <code>training_id</code>. Reminder: As we set it in <code>callback</code>, each <code>epoch</code> is represented by a dot.</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
 train_id &lt;- sample(boston_task$row_ids, 404L)
 test_id &lt;- setdiff(boston_task$row_ids, train_id)
+a &lt;- Sys.time()
 keras500$train(boston_task, row_ids = train_id)</code></pre>
 <pre><code>
 ................................................................................
@@ -1522,8 +1518,12 @@ keras500$train(boston_task, row_ids = train_id)</code></pre>
 ................................................................................
 ................................................................................
 ....................</code></pre>
+<pre class="r"><code>
+print(Sys.time() - a)</code></pre>
+<pre><code>
+Time difference of 13.26491 secs</code></pre>
 </div>
-<h3 id="vizualize-training-progress">Vizualize training progress</h3>
+<h3 id="visualize-training-progress">Visualize training progress</h3>
 <p>We plot the saved history from each <code>epoch</code>. The plot shows the <code>MAE</code> on training and validation set for each epoch.</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
@@ -1532,8 +1532,9 @@ plot(history, metrics = &quot;mean_absolute_error&quot;, smooth = FALSE) +
   coord_cartesian(ylim = c(0, 5))</code></pre>
 <p><img src="boston-housing-regression-task-on-mlr3keras_files/figure-html5/plotI-1.png" width="624" /></p>
 </div>
-<p>The validation curve noticably flattens after about 200 epochs. So <code>epochs = 500L</code> seems to be set to high. In this case we can iplement our Early stopping callback. <code>early_stop</code> will stop the modell if it shows no improvment in <code>val_loss</code> within 20 <code>epochs</code>. Accordingly it should stop after about 200 <code>epochs</code>.</p>
+<p>The validation curve noticeably flattens after about 200 epochs. So <code>epochs = 500L</code> seems to be set to high. In this case we can implement our Early stopping callback. <code>early_stop</code> will stop the model if it shows no improvement in <code>val_loss</code> within 20 <code>epochs</code>.</p>
 <h3 id="train-with-early-stopping">Train with early stopping</h3>
+<p>This is exactly the same keras model, using early stopping <code>callback</code>.</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
 keras_es$param_set$values$regr.keras.callbacks = list(early_stop, print_dot_callback)
@@ -1544,41 +1545,39 @@ keras_es$train(boston_task, row_ids = train_id)</code></pre>
 ................................................................................
 ................................................................................
 ................................................................................
-................................................................................
-................................................................................
-....................</code></pre>
+.....................</code></pre>
 <pre class="r"><code>
 history = keras_es$model$regr.keras$model$history
 plot(history, metrics = &quot;mean_absolute_error&quot;, smooth = FALSE) +
   coord_cartesian(xlim = c(0, 500), ylim = c(0, 5))</code></pre>
 <p><img src="boston-housing-regression-task-on-mlr3keras_files/figure-html5/earlystopping-1.png" width="624" /></p>
 </div>
-<p>And the graph stopps after arounf 200 <code>epochs</code>.</p>
-<h2 id="predict-and-evaluate">Predict and evaluate</h2>
-<p>In the last step we predict on the test set using <code>keras_es</code>. Prediction is as easy as with any other learner.</p>
+<p>Note that each <code>epoch</code> until stopping is exactly the same as in <code>keras500</code></p>
+<h1 id="predict-and-evaluate">Predict and evaluate</h1>
+<p>In the last step we predict on the test set using <code>keras_es</code>. Prediction is as easy as with any other learner. For prediction we take the <code>test_id</code>.</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
 predict_boston = keras_es$predict(boston_task, row_ids = test_id)
 head(predict_boston$data$tab, n = 3)</code></pre>
 <pre><code>
    row_id truth response
-1:      6  28.7  28.6226
-2:      7  22.9  21.8337
-3:      9  16.5  16.8804</code></pre>
+1:      1  24.0 22.96652
+2:     15  18.2 17.56711
+3:     17  23.1 22.68777</code></pre>
 <pre class="r"><code>
 predict_boston$score(msr(&quot;regr.mae&quot;))</code></pre>
 <pre><code>
  regr.mae 
-0.7294462 </code></pre>
+0.7323488 </code></pre>
 </div>
 <div class="layout-chunk" data-layout="l-body">
 <pre><code>
-[1] &quot;The models average error is at about 729.45$&quot;</code></pre>
+[1] &quot;The models average error is at about 732.35$&quot;</code></pre>
 </div>
-<h2 id="reproducability">Reproducability</h2>
-<p>As <code>Keras R Studio</code> is a system running code on multiple platforms, obtaining reproducibal results is not trivial. This chapter provides ways to easily obtain reproducible results anyways.</p>
+<h1 id="set-seed">Set Seed</h1>
+<p><code>Keras R Studio</code> is a system running code on multiple platforms. For this reason obtaining reproducible results is not trivial. This chapter provides ways to easily obtain reproducible results anyways.</p>
 <h3 id="tensorflow-versions">Tensorflow versions</h3>
-<p>This chapter will teach you a way to obtain reproducible results using <code>keras</code>. More precisely we will stick to <span class="math inline">\(tensorflow version \ge 2.0\)</span>. You can check the current version like this:</p>
+<p>Tensorflow provides a function to set seeds called <code>use_session_with_seed()</code>. However this function appears to work only partly for <span class="math inline">\(tensorflow version \ge 2.0\)</span>. You can check the current version like this:</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
 tensorflow::tf_version()</code></pre>
@@ -1587,25 +1586,41 @@ tensorflow::tf_version()</code></pre>
 <ol type="1">
 <li><p><code>use_session_with_seed()</code><br />
 <a href="https://keras.rstudio.com/articles/faq.html#how-can-i-obtain-reproducible-results-using-keras-during-development">RKerasFAQ</a> shows a nice way how to set seeds by the function <code>use_session_with_seed()</code>. In this case you can just replace <code>reset_random_seeds</code> in the <code>build_model</code> function by applying <code>use_session_with_seed()</code>.</p></li>
-<li><p>Use <code>reset_random_seeds</code> (see below)</p></li>
+<li><p>Use <code>reset_random_seeds</code> or respectively build you own set reset function (see below).</p></li>
 </ol>
 <h3 id="reset-random-seeds">Reset Random seeds</h3>
-<p>As you might have noticed we have already been using <code>reset_random_seeds</code> in this chapter to obtain reproducible results. We introduced this function because in some incidinces you might run into an error calling <code>use_session_with_seed()</code> with <span class="math inline">\(tensorflow version &lt; 2.0\)</span>.</p>
+<p>As you might have noticed we have already been using <code>reset_random_seeds</code> in this chapter to obtain reproducible results. We introduced this function because in some incidences you might run into an error calling <code>use_session_with_seed()</code> with <span class="math inline">\(tensorflow version &lt; 2.0\)</span>.</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
 tensorflow::use_session_with_seed(1L)</code></pre>
 <pre><code>
 Error in py_get_attr_impl(x, name, silent): AttributeError: module &#39;tensorflow&#39; has no attribute &#39;reset_default_graph&#39;</code></pre>
 </div>
-<p><code>reset_random_seeds</code> establishes a common random seed for <code>R</code>, <code>Python</code>, <code>NumPy</code>, and <code>TensorFlow</code> and disables hash randomization. Note, that you should not have been running <code>TensorFlow</code> before running the function. If you did you might have to restart the session before proceeding.</p>
+<p>In these cases it makes sense to create your own function to set seeds for <code>keras</code>. <code>reset_random_seeds</code> establishes a common random seed for <code>R</code>, <code>Python</code>, <code>NumPy</code>, and <code>TensorFlow</code> and disables hash randomization. Note, that you should not have been running <code>TensorFlow</code> before running the function. If you did you might have to restart the session before proceeding.</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
-print(reset_random_seeds)</code></pre>
-<pre><code>
-function(seed = 1L) {
+reset_random_seeds &lt;- function(seed = 1L,
+                               disable_gpu = FALSE,
+                               disable_parallel_cpu = FALSE) {
   checkmate::assert_integerish(seed, len = 1L, lower = 1L, all.missing = FALSE)
-  if(!is.integer(seed)) seed &lt;- as.integer(seed)
-  
+  if (!is.integer(seed)) seed &lt;- as.integer(seed)
+
+  # note what has been disabled
+  disabled &lt;- character()
+  config &lt;- list()
+  session &lt;- NULL
+
+  # disable CUDA if requested
+  if (disable_gpu) {
+    Sys.setenv(CUDA_VISIBLE_DEVICES = &quot;&quot;)
+    config$device_count &lt;-  list(gpu = 0L)
+    disabled &lt;- c(disabled, &quot;GPU&quot;)
+  }
+  if (disable_parallel_cpu) {
+    config$intra_op_parallelism_threads &lt;- 1L
+    config$inter_op_parallelism_threads &lt;- 1L
+    disabled &lt;- c(disabled, &quot;CPU parallelism&quot;)
+  }
   # set seed in...
   set.seed(seed) # R
   random &lt;- import(&quot;random&quot;)
@@ -1618,15 +1633,18 @@ function(seed = 1L) {
   # set tensorflow seed
   tensorflow &lt;- import(&quot;tensorflow&quot;)
   tensorflow$random$set_seed(seed)
-}
-&lt;bytecode: 0x000000005d7a2690&gt;</code></pre>
+  if (length(config) &gt; 0L) {
+    tf &lt;- tensorflow$compat$v1
+    session_conf &lt;- do.call(tf$ConfigProto, config)
+    session &lt;- tf$Session(graph = tf$get_default_graph(), config = session_conf)
+    tf$keras$backend$set_session(session)
+  }
+}</code></pre>
 </div>
 <p>For more information see <a href="https://stackoverflow.com/questions/59075244/if-keras-results-are-not-reproducible-whats-the-best-practice-for-comparing-mo">Stackoverflow Reset Seeds</a>.</p>
-<h3 id="nondeterministic-executions">Nondeterministic Executions</h3>
-<p>GPU computations and CPU parallelization can be another source of<br />
-non-reproducibility, since both can result in non-deterministic execution patterns. The only way to provide results from this error is to disable GPU and CPU paralelism. This can mean a hard Tade-of between time and reproducability. <code>use_session_with_seed()</code> diables both GPU and CPU by default. For more detailed description read code on <a href="https://github.com/rstudio/tensorflow/blob/master/R/seed.R">Github</a>.</p>
-<h2 id="conclusion">Conclusion</h2>
-<p>sdak bna</p>
+<h3 id="non-deterministic-executions">Non deterministic Executions</h3>
+<p>GPU computations and CPU palatalization can be another source of<br />
+non-reproducible, since both can result in non-deterministic execution patterns. The only way to provide results from this error is to disable GPU and CPU parallelism. This can mean a hard trade-off between time and reproducability. <code>use_session_with_seed()</code> disables both GPU and CPU by default. For more detailed description read code on <a href="https://github.com/rstudio/tensorflow/blob/master/R/seed.R">Github</a>.</p>
 <!--radix_placeholder_article_footer-->
 <!--/radix_placeholder_article_footer-->
 </div>
