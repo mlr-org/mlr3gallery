@@ -77,7 +77,7 @@ task_test$filter(64:83)
 
 ## Workflow
 
-Our pipeline will consist of log transforming the features (base 10), followed by scaling the features before either applying a PCA or ICA to extract principal / independent components. Here, both the number of principal / independent components is a tuning parameter. We will then either fit a LDA or random forest as a learner, where we can further choose different methods for estimating the mean and variance for the LDA and tune the `mtry` and `num.tree` parameters of the random forest. Note that the PCA-LCA combination has already been successfully applied in different cancer diagnostic contexts [@morais2018] and performing dimensionality reduction before fitting a random forest may also be helpful when dealing with `P greater than N` problems.
+Our pipeline will consist of log transforming the features (base 10), followed by scaling the features before either applying a PCA or ICA to extract principal / independent components. Here, both the number of principal / independent components is a tuning parameter. We will then either fit a LDA or random forest as a learner, where we can further choose different methods for estimating the mean and variance for the LDA and tune the `mtry` and `num.tree` parameters of the random forest. Note that the PCA-LCA combination has already been successfully applied in different cancer diagnostic contexts [@morais2018].
 
 To allow for switching between PCA/ICA and LDA/random forest we can either use branching or proxy pipelines within, i.e., `PipeOpBranch` and `PipeOpUnbranch` or `PipeOpProxy`. We will first cover branching in detail and later show how the same can be done using `PipeOpProxy`.
 
@@ -154,7 +154,7 @@ tune_ps1$add_dep("classif.ranger.mtry", on = "branch_learner.selection", cond = 
 tune_ps1$add_dep("classif.ranger.num.trees", on = "branch_learner.selection", cond = CondEqual$new("classif.ranger"))
 ```
 
-Finally, regarding the dependency of `classif.ranger.mtry` on `pca.rank.` and `ica.n.comp`, we define a trafo function. Here `x` will contain a named list of parameters sampled from the `param_set`. We store the `pca.rank.` or `ica.n.comp` value depending on which preprocessing step was sampled and we set `classif.ranger.mtry` to this number if it exceeded it.
+Finally, regarding the dependency of `classif.ranger.mtry` on `pca.rank.` and `ica.n.comp`, we define a trafo function. Here `x` will contain a named list of parameters sampled/selected from the `param_set`. We store the `pca.rank.` or `ica.n.comp` value depending on which preprocessing step was sampled/selected and we set `classif.ranger.mtry` to this number if it exceeded it.
 
 ```{r}
 tune_ps1$trafo = function(x, param_set) {
@@ -183,7 +183,7 @@ FIXME: This takes way too long. Save as RDS file?
 tnr("grid_search", resolution = 4)$tune(tune1)
 ```
 
-Now, we can inspect the results based on what was sampled by the tuner, ordered by the classification accuracy:
+Now, we can inspect the results ordered by the classification accuracy:
 
 ```{r}
 tune1_results = tune1$archive(unnest = "tune_x")
