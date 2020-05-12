@@ -1,0 +1,1907 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1"/>
+  <meta name="generator" content="distill" />
+
+  <style type="text/css">
+  /* Hide doc at startup (prevent jankiness while JS renders/transforms) */
+  body {
+    visibility: hidden;
+  }
+  </style>
+
+ <!--radix_placeholder_import_source-->
+ <!--/radix_placeholder_import_source-->
+
+  <!--radix_placeholder_meta_tags-->
+<title>mlr3gallery: Tuning a complex graph</title>
+
+<meta property="description" itemprop="description" content="We show how to tune a complex graph for a single task."/>
+
+<link rel="canonical" href="https://mlr3gallery.mlr-org.com/posts/2020-05-07-tuning-a-complex-graph/"/>
+
+<!--  https://schema.org/Article -->
+<meta property="article:published" itemprop="datePublished" content="2020-04-18"/>
+<meta property="article:created" itemprop="dateCreated" content="2020-04-18"/>
+<meta name="article:author" content="Lennart Schneider"/>
+
+<!--  https://developers.facebook.com/docs/sharing/webmasters#markup -->
+<meta property="og:title" content="mlr3gallery: Tuning a complex graph"/>
+<meta property="og:type" content="article"/>
+<meta property="og:description" content="We show how to tune a complex graph for a single task."/>
+<meta property="og:url" content="https://mlr3gallery.mlr-org.com/posts/2020-05-07-tuning-a-complex-graph/"/>
+<meta property="og:image" content="https://mlr3gallery.mlr-org.com/posts/2020-05-07-tuning-a-complex-graph/tuning-a-complex-graph_files/figure-html5/unnamed-chunk-6-1.png"/>
+<meta property="og:image:width" content="1248"/>
+<meta property="og:image:height" content="768"/>
+<meta property="og:locale" content="en_US"/>
+<meta property="og:site_name" content="mlr3gallery"/>
+
+<!--  https://dev.twitter.com/cards/types/summary -->
+<meta property="twitter:card" content="summary_large_image"/>
+<meta property="twitter:title" content="mlr3gallery: Tuning a complex graph"/>
+<meta property="twitter:description" content="We show how to tune a complex graph for a single task."/>
+<meta property="twitter:url" content="https://mlr3gallery.mlr-org.com/posts/2020-05-07-tuning-a-complex-graph/"/>
+<meta property="twitter:image" content="https://mlr3gallery.mlr-org.com/posts/2020-05-07-tuning-a-complex-graph/tuning-a-complex-graph_files/figure-html5/unnamed-chunk-6-1.png"/>
+<meta property="twitter:image:width" content="1248"/>
+<meta property="twitter:image:height" content="768"/>
+
+<!--  https://scholar.google.com/intl/en/scholar/inclusion.html#indexing -->
+<meta name="citation_title" content="mlr3gallery: Tuning a complex graph"/>
+<meta name="citation_fulltext_html_url" content="https://mlr3gallery.mlr-org.com/posts/2020-05-07-tuning-a-complex-graph/"/>
+<meta name="citation_online_date" content="2020/04/18"/>
+<meta name="citation_publication_date" content="2020/04/18"/>
+<meta name="citation_author" content="Lennart Schneider"/>
+<!--/radix_placeholder_meta_tags-->
+  
+  <meta name="citation_reference" content="citation_title=Principal component analysis with linear and quadratic discriminant analysis for identification of cancer samples based on mass spectrometry;citation_publication_date=2018;citation_volume=29;citation_doi=10.21577/0103-5053.20170159;citation_author=Camilo LM Morais;citation_author=Kássio MG Lima"/>
+  <!--radix_placeholder_rmarkdown_metadata-->
+
+<script type="text/json" id="radix-rmarkdown-metadata">
+{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["title","categories","author","date","description","output","bibliography","citation_url","canonical_url"]}},"value":[{"type":"character","attributes":{},"value":["Tuning a complex graph"]},{"type":"character","attributes":{},"value":["tuning","mlr3pipelines","classification"]},{"type":"list","attributes":{},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name"]}},"value":[{"type":"character","attributes":{},"value":["Lennart Schneider"]}]}]},{"type":"character","attributes":{},"value":["04-18-2020"]},{"type":"character","attributes":{},"value":["We show how to tune a complex graph for a single task."]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["distill::distill_article"]}},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["self_contained","css"]}},"value":[{"type":"logical","attributes":{},"value":[false]},{"type":"character","attributes":{},"value":["../../custom.css"]}]}]},{"type":"character","attributes":{},"value":["biblio.bib"]},{"type":"character","attributes":{},"value":["https://mlr3gallery.mlr-org.com/posts/2020-05-07-tuning-a-complex-graph/"]},{"type":"character","attributes":{},"value":["https://mlr3gallery.mlr-org.com/posts/2020-05-07-tuning-a-complex-graph/"]}]}
+</script>
+<!--/radix_placeholder_rmarkdown_metadata-->
+  
+  <script type="text/json" id="radix-resource-manifest">
+  {"type":"character","attributes":{},"value":["biblio.bib","tuning-a-complex-graph_files/figure-html5/unnamed-chunk-18-1.png","tuning-a-complex-graph_files/figure-html5/unnamed-chunk-6-1.png"]}
+  </script>
+  <!--radix_placeholder_navigation_in_header-->
+
+<script type="application/javascript">
+
+  window.headroom_prevent_pin = false;
+
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+
+    // initialize headroom for banner
+    var header = $('header').get(0);
+    var headerHeight = header.offsetHeight;
+    var headroom = new Headroom(header, {
+      onPin : function() {
+        if (window.headroom_prevent_pin) {
+          window.headroom_prevent_pin = false;
+          headroom.unpin();
+        }
+      }
+    });
+    headroom.init();
+    if(window.location.hash)
+      headroom.unpin();
+    $(header).addClass('headroom--transition');
+
+    // offset scroll location for banner on hash change
+    // (see: https://github.com/WickyNilliams/headroom.js/issues/38)
+    window.addEventListener("hashchange", function(event) {
+      window.scrollTo(0, window.pageYOffset - (headerHeight + 25));
+    });
+
+    // responsive menu
+    $('.distill-site-header').each(function(i, val) {
+      var topnav = $(this);
+      var toggle = topnav.find('.nav-toggle');
+      toggle.on('click', function() {
+        topnav.toggleClass('responsive');
+      });
+    });
+
+    // nav dropdowns
+    $('.nav-dropbtn').click(function(e) {
+      $(this).next('.nav-dropdown-content').toggleClass('nav-dropdown-active');
+      $(this).parent().siblings('.nav-dropdown')
+         .children('.nav-dropdown-content').removeClass('nav-dropdown-active');
+    });
+    $("body").click(function(e){
+      $('.nav-dropdown-content').removeClass('nav-dropdown-active');
+    });
+    $(".nav-dropdown").click(function(e){
+      e.stopPropagation();
+    });
+  });
+</script>
+
+<style type="text/css">
+
+/* Theme (user-documented overrideables for nav appearance) */
+
+.distill-site-nav {
+  color: rgba(255, 255, 255, 0.8);
+  background-color: #455a64;
+  font-size: 15px;
+  font-weight: 300;
+}
+
+.distill-site-nav a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.distill-site-nav a:hover {
+  color: white;
+}
+
+@media print {
+  .distill-site-nav {
+    display: none;
+  }
+}
+
+.distill-site-header {
+
+}
+
+.distill-site-footer {
+
+}
+
+
+/* Site Header */
+
+.distill-site-header {
+  width: 100%;
+  box-sizing: border-box;
+  z-index: 3;
+}
+
+.distill-site-header .nav-left {
+  display: inline-block;
+  margin-left: 8px;
+}
+
+@media screen and (max-width: 768px) {
+  .distill-site-header .nav-left {
+    margin-left: 0;
+  }
+}
+
+
+.distill-site-header .nav-right {
+  float: right;
+  margin-right: 8px;
+}
+
+.distill-site-header a,
+.distill-site-header .title {
+  display: inline-block;
+  text-align: center;
+  padding: 14px 10px 14px 10px;
+}
+
+.distill-site-header .title {
+  font-size: 18px;
+}
+
+.distill-site-header .logo {
+  padding: 0;
+}
+
+.distill-site-header .logo img {
+  display: none;
+  max-height: 20px;
+  width: auto;
+  margin-bottom: -4px;
+}
+
+.distill-site-header .nav-image img {
+  max-height: 18px;
+  width: auto;
+  display: inline-block;
+  margin-bottom: -3px;
+}
+
+
+
+@media screen and (min-width: 1000px) {
+  .distill-site-header .logo img {
+    display: inline-block;
+  }
+  .distill-site-header .nav-left {
+    margin-left: 20px;
+  }
+  .distill-site-header .nav-right {
+    margin-right: 20px;
+  }
+  .distill-site-header .title {
+    padding-left: 12px;
+  }
+}
+
+
+.distill-site-header .nav-toggle {
+  display: none;
+}
+
+.nav-dropdown {
+  display: inline-block;
+  position: relative;
+}
+
+.nav-dropdown .nav-dropbtn {
+  border: none;
+  outline: none;
+  color: rgba(255, 255, 255, 0.8);
+  padding: 16px 10px;
+  background-color: transparent;
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  margin: 0;
+  margin-top: 1px;
+  z-index: 2;
+}
+
+.nav-dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: white;
+  min-width: 200px;
+  border: 1px solid rgba(0,0,0,0.15);
+  border-radius: 4px;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.1);
+  z-index: 1;
+  margin-top: 2px;
+  white-space: nowrap;
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+.nav-dropdown-content hr {
+  margin-top: 4px;
+  margin-bottom: 4px;
+  border: none;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.nav-dropdown-active {
+  display: block;
+}
+
+.nav-dropdown-content a, .nav-dropdown-content .nav-dropdown-header {
+  color: black;
+  padding: 6px 24px;
+  text-decoration: none;
+  display: block;
+  text-align: left;
+}
+
+.nav-dropdown-content .nav-dropdown-header {
+  display: block;
+  padding: 5px 24px;
+  padding-bottom: 0;
+  text-transform: uppercase;
+  font-size: 14px;
+  color: #999999;
+  white-space: nowrap;
+}
+
+.nav-dropdown:hover .nav-dropbtn {
+  color: white;
+}
+
+.nav-dropdown-content a:hover {
+  background-color: #ddd;
+  color: black;
+}
+
+.nav-right .nav-dropdown-content {
+  margin-left: -45%;
+  right: 0;
+}
+
+@media screen and (max-width: 768px) {
+  .distill-site-header a, .distill-site-header .nav-dropdown  {display: none;}
+  .distill-site-header a.nav-toggle {
+    float: right;
+    display: block;
+  }
+  .distill-site-header .title {
+    margin-left: 0;
+  }
+  .distill-site-header .nav-right {
+    margin-right: 0;
+  }
+  .distill-site-header {
+    overflow: hidden;
+  }
+  .nav-right .nav-dropdown-content {
+    margin-left: 0;
+  }
+}
+
+
+@media screen and (max-width: 768px) {
+  .distill-site-header.responsive {position: relative;}
+  .distill-site-header.responsive a.nav-toggle {
+    position: absolute;
+    right: 0;
+    top: 0;
+  }
+  .distill-site-header.responsive a,
+  .distill-site-header.responsive .nav-dropdown {
+    display: block;
+    text-align: left;
+  }
+  .distill-site-header.responsive .nav-left,
+  .distill-site-header.responsive .nav-right {
+    width: 100%;
+  }
+  .distill-site-header.responsive .nav-dropdown {float: none;}
+  .distill-site-header.responsive .nav-dropdown-content {position: relative;}
+  .distill-site-header.responsive .nav-dropdown .nav-dropbtn {
+    display: block;
+    width: 100%;
+    text-align: left;
+  }
+}
+
+/* Site Footer */
+
+.distill-site-footer {
+  width: 100%;
+  overflow: hidden;
+  box-sizing: border-box;
+  z-index: 3;
+  margin-top: 30px;
+  padding-top: 30px;
+  padding-bottom: 30px;
+  text-align: center;
+}
+
+/* Headroom */
+
+d-title {
+  padding-top: 6rem;
+}
+
+@media print {
+  d-title {
+    padding-top: 4rem;
+  }
+}
+
+.headroom {
+  z-index: 1000;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+}
+
+.headroom--transition {
+  transition: all .4s ease-in-out;
+}
+
+.headroom--unpinned {
+  top: -100px;
+}
+
+.headroom--pinned {
+  top: 0;
+}
+
+</style>
+
+<link href="../../site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet"/>
+<link href="../../site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet"/>
+<script src="../../site_libs/headroom-0.9.4/headroom.min.js"></script>
+<!--/radix_placeholder_navigation_in_header-->
+  <!--radix_placeholder_distill-->
+
+<style type="text/css">
+
+body {
+  background-color: white;
+}
+
+.pandoc-table {
+  width: 100%;
+}
+
+.pandoc-table>caption {
+  margin-bottom: 10px;
+}
+
+.pandoc-table th:not([align]) {
+  text-align: left;
+}
+
+.pagedtable-footer {
+  font-size: 15px;
+}
+
+.html-widget {
+  margin-bottom: 2.0em;
+}
+
+.l-screen-inset {
+  padding-right: 16px;
+}
+
+.l-screen .caption {
+  margin-left: 10px;
+}
+
+.shaded {
+  background: rgb(247, 247, 247);
+  padding-top: 20px;
+  padding-bottom: 20px;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.shaded .html-widget {
+  margin-bottom: 0;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.shaded .shaded-content {
+  background: white;
+}
+
+.text-output {
+  margin-top: 0;
+  line-height: 1.5em;
+}
+
+.hidden {
+  display: none !important;
+}
+
+d-article {
+  padding-bottom: 30px;
+}
+
+d-appendix {
+  padding-top: 30px;
+}
+
+d-article>p>img {
+  width: 100%;
+}
+
+d-article iframe {
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  margin-bottom: 2.0em;
+  width: 100%;
+}
+
+figure img.external {
+  background: white;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.1);
+  padding: 18px;
+  box-sizing: border-box;
+}
+
+/* CSS for table of contents */
+
+.d-toc {
+  color: rgba(0,0,0,0.8);
+  font-size: 0.8em;
+  line-height: 1em;
+}
+
+.d-toc-header {
+  font-size: 0.6rem;
+  font-weight: 400;
+  color: rgba(0, 0, 0, 0.5);
+  text-transform: uppercase;
+  margin-top: 0;
+  margin-bottom: 1.3em;
+}
+
+.d-toc a {
+  border-bottom: none;
+}
+
+.d-toc ul {
+  padding-left: 0;
+}
+
+.d-toc li>ul {
+  padding-top: 0.8em;
+  padding-left: 16px;
+  margin-bottom: 0.6em;
+}
+
+.d-toc ul,
+.d-toc li {
+  list-style-type: none;
+}
+
+.d-toc li {
+  margin-bottom: 0.9em;
+}
+
+.d-toc-separator {
+  margin-top: 20px;
+  margin-bottom: 2em;
+}
+
+.d-article-with-toc {
+  border-top: none;
+  padding-top: 0;
+}
+
+
+
+/* Tweak code blocks (note that this CSS is repeated above in an injection
+   into the d-code shadow dom) */
+
+d-code {
+  overflow-x: auto !important;
+}
+
+pre.d-code code.d-code {
+  padding-left: 10px;
+  font-size: 12px;
+  border-left: 2px solid rgba(0,0,0,0.1);
+}
+
+pre.text-output {
+
+  font-size: 12px;
+  color: black;
+  background: none;
+  font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+  text-align: left;
+  white-space: pre;
+  word-spacing: normal;
+  word-break: normal;
+  word-wrap: normal;
+  line-height: 1.5;
+
+  -moz-tab-size: 4;
+  -o-tab-size: 4;
+  tab-size: 4;
+
+  -webkit-hyphens: none;
+  -moz-hyphens: none;
+  -ms-hyphens: none;
+  hyphens: none;
+}
+
+@media(min-width: 768px) {
+
+d-code {
+  overflow-x: visible !important;
+}
+
+pre.d-code code.d-code  {
+    padding-left: 18px;
+    font-size: 14px;
+}
+pre.text-output {
+  font-size: 14px;
+}
+}
+
+/* Figure */
+
+.figure {
+  position: relative;
+  margin-bottom: 2.5em;
+  margin-top: 1.5em;
+}
+
+.figure img {
+  width: 100%;
+}
+
+.figure .caption {
+  color: rgba(0, 0, 0, 0.6);
+  font-size: 12px;
+  line-height: 1.5em;
+}
+
+.figure img.external {
+  background: white;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.1);
+  padding: 18px;
+  box-sizing: border-box;
+}
+
+.figure .caption a {
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.figure .caption b,
+.figure .caption strong, {
+  font-weight: 600;
+  color: rgba(0, 0, 0, 1.0);
+}
+
+
+
+/* Tweak 1000px media break to show more text */
+
+@media(min-width: 1000px) {
+  .base-grid,
+  distill-header,
+  d-title,
+  d-abstract,
+  d-article,
+  d-appendix,
+  distill-appendix,
+  d-byline,
+  d-footnote-list,
+  d-citation-list,
+  distill-footer {
+    grid-template-columns: [screen-start] 1fr [page-start kicker-start] 80px [middle-start] 50px [text-start kicker-end] 65px 65px 65px 65px 65px 65px 65px 65px [text-end gutter-start] 65px [middle-end] 65px [page-end gutter-end] 1fr [screen-end];
+    grid-column-gap: 16px;
+  }
+
+  .grid {
+    grid-column-gap: 16px;
+  }
+
+  d-article {
+    font-size: 1.06rem;
+    line-height: 1.7em;
+  }
+  figure .caption, .figure .caption, figure figcaption {
+    font-size: 13px;
+  }
+}
+
+@media(min-width: 1180px) {
+  .base-grid,
+  distill-header,
+  d-title,
+  d-abstract,
+  d-article,
+  d-appendix,
+  distill-appendix,
+  d-byline,
+  d-footnote-list,
+  d-citation-list,
+  distill-footer {
+    grid-template-columns: [screen-start] 1fr [page-start kicker-start] 60px [middle-start] 60px [text-start kicker-end] 60px 60px 60px 60px 60px 60px 60px 60px [text-end gutter-start] 60px [middle-end] 60px [page-end gutter-end] 1fr [screen-end];
+    grid-column-gap: 32px;
+  }
+
+  .grid {
+    grid-column-gap: 32px;
+  }
+}
+
+
+/* Get the citation styles for the appendix (not auto-injected on render since
+   we do our own rendering of the citation appendix) */
+
+d-appendix .citation-appendix,
+.d-appendix .citation-appendix {
+  font-size: 11px;
+  line-height: 15px;
+  border-left: 1px solid rgba(0, 0, 0, 0.1);
+  padding-left: 18px;
+  border: 1px solid rgba(0,0,0,0.1);
+  background: rgba(0, 0, 0, 0.02);
+  padding: 10px 18px;
+  border-radius: 3px;
+  color: rgba(150, 150, 150, 1);
+  overflow: hidden;
+  margin-top: -12px;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+
+/* Social footer */
+
+.social_footer {
+  margin-top: 30px;
+  margin-bottom: 0;
+  color: rgba(0,0,0,0.67);
+}
+
+.disqus-comments {
+  margin-right: 30px;
+}
+
+.disqus-comment-count {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.4);
+  cursor: pointer;
+}
+
+#disqus_thread {
+  margin-top: 30px;
+}
+
+.article-sharing a {
+  border-bottom: none;
+  margin-right: 8px;
+}
+
+.article-sharing a:hover {
+  border-bottom: none;
+}
+
+.sidebar-section.subscribe {
+  font-size: 12px;
+  line-height: 1.6em;
+}
+
+.subscribe p {
+  margin-bottom: 0.5em;
+}
+
+
+.article-footer .subscribe {
+  font-size: 15px;
+  margin-top: 45px;
+}
+
+
+/* Improve display for browsers without grid (IE/Edge <= 15) */
+
+.downlevel {
+  line-height: 1.6em;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", Arial, sans-serif;
+  margin: 0;
+}
+
+.downlevel .d-title {
+  padding-top: 6rem;
+  padding-bottom: 1.5rem;
+}
+
+.downlevel .d-title h1 {
+  font-size: 50px;
+  font-weight: 700;
+  line-height: 1.1em;
+  margin: 0 0 0.5rem;
+}
+
+.downlevel .d-title p {
+  font-weight: 300;
+  font-size: 1.2rem;
+  line-height: 1.55em;
+  margin-top: 0;
+}
+
+.downlevel .d-byline {
+  padding-top: 0.8em;
+  padding-bottom: 0.8em;
+  font-size: 0.8rem;
+  line-height: 1.8em;
+}
+
+.downlevel .section-separator {
+  border: none;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.downlevel .d-article {
+  font-size: 1.06rem;
+  line-height: 1.7em;
+  padding-top: 1rem;
+  padding-bottom: 2rem;
+}
+
+
+.downlevel .d-appendix {
+  padding-left: 0;
+  padding-right: 0;
+  max-width: none;
+  font-size: 0.8em;
+  line-height: 1.7em;
+  margin-bottom: 0;
+  color: rgba(0,0,0,0.5);
+  padding-top: 40px;
+  padding-bottom: 48px;
+}
+
+.downlevel .footnotes ol {
+  padding-left: 13px;
+}
+
+.downlevel .base-grid,
+.downlevel .distill-header,
+.downlevel .d-title,
+.downlevel .d-abstract,
+.downlevel .d-article,
+.downlevel .d-appendix,
+.downlevel .distill-appendix,
+.downlevel .d-byline,
+.downlevel .d-footnote-list,
+.downlevel .d-citation-list,
+.downlevel .distill-footer,
+.downlevel .appendix-bottom,
+.downlevel .posts-container {
+  padding-left: 40px;
+  padding-right: 40px;
+}
+
+@media(min-width: 768px) {
+  .downlevel .base-grid,
+  .downlevel .distill-header,
+  .downlevel .d-title,
+  .downlevel .d-abstract,
+  .downlevel .d-article,
+  .downlevel .d-appendix,
+  .downlevel .distill-appendix,
+  .downlevel .d-byline,
+  .downlevel .d-footnote-list,
+  .downlevel .d-citation-list,
+  .downlevel .distill-footer,
+  .downlevel .appendix-bottom,
+  .downlevel .posts-container {
+  padding-left: 150px;
+  padding-right: 150px;
+  max-width: 900px;
+}
+}
+
+.downlevel pre code {
+  display: block;
+  border-left: 2px solid rgba(0, 0, 0, .1);
+  padding: 0 0 0 20px;
+  font-size: 14px;
+}
+
+.downlevel code, .downlevel pre {
+  color: black;
+  background: none;
+  font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+  text-align: left;
+  white-space: pre;
+  word-spacing: normal;
+  word-break: normal;
+  word-wrap: normal;
+  line-height: 1.5;
+
+  -moz-tab-size: 4;
+  -o-tab-size: 4;
+  tab-size: 4;
+
+  -webkit-hyphens: none;
+  -moz-hyphens: none;
+  -ms-hyphens: none;
+  hyphens: none;
+}
+
+</style>
+
+<script type="application/javascript">
+
+function is_downlevel_browser() {
+  if (bowser.isUnsupportedBrowser({ msie: "12", msedge: "16"},
+                                 window.navigator.userAgent)) {
+    return true;
+  } else {
+    return window.load_distill_framework === undefined;
+  }
+}
+
+// show body when load is complete
+function on_load_complete() {
+
+  // set body to visible
+  document.body.style.visibility = 'visible';
+
+  // force redraw for leaflet widgets
+  if (window.HTMLWidgets) {
+    var maps = window.HTMLWidgets.findAll(".leaflet");
+    $.each(maps, function(i, el) {
+      var map = this.getMap();
+      map.invalidateSize();
+      map.eachLayer(function(layer) {
+        if (layer instanceof L.TileLayer)
+          layer.redraw();
+      });
+    });
+  }
+
+  // trigger 'shown' so htmlwidgets resize
+  $('d-article').trigger('shown');
+}
+
+function init_distill() {
+
+  init_common();
+
+  // create front matter
+  var front_matter = $('<d-front-matter></d-front-matter>');
+  $('#distill-front-matter').wrap(front_matter);
+
+  // create d-title
+  $('.d-title').changeElementType('d-title');
+
+  // create d-byline
+  var byline = $('<d-byline></d-byline>');
+  $('.d-byline').replaceWith(byline);
+
+  // create d-article
+  var article = $('<d-article></d-article>');
+  $('.d-article').wrap(article).children().unwrap();
+
+  // move posts container into article
+  $('.posts-container').appendTo($('d-article'));
+
+  // create d-appendix
+  $('.d-appendix').changeElementType('d-appendix');
+
+  // create d-bibliography
+  var bibliography = $('<d-bibliography></d-bibliography>');
+  $('#distill-bibliography').wrap(bibliography);
+
+  // flag indicating that we have appendix items
+  var appendix = $('.appendix-bottom').children('h3').length > 0;
+
+  // replace citations with <d-cite>
+  $('.citation').each(function(i, val) {
+    appendix = true;
+    var cites = $(this).attr('data-cites').split(" ");
+    var dt_cite = $('<d-cite></d-cite>');
+    dt_cite.attr('key', cites.join());
+    $(this).replaceWith(dt_cite);
+  });
+  // remove refs
+  $('#refs').remove();
+
+  // replace footnotes with <d-footnote>
+  $('.footnote-ref').each(function(i, val) {
+    appendix = true;
+    var href = $(this).attr('href');
+    var id = href.replace('#', '');
+    var fn = $('#' + id);
+    var fn_p = $('#' + id + '>p');
+    fn_p.find('.footnote-back').remove();
+    var text = fn_p.html();
+    var dtfn = $('<d-footnote></d-footnote>');
+    dtfn.html(text);
+    $(this).replaceWith(dtfn);
+  });
+  // remove footnotes
+  $('.footnotes').remove();
+
+  $('h1.appendix, h2.appendix').each(function(i, val) {
+    $(this).changeElementType('h3');
+  });
+  $('h3.appendix').each(function(i, val) {
+    var id = $(this).attr('id');
+    $('.d-toc a[href="#' + id + '"]').parent().remove();
+    appendix = true;
+    $(this).nextUntil($('h1, h2, h3')).addBack().appendTo($('d-appendix'));
+  });
+
+  // show d-appendix if we have appendix content
+  $("d-appendix").css('display', appendix ? 'grid' : 'none');
+
+  // replace code blocks with d-code
+  $('pre>code').each(function(i, val) {
+    var code = $(this);
+    var pre = code.parent();
+    var clz = "";
+    var language = pre.attr('class');
+    if (language) {
+      // map unknown languages to "clike" (without this they just dissapear)
+      if ($.inArray(language, ["bash", "clike", "css", "go", "html",
+                               "javascript", "js", "julia", "lua", "markdown",
+                               "markup", "mathml", "python", "svg", "xml"]) == -1)
+        language = "clike";
+      language = ' language="' + language + '"';
+      var dt_code = $('<d-code block' + language + clz + '></d-code>');
+      dt_code.text(code.text());
+      pre.replaceWith(dt_code);
+    } else {
+      code.addClass('text-output').unwrap().changeElementType('pre');
+    }
+  });
+
+  // localize layout chunks to just output
+  $('.layout-chunk').each(function(i, val) {
+
+    // capture layout
+    var layout = $(this).attr('data-layout');
+
+    // apply layout to markdown level block elements
+    var elements = $(this).children().not('d-code, pre.text-output, script');
+    elements.each(function(i, el) {
+      var layout_div = $('<div class="' + layout + '"></div>');
+      if (layout_div.hasClass('shaded')) {
+        var shaded_content = $('<div class="shaded-content"></div>');
+        $(this).wrap(shaded_content);
+        $(this).parent().wrap(layout_div);
+      } else {
+        $(this).wrap(layout_div);
+      }
+    });
+
+
+    // unwrap the layout-chunk div
+    $(this).children().unwrap();
+  });
+
+  // load distill framework
+  load_distill_framework();
+
+  // wait for window.distillRunlevel == 4 to do post processing
+  function distill_post_process() {
+
+    if (!window.distillRunlevel || window.distillRunlevel < 4)
+      return;
+
+    // hide author/affiliations entirely if we have no authors
+    var front_matter = JSON.parse($("#distill-front-matter").html());
+    var have_authors = front_matter.authors && front_matter.authors.length > 0;
+    if (!have_authors)
+      $('d-byline').addClass('hidden');
+
+    // table of contents
+    if (have_authors) // adjust border if we are in authors
+      $('.d-toc').parent().addClass('d-article-with-toc');
+
+    // strip links that point to #
+    $('.authors-affiliations').find('a[href="#"]').removeAttr('href');
+
+    // hide elements of author/affiliations grid that have no value
+    function hide_byline_column(caption) {
+      $('d-byline').find('h3:contains("' + caption + '")').parent().css('visibility', 'hidden');
+    }
+
+    // affiliations
+    var have_affiliations = false;
+    for (var i = 0; i<front_matter.authors.length; ++i) {
+      var author = front_matter.authors[i];
+      if (author.affiliation !== "&nbsp;") {
+        have_affiliations = true;
+        break;
+      }
+    }
+    if (!have_affiliations)
+      $('d-byline').find('h3:contains("Affiliations")').css('visibility', 'hidden');
+
+    // published date
+    if (!front_matter.publishedDate)
+      hide_byline_column("Published");
+
+    // document object identifier
+    var doi = $('d-byline').find('h3:contains("DOI")');
+    var doi_p = doi.next().empty();
+    if (!front_matter.doi) {
+      // if we have a citation and valid citationText then link to that
+      if ($('#citation').length > 0 && front_matter.citationText) {
+        doi.html('Citation');
+        $('<a href="#citation"></a>')
+          .text(front_matter.citationText)
+          .appendTo(doi_p);
+      } else {
+        hide_byline_column("DOI");
+      }
+    } else {
+      $('<a></a>')
+         .attr('href', "https://doi.org/" + front_matter.doi)
+         .html(front_matter.doi)
+         .appendTo(doi_p);
+    }
+
+     // change plural form of authors/affiliations
+    if (front_matter.authors.length === 1) {
+      var grid = $('.authors-affiliations');
+      grid.children('h3:contains("Authors")').text('Author');
+      grid.children('h3:contains("Affiliations")').text('Affiliation');
+    }
+
+    // inject pre code styles (can't do this with a global stylesheet b/c a shadow root is used)
+    $('d-code').each(function(i, val) {
+      var style = document.createElement('style');
+      style.innerHTML = 'pre code { padding-left: 10px; font-size: 12px; border-left: 2px solid rgba(0,0,0,0.1); } ' +
+                        '@media(min-width: 768px) { pre code { padding-left: 18px; font-size: 14px; } }';
+      if (this.shadowRoot)
+        this.shadowRoot.appendChild(style);
+    });
+
+    // move appendix-bottom entries to the bottom
+    $('.appendix-bottom').appendTo('d-appendix').children().unwrap();
+    $('.appendix-bottom').remove();
+
+    // clear polling timer
+    clearInterval(tid);
+
+    // show body now that everything is ready
+    on_load_complete();
+  }
+
+  var tid = setInterval(distill_post_process, 50);
+  distill_post_process();
+
+}
+
+function init_downlevel() {
+
+  init_common();
+
+   // insert hr after d-title
+  $('.d-title').after($('<hr class="section-separator"/>'));
+
+  // check if we have authors
+  var front_matter = JSON.parse($("#distill-front-matter").html());
+  var have_authors = front_matter.authors && front_matter.authors.length > 0;
+
+  // manage byline/border
+  if (!have_authors)
+    $('.d-byline').remove();
+  $('.d-byline').after($('<hr class="section-separator"/>'));
+  $('.d-byline a').remove();
+
+  // remove toc
+  $('.d-toc-header').remove();
+  $('.d-toc').remove();
+  $('.d-toc-separator').remove();
+
+  // move appendix elements
+  $('h1.appendix, h2.appendix').each(function(i, val) {
+    $(this).changeElementType('h3');
+  });
+  $('h3.appendix').each(function(i, val) {
+    $(this).nextUntil($('h1, h2, h3')).addBack().appendTo($('.d-appendix'));
+  });
+
+
+  // inject headers into references and footnotes
+  var refs_header = $('<h3></h3>');
+  refs_header.text('References');
+  $('#refs').prepend(refs_header);
+
+  var footnotes_header = $('<h3></h3');
+  footnotes_header.text('Footnotes');
+  $('.footnotes').children('hr').first().replaceWith(footnotes_header);
+
+  // move appendix-bottom entries to the bottom
+  $('.appendix-bottom').appendTo('.d-appendix').children().unwrap();
+  $('.appendix-bottom').remove();
+
+  // remove appendix if it's empty
+  if ($('.d-appendix').children().length === 0)
+    $('.d-appendix').remove();
+
+  // prepend separator above appendix
+  $('.d-appendix').before($('<hr class="section-separator" style="clear: both"/>'));
+
+  // trim code
+  $('pre>code').each(function(i, val) {
+    $(this).html($.trim($(this).html()));
+  });
+
+  // move posts-container right before article
+  $('.posts-container').insertBefore($('.d-article'));
+
+  $('body').addClass('downlevel');
+
+  on_load_complete();
+}
+
+
+function init_common() {
+
+  // jquery plugin to change element types
+  (function($) {
+    $.fn.changeElementType = function(newType) {
+      var attrs = {};
+
+      $.each(this[0].attributes, function(idx, attr) {
+        attrs[attr.nodeName] = attr.nodeValue;
+      });
+
+      this.replaceWith(function() {
+        return $("<" + newType + "/>", attrs).append($(this).contents());
+      });
+    };
+  })(jQuery);
+
+  // prevent underline for linked images
+  $('a > img').parent().css({'border-bottom' : 'none'});
+
+  // mark non-body figures created by knitr chunks as 100% width
+  $('.layout-chunk').each(function(i, val) {
+    var figures = $(this).find('img, .html-widget');
+    if ($(this).attr('data-layout') !== "l-body") {
+      figures.css('width', '100%');
+    } else {
+      figures.css('max-width', '100%');
+      figures.filter("[width]").each(function(i, val) {
+        var fig = $(this);
+        fig.css('width', fig.attr('width') + 'px');
+      });
+
+    }
+  });
+
+  // auto-append index.html to post-preview links in file: protocol
+  // and in rstudio ide preview
+  $('.post-preview').each(function(i, val) {
+    if (window.location.protocol === "file:")
+      $(this).attr('href', $(this).attr('href') + "index.html");
+  });
+
+  // get rid of index.html references in header
+  if (window.location.protocol !== "file:") {
+    $('.distill-site-header a[href]').each(function(i,val) {
+      $(this).attr('href', $(this).attr('href').replace("index.html", "./"));
+    });
+  }
+
+  // add class to pandoc style tables
+  $('tr.header').parent('thead').parent('table').addClass('pandoc-table');
+  $('.kable-table').children('table').addClass('pandoc-table');
+
+  // add figcaption style to table captions
+  $('caption').parent('table').addClass("figcaption");
+
+  // initialize posts list
+  if (window.init_posts_list)
+    window.init_posts_list();
+
+  // implmement disqus comment link
+  $('.disqus-comment-count').click(function() {
+    window.headroom_prevent_pin = true;
+    $('#disqus_thread').toggleClass('hidden');
+    if (!$('#disqus_thread').hasClass('hidden')) {
+      var offset = $(this).offset();
+      $(window).resize();
+      $('html, body').animate({
+        scrollTop: offset.top - 35
+      });
+    }
+  });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  if (is_downlevel_browser())
+    init_downlevel();
+  else
+    window.addEventListener('WebComponentsReady', init_distill);
+});
+
+</script>
+
+<!--/radix_placeholder_distill-->
+  <script src="../../site_libs/header-attrs-2.1/header-attrs.js"></script>
+  <script src="../../site_libs/jquery-1.11.3/jquery.min.js"></script>
+  <script src="../../site_libs/bowser-1.9.3/bowser.min.js"></script>
+  <script src="../../site_libs/webcomponents-2.0.0/webcomponents.js"></script>
+  <script src="../../site_libs/distill-2.2.21/template.v2.js"></script>
+  <!--radix_placeholder_site_in_header-->
+<!--/radix_placeholder_site_in_header-->
+
+  <link rel="stylesheet" href="../../custom.css" type="text/css"/>
+
+</head>
+
+<body>
+
+<!--radix_placeholder_front_matter-->
+
+<script id="distill-front-matter" type="text/json">
+{"title":"Tuning a complex graph","description":"We show how to tune a complex graph for a single task.","authors":[{"author":"Lennart Schneider","authorURL":"#","affiliation":"&nbsp;","affiliationURL":"#"}],"publishedDate":"2020-04-18T00:00:00.000+02:00","citationText":"Schneider, 2020"}
+</script>
+
+<!--/radix_placeholder_front_matter-->
+<!--radix_placeholder_navigation_before_body-->
+<header class="header header--fixed" role="banner">
+<nav class="distill-site-nav distill-site-header">
+<div class="nav-left">
+<a class="logo" href="https://mlr3.mlr-org.com">
+<img src="../../images/logo.png"/>
+</a>
+<a href="../../index.html" class="title">mlr3gallery</a>
+</div>
+<div class="nav-right">
+<a href="https://github.com/mlr-org/mlr3gallery">
+<i class="fab fa-github"></i>
+</a>
+<a href="javascript:void(0);" class="nav-toggle">&#9776;</a>
+</div>
+</nav>
+</header>
+<!--/radix_placeholder_navigation_before_body-->
+<!--radix_placeholder_site_before_body-->
+<!--/radix_placeholder_site_before_body-->
+
+<div class="d-title">
+<h1>Tuning a complex graph</h1>
+<p><p>We show how to tune a complex graph for a single task.</p></p>
+</div>
+
+<div class="d-byline">
+  Lennart Schneider  
+  
+<br/>04-18-2020
+</div>
+
+<div class="d-article">
+<p>FIXME: hyperlinks</p>
+<p>FIXME: when do we actually say graph vs. pipeline</p>
+<p>In this use case we show how to tune a rather complex graph consisting of different preprocessing steps and different learners where each preprocessing step and learner itself has parameters that can be tuned. You will learn the following:</p>
+<ul>
+<li>Build a pipeline that consists of two common preprocessing steps, then switches between dimensionality reduction followed by a learner and another learner</li>
+<li>Define the search space</li>
+<li>Run a grid search</li>
+</ul>
+<p>Ideally you already had a look at how to tune over multiple learners. FIXME: URL</p>
+<p>First, we load the packages we will need and set some logging thresholds:</p>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+library(mlr3)
+library(mlr3tuning)
+library(mlr3pipelines)
+library(mlr3learners)
+library(mlr3misc)
+library(paradox)
+lgr::get_logger(&quot;mlr3&quot;)$set_threshold(&quot;warn&quot;)
+lgr::get_logger(&quot;mlr3tuning&quot;)$set_threshold(&quot;warn&quot;)</code></pre>
+</div>
+<h2 id="data-and-task">Data and Task</h2>
+<p>We are going to work with some gene expression data included as a supplement in the <code>bst</code> package. The data consists of 2308 gene profiles in 63 training and 20 test samples. The following data preprocessing steps are done analogously as in <code>vignette("khan", package = "bst")</code>:</p>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+datafile = system.file(&quot;extdata&quot;, &quot;supplemental_data&quot;, package = &quot;bst&quot;)
+dat0 = read.delim(datafile, header = TRUE, skip = 1)[, -(1:2)]
+dat0 = t(dat0)
+dat1 = dat0[rownames(dat0) %in% c(&quot;TEST.9&quot;, &quot;TEST.13&quot;,&quot;TEST.5&quot;, &quot;TEST.3&quot;, &quot;TEST.11&quot;), ]
+dat2 = dat0[rownames(dat0) %nin% c(&quot;TEST.9&quot;, &quot;TEST.13&quot;,&quot;TEST.5&quot;, &quot;TEST.3&quot;, &quot;TEST.11&quot;), ]
+dat = data.frame(rbind(dat2, dat1)[1:83, ])
+dat$classes = as.factor(c(substr(rownames(dat)[1:63], start = 1, stop = 2), c(&quot;NB&quot;, &quot;RM&quot;, &quot;NB&quot;, &quot;EW&quot;, &quot;RM&quot;, &quot;BL&quot;, &quot;EW&quot;, &quot;RM&quot;, &quot;EW&quot;, &quot;EW&quot;, &quot;EW&quot;, &quot;RM&quot;, &quot;BL&quot;, &quot;RM&quot;, &quot;NB&quot;, &quot;NB&quot;, &quot;NB&quot;, &quot;NB&quot;, &quot;BL&quot;, &quot;EW&quot;)))</code></pre>
+</div>
+<p>We then construct our training and test task:</p>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+task = TaskClassif$new(&quot;SRBCT&quot;, backend = dat, target = &quot;classes&quot;)
+task_train = task$clone(deep = TRUE)
+task_train$filter(1:63)
+task_test = task$clone(deep = TRUE)
+task_test$filter(64:83)</code></pre>
+</div>
+<h2 id="workflow">Workflow</h2>
+<p>Our pipeline will start with log transforming the features (base 10), followed by scaling the features. Then, either a PCA or ICA is applied to extract principal / independent components followed by fitting a LDA or a ranger random forest is fitted directly (note that we probably could skip the transformation and scaling for the random forest). Regarding the PCA and ICA, both the number of principal / independent components is a tuning parameter. Regarding the LDA we can further choose different methods for estimating the mean and variance and regarding the random forest we want to tune the <code>mtry</code> and <code>num.tree</code> parameters. Note that the PCA-LCA combination has already been successfully applied in different cancer diagnostic contexts when the feature space is of high dimensionality <span class="citation" data-cites="morais2018">(Morais and Lima <a href="#ref-morais2018" role="doc-biblioref">2018</a>)</span>.</p>
+<p>To allow for switching between PCA/ICA-LDA and random forest we can either use branching or proxy pipelines, i.e., <code>PipeOpBranch</code> and <code>PipeOpUnbranch</code> or <code>PipeOpProxy</code>. We will first cover branching in detail and later show how the same can be done using <code>PipeOpProxy</code>.</p>
+<h2 id="baseline">Baseline</h2>
+<p>First, we have a look at the baseline classification accuracy of the LDA and random forest on the training task:</p>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+set.seed(1290)
+base = benchmark(benchmark_grid(task_train, learners = list(lrn(&quot;classif.lda&quot;), lrn(&quot;classif.ranger&quot;)), resamplings = rsmp(&quot;cv&quot;, folds = 3)))
+base$aggregate(measures = msr(&quot;classif.acc&quot;))</code></pre>
+<pre><code>
+   nr  resample_result task_id     learner_id resampling_id iters classif.acc
+1:  1 &lt;ResampleResult&gt;   SRBCT    classif.lda            cv     3   0.6190476
+2:  2 &lt;ResampleResult&gt;   SRBCT classif.ranger            cv     3   0.9682540</code></pre>
+</div>
+<p>The out of box random forest appears to already have good performance on the training task. Regarding the LDA, we do get a warning message, that some features are colinear. This strongly suggests to reduce the dimensionality of the feature space. Let’s see if we can get some better performance, at least for the LDA.</p>
+<h2 id="branching">Branching</h2>
+<p>Our pipeline starts with log transforming the features (base 10), using <code>PipeOpColApply</code>, followed by scaling the features using <code>PipeOpScale</code>. Then, the first branch allows for switching between PCA/ICA-LDA and ranger, and within PCA/ICA-LDA, the second branch allows for switching between PCA and ICA:</p>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+pipeline1 = po(&quot;colapply&quot;, param_vals = list(applicator = function(x) log(x, base = 10))) %&gt;&gt;%
+  po(&quot;scale&quot;) %&gt;&gt;%
+  # pca/ica followed by lda vs. ranger
+  po(&quot;branch&quot;, id = &quot;branch_learner&quot;, options = c(&quot;pca_ica_lda&quot;, &quot;ranger&quot;)) %&gt;&gt;%
+    gunion(list(
+      po(&quot;branch&quot;, id = &quot;branch_preproc_lda&quot;, options = c(&quot;pca&quot;, &quot;ica&quot;)) %&gt;&gt;% gunion(list(po(&quot;pca&quot;), po(&quot;ica&quot;))) %&gt;&gt;% po(&quot;unbranch&quot;, id = &quot;unbranch_preproc_lda&quot;) %&gt;&gt;% lrn(&quot;classif.lda&quot;),
+      lrn(&quot;classif.ranger&quot;))
+    ) %&gt;&gt;%
+  po(&quot;unbranch&quot;, id = &quot;unbranch_learner&quot;)</code></pre>
+</div>
+<p>Note that the names of the options within each branch are arbitrary, but ideally they describe what is happening, therefore we go with <code>"pca_ica_lda"</code>/<code>"ranger</code>" and <code>"pca"</code>/<code>"ica"</code>. The pipeline looks like the following:</p>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+pipeline1$plot()</code></pre>
+<p><img src="tuning-a-complex-graph_files/figure-html5/unnamed-chunk-6-1.png" width="624" /></p>
+</div>
+<p>We can inspect the parameters of the <code>ParamSet</code> of the pipeline to see which parameters can be set:</p>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+pipeline1$param_set$ids()</code></pre>
+<pre><code>
+ [1] &quot;colapply.applicator&quot;                        
+ [2] &quot;colapply.affect_columns&quot;                    
+ [3] &quot;scale.center&quot;                               
+ [4] &quot;scale.scale&quot;                                
+ [5] &quot;scale.affect_columns&quot;                       
+ [6] &quot;branch_learner.selection&quot;                   
+ [7] &quot;branch_preproc_lda.selection&quot;               
+ [8] &quot;pca.center&quot;                                 
+ [9] &quot;pca.scale.&quot;                                 
+[10] &quot;pca.rank.&quot;                                  
+[11] &quot;pca.affect_columns&quot;                         
+[12] &quot;ica.n.comp&quot;                                 
+[13] &quot;ica.alg.typ&quot;                                
+[14] &quot;ica.fun&quot;                                    
+[15] &quot;ica.alpha&quot;                                  
+[16] &quot;ica.method&quot;                                 
+[17] &quot;ica.row.norm&quot;                               
+[18] &quot;ica.maxit&quot;                                  
+[19] &quot;ica.tol&quot;                                    
+[20] &quot;ica.verbose&quot;                                
+[21] &quot;ica.w.init&quot;                                 
+[22] &quot;ica.affect_columns&quot;                         
+[23] &quot;classif.lda.prior&quot;                          
+[24] &quot;classif.lda.tol&quot;                            
+[25] &quot;classif.lda.method&quot;                         
+[26] &quot;classif.lda.nu&quot;                             
+[27] &quot;classif.lda.predict.method&quot;                 
+[28] &quot;classif.lda.predict.prior&quot;                  
+[29] &quot;classif.lda.dimen&quot;                          
+[30] &quot;classif.ranger.num.trees&quot;                   
+[31] &quot;classif.ranger.mtry&quot;                        
+[32] &quot;classif.ranger.importance&quot;                  
+[33] &quot;classif.ranger.write.forest&quot;                
+[34] &quot;classif.ranger.min.node.size&quot;               
+[35] &quot;classif.ranger.replace&quot;                     
+[36] &quot;classif.ranger.sample.fraction&quot;             
+[37] &quot;classif.ranger.class.weights&quot;               
+[38] &quot;classif.ranger.splitrule&quot;                   
+[39] &quot;classif.ranger.num.random.splits&quot;           
+[40] &quot;classif.ranger.split.select.weights&quot;        
+[41] &quot;classif.ranger.always.split.variables&quot;      
+[42] &quot;classif.ranger.respect.unordered.factors&quot;   
+[43] &quot;classif.ranger.scale.permutation.importance&quot;
+[44] &quot;classif.ranger.keep.inbag&quot;                  
+[45] &quot;classif.ranger.holdout&quot;                     
+[46] &quot;classif.ranger.num.threads&quot;                 
+[47] &quot;classif.ranger.save.memory&quot;                 
+[48] &quot;classif.ranger.verbose&quot;                     
+[49] &quot;classif.ranger.oob.error&quot;                   
+[50] &quot;classif.ranger.max.depth&quot;                   
+[51] &quot;classif.ranger.alpha&quot;                       
+[52] &quot;classif.ranger.min.prop&quot;                    
+[53] &quot;classif.ranger.regularization.factor&quot;       
+[54] &quot;classif.ranger.regularization.usedepth&quot;     
+[55] &quot;classif.ranger.seed&quot;                        
+[56] &quot;classif.ranger.minprop&quot;                     
+[57] &quot;classif.ranger.predict.all&quot;                 
+[58] &quot;classif.ranger.se.method&quot;                   </code></pre>
+</div>
+<p>Note that the <code>id</code>’s are prefixed by the respective <code>PipeOp</code> they belong to, e.g., <code>pca.rank.</code> refers to the <code>rank.</code> parameter of the <code>PipeOpPCA</code>.</p>
+<h2 id="search-space">Search Space</h2>
+<p>Our pipeline either fits a LDA after applying PCA or ICA or fits a ranger. These two selections each define selection parameters that we can tune. Moreover, within the respective <code>PipeOp</code>’s we want to tune the following parameters: <code>pca.rank.</code>, <code>ica.n.comp</code>, <code>classif.lda.method</code>, <code>classif.ranger.mtry</code>, and <code>classif.ranger.num.trees</code>. The first two parameters are integers that in principal could range from 1 to the number of features. However, for ICA, the upper bound must not exceed the number of rows and as we will later use <code>3-fold cross-validation</code> as the resampling method for the tuning, we just set the upper bound to 30 (and do the same for the PCA). Regarding the <code>classif.lda.method</code> we will only be interested in <code>moment</code> estimation vs. minimum volume ellipsoid covariance estimation (<code>mve</code>). Moreover, we set the lower bound of <code>classif.ranger.mtry</code> to 200 (which is around the number of features divided by ten) and the upper bound to 1000.</p>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+tune_ps1 = ParamSet$new(list(
+  ParamFct$new(&quot;branch_learner.selection&quot;, levels = c(&quot;pca_ica_lda&quot;, &quot;ranger&quot;)),
+  ParamFct$new(&quot;branch_preproc_lda.selection&quot;, levels = c(&quot;pca&quot;, &quot;ica&quot;)),
+  ParamInt$new(&quot;pca.rank.&quot;, lower = 1, upper = 30),
+  ParamInt$new(&quot;ica.n.comp&quot;, lower = 1, upper = 30),
+  ParamFct$new(&quot;classif.lda.method&quot;, levels = c(&quot;moment&quot;, &quot;mve&quot;)),
+  ParamInt$new(&quot;classif.ranger.mtry&quot;, lower = 200, upper = 1000),
+  ParamInt$new(&quot;classif.ranger.num.trees&quot;, lower = 500, upper = 2000))
+)</code></pre>
+</div>
+<p>The parameter <code>branch_learner.selection</code> defines whether we go down the left (PCA/ICA followed by LDA) or the right branch (ranger). The parameter <code>branch_preproc_lda.selection</code> defines whether a PCA or ICA will be applied prior to the LDA. The other parameters directly belong to the <code>ParamSet</code> of the PCA/ICA/LDA/ranger. Note that it only makes sense to switch between PCA/ICA if the <code>"pca_ica_lda"</code> branch was selected beforehand. We have to specify this via:</p>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+tune_ps1$add_dep(&quot;branch_preproc_lda.selection&quot;, on = &quot;branch_learner.selection&quot;, cond = CondEqual$new(&quot;pca_ica_lda&quot;))</code></pre>
+</div>
+<p>Again, regarding the <code>pca.rank.</code> parameter, there is a dependency on that <code>pca</code> must have been selected in <code>branch_preproc_lda.selection</code> beforehand, which we have to explicitly specify:</p>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+tune_ps1$add_dep(&quot;pca.rank.&quot;, on = &quot;branch_preproc_lda.selection&quot;, cond = CondEqual$new(&quot;pca&quot;))</code></pre>
+</div>
+<p>The same holds for the following parameters analogously:</p>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+tune_ps1$add_dep(&quot;ica.n.comp&quot;, on = &quot;branch_preproc_lda.selection&quot;, cond = CondEqual$new(&quot;ica&quot;))
+tune_ps1$add_dep(&quot;classif.lda.method&quot;, on = &quot;branch_learner.selection&quot;, cond = CondEqual$new(&quot;pca_ica_lda&quot;))
+tune_ps1$add_dep(&quot;classif.ranger.mtry&quot;, on = &quot;branch_learner.selection&quot;, cond = CondEqual$new(&quot;ranger&quot;))
+tune_ps1$add_dep(&quot;classif.ranger.num.trees&quot;, on = &quot;branch_learner.selection&quot;, cond = CondEqual$new(&quot;ranger&quot;))</code></pre>
+</div>
+<h2 id="tuning">Tuning</h2>
+<p>We can now tune the parameters of our pipeline as defined in the search space with respect to a measure. Here, we will use the classification accuracy. As a resampling method we use <code>3-fold cross-validation</code>. We will use the <code>TerminatorNone</code> (i.e., no early termination) for terminating the tuning because we will apply a grid search.</p>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+set.seed(2409)
+tune1 = TuningInstance$new(task_train, learner = pipeline1, resampling = rsmp(&quot;cv&quot;, folds = 3), measures = msr(&quot;classif.acc&quot;), param_set = tune_ps1, terminator = term(&quot;none&quot;))</code></pre>
+</div>
+<p>We then perform a grid search using different a resolution of 4 for the numeric parameters. The grid being used will look like the following:</p>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+generate_design_grid(tune_ps1, resolution = 4)</code></pre>
+<pre><code>
+&lt;Design&gt; with 32 rows:
+    branch_learner.selection branch_preproc_lda.selection pca.rank. ica.n.comp
+ 1:              pca_ica_lda                          pca         1         NA
+ 2:              pca_ica_lda                          pca         1         NA
+ 3:              pca_ica_lda                          pca        10         NA
+ 4:              pca_ica_lda                          pca        10         NA
+ 5:              pca_ica_lda                          pca        20         NA
+ 6:              pca_ica_lda                          pca        20         NA
+ 7:              pca_ica_lda                          pca        30         NA
+ 8:              pca_ica_lda                          pca        30         NA
+ 9:              pca_ica_lda                          ica        NA          1
+10:              pca_ica_lda                          ica        NA          1
+11:              pca_ica_lda                          ica        NA         10
+12:              pca_ica_lda                          ica        NA         10
+13:              pca_ica_lda                          ica        NA         20
+14:              pca_ica_lda                          ica        NA         20
+15:              pca_ica_lda                          ica        NA         30
+16:              pca_ica_lda                          ica        NA         30
+17:                   ranger                         &lt;NA&gt;        NA         NA
+18:                   ranger                         &lt;NA&gt;        NA         NA
+19:                   ranger                         &lt;NA&gt;        NA         NA
+20:                   ranger                         &lt;NA&gt;        NA         NA
+21:                   ranger                         &lt;NA&gt;        NA         NA
+22:                   ranger                         &lt;NA&gt;        NA         NA
+23:                   ranger                         &lt;NA&gt;        NA         NA
+24:                   ranger                         &lt;NA&gt;        NA         NA
+25:                   ranger                         &lt;NA&gt;        NA         NA
+26:                   ranger                         &lt;NA&gt;        NA         NA
+27:                   ranger                         &lt;NA&gt;        NA         NA
+28:                   ranger                         &lt;NA&gt;        NA         NA
+29:                   ranger                         &lt;NA&gt;        NA         NA
+30:                   ranger                         &lt;NA&gt;        NA         NA
+31:                   ranger                         &lt;NA&gt;        NA         NA
+32:                   ranger                         &lt;NA&gt;        NA         NA
+    branch_learner.selection branch_preproc_lda.selection pca.rank. ica.n.comp
+    classif.lda.method classif.ranger.mtry classif.ranger.num.trees
+ 1:             moment                  NA                       NA
+ 2:                mve                  NA                       NA
+ 3:             moment                  NA                       NA
+ 4:                mve                  NA                       NA
+ 5:             moment                  NA                       NA
+ 6:                mve                  NA                       NA
+ 7:             moment                  NA                       NA
+ 8:                mve                  NA                       NA
+ 9:             moment                  NA                       NA
+10:                mve                  NA                       NA
+11:             moment                  NA                       NA
+12:                mve                  NA                       NA
+13:             moment                  NA                       NA
+14:                mve                  NA                       NA
+15:             moment                  NA                       NA
+16:                mve                  NA                       NA
+17:               &lt;NA&gt;                 200                      500
+18:               &lt;NA&gt;                 200                     1000
+19:               &lt;NA&gt;                 200                     1500
+20:               &lt;NA&gt;                 200                     2000
+21:               &lt;NA&gt;                 466                      500
+22:               &lt;NA&gt;                 466                     1000
+23:               &lt;NA&gt;                 466                     1500
+24:               &lt;NA&gt;                 466                     2000
+25:               &lt;NA&gt;                 733                      500
+26:               &lt;NA&gt;                 733                     1000
+27:               &lt;NA&gt;                 733                     1500
+28:               &lt;NA&gt;                 733                     2000
+29:               &lt;NA&gt;                1000                      500
+30:               &lt;NA&gt;                1000                     1000
+31:               &lt;NA&gt;                1000                     1500
+32:               &lt;NA&gt;                1000                     2000
+    classif.lda.method classif.ranger.mtry classif.ranger.num.trees</code></pre>
+</div>
+<p>To start the tuning we simply supply these resolutions:</p>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+tnr(&quot;grid_search&quot;, resolution = 4)$tune(tune1)</code></pre>
+</div>
+<p>Now, we can inspect the results ordered by the classification accuracy:</p>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+tune1_results = tune1$archive(unnest = &quot;params&quot;)
+tune1_results[order(classif.acc), ]</code></pre>
+<pre><code>
+    nr batch_nr  resample_result task_id
+ 1: 20       20 &lt;ResampleResult&gt;   SRBCT
+ 2: 24       24 &lt;ResampleResult&gt;   SRBCT
+ 3:  1        1 &lt;ResampleResult&gt;   SRBCT
+ 4: 10       10 &lt;ResampleResult&gt;   SRBCT
+ 5: 30       30 &lt;ResampleResult&gt;   SRBCT
+ 6:  7        7 &lt;ResampleResult&gt;   SRBCT
+ 7: 11       11 &lt;ResampleResult&gt;   SRBCT
+ 8: 23       23 &lt;ResampleResult&gt;   SRBCT
+ 9:  2        2 &lt;ResampleResult&gt;   SRBCT
+10:  6        6 &lt;ResampleResult&gt;   SRBCT
+11: 13       13 &lt;ResampleResult&gt;   SRBCT
+12: 15       15 &lt;ResampleResult&gt;   SRBCT
+13:  3        3 &lt;ResampleResult&gt;   SRBCT
+14: 12       12 &lt;ResampleResult&gt;   SRBCT
+15: 14       14 &lt;ResampleResult&gt;   SRBCT
+16: 25       25 &lt;ResampleResult&gt;   SRBCT
+17:  4        4 &lt;ResampleResult&gt;   SRBCT
+18:  5        5 &lt;ResampleResult&gt;   SRBCT
+19:  8        8 &lt;ResampleResult&gt;   SRBCT
+20:  9        9 &lt;ResampleResult&gt;   SRBCT
+21: 16       16 &lt;ResampleResult&gt;   SRBCT
+22: 17       17 &lt;ResampleResult&gt;   SRBCT
+23: 18       18 &lt;ResampleResult&gt;   SRBCT
+24: 19       19 &lt;ResampleResult&gt;   SRBCT
+25: 21       21 &lt;ResampleResult&gt;   SRBCT
+26: 22       22 &lt;ResampleResult&gt;   SRBCT
+27: 26       26 &lt;ResampleResult&gt;   SRBCT
+28: 27       27 &lt;ResampleResult&gt;   SRBCT
+29: 28       28 &lt;ResampleResult&gt;   SRBCT
+30: 29       29 &lt;ResampleResult&gt;   SRBCT
+31: 31       31 &lt;ResampleResult&gt;   SRBCT
+32: 32       32 &lt;ResampleResult&gt;   SRBCT
+    nr batch_nr  resample_result task_id
+                                                                                                                   learner_id
+ 1: colapply.scale.branch_learner.branch_preproc_lda.classif.ranger.pca.ica.unbranch_preproc_lda.classif.lda.unbranch_learner
+ 2: colapply.scale.branch_learner.branch_preproc_lda.classif.ranger.pca.ica.unbranch_preproc_lda.classif.lda.unbranch_learner
+ 3: colapply.scale.branch_learner.branch_preproc_lda.classif.ranger.pca.ica.unbranch_preproc_lda.classif.lda.unbranch_learner
+ 4: colapply.scale.branch_learner.branch_preproc_lda.classif.ranger.pca.ica.unbranch_preproc_lda.classif.lda.unbranch_learner
+ 5: colapply.scale.branch_learner.branch_preproc_lda.classif.ranger.pca.ica.unbranch_preproc_lda.classif.lda.unbranch_learner
+ 6: colapply.scale.branch_learner.branch_preproc_lda.classif.ranger.pca.ica.unbranch_preproc_lda.classif.lda.unbranch_learner
+ 7: colapply.scale.branch_learner.branch_preproc_lda.classif.ranger.pca.ica.unbranch_preproc_lda.classif.lda.unbranch_learner
+ 8: colapply.scale.branch_learner.branch_preproc_lda.classif.ranger.pca.ica.unbranch_preproc_lda.classif.lda.unbranch_learner
+ 9: colapply.scale.branch_learner.branch_preproc_lda.classif.ranger.pca.ica.unbranch_preproc_lda.classif.lda.unbranch_learner
+10: colapply.scale.branch_learner.branch_preproc_lda.classif.ranger.pca.ica.unbranch_preproc_lda.classif.lda.unbranch_learner
+11: colapply.scale.branch_learner.branch_preproc_lda.classif.ranger.pca.ica.unbranch_preproc_lda.classif.lda.unbranch_learner
+12: colapply.scale.branch_learner.branch_preproc_lda.classif.ranger.pca.ica.unbranch_preproc_lda.classif.lda.unbranch_learner
+13: colapply.scale.branch_learner.branch_preproc_lda.classif.ranger.pca.ica.unbranch_preproc_lda.classif.lda.unbranch_learner
+14: colapply.scale.branch_learner.branch_preproc_lda.classif.ranger.pca.ica.unbranch_preproc_lda.classif.lda.unbranch_learner
+15: colapply.scale.branch_learner.branch_preproc_lda.classif.ranger.pca.ica.unbranch_preproc_lda.classif.lda.unbranch_learner
+16: colapply.scale.branch_learner.branch_preproc_lda.classif.ranger.pca.ica.unbranch_preproc_lda.classif.lda.unbranch_learner
+17: colapply.scale.branch_learner.branch_preproc_lda.classif.ranger.pca.ica.unbranch_preproc_lda.classif.lda.unbranch_learner
+18: colapply.scale.branch_learner.branch_preproc_lda.classif.ranger.pca.ica.unbranch_preproc_lda.classif.lda.unbranch_learner
+19: colapply.scale.branch_learner.branch_preproc_lda.classif.ranger.pca.ica.unbranch_preproc_lda.classif.lda.unbranch_learner
+20: colapply.scale.branch_learner.branch_preproc_lda.classif.ranger.pca.ica.unbranch_preproc_lda.classif.lda.unbranch_learner
+21: colapply.scale.branch_learner.branch_preproc_lda.classif.ranger.pca.ica.unbranch_preproc_lda.classif.lda.unbranch_learner
+22: colapply.scale.branch_learner.branch_preproc_lda.classif.ranger.pca.ica.unbranch_preproc_lda.classif.lda.unbranch_learner
+23: colapply.scale.branch_learner.branch_preproc_lda.classif.ranger.pca.ica.unbranch_preproc_lda.classif.lda.unbranch_learner
+24: colapply.scale.branch_learner.branch_preproc_lda.classif.ranger.pca.ica.unbranch_preproc_lda.classif.lda.unbranch_learner
+25: colapply.scale.branch_learner.branch_preproc_lda.classif.ranger.pca.ica.unbranch_preproc_lda.classif.lda.unbranch_learner
+26: colapply.scale.branch_learner.branch_preproc_lda.classif.ranger.pca.ica.unbranch_preproc_lda.classif.lda.unbranch_learner
+27: colapply.scale.branch_learner.branch_preproc_lda.classif.ranger.pca.ica.unbranch_preproc_lda.classif.lda.unbranch_learner
+28: colapply.scale.branch_learner.branch_preproc_lda.classif.ranger.pca.ica.unbranch_preproc_lda.classif.lda.unbranch_learner
+29: colapply.scale.branch_learner.branch_preproc_lda.classif.ranger.pca.ica.unbranch_preproc_lda.classif.lda.unbranch_learner
+30: colapply.scale.branch_learner.branch_preproc_lda.classif.ranger.pca.ica.unbranch_preproc_lda.classif.lda.unbranch_learner
+31: colapply.scale.branch_learner.branch_preproc_lda.classif.ranger.pca.ica.unbranch_preproc_lda.classif.lda.unbranch_learner
+32: colapply.scale.branch_learner.branch_preproc_lda.classif.ranger.pca.ica.unbranch_preproc_lda.classif.lda.unbranch_learner
+                                                                                                                   learner_id
+    resampling_id iters tune_x warnings errors classif.acc colapply.applicator
+ 1:            cv     3 &lt;list&gt;        0      0   0.2380952          &lt;function&gt;
+ 2:            cv     3 &lt;list&gt;        0      0   0.2380952          &lt;function&gt;
+ 3:            cv     3 &lt;list&gt;        0      0   0.2698413          &lt;function&gt;
+ 4:            cv     3 &lt;list&gt;        0      0   0.2698413          &lt;function&gt;
+ 5:            cv     3 &lt;list&gt;        0      0   0.8412698          &lt;function&gt;
+ 6:            cv     3 &lt;list&gt;        0      0   0.8730159          &lt;function&gt;
+ 7:            cv     3 &lt;list&gt;        0      0   0.8730159          &lt;function&gt;
+ 8:            cv     3 &lt;list&gt;        0      0   0.8730159          &lt;function&gt;
+ 9:            cv     3 &lt;list&gt;        0      0   0.9206349          &lt;function&gt;
+10:            cv     3 &lt;list&gt;        0      0   0.9206349          &lt;function&gt;
+11:            cv     3 &lt;list&gt;        0      0   0.9365079          &lt;function&gt;
+12:            cv     3 &lt;list&gt;        0      0   0.9523810          &lt;function&gt;
+13:            cv     3 &lt;list&gt;        0      0   0.9682540          &lt;function&gt;
+14:            cv     3 &lt;list&gt;        0      0   0.9682540          &lt;function&gt;
+15:            cv     3 &lt;list&gt;        0      0   0.9841270          &lt;function&gt;
+16:            cv     3 &lt;list&gt;        0      0   0.9841270          &lt;function&gt;
+17:            cv     3 &lt;list&gt;        0      0   1.0000000          &lt;function&gt;
+18:            cv     3 &lt;list&gt;        0      0   1.0000000          &lt;function&gt;
+19:            cv     3 &lt;list&gt;        0      0   1.0000000          &lt;function&gt;
+20:            cv     3 &lt;list&gt;        0      0   1.0000000          &lt;function&gt;
+21:            cv     3 &lt;list&gt;        0      0   1.0000000          &lt;function&gt;
+22:            cv     3 &lt;list&gt;        0      0   1.0000000          &lt;function&gt;
+23:            cv     3 &lt;list&gt;        0      0   1.0000000          &lt;function&gt;
+24:            cv     3 &lt;list&gt;        0      0   1.0000000          &lt;function&gt;
+25:            cv     3 &lt;list&gt;        0      0   1.0000000          &lt;function&gt;
+26:            cv     3 &lt;list&gt;        0      0   1.0000000          &lt;function&gt;
+27:            cv     3 &lt;list&gt;        0      0   1.0000000          &lt;function&gt;
+28:            cv     3 &lt;list&gt;        0      0   1.0000000          &lt;function&gt;
+29:            cv     3 &lt;list&gt;        0      0   1.0000000          &lt;function&gt;
+30:            cv     3 &lt;list&gt;        0      0   1.0000000          &lt;function&gt;
+31:            cv     3 &lt;list&gt;        0      0   1.0000000          &lt;function&gt;
+32:            cv     3 &lt;list&gt;        0      0   1.0000000          &lt;function&gt;
+    resampling_id iters tune_x warnings errors classif.acc colapply.applicator
+    branch_learner.selection branch_preproc_lda.selection ica.n.comp ica.method
+ 1:              pca_ica_lda                          ica          1          C
+ 2:              pca_ica_lda                          pca         NA          C
+ 3:              pca_ica_lda                          ica          1          C
+ 4:              pca_ica_lda                          pca         NA          C
+ 5:              pca_ica_lda                          ica         10          C
+ 6:              pca_ica_lda                          pca         NA          C
+ 7:              pca_ica_lda                          pca         NA          C
+ 8:              pca_ica_lda                          ica         10          C
+ 9:              pca_ica_lda                          pca         NA          C
+10:              pca_ica_lda                          ica         30          C
+11:              pca_ica_lda                          ica         20          C
+12:              pca_ica_lda                          pca         NA          C
+13:              pca_ica_lda                          pca         NA          C
+14:              pca_ica_lda                          ica         20          C
+15:              pca_ica_lda                          ica         30          C
+16:              pca_ica_lda                          pca         NA          C
+17:                   ranger                          pca         NA          C
+18:                   ranger                          pca         NA          C
+19:                   ranger                          pca         NA          C
+20:                   ranger                          pca         NA          C
+21:                   ranger                          pca         NA          C
+22:                   ranger                          pca         NA          C
+23:                   ranger                          pca         NA          C
+24:                   ranger                          pca         NA          C
+25:                   ranger                          pca         NA          C
+26:                   ranger                          pca         NA          C
+27:                   ranger                          pca         NA          C
+28:                   ranger                          pca         NA          C
+29:                   ranger                          pca         NA          C
+30:                   ranger                          pca         NA          C
+31:                   ranger                          pca         NA          C
+32:                   ranger                          pca         NA          C
+    branch_learner.selection branch_preproc_lda.selection ica.n.comp ica.method
+    classif.lda.method pca.rank. classif.ranger.num.trees classif.ranger.mtry
+ 1:             moment        NA                       NA                  NA
+ 2:             moment         1                       NA                  NA
+ 3:                mve        NA                       NA                  NA
+ 4:                mve         1                       NA                  NA
+ 5:                mve        NA                       NA                  NA
+ 6:                mve        10                       NA                  NA
+ 7:             moment        10                       NA                  NA
+ 8:             moment        NA                       NA                  NA
+ 9:                mve        30                       NA                  NA
+10:                mve        NA                       NA                  NA
+11:                mve        NA                       NA                  NA
+12:                mve        20                       NA                  NA
+13:             moment        20                       NA                  NA
+14:             moment        NA                       NA                  NA
+15:             moment        NA                       NA                  NA
+16:             moment        30                       NA                  NA
+17:               &lt;NA&gt;        NA                     1000                 200
+18:               &lt;NA&gt;        NA                     1000                1000
+19:               &lt;NA&gt;        NA                      500                 733
+20:               &lt;NA&gt;        NA                     2000                 200
+21:               &lt;NA&gt;        NA                     2000                1000
+22:               &lt;NA&gt;        NA                     1500                 466
+23:               &lt;NA&gt;        NA                     1000                 733
+24:               &lt;NA&gt;        NA                     2000                 466
+25:               &lt;NA&gt;        NA                      500                1000
+26:               &lt;NA&gt;        NA                     1500                1000
+27:               &lt;NA&gt;        NA                      500                 200
+28:               &lt;NA&gt;        NA                      500                 466
+29:               &lt;NA&gt;        NA                     1500                 733
+30:               &lt;NA&gt;        NA                     1500                 200
+31:               &lt;NA&gt;        NA                     2000                 733
+32:               &lt;NA&gt;        NA                     1000                 466
+    classif.lda.method pca.rank. classif.ranger.num.trees classif.ranger.mtry</code></pre>
+</div>
+<p>We achieve very good accuracy using ranger with a higher number of <code>mtry</code> and <code>num.trees</code> (which in hindsight makes sense because our task is of high dimensional nature). However, the LDA also shows very good accuracy when combined with PCA or ICA retaining 30 principal or independent components.</p>
+<p>For now, we decide to use ranger with <code>mtry</code> set to 200 and <code>num.trees</code> set to 1000.</p>
+<p>Setting these parameters manually in our pipeline, then training on the training task and predicting on the test task yields an accuracy of:</p>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+pipeline1$param_set$values$branch_learner.selection = &quot;ranger&quot;
+pipeline1$param_set$values$classif.ranger.mtry = 200
+pipeline1$param_set$values$classif.ranger.num.trees = 1000
+
+pipeline1$train(task_train)</code></pre>
+<pre><code>
+$unbranch_learner.output
+NULL</code></pre>
+<pre class="r"><code>
+msr(&quot;classif.acc&quot;)$score(pipeline1$predict(task_test)[[1L]])</code></pre>
+<pre><code>
+[1] 1</code></pre>
+</div>
+<h2 id="proxy">Proxy</h2>
+<p>Instead of using branches to split our pipeline with respect to the learner and preprocessing options, we can also use <code>PipeOpProxy</code>. <code>PipeOpProxy</code> accepts a single <code>content</code> parameter that can contain any other <code>PipeOp</code> or <code>Graph</code>. This is extremely flexible in the sense that we do not have to specify our options during construction. However, the parameters of the contained <code>PipeOp</code> or <code>Graph</code> are no longer directly contained in the <code>ParamSet</code> of the resulting pipeline. Therefore, when tuning the pipeline, we do have to make use of a <code>trafo</code> function.</p>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+pipeline2 = po(&quot;colapply&quot;, param_vals = list(applicator = function(x) log(x, base = 10))) %&gt;&gt;%
+  po(&quot;scale&quot;) %&gt;&gt;%
+  po(&quot;proxy&quot;)</code></pre>
+</div>
+<p>This pipeline now looks like the following:</p>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+pipeline2$plot()</code></pre>
+<p><img src="tuning-a-complex-graph_files/figure-html5/unnamed-chunk-18-1.png" width="624" /></p>
+</div>
+<p>At first, this may look like a linear pipeline. However, as the <code>content</code> parameter of <code>PipeOpProxy</code> can be tuned and set to contain any other <code>PipeOp</code> or <code>Graph</code>, this will allow for a similar non-linear pipeline as when doing branching.</p>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+pipeline2$param_set$ids()</code></pre>
+<pre><code>
+[1] &quot;colapply.applicator&quot;     &quot;colapply.affect_columns&quot;
+[3] &quot;scale.center&quot;            &quot;scale.scale&quot;            
+[5] &quot;scale.affect_columns&quot;    &quot;proxy.content&quot;          </code></pre>
+</div>
+<p>We can tune the pipeline by using the same search space as before. However, here the <code>trafo</code> function is of central importance to actually set our options and parameters:</p>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+tune_ps2 = tune_ps1$clone(deep = TRUE)</code></pre>
+</div>
+<p>The <code>trafo</code> function does all the work, i.e., selecting either the PCA/ICA-LDA or the ranger as the <code>proxy.content</code> as well as setting the parameters of the respective preprocessing <code>PipeOp</code>s and <code>Learner</code>s.</p>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+proxy_options = list(pca_ica_lda = ppl(&quot;branch&quot;, graphs = list(pca = po(&quot;pca&quot;), ica = po(&quot;ica&quot;))) %&gt;&gt;% lrn(&quot;classif.lda&quot;), ranger = lrn(&quot;classif.ranger&quot;))</code></pre>
+</div>
+<p>Note that above we made use of the <code>branch</code> <code>ppl</code> which is syntactic sugar for doing branching (<code>PipeOpBranch</code> followed by <code>gunion</code> followed by <code>PipeOpUnbranch</code>). Of course we also could have use another nested <code>PipeOpProxy</code> to specify the preprocessing options (<code>"pca"</code> vs. <code>"ica"</code>) within <code>proxy_options</code> if for some reason we do not want to do branching at all. The <code>trafo</code> function then selects one of the <code>proxy_options</code> and sets the respective parameters for the PCA, ICA, LDA and ranger:</p>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+tune_ps2$trafo = function(x, param_set) {
+  values_out = list(proxy.content = proxy_options[[x$branch_learner.selection]])
+  if (x$branch_learner.selection == &quot;pca_ica_lda&quot;) {
+    # pca_ica_lda
+    values_out$proxy.content$param_set$values$branch.selection = x$branch_preproc_lda.selection
+    if (x$branch_preproc_lda.selection == &quot;pca&quot;) {
+      values_out$proxy.content$param_set$values$pca.rank. = x$pca.rank.
+    } else {
+      values_out$proxy.content$param_set$values$ica.n.comp = x$ica.n.comp
+    }
+    values_out$proxy.content$param_set$values$classif.lda.method = x$classif.lda.method
+  } else {
+    # ranger
+    values_out$proxy.content$param_set$values$mtry = x$classif.ranger.mtry
+    values_out$proxy.content$param_set$values$num.trees = x$classif.ranger.num.trees 
+  }
+  values_out
+}</code></pre>
+</div>
+<p>Tuning then can be carried out analogously as done above (note that setting <code>unnest = "tune_x"</code> allows us to inspect the parameters as they were selected prior to the trafo function being applied):</p>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+set.seed(2409)
+tune2 = TuningInstance$new(task_train, learner = pipeline2, resampling = rsmp(&quot;cv&quot;, folds = 3), measures = msr(&quot;classif.acc&quot;), param_set = tune_ps2, terminator = term(&quot;none&quot;))
+tnr(&quot;grid_search&quot;, resolution = 4)$tune(tune2)
+tune2_results = tune2$archive(unnest = &quot;tune_x&quot;)
+tune2_results[order(classif.acc), ]</code></pre>
+</div>
+<div id="refs" class="references hanging-indent" role="doc-bibliography">
+<div id="ref-morais2018">
+<p>Morais, Camilo LM, and Kássio MG Lima. 2018. “Principal Component Analysis with Linear and Quadratic Discriminant Analysis for Identification of Cancer Samples Based on Mass Spectrometry.” <em>Journal of the Brazilian Chemical Society</em> 29 (3): 472–81. <a href="https://doi.org/10.21577/0103-5053.20170159">https://doi.org/10.21577/0103-5053.20170159</a>.</p>
+</div>
+</div>
+<!--radix_placeholder_article_footer-->
+<!--/radix_placeholder_article_footer-->
+</div>
+
+<div class="d-appendix">
+</div>
+
+
+<!--radix_placeholder_site_after_body-->
+<!--/radix_placeholder_site_after_body-->
+<!--radix_placeholder_appendices-->
+<div class="appendix-bottom">
+  <h3 id="citation">Citation</h3>
+  <p>For attribution, please cite this work as</p>
+  <pre class="citation-appendix short">Schneider (2020, April 18). mlr3gallery: Tuning a complex graph. Retrieved from https://mlr3gallery.mlr-org.com/posts/2020-05-07-tuning-a-complex-graph/</pre>
+  <p>BibTeX citation</p>
+  <pre class="citation-appendix long">@misc{schneider2020tuning,
+  author = {Schneider, Lennart},
+  title = {mlr3gallery: Tuning a complex graph},
+  url = {https://mlr3gallery.mlr-org.com/posts/2020-05-07-tuning-a-complex-graph/},
+  year = {2020}
+}</pre>
+</div>
+<script id="distill-bibliography" type="text/bibtex">
+@article{morais2018,
+  doi = {10.21577/0103-5053.20170159},
+  url = {http://static.sites.sbq.org.br/jbcs.sbq.org.br/pdf/2017-0124AR.pdf},
+  title = {Principal component analysis with linear and quadratic discriminant analysis for identification of cancer samples based on mass spectrometry},
+  author = {Morais, Camilo LM and Lima, K{\'a}ssio MG},
+  journal = {Journal of the Brazilian Chemical Society},
+  volume = {29},
+  number = {3},
+  pages = {472--481},
+  year = {2018}
+}
+</script>
+<!--/radix_placeholder_appendices-->
+<!--radix_placeholder_navigation_after_body-->
+<!--/radix_placeholder_navigation_after_body-->
+
+</body>
+
+</html>
