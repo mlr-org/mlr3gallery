@@ -1,0 +1,167 @@
+---
+title: "Regression chains"
+categories:
+  - regression
+  - mlr3pipelines
+author:
+  - name: Lennart Schneider
+date: 04-18-2020
+description: |
+  We show how to use mlr3pipelines to do regression chains.
+output:
+  distill::distill_article:
+    self_contained: false
+    css: ../../custom.css
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  R.options = list(width = 80)
+)
+library(mlr3book)
+lgr::get_logger("mlr3")$set_threshold("warn")
+```
+
+In this tutorial we demonstrate how to use `r mlr_pkg("mlr3pipelines")` to handle multi-target regression by arranging regression models into a chain, i.e., creating a linear sequence of regression models.
+
+## Regression Chains
+
+In a simple regression chain, regression models are arranged in a linear sequence. Here, the first model will use the input to predict a single output and the second model will use the input and the output of the first model to make its own prediction and so on. For more details, see e.g. [Spyromitros-Xioufis, Tsoumakas, Groves & Vlahavas (2016)](https://doi.org/10.1007/s10994-016-5546-z).
+
+## Data
+
+In the following, we rely on some toy data. We simulate 100 responses to three target variables, $y_{1}$, $y_{2}$, and $y_{3}$ following a multivariate normal distribution with a mean and covariance matrix of:
+
+```{r}
+library(data.table)
+library(mvtnorm)
+set.seed(2409)
+n = 100
+(mean = c(y1 = 1, y2 = 2, y3 = 3))
+(sigma = matrix(c(1, -0.5, 0.25, -0.5, 1, -0.25, 0.25, -0.25, 1),
+  nrow = 3, ncol = 3, byrow = TRUE))
+Y = rmvnorm(n, mean = mean, sigma = sigma)
+```
+
+The feature variables $x_{1}$, and $x_{2}$ are simulated as follows: $x_{1}$ is simply given by $y_{1}$ and an independent standard normally distributed error term and $x_{2}$ is given by $y_{2}$ and an independent standard normally distributed error term.
+
+```{r}
+x1 = Y[, 1] + rnorm(n)
+x2 = Y[, 2] + rnorm(n)
+```
+
+The final data is given as:
+
+```{r}
+dat = as.data.table(cbind(Y, x1, x2))
+str(dat)
+```
+
+## 3D Visualization of the Data
+
+If you feel confident to already have a good feeling of the data, feel free to skip this section. If not, you can use the `rgl` package to play around with the following three 3D plots with the feature variables on the x- and y-axis and the target variables on the respective z-axes:
+
+```{r, eval = FALSE}
+library(rgl)
+colfun = colorRampPalette(c("#161B1D", "#ADD8E6"))
+```
+
+```{r, eval = FALSE}
+setorder(dat, y1)
+plot3d(dat$x1, dat$x2, dat$y1,
+  xlab = "x1", ylab = "x2", zlab = "y1",
+  type = "s", radius = 0.1, col = colfun(n))
+```
+
+```{r, eval = FALSE}
+setorder(dat, y2)
+plot3d(dat$x1, dat$x2, dat$y2,
+  xlab = "x1", ylab = "x2", zlab = "y2",
+  type = "s", radius = 0.1, col = colfun(n))
+```
+
+```{r, eval = FALSE}
+setorder(dat, y3)
+plot3d(dat$x1, dat$x2, dat$y3,
+  xlab = "x1", ylab = "x2", zlab = "y3",
+  type = "s", radius = 0.1, col = colfun(n))
+```
+
+## Building the Pipeline
+
+In our regression chain, the first model will predict $y_{1}$. Therefore, we initialize our task with respect to this target:
+
+```{r}
+library(mlr3)
+library(mlr3learners)
+library(mlr3pipelines)
+task = TaskRegr$new("Multiregression", backend = dat, target = "y1")
+```
+
+As learners we will use simple linear regression models, `r ref("mlr_learners_regr.lm", "lm learner")`. Our pipeline building the regression chain then has to do the following:
+
+* Use the input to predict $y_{1}$ within the first learner (i.e., $y_{1} \sim x_{1} + x_{2} + y_{2} + y_{3}$).
+* Combine the input with the prediction of $y_{1}$, $\hat{y_{1}}$ and use this to predict $y_{2}$ within the second learner (i.e., $y_{2} \sim x_{1} + x_{2} + \hat{y_{1}} + y_{3}$).
+* Combine the input with the prediction of $y_{2}$ and use this to predict $y_{3}$ within the final learner (i.e., $y_{3} \sim x_{1} + x_{2} + \hat{y_{1}} + \hat{y_{2}}$).
+
+To combine predictions of a learner with the previous input, we rely on `PipeOpLearnerCV` and `PipeOpNOP` arranged in parallel via `gunion` combined via `PipeOpFeatureUnion`, e.g., in the first step:
+
+```{r}
+step1 = po("copy", outnum = 2, id = "copy1") %>>%
+  gunion(list(
+    po("learner_cv", learner = lrn("regr.lm"), id = "y1_learner"),
+    po("nop", id = "nop1")
+  )) %>>%
+  po("featureunion", id = "union1")
+step1$plot()
+```
+
+Within the second step we then have to define $y_{2}$ as the new target. This can be done using `PipeOpUpdateTarget` (note that `PipeOpUpdateTarget` by default drops the original target, here $y_{1}$). Typically one would use `PipeOpUpdateTarget` to apply a transformation function to the original target (possibly also renaming it) which must not be inverted later. However, in the special case of leaving the `trafo` at its default `identity` and providing a `new_target_name` that already matches a column of the input data, `PipeOpUpdateTarget` simply sets this column as the new target:
+
+```{r}
+step2 = po("update_target", id = "y2_target",
+    param_vals = list(new_target_name = "y2")
+  ) %>>%
+  po("copy", outnum = 2, id = "copy2") %>>%
+  gunion(list(
+    po("nop", id = "nop2"),
+    po("learner_cv", learner = lrn("regr.lm"), id = "y2_learner")
+  )) %>>%
+  po("featureunion", id = "union2")
+```
+
+In the final third step we define $y_{3}$ as the new target:
+
+```{r}
+step3 = po("update_target", id = "y3_target",
+    param_vals = list(new_target_name = "y3")
+  ) %>>%
+  po("learner", learner = lrn("regr.lm"), id = "y3_learner")
+```
+
+The complete pipeline, more precisely `Graph`, looks like the following:
+
+```{r}
+graph = step1 %>>% step2 %>>% step3
+graph$plot()
+```
+
+## Evaluating the Pipeline
+
+By wrapping our `Graph` in a `GraphLearner`, we can perform `3-fold cross-validation` and get an average of the root-mean-square error (of course, in a real world setting splitting the data in a training and test set should have been done):
+
+```{r}
+rr = resample(task, learner = GraphLearner$new(graph),
+  resampling = rsmp("cv", folds = 3))
+rr$aggregate(msr("regr.mse"))
+```
+
+We can compare this to a simple linear regression model only predicting $y_{3}$:
+
+```{r}
+task_y3 = TaskRegr$new("y3", backend = dat, target = "y3")
+rr_y3 = resample(task_y3, learner = lrn("regr.lm"),
+  resampling = rsmp("cv", folds = 3))
+rr_y3$aggregate(msr("regr.mse"))
+```
