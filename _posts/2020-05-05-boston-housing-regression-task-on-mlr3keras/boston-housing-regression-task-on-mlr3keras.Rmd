@@ -32,25 +32,19 @@ library(mlr3book)
 
 # Intro
 
-This use case shows how to use `r gh_pkg("mlr-org/mlr3keras")` on simple
-[Boston Housing Regression Task](https://www.cs.toronto.edu/~delve/data/boston/bostonDetail.html).
-Therefore, the Code from
-[Keras Basic Regression Tutorial](https://keras.rstudio.com/articles/tutorial_basic_regression.html)
-is translated to `r gh_pkg("mlr-org/mlr3keras")` respectively `r gh_pkg("mlr-org/mlr3keras")` syntax.
+This use case shows how to use `r gh_pkg("mlr-org/mlr3keras")` on simple [Boston Housing Regression Task](https://www.cs.toronto.edu/~delve/data/boston/bostonDetail.html).
+Therefore, code from [Keras Basic Regression Tutorial](https://keras.rstudio.com/articles/tutorial_basic_regression.html) is translated to `r gh_pkg("mlr-org/mlr3keras")` respectively `r gh_pkg("mlr-org/mlr3keras")` syntax.
 Moreover, this use case extends the tutorial mentioned above by
  
  * giving an introduction to callbacks and how they can be used
  * generating reproducible results with `r gh_pkg("mlr-org/mlr3keras")` 
 
-As `r gh_pkg("mlr-org/mlr3keras")` is still under heavy development, this place might be 
-a good way to look for currently working aspects of the package.
+As `r gh_pkg("mlr-org/mlr3keras")` is still under heavy development, this might be a good place to look for currently working aspects of the package.
 
 ## Prerequisites
 
-This tutorial assumes familiarity with the basics of
-`r mlr_pkg("mlr3pipelines")`.
-Consult the [mlr3book](https://mlr3book.mlr-org.com/pipelines.html) if some 
-aspects are not  fully understandable.
+This tutorial assumes familiarity with the basics of `r mlr_pkg("mlr3pipelines")`.
+Consult the [mlr3book](https://mlr3book.mlr-org.com/pipelines.html) if some aspects are not  fully understandable.
 
 ```{r lib}
 library(mlr3)
@@ -59,16 +53,14 @@ library(mlr3pipelines)
 library(keras)
 library(reticulate)
 library(ggplot2)
-source("reset_random_seeds.R")
+source("set_seeds.R")
 ```
 
 # Basic Regression Task - Boston Housing Prices
 
-In this use case we build a model that predicts the Median value of
-owner-occupied homes in Boston in $1000's (`medv`).
+In this use case we build a model that predicts the Median value of owner-occupied homes in Boston in $1000's (`medv`).
 
-The `r ref("mlr_tasks_boston_housing", "Boston Housing Task")` is accessible
-directly from `mlr3tasks`.
+The `r ref("mlr_tasks_boston_housing", "Boston Housing Task")` is accessible directly from `mlr3tasks`.
 
 ```{r train}
 boston_task = tsk("boston_housing")
@@ -102,18 +94,14 @@ Now the data set contains 13 different numeric features:
 * `ptratio` - pupil-teacher ratio by town
 * `b` - 1000(Bk - 0.63)^2 where Bk is the proportion of blacks by town
 * `lstat` - % lower status of the population
-* `cmedv` - a numeric vector of corrected median values of owner-occupied 
-housing in USD 1000
+* `cmedv` - a numeric vector of corrected median values of owner-occupied housing in USD 1000
 * `lon` - a numeric vector of tract point longitudes in decimal degrees
 * `lat` - a numeric vector of tract point latitudes in decimal degrees
 
 Notice that each one of these input data features is stored using a different scale.
 In this case it’s recommended to normalize features.
-Although the model might converge without feature normalization, it makes
-training more difficult, and it makes the resulting model more dependent on the
-choice of units used in the input.
-We create a `r ref("mlr_pipeops_scale", "PipeOpScale")` that is going to be
-connected to the learner before training.
+Although the model might converge without feature normalization, it makes training more difficult, and it makes the resulting model more dependent on the choice of units used in the input.
+We create a `r ref("mlr_pipeops_scale", "PipeOpScale")` that is going to be connected to the learner before training.
 
 ```{r normalize}
 po_scale = PipeOpScale$new()
@@ -121,34 +109,31 @@ po_scale = PipeOpScale$new()
 
 # Create the model
 
-As creation of models is very convenient and intuitive in
-[keras](https://keras.rstudio.com/), `r gh_pkg("mlr-org/mlr3keras")` relies on
-this syntax for model creation.  
+As creation of models is very convenient and intuitive in [keras](https://keras.rstudio.com/), `r gh_pkg("mlr-org/mlr3keras")` relies on this syntax for model creation.  
 We wrap our model in a function `build_modell`.
 That has several advantages:
 
-* Each new learner needs a separately build model, if you aim to train a whole
-new model!
-Cloning the learner is not sufficient in this case and will lead to continue 
-training one and the same model in a new learner.
+* Each new learner needs a separately build model, if you aim to train a whole new model!
+Cloning the learner is not sufficient in this case and will lead to continue training one and the same model in a new learner.
 You might notice a flat history curve in such cases.
-* In case of more complex models, a function makes a model a tunable
-hyperparameter.
-* You can easily build models with reproducible and comparable results by
-assigning a seed to the `build_model`. Note, that seed setting is not trivial in
-this case. If you are interested in more details, see chapter \@ref(set-seed).
+* In case of more complex models, a function makes a model a tunable hyperparameter.
+* You can easily build models with reproducible and comparable results by assigning a seed to the `build_model`.
+
+Note, that seed setting is not trivial in  keras.
+If you are interested in more details, see chapter Set Seed.
 
 ```{r kerasmodel}
 build_model = function(seed = TRUE) {
   
-  checkmate::assert_logical(seed, len = 1, all.missing = FALSE)
-  if (seed)  reset_random_seeds(123)
+  checkmate::assert_logical(seed, len = 1L, all.missing = FALSE)
+  if (seed)  set_seeds(123L)
+
   
   model = keras_model_sequential() %>%
-    layer_dense(units = 64, activation = "relu",
-                input_shape = boston_task$ncol - 1) %>%
-    layer_dense(units = 64, activation = "relu") %>%
-    layer_dense(units = 1)
+    layer_dense(units = 64L, activation = "relu",
+                input_shape = boston_task$ncol - 1L) %>%
+    layer_dense(units = 64L, activation = "relu") %>%
+    layer_dense(units = 1L)
   
   model %>% compile(
     loss = "mse",
@@ -166,23 +151,20 @@ model %>% summary()
 For this use case we create a sequential model, a linear stack of three layers.
 The shape of our input data is defined in the input layer.
 Input is analyzed by two densely connected hidden layers.
-A final denselayer returns a single continuous estimation value for the
-observations target.
+A final denselayer returns a single continuous target estimation value.
 
 # Learner
 
 ### Define hyperparameters
 
-Heading back to `mlr_pkg("mlr3")` syntax  we set up the keras regression learner
-like any other and define hyperparameters.
-Note that the compiled `model` defined in the previous chapter is such a
-hyperparameter.
+Heading back to `mlr_pkg("mlr3")` syntax  we set up the keras regression learner like any other and define hyperparameters.
+Note that the compiled `model` defined in the previous chapter is such a hyperparameter.
 That makes `regr.keras` learner easily tunable over different models.
-For more information about tuning see
-[mlr3 manual](https://mlr3book.mlr-org.com/optimization.html).
+For more information about tuning see [mlr3 manual](https://mlr3book.mlr-org.com/optimization.html).
 
 ```{r hyperparams}
 learner = po("learner", lrn("regr.keras"))
+learner = lrn("regr.keras")
 
 learner$param_set$values$epochs = 500L
 learner$param_set$values$model = model
@@ -192,20 +174,14 @@ learner$param_set$values$validation_split = 0.2
 ### Callbacks
 
 Another hypereparameter is `callback`.
-A `callback` is a set of functions, bundled in a list that can be used to
-explore specified progress stages during training.
-Accordingly a defined `callback` function is called at its' specified stage of
-training to monitor or display specified model parameters at this stage.
-The history callback for example is applied to each training progress of a
-model by default.
-It stores the training history in a `history` slot of its' concerning model
-object.
-For a list of all implemented callbacks see
-[Keras Callbacks](https://keras.io/callbacks/).
+A `callback` is a set of functions, bundled in a list that can be used to explore specified progress stages during training.
+Accordingly a defined `callback` function is called at its' specified stage of training to monitor or display specified model parameters at this stage.
+The history callback for example is applied to each training progress of a model by default.
+It stores the training history in a `history` slot of its' concerning model object.
+For a list of all implemented callbacks see [Keras Callbacks](https://keras.io/callbacks/).
 
-In our first learner we want to reduce information about training progress to a
-single dot printed out at the end of each applied epoch.
-Therefore we create a `LambdaCallback` that applied at each epochs end.
+In our first learner we want to reduce information about training progress to a single dot printed out at the end of each applied epoch.
+Therefore we create a `LambdaCallback` that is called at each epochs end.
 
 ```{r callbacks}
 print_dot_callback <- callback_lambda(
@@ -218,12 +194,8 @@ print_dot_callback <- callback_lambda(
 learner$param_set$values$callbacks = list(print_dot_callback)
 ```
 
-Callback can also be called through 
-[mlr3keras](https://github.com/mlr-org/mlr3keras/blob/master/R/keras_callbacks.R)
-syntax.
-As not all callbacks are implemented yet
-[mlr3keras callbacks](https://github.com/mlr-org/mlr3keras/blob/master/R/keras_callbacks.R)
-is still in progress.
+Callback can also be called through [mlr3keras](https://github.com/mlr-org/mlr3keras/blob/master/R/keras_callbacks.R) syntax.
+As not all callbacks are implemented yet [mlr3keras callbacks](https://github.com/mlr-org/mlr3keras/blob/master/R/keras_callbacks.R) is still in progress.
 Currently working callbacks are:
 
 * `cb_es`: Early stopping callback
@@ -236,16 +208,15 @@ Currently working callbacks are:
 Initialize early stopping like this:
 
 ```{r mlr3cb}
-early_stop <- callback_early_stopping(monitor = "val_loss", patience = 20) # keras syntax
-# early_stop <- cb_es(monitor = "val_loss", patience = 20) # mlr3 syntax
+# early_stop <- callback_early_stopping(monitor = "val_loss", patience = 20) # keras syntax
+early_stop <- cb_es(monitor = "val_loss", patience = 20) # mlr3 syntax
 ```
 
 
 ### Set Up the Learner
 
 We initialize our learner.
-Note, that we clone the `R6` object `keras_500` learner to a second 
-object `keras_es` that we will use later on.
+Note, that we clone the `R6` object `keras_500` learner to a second object `keras_es` that we will use later on.
 
 ```{r po}
 keras500 = GraphLearner$new(po_scale %>>% learner)
@@ -254,11 +225,10 @@ keras_es = keras500$clone(deep = TRUE)
 
 # Training
 
-Before we train the learner we divide observations randomly into train and test
-set.
+Before we train the learner we divide observations randomly into train and test set.
 The training set contains 404 observations and the test set 102.
 Now we can train our learner, using the `training_id`.
-Reminder: As we set it in `callback`, each `epoch` is represented by a dot.
+Reminder: The `callback` setting vizualizes training progress by a dot after each `epoch`.
 
 ```{r trainingI}
 train_id <- sample(boston_task$row_ids, 404L)
@@ -281,13 +251,13 @@ plot(history, metrics = "mean_absolute_error", smooth = FALSE) +
 
 The validation curve noticeably flattens after about 200 epochs.
 So `epochs = 500L` seems to be set to high.
-In this case we can implement our Early stopping callback.
+In this case we can implement the early stopping callback.
 `early_stop` will stop the model if it shows no improvement in `val_loss` within
 20 `epochs`.
 
 ### Train with early stopping
 
-This is exactly the same keras model, using early stopping `callback`.
+We train exactly the same keras model, using early stopping `callback`.
 
 ```{r earlystopping}
 keras_es$param_set$values$regr.keras.callbacks = list(early_stop, print_dot_callback)
@@ -298,7 +268,7 @@ plot(history, metrics = "mean_absolute_error", smooth = FALSE) +
   coord_cartesian(xlim = c(0, 500), ylim = c(0, 5))
 ```
 
-Note that each `epoch` until stopping is exactly the same as in `keras500`
+Note that each `epoch` until stopping is exactly the same as in `keras500`.
 
 # Predict and evaluate
 
@@ -324,50 +294,38 @@ paste0(
 
 `Keras R Studio` is a system running code on multiple platforms.
 For this reason obtaining reproducible results is not trivial.
-This chapter provides ways to easily obtain reproducible results anyways.
+This chapter suggests ways to easily obtain reproducible results anyways.
 
-### Tensorflow versions
+### `TensorFlow` versions
 
-Tensorflow provides a function to set seeds called `use_session_with_seed()`.
-However this function appears to work only partly for $tensorflow version \ge 2.0$.
+`TensorFlow` provides a function to set seeds called `use_session_with_seed()`.
+[RKerasFAQ](https://keras.rstudio.com/articles/faq.html#how-can-i-obtain-reproducible-results-using-keras-during-development) shows a convenient way to set seeds by the function `use_session_with_seed()`.
+However this function appears to work only partly for `TensorFlow`-version $\ge 2.0$.
+If you use `TensorFlow`-version $< 2.0$ `use_session_with_seed()` should run without problems.
 You can check the current version like this:
 
 ```{r checkversion, eval=FALSE}
 tensorflow::tf_version()
 ```
 
-If you use $tensorflow version < 2.0$ you have two options.
+`mlr3 keras` provides an alternative solution that should work on any `TensorFlow`-version `set_seeds`.
 
-1. `use_session_with_seed()`  
-[RKerasFAQ](https://keras.rstudio.com/articles/faq.html#how-can-i-obtain-reproducible-results-using-keras-during-development)
-shows a nice way how to set seeds by the function `use_session_with_seed()`.
-In this case you can just replace `reset_random_seeds` in the `build_model`
-function by applying `use_session_with_seed()`.
+### `set_seeds`
 
-2. Use `reset_random_seeds` or respectively build you own set reset function
-(see below).
-
-### Reset Random seeds
-
-As you might have noticed we have already been using `reset_random_seeds` in
-this chapter to obtain reproducible results.
-We introduced this function because in some incidences you might run into an
-error calling `use_session_with_seed()` with $tensorflow version < 2.0$.
+As you might have noticed we have already been using `keras::set_seeds` function in this chapter to obtain reproducible results.
+We introduced this function because in some incidences you might run into an error calling `use_session_with_seed()` with `TensorFlow`-version $< 2.0$.
 
 ```{r useerror, error=TRUE}
 tensorflow::use_session_with_seed(1L)
 ```
 
-In these cases it makes sense to create your own function to set seeds for
-`keras`.
-`reset_random_seeds` establishes a common random seed for `R`, `Python`,
-`NumPy`, and `TensorFlow` and disables hash randomization.
-Note, that you should not have been running `TensorFlow` before running the
-function.
+In these cases it makes sense to create use `mlr3keras` function `set_seeds`.
+`set_seeds` establishes a common random seed for `R`, `Python`, `NumPy`, and `TensorFlow`, disables hash randomization, GPU and CPU parallelization.
+Note, that you should not have been running `TensorFlow` before running the function.
 If you did you might have to restart the session before proceeding.
 
 ```{r seedprint, eval=FALSE}
-reset_random_seeds <- function(seed = 1L,
+set_seeds = function(seed = 1L,
                                disable_gpu = FALSE,
                                disable_parallel_cpu = FALSE) {
   checkmate::assert_integerish(seed, len = 1L, lower = 1L, all.missing = FALSE)
@@ -410,17 +368,12 @@ reset_random_seeds <- function(seed = 1L,
 }
 ```
 
-For more information see
-[Stackoverflow Reset Seeds](https://stackoverflow.com/questions/59075244/if-keras-results-are-not-reproducible-whats-the-best-practice-for-comparing-mo).
+For more information see [Stackoverflow Reset Seeds](https://stackoverflow.com/questions/59075244/if-keras-results-are-not-reproducible-whats-the-best-practice-for-comparing-mo).
 
 ### Non deterministic Executions
 
-GPU computations and CPU palatalization can be another source of  
-non-reproducible, since both can result in non-deterministic execution
-patterns.
-The only way to provide results from this error is to disable GPU and CPU
-parallelism.
+GPU computations and CPU parallelize can be another source of non-reproducible results, since both can result in non-deterministic execution patterns.
+The only way to provide results from this error is to disable GPU and CPU parallelism.
 This can mean a hard trade-off between time and reproducability.
-`use_session_with_seed()` disables both GPU and CPU by default. For more detailed
-description read code on
-[Github](https://github.com/rstudio/tensorflow/blob/master/R/seed.R).
+`use_session_with_seed()` disables both GPU and CPU by default.
+For more detailed description read the code on [Github](https://github.com/rstudio/tensorflow/blob/master/R/seed.R).
