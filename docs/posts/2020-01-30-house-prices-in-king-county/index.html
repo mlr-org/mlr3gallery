@@ -65,7 +65,7 @@
 <!--/radix_placeholder_rmarkdown_metadata-->
   
   <script type="text/json" id="radix-resource-manifest">
-  {"type":"character","attributes":{},"value":["2020-01-30-house-prices-in-king-county_files/bowser-1.9.3/bowser.min.js","2020-01-30-house-prices-in-king-county_files/distill-2.2.21/template.v2.js","2020-01-30-house-prices-in-king-county_files/figure-html5/unnamed-chunk-10-1.png","2020-01-30-house-prices-in-king-county_files/figure-html5/unnamed-chunk-12-1.png","2020-01-30-house-prices-in-king-county_files/figure-html5/unnamed-chunk-13-1.png","2020-01-30-house-prices-in-king-county_files/figure-html5/unnamed-chunk-14-1.png","2020-01-30-house-prices-in-king-county_files/figure-html5/unnamed-chunk-15-1.png","2020-01-30-house-prices-in-king-county_files/figure-html5/unnamed-chunk-19-1.png","2020-01-30-house-prices-in-king-county_files/figure-html5/unnamed-chunk-20-1.png","2020-01-30-house-prices-in-king-county_files/figure-html5/unnamed-chunk-20-2.png","2020-01-30-house-prices-in-king-county_files/header-attrs-2.1/header-attrs.js","2020-01-30-house-prices-in-king-county_files/jquery-1.11.3/jquery.min.js","2020-01-30-house-prices-in-king-county_files/webcomponents-2.0.0/webcomponents.js"]}
+  {"type":"character","attributes":{},"value":["2020-01-30-house-prices-in-king-county_files/figure-html5/unnamed-chunk-10-1.png","2020-01-30-house-prices-in-king-county_files/figure-html5/unnamed-chunk-12-1.png","2020-01-30-house-prices-in-king-county_files/figure-html5/unnamed-chunk-13-1.png","2020-01-30-house-prices-in-king-county_files/figure-html5/unnamed-chunk-14-1.png","2020-01-30-house-prices-in-king-county_files/figure-html5/unnamed-chunk-15-1.png","2020-01-30-house-prices-in-king-county_files/figure-html5/unnamed-chunk-19-1.png","2020-01-30-house-prices-in-king-county_files/figure-html5/unnamed-chunk-20-1.png","2020-01-30-house-prices-in-king-county_files/figure-html5/unnamed-chunk-20-2.png"]}
   </script>
   <!--radix_placeholder_navigation_in_header-->
 
@@ -1280,7 +1280,6 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 <!--/radix_placeholder_distill-->
-  <script src="../../site_libs/header-attrs-2.1/header-attrs.js"></script>
   <script src="../../site_libs/jquery-1.11.3/jquery.min.js"></script>
   <script src="../../site_libs/bowser-1.9.3/bowser.min.js"></script>
   <script src="../../site_libs/webcomponents-2.0.0/webcomponents.js"></script>
@@ -1595,13 +1594,13 @@ res$score(msr(&quot;regr.mse&quot;))</code></pre>
 2: &lt;TaskRegr&gt;   sales &lt;LearnerRegrRanger&gt; regr.ranger &lt;ResamplingCV&gt;
 3: &lt;TaskRegr&gt;   sales &lt;LearnerRegrRanger&gt; regr.ranger &lt;ResamplingCV&gt;
    resampling_id iteration prediction regr.mse
-1:            cv         1     &lt;list&gt; 20254.29
-2:            cv         2     &lt;list&gt; 18892.31
-3:            cv         3     &lt;list&gt; 26758.39</code></pre>
+1:            cv         1     &lt;list&gt; 20015.32
+2:            cv         2     &lt;list&gt; 19093.20
+3:            cv         3     &lt;list&gt; 25412.27</code></pre>
 <pre class="r"><code>
 sprintf(&quot;RMSE of the simple ranger: %s&quot;, round(sqrt(res$aggregate()), 2))</code></pre>
 <pre><code>
-[1] &quot;RMSE of the simple ranger: 148.22&quot;</code></pre>
+[1] &quot;RMSE of the simple ranger: 146.65&quot;</code></pre>
 </div>
 <p>Often tuning <strong>RandomForest</strong> methods does not increase predictive performances substantially. If time permits, it can nonetheless lead to improvements and should thus be performed. In this case, we resort to tune a different kind of model: <strong>Gradient Boosted Decision Trees</strong> from the package <a href="https://cran.r-project.org/package=xgboost">xgboost</a>.</p>
 <h3 id="a-better-baseline-autotuner">A better baseline: <code>AutoTuner</code></h3>
@@ -1645,13 +1644,13 @@ res$score(msr(&quot;regr.mse&quot;))</code></pre>
 2: &lt;TaskRegr&gt;   sales &lt;AutoTuner&gt; regr.xgboost.tuned &lt;ResamplingCV&gt;
 3: &lt;TaskRegr&gt;   sales &lt;AutoTuner&gt; regr.xgboost.tuned &lt;ResamplingCV&gt;
    resampling_id iteration prediction regr.mse
-1:            cv         1     &lt;list&gt; 20849.30
-2:            cv         2     &lt;list&gt; 20365.25
-3:            cv         3     &lt;list&gt; 19136.54</code></pre>
+1:            cv         1     &lt;list&gt; 22666.56
+2:            cv         2     &lt;list&gt; 17164.59
+3:            cv         3     &lt;list&gt; 18996.10</code></pre>
 <pre class="r"><code>
 sprintf(&quot;RMSE of the tuned xgboost: %s&quot;, round(sqrt(res$aggregate()), 2))</code></pre>
 <pre><code>
-[1] &quot;RMSE of the tuned xgboost: 141.83&quot;</code></pre>
+[1] &quot;RMSE of the tuned xgboost: 140.03&quot;</code></pre>
 </div>
 <p>We can obtain the resulting params in the respective splits by accessing the <a href="https://mlr3.mlr-org.com/reference/ResampleResult.html"><code>ResampleResult</code></a>.</p>
 <div class="layout-chunk" data-layout="l-body">
@@ -1659,12 +1658,12 @@ sprintf(&quot;RMSE of the tuned xgboost: %s&quot;, round(sqrt(res$aggregate()), 
 sapply(res$learners, function(x) x$param_set$values)[-2,]</code></pre>
 <pre><code>
                   [,1]      [,2]      [,3]     
-nrounds           24        19        22       
-eta               0.3026393 0.3725926 0.2348035
-min_child_weight  13.35305  16.98946  10.62785 
-subsample         0.7400116 0.7621237 0.7601959
-colsample_bytree  0.9716076 0.9236286 0.9987225
-colsample_bylevel 0.6090116 0.5194845 0.6217055</code></pre>
+nrounds           25        24        17       
+eta               0.2954499 0.3160394 0.3338148
+min_child_weight  2.577776  6.536509  14.27821 
+subsample         0.7545431 0.7172381 0.7339708
+colsample_bytree  0.9187804 0.9313419 0.9484409
+colsample_bylevel 0.6029092 0.5174263 0.63602  </code></pre>
 </div>
 <p><strong>NOTE:</strong> To keep runtime low, we only tune parts of the hyperparameter space of <a href="https://cran.r-project.org/package=xgboost">xgboost</a> in this example. Additionally, we only allow for <span class="math inline">\(10\)</span> random search iterations, which is usually to little for real-world applications. Nonetheless, we are able to obtain an improved performance when comparing to the <a href="https://cran.r-project.org/package=ranger">ranger</a> model.</p>
 <p>In order to further improve our results we have several options:</p>
@@ -1702,13 +1701,13 @@ res$score(msr(&quot;regr.mse&quot;))</code></pre>
 2: &lt;TaskRegr&gt;   sales &lt;LearnerRegrRanger&gt; regr.ranger &lt;ResamplingCV&gt;
 3: &lt;TaskRegr&gt;   sales &lt;LearnerRegrRanger&gt; regr.ranger &lt;ResamplingCV&gt;
    resampling_id iteration prediction regr.mse
-1:            cv         1     &lt;list&gt; 22797.43
-2:            cv         2     &lt;list&gt; 18270.64
-3:            cv         3     &lt;list&gt; 13688.15</code></pre>
+1:            cv         1     &lt;list&gt; 16315.18
+2:            cv         2     &lt;list&gt; 18830.75
+3:            cv         3     &lt;list&gt; 18148.22</code></pre>
 <pre class="r"><code>
 sprintf(&quot;RMSE of ranger with med_price: %s&quot;, round(sqrt(res$aggregate()), 2))</code></pre>
 <pre><code>
-[1] &quot;RMSE of ranger with med_price: 135.1&quot;</code></pre>
+[1] &quot;RMSE of ranger with med_price: 133.28&quot;</code></pre>
 </div>
 <h3 id="advanced-obtaining-a-sparser-model">Advanced: Obtaining a sparser model</h3>
 <p>In many cases, we might want to have a sparse model. For this purpose we can use a <a href="https://mlr3filters.mlr-org.com/reference/Filter.html"><code>mlr3filters::Filter</code></a> implemented in <code>mlr3filters</code>. This can prevent our learner from overfitting make it easier for humans to interpret models as fewer variables influence the resulting prediction.</p>
@@ -1733,13 +1732,13 @@ res$score(msr(&quot;regr.mse&quot;))</code></pre>
 2: &lt;TaskRegr&gt;   sales &lt;GraphLearner&gt; mrmr.regr.ranger &lt;ResamplingCV&gt;
 3: &lt;TaskRegr&gt;   sales &lt;GraphLearner&gt; mrmr.regr.ranger &lt;ResamplingCV&gt;
    resampling_id iteration prediction regr.mse
-1:            cv         1     &lt;list&gt; 27312.88
-2:            cv         2     &lt;list&gt; 20360.36
-3:            cv         3     &lt;list&gt; 19823.75</code></pre>
+1:            cv         1     &lt;list&gt; 22872.03
+2:            cv         2     &lt;list&gt; 19857.17
+3:            cv         3     &lt;list&gt; 23287.96</code></pre>
 <pre class="r"><code>
 sprintf(&quot;RMSE of ranger with filtering: %s&quot;, round(sqrt(res$aggregate()), 2))</code></pre>
 <pre><code>
-[1] &quot;RMSE of ranger with filtering: 150&quot;</code></pre>
+[1] &quot;RMSE of ranger with filtering: 148.34&quot;</code></pre>
 </div>
 <h2 id="summary">Summary:</h2>
 <p>We have seen different ways to improve models with respect to our criteria by:</p>
@@ -1767,7 +1766,7 @@ pred = lrn_ranger$predict(task_test)
 pred$score(msr(&quot;regr.mse&quot;))</code></pre>
 <pre><code>
 regr.mse 
- 36238.5 </code></pre>
+36614.89 </code></pre>
 </div>
 <!--radix_placeholder_article_footer-->
 <!--/radix_placeholder_article_footer-->
