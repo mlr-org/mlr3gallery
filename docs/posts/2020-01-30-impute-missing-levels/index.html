@@ -65,7 +65,7 @@
 <!--/radix_placeholder_rmarkdown_metadata-->
   
   <script type="text/json" id="radix-resource-manifest">
-  {"type":"character","attributes":{},"value":["2020-01-30-impute-missing-levels_files/bowser-1.9.3/bowser.min.js","2020-01-30-impute-missing-levels_files/distill-2.2.21/template.v2.js","2020-01-30-impute-missing-levels_files/figure-html5/unnamed-chunk-14-1.png","2020-01-30-impute-missing-levels_files/figure-html5/unnamed-chunk-6-1.png","2020-01-30-impute-missing-levels_files/header-attrs-2.1/header-attrs.js","2020-01-30-impute-missing-levels_files/jquery-1.11.3/jquery.min.js","2020-01-30-impute-missing-levels_files/webcomponents-2.0.0/webcomponents.js"]}
+  {"type":"character","attributes":{},"value":["2020-01-30-impute-missing-levels_files/figure-html5/unnamed-chunk-14-1.png","2020-01-30-impute-missing-levels_files/figure-html5/unnamed-chunk-6-1.png"]}
   </script>
   <!--radix_placeholder_navigation_in_header-->
 
@@ -1280,7 +1280,6 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 <!--/radix_placeholder_distill-->
-  <script src="../../site_libs/header-attrs-2.1/header-attrs.js"></script>
   <script src="../../site_libs/jquery-1.11.3/jquery.min.js"></script>
   <script src="../../site_libs/bowser-1.9.3/bowser.min.js"></script>
   <script src="../../site_libs/webcomponents-2.0.0/webcomponents.js"></script>
@@ -1474,17 +1473,17 @@ ext_task = imp_num$train(list(task))[[1]]
 ext_task$data()</code></pre>
 <pre><code>
      diabetes age pedigree pregnant glucose   insulin mass pressure  triceps
-  1:      pos  50    0.627        6     148  84.89571 33.6       72 35.00000
-  2:      neg  31    0.351        1      85 124.14928 26.6       66 29.00000
-  3:      pos  32    0.672        8     183 190.20165 23.3       64 16.32963
+  1:      pos  50    0.627        6     148  41.90173 33.6       72 35.00000
+  2:      neg  31    0.351        1      85  42.38649 26.6       66 29.00000
+  3:      pos  32    0.672        8     183 378.58838 23.3       64 13.13584
   4:      neg  21    0.167        1      89  94.00000 28.1       66 23.00000
   5:      pos  33    2.288        0     137 168.00000 43.1       40 35.00000
  ---                                                                        
 764:      neg  63    0.171       10     101 180.00000 32.9       76 48.00000
-765:      neg  27    0.340        2     122 104.68058 36.8       70 27.00000
+765:      neg  27    0.340        2     122 244.19349 36.8       70 27.00000
 766:      neg  30    0.245        5     121 112.00000 26.2       72 23.00000
-767:      pos  47    0.349        1     126 142.35291 30.1       60 37.82867
-768:      neg  23    0.315        1      93  94.90592 30.4       70 31.00000</code></pre>
+767:      pos  47    0.349        1     126 157.62713 30.1       60 22.92699
+768:      neg  23    0.315        1      93  72.02897 30.4       70 31.00000</code></pre>
 </div>
 <p>This time we obtain the imputed data set without <code>missing</code> values.</p>
 <div class="layout-chunk" data-layout="l-body">
@@ -1524,7 +1523,7 @@ rr = resample(task, glearner, rsmp(&quot;cv&quot;, folds = 3))
 rr$aggregate()</code></pre>
 <pre><code>
 classif.ce 
- 0.2460938 </code></pre>
+ 0.2395833 </code></pre>
 </div>
 <h2 id="missing-values-during-prediction">Missing values during prediction</h2>
 <p>In some cases, we have missing values only in the data we want to predict on. In order to showcase this, we create a copy of the task with several more missing columns.</p>
@@ -1582,13 +1581,13 @@ gl$predict(t2)</code></pre>
 <pre><code>
 &lt;PredictionRegr&gt; for 506 observations:
     row_id truth response
-         1  24.0 24.84179
-         2  21.6 22.19633
-         3  34.7 34.73055
+         1  24.0 24.76622
+         2  21.6 21.97126
+         3  34.7 34.46169
 ---                      
-       504  23.9 24.00017
-       505  22.0 22.37630
-       506  11.9 15.47351</code></pre>
+       504  23.9 24.11775
+       505  22.0 22.38956
+       506  11.9 15.73886</code></pre>
 </div>
 <p>Success! We learned how to deal with missing values in less then 10 minutes.</p>
 <!--radix_placeholder_article_footer-->

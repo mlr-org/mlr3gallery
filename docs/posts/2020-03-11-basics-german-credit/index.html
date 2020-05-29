@@ -67,7 +67,7 @@
 <!--/radix_placeholder_rmarkdown_metadata-->
   
   <script type="text/json" id="radix-resource-manifest">
-  {"type":"character","attributes":{},"value":["2020-03-11-mlr3-basics-german-credit_files/bowser-1.9.3/bowser.min.js","2020-03-11-mlr3-basics-german-credit_files/distill-2.2.21/template.v2.js","2020-03-11-mlr3-basics-german-credit_files/figure-html5/unnamed-chunk-10-1.png","2020-03-11-mlr3-basics-german-credit_files/figure-html5/unnamed-chunk-11-1.png","2020-03-11-mlr3-basics-german-credit_files/figure-html5/unnamed-chunk-11-2.png","2020-03-11-mlr3-basics-german-credit_files/figure-html5/unnamed-chunk-19-1.png","2020-03-11-mlr3-basics-german-credit_files/header-attrs-2.1/header-attrs.js","2020-03-11-mlr3-basics-german-credit_files/jquery-1.11.3/jquery.min.js","2020-03-11-mlr3-basics-german-credit_files/webcomponents-2.0.0/webcomponents.js"]}
+  {"type":"character","attributes":{},"value":["2020-03-11-mlr3-basics-german-credit_files/figure-html5/unnamed-chunk-10-1.png","2020-03-11-mlr3-basics-german-credit_files/figure-html5/unnamed-chunk-11-1.png","2020-03-11-mlr3-basics-german-credit_files/figure-html5/unnamed-chunk-11-2.png","2020-03-11-mlr3-basics-german-credit_files/figure-html5/unnamed-chunk-19-1.png"]}
   </script>
   <!--radix_placeholder_navigation_in_header-->
 
@@ -1282,7 +1282,6 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 <!--/radix_placeholder_distill-->
-  <script src="../../site_libs/header-attrs-2.1/header-attrs.js"></script>
   <script src="../../site_libs/jquery-1.11.3/jquery.min.js"></script>
   <script src="../../site_libs/bowser-1.9.3/bowser.min.js"></script>
   <script src="../../site_libs/webcomponents-2.0.0/webcomponents.js"></script>
@@ -1891,13 +1890,13 @@ learner_rf$train(task)</code></pre>
 learner_rf$importance()</code></pre>
 <pre><code>
                  status                duration          credit_history                  amount                 savings 
-           0.0385156998            0.0198591001            0.0128787938            0.0128386502            0.0086113981 
-                    age                property     employment_duration other_installment_plans                 purpose 
-           0.0068087553            0.0052470343            0.0046539896            0.0038662998            0.0037037053 
-       installment_rate           other_debtors       present_residence                 housing          number_credits 
-           0.0035669248            0.0031286409            0.0028212935            0.0023686904            0.0022347954 
-    personal_status_sex                     job               telephone           people_liable          foreign_worker 
-           0.0018073103            0.0017763112            0.0012640172            0.0002386399            0.0002053380 </code></pre>
+           0.0368034853            0.0179653975            0.0132930751            0.0120606162            0.0083545202 
+                    age     employment_duration                property other_installment_plans           other_debtors 
+           0.0071815266            0.0055828083            0.0041096520            0.0039578380            0.0034392968 
+       installment_rate                 purpose                 housing       present_residence                     job 
+           0.0031319959            0.0028036002            0.0024353917            0.0018174198            0.0016769780 
+    personal_status_sex          number_credits               telephone           people_liable          foreign_worker 
+           0.0016285251            0.0014109164            0.0007867318            0.0003785059            0.0002943012 </code></pre>
 </div>
 <ul>
 <li>We convert the importance into a <code>data.table</code> so we can plot it</li>
@@ -1909,26 +1908,26 @@ colnames(importance) = c(&quot;Feature&quot;, &quot;Importance&quot;)
 importance</code></pre>
 <pre><code>
                     Feature   Importance
- 1:                  status 0.0385156998
- 2:                duration 0.0198591001
- 3:          credit_history 0.0128787938
- 4:                  amount 0.0128386502
- 5:                 savings 0.0086113981
- 6:                     age 0.0068087553
- 7:                property 0.0052470343
- 8:     employment_duration 0.0046539896
- 9: other_installment_plans 0.0038662998
-10:                 purpose 0.0037037053
-11:        installment_rate 0.0035669248
-12:           other_debtors 0.0031286409
-13:       present_residence 0.0028212935
-14:                 housing 0.0023686904
-15:          number_credits 0.0022347954
-16:     personal_status_sex 0.0018073103
-17:                     job 0.0017763112
-18:               telephone 0.0012640172
-19:           people_liable 0.0002386399
-20:          foreign_worker 0.0002053380</code></pre>
+ 1:                  status 0.0368034853
+ 2:                duration 0.0179653975
+ 3:          credit_history 0.0132930751
+ 4:                  amount 0.0120606162
+ 5:                 savings 0.0083545202
+ 6:                     age 0.0071815266
+ 7:     employment_duration 0.0055828083
+ 8:                property 0.0041096520
+ 9: other_installment_plans 0.0039578380
+10:           other_debtors 0.0034392968
+11:        installment_rate 0.0031319959
+12:                 purpose 0.0028036002
+13:                 housing 0.0024353917
+14:       present_residence 0.0018174198
+15:                     job 0.0016769780
+16:     personal_status_sex 0.0016285251
+17:          number_credits 0.0014109164
+18:               telephone 0.0007867318
+19:           people_liable 0.0003785059
+20:          foreign_worker 0.0002943012</code></pre>
 <pre class="r"><code>
 ggplot(importance, aes(x = reorder(Feature, Importance), y = Importance)) +
   geom_col() + coord_flip() + xlab(&quot;&quot;)</code></pre>
@@ -2085,7 +2084,7 @@ res_sub = resample(task, learner_logreg, rsmp(&quot;subsampling&quot;, repeats =
 res_sub$aggregate()</code></pre>
 <pre><code>
 classif.ce 
- 0.2459459 </code></pre>
+ 0.2498498 </code></pre>
 </div>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
@@ -2093,7 +2092,7 @@ res_cv = resample(task, learner_logreg, rsmp(&quot;cv&quot;, folds = 10))
 res_cv$aggregate()</code></pre>
 <pre><code>
 classif.ce 
-     0.248 </code></pre>
+     0.242 </code></pre>
 </div>
 <ul>
 <li>We can also calculate scores for different measures (e.g., <code>msr("classif.fpr")</code> for the false positive rate).</li>
@@ -2104,7 +2103,7 @@ classif.ce
 res_cv$aggregate(msr(&quot;classif.fpr&quot;))</code></pre>
 <pre><code>
 classif.fpr 
-  0.5046841 </code></pre>
+  0.5057089 </code></pre>
 <pre class="r"><code>
 # false positive rate and false negative
 msr_list = list(
@@ -2114,7 +2113,7 @@ msr_list = list(
 res_cv$aggregate(msr_list)</code></pre>
 <pre><code>
 classif.fpr classif.fnr 
-  0.5046841   0.1390239 </code></pre>
+  0.5057089   0.1310051 </code></pre>
 </div>
 <ul>
 <li>There are a few more resampling methods, and quite a few more measures. List them in</li>
@@ -2184,8 +2183,8 @@ performances = bmr$aggregate(msr_list)
 performances[, c(&quot;learner_id&quot;, &quot;classif.ce&quot;, &quot;classif.auc&quot;)]</code></pre>
 <pre><code>
         learner_id classif.ce classif.auc
-1: classif.log_reg      0.252   0.7764657
-2:  classif.ranger      0.232   0.7939573</code></pre>
+1: classif.log_reg      0.248   0.7802529
+2:  classif.ranger      0.233   0.8018138</code></pre>
 </div>
 <h2 id="outlook">Outlook</h2>
 <ul>
