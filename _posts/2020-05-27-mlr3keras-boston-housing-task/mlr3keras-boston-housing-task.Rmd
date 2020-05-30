@@ -56,7 +56,7 @@ library(ggplot2)
 
 # Basic Regression Task - Boston Housing Prices
 
-In this use case we build a model that predicts the Median value of owner-occupied homes in Boston in $1000's (`medv`).
+In this use case, we build a model that predicts the Median value of owner-occupied homes in Boston in $1000's (`medv`).
 
 The `r ref("mlr_tasks_boston_housing", "Boston Housing Task")` is accessible directly from `mlr3tasks`.
 
@@ -171,17 +171,18 @@ learner$param_set$values$validation_split = 0.2
 ### Callbacks
 
 Another hypereparameter is `callback`.
-A `callback` is a set of functions, bundled in a list that can be used to explore specified progress stages during training.
+A `callback` is a set of functions, bundled in a list that can be used to explore and manipulate specified progress stages during training.
 Accordingly a defined `callback` function is called at its' specified stage of training to monitor or display specified model parameters at this stage.
-The history callback for example is applied to each training progress of a model by default.
+The history callback, for example, tracks the train and validation loss after each epoch.
 It stores the training history in a `history` slot of its' concerning model object.
 For a list of all implemented callbacks see [Keras Callbacks](https://keras.io/callbacks/).
 
-In our first learner we want to reduce information about training progress to a single dot printed out at the end of each applied epoch.
+In our learner we want to reduce information about training progress.
 Therefore we create a `LambdaCallback` that is called at each epochs end and assign it to the learners' `callbacks`-hyperparameter.
+This Callback  will print  a "." after every epoch and newline after every 80 epochs.
 
 ```{r callbacks}
-print_dot_callback <- callback_lambda(
+print_dot_callback = callback_lambda(
   on_epoch_end = function(epoch, logs) {
     if (epoch %% 80 == 0) cat("\n")
     cat(".")
@@ -191,9 +192,7 @@ print_dot_callback <- callback_lambda(
 learner$param_set$values$callbacks = list(print_dot_callback)
 ```
 
-Callback can also be called through `r gh_pkg("mlr-org/mlr3keras")` syntax.
-As not all callbacks are implemented yet [mlr3keras callbacks](https://github.com/mlr-org/mlr3keras/blob/master/R/keras_callbacks.R) is still in progress.
-Currently working callbacks within `r gh_pkg("mlr-org/mlr3keras")`-syntax  are:
+`r gh_pkg("mlr-org/mlr3keras")` contains a set of often-used callbacks for the user's convenience.
 
 * `cb_es`: Early stopping callback
 * `cb_lrs`: Learning rate scheduler callback
@@ -205,8 +204,8 @@ Currently working callbacks within `r gh_pkg("mlr-org/mlr3keras")`-syntax  are:
 Initialize early stopping like this:
 
 ```{r mlr3cb}
-# early_stop <- callback_early_stopping(monitor = "val_loss", patience = 20) # keras syntax
-early_stop <- cb_es(monitor = "val_loss", patience = 20) # mlr3 syntax
+# early_stop = callback_early_stopping(monitor = "val_loss", patience = 20) # keras syntax
+early_stop = cb_es(monitor = "val_loss", patience = 20) # mlr3 syntax
 ```
 
 
@@ -228,8 +227,8 @@ Now we can train our learner, using the `training_id`.
 Reminder: The `callback` setting vizualizes training progress by a dot after each `epoch`.
 
 ```{r trainingI}
-train_id <- sample(boston_task$row_ids, 404L)
-test_id <- setdiff(boston_task$row_ids, train_id)
+train_id = sample(boston_task$row_ids, 404L)
+test_id = setdiff(boston_task$row_ids, train_id)
 keras_500$train(boston_task, row_ids = train_id)
 ```
 
@@ -287,8 +286,16 @@ paste0(
 
 # Set Seed
 
-`Keras R Studio` is a system running code on multiple platforms.
-For this reason obtaining reproducible results is not trivial.
+`Keras` has mutiple sources of stochasticity. 
+Pseudo Random Numbers can be gernerated while
+
+* initializing weights
+* ordering in batches
+* set up model architecture
+* parallel execution
+
+True reproducibility can only be guaranteed if code is not run in parallel and initial weights are fixed.
+As `Keras` can run code across multiple devices obtaining reproducible results is not trivial.
 This chapter suggests ways to easily obtain reproducible results anyways.
 
 ### `TensorFlow` versions
