@@ -1624,7 +1624,7 @@ rr = resample(task, stackgraph, cv10_instance, store_model = TRUE)
 rr$aggregate()</code></pre>
 <pre><code>
 classif.ce 
-     0.293 </code></pre>
+     0.296 </code></pre>
 </div>
 <ul>
 <li>Compare this to performance of individual <code>Learner</code>s. Note, however, that the difference is smaller than the variation in CV estimate.</li>
@@ -1641,7 +1641,7 @@ bmr = benchmark(data.table(
 bmr$aggregate()[, c(&quot;learner_id&quot;, &quot;classif.ce&quot;)]</code></pre>
 <pre><code>
                    learner_id classif.ce
-1:  imputemean.classif.ranger      0.290
+1:  imputemean.classif.ranger      0.298
 2:    imputemean.classif.kknn      0.350
 3: imputemean.classif.log_reg      0.291</code></pre>
 </div>
@@ -1663,14 +1663,14 @@ stats::glm(formula = task$formula(), family = &quot;binomial&quot;, data = task$
 
 Deviance Residuals: 
     Min       1Q   Median       3Q      Max  
--1.5521  -0.8489  -0.6985   1.2559   1.9143  
+-1.4995  -0.8383  -0.6795   1.2048   2.0085  
 
 Coefficients: (2 not defined because of singularities)
                          Estimate Std. Error z value Pr(&gt;|z|)    
-(Intercept)                1.4389     0.3261   4.412 1.02e-05 ***
-classif.ranger.prob.good  -2.5411     0.5309  -4.787 1.69e-06 ***
+(Intercept)                1.8126     0.3398   5.334 9.62e-08 ***
+classif.ranger.prob.good  -3.8262     0.5589  -6.845 7.63e-12 ***
 classif.ranger.prob.bad        NA         NA      NA       NA    
-classif.kknn.prob.good    -0.8290     0.3420  -2.424   0.0154 *  
+classif.kknn.prob.good    -0.1159     0.3304  -0.351    0.726    
 classif.kknn.prob.bad          NA         NA      NA       NA    
 ---
 Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
@@ -1678,8 +1678,8 @@ Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&
 (Dispersion parameter for binomial family taken to be 1)
 
     Null deviance: 1221.7  on 999  degrees of freedom
-Residual deviance: 1168.3  on 997  degrees of freedom
-AIC: 1174.3
+Residual deviance: 1155.1  on 997  degrees of freedom
+AIC: 1161.1
 
 Number of Fisher Scoring iterations: 4</code></pre>
 </div>
