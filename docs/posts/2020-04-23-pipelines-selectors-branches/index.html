@@ -757,6 +757,16 @@ d-appendix .citation-appendix,
 }
 
 
+.sidebar-section.custom {
+  font-size: 12px;
+  line-height: 1.6em;
+}
+
+.custom p {
+  margin-bottom: 0.5em;
+}
+
+
 /* Improve display for browsers without grid (IE/Edge <= 15) */
 
 .downlevel {
@@ -1307,13 +1317,13 @@ document.addEventListener('DOMContentLoaded', function() {
 <nav class="distill-site-nav distill-site-header">
 <div class="nav-left">
 <a class="logo" href="https://mlr3.mlr-org.com">
-<img src="../../images/logo.png"/>
+<img src="../../images/logo.png" alt="Logo"/>
 </a>
 <a href="../../index.html" class="title">mlr3gallery</a>
 </div>
 <div class="nav-right">
 <a href="https://github.com/mlr-org/mlr3gallery">
-<i class="fab fa-github"></i>
+<i class="fab fa-github" aria-hidden="true"></i>
 </a>
 <a href="javascript:void(0);" class="nav-toggle">&#9776;</a>
 </div>
@@ -1921,18 +1931,18 @@ instance$archive()</code></pre>
 5: branch.copy.simple_median.imputehist.missind.imputemedian.featureunion.unbranch.classif.rpart
    resampling_id iters params tune_x warnings errors classif.ce
 1:            cv     3 &lt;list&gt; &lt;list&gt;        0      0  0.2617188
-2:            cv     3 &lt;list&gt; &lt;list&gt;        0      0  0.2526042
-3:            cv     3 &lt;list&gt; &lt;list&gt;        0      0  0.2500000
-4:            cv     3 &lt;list&gt; &lt;list&gt;        0      0  0.2604167
-5:            cv     3 &lt;list&gt; &lt;list&gt;        0      0  0.2513021</code></pre>
+2:            cv     3 &lt;list&gt; &lt;list&gt;        0      0  0.2552083
+3:            cv     3 &lt;list&gt; &lt;list&gt;        0      0  0.2513021
+4:            cv     3 &lt;list&gt; &lt;list&gt;        0      0  0.2656250
+5:            cv     3 &lt;list&gt; &lt;list&gt;        0      0  0.2617188</code></pre>
 </div>
-<p>The best performance in this short tuned experiment was achieved with “impute_missind”.</p>
+<p>The best performance in this short tuned experiment was achieved with “simple_median”.</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
 instance$result$params</code></pre>
 <pre><code>
 $branch.selection
-[1] &quot;impute_missind&quot;
+[1] &quot;simple_median&quot;
 
 $imputehist.affect_columns
 selector_name(c(&quot;glucose&quot;, &quot;mass&quot;, &quot;pressure&quot;))
@@ -1950,10 +1960,10 @@ $classif.rpart.xval
 [1] 0
 
 $classif.rpart.cp
-[1] 0.003969142
+[1] 0.03692127
 
 $classif.rpart.minbucket
-[1] 5</code></pre>
+[1] 8</code></pre>
 </div>
 <h2 id="conclusion">Conclusion</h2>
 <p>This post shows ways on how to specify features on which preprocessing steps are to be performed. In addition it shows how to create alternative paths in the learner graph. The preprocessing steps that can be used are not limited to imputation. Check the list of available <a href="https://mlr3pipelines.mlr-org.com/reference/index.html"><code>PipeOp</code>s</a>.</p>
