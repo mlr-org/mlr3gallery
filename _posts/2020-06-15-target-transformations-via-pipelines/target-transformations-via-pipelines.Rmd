@@ -167,7 +167,7 @@ No matter how "complicated" the actual target transformation and inverse transfo
 To allow for more advanced target transformations, we now have a closer look at the abstract base class, PipeOpTargetTrafo:
 
 PipeOpTargetTrafo has one input channel, named `"input"` taking a task both during training and prediction.
-It's two output channels are named `"fun"` and `"output"`. During training `"fun"` returns `NULL` and during prediction `"fun"` returns a function that will be used by PipeOpTargetInverter to perform the inverse target transformation. `"output"` returns the modified input task.
+It's two output channels are named `"fun"` and `"output"`. During training `"fun"` returns `NULL` and during prediction `"fun"` returns a function that will be used by PipeOpTargetInverter to perform the inverse target transformation based on PipeOpTargetInverter's `"prediction"` input. `"output"` returns the modified input task.
 
 Inherited classes should overload four functions:
 
@@ -178,13 +178,13 @@ Inherited classes should overload four functions:
 
 * `train_invert()` takes the input task and returns a `predict_phase_control` object. This can be anything. Note that `train_invert()` should not modify the input task.
 
-* `inverter()` takes a prediction and a `predict_phase_control` object as inputs and returns a prediction. This is the main function for specifying the actual inverse target transformation that will later be carried out by PipeOpTargetInverter
+* `inverter()` takes a prediction and a `predict_phase_control` object as inputs and returns a prediction. This is the main function for specifying the actual inverse target transformation that will later be carried out by PipeOpTargetInverter. Internally a private helper function will construct the function that will be returned by the `"fun"` output of PipeOpTargetTrafo so that PipeOpTargetInverter can later simply dispatch this inverse target transformation on its `"prediction"` input.
 
-The workflow during training is given in the following figure:
-FIXME
+The supposed workflow of a class inherited from PipeOpTargetTrafo is given in the following figure:
 
-During prediction the workflow looks like this:
-FIXME
+```{r, echo = FALSE, out.width = "100%"}
+knitr::include_graphics("workflow.svg")
+```
 
 To solidify our understanding we will design a new target transformation PipeOp in the next section: PipeOpTargetTrafoBoxCox
 

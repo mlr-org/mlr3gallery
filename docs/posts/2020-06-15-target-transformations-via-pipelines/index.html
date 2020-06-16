@@ -65,7 +65,7 @@
 <!--/radix_placeholder_rmarkdown_metadata-->
   
   <script type="text/json" id="radix-resource-manifest">
-  {"type":"character","attributes":{},"value":["target-transformations-via-pipelines_files/bowser-1.9.3/bowser.min.js","target-transformations-via-pipelines_files/distill-2.2.21/template.v2.js","target-transformations-via-pipelines_files/figure-html5/unnamed-chunk-12-1.png","target-transformations-via-pipelines_files/figure-html5/unnamed-chunk-22-1.png","target-transformations-via-pipelines_files/header-attrs-2.2/header-attrs.js","target-transformations-via-pipelines_files/jquery-1.11.3/jquery.min.js","target-transformations-via-pipelines_files/webcomponents-2.0.0/webcomponents.js"]}
+  {"type":"character","attributes":{},"value":["target-transformations-via-pipelines_files/bowser-1.9.3/bowser.min.js","target-transformations-via-pipelines_files/distill-2.2.21/template.v2.js","target-transformations-via-pipelines_files/figure-html5/unnamed-chunk-12-1.png","target-transformations-via-pipelines_files/figure-html5/unnamed-chunk-23-1.png","target-transformations-via-pipelines_files/header-attrs-2.2/header-attrs.js","target-transformations-via-pipelines_files/jquery-1.11.3/jquery.min.js","target-transformations-via-pipelines_files/webcomponents-2.0.0/webcomponents.js","workflow.svg"]}
   </script>
   <!--radix_placeholder_navigation_in_header-->
 
@@ -1457,7 +1457,7 @@ function(inputs) {
         assert_list(inputs, len = 1L, types = &quot;Prediction&quot;)
         self$inverter(inputs[[1L]], predict_phase_control)
       }
-&lt;environment: 0x55f6e501ce48&gt;
+&lt;environment: 0x564ddc86df30&gt;
 
 $output
 &lt;TaskRegr:mtcars&gt; (32 x 11)
@@ -1526,7 +1526,7 @@ $model$regr.lm$log
 Empty data.table (0 rows and 3 cols): stage,class,msg
 
 $model$regr.lm$train_time
-[1] 0.01
+[1] 0.009
 
 $model$regr.lm$train_task
 &lt;TaskRegr:mtcars&gt; (0 x 11)
@@ -1544,7 +1544,7 @@ $log
 Empty data.table (0 rows and 3 cols): stage,class,msg
 
 $train_time
-[1] 0.124
+[1] 0.067
 
 $train_task
 &lt;TaskRegr:mtcars&gt; (0 x 11)
@@ -1613,16 +1613,18 @@ learner_lm$predict(task)</code></pre>
 <h1 id="abstract-base-class">Abstract Base Class</h1>
 <p>No matter how “complicated” the actual target transformation and inverse transformation may be, applying the inverse transformation function after having predicted from a Learner will always be done via PipeOpTargetInverter (as already outlined above, PipeOpTargetInverter has an empty ParamSet and its sole purpose is to apply the inverse transformation function after having predicted from a Learner). All Graphs for doing target transformations will therefore look similar like the simple one above, i.e., a target transformation PipeOp followed by some Learner or a whole Graph, followed by PipeOpTargetInverter. Therefore, using <code>ppl("targettrafo")</code> to construct such Graphs is highly recommended.</p>
 <p>To allow for more advanced target transformations, we now have a closer look at the abstract base class, PipeOpTargetTrafo:</p>
-<p>PipeOpTargetTrafo has one input channel, named <code>"input"</code> taking a task both during training and prediction. It’s two output channels are named <code>"fun"</code> and <code>"output"</code>. During training <code>"fun"</code> returns <code>NULL</code> and during prediction <code>"fun"</code> returns a function that will be used by PipeOpTargetInverter to perform the inverse target transformation. <code>"output"</code> returns the modified input task.</p>
+<p>PipeOpTargetTrafo has one input channel, named <code>"input"</code> taking a task both during training and prediction. It’s two output channels are named <code>"fun"</code> and <code>"output"</code>. During training <code>"fun"</code> returns <code>NULL</code> and during prediction <code>"fun"</code> returns a function that will be used by PipeOpTargetInverter to perform the inverse target transformation based on PipeOpTargetInverter’s <code>"prediction"</code> input. <code>"output"</code> returns the modified input task.</p>
 <p>Inherited classes should overload four functions:</p>
 <ul>
 <li><p><code>set_state()</code> takes the input task and returns a <code>list()</code> which will internally be used to set the <code>$state</code>. Typically it is sensible to make use of the <code>$state</code> during <code>train_target()</code> and <code>train_invert()</code></p></li>
 <li><p><code>train_target()</code> takes the input task and returns a modified task (i.e., the task with the transformed target). This is the main function for doing the actual target transformation. Note that <code>set_state()</code> is evaluated a single time during training right before <code>train_target()</code> and therefore, you can rely on the <code>$state</code> that has been set. To update the input task with respect to the transformed target, inheritances should make use of the private <code>$.update_target()</code> function which itself will call <code>convert_task()</code> and drop the original target from the task.</p></li>
 <li><p><code>train_invert()</code> takes the input task and returns a <code>predict_phase_control</code> object. This can be anything. Note that <code>train_invert()</code> should not modify the input task.</p></li>
-<li><p><code>inverter()</code> takes a prediction and a <code>predict_phase_control</code> object as inputs and returns a prediction. This is the main function for specifying the actual inverse target transformation that will later be carried out by PipeOpTargetInverter</p></li>
+<li><p><code>inverter()</code> takes a prediction and a <code>predict_phase_control</code> object as inputs and returns a prediction. This is the main function for specifying the actual inverse target transformation that will later be carried out by PipeOpTargetInverter. Internally a private helper function will construct the function that will be returned by the <code>"fun"</code> output of PipeOpTargetTrafo so that PipeOpTargetInverter can later simply dispatch this inverse target transformation on its <code>"prediction"</code> input.</p></li>
 </ul>
-<p>The workflow during training is given in the following figure: FIXME</p>
-<p>During prediction the workflow looks like this: FIXME</p>
+<p>The supposed workflow of a class inherited from PipeOpTargetTrafo is given in the following figure:</p>
+<div class="layout-chunk" data-layout="l-body">
+<p><img src="workflow.svg" width="100%" /></p>
+</div>
 <p>To solidify our understanding we will design a new target transformation PipeOp in the next section: PipeOpTargetTrafoBoxCox</p>
 <h1 id="hands-on-pipeoptargettrafoboxcox">Hands on: PipeOpTargetTrafoBoxCox</h1>
 <p>The Box-Cox transformation is given as FIXME</p>
@@ -1707,7 +1709,7 @@ g_bc = ppl(&quot;targettrafo&quot;, graph = learner_lm, trafo_pipeop = PipeOpTar
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
 g_bc$plot()</code></pre>
-<p><img src="target-transformations-via-pipelines_files/figure-html5/unnamed-chunk-22-1.png" width="624" /></p>
+<p><img src="target-transformations-via-pipelines_files/figure-html5/unnamed-chunk-23-1.png" width="624" /></p>
 </div>
 <p>Finally we <code>$train()</code> and <code>$predict()</code> on the task (again, we wrap the Graph in a GraphLearner):</p>
 <div class="layout-chunk" data-layout="l-body">
@@ -1734,7 +1736,7 @@ $model$regr.lm$log
 Empty data.table (0 rows and 3 cols): stage,class,msg
 
 $model$regr.lm$train_time
-[1] 0.009
+[1] 0.008
 
 $model$regr.lm$train_task
 &lt;TaskRegr:mtcars&gt; (0 x 11)
@@ -1761,7 +1763,7 @@ $log
 Empty data.table (0 rows and 3 cols): stage,class,msg
 
 $train_time
-[1] 0.085
+[1] 0.093
 
 $train_task
 &lt;TaskRegr:mtcars&gt; (0 x 11)
@@ -1788,38 +1790,38 @@ gl_bc$predict(task)</code></pre>
 bg = benchmark_grid(list(task), learners = list(learner_lm, gl, gl_bc), resamplings = list(rsmp(&quot;cv&quot;, folds = 10)))
 b = benchmark(bg)</code></pre>
 <pre><code>
-INFO  [23:10:26.765] Benchmark with 30 resampling iterations 
-INFO  [23:10:26.874] Applying learner &#39;regr.lm&#39; on task &#39;mtcars&#39; (iter 6/10) 
-INFO  [23:10:26.888] Applying learner &#39;targettrafoboxcox.regr.lm.targetinverter&#39; on task &#39;mtcars&#39; (iter 7/10) 
-INFO  [23:10:27.026] Applying learner &#39;targettrafoboxcox.regr.lm.targetinverter&#39; on task &#39;mtcars&#39; (iter 2/10) 
-INFO  [23:10:27.173] Applying learner &#39;regr.lm&#39; on task &#39;mtcars&#39; (iter 4/10) 
-INFO  [23:10:27.188] Applying learner &#39;targettrafoboxcox.regr.lm.targetinverter&#39; on task &#39;mtcars&#39; (iter 6/10) 
-INFO  [23:10:27.358] Applying learner &#39;targettrafoboxcox.regr.lm.targetinverter&#39; on task &#39;mtcars&#39; (iter 9/10) 
-INFO  [23:10:27.507] Applying learner &#39;regr.lm&#39; on task &#39;mtcars&#39; (iter 9/10) 
-INFO  [23:10:27.737] Applying learner &#39;targettrafosimple.regr.lm.targetinverter&#39; on task &#39;mtcars&#39; (iter 10/10) 
-INFO  [23:10:27.875] Applying learner &#39;targettrafoboxcox.regr.lm.targetinverter&#39; on task &#39;mtcars&#39; (iter 1/10) 
-INFO  [23:10:28.030] Applying learner &#39;targettrafoboxcox.regr.lm.targetinverter&#39; on task &#39;mtcars&#39; (iter 5/10) 
-INFO  [23:10:28.175] Applying learner &#39;regr.lm&#39; on task &#39;mtcars&#39; (iter 8/10) 
-INFO  [23:10:28.189] Applying learner &#39;targettrafoboxcox.regr.lm.targetinverter&#39; on task &#39;mtcars&#39; (iter 3/10) 
-INFO  [23:10:28.345] Applying learner &#39;targettrafoboxcox.regr.lm.targetinverter&#39; on task &#39;mtcars&#39; (iter 8/10) 
-INFO  [23:10:28.500] Applying learner &#39;regr.lm&#39; on task &#39;mtcars&#39; (iter 10/10) 
-INFO  [23:10:28.516] Applying learner &#39;targettrafosimple.regr.lm.targetinverter&#39; on task &#39;mtcars&#39; (iter 1/10) 
-INFO  [23:10:28.670] Applying learner &#39;targettrafosimple.regr.lm.targetinverter&#39; on task &#39;mtcars&#39; (iter 8/10) 
-INFO  [23:10:28.814] Applying learner &#39;regr.lm&#39; on task &#39;mtcars&#39; (iter 7/10) 
-INFO  [23:10:28.828] Applying learner &#39;targettrafoboxcox.regr.lm.targetinverter&#39; on task &#39;mtcars&#39; (iter 4/10) 
-INFO  [23:10:28.976] Applying learner &#39;targettrafoboxcox.regr.lm.targetinverter&#39; on task &#39;mtcars&#39; (iter 10/10) 
-INFO  [23:10:29.145] Applying learner &#39;regr.lm&#39; on task &#39;mtcars&#39; (iter 2/10) 
-INFO  [23:10:29.163] Applying learner &#39;regr.lm&#39; on task &#39;mtcars&#39; (iter 3/10) 
-INFO  [23:10:29.180] Applying learner &#39;targettrafosimple.regr.lm.targetinverter&#39; on task &#39;mtcars&#39; (iter 6/10) 
-INFO  [23:10:29.351] Applying learner &#39;regr.lm&#39; on task &#39;mtcars&#39; (iter 1/10) 
-INFO  [23:10:29.366] Applying learner &#39;targettrafosimple.regr.lm.targetinverter&#39; on task &#39;mtcars&#39; (iter 3/10) 
-INFO  [23:10:29.524] Applying learner &#39;regr.lm&#39; on task &#39;mtcars&#39; (iter 5/10) 
-INFO  [23:10:29.538] Applying learner &#39;targettrafosimple.regr.lm.targetinverter&#39; on task &#39;mtcars&#39; (iter 7/10) 
-INFO  [23:10:29.711] Applying learner &#39;targettrafosimple.regr.lm.targetinverter&#39; on task &#39;mtcars&#39; (iter 9/10) 
-INFO  [23:10:29.869] Applying learner &#39;targettrafosimple.regr.lm.targetinverter&#39; on task &#39;mtcars&#39; (iter 4/10) 
-INFO  [23:10:30.032] Applying learner &#39;targettrafosimple.regr.lm.targetinverter&#39; on task &#39;mtcars&#39; (iter 5/10) 
-INFO  [23:10:30.191] Applying learner &#39;targettrafosimple.regr.lm.targetinverter&#39; on task &#39;mtcars&#39; (iter 2/10) 
-INFO  [23:10:30.384] Finished benchmark </code></pre>
+INFO  [22:35:05.344] Benchmark with 30 resampling iterations 
+INFO  [22:35:05.454] Applying learner &#39;regr.lm&#39; on task &#39;mtcars&#39; (iter 6/10) 
+INFO  [22:35:05.477] Applying learner &#39;targettrafoboxcox.regr.lm.targetinverter&#39; on task &#39;mtcars&#39; (iter 7/10) 
+INFO  [22:35:05.619] Applying learner &#39;targettrafoboxcox.regr.lm.targetinverter&#39; on task &#39;mtcars&#39; (iter 2/10) 
+INFO  [22:35:05.769] Applying learner &#39;regr.lm&#39; on task &#39;mtcars&#39; (iter 4/10) 
+INFO  [22:35:05.783] Applying learner &#39;targettrafoboxcox.regr.lm.targetinverter&#39; on task &#39;mtcars&#39; (iter 6/10) 
+INFO  [22:35:05.919] Applying learner &#39;targettrafoboxcox.regr.lm.targetinverter&#39; on task &#39;mtcars&#39; (iter 9/10) 
+INFO  [22:35:06.076] Applying learner &#39;regr.lm&#39; on task &#39;mtcars&#39; (iter 9/10) 
+INFO  [22:35:06.090] Applying learner &#39;targettrafosimple.regr.lm.targetinverter&#39; on task &#39;mtcars&#39; (iter 10/10) 
+INFO  [22:35:06.224] Applying learner &#39;targettrafoboxcox.regr.lm.targetinverter&#39; on task &#39;mtcars&#39; (iter 1/10) 
+INFO  [22:35:06.369] Applying learner &#39;targettrafoboxcox.regr.lm.targetinverter&#39; on task &#39;mtcars&#39; (iter 5/10) 
+INFO  [22:35:06.703] Applying learner &#39;regr.lm&#39; on task &#39;mtcars&#39; (iter 8/10) 
+INFO  [22:35:06.716] Applying learner &#39;targettrafoboxcox.regr.lm.targetinverter&#39; on task &#39;mtcars&#39; (iter 3/10) 
+INFO  [22:35:06.850] Applying learner &#39;targettrafoboxcox.regr.lm.targetinverter&#39; on task &#39;mtcars&#39; (iter 8/10) 
+INFO  [22:35:06.984] Applying learner &#39;regr.lm&#39; on task &#39;mtcars&#39; (iter 10/10) 
+INFO  [22:35:06.998] Applying learner &#39;targettrafosimple.regr.lm.targetinverter&#39; on task &#39;mtcars&#39; (iter 1/10) 
+INFO  [22:35:07.129] Applying learner &#39;targettrafosimple.regr.lm.targetinverter&#39; on task &#39;mtcars&#39; (iter 8/10) 
+INFO  [22:35:07.270] Applying learner &#39;regr.lm&#39; on task &#39;mtcars&#39; (iter 7/10) 
+INFO  [22:35:07.284] Applying learner &#39;targettrafoboxcox.regr.lm.targetinverter&#39; on task &#39;mtcars&#39; (iter 4/10) 
+INFO  [22:35:07.419] Applying learner &#39;targettrafoboxcox.regr.lm.targetinverter&#39; on task &#39;mtcars&#39; (iter 10/10) 
+INFO  [22:35:07.561] Applying learner &#39;regr.lm&#39; on task &#39;mtcars&#39; (iter 2/10) 
+INFO  [22:35:07.575] Applying learner &#39;regr.lm&#39; on task &#39;mtcars&#39; (iter 3/10) 
+INFO  [22:35:07.588] Applying learner &#39;targettrafosimple.regr.lm.targetinverter&#39; on task &#39;mtcars&#39; (iter 6/10) 
+INFO  [22:35:07.721] Applying learner &#39;regr.lm&#39; on task &#39;mtcars&#39; (iter 1/10) 
+INFO  [22:35:07.735] Applying learner &#39;targettrafosimple.regr.lm.targetinverter&#39; on task &#39;mtcars&#39; (iter 3/10) 
+INFO  [22:35:07.871] Applying learner &#39;regr.lm&#39; on task &#39;mtcars&#39; (iter 5/10) 
+INFO  [22:35:07.885] Applying learner &#39;targettrafosimple.regr.lm.targetinverter&#39; on task &#39;mtcars&#39; (iter 7/10) 
+INFO  [22:35:08.031] Applying learner &#39;targettrafosimple.regr.lm.targetinverter&#39; on task &#39;mtcars&#39; (iter 9/10) 
+INFO  [22:35:08.160] Applying learner &#39;targettrafosimple.regr.lm.targetinverter&#39; on task &#39;mtcars&#39; (iter 4/10) 
+INFO  [22:35:08.292] Applying learner &#39;targettrafosimple.regr.lm.targetinverter&#39; on task &#39;mtcars&#39; (iter 5/10) 
+INFO  [22:35:08.430] Applying learner &#39;targettrafosimple.regr.lm.targetinverter&#39; on task &#39;mtcars&#39; (iter 2/10) 
+INFO  [22:35:08.596] Finished benchmark </code></pre>
 </div>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
