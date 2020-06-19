@@ -1457,7 +1457,7 @@ function(inputs) {
         assert_list(inputs, len = 1L, types = &quot;Prediction&quot;)
         self$inverter(inputs[[1L]], predict_phase_control)
       }
-&lt;environment: 0x560d14b3f898&gt;
+&lt;environment: 0x560d09f2e7a8&gt;
 
 $output
 &lt;TaskRegr:mtcars&gt; (32 x 11)
@@ -1526,7 +1526,7 @@ $model$regr.lm$log
 Empty data.table (0 rows and 3 cols): stage,class,msg
 
 $model$regr.lm$train_time
-[1] 0.009
+[1] 0.01
 
 $model$regr.lm$train_task
 &lt;TaskRegr:mtcars&gt; (0 x 11)
@@ -1544,7 +1544,7 @@ $log
 Empty data.table (0 rows and 3 cols): stage,class,msg
 
 $train_time
-[1] 0.081
+[1] 0.075
 
 $train_task
 &lt;TaskRegr:mtcars&gt; (0 x 11)
@@ -1587,7 +1587,7 @@ $log
 Empty data.table (0 rows and 3 cols): stage,class,msg
 
 $train_time
-[1] 0.005
+[1] 0.004
 
 $train_task
 &lt;TaskRegr:mtcars&gt; (0 x 11)
@@ -1653,7 +1653,25 @@ PipeOpTargetTrafoBoxCox = R6Class(&quot;PipeOpTargetTrafoBoxCox&quot;,
       ))
       super$initialize(id = id, param_set = ps, param_vals = param_vals,
         packages = &quot;bestNormalize&quot;)
-    },</code></pre>
+    },
+
+    set_state = function(task) {
+      ...
+    },
+
+    train_target = function(task) {
+      ...
+    },
+
+    train_invert = function(task) {
+      ...
+    },
+
+    inverter = function(prediction, predict_phase_control) {
+      ...
+    }
+  )
+)</code></pre>
 </div>
 <p>As parameters, we allow <code>"standardize"</code> (whether to center and scale the transformed values to attempt a standard normal distribution), <code>"eps"</code> (tolerance parameter to identify if the <span class="math inline">\(\lambda\)</span> parameter is equal to zero), <code>"lower"</code> (lower value for the estimation of the <span class="math inline">\(\lambda\)</span> parameter) and <code>"upper"</code> (upper value for the estimation of the <span class="math inline">\(\lambda\)</span> parameter).</p>
 <p>Second, we overload the four functions as mentioned above.</p>
@@ -1663,7 +1681,7 @@ PipeOpTargetTrafoBoxCox = R6Class(&quot;PipeOpTargetTrafoBoxCox&quot;,
     set_state = function(task) {
       checkmate::assert_r6(task, classes = &quot;TaskRegr&quot;)
       target = task$data(cols = task$target_names)[[1L]]
-      bc = invoke(bestNormalize::boxcox, target,
+      bc = mlr3misc::invoke(bestNormalize::boxcox, target,
         .args = self$param_set$get_values(tags = &quot;boxcox&quot;))
       bc$x.t = NULL
       bc$x = NULL
@@ -1675,6 +1693,7 @@ PipeOpTargetTrafoBoxCox = R6Class(&quot;PipeOpTargetTrafoBoxCox&quot;,
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
     train_target = function(task) {
+      checkmate::assert_r6(task, classes = &quot;TaskRegr&quot;)
       target = task$data(cols = task$target_names)[[1L]]
       new_target = as.data.table(predict(self$state$bc, newdata = target))
       colnames(new_target) = paste0(task$target_names, &quot;.bc&quot;)
@@ -1706,9 +1725,7 @@ PipeOpTargetTrafoBoxCox = R6Class(&quot;PipeOpTargetTrafoBoxCox&quot;,
       get(mlr_reflections$task_types[type]$prediction)$new(
         row_ids = prediction$row_ids, truth = truth, response = response
       )
-    }
-  )
-)</code></pre>
+    }</code></pre>
 </div>
 <p>We assert that the input prediction is of class <a href="https://mlr3.mlr-org.com/reference/PredictionRegr.html"><code>PredictionRegr</code></a> and extract the truth and the response from the <code>Prediction</code>. We then apply the inverse Box-Cox transformation to both the truth and the response based on the <span class="math inline">\(\lambda\)</span> parameter and the mean and standard deviation learned during training, relying on the <code>predict_phase_control</code> object (which we specified while overloading <code>train_invert()</code>, i.e., this is just the <code>"boxcox"</code> object stored in the <code>$state</code>). Finally, we construct a new <code>Prediction</code> object.</p>
 <div class="layout-chunk" data-layout="l-body">
@@ -1751,7 +1768,7 @@ $model$regr.lm$log
 Empty data.table (0 rows and 3 cols): stage,class,msg
 
 $model$regr.lm$train_time
-[1] 0.008
+[1] 0.01
 
 $model$regr.lm$train_task
 &lt;TaskRegr:mtcars&gt; (0 x 11)
@@ -1778,7 +1795,7 @@ $log
 Empty data.table (0 rows and 3 cols): stage,class,msg
 
 $train_time
-[1] 0.071
+[1] 0.098
 
 $train_task
 &lt;TaskRegr:mtcars&gt; (0 x 11)

@@ -205,7 +205,7 @@ Here we will design a `PipeO`p to apply the Box-Cox transformation as a target t
 
 First, we inherit from `PipeOpTargetTrafo` and overload the `initialize()` function:
 
-```{r, eval = FALSE}
+```{r, eval = FALSE, tidy = FALSE}
 PipeOpTargetTrafoBoxCox = R6Class("PipeOpTargetTrafoBoxCox",
   inherit = PipeOpTargetTrafo,
   public = list(
@@ -223,6 +223,24 @@ PipeOpTargetTrafoBoxCox = R6Class("PipeOpTargetTrafoBoxCox",
       super$initialize(id = id, param_set = ps, param_vals = param_vals,
         packages = "bestNormalize")
     },
+
+    set_state = function(task) {
+      ...
+    },
+
+    train_target = function(task) {
+      ...
+    },
+
+    train_invert = function(task) {
+      ...
+    },
+
+    inverter = function(prediction, predict_phase_control) {
+      ...
+    }
+  )
+)
 ```
 
 As parameters, we allow `"standardize"` (whether to center and scale the transformed values to attempt a standard normal distribution), `"eps"` (tolerance parameter to identify if the $\lambda$ parameter is equal to zero), `"lower"` (lower value for the estimation of the $\lambda$ parameter) and `"upper"` (upper value for the estimation of the $\lambda$ parameter).
@@ -231,11 +249,11 @@ Second, we overload the four functions as mentioned above.
 
 We start with `set_state()`:
 
-```{r, eval = FALSE}
+```{r, eval = FALSE, tidy = FALSE}
     set_state = function(task) {
       checkmate::assert_r6(task, classes = "TaskRegr")
       target = task$data(cols = task$target_names)[[1L]]
-      bc = invoke(bestNormalize::boxcox, target,
+      bc = mlr3misc::invoke(bestNormalize::boxcox, target,
         .args = self$param_set$get_values(tags = "boxcox"))
       bc$x.t = NULL
       bc$x = NULL
@@ -247,8 +265,9 @@ We assert that the input task is of class `r ref("TaskRegr", "TaskRegr")`  and a
 
 Next, we tackle `train_target()`:
 
-```{r, eval = FALSE}
+```{r, eval = FALSE, tidy = FALSE}
     train_target = function(task) {
+      checkmate::assert_r6(task, classes = "TaskRegr")
       target = task$data(cols = task$target_names)[[1L]]
       new_target = as.data.table(predict(self$state$bc, newdata = target))
       colnames(new_target) = paste0(task$target_names, ".bc")
@@ -263,7 +282,7 @@ Time to overload `train_invert()`:
 
 This is even more straightforward, because the prediction method for objects of class `"boxcox"` directly allows for inverting the transformation via setting the argument `inverse = TRUE`. Therefore, we only need the `"boxcox"` object stored in the `$state`.
 
-```{r, eval = FALSE}
+```{r, eval = FALSE, tidy = FALSE}
     train_invert = function(task) {
       self$state$bc
     },
@@ -271,7 +290,7 @@ This is even more straightforward, because the prediction method for objects of 
 
 Finally, we overload `inverter()`:
 
-```{r, eval = FALSE}
+```{r, eval = FALSE, tidy = FALSE}
     inverter = function(prediction, predict_phase_control) {
       checkmate::assert_r6(prediction, classes = "PredictionRegr")
       type = prediction$task_type
@@ -285,8 +304,6 @@ Finally, we overload `inverter()`:
         row_ids = prediction$row_ids, truth = truth, response = response
       )
     }
-  )
-)
 ```
 
 We assert that the input prediction is of class `r ref("PredictionRegr", "PredictionRegr")` and extract the truth and the response from the `Prediction`. We then apply the inverse Box-Cox transformation to both the truth and the response based on the $\lambda$ parameter and the mean and standard deviation learned during training, relying on the `predict_phase_control` object (which we specified while overloading `train_invert()`, i.e., this is just the `"boxcox"` object stored in the `$state`). Finally, we construct a new `Prediction` object.
@@ -311,7 +328,7 @@ PipeOpTargetTrafoBoxCox = R6Class("PipeOpTargetTrafoBoxCox",
     },
 
     set_state = function(task) {
-      assert_r6(task, classes = "TaskRegr")
+      checkmate::assert_r6(task, classes = "TaskRegr")
       target = task$data(cols = task$target_names)[[1L]]
       bc = mlr3misc::invoke(bestNormalize::boxcox, target,
         .args = self$param_set$get_values(tags = "boxcox"))
@@ -321,6 +338,7 @@ PipeOpTargetTrafoBoxCox = R6Class("PipeOpTargetTrafoBoxCox",
     },
 
     train_target = function(task) {
+      checkmate::assert_r6(task, classes = "TaskRegr")
       target = task$data(cols = task$target_names)[[1L]]
       new_target = as.data.table(predict(self$state$bc, newdata = target))
       colnames(new_target) = paste0(task$target_names, ".bc")
@@ -333,7 +351,7 @@ PipeOpTargetTrafoBoxCox = R6Class("PipeOpTargetTrafoBoxCox",
     },
 
     inverter = function(prediction, predict_phase_control) {
-      assert_r6(prediction, classes = "PredictionRegr")
+      checkmate::assert_r6(prediction, classes = "PredictionRegr")
       type = prediction$task_type
       truth = prediction$truth
       response = prediction$response
