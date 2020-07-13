@@ -1,7 +1,7 @@
 ---
-title: "Integer hyperparameters in tuners for real-valued search spaces"
+title: "Integer Hyperparameters in Tuners for Real-valued Search Spaces"
 description: |
-  How to tune integer hyperparameter with tuner that can only suggest real numbers.
+  How to tune integer hyperparameters with tuners that can only propose real numbers.
 author:
   - name: Marc Becker
 date: 07-08-2020
@@ -21,15 +21,13 @@ lgr::get_logger("bbotk")$set_threshold("warn")
 
 ## Intro
 
-`Tuner` for real-valued search spaces are not able to produce integer
-hyperparameter values by themselves. However, it is possible to transform the
-real values proposed by a `Tuner` to integers before passing them to the learner
-in the evaluation. We show how to add a parameter transformation to a
-`ParamSet`and apply this set in the tuning process.
+`Tuner` for real-valued search spaces are not able to tune on integer hyperparameters. 
+However, it is possible to round the real values proposed by a `Tuner` to integers 
+before passing them to the learner in the evaluation. We show how to apply a parameter transformation to a `ParamSet`and use this set in the tuning process.
 
 ## Task and Learner
 
-First, we take a learner with a integer-valued hyperparameter.
+To illustrate this, we take a learner with a integer-valued hyperparameter.
 
 ```{r}
 library(mlr3)
@@ -42,8 +40,7 @@ learner$param_set$values$kernel = "triangular"
 print(learner$param_set)
 ```
 
-We want to tune the integer-valued hyperparameter `k` which defines the numbers
-of neighbors.
+We want to tune the integer-valued hyperparameter `k` which defines the numbers of neighbors.
 
 ```{r}
 task = tsk("iris")
@@ -67,11 +64,11 @@ with a transformation function.
 
 ```{r}
 search_space = ParamSet$new(params = list(
-  ParamDbl$new("k", lower = 3, upper = 7)
+  ParamDbl$new("k", lower = 3, upper = 8)
 ))
 
 search_space$trafo = function(x, param_set) {
-  x$k = as.integer(round(x$k))
+  x$k = as.integer(x$k)
   return(x)
 }
 ```
@@ -112,11 +109,23 @@ However, in the learners hyperparameters space, `k` is an integer value.
 instance$result_x_domain
 ```
 
+```{r}
+instance$archive$data(unnest = "x_domain")
+```
+
+
+The archive shows us that for all real-valued `k` proposed by `GenSA`, 
+an integer-valued `k` in the learner hyperparameter space (`x_domain_k`) was created. 
+
 Internally, `TunerGenSA` was given the parameter types of the search space and
 therefore suggested real numbers for `k`. Before the performance of the
 different `k` values was evaluated, the transformation function of the
 `search_space` parameter set was called and `k` was transformed to an integer
 value.
+
+Note that the tuner is not aware of the transformation. This could lead to problems
+since the tuner proposes different real values but they might be all rounded to
+the same integer value. 
 
 We successfully tuned a integer-valued hyperparameter with `TunerGenSA` which is
 only suitable for an real-valued search space. This technique is not limited to
