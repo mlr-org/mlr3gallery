@@ -1,6 +1,6 @@
 ---
 title: House prices in King County
-categories: 
+categories:
   - regression
   - visualization
   - feature engineering
@@ -327,7 +327,7 @@ ps = ParamSet$new(
 
 # Define the Terminator
 terminator = term("evals", n_evals = 10)
-at = AutoTuner$new(lrn_xgb, rsmp("holdout"), measures = msr("regr.mse"), ps,
+at = AutoTuner$new(lrn_xgb, rsmp("holdout"), msr("regr.mse"), ps,
   terminator, tuner = tnr("random_search"))
 ```
 
@@ -365,23 +365,26 @@ In order to further improve our results we have several options:
 
 Below we will investigate some of those possibilities and investigate whether this improves performance.
 
-### Engineering Features: Mutating ZIP-Codes
+### Advanced: Engineering Features: Mutating ZIP-Codes
 
 In order to better cluster the zip codes, we compute a new feature: **med_price**:
 It computes the median price in each zip-code.
 This might help our model to improve the prediction.
+This is equivalent to **impact encoding**
+[more information](https://win-vector.com/2012/07/23/modeling-trick-impact-coding-of-categorical-variables-with-many-levels/):
+
+We can equip a learner with impact encoding using **mlr3pipelines**. More information on **mlr3pipelines** can be obtained from other posts.
+
 
 ```{r}
-data = task_train$data(cols = c("price", "zipcode"))
-data[, med_price := median(price), by = "zipcode"]
-task_train$cbind(data[, .(med_price)])
+library(mlr3pipelines)
+lrn_impact = po("encodeimpact", affect_columns = selector_name("zipcode")) %>>% lrn("regr.ranger")
 ```
 
 Again, we run `r ref("resample()")` and compute the **RMSE**.
 
 ```{r}
-lrn_ranger = lrn("regr.ranger")
-res = resample(task = task_train, lrn_ranger, cv3)
+res = resample(task = task_train, lrn_impact, cv3)
 res$score(msr("regr.mse"))
 sprintf("RMSE of ranger with med_price: %s", round(sqrt(res$aggregate()), 2))
 ```
