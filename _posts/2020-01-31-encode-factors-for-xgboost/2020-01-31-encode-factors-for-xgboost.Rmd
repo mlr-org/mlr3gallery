@@ -75,14 +75,14 @@ fencoder$train(list(task))
 ```
 
 The ordered factor remained untouched, all other factors have been converted to numeric columns.
-To also convert the ordered variables `installment_rate`, `number_credits`, and `present_residence`, we construct the `r ref("mlr_pipeops_colapply", "colapply")` operator with the converter `as.integer()`:
+To also convert the ordered variable `employment_duration`, we construct the `r ref("mlr_pipeops_colapply", "colapply")` operator with the converter `as.integer()`:
 
 ```{r}
 ord_to_int = po("colapply", applicator = as.integer,
   affect_columns = selector_type("ordered"))
 ```
 
-Applied on the original task, it changes factor columns to `integer`:
+Applied on the original task, it changes the factor column to `integer`:
 
 ```{r}
 ord_to_int$train(list(task))
