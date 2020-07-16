@@ -7,7 +7,8 @@ date: 03-11-2020
 description: |
   We tune hyperparameters and perform nested resampling.
 categories:
-  - 'tuning'
+  - mlr3tuning
+  - tuning
 output:
   distill::distill_article:
     self_contained: false
@@ -45,10 +46,11 @@ First, load the packages we are going to use:
 
 ```{r, message=FALSE, warning=FALSE}
 library("data.table")
+library("ggplot2")
 library("mlr3")
 library("mlr3learners")
 library("mlr3tuning")
-library("ggplot2")
+library("paradox")
 ```
 
 ```{r, include=FALSE}
@@ -91,11 +93,6 @@ Parameter tuning in `mlr3` needs two packages:
 
 1) The `r mlr_pkg("paradox")` package is used for the search space definition of the hyperparameters
 2) The `r mlr_pkg("mlr3tuning")` package is used for tuning the hyperparameters
-
-```{r, message=FALSE, warning=FALSE}
-library("mlr3tuning")
-library("paradox")
-```
 
 ### Search Space and Problem Definition
 
@@ -329,7 +326,7 @@ grid_auto = AutoTuner$new(
 ```
 
 The `AutoTuner` behaves just like a regular `Learner`.
-It can be used to combine the steps of hyperparameter tuning and model fitting but is especially useful for resampling and _fair_ comparison of performance through benchmarking:
+It can be used to combine the steps of hyperparameter tuning and model fitting but is especially useful for resampling and *fair* comparison of performance through benchmarking:
 
 ```{r, eval=FALSE}
 resample(task, grid_auto, cv10_instance)$aggregate()
