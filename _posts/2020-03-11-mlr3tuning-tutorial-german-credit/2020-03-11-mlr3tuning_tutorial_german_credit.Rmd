@@ -77,8 +77,10 @@ Otherwise, some evaluation could get unusually "hard" splits, which would make c
 ```{r}
 set.seed(8008135)
 cv10_instance = rsmp("cv", folds = 10)
+
 # fix the train-test splits using the $instantiate() method
 cv10_instance$instantiate(task)
+
 # have a look at the test set instances per fold
 cv10_instance$instance
 ```
@@ -87,8 +89,8 @@ cv10_instance$instance
 
 Parameter tuning in `mlr3` needs two packages:
 
-1) The `r mlr_pkg("paradox")` package is used for the search space definition of the hyperparameters.
-2) The `r mlr_pkg("mlr3tuning")` package is used for tuning the hyperparameters.
+1) The `r mlr_pkg("paradox")` package is used for the search space definition of the hyperparameters
+2) The `r mlr_pkg("mlr3tuning")` package is used for tuning the hyperparameters
 
 ```{r, message=FALSE, warning=FALSE}
 library("mlr3tuning")
@@ -130,12 +132,12 @@ As a next step, we define a `r ref("TuningInstance")` that represents the proble
 
 Typically a tuning instance needs to be supplied with:
 
-  - The task we are optimizing for
-  - The learner are we using
-  - The resampling we use
-  - The performance measure to be optimized
+  - The `Task` we are optimizing for
+  - The `Learner` are we using
+  - The `Resampling` we use
+  - The performance `Measure` to be optimized
   - The search space ("parameter set")
-  - The end of tuning ("terminator") (ignore this for now)
+  - The end of tuning (`Terminator`) (ignore this for now)
 
 ```{r}
 instance_grid = TuningInstance$new(
@@ -184,7 +186,7 @@ instance_grid$result
 ```
 
 We can also look at the `archive` of evaluated configurations.
-We do so by expanding the `"params"` (the parameters that the `Learner` actually saw).
+We do so by expanding the `"params"` (the parameters that the `Learner` actually saw):
 
 ```{r}
 perfdata = instance_grid$archive("params")
@@ -213,7 +215,7 @@ While 4 is 33% larger than 3, 50 is only 2 percent larger than 49.
 To account for this we will use a **transformation function** for `k` and sample values on the log-space.
 We define the range for `k` from `log(3)` to `log(50)` and exponentiate in the transformation.
 Now, `k` is not necessarily an integer anymore.
-So, we must use `ParamDbl` instead of `ParamInt`.
+So, we must use `ParamDbl` instead of `ParamInt`:
 
 ```{r}
 large_searchspace = ParamSet$new(list(
@@ -234,7 +236,7 @@ For instance, trying out three different values for `k`, `distance`, `kernel`, a
 Because of this, we use a different search algorithm, namely the **Random Search**.
 We need to specify in the *tuning instance* a *termination criterion*.
 The criterion tells the search algorithm when to stop.
-Here, we will terminate after 36 evaluations.
+Here, we will terminate after 36 evaluations:
 
 ```{r}
 tuner_random = tnr("random_search", batch_size = 36)
@@ -270,8 +272,8 @@ perfdata = instance_random$archive("params")
 perfdata[, c("k", "distance", "kernel", "scale", "classif.ce")]
 ```
 
-Let's now look to investigate the performance by parameters.
-This is especially easy using visualization.
+Let's now investigate the performance by parameters.
+This is especially easy using visualization:
 
 ```{r}
 ggplot(perfdata, aes(x = k, y = classif.ce, color = scale)) +
@@ -313,7 +315,7 @@ In this fashion the `AutoTuner` features:
 The `$train()` method facilitates tuning of hyperparameters on the training data, using a resampling strategy (below we use 5-fold cross-validation).
 Then, we actually train a model with optimal hyperparameters on the whole training data.
 
-The `AutoTuner` finds the best parameters and uses them for training.
+The `AutoTuner` finds the best parameters and uses them for training:
 
 ```{r, eval=FALSE}
 grid_auto = AutoTuner$new(
@@ -326,8 +328,8 @@ grid_auto = AutoTuner$new(
 )
 ```
 
-The autotuner behaves just like a regular `Learner`.
-It can be used to combine the steps of hyperparameter tuning and model fitting but is especially useful for resampling and _fair_ comparison of performance through benchmarking.
+The `AutoTuner` behaves just like a regular `Learner`.
+It can be used to combine the steps of hyperparameter tuning and model fitting but is especially useful for resampling and _fair_ comparison of performance through benchmarking:
 
 ```{r, eval=FALSE}
 resample(task, grid_auto, cv10_instance)$aggregate()
@@ -339,7 +341,7 @@ Essentially, this is the performance of a "knn with optimal hyperparameters foun
 
 ### Example: Tuning With A Larger Budget
 
-It is always interesting to look at what could have been. The following dataset contains an optimization run result with 3600 evaluations -- more than above by a factor of 100.
+It is always interesting to look at what could have been. The following dataset contains an optimization run result with 3600 evaluations -- more than above by a factor of 100:
 
 ```{r, echo=FALSE, eval=FALSE}
 set.seed(2409)
@@ -377,13 +379,13 @@ ggplot(perfdata, aes(x = k, y = classif.ce, color = kernel)) +
   geom_point(size = 2, alpha = 0.3)
 ```
 
-In fact, if we zoom in to `(5, 30)` $\times$ `(0.2, 0.3)` and do decrease smoothing we see that different kernels have their optimum at different values of `k`:
+In fact, if we zoom in to `(5, 35)` $\times$ `(0.23, 0.28)` and do decrease smoothing we see that different kernels have their optimum at different values of `k`:
 
 ```{r, warning=FALSE}
 ggplot(perfdata, aes(x = k, y = classif.ce, color = kernel,
   group = interaction(kernel, scale))) +
   geom_point(size = 2, alpha = 0.3) + geom_smooth() +
-  xlim(5, 30) + ylim(0.2, 0.3)
+  xlim(5, 35) + ylim(0.23, 0.28)
 ```
 
 What about the `distance` parameter?
@@ -424,10 +426,10 @@ ParamFct$new("parameter_id", levels = c("value1", "value2", "value3"))
 # - integer (from 'lower' to 'upper' bound)
 ParamInt$new("parameter_id", lower = 0, upper = 10)
 # - numeric (from 'lower' to 'upper' bound)
-# - unfortunately named after the storage type, "double precision floating point"
+# - named after the storage type, "double precision floating point"
 ParamDbl$new("parameter_id", lower = 0, upper = 10)
 
-# Also possible: "untyped", but we can not tune with this without a transformation function!
+# also possible: "untyped", but we can not tune with this without a transformation function!
 ParamUty$new("parameter_id")
 ```
 
