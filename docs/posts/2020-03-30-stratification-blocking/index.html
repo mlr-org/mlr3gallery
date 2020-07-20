@@ -1367,16 +1367,16 @@ gc_tsk = tsk(&quot;german_credit&quot;)
 gc_tsk$col_roles</code></pre>
 <pre><code>
 $feature
- [1] &quot;age&quot;                     &quot;amount&quot;                 
- [3] &quot;credit_history&quot;          &quot;duration&quot;               
- [5] &quot;employment_duration&quot;     &quot;foreign_worker&quot;         
- [7] &quot;housing&quot;                 &quot;installment_rate&quot;       
- [9] &quot;job&quot;                     &quot;number_credits&quot;         
-[11] &quot;other_debtors&quot;           &quot;other_installment_plans&quot;
-[13] &quot;people_liable&quot;           &quot;personal_status_sex&quot;    
-[15] &quot;present_residence&quot;       &quot;property&quot;               
-[17] &quot;purpose&quot;                 &quot;savings&quot;                
-[19] &quot;status&quot;                  &quot;telephone&quot;              
+ [1] &quot;status&quot;                  &quot;duration&quot;               
+ [3] &quot;credit_history&quot;          &quot;purpose&quot;                
+ [5] &quot;amount&quot;                  &quot;savings&quot;                
+ [7] &quot;employment_duration&quot;     &quot;installment_rate&quot;       
+ [9] &quot;personal_status_sex&quot;     &quot;other_debtors&quot;          
+[11] &quot;present_residence&quot;       &quot;property&quot;               
+[13] &quot;age&quot;                     &quot;other_installment_plans&quot;
+[15] &quot;housing&quot;                 &quot;number_credits&quot;         
+[17] &quot;job&quot;                     &quot;people_liable&quot;          
+[19] &quot;telephone&quot;               &quot;foreign_worker&quot;         
 
 $target
 [1] &quot;credit_risk&quot;
@@ -1495,13 +1495,13 @@ dt = dcast(dt, housing + telephone ~ fold)
 dt[, c(3:5) := lapply(.SD, function(x) x / sum(x)), .SDcols = 3:5]
 dt</code></pre>
 <pre><code>
-    housing telephone          1          2          3
-1:     rent        no 0.11607143 0.11711712 0.11480363
-2:     rent       yes 0.06250000 0.06306306 0.06344411
-3:      own        no 0.43154762 0.43243243 0.43504532
-4:      own       yes 0.27976190 0.27927928 0.28096677
-5: for free        no 0.04761905 0.04804805 0.04531722
-6: for free       yes 0.06250000 0.06006006 0.06042296</code></pre>
+    housing                 telephone          1          2          3
+1: for free                        no 0.11607143 0.11711712 0.11480363
+2: for free yes (under customer name) 0.06250000 0.06306306 0.06344411
+3:     rent                        no 0.43154762 0.43243243 0.43504532
+4:     rent yes (under customer name) 0.27976190 0.27927928 0.28096677
+5:      own                        no 0.04761905 0.04804805 0.04531722
+6:      own yes (under customer name) 0.06250000 0.06006006 0.06042296</code></pre>
 </div>
 <p>And compare it with the relative frequency from the whole data set:</p>
 <div class="layout-chunk" data-layout="l-body">
@@ -1509,13 +1509,13 @@ dt</code></pre>
 gc_tsk$data()[, .(freq = .N / max(.I)),
   by = list(housing, telephone)][order(housing, telephone), ]</code></pre>
 <pre><code>
-    housing telephone       freq
-1:     rent        no 0.11681772
-2:     rent       yes 0.06415479
-3:      own        no 0.43300000
-4:      own       yes 0.28084253
-5: for free        no 0.04895833
-6: for free       yes 0.06106106</code></pre>
+    housing                 telephone       freq
+1: for free                        no 0.11681772
+2: for free yes (under customer name) 0.06415479
+3:     rent                        no 0.43300000
+4:     rent yes (under customer name) 0.28084253
+5:      own                        no 0.04895833
+6:      own yes (under customer name) 0.06106106</code></pre>
 </div>
 <p>It is evident that in each fold, the combination of <code>housing</code> and <code>telephone</code> have similar frequencies that also coincide with the frequencies from the whole data set.</p>
 <h2 id="block-resampling"><a id="block"></a>Block resampling</h2>
