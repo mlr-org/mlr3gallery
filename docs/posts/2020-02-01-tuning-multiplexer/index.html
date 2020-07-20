@@ -1397,8 +1397,8 @@ b = benchmark(bg)
 b$aggregate(measures = msr(&quot;classif.ce&quot;))</code></pre>
 <pre><code>
    nr  resample_result task_id learner_id resampling_id iters classif.ce
-1:  1 &lt;ResampleResult&gt;   sonar        xgb            cv     5  0.2743322
-2:  2 &lt;ResampleResult&gt;   sonar         rf            cv     5  0.1728223</code></pre>
+1:  1 &lt;ResampleResult&gt;   sonar        xgb            cv     5  0.2694541
+2:  2 &lt;ResampleResult&gt;   sonar         rf            cv     5  0.1777003</code></pre>
 </div>
 <h3 id="the-pipelines-approach">The Pipelines Approach</h3>
 <p>Ok, why would we ever want to change the simple approach above - and use pipelines / tuning for this? Three reasons: a) What we are doing with <code>benchmark</code>is actually statistically flawed, insofar if we report the error of the numerically best method from the benchmark table as its estimated future performance. If we do that we have “optimized on the CV” (we basically ran a grid search over our learners!) and we know that this is will produce optimistically biased results. NB: This is a somewhat ridiculous criticism if we are going over only a handful of options, and the bias will be very small. But it will be noticeable if we do this over hundreds of learners, so it is important to understand the underlying problem. This is a somewhat subtle point, and this gallery post is more about technical hints for mlr3, so we will stop this discussion here. b) For some tuning algorithms, you might have a chance to more efficiently select from the set of algorithms than running the full benchmark. Because of the categorical nature of the problem, you will not be able to learn stuff like “If learner A works bad, I don’t have to try learner B”, but you can potentially save some resampling iterations. Assume you have so select from 100 candidates, experiments are expensive, and you use a 20-fold CV. If learner A has super-bad results in the first 5 folds of the CV, you might already want to stop here. “Racing” would be such a tuning algorithm. c) It helps us to foreshadow what comes later in this post where we tune the learners.</p>
@@ -1495,8 +1495,8 @@ instance$archive(unnest = &quot;tune_x&quot;)</code></pre>
 1:  1        1 &lt;ResampleResult&gt;   sonar          g            cv     2 &lt;list&gt;
 2:  2        2 &lt;ResampleResult&gt;   sonar          g            cv     2 &lt;list&gt;
    warnings errors classif.ce branch.selection
-1:        0      0  0.3413462              xgb
-2:        0      0  0.2355769               rf</code></pre>
+1:        0      0  0.2740385              xgb
+2:        0      0  0.2211538               rf</code></pre>
 <pre class="r"><code>
 instance$result</code></pre>
 <pre><code>
@@ -1518,7 +1518,7 @@ $params$xgb.verbose
 
 $perf
 classif.ce 
- 0.2355769 </code></pre>
+ 0.2211538 </code></pre>
 </div>
 <p>But: Via this approach we can now get unbiased performance results via nested resampling and using the AutoTuner (which would make much more sense if we would select from 100 models and not 2).</p>
 <div class="layout-chunk" data-layout="l-body">
@@ -1562,7 +1562,7 @@ ll$archive(unnest = &quot;tune_x&quot;)</code></pre>
 1:  1        1 &lt;ResampleResult&gt;   sonar          g            cv     2 &lt;list&gt;
 2:  2        2 &lt;ResampleResult&gt;   sonar          g            cv     2 &lt;list&gt;
    warnings errors classif.ce branch.selection
-1:        0      0  0.3253012              xgb
+1:        0      0  0.3313253              xgb
 2:        0      0  0.2469880               rf</code></pre>
 </div>
 <h2 id="model-selection-and-tuning-with-pipelines">Model-Selection and Tuning with Pipelines</h2>
@@ -1707,16 +1707,16 @@ instance$archive(unnest = &quot;tune_x&quot;)</code></pre>
  9:  9        9 &lt;ResampleResult&gt;   sonar          g            cv     2 &lt;list&gt;
 10: 10       10 &lt;ResampleResult&gt;   sonar          g            cv     2 &lt;list&gt;
     warnings errors classif.ce branch.selection rf.mtry xgb.nrounds
- 1:        0      0  0.2403846               rf      13          NA
- 2:        0      0  0.2884615              xgb      NA          23
- 3:        0      0  0.2548077              xgb      NA         351
- 4:        0      0  0.2548077              xgb      NA         339
- 5:        0      0  0.2403846               rf       6          NA
- 6:        0      0  0.2451923               rf      12          NA
- 7:        0      0  0.2548077              xgb      NA         176
- 8:        0      0  0.2548077               rf      20          NA
- 9:        0      0  0.2355769               rf       1          NA
-10:        0      0  0.2355769               rf       9          NA</code></pre>
+ 1:        0      0  0.1826923               rf      13          NA
+ 2:        0      0  0.1682692              xgb      NA         371
+ 3:        0      0  0.1634615               rf       1          NA
+ 4:        0      0  0.1682692              xgb      NA         337
+ 5:        0      0  0.1682692              xgb      NA         354
+ 6:        0      0  0.1682692              xgb      NA         339
+ 7:        0      0  0.1778846               rf      15          NA
+ 8:        0      0  0.1875000               rf       9          NA
+ 9:        0      0  0.1682692              xgb      NA         294
+10:        0      0  0.1778846               rf      12          NA</code></pre>
 <pre class="r"><code>
 instance$result</code></pre>
 <pre><code>
@@ -1744,7 +1744,7 @@ $params$rf.mtry
 
 $perf
 classif.ce 
- 0.2355769 </code></pre>
+ 0.1634615 </code></pre>
 </div>
 <p>The following shows a quick way to visualize the tuning results.</p>
 <div class="layout-chunk" data-layout="l-body">
@@ -1784,7 +1784,7 @@ $tune_x$branch.selection
 [1] &quot;rf&quot;
 
 $tune_x$rf.mtry
-[1] 6
+[1] 11
 
 
 $params
@@ -1798,12 +1798,12 @@ $params$xgb.verbose
 [1] 0
 
 $params$rf.mtry
-[1] 6
+[1] 11
 
 
 $perf
 classif.ce 
-  0.186747 </code></pre>
+ 0.1927711 </code></pre>
 <pre class="r"><code>
 ll$archive(unnest = &quot;tune_x&quot;)</code></pre>
 <pre><code>
@@ -1818,17 +1818,17 @@ ll$archive(unnest = &quot;tune_x&quot;)</code></pre>
  8:  8        8 &lt;ResampleResult&gt;   sonar          g            cv     2 &lt;list&gt;
  9:  9        9 &lt;ResampleResult&gt;   sonar          g            cv     2 &lt;list&gt;
 10: 10       10 &lt;ResampleResult&gt;   sonar          g            cv     2 &lt;list&gt;
-    warnings errors classif.ce branch.selection rf.mtry xgb.nrounds
- 1:        0      0  0.2048193               rf      18          NA
- 2:        0      0  0.1867470               rf       6          NA
- 3:        0      0  0.2289157               rf      14          NA
- 4:        0      0  0.2108434              xgb      NA         341
- 5:        0      0  0.2108434              xgb      NA         377
- 6:        0      0  0.1927711               rf       9          NA
- 7:        0      0  0.2168675              xgb      NA          51
- 8:        0      0  0.2108434               rf       6          NA
- 9:        0      0  0.2108434               rf      17          NA
-10:        0      0  0.2108434              xgb      NA         121</code></pre>
+    warnings errors classif.ce branch.selection xgb.nrounds rf.mtry
+ 1:        0      0  0.2108434              xgb         178      NA
+ 2:        0      0  0.2108434              xgb         106      NA
+ 3:        0      0  0.2168675               rf          NA      17
+ 4:        0      0  0.2108434              xgb         428      NA
+ 5:        0      0  0.1927711               rf          NA      11
+ 6:        0      0  0.2108434              xgb         193      NA
+ 7:        0      0  0.2048193               rf          NA      10
+ 8:        0      0  0.2108434              xgb         137      NA
+ 9:        0      0  0.2228916               rf          NA       8
+10:        0      0  0.2108434              xgb         332      NA</code></pre>
 </div>
 <!--radix_placeholder_article_footer-->
 <!--/radix_placeholder_article_footer-->

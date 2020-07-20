@@ -1604,13 +1604,13 @@ res$score(msr(&quot;regr.mse&quot;))</code></pre>
 2: &lt;TaskRegr&gt;   sales &lt;LearnerRegrRanger&gt; regr.ranger &lt;ResamplingCV&gt;
 3: &lt;TaskRegr&gt;   sales &lt;LearnerRegrRanger&gt; regr.ranger &lt;ResamplingCV&gt;
    resampling_id iteration prediction regr.mse
-1:            cv         1     &lt;list&gt; 23708.97
-2:            cv         2     &lt;list&gt; 17713.58
-3:            cv         3     &lt;list&gt; 28823.72</code></pre>
+1:            cv         1     &lt;list&gt; 17646.30
+2:            cv         2     &lt;list&gt; 20186.77
+3:            cv         3     &lt;list&gt; 25272.01</code></pre>
 <pre class="r"><code>
 sprintf(&quot;RMSE of the simple ranger: %s&quot;, round(sqrt(res$aggregate()), 2))</code></pre>
 <pre><code>
-[1] &quot;RMSE of the simple ranger: 153.02&quot;</code></pre>
+[1] &quot;RMSE of the simple ranger: 145.03&quot;</code></pre>
 </div>
 <p>Often tuning <strong>RandomForest</strong> methods does not increase predictive performances substantially. If time permits, it can nonetheless lead to improvements and should thus be performed. In this case, we resort to tune a different kind of model: <strong>Gradient Boosted Decision Trees</strong> from the package <a href="https://cran.r-project.org/package=xgboost">xgboost</a>.</p>
 <h3 id="a-better-baseline-autotuner">A better baseline: <code>AutoTuner</code></h3>
@@ -1654,27 +1654,26 @@ res$score(msr(&quot;regr.mse&quot;))</code></pre>
 2: &lt;TaskRegr&gt;   sales &lt;AutoTuner&gt; regr.xgboost.tuned &lt;ResamplingCV&gt;
 3: &lt;TaskRegr&gt;   sales &lt;AutoTuner&gt; regr.xgboost.tuned &lt;ResamplingCV&gt;
    resampling_id iteration prediction regr.mse
-1:            cv         1     &lt;list&gt; 19179.86
-2:            cv         2     &lt;list&gt; 22984.12
-3:            cv         3     &lt;list&gt; 18861.13</code></pre>
+1:            cv         1     &lt;list&gt; 22762.53
+2:            cv         2     &lt;list&gt; 19218.19
+3:            cv         3     &lt;list&gt; 18916.26</code></pre>
 <pre class="r"><code>
 sprintf(&quot;RMSE of the tuned xgboost: %s&quot;, round(sqrt(res$aggregate()), 2))</code></pre>
 <pre><code>
-[1] &quot;RMSE of the tuned xgboost: 142.62&quot;</code></pre>
+[1] &quot;RMSE of the tuned xgboost: 142.47&quot;</code></pre>
 </div>
 <p>We can obtain the resulting params in the respective splits by accessing the <a href="https://mlr3.mlr-org.com/reference/ResampleResult.html"><code>ResampleResult</code></a>.</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
 sapply(res$learners, function(x) x$param_set$values)[-2,]</code></pre>
 <pre><code>
-[[1]]
-[1] 1
-
-[[2]]
-[1] 1
-
-[[3]]
-[1] 1</code></pre>
+                  [,1]      [,2]      [,3]     
+nrounds           18        19        23       
+eta               0.3216396 0.2373166 0.3256245
+min_child_weight  6.121228  4.777913  13.20199 
+subsample         0.7349276 0.7553011 0.7438482
+colsample_bytree  0.9621787 0.9775707 0.9619294
+colsample_bylevel 0.6347809 0.5899552 0.6703639</code></pre>
 </div>
 <p><strong>NOTE:</strong> To keep runtime low, we only tune parts of the hyperparameter space of <a href="https://cran.r-project.org/package=xgboost">xgboost</a> in this example. Additionally, we only allow for <span class="math inline">\(10\)</span> random search iterations, which is usually to little for real-world applications. Nonetheless, we are able to obtain an improved performance when comparing to the <a href="https://cran.r-project.org/package=ranger">ranger</a> model.</p>
 <p>In order to further improve our results we have several options:</p>
@@ -1712,13 +1711,13 @@ res$score(msr(&quot;regr.mse&quot;))</code></pre>
 2: &lt;TaskRegr&gt;   sales &lt;LearnerRegrRanger&gt; regr.ranger &lt;ResamplingCV&gt;
 3: &lt;TaskRegr&gt;   sales &lt;LearnerRegrRanger&gt; regr.ranger &lt;ResamplingCV&gt;
    resampling_id iteration prediction regr.mse
-1:            cv         1     &lt;list&gt; 15768.04
-2:            cv         2     &lt;list&gt; 14873.15
-3:            cv         3     &lt;list&gt; 23081.63</code></pre>
+1:            cv         1     &lt;list&gt; 15628.35
+2:            cv         2     &lt;list&gt; 21030.42
+3:            cv         3     &lt;list&gt; 16341.77</code></pre>
 <pre class="r"><code>
 sprintf(&quot;RMSE of ranger with med_price: %s&quot;, round(sqrt(res$aggregate()), 2))</code></pre>
 <pre><code>
-[1] &quot;RMSE of ranger with med_price: 133.82&quot;</code></pre>
+[1] &quot;RMSE of ranger with med_price: 132.92&quot;</code></pre>
 </div>
 <h3 id="advanced-obtaining-a-sparser-model">Advanced: Obtaining a sparser model</h3>
 <p>In many cases, we might want to have a sparse model. For this purpose we can use a <a href="https://mlr3filters.mlr-org.com/reference/Filter.html"><code>mlr3filters::Filter</code></a> implemented in <code>mlr3filters</code>. This can prevent our learner from overfitting make it easier for humans to interpret models as fewer variables influence the resulting prediction.</p>
@@ -1743,13 +1742,13 @@ res$score(msr(&quot;regr.mse&quot;))</code></pre>
 2: &lt;TaskRegr&gt;   sales &lt;GraphLearner&gt; mrmr.regr.ranger &lt;ResamplingCV&gt;
 3: &lt;TaskRegr&gt;   sales &lt;GraphLearner&gt; mrmr.regr.ranger &lt;ResamplingCV&gt;
    resampling_id iteration prediction regr.mse
-1:            cv         1     &lt;list&gt; 23371.08
-2:            cv         2     &lt;list&gt; 23904.78
-3:            cv         3     &lt;list&gt; 20941.77</code></pre>
+1:            cv         1     &lt;list&gt; 18472.45
+2:            cv         2     &lt;list&gt; 29342.03
+3:            cv         3     &lt;list&gt; 22631.51</code></pre>
 <pre class="r"><code>
 sprintf(&quot;RMSE of ranger with filtering: %s&quot;, round(sqrt(res$aggregate()), 2))</code></pre>
 <pre><code>
-[1] &quot;RMSE of ranger with filtering: 150.8&quot;</code></pre>
+[1] &quot;RMSE of ranger with filtering: 153.24&quot;</code></pre>
 </div>
 <h2 id="summary">Summary:</h2>
 <p>We have seen different ways to improve models with respect to our criteria by:</p>
@@ -1777,7 +1776,7 @@ pred = lrn_ranger$predict(task_test)
 pred$score(msr(&quot;regr.mse&quot;))</code></pre>
 <pre><code>
 regr.mse 
-36425.93 </code></pre>
+35686.86 </code></pre>
 </div>
 <!--radix_placeholder_article_footer-->
 <!--/radix_placeholder_article_footer-->
