@@ -1387,8 +1387,8 @@ res &lt;- resample(task, learner, rdesc, store_models = TRUE)</code></pre>
 <pre class="r"><code>
 task$missings()</code></pre>
 <pre><code>
-survived   pclass      sex      age   sib_sp    parch     fare embarked 
-       0        0        0      177        0        0        0        2 </code></pre>
+survived      age embarked     fare    parch   pclass      sex   sib_sp 
+       0      177        2        0        0        0        0        0 </code></pre>
 </div>
 <p>Let’s first deal with the categorical variables:</p>
 <div class="layout-chunk" data-layout="l-body">
@@ -1402,8 +1402,8 @@ task_newlvl &lt;- po_newlvl$train(list(task))[[1]]</code></pre>
 <pre class="r"><code>
 task_newlvl$missings()</code></pre>
 <pre><code>
-survived   pclass      sex      age   sib_sp    parch     fare embarked 
-       0        0        0      177        0        0        0        0 </code></pre>
+survived      age     fare    parch   pclass      sex   sib_sp embarked 
+       0      177        0        0        0        0        0        0 </code></pre>
 </div>
 <p>Cool! <code>embarked</code> does not have missing values anymore. Note that <code>PipeOpImputeNewLvl</code> by default affects <code>character</code>, <code>factor</code> and <code>ordered</code> columns.</p>
 <p>For the <code>numeric</code> features we want to do two things, impute values and add an indicator column. In order to do this, we need a more complicated structure, a <code>Graph</code>.</p>
@@ -1431,9 +1431,9 @@ gr &lt;- gr %&gt;&gt;% po(&quot;imputenewlvl&quot;)</code></pre>
 task_imputed &lt;- gr$clone()$train(task)[[1]]
 task_imputed$missings()</code></pre>
 <pre><code>
-   survived missing_age      pclass         sex      sib_sp       parch 
+   survived missing_age      pclass         sex        fare       parch 
           0           0           0           0           0           0 
-       fare         age    embarked 
+     sib_sp         age    embarked 
           0           0           0 </code></pre>
 </div>
 <p>Awesome, now we do not have any missing values!</p>
@@ -1487,18 +1487,18 @@ po_ftextract &lt;- po(&quot;mutate&quot;, param_vals = list(
 task_eng &lt;- po_ftextract$clone()$train(list(task))[[1]]
 task_eng$data()</code></pre>
 <pre><code>
-     survived pclass    sex age sib_sp parch    fare embarked cabin
-  1:        0      3   male  22      1     0  7.2500        S  &lt;NA&gt;
-  2:        1      1 female  38      1     0 71.2833        C   C85
-  3:        1      3 female  26      0     0  7.9250        S  &lt;NA&gt;
-  4:        1      1 female  35      1     0 53.1000        S  C123
-  5:        0      3   male  35      0     0  8.0500        S  &lt;NA&gt;
+     survived age embarked    fare parch pclass    sex sib_sp cabin
+  1:        0  22        S  7.2500     0      3   male      1  &lt;NA&gt;
+  2:        1  38        C 71.2833     0      1 female      1   C85
+  3:        1  26        S  7.9250     0      3 female      0  &lt;NA&gt;
+  4:        1  35        S 53.1000     0      1 female      1  C123
+  5:        0  35        S  8.0500     0      3   male      0  &lt;NA&gt;
  ---                                                               
-887:        0      2   male  27      0     0 13.0000        S  &lt;NA&gt;
-888:        1      1 female  19      0     0 30.0000        S   B42
-889:        0      3 female  NA      1     2 23.4500        S  &lt;NA&gt;
-890:        1      1   male  26      0     0 30.0000        C  C148
-891:        0      3   male  32      0     0  7.7500        Q  &lt;NA&gt;
+887:        0  27        S 13.0000     0      2   male      0  &lt;NA&gt;
+888:        1  19        S 30.0000     0      1 female      0   B42
+889:        0  NA        S 23.4500     2      3 female      1  &lt;NA&gt;
+890:        1  26        C 30.0000     0      1   male      0  C148
+891:        0  32        Q  7.7500     0      3   male      0  &lt;NA&gt;
                                                     name           ticket
   1:                             Braund, Mr. Owen Harris        A/5 21171
   2: Cumings, Mrs. John Bradley (Florence Briggs Thayer)         PC 17599
@@ -1574,7 +1574,7 @@ agg_ranger &lt;- res$aggregate(msr(&quot;classif.acc&quot;))
 agg_ranger</code></pre>
 <pre><code>
 classif.acc 
-  0.8282828 </code></pre>
+  0.8271605 </code></pre>
 </div>
 <p>We have improved even more!</p>
 <h2 id="benchmarking">Benchmarking</h2>

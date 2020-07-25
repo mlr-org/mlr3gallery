@@ -1467,16 +1467,16 @@ response     setosa versicolor virginica
 print(learner1$param_set)</code></pre>
 <pre><code>
 &lt;ParamSet&gt;
-               id    class lower upper levels     default value
-1:       minsplit ParamInt     1   Inf                 20      
-2:      minbucket ParamInt     1   Inf        &lt;NoDefault&gt;      
-3:             cp ParamDbl     0     1               0.01      
-4:     maxcompete ParamInt     0   Inf                  4      
-5:   maxsurrogate ParamInt     0   Inf                  5      
-6:       maxdepth ParamInt     1    30                 30      
-7:   usesurrogate ParamInt     0     2                  2      
-8: surrogatestyle ParamInt     0     1                  0      
-9:           xval ParamInt     0   Inf                 10     0</code></pre>
+               id    class lower upper levels        default value
+1:       minsplit ParamInt     1   Inf                    20      
+2:      minbucket ParamInt     1   Inf        &lt;NoDefault[3]&gt;      
+3:             cp ParamDbl     0     1                  0.01      
+4:     maxcompete ParamInt     0   Inf                     4      
+5:   maxsurrogate ParamInt     0   Inf                     5      
+6:       maxdepth ParamInt     1    30                    30      
+7:   usesurrogate ParamInt     0     2                     2      
+8: surrogatestyle ParamInt     0     1                     0      
+9:           xval ParamInt     0   Inf                    10     0</code></pre>
 <pre class="r"><code>
 learner2 = lrn(&quot;classif.rpart&quot;, predict_type = &quot;prob&quot;, minsplit = 50)
 learner2$param_set$values$minsplit = 50</code></pre>
@@ -1497,42 +1497,64 @@ print(r)</code></pre>
 <pre class="r"><code>
 r$score(msrs(c(&quot;classif.acc&quot;, &quot;classif.ce&quot;)))</code></pre>
 <pre><code>
-             task task_id               learner    learner_id     resampling
- 1: &lt;TaskClassif&gt;    iris &lt;LearnerClassifRpart&gt; classif.rpart &lt;ResamplingCV&gt;
- 2: &lt;TaskClassif&gt;    iris &lt;LearnerClassifRpart&gt; classif.rpart &lt;ResamplingCV&gt;
- 3: &lt;TaskClassif&gt;    iris &lt;LearnerClassifRpart&gt; classif.rpart &lt;ResamplingCV&gt;
- 4: &lt;TaskClassif&gt;    iris &lt;LearnerClassifRpart&gt; classif.rpart &lt;ResamplingCV&gt;
- 5: &lt;TaskClassif&gt;    iris &lt;LearnerClassifRpart&gt; classif.rpart &lt;ResamplingCV&gt;
- 6: &lt;TaskClassif&gt;    iris &lt;LearnerClassifRpart&gt; classif.rpart &lt;ResamplingCV&gt;
- 7: &lt;TaskClassif&gt;    iris &lt;LearnerClassifRpart&gt; classif.rpart &lt;ResamplingCV&gt;
- 8: &lt;TaskClassif&gt;    iris &lt;LearnerClassifRpart&gt; classif.rpart &lt;ResamplingCV&gt;
- 9: &lt;TaskClassif&gt;    iris &lt;LearnerClassifRpart&gt; classif.rpart &lt;ResamplingCV&gt;
-10: &lt;TaskClassif&gt;    iris &lt;LearnerClassifRpart&gt; classif.rpart &lt;ResamplingCV&gt;
-    resampling_id iteration prediction classif.acc classif.ce
- 1:            cv         1     &lt;list&gt;   0.9333333 0.06666667
- 2:            cv         2     &lt;list&gt;   0.8000000 0.20000000
- 3:            cv         3     &lt;list&gt;   0.9333333 0.06666667
- 4:            cv         4     &lt;list&gt;   0.9333333 0.06666667
- 5:            cv         5     &lt;list&gt;   0.9333333 0.06666667
- 6:            cv         6     &lt;list&gt;   1.0000000 0.00000000
- 7:            cv         7     &lt;list&gt;   1.0000000 0.00000000
- 8:            cv         8     &lt;list&gt;   1.0000000 0.00000000
- 9:            cv         9     &lt;list&gt;   1.0000000 0.00000000
-10:            cv        10     &lt;list&gt;   0.8666667 0.13333333</code></pre>
+                 task task_id                   learner    learner_id
+ 1: &lt;TaskClassif[44]&gt;    iris &lt;LearnerClassifRpart[32]&gt; classif.rpart
+ 2: &lt;TaskClassif[44]&gt;    iris &lt;LearnerClassifRpart[32]&gt; classif.rpart
+ 3: &lt;TaskClassif[44]&gt;    iris &lt;LearnerClassifRpart[32]&gt; classif.rpart
+ 4: &lt;TaskClassif[44]&gt;    iris &lt;LearnerClassifRpart[32]&gt; classif.rpart
+ 5: &lt;TaskClassif[44]&gt;    iris &lt;LearnerClassifRpart[32]&gt; classif.rpart
+ 6: &lt;TaskClassif[44]&gt;    iris &lt;LearnerClassifRpart[32]&gt; classif.rpart
+ 7: &lt;TaskClassif[44]&gt;    iris &lt;LearnerClassifRpart[32]&gt; classif.rpart
+ 8: &lt;TaskClassif[44]&gt;    iris &lt;LearnerClassifRpart[32]&gt; classif.rpart
+ 9: &lt;TaskClassif[44]&gt;    iris &lt;LearnerClassifRpart[32]&gt; classif.rpart
+10: &lt;TaskClassif[44]&gt;    iris &lt;LearnerClassifRpart[32]&gt; classif.rpart
+            resampling resampling_id iteration prediction classif.acc
+ 1: &lt;ResamplingCV[19]&gt;            cv         1  &lt;list[1]&gt;   0.9333333
+ 2: &lt;ResamplingCV[19]&gt;            cv         2  &lt;list[1]&gt;   0.8000000
+ 3: &lt;ResamplingCV[19]&gt;            cv         3  &lt;list[1]&gt;   0.9333333
+ 4: &lt;ResamplingCV[19]&gt;            cv         4  &lt;list[1]&gt;   0.9333333
+ 5: &lt;ResamplingCV[19]&gt;            cv         5  &lt;list[1]&gt;   0.9333333
+ 6: &lt;ResamplingCV[19]&gt;            cv         6  &lt;list[1]&gt;   1.0000000
+ 7: &lt;ResamplingCV[19]&gt;            cv         7  &lt;list[1]&gt;   1.0000000
+ 8: &lt;ResamplingCV[19]&gt;            cv         8  &lt;list[1]&gt;   1.0000000
+ 9: &lt;ResamplingCV[19]&gt;            cv         9  &lt;list[1]&gt;   1.0000000
+10: &lt;ResamplingCV[19]&gt;            cv        10  &lt;list[1]&gt;   0.8666667
+    classif.ce
+ 1: 0.06666667
+ 2: 0.20000000
+ 3: 0.06666667
+ 4: 0.06666667
+ 5: 0.06666667
+ 6: 0.00000000
+ 7: 0.00000000
+ 8: 0.00000000
+ 9: 0.00000000
+10: 0.13333333</code></pre>
 <pre class="r"><code>
 print(r$data)</code></pre>
 <pre><code>
-             task               learner     resampling iteration prediction
- 1: &lt;TaskClassif&gt; &lt;LearnerClassifRpart&gt; &lt;ResamplingCV&gt;         1     &lt;list&gt;
- 2: &lt;TaskClassif&gt; &lt;LearnerClassifRpart&gt; &lt;ResamplingCV&gt;         2     &lt;list&gt;
- 3: &lt;TaskClassif&gt; &lt;LearnerClassifRpart&gt; &lt;ResamplingCV&gt;         3     &lt;list&gt;
- 4: &lt;TaskClassif&gt; &lt;LearnerClassifRpart&gt; &lt;ResamplingCV&gt;         4     &lt;list&gt;
- 5: &lt;TaskClassif&gt; &lt;LearnerClassifRpart&gt; &lt;ResamplingCV&gt;         5     &lt;list&gt;
- 6: &lt;TaskClassif&gt; &lt;LearnerClassifRpart&gt; &lt;ResamplingCV&gt;         6     &lt;list&gt;
- 7: &lt;TaskClassif&gt; &lt;LearnerClassifRpart&gt; &lt;ResamplingCV&gt;         7     &lt;list&gt;
- 8: &lt;TaskClassif&gt; &lt;LearnerClassifRpart&gt; &lt;ResamplingCV&gt;         8     &lt;list&gt;
- 9: &lt;TaskClassif&gt; &lt;LearnerClassifRpart&gt; &lt;ResamplingCV&gt;         9     &lt;list&gt;
-10: &lt;TaskClassif&gt; &lt;LearnerClassifRpart&gt; &lt;ResamplingCV&gt;        10     &lt;list&gt;</code></pre>
+                 task                   learner         resampling iteration
+ 1: &lt;TaskClassif[44]&gt; &lt;LearnerClassifRpart[32]&gt; &lt;ResamplingCV[19]&gt;         1
+ 2: &lt;TaskClassif[44]&gt; &lt;LearnerClassifRpart[32]&gt; &lt;ResamplingCV[19]&gt;         2
+ 3: &lt;TaskClassif[44]&gt; &lt;LearnerClassifRpart[32]&gt; &lt;ResamplingCV[19]&gt;         3
+ 4: &lt;TaskClassif[44]&gt; &lt;LearnerClassifRpart[32]&gt; &lt;ResamplingCV[19]&gt;         4
+ 5: &lt;TaskClassif[44]&gt; &lt;LearnerClassifRpart[32]&gt; &lt;ResamplingCV[19]&gt;         5
+ 6: &lt;TaskClassif[44]&gt; &lt;LearnerClassifRpart[32]&gt; &lt;ResamplingCV[19]&gt;         6
+ 7: &lt;TaskClassif[44]&gt; &lt;LearnerClassifRpart[32]&gt; &lt;ResamplingCV[19]&gt;         7
+ 8: &lt;TaskClassif[44]&gt; &lt;LearnerClassifRpart[32]&gt; &lt;ResamplingCV[19]&gt;         8
+ 9: &lt;TaskClassif[44]&gt; &lt;LearnerClassifRpart[32]&gt; &lt;ResamplingCV[19]&gt;         9
+10: &lt;TaskClassif[44]&gt; &lt;LearnerClassifRpart[32]&gt; &lt;ResamplingCV[19]&gt;        10
+    prediction
+ 1:  &lt;list[1]&gt;
+ 2:  &lt;list[1]&gt;
+ 3:  &lt;list[1]&gt;
+ 4:  &lt;list[1]&gt;
+ 5:  &lt;list[1]&gt;
+ 6:  &lt;list[1]&gt;
+ 7:  &lt;list[1]&gt;
+ 8:  &lt;list[1]&gt;
+ 9:  &lt;list[1]&gt;
+10:  &lt;list[1]&gt;</code></pre>
 <pre class="r"><code>
 # get all predictions nicely concatenated in a table
 preds = r$prediction()
@@ -1621,10 +1643,10 @@ print(bm)</code></pre>
 <pre class="r"><code>
 print(bm$aggregate(measures = msrs(c(&quot;classif.acc&quot;, &quot;classif.ce&quot;))))</code></pre>
 <pre><code>
-   nr  resample_result task_id           learner_id resampling_id iters
-1:  1 &lt;ResampleResult&gt;    iris        classif.rpart            cv    10
-2:  2 &lt;ResampleResult&gt;    iris        classif.rpart            cv    10
-3:  3 &lt;ResampleResult&gt;    iris classif.randomForest            cv    10
+   nr      resample_result task_id           learner_id resampling_id iters
+1:  1 &lt;ResampleResult[18]&gt;    iris        classif.rpart            cv    10
+2:  2 &lt;ResampleResult[18]&gt;    iris        classif.rpart            cv    10
+3:  3 &lt;ResampleResult[18]&gt;    iris classif.randomForest            cv    10
    classif.acc classif.ce
 1:   0.9266667 0.07333333
 2:   0.9200000 0.08000000

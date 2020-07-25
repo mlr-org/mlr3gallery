@@ -1577,14 +1577,14 @@ lrn_rpart = lrn(&quot;regr.rpart&quot;)
 res = resample(task = task_train, lrn_rpart, cv3)
 res$score(msr(&quot;regr.mse&quot;))</code></pre>
 <pre><code>
-         task task_id            learner learner_id     resampling
-1: &lt;TaskRegr&gt;   sales &lt;LearnerRegrRpart&gt; regr.rpart &lt;ResamplingCV&gt;
-2: &lt;TaskRegr&gt;   sales &lt;LearnerRegrRpart&gt; regr.rpart &lt;ResamplingCV&gt;
-3: &lt;TaskRegr&gt;   sales &lt;LearnerRegrRpart&gt; regr.rpart &lt;ResamplingCV&gt;
+             task task_id                learner learner_id         resampling
+1: &lt;TaskRegr[41]&gt;   sales &lt;LearnerRegrRpart[32]&gt; regr.rpart &lt;ResamplingCV[19]&gt;
+2: &lt;TaskRegr[41]&gt;   sales &lt;LearnerRegrRpart[32]&gt; regr.rpart &lt;ResamplingCV[19]&gt;
+3: &lt;TaskRegr[41]&gt;   sales &lt;LearnerRegrRpart[32]&gt; regr.rpart &lt;ResamplingCV[19]&gt;
    resampling_id iteration prediction regr.mse
-1:            cv         1     &lt;list&gt; 45415.78
-2:            cv         2     &lt;list&gt; 49598.67
-3:            cv         3     &lt;list&gt; 42517.76</code></pre>
+1:            cv         1  &lt;list[1]&gt; 45415.78
+2:            cv         2  &lt;list[1]&gt; 49598.67
+3:            cv         3  &lt;list[1]&gt; 42517.76</code></pre>
 <pre class="r"><code>
 sprintf(&quot;RMSE of the simple rpart: %s&quot;, round(sqrt(res$aggregate()), 2))</code></pre>
 <pre><code>
@@ -1599,18 +1599,18 @@ lrn_ranger = lrn(&quot;regr.ranger&quot;, num.trees = 15L)
 res = resample(task = task_train, lrn_ranger, cv3)
 res$score(msr(&quot;regr.mse&quot;))</code></pre>
 <pre><code>
-         task task_id             learner  learner_id     resampling
-1: &lt;TaskRegr&gt;   sales &lt;LearnerRegrRanger&gt; regr.ranger &lt;ResamplingCV&gt;
-2: &lt;TaskRegr&gt;   sales &lt;LearnerRegrRanger&gt; regr.ranger &lt;ResamplingCV&gt;
-3: &lt;TaskRegr&gt;   sales &lt;LearnerRegrRanger&gt; regr.ranger &lt;ResamplingCV&gt;
-   resampling_id iteration prediction regr.mse
-1:            cv         1     &lt;list&gt; 17646.30
-2:            cv         2     &lt;list&gt; 20186.77
-3:            cv         3     &lt;list&gt; 25272.01</code></pre>
+             task task_id                 learner  learner_id
+1: &lt;TaskRegr[41]&gt;   sales &lt;LearnerRegrRanger[32]&gt; regr.ranger
+2: &lt;TaskRegr[41]&gt;   sales &lt;LearnerRegrRanger[32]&gt; regr.ranger
+3: &lt;TaskRegr[41]&gt;   sales &lt;LearnerRegrRanger[32]&gt; regr.ranger
+           resampling resampling_id iteration prediction regr.mse
+1: &lt;ResamplingCV[19]&gt;            cv         1  &lt;list[1]&gt; 19041.54
+2: &lt;ResamplingCV[19]&gt;            cv         2  &lt;list[1]&gt; 19706.85
+3: &lt;ResamplingCV[19]&gt;            cv         3  &lt;list[1]&gt; 24544.56</code></pre>
 <pre class="r"><code>
 sprintf(&quot;RMSE of the simple ranger: %s&quot;, round(sqrt(res$aggregate()), 2))</code></pre>
 <pre><code>
-[1] &quot;RMSE of the simple ranger: 145.03&quot;</code></pre>
+[1] &quot;RMSE of the simple ranger: 145.25&quot;</code></pre>
 </div>
 <p>Often tuning <strong>RandomForest</strong> methods does not increase predictive performances substantially. If time permits, it can nonetheless lead to improvements and should thus be performed. In this case, we resort to tune a different kind of model: <strong>Gradient Boosted Decision Trees</strong> from the package <a href="https://cran.r-project.org/package=xgboost">xgboost</a>.</p>
 <h3 id="a-better-baseline-autotuner">A better baseline: <code>AutoTuner</code></h3>
@@ -1639,7 +1639,7 @@ ps = ParamSet$new(
 
 # Define the Terminator
 terminator = term(&quot;evals&quot;, n_evals = 10)
-at = AutoTuner$new(lrn_xgb, rsmp(&quot;holdout&quot;), measures = msr(&quot;regr.mse&quot;), ps,
+at = AutoTuner$new(lrn_xgb, rsmp(&quot;holdout&quot;), msr(&quot;regr.mse&quot;), ps,
   terminator, tuner = tnr(&quot;random_search&quot;))</code></pre>
 </div>
 <div class="layout-chunk" data-layout="l-body">
@@ -1649,18 +1649,18 @@ at = AutoTuner$new(lrn_xgb, rsmp(&quot;holdout&quot;), measures = msr(&quot;regr
 <pre class="r"><code>
 res$score(msr(&quot;regr.mse&quot;))</code></pre>
 <pre><code>
-         task task_id     learner         learner_id     resampling
-1: &lt;TaskRegr&gt;   sales &lt;AutoTuner&gt; regr.xgboost.tuned &lt;ResamplingCV&gt;
-2: &lt;TaskRegr&gt;   sales &lt;AutoTuner&gt; regr.xgboost.tuned &lt;ResamplingCV&gt;
-3: &lt;TaskRegr&gt;   sales &lt;AutoTuner&gt; regr.xgboost.tuned &lt;ResamplingCV&gt;
+             task task_id         learner         learner_id         resampling
+1: &lt;TaskRegr[41]&gt;   sales &lt;AutoTuner[39]&gt; regr.xgboost.tuned &lt;ResamplingCV[19]&gt;
+2: &lt;TaskRegr[41]&gt;   sales &lt;AutoTuner[39]&gt; regr.xgboost.tuned &lt;ResamplingCV[19]&gt;
+3: &lt;TaskRegr[41]&gt;   sales &lt;AutoTuner[39]&gt; regr.xgboost.tuned &lt;ResamplingCV[19]&gt;
    resampling_id iteration prediction regr.mse
-1:            cv         1     &lt;list&gt; 22762.53
-2:            cv         2     &lt;list&gt; 19218.19
-3:            cv         3     &lt;list&gt; 18916.26</code></pre>
+1:            cv         1  &lt;list[1]&gt; 21473.25
+2:            cv         2  &lt;list[1]&gt; 20444.80
+3:            cv         3  &lt;list[1]&gt; 20115.66</code></pre>
 <pre class="r"><code>
 sprintf(&quot;RMSE of the tuned xgboost: %s&quot;, round(sqrt(res$aggregate()), 2))</code></pre>
 <pre><code>
-[1] &quot;RMSE of the tuned xgboost: 142.47&quot;</code></pre>
+[1] &quot;RMSE of the tuned xgboost: 143.8&quot;</code></pre>
 </div>
 <p>We can obtain the resulting params in the respective splits by accessing the <a href="https://mlr3.mlr-org.com/reference/ResampleResult.html"><code>ResampleResult</code></a>.</p>
 <div class="layout-chunk" data-layout="l-body">
@@ -1691,33 +1691,32 @@ colsample_bylevel 0.6347809 0.5899552 0.6703639</code></pre>
 <li>Stacking and Ensembles</li>
 </ul>
 <p>Below we will investigate some of those possibilities and investigate whether this improves performance.</p>
-<h3 id="engineering-features-mutating-zip-codes">Engineering Features: Mutating ZIP-Codes</h3>
-<p>In order to better cluster the zip codes, we compute a new feature: <strong>med_price</strong>: It computes the median price in each zip-code. This might help our model to improve the prediction.</p>
+<h3 id="advanced-engineering-features-mutating-zip-codes">Advanced: Engineering Features: Mutating ZIP-Codes</h3>
+<p>In order to better cluster the zip codes, we compute a new feature: <strong>med_price</strong>: It computes the median price in each zip-code. This might help our model to improve the prediction. This is equivalent to <strong>impact encoding</strong> <a href="https://win-vector.com/2012/07/23/modeling-trick-impact-coding-of-categorical-variables-with-many-levels/">more information</a>:</p>
+<p>We can equip a learner with impact encoding using <strong>mlr3pipelines</strong>. More information on <strong>mlr3pipelines</strong> can be obtained from other posts.</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
-data = task_train$data(cols = c(&quot;price&quot;, &quot;zipcode&quot;))
-data[, med_price := median(price), by = &quot;zipcode&quot;]
-task_train$cbind(data[, .(med_price)])</code></pre>
+library(mlr3pipelines)
+lrn_impact = po(&quot;encodeimpact&quot;, affect_columns = selector_name(&quot;zipcode&quot;)) %&gt;&gt;% lrn(&quot;regr.ranger&quot;)</code></pre>
 </div>
 <p>Again, we run <a href="https://mlr3.mlr-org.com/reference/resample.html"><code>resample()</code></a> and compute the <strong>RMSE</strong>.</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
-lrn_ranger = lrn(&quot;regr.ranger&quot;)
-res = resample(task = task_train, lrn_ranger, cv3)
+res = resample(task = task_train, lrn_impact, cv3)
 res$score(msr(&quot;regr.mse&quot;))</code></pre>
 <pre><code>
-         task task_id             learner  learner_id     resampling
-1: &lt;TaskRegr&gt;   sales &lt;LearnerRegrRanger&gt; regr.ranger &lt;ResamplingCV&gt;
-2: &lt;TaskRegr&gt;   sales &lt;LearnerRegrRanger&gt; regr.ranger &lt;ResamplingCV&gt;
-3: &lt;TaskRegr&gt;   sales &lt;LearnerRegrRanger&gt; regr.ranger &lt;ResamplingCV&gt;
-   resampling_id iteration prediction regr.mse
-1:            cv         1     &lt;list&gt; 15628.35
-2:            cv         2     &lt;list&gt; 21030.42
-3:            cv         3     &lt;list&gt; 16341.77</code></pre>
+             task task_id            learner               learner_id
+1: &lt;TaskRegr[41]&gt;   sales &lt;GraphLearner[33]&gt; encodeimpact.regr.ranger
+2: &lt;TaskRegr[41]&gt;   sales &lt;GraphLearner[33]&gt; encodeimpact.regr.ranger
+3: &lt;TaskRegr[41]&gt;   sales &lt;GraphLearner[33]&gt; encodeimpact.regr.ranger
+           resampling resampling_id iteration prediction regr.mse
+1: &lt;ResamplingCV[19]&gt;            cv         1  &lt;list[1]&gt; 15272.07
+2: &lt;ResamplingCV[19]&gt;            cv         2  &lt;list[1]&gt; 20454.18
+3: &lt;ResamplingCV[19]&gt;            cv         3  &lt;list[1]&gt; 16294.22</code></pre>
 <pre class="r"><code>
 sprintf(&quot;RMSE of ranger with med_price: %s&quot;, round(sqrt(res$aggregate()), 2))</code></pre>
 <pre><code>
-[1] &quot;RMSE of ranger with med_price: 132.92&quot;</code></pre>
+[1] &quot;RMSE of ranger with med_price: 131.68&quot;</code></pre>
 </div>
 <h3 id="advanced-obtaining-a-sparser-model">Advanced: Obtaining a sparser model</h3>
 <p>In many cases, we might want to have a sparse model. For this purpose we can use a <a href="https://mlr3filters.mlr-org.com/reference/Filter.html"><code>mlr3filters::Filter</code></a> implemented in <code>mlr3filters</code>. This can prevent our learner from overfitting make it easier for humans to interpret models as fewer variables influence the resulting prediction.</p>
@@ -1737,18 +1736,18 @@ lrn_filter = GraphLearner$new(
 res = resample(task = task_train, lrn_filter, cv3)
 res$score(msr(&quot;regr.mse&quot;))</code></pre>
 <pre><code>
-         task task_id        learner       learner_id     resampling
-1: &lt;TaskRegr&gt;   sales &lt;GraphLearner&gt; mrmr.regr.ranger &lt;ResamplingCV&gt;
-2: &lt;TaskRegr&gt;   sales &lt;GraphLearner&gt; mrmr.regr.ranger &lt;ResamplingCV&gt;
-3: &lt;TaskRegr&gt;   sales &lt;GraphLearner&gt; mrmr.regr.ranger &lt;ResamplingCV&gt;
-   resampling_id iteration prediction regr.mse
-1:            cv         1     &lt;list&gt; 18472.45
-2:            cv         2     &lt;list&gt; 29342.03
-3:            cv         3     &lt;list&gt; 22631.51</code></pre>
+             task task_id            learner       learner_id
+1: &lt;TaskRegr[41]&gt;   sales &lt;GraphLearner[33]&gt; mrmr.regr.ranger
+2: &lt;TaskRegr[41]&gt;   sales &lt;GraphLearner[33]&gt; mrmr.regr.ranger
+3: &lt;TaskRegr[41]&gt;   sales &lt;GraphLearner[33]&gt; mrmr.regr.ranger
+           resampling resampling_id iteration prediction regr.mse
+1: &lt;ResamplingCV[19]&gt;            cv         1  &lt;list[1]&gt; 18964.31
+2: &lt;ResamplingCV[19]&gt;            cv         2  &lt;list[1]&gt; 33037.83
+3: &lt;ResamplingCV[19]&gt;            cv         3  &lt;list[1]&gt; 23734.95</code></pre>
 <pre class="r"><code>
 sprintf(&quot;RMSE of ranger with filtering: %s&quot;, round(sqrt(res$aggregate()), 2))</code></pre>
 <pre><code>
-[1] &quot;RMSE of ranger with filtering: 153.24&quot;</code></pre>
+[1] &quot;RMSE of ranger with filtering: 158.89&quot;</code></pre>
 </div>
 <h2 id="summary">Summary:</h2>
 <p>We have seen different ways to improve models with respect to our criteria by:</p>
@@ -1776,7 +1775,7 @@ pred = lrn_ranger$predict(task_test)
 pred$score(msr(&quot;regr.mse&quot;))</code></pre>
 <pre><code>
 regr.mse 
-35686.86 </code></pre>
+20207.61 </code></pre>
 </div>
 <!--radix_placeholder_article_footer-->
 <!--/radix_placeholder_article_footer-->

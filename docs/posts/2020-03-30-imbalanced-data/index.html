@@ -2491,10 +2491,10 @@ design = benchmark_grid(
 )
 print(design)</code></pre>
 <pre><code>
-            task     learner          resampling
-1: &lt;TaskClassif&gt; &lt;AutoTuner&gt; &lt;ResamplingHoldout&gt;
-2: &lt;TaskClassif&gt; &lt;AutoTuner&gt; &lt;ResamplingHoldout&gt;
-3: &lt;TaskClassif&gt; &lt;AutoTuner&gt; &lt;ResamplingHoldout&gt;</code></pre>
+                task         learner              resampling
+1: &lt;TaskClassif[44]&gt; &lt;AutoTuner[39]&gt; &lt;ResamplingHoldout[19]&gt;
+2: &lt;TaskClassif[44]&gt; &lt;AutoTuner[39]&gt; &lt;ResamplingHoldout[19]&gt;
+3: &lt;TaskClassif[44]&gt; &lt;AutoTuner[39]&gt; &lt;ResamplingHoldout[19]&gt;</code></pre>
 <pre class="r"><code>
 set.seed(1)
 bmr = benchmark(design, store_models = TRUE)</code></pre>
@@ -2504,14 +2504,14 @@ bmr = benchmark(design, store_models = TRUE)</code></pre>
 <pre class="r"><code>
 bmr$aggregate(measure)</code></pre>
 <pre><code>
-   nr  resample_result   task_id                       learner_id resampling_id
-1:  1 &lt;ResampleResult&gt; optdigits undersample.classif.ranger.tuned       holdout
-2:  2 &lt;ResampleResult&gt; optdigits  oversample.classif.ranger.tuned       holdout
-3:  3 &lt;ResampleResult&gt; optdigits       smote.classif.ranger.tuned       holdout
-   iters classif.fbeta
-1:     1     0.9677419
-2:     1     0.9650000
-3:     1     0.9675810</code></pre>
+   nr      resample_result   task_id                       learner_id
+1:  1 &lt;ResampleResult[18]&gt; optdigits undersample.classif.ranger.tuned
+2:  2 &lt;ResampleResult[18]&gt; optdigits  oversample.classif.ranger.tuned
+3:  3 &lt;ResampleResult[18]&gt; optdigits       smote.classif.ranger.tuned
+   resampling_id iters classif.fbeta
+1:       holdout     1     0.9438776
+2:       holdout     1     0.9622166
+3:       holdout     1     0.9625935</code></pre>
 <pre class="r"><code>
 # one value per boxplot since we used holdout as outer resampling
 autoplot(bmr, measure = measure)</code></pre>

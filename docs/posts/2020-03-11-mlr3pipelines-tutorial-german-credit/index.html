@@ -1423,7 +1423,7 @@ Keys: boxcox, branch, chunk, classbalancing, classifavg, classweights,
 ranger = lrn(&quot;classif.ranger&quot;)
 ranger$train(task)</code></pre>
 <pre><code>
-Error: Missing data in columns: status, credit_history, purpose, savings, employment_duration, installment_rate, personal_status_sex, other_debtors, present_residence, property, other_installment_plans, housing, number_credits, job, people_liable, telephone, foreign_worker.</code></pre>
+Error: Missing data in columns: credit_history, employment_duration, foreign_worker, housing, installment_rate, job, number_credits, other_debtors, other_installment_plans, people_liable, personal_status_sex, present_residence, property, purpose, savings, status, telephone.</code></pre>
 </div>
 <p>We can perform imputation of missing values using a <code>PipeOp</code>. To find out which imputation <code>PipeOp</code>s are available, we do the following:</p>
 <div class="layout-chunk" data-layout="l-body">
@@ -1439,70 +1439,63 @@ imputer = po(&quot;imputenewlvl&quot;)
 task_imputed = imputer$train(list(task))[[1]]
 task_imputed$missings()</code></pre>
 <pre><code>
-            credit_risk                  status          credit_history 
+            credit_risk          credit_history     employment_duration 
                       0                       0                       0 
-                purpose                 savings     employment_duration 
+         foreign_worker                 housing        installment_rate 
                       0                       0                       0 
-       installment_rate     personal_status_sex           other_debtors 
+                    job          number_credits           other_debtors 
                       0                       0                       0 
-      present_residence                property other_installment_plans 
+other_installment_plans           people_liable     personal_status_sex 
                       0                       0                       0 
-                housing          number_credits                     job 
+      present_residence                property                 purpose 
                       0                       0                       0 
-          people_liable               telephone          foreign_worker 
+                savings                  status               telephone 
                       0                       0                       0 </code></pre>
 <pre class="r"><code>
 head(task_imputed$data())</code></pre>
 <pre><code>
-   credit_risk                                     status
-1:        good                        no checking account
-2:         bad                                 ... &lt; 0 DM
-3:        good ... &gt;= 200 DM / salary for at least 1 year
-4:        good                        no checking account
-5:         bad                        no checking account
-6:        good                                   .MISSING
-                                credit_history             purpose
-1:     all credits at this bank paid back duly furniture/equipment
-2: no credits taken/all credits paid back duly            .MISSING
-3:     all credits at this bank paid back duly            .MISSING
-4: no credits taken/all credits paid back duly          car (used)
-5:    existing credits paid back duly till now              others
-6: no credits taken/all credits paid back duly             repairs
-                      savings employment_duration installment_rate
-1:             ... &gt;= 1000 DM            &gt;= 7 yrs             &lt; 20
-2: unknown/no savings account    1 &lt;= ... &lt; 4 yrs   25 &lt;= ... &lt; 35
-3: unknown/no savings account    4 &lt;= ... &lt; 7 yrs   25 &lt;= ... &lt; 35
-4: unknown/no savings account    4 &lt;= ... &lt; 7 yrs   25 &lt;= ... &lt; 35
-5: unknown/no savings account    1 &lt;= ... &lt; 4 yrs   20 &lt;= ... &lt; 25
-6:             ... &gt;= 1000 DM    1 &lt;= ... &lt; 4 yrs   25 &lt;= ... &lt; 35
-                    personal_status_sex other_debtors present_residence
-1:               male : married/widowed          none          &gt;= 7 yrs
-2: female : non-single or male : single          none  1 &lt;= ... &lt; 4 yrs
-3:                             .MISSING          none  4 &lt;= ... &lt; 7 yrs
-4:               male : married/widowed      .MISSING          &gt;= 7 yrs
-5:               male : married/widowed      .MISSING          &gt;= 7 yrs
-6:               male : married/widowed          none          &gt;= 7 yrs
-                property other_installment_plans housing number_credits
-1: unknown / no property                .MISSING    rent       .MISSING
-2: unknown / no property                    none    rent              1
-3: unknown / no property                .MISSING    rent              1
-4:          car or other                    none     own              1
-5:           real estate                    none     own            2-3
-6:           real estate                    none     own              1
-                         job people_liable                 telephone
-1: skilled employee/official        0 to 2                  .MISSING
-2: skilled employee/official        0 to 2                        no
-3:      unskilled - resident     3 or more                        no
-4: skilled employee/official     3 or more                        no
-5: skilled employee/official     3 or more                        no
-6:      unskilled - resident     3 or more yes (under customer name)
-   foreign_worker
-1:             no
-2:       .MISSING
-3:             no
-4:       .MISSING
-5:             no
-6:             no</code></pre>
+   credit_risk                              credit_history employment_duration
+1:        good     all credits at this bank paid back duly            &gt;= 7 yrs
+2:         bad no credits taken/all credits paid back duly    1 &lt;= ... &lt; 4 yrs
+3:        good     all credits at this bank paid back duly    4 &lt;= ... &lt; 7 yrs
+4:        good no credits taken/all credits paid back duly    4 &lt;= ... &lt; 7 yrs
+5:         bad    existing credits paid back duly till now    1 &lt;= ... &lt; 4 yrs
+6:        good                                    .MISSING    1 &lt;= ... &lt; 4 yrs
+   foreign_worker housing installment_rate                       job
+1:             no    rent             &lt; 20 skilled employee/official
+2:       .MISSING    rent   25 &lt;= ... &lt; 35 skilled employee/official
+3:       .MISSING    rent   25 &lt;= ... &lt; 35      unskilled - resident
+4:             no     own   25 &lt;= ... &lt; 35 skilled employee/official
+5:             no     own   20 &lt;= ... &lt; 25 skilled employee/official
+6:             no     own   25 &lt;= ... &lt; 35      unskilled - resident
+   number_credits other_debtors other_installment_plans people_liable
+1:            2-3          none                    none        0 to 2
+2:              1          none                    none        0 to 2
+3:       .MISSING          none                    none     3 or more
+4:              1      .MISSING                    none     3 or more
+5:            2-3      .MISSING                    none     3 or more
+6:              1          none                    none     3 or more
+                    personal_status_sex present_residence              property
+1:                             .MISSING          &gt;= 7 yrs              .MISSING
+2: female : non-single or male : single  1 &lt;= ... &lt; 4 yrs unknown / no property
+3:                             .MISSING  4 &lt;= ... &lt; 7 yrs unknown / no property
+4:               male : married/widowed          &gt;= 7 yrs          car or other
+5:               male : married/widowed          &gt;= 7 yrs           real estate
+6:               male : married/widowed          &gt;= 7 yrs           real estate
+               purpose                    savings
+1: furniture/equipment             ... &gt;= 1000 DM
+2: furniture/equipment unknown/no savings account
+3:             repairs unknown/no savings account
+4:          car (used) unknown/no savings account
+5:              others unknown/no savings account
+6:             repairs             ... &gt;= 1000 DM
+                                       status                 telephone
+1:                                   .MISSING yes (under customer name)
+2:                                 ... &lt; 0 DM                  .MISSING
+3: ... &gt;= 200 DM / salary for at least 1 year                        no
+4:                        no checking account                  .MISSING
+5:                        no checking account                        no
+6: ... &gt;= 200 DM / salary for at least 1 year yes (under customer name)</code></pre>
 </div>
 <p>We do not only need complete data during training but also during prediction. Using the same imputation heuristic for both is the most consistent strategy. This way the imputation strategy can, in fact, be seen as a part of the complete learner (which could be tuned).</p>
 <p>If we used the imputed <code>Task</code> for Resampling, we would <em>leak</em> information from the test set into the training set. Therefore, it is mandatory to attach the imputation operator to the <code>Learner</code> itself, creating a <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_learners_graph.html"><code>GraphLearner</code></a>:</p>
@@ -1519,7 +1512,7 @@ rr = resample(task, learner = imp_ranger, resampling = cv10_instance)
 rr$aggregate()</code></pre>
 <pre><code>
 classif.ce 
-     0.257 </code></pre>
+     0.254 </code></pre>
 </div>
 <h2 id="feature-filtering">Feature Filtering</h2>
 <p>Typically, sparse models, i.e. having models with few(er) features, are desirable. This is due to a variety of reasons, e.g., enhanced interpretability or decreased costs of acquiring data. Furthermore, sparse models may actually be associated with increased performance (especially if overfitting is anticipated). We can use <em>feature filter</em> to only keep features with the highest <em>information</em>. Filters are implemented in the <a href="https://mlr3filters.mlr-org.com">mlr3filters</a> package and listed in the following dictionary:</p>
@@ -1539,17 +1532,17 @@ filter = flt(&quot;mim&quot;)
 filter$calculate(task_imputed)$scores</code></pre>
 <pre><code>
                  status          credit_history                 savings 
-           6.509985e-02            2.808375e-02            2.285752e-02 
-                purpose                property     employment_duration 
-           2.087642e-02            1.497959e-02            9.209878e-03 
-                housing other_installment_plans          foreign_worker 
-           6.171121e-03            5.135096e-03            3.706056e-03 
-    personal_status_sex           other_debtors        installment_rate 
-           3.425849e-03            3.285763e-03            2.938696e-03 
-         number_credits                     job       present_residence 
-           1.628828e-03            1.191905e-03            9.593585e-04 
-              telephone           people_liable 
-           2.059979e-04            7.182791e-06 </code></pre>
+           0.0560477846            0.0272292095            0.0162383750 
+                purpose                property                 housing 
+           0.0145509110            0.0117234634            0.0114749476 
+    employment_duration     personal_status_sex other_installment_plans 
+           0.0085307023            0.0056389930            0.0052711015 
+          other_debtors          foreign_worker       present_residence 
+           0.0032857631            0.0030732135            0.0018579748 
+       installment_rate           people_liable          number_credits 
+           0.0016124103            0.0014452494            0.0010182556 
+              telephone                     job 
+           0.0006202092            0.0003274007 </code></pre>
 </div>
 <p>Making use of this <code>Filter</code>, you may wonder at which costs the reduction of the feature space comes. We can investigate the trade-off between features and performance by tuning. We incorporate our filtering strategy into the pipeline using <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_filter.html"><code>PipeOpFilter</code></a>. Like before, we need to perform imputation as the <code>Filter</code> also relies on complete data:</p>
 <div class="layout-chunk" data-layout="l-body">
@@ -1557,20 +1550,20 @@ filter$calculate(task_imputed)$scores</code></pre>
 fpipe = po(&quot;imputenewlvl&quot;) %&gt;&gt;% po(&quot;filter&quot;, flt(&quot;mim&quot;), filter.nfeat = 3)
 fpipe$train(task)[[1]]$head()</code></pre>
 <pre><code>
-   credit_risk                                     status
-1:        good                        no checking account
-2:         bad                                 ... &lt; 0 DM
-3:        good ... &gt;= 200 DM / salary for at least 1 year
-4:        good                        no checking account
-5:         bad                        no checking account
-6:        good                                   .MISSING
-                                credit_history                    savings
-1:     all credits at this bank paid back duly             ... &gt;= 1000 DM
-2: no credits taken/all credits paid back duly unknown/no savings account
-3:     all credits at this bank paid back duly unknown/no savings account
-4: no credits taken/all credits paid back duly unknown/no savings account
-5:    existing credits paid back duly till now unknown/no savings account
-6: no credits taken/all credits paid back duly             ... &gt;= 1000 DM</code></pre>
+   credit_risk                              credit_history
+1:        good     all credits at this bank paid back duly
+2:         bad no credits taken/all credits paid back duly
+3:        good     all credits at this bank paid back duly
+4:        good no credits taken/all credits paid back duly
+5:         bad    existing credits paid back duly till now
+6:        good                                    .MISSING
+                      savings                                     status
+1:             ... &gt;= 1000 DM                                   .MISSING
+2: unknown/no savings account                                 ... &lt; 0 DM
+3: unknown/no savings account ... &gt;= 200 DM / salary for at least 1 year
+4: unknown/no savings account                        no checking account
+5: unknown/no savings account                        no checking account
+6:             ... &gt;= 1000 DM ... &gt;= 200 DM / salary for at least 1 year</code></pre>
 </div>
 <p>We can now tune over the <code>mim.filter.nfeat</code> parameter. It steers how many features are kept by the <code>Filter</code> and eventually used by the learner:</p>
 <div class="layout-chunk" data-layout="l-body">
@@ -1636,10 +1629,10 @@ bmr$aggregate()[, c(&quot;learner_id&quot;, &quot;classif.ce&quot;)]</code></pre
 3:                                             imputenewlvl.classif.kknn
 4:                                          imputenewlvl.classif.log_reg
    classif.ce
-1:      0.264
-2:      0.257
-3:      0.332
-4:      0.261</code></pre>
+1:      0.256
+2:      0.259
+3:      0.323
+4:      0.284</code></pre>
 </div>
 <p>If we train the stacked learner and look into the final <code>Learner</code> (the logistic regression), we can see how “important” each <code>Learner</code> of the stacked learner is:</p>
 <div class="layout-chunk" data-layout="l-body">
@@ -1657,14 +1650,14 @@ stats::glm(formula = task$formula(), family = &quot;binomial&quot;, data = task$
 
 Deviance Residuals: 
     Min       1Q   Median       3Q      Max  
--1.9244  -0.7588  -0.5325   0.9528   2.2616  
+-2.2196  -0.7843  -0.5441   0.9380   2.3104  
 
 Coefficients: (2 not defined because of singularities)
                          Estimate Std. Error z value Pr(&gt;|z|)    
-(Intercept)                3.0640     0.3214   9.533   &lt;2e-16 ***
-classif.ranger.prob.good  -5.3321     0.5441  -9.799   &lt;2e-16 ***
+(Intercept)                3.1103     0.3359   9.260  &lt; 2e-16 ***
+classif.ranger.prob.good  -5.0988     0.5525  -9.228  &lt; 2e-16 ***
 classif.ranger.prob.bad        NA         NA      NA       NA    
-classif.kknn.prob.good    -0.5265     0.3553  -1.482    0.138    
+classif.kknn.prob.good    -0.8452     0.3232  -2.615  0.00892 ** 
 classif.kknn.prob.bad          NA         NA      NA       NA    
 ---
 Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
@@ -1672,8 +1665,8 @@ Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&
 (Dispersion parameter for binomial family taken to be 1)
 
     Null deviance: 1221.7  on 999  degrees of freedom
-Residual deviance: 1038.9  on 997  degrees of freedom
-AIC: 1044.9
+Residual deviance: 1050.7  on 997  degrees of freedom
+AIC: 1056.7
 
 Number of Fisher Scoring iterations: 4</code></pre>
 </div>
@@ -1692,7 +1685,7 @@ logreg = lrn(&quot;classif.log_reg&quot;)
 logreg$train(task_unseen)
 logreg$predict(task)</code></pre>
 <pre><code>
-Error in model.frame.default(Terms, newdata, na.action = na.action, xlev = object$xlevels): factor purpose has new levels radio/television, domestic appliances, vacation, business</code></pre>
+Error in model.frame.default(Terms, newdata, na.action = na.action, xlev = object$xlevels): factor job has new levels unemployed/unskilled - non-resident</code></pre>
 </div>
 <p>Not only logistic regression but also many other <code>Learner</code>s cannot handle new levels during prediction. Thus, we use <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_fixfactors.html"><code>PipeOpFixFactors</code></a> to prevent that. <code>PipeOpFixFactors</code> introduces <code>NA</code> values for unseen levels. This means that we may need to impute afterwards. To solve this issue we can use <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_imputesample.html"><code>PipeOpImputeSample</code></a>, but with <code>affect_cols</code> set to only <em>factorial</em> features.</p>
 <p>Another observation is that all-constant features may also be a problem:</p>
@@ -1729,7 +1722,7 @@ roblogreg$predict(task)</code></pre>
          2   bad      bad
          3  good     good
 ---                      
-       998  good     good
+       998  good      bad
        999   bad      bad
       1000  good      bad</code></pre>
 </div>
