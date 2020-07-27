@@ -1495,13 +1495,13 @@ dt = dcast(dt, housing + telephone ~ fold)
 dt[, c(3:5) := lapply(.SD, function(x) x / sum(x)), .SDcols = 3:5]
 dt</code></pre>
 <pre><code>
-    housing telephone          1          2          3
-1:     rent        no 0.11607143 0.11711712 0.11480363
-2:     rent       yes 0.06250000 0.06306306 0.06344411
-3:      own        no 0.43154762 0.43243243 0.43504532
-4:      own       yes 0.27976190 0.27927928 0.28096677
-5: for free        no 0.04761905 0.04804805 0.04531722
-6: for free       yes 0.06250000 0.06006006 0.06042296</code></pre>
+    housing                 telephone          1          2          3
+1: for free                        no 0.11607143 0.11711712 0.11480363
+2: for free yes (under customer name) 0.06250000 0.06306306 0.06344411
+3:     rent                        no 0.43154762 0.43243243 0.43504532
+4:     rent yes (under customer name) 0.27976190 0.27927928 0.28096677
+5:      own                        no 0.04761905 0.04804805 0.04531722
+6:      own yes (under customer name) 0.06250000 0.06006006 0.06042296</code></pre>
 </div>
 <p>And compare it with the relative frequency from the whole data set:</p>
 <div class="layout-chunk" data-layout="l-body">
@@ -1509,13 +1509,13 @@ dt</code></pre>
 gc_tsk$data()[, .(freq = .N / max(.I)),
   by = list(housing, telephone)][order(housing, telephone), ]</code></pre>
 <pre><code>
-    housing telephone       freq
-1:     rent        no 0.11681772
-2:     rent       yes 0.06415479
-3:      own        no 0.43300000
-4:      own       yes 0.28084253
-5: for free        no 0.04895833
-6: for free       yes 0.06106106</code></pre>
+    housing                 telephone       freq
+1: for free                        no 0.11681772
+2: for free yes (under customer name) 0.06415479
+3:     rent                        no 0.43300000
+4:     rent yes (under customer name) 0.28084253
+5:      own                        no 0.04895833
+6:      own yes (under customer name) 0.06106106</code></pre>
 </div>
 <p>It is evident that in each fold, the combination of <code>housing</code> and <code>telephone</code> have similar frequencies that also coincide with the frequencies from the whole data set.</p>
 <h2 id="block-resampling"><a id="block"></a>Block resampling</h2>
