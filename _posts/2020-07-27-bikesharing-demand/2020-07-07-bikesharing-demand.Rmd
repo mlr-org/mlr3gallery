@@ -53,7 +53,6 @@ library(knitr)
 library(kableExtra)
 # descriptive
 library(ggplot2)
-library(summarytools)
 library(DataExplorer)
 library(GGally)
 library(ggrepel)
@@ -142,17 +141,6 @@ Since there are no missing values in our data, we do not need to apply any furth
 
 
 ## Descriptive Statistics
-
-Table 2 shows summary statistics for our training data before we processed it.
-Note that categorical variables like `season` are still treated as continuous here because we have not converted them yet.
-
-```{r kable,echo=FALSE}
-df = descr(train, stats = "fivenum", transpose = TRUE)
-kable(df, booktabs = TRUE,  caption = "Summary statistics training data",
-      linesep = "\\addlinespace", longtable = TRUE) %>%
-kable_styling(full_width = TRUE) %>%
-column_spec(1, width = "4cm")
-```
 
 In Figure 1 we show the density estimates of the continuous variables in the training data.
 We find that our target variable `count` is highly right-skewed, which we
