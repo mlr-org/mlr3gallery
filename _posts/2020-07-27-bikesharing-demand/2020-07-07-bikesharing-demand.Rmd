@@ -729,7 +729,6 @@ important features from the impurity filtering.
 ```{r}
 po_flt = po("filter", filter_ranger, param_vals = list(filter.nfeat = 11L)) %>>%
   po("learner", ranger_learner$clone())
-ranger_feature = log1p_target_trafo(po_flt)
 ```
 
 **Tuning Random Forest**
@@ -792,6 +791,7 @@ To save up time we will stick to 28 combinations here, including all possible co
 
 ```{r ranger, message=FALSE, eval=FALSE}
 set.seed(123456)
+ranger_feature = log1p_target_trafo(po_flt)
 at_ranger = AutoTuner$new(ranger_feature,
   resampling = resampling_cv_5,
   measures = measures,
@@ -959,7 +959,7 @@ Therefore our selected learners `kknn`, `rpart` and `importance.ranger` can be
 considered as hyperparams in a more universal graphlearner `glrn`.
 For more information see [mlr3pipelines](https://mlr3book.mlr-org.com/pipelines.html).  
 
-```{r pipelinie, fig.cap="Pipeline Learner", fig.width = 5, fig.height = 4.3, echo=FALSE, eval=FALSE}
+```{r pipelinie, fig.cap="Pipeline Learner", fig.width = 5, fig.height = 4.3, eval=FALSE}
 list = sapply(list(po(kknn_learner), po(rpart_learner), po(ranger_learner)), log1p_target_trafo)
 list[[3]] = po("filter", filter_ranger, param_vals = list(filter.nfeat = 11L)) %>>%
   po("learner", list[[3]]$clone())
@@ -982,7 +982,7 @@ For this purpose we add *dependencies* to the parameter.
 This is used to control the levels, a grid can tune over. 
 `mtry` is initialized in the transformation depending on the randomly chosen `nfeat`.
 
-```{r graphparamset, message=FALSE, results='hide', eval=FALSE, echo=FALSE}
+```{r graphparamset, message=FALSE, results='hide', eval=FALSE}
 ps = ParamSet$new(list(
   ParamInt$new("branch.selection", lower = 1L, upper = 3L),
   ParamInt$new("targettrafosimple.regr.kknn.targetinverter.regr.kknn.k", lower = 1L, upper = 50L),
