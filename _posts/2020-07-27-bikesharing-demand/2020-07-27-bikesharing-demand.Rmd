@@ -289,6 +289,8 @@ engineer_features = function(df) {
 }
 ```
 
+Note that [PipeOpDateFeatures](https://github.com/mlr-org/mlr3pipelines/blob/master/R/PipeOpDateFeatures.R) provides an alternative to engineer features.
+
 ```{r}
 train = engineer_features(train)
 ```
@@ -347,8 +349,9 @@ ggplot(train, aes(log1p(count))) +
 Therefore we use the transformed variable `log1p_count` as target variable for model fitting.
 For predictions we have to transform it back to the original scale with $x = exp(z) - 1$. \
 (Note that $exp(log(x + 1)) - 1 = x$)
-mlr3 simplifies that process.
-Using the `PipeOpTrafo` we can dynamicly transform our target later on.
+mlr3 simplifies that process by Pipe Operators.
+These `PipeOps` are computational steps that can be arranged Pipelines to manage dataflow in mlr3.
+Using `PipeOpTargetTrafo` we can dynamicly transform our target later on.
 
 ```{r potrafo}
 log1p_target_trafo = function(learner, graph = TRUE) {
@@ -368,7 +371,7 @@ First, we have to initialize our bike task.
 As backend, we use our training data and as target variable `count`.
 
 ```{r taskinit}
-bike_task = TaskRegr$new("bike_task_id", backend = train, target = "count")
+bike_task = TaskRegr$new("bike_sharing", backend = train, target = "count")
 ```
 
 ## Descriptive Analysis with  `mlr3`
