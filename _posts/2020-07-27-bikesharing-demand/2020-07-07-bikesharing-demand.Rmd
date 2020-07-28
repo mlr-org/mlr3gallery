@@ -433,7 +433,7 @@ section on the `autotuner` concerned.
 resampling_cv_5 = rsmp("cv", folds = 5L)
 resampling_outer_cv3 = rsmp("cv", folds = 3L)
 measures = msr("regr.rmse")
-tuner_grid_10 = tnr("grid_search", resolution = 10L)
+tuner_grid_10 = mlr3tuning::tnr("grid_search", resolution = 10L)
 term_evals20 = term("evals", n_evals = 20L)
 ```
 
@@ -797,7 +797,7 @@ at_ranger = AutoTuner$new(ranger_feature,
   measures = measures,
   tune_ps = param_set_ranger,
   terminator = term("evals", n_evals = 28L),
-  tuner = tnr("design_points", design = grid$data)
+  tuner = mlr3tuning::tnr("design_points", design = grid$data)
 )
 # at_ranger$store_tuning_instance = FALSE
 at_ranger$train(bike_task)
@@ -1021,7 +1021,7 @@ multi_at = AutoTuner$new(
     measures = measures,
     tune_ps = ps,
     term = term("evals", n_evals = 21),
-    tuner = tnr("random_search")
+    tuner = mlr3tuning::tnr("random_search")
     )
 set.seed(12345)
 multi_at_rr = resample(bike_task, multi_at, resampling_outer_cv3, store_models = TRUE)
