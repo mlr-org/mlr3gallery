@@ -127,7 +127,7 @@ instance = TuningInstance$new(
   resampling = cv1,
   measures = msr("classif.ce"),
   param_set = ps,
-  terminator = trm("none")
+  terminator = term("none")
 )
 tuner = tnr("grid_search")
 tuner$tune(instance)
@@ -143,7 +143,7 @@ at = AutoTuner$new(
   resampling = cv1,
   measures = msr("classif.ce"),
   tune_ps = ps,
-  terminator = trm("none"),
+  terminator = term("none"),
   tuner = tuner
 )
 rr = resample(task, at, cv2, store_models = TRUE)
@@ -201,7 +201,7 @@ instance = TuningInstance$new(
   resampling = cv1,
   measures = msr("classif.ce"),
   param_set = ps,
-  terminator = trm("evals", n_evals = 10)
+  terminator = term("evals", n_evals = 10)
 )
 tuner = tnr("random_search")
 tuner$tune(instance)
@@ -234,7 +234,7 @@ at = AutoTuner$new(
   resampling = cv1,
   measures = msr("classif.ce"),
   tune_ps = ps,
-  terminator = trm("evals", n_evals = 10),
+  terminator = term("evals", n_evals = 10),
   tuner = tuner
 )
 rr = resample(task, at, cv2, store_models = TRUE)

@@ -143,7 +143,7 @@ instance_grid = TuningInstance$new(
   resampling = cv10_instance,
   measures = msr("classif.ce"),
   param_set = searchspace,
-  terminator = trm("none")
+  terminator = term("none")
 )
 ```
 
@@ -244,7 +244,7 @@ instance_random = TuningInstance$new(
   resampling = cv10_instance,
   measures = msr("classif.ce"),
   param_set = large_searchspace,
-  terminator = trm("evals", n_evals = 36)
+  terminator = term("evals", n_evals = 36)
 )
 ```
 
@@ -320,7 +320,7 @@ grid_auto = AutoTuner$new(
   resampling = rsmp("cv", folds = 5), # we can NOT use fixed resampling here
   measures = msr("classif.ce"),
   tune_ps = searchspace,
-  terminator = trm("none"),
+  terminator = term("none"),
   tuner = tnr("grid_search", resolution = 18)
 )
 ```
@@ -348,7 +348,7 @@ instance_random = TuningInstance$new(
   resampling = cv10_instance,
   measures = msr("classif.ce"),
   param_set = large_searchspace,
-  terminator = trm("evals", n_evals = 3600)
+  terminator = term("evals", n_evals = 3600)
 )
 tuner_random$tune(instance_random)
 instance_random$result

@@ -437,7 +437,7 @@ resampling_cv_5 = rsmp("cv", folds = 5L)
 resampling_outer_cv3 = rsmp("cv", folds = 3L)
 measures = msr("regr.rmse")
 tuner_grid_10 = mlr3tuning::tnr("grid_search", resolution = 10L)
-term_evals20 = trm("evals", n_evals = 20L)
+term_evals20 = term("evals", n_evals = 20L)
 ```
 
 
@@ -799,7 +799,7 @@ at_ranger = AutoTuner$new(ranger_feature,
   resampling = resampling_cv_5,
   measures = measures,
   tune_ps = param_set_ranger,
-  terminator = trm("evals", n_evals = 28L),
+  terminator = term("evals", n_evals = 28L),
   tuner = mlr3tuning::tnr("design_points", design = grid$data)
 )
 # at_ranger$store_tuning_instance = FALSE
@@ -1023,7 +1023,7 @@ multi_at = AutoTuner$new(
     resampling =  rsmp("cv", folds = 5),
     measures = measures,
     tune_ps = ps,
-    term = trm("evals", n_evals = 21),
+    term = term("evals", n_evals = 21),
     tuner = mlr3tuning::tnr("random_search")
     )
 set.seed(12345)
