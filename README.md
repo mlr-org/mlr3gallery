@@ -1,19 +1,32 @@
 # mlr3gallery
 
 <!-- badges: start -->
-![R CMD Check via {tic}](https://github.com/mlr-org/mlr3gallery/workflows/R%20CMD%20Check%20via%20%7Btic%7D/badge.svg?branch=master&event=push)
+[![R CMD Check via {tic}](https://github.com/mlr-org/mlr3gallery/workflows/R%20CMD%20Check%20via%20{tic}/badge.svg?branch=master)](https://github.com/mlr-org/mlr3gallery/actions)
 <!-- badges: end -->
 
-A simple blogdown site for case studies using mlr3.
+## Add a new post
 
-## Create a new post
+1. Install `distill` via `install.packages("distill")`.
+1. Run `distill::create_post()`.
+1. Add a setup chunk to your post
 
-Copy and rename an existing post in `content/post/`.
-You can render the new post with `rmarkdown::render()`.
-To see it integrated into the layout of the page, use:
+   ````r
+   ```{r setup, include=FALSE}
+   knitr::opts_chunk$set(
+     echo = TRUE,
+     R.options = list(width = 80)
+   )
+   ```
+   ````
+1. Write the post and select appropriate categories. Tags are not available.
+1. Add required packages to the DESCRIPTION file via `usethis::use_package(<package>)`.
+1. Render your post locally using `rmarkdown::render()` and preview locally using `rmarkdown::render_site()` and `pkgdown::preview_site()` or (when using RStudio) by clicking on "Build Website" in the "Build" pane.
+1. Apply the [mlr-style](https://github.com/mlr-org/mlr3/wiki/Style-Guide#styler-mlr-style) to the post.
+1. Open a Pull request and commit only the Rmd file and external images (your local html file and all files generated during the rendering should be ignored automatically).
+1. Now CI deploys a preview of the site including the new Rmd.
+   All auxiliary files will be deployed automatically.
+   The preview is available in the Checks menu within the PR.
 
-```r
-blogdown::serve_site()
-```
+## CI
 
-Note that you need to have `hugo` installed locally.
+All posts are rendered on every push to ensure that all posts can be run without issues.
