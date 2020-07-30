@@ -326,7 +326,7 @@ ps = ParamSet$new(
 ))
 
 # Define the Terminator
-terminator = term("evals", n_evals = 10)
+terminator = trm("evals", n_evals = 10)
 at = AutoTuner$new(lrn_xgb, rsmp("holdout"), msr("regr.rmse"), ps,
   terminator, tuner = tnr("random_search"))
 ```
@@ -341,7 +341,7 @@ res$score(msr("regr.rmse"))
 sprintf("RMSE of the tuned xgboost: %s", round(sqrt(res$aggregate()), 2))
 ```
 
-We can obtain the resulting params in the respective splits by accessing the `r ref("ResampleResult")`.
+We can obtain the resulting parameters in the respective splits by accessing the `r ref("ResampleResult")`.
 
 ```{r, eval = eval_tune}
 sapply(res$learners, function(x) x$param_set$values)[-2,]
