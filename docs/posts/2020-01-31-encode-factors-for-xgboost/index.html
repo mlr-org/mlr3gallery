@@ -1352,12 +1352,12 @@ print(task)</code></pre>
 * Target: credit_risk
 * Properties: twoclass
 * Features (20):
-  - fct (12): credit_history, foreign_worker, housing, job,
-    other_debtors, other_installment_plans, personal_status_sex,
-    property, purpose, savings, status, telephone
-  - dbl (7): age, amount, duration, installment_rate, number_credits,
-    people_liable, present_residence
-  - ord (1): employment_duration</code></pre>
+  - fct (14): credit_history, employment_duration, foreign_worker,
+    housing, job, other_debtors, other_installment_plans,
+    people_liable, personal_status_sex, property, purpose, savings,
+    status, telephone
+  - int (3): age, amount, duration
+  - ord (3): installment_rate, number_credits, present_residence</code></pre>
 <pre class="r"><code>
 learner = lrn(&quot;classif.xgboost&quot;, nrounds = 100)
 print(learner)</code></pre>
@@ -1375,7 +1375,7 @@ print(learner)</code></pre>
 <pre class="r"><code>
 unique(task$feature_types$type)</code></pre>
 <pre><code>
-[1] &quot;numeric&quot; &quot;factor&quot;  &quot;ordered&quot;</code></pre>
+[1] &quot;integer&quot; &quot;factor&quot;  &quot;ordered&quot;</code></pre>
 <pre class="r"><code>
 learner$feature_types</code></pre>
 <pre><code>
@@ -1400,43 +1400,46 @@ fencoder = po(&quot;encode&quot;, method = &quot;treatment&quot;,
 fencoder$train(list(task))</code></pre>
 <pre><code>
 $output
-&lt;TaskClassif:german_credit&gt; (1000 x 47)
+&lt;TaskClassif:german_credit&gt; (1000 x 50)
 * Target: credit_risk
 * Properties: twoclass
-* Features (46):
-  - dbl (45): age, amount,
-    credit_history.all.credits.at.this.bank.paid.back.duly,
-    credit_history.critical.account.other.credits.existing,
-    credit_history.delay.in.paying.off.in.the.past,
-    credit_history.existing.credits.paid.back.duly.till.now, duration,
-    foreign_worker.no, housing.for.free, housing.own, installment_rate,
-    job.management.self.employed.highly.qualified.employee.officer,
+* Features (49):
+  - dbl (43): credit_history.all.credits.at.this.bank.paid.back.duly,
+    credit_history.critical.account.other.credits.elsewhere,
+    credit_history.existing.credits.paid.back.duly.till.now,
+    credit_history.no.credits.taken.all.credits.paid.back.duly,
+    employment_duration....7.yrs, employment_duration...1.yr,
+    employment_duration.1..........4.yrs,
+    employment_duration.4..........7.yrs, foreign_worker.yes,
+    housing.own, housing.rent,
+    job.manager.self.empl.highly.qualif..employee,
     job.skilled.employee.official, job.unskilled...resident,
-    number_credits, other_debtors.co.applicant,
-    other_debtors.guarantor, other_installment_plans.none,
-    other_installment_plans.stores, people_liable,
-    personal_status_sex.female...divorced.separated.married,
+    other_debtors.co.applicant, other_debtors.guarantor,
+    other_installment_plans.none, other_installment_plans.stores,
+    people_liable.3.or.more,
+    personal_status_sex.female...non.single.or.male...single,
     personal_status_sex.female...single,
     personal_status_sex.male...married.widowed,
-    personal_status_sex.male...single, present_residence,
-    property.building.society.savings.agreement.life.insurance,
-    property.car.or.other, property.unknown.no.property,
-    purpose.business, purpose.car..used., purpose.domestic.appliances,
-    purpose.education, purpose.furniture.equipment, purpose.others,
+    property.building.soc..savings.agr....life.insurance,
+    property.car.or.other, property.real.estate, purpose.business,
+    purpose.car..new., purpose.car..used., purpose.domestic.appliances,
+    purpose.education, purpose.furniture.equipment,
     purpose.radio.television, purpose.repairs, purpose.retraining,
-    savings........1000.DM, savings.100..........500.DM,
-    savings.500..........1000.DM, savings.unknown.no.savings.account,
+    purpose.vacation, savings........1000.DM, savings.......100.DM,
+    savings.100..........500.DM, savings.500..........1000.DM,
     status........200.DM...salary.for.at.least.1.year,
-    status.0..........200.DM, status.no.checking.account, telephone.yes
-  - ord (1): employment_duration</code></pre>
+    status.......0.DM, status.0.........200.DM,
+    telephone.yes..under.customer.name.
+  - int (3): age, amount, duration
+  - ord (3): installment_rate, number_credits, present_residence</code></pre>
 </div>
-<p>The ordered factor remained untouched, all other factors have been converted to numeric columns. To also convert the ordered variable <code>employment_duration</code>, we construct the <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_colapply.html"><code>colapply</code></a> operator with the converter <code>as.integer()</code>:</p>
+<p>The ordered factor remained untouched, all other factors have been converted to numeric columns. To also convert the ordered variables <code>installment_rate</code>, <code>number_credits</code>, and <code>present_residence</code>, we construct the <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_colapply.html"><code>colapply</code></a> operator with the converter <code>as.integer()</code>:</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
 ord_to_int = po(&quot;colapply&quot;, applicator = as.integer,
   affect_columns = selector_type(&quot;ordered&quot;))</code></pre>
 </div>
-<p>Applied on the original task, it changes the factor column to <code>integer</code>:</p>
+<p>Applied on the original task, it changes factor columns to <code>integer</code>:</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
 ord_to_int$train(list(task))</code></pre>
@@ -1446,12 +1449,12 @@ $output
 * Target: credit_risk
 * Properties: twoclass
 * Features (20):
-  - fct (12): credit_history, foreign_worker, housing, job,
-    other_debtors, other_installment_plans, personal_status_sex,
-    property, purpose, savings, status, telephone
-  - dbl (7): age, amount, duration, installment_rate, number_credits,
-    people_liable, present_residence
-  - int (1): employment_duration</code></pre>
+  - fct (14): credit_history, employment_duration, foreign_worker,
+    housing, job, other_debtors, other_installment_plans,
+    people_liable, personal_status_sex, property, purpose, savings,
+    status, telephone
+  - int (6): age, amount, duration, installment_rate, number_credits,
+    present_residence</code></pre>
 </div>
 <h2 id="construct-pipeline">Construct Pipeline</h2>
 <p>Finally, we construct a linear pipeline consisting of</p>
@@ -1483,7 +1486,7 @@ rr = resample(task, glearner, rsmp(&quot;cv&quot;, folds = 3))
 rr$aggregate()</code></pre>
 <pre><code>
 classif.ce 
- 0.2569995 </code></pre>
+ 0.2620075 </code></pre>
 </div>
 <p>Success! We augmented xgboost with handling of factors and ordered factors. If we combine this learner with a tuner from <a href="https://mlr3tuning.mlr-org.com">mlr3tuning</a>, we get a universal and competitive learner.</p>
 <!--radix_placeholder_article_footer-->
