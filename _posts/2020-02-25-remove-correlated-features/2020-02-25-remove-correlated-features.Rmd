@@ -25,7 +25,7 @@ library(mlr3book)
 ```
 
 The following example describes a situation where we aim to remove **correlated features**.
-This in essence means, that we drop features until no features have a correlation higher then a given `cutoff`.
+This in essence means, that we drop features until no features have a correlation higher than a given `cutoff`.
 This is often useful when we for example want to use **linear models**.
 
 ## Prerequisites
@@ -60,7 +60,7 @@ pipeline = po("select") %>>% lrn("classif.rpart")
 
 Now we get to the magic:
 
-We want to use the function `r ref("caret::findCorrelation")` from the `r cran_pkg("caret")` package in order to select uncorrelated variables.
+We want to use the function `r ref("caret::findCorrelation()")` from the `r cran_pkg("caret")` package in order to select uncorrelated variables.
 This function has a `cutoff` parameter, that specifies the maximum correlation allowed between variables.
 In order to expose this variable as a `numeric` parameter we can tune over we specify the following `r ref("ParamSet")`:
 
@@ -106,7 +106,7 @@ inst = TuningInstance$new(
 )
 ```
 
-and run the tuning:
+Then we run the tuning:
 
 ```{r}
 tnr("grid_search")$tune(inst)
@@ -114,7 +114,7 @@ tnr("grid_search")$tune(inst)
 
 In order to demonstrate that different cutoff values result in different features being selected, we can run the following to inspect the trained models.
 Note this inspects only the trained models of the first CV fold of each evaluated model.
-The features being excluded depends on the training data seen by the pipeline and may be different in different folds, even at the same cutoff value
+The features being excluded depends on the training data seen by the pipeline and may be different in different folds, even at the same cutoff value.
 
 ```{r}
 inst$archive(unnest = "tune_x")[
