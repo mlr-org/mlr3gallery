@@ -100,8 +100,6 @@ First, we'll do a thorough investigation of the dataset.
 
 ### Exploring the Data
 
-FIXME: I'm not 100% sure whether we need all this data exploration
-
 We can get a quick overview of our dataset using R's summary function:
 
 ```{r}
@@ -154,7 +152,7 @@ During this exploratory analysis meaningful aspects could be:
 
 An explanatory analysis is crucial to get a feeling for your data.
 On the other hand the data can be validated this way.
-Non plausible data can be investigated or outliers can be removed.
+Non-plausible data can be investigated or outliers can be removed.
 
 After feeling confident with the data, we want to do modeling now.
 
@@ -170,19 +168,15 @@ The typical questions that arise when building a machine learning workflow are:
 
 More systematically in `mlr3` they can be expressed via five components:
 
-1) The `Task` definition
-
-2) The `Learner` definition
-
-3) The training
-
-4) The prediction
-
-5) The evaluation via `Measure`s
+1. The `r ref("Task")` definition.
+2. The `r ref("Learner")` definition.
+3. The training.
+4. The prediction.
+5. The evaluation via one or multiple `r ref("Measure", text = "Measures")`.
 
 ### Task Definition
 
-First of all, we are interested in the target which we want to model.
+First, we are interested in the target which we want to model.
 Most supervised machine learning problems are **regression** or **classification** problems.
 However, note that other problems include unsupervised learning or time-to-event data (covered in `r mlr_pkg("mlr3survival")`).
 
@@ -193,7 +187,8 @@ For a regression problem, we define a regression task -- `r ref("TaskRegr")`.
 In our case it is clearly our objective to model or predict the binary `factor` variable `credit_risk`.
 Thus, we define a `TaskClassif`.
 
-Suppose `mlr3` would not contain a predefined `Task` for the German credit dataset. We could then initialize a classification task using `TaskClassif$new()`.
+Suppose `mlr3` would not contain a predefined `Task` for the German credit dataset.
+We could then initialize a classification task using `TaskClassif$new()`.
 We need to specify a name for the task (we choose `"GermanCredit"`), the data we want to use (`german_credit`) and name of the target (`"credit_risk"`):
 
 ```{r}
@@ -203,17 +198,17 @@ task = TaskClassif$new("GermanCredit", backend = german_credit, target = "credit
 ### Learner Definition
 
 After having decided *what* should be modeled, we need to decide on *how*.
-This means we need to decide which learning algorithms, or `Learner`s are appropriate.
+This means we need to decide which learning algorithms, or `r ref("Learner", text = "Learners")` are appropriate.
 Using prior knowledge (e.g. knowing that it is a classification task or assuming that the classes are linearly separable) one ends up with one or more suitable `Learner`s.
 
 Many learners can be obtained via the `r mlr_pkg("mlr3learners")` package.
 Additionally, many learners are provided via the `mlr3learners` organization ([github page](https://github.com/mlr3learners)).
 These two resources combined account for a large fraction of standard learning algorithms.
 As `mlr3` usually only wraps learners from packages, it is even easy to create a formal `Learner` by yourself.
-You may find the section 'Extending mlr3' in the `r mlr_pkg("mlr3book")` very helpful.
-If you happen to write your own `Learner` in `mlr3`, we would be happy if you share it with the `mlr3` community.
+You may find the section about [extending mlr3](https://mlr3book.mlr-org.com/extending.html) in the `r mlr_pkg("mlr3book")` very helpful.
+If you happen to write your own `r ref("Learner")` in `mlr3`, we would be happy if you share it with the `mlr3` community.
 
-All available `Learner`s (i.e. all which you have installed from `mlr3`, `mlr3learners`, the mlr3learners github page, or self-written ones) can be listed in the following dictionary:
+All available `Learner`s (i.e. all which you have installed from `mlr3`, `mlr3learners`, the [mlr3learners github organization](https://github.com/mlr3learners/), or self-written ones) can be listed in the following dictionary:
 
 ```{r}
 mlr_learners
@@ -223,7 +218,7 @@ For our problem, a suitable learner could be one of the following:
 Logistic regression, CART, Random Forest (or many more).
 
 A learner can be initialized with the `lrn` function and the name of the learner, e.g., `lrn("classif.xxx")`.
-Use `?mlr_learners_xxx` to open the help page of a learner named `xxx`, or use [the internet](https://mlr3learners.mlr-org.com/reference/index.html).
+Use `?mlr_learners_xxx` to open the help page of a learner named `xxx`, or the [rendered overview page](https://mlr3learners.mlr-org.com/reference/index.html).
 
 For example, a logistic regression can be initialized in the following manner (logistic regression uses R's `glm()` function and is provided by the `mlr3learners` package):
 
@@ -292,7 +287,7 @@ summary(learner_logreg$model)
 
 Just like the logistic regression, we could train a random forest instead.
 We use the fast implementation from the `r cran_pkg("ranger")` package.
-To do so we first need to define the learner and then actually train it.
+For this, we first need to define the learner and then actually train it.
 
 We now additionally supply the importance argument (`importance = "permutation"`).
 Doing so, we override the default and let the learner do feature importance determination based on permutation feature importance.
@@ -480,7 +475,7 @@ bmr = benchmark(bm_design)
 ```
 
 Careful, large benchmarks may take a long time! This one should take less than a minute, however.
-In general, we want use parallelization to speed things up on multi-core machines.
+In general, we want to use parallelization to speed things up on multi-core machines.
 For parallelization, `mlr3` relies on the `r cran_pkg("future")` package:
 
 ```{r, eval=FALSE}
@@ -488,7 +483,7 @@ For parallelization, `mlr3` relies on the `r cran_pkg("future")` package:
 ```
 
 In the benchmark we can compare different measures.
-We compare misclassification rate and AUC.
+We compare `r ref("mlr_measures_ce", text = "misclassification rate")` and `r ref("mlr_measures_auc", text = "AUC")`.
 
 ```{r}
 msr_list = list(msr("classif.ce"), msr("classif.auc"))
@@ -513,7 +508,7 @@ learner_rf$param_set
 We can parameterize our learners in two distinct manners.
 If we have prior knowledge on how the learner should be (hyper-)parameterized, the way to go would be manually entering the parameters in the parameter set.
 In most cases, however, we would want to tune the learner so that it can search good model configurations itself.
-For now, we only want to compare a small number of models.
+For now, we only want to compare a few models.
 
 To get an idea on which parameters can be manipulated, we can investigate the parameters of the original package version.
 
@@ -619,16 +614,3 @@ names(pred_rf)
 ```{r}
 class(pred_rf)
 ```
-
-### mlr3 and its Extensions
-
-| Package         | Functionality                                                                                |
-| :-------------- | :--------------------------------------------------------------------------------------------|
-| `mlr3`          | Framework for machine learning: `Task`, `Learner`, `Measure`, `resample()` and `benchmark()` |
-| `mlr3learners`  | Concrete `Learner`s for many popular machine learning implementations                        |
-| `mlr3pipelines` | Dataflow programming of machine learning workflows                                           |
-| `mlr3tuning`    | Hyperparameter tuning for machine learning algorithms                                        |
-| `mlr3filter`    | Feature filtering                                                                            |
-| `mlr3viz`       | Visualisations and plots                                                                     |
-| `paradox`       | Auxiliary package providing (hyper)parameter handling                                        |
-| `mlr3misc`      | Auxiliary functions                                                                          |
