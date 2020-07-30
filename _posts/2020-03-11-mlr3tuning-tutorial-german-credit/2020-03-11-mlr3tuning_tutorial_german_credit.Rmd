@@ -126,7 +126,7 @@ search_space = ParamSet$new(list(
 ))
 ```
 
-As a next step, we define a `r ref("TuningInstance")` that represents the problem we are trying to optimize.
+As a next step, we define a `r ref("TuningInstanceSingleCrit")` that represents the problem we are trying to optimize.
 
 Typically a tuning instance needs to be supplied with:
 
@@ -175,7 +175,7 @@ instance_grid$result
 Now, we tune:
 
 ```{r}
-tuner_grid$tune(instance_grid)
+tuner_grid$optimize(instance_grid)
 ```
 
 The result are returned by `$optimize()` together with its performance and 
@@ -337,7 +337,7 @@ rr = resample(task, grid_auto, cv10_instance)
 
 We aggregate the performances of all resampling iterations.
 
-```{r}
+```{r, eval = FALSE}
 rr$aggregate()
 ```
 
