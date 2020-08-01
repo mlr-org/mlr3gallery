@@ -102,7 +102,7 @@ task$missings()
 Let's first deal with the categorical variables:
 
 ```{r}
-po_newlvl = po("imputenewlvl")
+po_newlvl = po("imputeoor")
 task_newlvl = po_newlvl$train(list(task))[[1]]
 ```
 
@@ -116,7 +116,7 @@ task_newlvl$missings()
 ```
 
 Cool! `embarked` does not have missing values anymore.
-Note that `PipeOpImputeNewLvl` by default affects `character`, `factor` and `ordered` columns.
+Note that `PipeOpImputeOOR` by default affects `character`, `factor` and `ordered` columns.
 
 For the `numeric` features we want to do two things, impute values and add an indicator column.
 In order to do this, we need a more complicated structure, a `Graph`.
@@ -142,7 +142,7 @@ Afterwards, we `cbind` the resulting data using `po("featureunion")`, connecting
 We can now also connect the newlvl imputation:
 
 ```{r}
-gr = gr %>>% po("imputenewlvl")
+gr = gr %>>% po("imputeoor")
 ```
 
 and see what happens when we now train the whole **Graph**:
@@ -175,7 +175,7 @@ glrn = GraphLearner$new(gr$clone() %>>%
 
 We needed to use the following commands for the Graph:
 * `fixfactors`: Removes empty factor levels and removes factor levels that do not exist during training.
-* `imputesample`: In some cases, if missing factor levels do not occur during training but only while predicting, `imputenewlvl` does not create a new level. For those, we sample a random value.
+* `imputesample`: In some cases, if missing factor levels do not occur during training but only while predicting, `imputeoor` does not create a new level. For those, we sample a random value.
 
 ```{r}
 res = resample(task, glrn, rdesc, store_models = TRUE)
@@ -231,9 +231,9 @@ In summary, we do the following:
   * `missind`: `po_indicator` adds a column for each numeric with the info whether the value is NA or not.
   * `imputehist`: Imputes numeric and integer columns by sampling from the histogram.
 * `featureunion`: Cbind's parallel data streams.
-* `imputenewlvl`: Imputes factor and ordered columns.
+* `imputeoor`: Imputes factor and ordered columns.
 * `fixfactors`: Removes empty factor levels and removes factor levels that do not exist during training.
-* `imputesample`: In some cases, if missing factor levels do not occur during training but only while predicting, `imputenewlvl` does not create a new level. For those, we sample a random value.
+* `imputesample`: In some cases, if missing factor levels do not occur during training but only while predicting, `imputeoor` does not create a new level. For those, we sample a random value.
 * `learner`: Appends a learner to the `Graph`.
 
 The full graph we created is the following:
@@ -249,7 +249,7 @@ gr_final = po_ftextract %>>%
   po("select", param_vals = list(selector = selector_invert(selector_type("character")))) %>>%
   gunion(list(po_indicator, po("imputehist"))) %>>%
   po("featureunion") %>>%
-  po("imputenewlvl") %>>%
+  po("imputeoor") %>>%
   po("fixfactors") %>>%
   po("imputesample") %>>%
   po(learner)

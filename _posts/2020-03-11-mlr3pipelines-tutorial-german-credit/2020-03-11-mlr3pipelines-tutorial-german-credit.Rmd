@@ -124,12 +124,12 @@ To find out which imputation `PipeOp`s are available, we do the following:
 mlr_pipeops$keys("^impute")
 ```
 
-We choose to impute factorial features using a new level (via `r ref("PipeOpImputeNewlvl")`).
+We choose to impute factorial features using a new level (via `r ref("PipeOpImputeOOR")`).
 Let's use the `PipeOp` itself to create an imputed `Task`.
 This shows us how the `PipeOp` actually works:
 
 ```{r}
-imputer = po("imputenewlvl")
+imputer = po("imputeoor")
 task_imputed = imputer$train(list(task))[[1]]
 task_imputed$missings()
 head(task_imputed$data())
@@ -143,7 +143,7 @@ If we used the imputed `Task` for Resampling, we would *leak* information from t
 Therefore, it is mandatory to attach the imputation operator to the `Learner` itself, creating a `r ref("GraphLearner")`:
 
 ```{r}
-imp_ranger = GraphLearner$new(po("imputenewlvl") %>>% ranger)
+imp_ranger = GraphLearner$new(po("imputeoor") %>>% ranger)
 
 imp_ranger$train(task)
 ```
@@ -179,7 +179,7 @@ We incorporate our filtering strategy into the pipeline using `r ref("PipeOpFilt
 Like before, we need to perform imputation as the `Filter` also relies on complete data:
 
 ```{r}
-fpipe = po("imputenewlvl") %>>% po("filter", flt("mim"), filter.nfeat = 3)
+fpipe = po("imputeoor") %>>% po("filter", flt("mim"), filter.nfeat = 3)
 fpipe$train(task)[[1]]$head()
 ```
 
@@ -227,7 +227,7 @@ This is a very specific case that is luckily handled by `r ref("PipeOpLearnerCV"
 We use `"prob"` predictions because they carry more information than response prediction:
 
 ```{r}
-stackgraph = po("imputenewlvl") %>>%
+stackgraph = po("imputeoor") %>>%
   list(
     po("learner_cv", lrn("classif.ranger", predict_type = "prob")),
     po("learner_cv", lrn("classif.kknn", predict_type = "prob"))
@@ -249,9 +249,9 @@ bmr = benchmark(data.table(
   task = list(task),
   learner = list(
     stackgraph,
-    GraphLearner$new(po("imputenewlvl") %>>% lrn("classif.ranger")),
-    GraphLearner$new(po("imputenewlvl") %>>% lrn("classif.kknn")),
-    GraphLearner$new(po("imputenewlvl") %>>% lrn("classif.log_reg"))),
+    GraphLearner$new(po("imputeoor") %>>% lrn("classif.ranger")),
+    GraphLearner$new(po("imputeoor") %>>% lrn("classif.kknn")),
+    GraphLearner$new(po("imputeoor") %>>% lrn("classif.log_reg"))),
   resampling = list(cv10_instance)))
 bmr$aggregate()[, c("learner_id", "classif.ce")]
 ```
