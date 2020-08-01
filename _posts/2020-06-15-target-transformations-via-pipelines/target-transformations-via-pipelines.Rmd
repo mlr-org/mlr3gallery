@@ -24,23 +24,23 @@ knitr::opts_chunk$set(
 library(mlr3book)
 ```
 
-FIXME: ref links for new PipeOps etc when new mlr3pipelines hits CRAN.
+FIXME: reference links for new PipeOps etc. when new mlr3pipelines hits CRAN
 
 Transforming the target variable often can lead to predictive improvement and is a widely used tool. Typical transformations are for example the $\log$ transformation of the target aiming at minimizing (right) skewness, or the Box Cox and Yeo-Johnson transformations being more flexible but having a similar goal.
 
-One option to perform, e.g., a $\log$ transformation would be to manually transform the target prior to training a `r ref("Learner", "Learner")` (or predicting from it) and then manually invert this transformation via $\exp$ after predicting from the `Learner`. This is quite cumbersome. Especially if the transformation and inverse transformation require information about both the training and prediction data.
+One option to perform, e.g., a $\log$ transformation would be to manually transform the target prior to training a `r ref("Learner", "Learner")` (and also predicting from it) and then manually invert this transformation via $\exp$ after predicting from the `Learner`. This is quite cumbersome, especially if the transformation and inverse transformation require information about both the training and prediction data.
 
 In this post, we show how to do various kinds of target transformations using `r mlr_pkg("mlr3pipelines")` and explain the design of the target transformation and inversion `r ref("PipeOp", "PipeOps")`.
 
 You will:
 
-* learn how to do simple target transformations using `PipeOpTargetTrafoSimple`
+* learn how to do simple target transformations using `PipeOpTargetMutate`
 
 * be introduced to the abstract base class to implement custom target transformations, `PipeOpTargetTrafo`
 
 * implement a custom target transformation PipeOp, `PipeOpTargetTrafoBoxCox`
 
-As a prerequisite, you should be quite familiar with mlr3pipelines, i.e, know about the `$state` field of `PipeOp`s, input and output channels, as well as `r ref("Graph", "Graphs")`. We will start with a PipeOp for simple target transformations, `PipeOpTargetTrafoSimple`.
+As a prerequisite, you should be quite familiar with `mlr3pipelines`, i.e, know about the `$state` field of `PipeOp`s, input and output channels, as well as `r ref("Graph", "Graphs")`. We will start with a PipeOp for simple target transformations, `PipeOpTargetMutate`.
 
 In all sections we will use the `r ref("mlr_tasks_mtcars", "mtcars")` regression `r ref("Task", "task")` with `mpg` being a numerical, positive target:
 
@@ -68,8 +68,8 @@ If you are only interested in doing such a transformation and you do not have th
 
 ```{r}
 g_ppl = ppl("targettrafo", graph = learner_lm)
-g_ppl$param_set$values$targettrafosimple.trafo = function(x) log(x)
-g_ppl$param_set$values$targettrafosimple.inverter = function(x) exp(x)
+g_ppl$param_set$values$targetmutate.trafo = function(x) log(x)
+g_ppl$param_set$values$targetmutate.inverter = function(x) list(response = exp(x$response))
 ```
 
 This constructs a `Graph` that will $\log$ transform the target prior to training the linear regression learner (or predicting from it) and $\exp$ transform the target after predicting from it.
@@ -77,10 +77,10 @@ Note that you can supply any other `Learner` or even a whole Graph as the `graph
 
 Now, we will go into more detail about how this actually works:
 
-We can perform a $\log$ transformation of our numerical, positive target, `mpg`, using `PipeOpTargetTrafoSimple` (by default, `ppl("targettrafo")` uses this target transformation `PipeOp`):
+We can perform a $\log$ transformation of our numerical, positive target, `mpg`, using `PipeOpTargetMutate` (by default, `ppl("targettrafo")` uses this target transformation `PipeOp`):
 
 ```{r}
-trafo = po("targettrafosimple", param_vals = list(trafo = function(x) log(x)))
+trafo = po("targetmutate", param_vals = list(trafo = function(x) log(x)))
 ```
 
 We have to specify the `trafo` parameter as a function of `x` (which will internally be evaluated to be the target of the `Task`): `trafo = function(x) log(x))`.
@@ -90,48 +90,50 @@ In principle, this is all that is needed to transform the target prior to traini
 trafo$train(list(task))$output$data(cols = task$target_names)
 ```
 
-After having predicted from the `Learner` we could then proceed to apply the inverse transformation function in a similar manner. However, in `mlr3pipelines`, we decided to go with a more unified design of handling target transformations. In all target transformation `PipeOp`s also the inverse transformation function of the target has to be specified. Therefore, in `PipeOpTargetTrafoSimple`, the parameter `inverter` also has to be correctly specified, i.e.:
+After having predicted from the `Learner` we could then proceed to apply the inverse transformation function in a similar manner. However, in `mlr3pipelines`, we decided to go with a more unified design of handling target transformations. In all target transformation `PipeOp`s also the inverse transformation function of the target has to be specified. Therefore, in `PipeOpTargetMutate`, the parameter `inverter` also has to be correctly specified:
 
 ```{r}
-trafo$param_set$values$inverter = function(x) exp(x)
+trafo$param_set$values$inverter = function(x) list(response = exp(x$response))
 ```
 
-To actually carry out the inverse transformation function after predicting from the `Learner`, we then rely on `PipeOpTargetInverter`. `PipeOpTargetInverter` has an empty `r ref("ParamSet", "ParamSet")` and its sole purpose is to apply the inverse transformation function after having predicted from a `Learner` (note that this whole design of target transformations may seem somewhat over-engineered, however, we will learn of its advantages when we later move to the advanced section).
+Internally, this function will be applied to the `$data$tab` slot of a `r ref("Prediction", "Prediction")` object without the `$row_id` and `$truth` columns, and we specify that the `$response` column should be transformed.
 
-`PipeOpTargetInverter` has two input channels named `"fun"` and `"prediction"`. During training, both take `NULL` as input (because this is what a `Learner`'s `"output"` output and `PipeOpTargetTrafoSimple`'s `"fun"` output will return during training). During prediction, the `"prediction"` input takes a `r ref("Prediction", "Prediction")`, and the `"fun"` input takes the `"fun"` output from `PipeOpTargetTrafoSimple` (you may have noticed already, that `PipeOpTargetTrafoSimple` has actually two outputs, `"fun"` and `"output"`, with `"fun"` returning `NULL` during training and a function during prediction, while `"output"` always returns the transformed input `Task`). We can see this, if we look at:
+To actually carry out the inverse transformation function after predicting from the `Learner`, we then rely on `PipeOpTargetInvert`. `PipeOpTargetInvert` has an empty `r ref("ParamSet", "ParamSet")` and its sole purpose is to apply the inverse transformation function after having predicted from a `Learner` (note that this whole design of target transformations may seem somewhat over-engineered, however, we will learn of its advantages when we later move to the advanced section).
+
+`PipeOpTargetInvert` has two input channels named `"fun"` and `"prediction"`. During training, both take `NULL` as input (because this is what a `Learner`'s `"output"` output and `PipeOpTargetMutate`'s `"fun"` output will return during training). During prediction, the `"prediction"` input takes a `Prediction`, and the `"fun"` input takes the `"fun"` output from `PipeOpTargetMutate` (you may have noticed already, that `PipeOpTargetMutate` has actually two outputs, `"fun"` and `"output"`, with `"fun"` returning `NULL` during training and a function during prediction, while `"output"` always returns the transformed input `Task`). We can see this, if we look at:
 
 ```{r}
 trafo$output
 trafo$predict(list(task))
 ```
 
-We will talk more about the technical details here in the advanced section. To finally construct our target transformation pipeline, we build a `Graph`:
+We will talk more about the technical details here in the advanced section. For now, to finally construct our target transformation pipeline, we build a `Graph`:
 
 ```{r}
 g = Graph$new()
 g$add_pipeop(trafo)
 g$add_pipeop(learner_lm)
-g$add_pipeop(po("targetinverter"))
+g$add_pipeop(po("targetinvert"))
 ```
 
-Manually connecting the edges is quite cumbersome. First we connect the `"output"` output of `"targettrafosimple"` to the `"input"` input of `"regr.lm"`:
+Manually connecting the edges is quite cumbersome. First we connect the `"output"` output of `"targetmutate"` to the `"input"` input of `"regr.lm"`:
 
 ```{r}
-g$add_edge(src_id = "targettrafosimple", dst_id = "regr.lm",
+g$add_edge(src_id = "targetmutate", dst_id = "regr.lm",
   src_channel = 2, dst_channel = 1)
 ```
 
-Then we connect the `"output"` output of `"regr.lm"` to the `"prediction"` input of `"targetinverter"`:
+Then we connect the `"output"` output of `"regr.lm"` to the `"prediction"` input of `"targetinvert"`:
 
 ```{r}
-g$add_edge(src_id = "regr.lm", dst_id = "targetinverter",
+g$add_edge(src_id = "regr.lm", dst_id = "targetinvert",
   src_channel = 1, dst_channel = 2)
 ```
 
-Finally, we connect the `"fun"` output of `"targettrafosimple"` to the `"fun"` input of `"targetinverter"`:
+Finally, we connect the `"fun"` output of `"targetmutate"` to the `"fun"` input of `"targetinvert"`:
 
 ```{r}
-g$add_edge(src_id = "targettrafosimple", dst_id = "targetinverter",
+g$add_edge(src_id = "targetmutate", dst_id = "targetinvert",
   src_channel = 1, dst_channel = 1)
 ```
 
@@ -141,7 +143,9 @@ This graph (which is conceptually the same graph as constructed via the `ppl("ta
 g$plot()
 ```
 
-We can then finally call `$train()` and `$predict()` (prior to this we wrap the `Graph` in a `GraphLearner` and here we do have to set the `task_type` manually, because `PipeOpTargetInverter` does not expose its prediction type):
+FIXME: change the following sentence once predict type can be passed along
+
+We can then finally call `$train()` and `$predict()` (prior to this we wrap the `Graph` in a `r ref("GraphLearner", "GraphLearner")` and here we do have to set the `task_type` manually, because `PipeOpTargetInvert` does not expose its prediction type):
 
 ```{r}
 gl = GraphLearner$new(g, task_type = "regr")
@@ -160,27 +164,26 @@ learner_lm$predict(task)
 
 You should continue reading, if you are interested in more advanced target transformations, i.e., where the transformation and inverse transformation require information about both the training and prediction data.
 
-First we will introduce the abstract base class for doing target transformations, `PipeOpTargetTrafo`, from which `PipeOpTargetTrafoSimple` inherits.
+First we will introduce the abstract base class for doing target transformations, `PipeOpTargetTrafo`, from which `PipeOpTargetMutate` inherits.
 
 # Abstract Base Class: PipeOpTargetTrafo
 
-No matter how "complicated" the actual target transformation and inverse transformation may be, applying the inverse transformation function after having predicted from a `Learner` will always be done via `PipeOpTargetInverter` (as already outlined above, `PipeOpTargetInverter` has an empty ParamSet and its sole purpose is to apply the inverse transformation function after having predicted from a `Learner`). All `Graph`s for doing target transformations will therefore look similar like the simple one above, i.e., a target transformation `PipeOp` followed by some `Learner` or a whole `Graph`, followed by `PipeOpTargetInverter`. Therefore, using `ppl("targettrafo")` to construct such `Graph`s is highly recommended.
+No matter how "complicated" the actual target transformation and inverse transformation may be, applying the inverse transformation function after having predicted from a `Learner` will always be done via `PipeOpTargetInvert` (as already outlined above, `PipeOpTargetInvert` has an empty `ParamSet` and its sole purpose is to apply the inverse transformation function after having predicted from a `Learner`). All `Graph`s for doing target transformations will therefore look similar like the simple one above, i.e., a target transformation `PipeOp` followed by some `Learner` or a whole `Graph`, followed by `PipeOpTargetInvert`. Therefore, using `ppl("targettrafo")` to construct such `Graph`s is highly recommended.
 
 To allow for more advanced target transformations, we now have a closer look at the abstract base class, `PipeOpTargetTrafo`:
 
 `PipeOpTargetTrafo` has one input channel, named `"input"` taking a `Task` both during training and prediction.
-It's two output channels are named `"fun"` and `"output"`. During training `"fun"` returns `NULL` and during prediction `"fun"` returns a function that will be used by PipeOpTargetInverter to perform the inverse target transformation based on `PipeOpTargetInverter`'s `"prediction"` input. `"output"` returns the modified input `Task`.
+It's two output channels are named `"fun"` and `"output"`. During training `"fun"` returns `NULL` and during prediction `"fun"` returns a function that will be used by PipeOpTargetInvert to perform the inverse target transformation on `PipeOpTargetInvert`'s `"prediction"` input. `"output"` returns the modified input `Task` both during training and prediction.
 
-Inherited classes should overload four functions:
+Subclasses can overload up to four functions:
 
-* `set_state()` takes the input `Task` and returns a `list()` which will internally be used to set the `$state`. Typically it is sensible to make use of the `$state` during `train_target()` and `train_invert()`
+* `.get_state()` takes the input `Task` and returns a `list()` which will internally be used to set the `$state`. Typically it is sensible to make use of the `$state` during `.transform()` and `.train_invert()`. The base implementation returns `list()` and should be overloaded if setting the state is desired.
 
-* `train_target()` takes the input `Task` and returns a modified `Task` (i.e., the task with the transformed target).
-  This is the main function for doing the actual target transformation. Note that `set_state()` is evaluated a single time during training right before `train_target()` and therefore, you can rely on the `$state` that has been set. To update the input `Task` with respect to the transformed target, inherited classes should make use of the private `$.update_target()` function which itself will call `convert_task()` and drop the original target from the `Task`.
+* `.transform()` takes the input `Task` and returns a modified `Task` (i.e., the `Task` with the transformed target). This is the main function for doing the actual target transformation. Note that `.get_state()` is evaluated a single time during training right before `.transform()` and therefore, you can rely on the `$state` that has been set. To update the input `Task` with respect to the transformed target, subclasses should make use of the `convert_task()` function and drop the original target from the `Task`. `.transform()` also accepts a `phase` argument that will receive `"train"` during training and `"predict"` during prediction. This can be used to enable different behavior during training and prediction. `.transform()` should always be overloaded by subclasses.
 
-* `train_invert()` takes the input `Task` and returns a `predict_phase_control` object. This can be anything. Note that `train_invert()` should not modify the input `Task`.
+* `.train_invert()` takes the input `Task` and returns a `predict_phase_state` object. This can be anything. Note that `.train_invert()` should not modify the input `Task`. The base implementation returns a list with a single argument, the `$truth` column of the input `Task` and should be overloaded if a more training-phase-dependent state is desired.
 
-* `inverter()` takes a `Prediction` and a `predict_phase_control` object as inputs and returns a `Prediction`. This is the main function for specifying the actual inverse target transformation that will later be carried out by `PipeOpTargetInverter`. Internally a private helper function will construct the function that will be returned by the `"fun"` output of `PipeOpTargetTrafo` so that `PipeOpTargetInverter` can later simply dispatch this inverse target transformation on its `"prediction"` input.
+* `.invert()` takes a `Prediction` and a `predict_phase_state` object as inputs and returns a `Prediction`. This is the main function for specifying the actual inverse target transformation that will later be carried out by `PipeOpTargetInvert`. Internally a private helper function , `.invert_help()` will construct the function that will be returned by the `"fun"` output of `PipeOpTargetTrafo` so that `PipeOpTargetInvert` can later simply dispatch this inverse target transformation on its `"prediction"` input.
 
 The supposed workflow of a class inherited from `PipeOpTargetTrafo` is given in the following figure:
 
@@ -201,7 +204,7 @@ $$y_{i}(\lambda) = \begin{cases}
 
 `mlr3pipelines` already supports the Box-Cox transformation for numerical, positive features, see `?PipeOpBoxCox`.
 
-Here we will design a `PipeO`p to apply the Box-Cox transformation as a target transformation. The $\lambda$ parameter of the transformation is estimated during training and used for both training and prediction transformation. After predicting from a `Learner` we will as always apply the inverse transformation function. To do the actual transformation we will use `bestNormalize::boxcox()`.
+Here we will design a `PipeOp` to apply the Box-Cox transformation as a target transformation. The $\lambda$ parameter of the transformation is estimated during training and used for both the training and prediction transformation. After predicting from a `Learner` we will as always apply the inverse transformation function. To do the actual transformation we will use `bestNormalize::boxcox()`.
 
 First, we inherit from `PipeOpTargetTrafo` and overload the `initialize()` function:
 
@@ -221,37 +224,39 @@ PipeOpTargetTrafoBoxCox = R6Class("PipeOpTargetTrafoBoxCox",
           tags = c("train", "boxcox"))
       ))
       super$initialize(id = id, param_set = ps, param_vals = param_vals,
-        packages = "bestNormalize")
-    },
+        packages = "bestNormalize", task_type_in = "TaskRegr",
+        task_type_out = "TaskRegr")
+    }
+  ),
+  private = list(
 
-    set_state = function(task) {
+    .get_state = function(task) {
       ...
     },
 
-    train_target = function(task) {
+    .transform = function(task, phase) {
       ...
     },
 
-    train_invert = function(task) {
+    .train_invert = function(task) {
       ...
     },
 
-    inverter = function(prediction, predict_phase_control) {
+    .invert = function(prediction, predict_phase_state) {
       ...
     }
   )
 )
 ```
 
-As parameters, we allow `"standardize"` (whether to center and scale the transformed values to attempt a standard normal distribution), `"eps"` (tolerance parameter to identify if the $\lambda$ parameter is equal to zero), `"lower"` (lower value for the estimation of the $\lambda$ parameter) and `"upper"` (upper value for the estimation of the $\lambda$ parameter).
+As parameters, we allow `"standardize"` (whether to center and scale the transformed values to attempt a standard normal distribution), `"eps"` (tolerance parameter to identify if the $\lambda$ parameter is equal to zero), `"lower"` (lower value for the estimation of the $\lambda$ parameter) and `"upper"` (upper value for the estimation of the $\lambda$ parameter). Note that we set `task_type_in = "TaskRegr"` and `task_type_out = "TaskRegr"` to specify that this `PipeOp` only works for `r ref("TaskRegr", "regression Tasks")`.
 
 Second, we overload the four functions as mentioned above.
 
-We start with `set_state()`:
+We start with `.get_state()`. We extract the target and apply the Box-Cox transformation to the target. This yields an object of class `"boxcox"` which we will wrap in a `list()` and set as the `$state` (`bc$x.t = NULL` and `bc$x = NULL` is done to save some memory because we do not need the transformed original data and original data later):
 
 ```{r, eval = FALSE, tidy = FALSE}
-    set_state = function(task) {
-      checkmate::assert_r6(task, classes = "TaskRegr")
+    .get_state = function(task) {
       target = task$data(cols = task$target_names)[[1L]]
       bc = mlr3misc::invoke(bestNormalize::boxcox, target,
         .args = self$param_set$get_values(tags = "boxcox"))
@@ -261,52 +266,37 @@ We start with `set_state()`:
     },
 ```
 
-We assert that the input task is of class `r ref("TaskRegr", "TaskRegr")`  and apply the Box-Cox transformation to the target. This yields an object of class `"boxcox"` which we will wrap in a `list()` and set as the `$state` (`bc$x.t = NULL` and `bc$x = NULL` is done to save some memory because we do not need the transformed original data and original data here).
-
-Next, we tackle `train_target()`:
+Next, we tackle `.transform()`. This is quite straightforward, because objects of class `"boxcox"` have their own predict method which we can use here to carry out the actual Box-Cox transformation based on the learned $\lambda$ parameter as stored in the `"boxcox"` object in the `$state` (both during training and prediction). We then rename the target, add it to the task and finally update the task with respect to this new target:
 
 ```{r, eval = FALSE, tidy = FALSE}
-    train_target = function(task) {
-      checkmate::assert_r6(task, classes = "TaskRegr")
+    .transform = function(task, phase) {
       target = task$data(cols = task$target_names)[[1L]]
       new_target = as.data.table(predict(self$state$bc, newdata = target))
       colnames(new_target) = paste0(task$target_names, ".bc")
       task$cbind(new_target)
-      private$.update_target(task, new_target = colnames(new_target))
+      convert_task(task, new_target = colnames(new_target))
     },
 ```
 
-This is quite straightforward, because objects of class `"boxcox"` have their own predict method which we can use here to carry out the actual Box-Cox transformation based on the learned $\lambda$ parameter as stored in the `"boxcox"` object in the `$state` (both during training and prediction). We then rename the target, add it to the task and finally update the task with respect to this new target.
-
-Time to overload `train_invert()`:
-
-This is even more straightforward, because the prediction method for objects of class `"boxcox"` directly allows for inverting the transformation via setting the argument `inverse = TRUE`. Therefore, we only need the `"boxcox"` object stored in the `$state`.
+Time to overload `.train_invert()`. This is even more straightforward, because the prediction method for objects of class `"boxcox"` directly allows for inverting the transformation via setting the argument `inverse = TRUE`. Therefore, we only need the `"boxcox"` object stored in the `$state` along the `$truth` column of the input `Task` (remember that this will later be available as the `predict_phase_state` object):
 
 ```{r, eval = FALSE, tidy = FALSE}
-    train_invert = function(task) {
-      self$state$bc
+    .train_invert = function(task) {
+      list(truth = task$truth(), bc = self$state$bc)
     },
 ```
 
-Finally, we overload `inverter()`:
+Finally, we overload `.invert()`. We extract the truth from the `predict_phase_state` and the response from the `Prediction`. We then apply the inverse Box-Cox transformation to the response based on the $\lambda$ parameter and the mean and standard deviation learned during training, relying on the `predict_phase_state` object. Finally, we construct a new `Prediction` object:
 
 ```{r, eval = FALSE, tidy = FALSE}
-    inverter = function(prediction, predict_phase_control) {
-      checkmate::assert_r6(prediction, classes = "PredictionRegr")
-      type = prediction$task_type
-      truth = prediction$truth
-      response = prediction$response
-      truth = predict(predict_phase_control, newdata = truth,
+    .invert = function(prediction, predict_phase_state) {
+      truth = predict_phase_state$truth
+      response = predict(predict_phase_state$bc, newdata = prediction$response,
         inverse = TRUE)
-      response = predict(predict_phase_control, newdata = response,
-        inverse = TRUE)
-      get(mlr_reflections$task_types[type]$prediction)$new(
-        row_ids = prediction$row_ids, truth = truth, response = response
-      )
+      invoke(get(mlr_reflections$task_types["regr"]$prediction)$new,
+        row_ids = prediction$row_ids, truth = truth, response = response)
     }
 ```
-
-We assert that the input prediction is of class `r ref("PredictionRegr", "PredictionRegr")` and extract the truth and the response from the `Prediction`. We then apply the inverse Box-Cox transformation to both the truth and the response based on the $\lambda$ parameter and the mean and standard deviation learned during training, relying on the `predict_phase_control` object (which we specified while overloading `train_invert()`, i.e., this is just the `"boxcox"` object stored in the `$state`). Finally, we construct a new `Prediction` object.
 
 ```{r, echo = FALSE}
 PipeOpTargetTrafoBoxCox = R6Class("PipeOpTargetTrafoBoxCox",
@@ -324,11 +314,13 @@ PipeOpTargetTrafoBoxCox = R6Class("PipeOpTargetTrafoBoxCox",
           tags = c("train", "boxcox"))
       ))
       super$initialize(id = id, param_set = ps, param_vals = param_vals,
-        packages = "bestNormalize")
-    },
+        packages = "bestNormalize", task_type_in = "TaskRegr",
+        task_type_out = "TaskRegr")
+    }
+  ),
+  private = list(
 
-    set_state = function(task) {
-      checkmate::assert_r6(task, classes = "TaskRegr")
+    .get_state = function(task) {
       target = task$data(cols = task$target_names)[[1L]]
       bc = mlr3misc::invoke(bestNormalize::boxcox, target,
         .args = self$param_set$get_values(tags = "boxcox"))
@@ -337,31 +329,24 @@ PipeOpTargetTrafoBoxCox = R6Class("PipeOpTargetTrafoBoxCox",
       list(bc = bc)
     },
 
-    train_target = function(task) {
-      checkmate::assert_r6(task, classes = "TaskRegr")
+    .transform = function(task, phase) {
       target = task$data(cols = task$target_names)[[1L]]
       new_target = as.data.table(predict(self$state$bc, newdata = target))
       colnames(new_target) = paste0(task$target_names, ".bc")
       task$cbind(new_target)
-      private$.update_target(task, new_target = colnames(new_target))
+      convert_task(task, new_target = colnames(new_target))
     },
 
-    train_invert = function(task) {
-      self$state$bc
+    .train_invert = function(task) {
+      list(truth = task$truth(), bc = self$state$bc)
     },
 
-    inverter = function(prediction, predict_phase_control) {
-      checkmate::assert_r6(prediction, classes = "PredictionRegr")
-      type = prediction$task_type
-      truth = prediction$truth
-      response = prediction$response
-      truth = predict(predict_phase_control, newdata = truth,
+    .invert = function(prediction, predict_phase_state) {
+      truth = predict_phase_state$truth
+      response = predict(predict_phase_state$bc, newdata = prediction$response,
         inverse = TRUE)
-      response = predict(predict_phase_control, newdata = response,
-        inverse = TRUE)
-      get(mlr_reflections$task_types[type]$prediction)$new(
-        row_ids = prediction$row_ids, truth = truth, response = response
-      )
+      invoke(get(mlr_reflections$task_types["regr"]$prediction)$new,
+        row_ids = prediction$row_ids, truth = truth, response = response)
     }
   )
 )
