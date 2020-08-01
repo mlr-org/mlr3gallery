@@ -7,6 +7,7 @@ categories:
 author:
   - name: Martin Binder
   - name: Florian Pfisterer
+  - name: Michel Lang
 date: 03-11-2020
 description: |
   mlr3 is a machine learning framework for R. Together with other packages following the naming scheme "mlr3___", it offers functionality around developing, tuning, and evaluating machine learning workflows.
@@ -26,6 +27,7 @@ library(mlr3book)
 if (require("data.table")) data.table::setDTthreads(1)
 set.seed(8008135)
 lgr::get_logger("mlr3")$set_threshold("warn")
+ggplot2::theme_set(ggplot2::theme_light())
 ```
 
 ## Intro
@@ -50,10 +52,6 @@ library("data.table")
 library("mlr3")
 library("mlr3learners")
 library("ggplot2")
-```
-
-```{r, include=FALSE}
-theme_set(theme_light())
 ```
 
 ## Machine Learning Use Case: German Credit Data
@@ -89,11 +87,11 @@ The Goal is to classify people by their credit risk (good or bad) using 20 perso
 
 The dataset we are going to use is a transformed version of this German credit dataset, as provided by the `r cran_pkg("rchallenge")` package (this transformed dataset was proposed by Ulrike Grömping, with factors instead of dummy variables and corrected features).
 
-`r mlr_pkg("mlr3")` provides a predefined `r ref("Task")`, more precisely a `r ref("TaskClassif", "classification Task")` for this dataset.
-We can load it using the `tsk()` function.
+`r mlr_pkg("mlr3")` provides a predefined `r ref("Task")`, more precisely a `r ref("TaskClassif", "classification task")` for this dataset.
+We can load it using the `r ref("tsk()")` function.
 
 ```{r, message=FALSE}
-task = tsk("german_credit")
+data("german", package = "rchallenge")
 ```
 
 First, we'll do a thorough investigation of the dataset.
@@ -103,48 +101,46 @@ First, we'll do a thorough investigation of the dataset.
 We can get a quick overview of our dataset using R's summary function:
 
 ```{r}
-german_credit = task$data()
-summary(german_credit)
-dim(german_credit)
+dim(german)
+str(german)
 ```
 
-Our dataset has `r nrow(german_credit)` observations and `r ncol(german_credit)` columns.
+Our dataset has `r nrow(german)` observations and `r ncol(german)` columns.
 The variable we want to predict is `credit_risk` (either good or bad).
 That means we aim to classify people by their credit risk (`"good"` or `"bad"`).
 
-We also recommend the `skimr` (`skimr::skim`) and `DataExplorer` (`DataExplorer::plot_bar`, `DataExplorer::plot_histogram`, `DataExplorer::plot_boxplot`) packages as they create very well readable and understandable overviews.
+We also recommend the packages `r cran_pkg("skimr")` (`r ref("skimr::skim()")`) and `r cran_pkg("DataExplorer")` (`r ref("DataExplorer::plot_bar()")`, `r ref("DataExplorer::plot_histogram()")`, `r ref("DataExplorer::plot_boxplot()")`) packages as they create very well readable and understandable overviews.
 
 ```{r, R.options=list(width = 120)}
-skimr::skim(german_credit)
+skimr::skim(german)
 ```
 
 ```{r, echo=FALSE}
-library(mlr3misc)
-german_credit_short = map_dtc(german_credit, function(x) {
+german_short = mlr3misc::map_dtc(german, function(x) {
   if (is.factor(x) || is.character(x)) {
-    levels(x) = abbreviate(stringr::str_trunc(levels(x), 16), 12)
+    levels(x) = abbreviate(mlr3misc::str_trunc(levels(x), 16, "..."), 12)
   }
   x
 })
 ```
 
 ```{r, eval=FALSE}
-DataExplorer::plot_bar(german_credit, nrow = 6, ncol = 3)
+DataExplorer::plot_bar(german_short, nrow = 6, ncol = 3)
 ```
 
 ```{r, echo=FALSE, out.width="100%", fig.height=18}
-DataExplorer::plot_bar(german_credit_short, nrow = 6, ncol = 3)
+DataExplorer::plot_bar(german_short, nrow = 6, ncol = 3)
 ```
 
 ```{r, out.width="100%", fig.height=3}
-DataExplorer::plot_histogram(german_credit, nrow = 1, ncol = 3)
+DataExplorer::plot_histogram(german_short, nrow = 1, ncol = 3)
 ```
 
 ```{r, out.width="100%", fig.height=3}
-DataExplorer::plot_boxplot(german_credit, by = "credit_risk", nrow = 1, ncol = 3)
+DataExplorer::plot_boxplot(german_short, by = "credit_risk", nrow = 1, ncol = 3)
 ```
 
-During this exploratory analysis meaningful aspects could be:
+During this exploratory analysis meaningful discoveries could be:
 
 - Skewed distributions
 - Missing values
@@ -178,22 +174,22 @@ More systematically in `mlr3` they can be expressed via five components:
 
 First, we are interested in the target which we want to model.
 Most supervised machine learning problems are **regression** or **classification** problems.
-However, note that other problems include unsupervised learning or time-to-event data (covered in `r mlr_pkg("mlr3survival")`).
+However, note that other problems include unsupervised learning or time-to-event data (covered in `r mlr_pkg("mlr3proba")`).
 
-Within `mlr3`, to distinguish between these problems, we define `Task`s.
+Within `mlr3`, to distinguish between these problems, we define `r ref("Task", text = "Tasks")`.
 If we want to solve a classification problem, we define a classification task -- `r ref("TaskClassif")`.
 For a regression problem, we define a regression task -- `r ref("TaskRegr")`.
 
 In our case it is clearly our objective to model or predict the binary `factor` variable `credit_risk`.
 Thus, we define a `TaskClassif`.
 
-Suppose `mlr3` would not contain a predefined `Task` for the German credit dataset.
-We could then initialize a classification task using `TaskClassif$new()`.
-We need to specify a name for the task (we choose `"GermanCredit"`), the data we want to use (`german_credit`) and name of the target (`"credit_risk"`):
-
 ```{r}
-task = TaskClassif$new("GermanCredit", backend = german_credit, target = "credit_risk")
+task = TaskClassif$new("GermanCredit", backend = german, target = "credit_risk")
 ```
+
+Note that this task is an example task which ships with the `mlr3` package.
+Thus, you actually don't need to construct it yourself, just call `tsk("german_credit")` to retrieve the object from the dictionary `r ref("mlr_tasks")`.
+
 
 ### Learner Definition
 
@@ -202,13 +198,13 @@ This means we need to decide which learning algorithms, or `r ref("Learner", tex
 Using prior knowledge (e.g. knowing that it is a classification task or assuming that the classes are linearly separable) one ends up with one or more suitable `Learner`s.
 
 Many learners can be obtained via the `r mlr_pkg("mlr3learners")` package.
-Additionally, many learners are provided via the `mlr3learners` organization ([github page](https://github.com/mlr3learners)).
+Additionally, many learners are provided via the `mlr3learners` [github organization](https://github.com/mlr3learners).
 These two resources combined account for a large fraction of standard learning algorithms.
 As `mlr3` usually only wraps learners from packages, it is even easy to create a formal `Learner` by yourself.
 You may find the section about [extending mlr3](https://mlr3book.mlr-org.com/extending.html) in the `r mlr_pkg("mlr3book")` very helpful.
 If you happen to write your own `r ref("Learner")` in `mlr3`, we would be happy if you share it with the `mlr3` community.
 
-All available `Learner`s (i.e. all which you have installed from `mlr3`, `mlr3learners`, the [mlr3learners github organization](https://github.com/mlr3learners/), or self-written ones) can be listed in the following dictionary:
+All available `Learner`s (i.e. all which you have installed from `mlr3`, `mlr3learners`, the [mlr3learners github organization](https://github.com/mlr3learners/), or self-written ones) are registered in the dictionary `r ref("mlr_learners")`:
 
 ```{r}
 mlr_learners
@@ -217,19 +213,14 @@ mlr_learners
 For our problem, a suitable learner could be one of the following:
 Logistic regression, CART, Random Forest (or many more).
 
-A learner can be initialized with the `lrn` function and the name of the learner, e.g., `lrn("classif.xxx")`.
-Use `?mlr_learners_xxx` to open the help page of a learner named `xxx`, or the [rendered overview page](https://mlr3learners.mlr-org.com/reference/index.html).
+A learner can be initialized with the `r ref("lrn()")` function and the name of the learner, e.g., `lrn("classif.xxx")`.
+Use `?mlr_learners_xxx` to open the help page of a learner named `xxx`, or follow the link on the [rendered overview page](https://mlr3learners.mlr-org.com/reference/index.html).
 
 For example, a logistic regression can be initialized in the following manner (logistic regression uses R's `glm()` function and is provided by the `mlr3learners` package):
 
 ```{r}
+library("mlr3learners")
 learner_logreg = lrn("classif.log_reg")
-```
-
-Alternatively but equivalently, one could use:
-
-```{r}
-learner_logreg = LearnerClassifLogReg$new()
 ```
 
 ### Training
@@ -258,7 +249,7 @@ test_set = setdiff(task$row_ids, train_set)
 
 80 percent of the data is used for training.
 The remaining 20 percent are used for evaluation at a subsequent later point in time.
-`train_set` is an integer vector displaying the selected rows of the original dataset:
+`train_set` is an integer vector referring to the selected rows of the original dataset:
 
 ```{r}
 head(train_set)
@@ -303,7 +294,7 @@ We can access the importance values using `$importance()`.
 learner_rf$importance()
 ```
 
-In order to obtain a better plot, we convert the importance to a `data.table`.
+In order to obtain a plot for the importance values, we convert the importance to a `r cran_pkg("data.table")` and then process it with `r cran_pkg("ggplot2")`:
 
 ```{r}
 importance = as.data.table(learner_rf$importance(), keep.rownames = TRUE)
@@ -331,13 +322,10 @@ Based on these values, one can derive class predictions.
 #### Predict Classes
 
 First, we directly predict classes.
-We will clone the original task and filter it to only keep the rows of the previously defined `test_set`:
 
 ```{r}
-task_predict = task$clone()
-task_predict$filter(test_set)
-pred_logreg = learner_logreg$predict(task_predict)
-pred_rf = learner_rf$predict(task_predict)
+pred_logreg = learner_logreg$predict(task, row_ids = test_set)
+pred_rf = learner_rf$predict(task, row_ids = test_set)
 ```
 
 ```{r}
@@ -348,7 +336,7 @@ pred_logreg
 pred_rf
 ```
 
-The `predict()` function returns  a `r ref("Prediction")` object.
+The `$predict()` method returns  a `r ref("Prediction")` object.
 It can be converted to a `data.table` if one wants to use it downstream.
 
 We can also display the prediction results aggregated in a confusion matrix.
@@ -371,7 +359,7 @@ learner_logreg$predict_type = "prob"
 ```
 
 ```{r}
-learner_logreg$predict(task_predict)
+learner_logreg$predict(task, row_ids = test_set)
 ```
 
 Note that sometimes one needs to be cautious when dealing with the probability interpretation of the predictions.
@@ -382,7 +370,7 @@ To measure the performance of a learner on new unseen data, we usually mimic the
 The training set is used for training the learner, and the test set is only used for predicting and evaluating the performance of the trained learner.
 Numerous resampling methods (cross-validation, bootstrap) repeat the splitting process in different ways.
 
-Within `mlr3`, we need to specify the resampling strategy using the `rsmp()` function:
+Within `mlr3`, we need to specify the resampling strategy using the `r ref("rsmp()")` function:
 
 ```{r}
 resampling = rsmp("holdout", ratio = 2/3)
@@ -390,7 +378,7 @@ print(resampling)
 ```
 
 Here, we use "holdout", a simple train-test split (with just one iteration).
-We use the `resample()` function to undertake the resampling calculation:
+We use the `r ref("resample()")` function to undertake the resampling calculation:
 
 ```{r}
 res = resample(task, learner = learner_logreg, resampling = resampling)
@@ -403,9 +391,8 @@ The default score of the measure is included in the `$aggregate()` slot:
 res$aggregate()
 ```
 
-The default measure in this scenario is `classif.ce`.
-This refers to the classification error.
-A low value close to zero is desired.
+The default measure in this scenario is the `r ref("mlr_measures_classif.ce", "classification error")`.
+Lower is better.
 
 We can easily run different resampling strategies, e.g. repeated holdout (`"subsampling"`), or cross validation.
 Most methods perform repeated train/predict cycles on different data subsets and aggregate the result (usually as the mean).
@@ -413,64 +400,58 @@ Doing this manually would require us to write loops.
 `mlr3` does the job for us.
 
 ```{r}
-res_sub = resample(task, learner = learner_logreg, resampling = rsmp("subsampling", repeats = 10))
-res_sub$aggregate()
+resampling = rsmp("subsampling", repeats = 10)
+rr = resample(task, learner = learner_logreg, resampling = resampling)
+rr$aggregate()
 ```
 
-Instead, we could also apply cross-validation.
+Instead, we could also run cross-validation.
 
 ```{r}
-res_cv = resample(task, learner = learner_logreg, resampling = rsmp("cv", folds = 10))
-res_cv$aggregate()
+resampling = resampling = rsmp("cv", folds = 10)
+rr = resample(task, learner = learner_logreg, resampling = resampling)
+rr$aggregate()
 ```
 
 `mlr3` features scores for many more measures.
-Here, we apply `msr("classif.fpr")` for the false positive rate, or `msr("classif.fnr")` for the false negative rate.
-Multiple measures are entered via a list:
+Here, we apply `r ref("mlr_measures_classif.fpr")`  for the false positive rate, and `r ref("mlr_measures_classif.fnr")` for the false negative rate.
+Multiple measures can be provided as a list of measures (which can directly be constructed via `r ref("msrs()")`:
 
 ```{r}
 # false positive rate
-res_cv$aggregate(msr("classif.fpr"))
+rr$aggregate(msr("classif.fpr"))
 # false positive rate and false negative
-msr_list = list(
-  msr("classif.fpr"),
-  msr("classif.fnr")
-)
-res_cv$aggregate(msr_list)
+measures = msrs(c("classif.fpr", "classif.fnr"))
+rr$aggregate(measures)
 ```
 
-There are a few more resampling methods, and quite a few more measures.
-We list them in
+There are a few more resampling methods, and quite a few more measures (implemented in `r mlr_pkg("mlr3measures")`).
+They are automatically registered in the respective dictionaries:
 
 ```{r}
 mlr_resamplings
-```
-
-and
-
-```{r}
 mlr_measures
 ```
 
 To get help on a resampling method, use `?mlr_resamplings_xxx`, for a measure do `?mlr_measures_xxx`.
-You can also use the [mlr3 reference](https://mlr3.mlr-org.com/reference/index.html) online.
+You can also browse the [mlr3 reference](https://mlr3.mlr-org.com/reference/index.html) online.
 
-Note that some measures, for example AUC, require a "probability" prediction, instead of a response prediction.
+Note that some measures, for example `r ref("mlr_measures_classif.auc", text = "AUC")`, require the prediction of probabilities.
 
 ### Performance Comparison and Benchmarks
 
-We could compare `Learners` by evaluating `resample()` for each of them manually.
-However, `benchmark()` automatically performs resampling evaluations for multiple learners and tasks.
-`benchmark_grid()` creates fully crossed designs:
-Multiple `Learner`s for multiple `Task`s are compared w.r.t. multiple `Resampling`s.
+We could compare `r ref("Learner", "Learners")` by evaluating `r ref("resample()")` for each of them manually.
+However, `r ref("benchmark()")` automatically performs resampling evaluations for multiple learners and tasks.
+`r ref("benchmark_grid()")` creates fully crossed designs:
+Multiple `r ref("Learner", "Learners")` for multiple `r ref("Task", "Tasks")` are compared w.r.t. multiple `r ref("Resampling", "Resamplings")`.
 
 ```{r}
-lrn_list = list(
-  lrn("classif.log_reg", predict_type = "prob"),
-  lrn("classif.ranger", predict_type = "prob")
+learners = lrns(c("classif.log_reg", "classif.ranger"), predict_type = "prob")
+bm_design = benchmark_grid(
+  tasks = task,
+  learners = learners,
+  resamplings = rsmp("cv", folds = 10)
 )
-
-bm_design = benchmark_grid(task, learners = lrn_list, resamplings = rsmp("cv", folds = 10))
 bmr = benchmark(bm_design)
 ```
 
@@ -483,72 +464,72 @@ For parallelization, `mlr3` relies on the `r cran_pkg("future")` package:
 ```
 
 In the benchmark we can compare different measures.
-We compare `r ref("mlr_measures_ce", text = "misclassification rate")` and `r ref("mlr_measures_auc", text = "AUC")`.
+We compare `r ref("mlr_measures_classif.ce", text = "misclassification rate")` and `r ref("mlr_measures_classif.auc", text = "AUC")`.
 
 ```{r}
-msr_list = list(msr("classif.ce"), msr("classif.auc"))
-performances = bmr$aggregate(msr_list)
+measures = msrs(c("classif.ce", "classif.auc"))
+performances = bmr$aggregate(measures)
 performances[, c("learner_id", "classif.ce", "classif.auc")]
 ```
 
 We see that the two models perform very similarly.
 
-## Deviating from package defaults
+## Deviating from hyperparameters defaults
 
 The previously shown techniques build the backbone of a `mlr3`-featured machine learning workflow.
 However, in most cases one would never proceed in the way we did.
 While many R packages have carefully selected default settings, they will not perform optimally in any scenario.
 Typically, we can select the values of such hyperparameters.
-The (hyper)parameters of a `Learner` can be accessed via its `$param_set`:
+The (hyper)parameters of a `r ref("Learner")` can be accessed and set via its `r ref("ParamSet")` `$param_set`:
 
 ```{r, eval=FALSE}
 learner_rf$param_set
+learner_rf$param_set$values = list(verbose = FALSE)
 ```
 
-We can parameterize our learners in two distinct manners.
+We can choose parameters for our learners in two distinct manners.
 If we have prior knowledge on how the learner should be (hyper-)parameterized, the way to go would be manually entering the parameters in the parameter set.
 In most cases, however, we would want to tune the learner so that it can search good model configurations itself.
 For now, we only want to compare a few models.
 
-To get an idea on which parameters can be manipulated, we can investigate the parameters of the original package version.
+To get an idea on which parameters can be manipulated, we can investigate the parameters of the original package version or look into the parameter set of the learner:
 
-```{r, eval=FALSE}
+```{r, eval=2}
 ?ranger::ranger
+as.data.table(learner_rf$param_set)[, .(id, class, lower, upper)]
 ```
 
 For the random forest two meaningful parameters which steer model complexity are `num.trees` and `mtry`.
-
-`num.trees` defaults to `500` and `mtry` to `floor(sqrt(ncol(data) - 1))`, in our case `r floor(sqrt(ncol(german_credit) - 1))`.
+`num.trees` defaults to `500` and `mtry` to `floor(sqrt(ncol(data) - 1))`, in our case `r floor(sqrt(task$ncol - 1))`.
 
 In the following we aim to train three different learners:
 
-1) The default random forest.
-2) A random forest with low `num.trees` and low `mtry`.
-3) A random forest with high `num.trees` and high `mtry`.
+1. The default random forest.
+2. A random forest with **low** `num.trees` and **low** `mtry`.
+3. A random forest with **high** `num.trees` and **high** `mtry`.
 
 We will benchmark their performance on the German credit dataset.
-
-We construct these three learners and set the parameters with a named list.
+For this we construct the three learners and set the parameters accordingly:
 
 ```{r}
-learner_rf_medium = lrn("classif.ranger", predict_type = "prob")
+rf_med = lrn("classif.ranger", id = "med", predict_type = "prob")
 
-learner_rf_low = lrn("classif.ranger", predict_type = "prob")
-learner_rf_low$param_set$values = list(num.trees = 5, mtry = 2)
+rf_low = lrn("classif.ranger", id = "low", predict_type = "prob",
+  num.trees = 5, mtry = 2)
 
-learner_rf_high = lrn("classif.ranger", predict_type = "prob")
-learner_rf_high$param_set$values = list(num.trees = 1000, mtry = 11)
+rf_high = lrn("classif.ranger", id = "high", predict_type = "prob",
+  num.trees = 1000, mtry = 11)
 ```
 
 Once the learners are defined, we can benchmark them:
 
 ```{r}
-lrn_list = list(
-  learner_rf_low = learner_rf_low,
-  learner_rf_medium = learner_rf_medium,
-  learner_rf_high = learner_rf_high
+learners = list(rf_low, rf_med, rf_high)
+bm_design = benchmark_grid(
+  tasks = task,
+  learners = learners,
+  resamplings = rsmp("cv", folds = 10)
 )
-bm_design = benchmark_grid(task = task, resamplings = rsmp("cv", folds = 10), learners = lrn_list)
 ```
 
 ```{r}
@@ -558,12 +539,14 @@ bmr = benchmark(bm_design)
 We compare misclassification rate and AUC again:
 
 ```{r}
-msr_list = list(msr("classif.ce"), msr("classif.auc"))
-performances = bmr$aggregate(msr_list)
-cbind(learner = names(lrn_list), performances[, c("classif.ce", "classif.auc")])
+measures = msrs(c("classif.ce", "classif.auc"))
+performances = bmr$aggregate(measures)
+performances[, .(learner_id, classif.ce, classif.auc)]
+
+autoplot(bmr)
 ```
 
-All learners seem to have similar performance while the `learner_rf_low` seems to underfit a bit.
+The "low" settings seem to underfit a bit, the "high" setting is comparable to the default setting "med".
 
 ## Outlook
 
