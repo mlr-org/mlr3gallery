@@ -241,16 +241,16 @@ instance = TuningInstanceSingleCrit$new(
   task = pima_tsk,
   learner = grph_lrn,
   resampling = rsmp("cv", folds = 3),
-  measures = msr("classif.ce"),
-  param_set = ps,
-  terminator = term("evals", n_evals = 5)
+  measure = msr("classif.ce"),
+  search_space = ps,
+  terminator = trm("evals", n_evals = 5)
 )
 
 tuner = TunerRandomSearch$new()
 set.seed(321)
-tuner$tune(instance)
+tuner$optimize(instance)
 
-instance$archive()
+instance$archive
 ```
 
 The best performance in this short tuned experiment was achieved with `r dQuote(instance$result$params$branch.selection)`.
