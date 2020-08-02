@@ -289,7 +289,7 @@ engineer_features = function(df) {
 }
 ```
 
-Note that [PipeOpDateFeatures](https://github.com/mlr-org/mlr3pipelines/blob/master/R/PipeOpDateFeatures.R) provides an alternative to engineer features.
+Note that [PipeOpDateFeatures](https://github.com/mlr-org/mlr3pipelines/blob/master/R/PipeOpDateFeatures.R) provides an alternative to engineering such features by automatically extracting a set of date-related features from a `POSIXct` date variable.
 
 ```{r}
 train = engineer_features(train)
@@ -346,12 +346,13 @@ ggplot(train, aes(log1p(count))) +
   theme_bw()
 ```
 
-Therefore we use the transformed variable `log1p_count` as target variable for model fitting.
 For predictions we have to transform it back to the original scale with $x = exp(z) - 1$. \
 (Note that $exp(log(x + 1)) - 1 = x$)
-mlr3 simplifies that process by Pipe Operators.
-These `PipeOps` are computational steps that can be arranged Pipelines to manage dataflow in mlr3.
-Using `PipeOpTargetTrafo` we can dynamicly transform our target later on.
+mlr3 simplifies this process by offering Pipeline Operators (PipeOps for short).
+These `PipeOps` are computational steps that can be arranged into Pipelines to manage dataflow in mlr3.
+
+Using `PipeOpTargetTrafo` we can dynamically transform our target before the prediction and transform it back
+into our original scale afterwards.
 
 ```{r potrafo}
 log1p_target_trafo = function(learner, graph = TRUE) {
@@ -423,12 +424,12 @@ autoplot(bike_task,
 
 In our modelling process, we consider three learners: `kknn`, `rpart` and `ranger`.
 For parameter optimization, we use the so-called `autotuner`.
-An autotuner is a learner that can do hyperparameter tuning.
+An `Autotuner` is a learner, that tunes its hyperparameters during training.
 The technical implementation is provided by `mlr3tuning`.
 For more details see the [mlr3manual](https://mlr3book.mlr-org.com/tuning.html).  
 
-In order to achieve maximum comparability between the learners the following objects 
-are initialized and mainly used in each `autotuner`. 
+In order to achieve maximum comparability between the learners the `Resampling` objects and 
+which enable us to measure a learner-configuration's performance as well as the tuning strategy are kept fixed for all compared learners.
 If a learner's settings differ from the general case, the reason is given in the 
 section on the `autotuner` concerned.
 
@@ -440,16 +441,13 @@ tuner_grid_10 = mlr3tuning::tnr("grid_search", resolution = 10L)
 term_evals20 = trm("evals", n_evals = 20L)
 ```
 
-
-* `nested resampling` is a method to obtain an unbiased performance estimation 
-for each learner.
-For more information see 
-[Nested Resamling](https://mlr3book.mlr-org.com/nested-resampling.html).
-During our modelling process, we use 3-fold CV for `inner resampling` to avoid 
+* `nested resampling` is a method to obtain an unbiased performance estimation for each learner.
+For more information see [Nested Resamling](https://mlr3book.mlr-org.com/nested-resampling.html).
+During our modelling process, we use 5-fold CV for `inner resampling` to avoid 
 overfitting when optimizing the model parameters (`resampling_cv_5`).
-For avoiding overfitting during hyperparameter tuning we use 3-fold CV as 
+In order to avoid overfitting during hyperparameter tuning, we use 3-fold CV as 
 `outer resampling` method (`resampling_outer_cv3`). Nested resampling is 
-done in our Chapter 5 "Nested Resampling" when we evaluate and 
+done in our Chapter 5 "Nested Resampling" where we evaluate and 
 compare the performance of the learners in a single Graph Learner. 
 
 * `measure` defines the loss function that the autotuner evaluates during training.
@@ -463,7 +461,6 @@ of $10^{2} = 100$ configurations. The tuner grid is called `tuner_grid_10`.
 * `terminator` limits the tuning process to 20 hyperparameter combinations,
 which will be drawn randomly from the `tuner_grid_10`.
 The terminator is called `term_evals20`.
-
 
 As the computational time of `nested resampling` is high and tuning over
 multiple parameters would be very complex, the `autotuners` are be
@@ -633,7 +630,6 @@ archive_rpart = at_rpart$archive("tune_x")[, c("regr.rmse",
 archive_rpart = readRDS("archive_rpart.rds")
 ```
 
-
 In Figure 10 we see the RMSE for the considered hyperparameter of the rpart autotuner.
 The learner performs the worst if we set the minimum size of nodes in `minsplit < 3`.
 For splitting criteria `minsplit > 3` seems to have no significant influence 
@@ -750,9 +746,7 @@ down) square root of the number variables.
 > A param from `importance` that allows to control the size of features computed 
 in the model.
 
-For more information see the
-[ranger documentation](https://cran.r-project.org/web/packages/ranger/ranger.pdf)
-and [mlr3 pipelines](https://mlr3book.mlr-org.com/pipelines.html).
+For more information see the [ranger documentation](https://cran.r-project.org/web/packages/ranger/ranger.pdf) and [mlr3 pipelines](https://mlr3book.mlr-org.com/pipelines.html).
 
 ```{r}
 param_set_ranger = ParamSet$new(
@@ -787,8 +781,7 @@ ggplot(grid$data, aes(x = importance.filter.nfeat,
     legend.title = element_text(size = 9))
 ```
 
-To ensure that `regr.ranger.mtry` never exceeds, `importance.filter.nfeat` we
-define a searchspace.
+To ensure that `regr.ranger.mtry` never exceeds, `importance.filter.nfeat` we define a searchspace.
 Since the space for hyperparameters is limited, one could consider here to exploid the whole Parameterspace for nfeat and mtry.
 To save up time we will stick to 28 combinations here, including all possible combinations at 1, 6, 10 and 11 levels.
 
@@ -852,15 +845,14 @@ ggplot(archive_ranger, aes(x = importance.filter.nfeat,
 
 # Benchmarking
 
-Benchmarking has two objectives. First, we want to obtain a performance
-measure for all the fitted models through resampling.
+Benchmarking has two objectives. First, we want to obtain a performance measure for all the fitted models through resampling.
 
 Second, we want to compare the models with each other and examine how tuning
 improved each of them.
 As stated in Chapter 3.3 we use a 3-fold CV as our benchmarking resampling method,
 a 5-fold CV is evaluated inside each autotuning object to obtain the best
 hyperparameter combination.
-Note, that this method does not lead to an unbiased GE, but rather a step to compare the learners to
+Note, that this method does not lead to an unbiased GE, but rather is a step to compare the learners to
 each other.
 
 ```{r bmr, message=FALSE, results='hide', eval=FALSE}
