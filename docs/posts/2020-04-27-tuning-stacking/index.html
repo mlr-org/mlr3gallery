@@ -1501,9 +1501,9 @@ cv3 = rsmp(&quot;cv&quot;, folds = 3)
 auto1 = AutoTuner$new(
     learner = ens_lrn,
     resampling = cv3,
-    measures = msr(&quot;classif.auc&quot;),
-    tune_ps = ps_ens,
-    terminator = term(&quot;evals&quot;, n_evals = 3), # to limit running time
+    measure = msr(&quot;classif.auc&quot;),
+    search_space = ps_ens,
+    terminator = trm(&quot;evals&quot;, n_evals = 3), # to limit running time
     tuner = tnr(&quot;random_search&quot;)
   )
 
@@ -1511,9 +1511,9 @@ auto1 = AutoTuner$new(
 auto2 = AutoTuner$new(
     learner = ranger_lrn,
     resampling = cv3,
-    measures = msr(&quot;classif.auc&quot;),
-    tune_ps = ps_ranger,
-    terminator = term(&quot;evals&quot;, n_evals = 3), # to limit running time
+    measure = msr(&quot;classif.auc&quot;),
+    search_space = ps_ranger,
+    terminator = trm(&quot;evals&quot;, n_evals = 3), # to limit running time
     tuner = tnr(&quot;random_search&quot;)
   )
 

@@ -67,7 +67,7 @@
 <!--/radix_placeholder_rmarkdown_metadata-->
   
   <script type="text/json" id="radix-resource-manifest">
-  {"type":"character","attributes":{},"value":["2020-03-11-mlr3tuning_tutorial_german_credit_files/figure-html5/unnamed-chunk-16-1.png","2020-03-11-mlr3tuning_tutorial_german_credit_files/figure-html5/unnamed-chunk-22-1.png","2020-03-11-mlr3tuning_tutorial_german_credit_files/figure-html5/unnamed-chunk-23-1.png","2020-03-11-mlr3tuning_tutorial_german_credit_files/figure-html5/unnamed-chunk-30-1.png","2020-03-11-mlr3tuning_tutorial_german_credit_files/figure-html5/unnamed-chunk-31-1.png","2020-03-11-mlr3tuning_tutorial_german_credit_files/figure-html5/unnamed-chunk-32-1.png","2020-03-11-mlr3tuning_tutorial_german_credit_files/figure-html5/unnamed-chunk-33-1.png"]}
+  {"type":"character","attributes":{},"value":["2020-03-11-mlr3tuning_tutorial_german_credit_files/figure-html5/unnamed-chunk-16-1.png","2020-03-11-mlr3tuning_tutorial_german_credit_files/figure-html5/unnamed-chunk-22-1.png","2020-03-11-mlr3tuning_tutorial_german_credit_files/figure-html5/unnamed-chunk-23-1.png","2020-03-11-mlr3tuning_tutorial_german_credit_files/figure-html5/unnamed-chunk-32-1.png","2020-03-11-mlr3tuning_tutorial_german_credit_files/figure-html5/unnamed-chunk-33-1.png","2020-03-11-mlr3tuning_tutorial_german_credit_files/figure-html5/unnamed-chunk-34-1.png","2020-03-11-mlr3tuning_tutorial_german_credit_files/figure-html5/unnamed-chunk-35-1.png"]}
   </script>
   <!--radix_placeholder_navigation_in_header-->
 
@@ -1374,13 +1374,13 @@ library(&quot;paradox&quot;)</code></pre>
 <pre class="r"><code>
 task = tsk(&quot;german_credit&quot;)</code></pre>
 </div>
-<p>Also, because tuning often takes a long time, we want to make more efficient use of our multi-core CPUs. Don’t do this on Rstudio cloud, however.</p>
+<p>Also, because tuning often takes a long time, we want to make more efficient use of our multi-core CPUs. Don’t do this on RStudio cloud, however.</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
 # future::plan(&quot;multiprocess&quot;) # uncomment for parallelization</code></pre>
 </div>
 <h3 id="evaluation">Evaluation</h3>
-<p>We will evaluate all algorithms using 10-fold cross-validation. We use a <em>fixed</em> train-test split, i.e. the same splits for each evaluation. Otherwise, some evaluation could get unusually “hard” splits, which would make comparisons unfair.</p>
+<p>We will evaluate all hyperparameter configurations using 10-fold cross-validation. We use a <em>fixed</em> train-test split, i.e. the same splits for each evaluation. Otherwise, some evaluation could get unusually “hard” splits, which would make comparisons unfair.</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
 set.seed(8008135)
@@ -1446,12 +1446,12 @@ knn$param_set</code></pre>
 <p>We first tune the <code>k</code> parameter (i.e. the number of neighbors to be accounted for). A range from 3 to 20 seems reasonable for this. Second, we aim to tune the <code>distance</code> function. We aim to keep it simple and only tune over the L1 and L2 distance. To do so, we use the <code>paradox</code> package to define a search space (see <a href="#very-quick-paradox-primer">Appendix</a> for a short list of possible parameter types).</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
-searchspace = ParamSet$new(list(
+search_space = ParamSet$new(list(
   ParamInt$new(&quot;k&quot;, lower = 3, upper = 20),
   ParamInt$new(&quot;distance&quot;, lower = 1, upper = 2)
 ))</code></pre>
 </div>
-<p>As a next step, we define a <a href="https://mlr3tuning.mlr-org.com/reference/TuningInstance.html"><code>TuningInstance</code></a> that represents the problem we are trying to optimize.</p>
+<p>As a next step, we define a <a href="https://mlr3tuning.mlr-org.com/reference/TuningInstanceSingleCrit.html"><code>TuningInstanceSingleCrit</code></a> that represents the problem we are trying to optimize.</p>
 <p>Typically a tuning instance needs to be supplied with:</p>
 <ul>
 <li>The <code>Task</code> we are optimizing for</li>
@@ -1463,13 +1463,13 @@ searchspace = ParamSet$new(list(
 </ul>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
-instance_grid = TuningInstance$new(
+instance_grid = TuningInstanceSingleCrit$new(
   task = task,
   learner = knn,
   resampling = cv10_instance,
-  measures = msr(&quot;classif.ce&quot;),
-  param_set = searchspace,
-  terminator = term(&quot;none&quot;)
+  measure = msr(&quot;classif.ce&quot;),
+  search_space = search_space,
+  terminator = trm(&quot;none&quot;)
 )</code></pre>
 </div>
 <h3 id="grid-search">Grid Search</h3>
@@ -1479,110 +1479,122 @@ instance_grid = TuningInstance$new(
 set.seed(1)
 tuner_grid = tnr(&quot;grid_search&quot;, resolution = 18, batch_size = 36)</code></pre>
 </div>
-<p>Tuning works by calling <code>$tune()</code>. Note that the tuning procedure <em>modifies</em> our tuning instance (as usual for <code>R6</code> class objects). The result can be found in the <code>instance</code> object. Before tuning it is empty:</p>
+<p>Tuning works by calling <code>$optimize()</code>. Note that the tuning procedure <em>modifies</em> our tuning instance (as usual for <code>R6</code> class objects). The result can be found in the <code>instance</code> object. Before tuning it is empty:</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
 instance_grid$result</code></pre>
 <pre><code>
-$tune_x
-NULL
-
-$params
-$params$kernel
-[1] &quot;rectangular&quot;
-
-
-$perf
 NULL</code></pre>
 </div>
 <p>Now, we tune:</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
-tuner_grid$tune(instance_grid)</code></pre>
+tuner_grid$optimize(instance_grid)</code></pre>
+<pre><code>
+   k distance learner_param_vals  x_domain classif.ce
+1: 9        2          &lt;list[3]&gt; &lt;list[2]&gt;       0.25</code></pre>
 </div>
-<p>The result of tuning can now be found in the <code>$result</code> slot – together with its performance:</p>
+<p>The result is returned by <code>$optimize()</code> together with its performance. It can be also accessed with the <code>$result</code> slot.</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
 instance_grid$result</code></pre>
 <pre><code>
-$tune_x
-$tune_x$k
-[1] 9
-
-$tune_x$distance
-[1] 2
-
-
-$params
-$params$kernel
-[1] &quot;rectangular&quot;
-
-$params$k
-[1] 9
-
-$params$distance
-[1] 2
-
-
-$perf
-classif.ce 
-      0.25 </code></pre>
+   k distance learner_param_vals  x_domain classif.ce
+1: 9        2          &lt;list[3]&gt; &lt;list[2]&gt;       0.25</code></pre>
 </div>
-<p>We can also look at the <code>archive</code> of evaluated configurations. We do so by expanding the <code>"params"</code> (the parameters that the <code>Learner</code> actually saw):</p>
+<p>We can also look at the <code>Archive</code> of evaluated configurations.</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
-perfdata = instance_grid$archive(&quot;params&quot;)
-perfdata[, c(&quot;nr&quot;, &quot;k&quot;, &quot;distance&quot;, &quot;classif.ce&quot;)]</code></pre>
+instance_grid$archive$data()</code></pre>
 <pre><code>
-    nr  k distance classif.ce
- 1:  1  3        1      0.271
- 2:  2  3        2      0.273
- 3:  3  4        1      0.292
- 4:  4  4        2      0.279
- 5:  5  5        1      0.271
- 6:  6  5        2      0.274
- 7:  7  6        1      0.278
- 8:  8  6        2      0.273
- 9:  9  7        1      0.257
-10: 10  7        2      0.258
-11: 11  8        1      0.264
-12: 12  8        2      0.256
-13: 13  9        1      0.251
-14: 14  9        2      0.250
-15: 15 10        1      0.261
-16: 16 10        2      0.250
-17: 17 11        1      0.256
-18: 18 11        2      0.254
-19: 19 12        1      0.260
-20: 20 12        2      0.259
-21: 21 13        1      0.268
-22: 22 13        2      0.258
-23: 23 14        1      0.265
-24: 24 14        2      0.263
-25: 25 15        1      0.268
-26: 26 15        2      0.264
-27: 27 16        1      0.267
-28: 28 16        2      0.262
-29: 29 17        1      0.264
-30: 30 17        2      0.267
-31: 31 18        1      0.273
-32: 32 18        2      0.271
-33: 33 19        1      0.269
-34: 34 19        2      0.269
-35: 35 20        1      0.268
-36: 36 20        2      0.269
-    nr  k distance classif.ce</code></pre>
+     k distance classif.ce      resample_result  x_domain           timestamp
+ 1:  3        1      0.271 &lt;ResampleResult[18]&gt; &lt;list[2]&gt; 2020-08-02 20:09:43
+ 2:  3        2      0.273 &lt;ResampleResult[18]&gt; &lt;list[2]&gt; 2020-08-02 20:09:43
+ 3:  4        1      0.292 &lt;ResampleResult[18]&gt; &lt;list[2]&gt; 2020-08-02 20:09:43
+ 4:  4        2      0.279 &lt;ResampleResult[18]&gt; &lt;list[2]&gt; 2020-08-02 20:09:43
+ 5:  5        1      0.271 &lt;ResampleResult[18]&gt; &lt;list[2]&gt; 2020-08-02 20:09:43
+ 6:  5        2      0.274 &lt;ResampleResult[18]&gt; &lt;list[2]&gt; 2020-08-02 20:09:43
+ 7:  6        1      0.278 &lt;ResampleResult[18]&gt; &lt;list[2]&gt; 2020-08-02 20:09:43
+ 8:  6        2      0.273 &lt;ResampleResult[18]&gt; &lt;list[2]&gt; 2020-08-02 20:09:43
+ 9:  7        1      0.257 &lt;ResampleResult[18]&gt; &lt;list[2]&gt; 2020-08-02 20:09:43
+10:  7        2      0.258 &lt;ResampleResult[18]&gt; &lt;list[2]&gt; 2020-08-02 20:09:43
+11:  8        1      0.264 &lt;ResampleResult[18]&gt; &lt;list[2]&gt; 2020-08-02 20:09:43
+12:  8        2      0.256 &lt;ResampleResult[18]&gt; &lt;list[2]&gt; 2020-08-02 20:09:43
+13:  9        1      0.251 &lt;ResampleResult[18]&gt; &lt;list[2]&gt; 2020-08-02 20:09:43
+14:  9        2      0.250 &lt;ResampleResult[18]&gt; &lt;list[2]&gt; 2020-08-02 20:09:43
+15: 10        1      0.261 &lt;ResampleResult[18]&gt; &lt;list[2]&gt; 2020-08-02 20:09:43
+16: 10        2      0.250 &lt;ResampleResult[18]&gt; &lt;list[2]&gt; 2020-08-02 20:09:43
+17: 11        1      0.256 &lt;ResampleResult[18]&gt; &lt;list[2]&gt; 2020-08-02 20:09:43
+18: 11        2      0.254 &lt;ResampleResult[18]&gt; &lt;list[2]&gt; 2020-08-02 20:09:43
+19: 12        1      0.260 &lt;ResampleResult[18]&gt; &lt;list[2]&gt; 2020-08-02 20:09:43
+20: 12        2      0.259 &lt;ResampleResult[18]&gt; &lt;list[2]&gt; 2020-08-02 20:09:43
+21: 13        1      0.268 &lt;ResampleResult[18]&gt; &lt;list[2]&gt; 2020-08-02 20:09:43
+22: 13        2      0.258 &lt;ResampleResult[18]&gt; &lt;list[2]&gt; 2020-08-02 20:09:43
+23: 14        1      0.265 &lt;ResampleResult[18]&gt; &lt;list[2]&gt; 2020-08-02 20:09:43
+24: 14        2      0.263 &lt;ResampleResult[18]&gt; &lt;list[2]&gt; 2020-08-02 20:09:43
+25: 15        1      0.268 &lt;ResampleResult[18]&gt; &lt;list[2]&gt; 2020-08-02 20:09:43
+26: 15        2      0.264 &lt;ResampleResult[18]&gt; &lt;list[2]&gt; 2020-08-02 20:09:43
+27: 16        1      0.267 &lt;ResampleResult[18]&gt; &lt;list[2]&gt; 2020-08-02 20:09:43
+28: 16        2      0.262 &lt;ResampleResult[18]&gt; &lt;list[2]&gt; 2020-08-02 20:09:43
+29: 17        1      0.264 &lt;ResampleResult[18]&gt; &lt;list[2]&gt; 2020-08-02 20:09:43
+30: 17        2      0.267 &lt;ResampleResult[18]&gt; &lt;list[2]&gt; 2020-08-02 20:09:43
+31: 18        1      0.273 &lt;ResampleResult[18]&gt; &lt;list[2]&gt; 2020-08-02 20:09:43
+32: 18        2      0.271 &lt;ResampleResult[18]&gt; &lt;list[2]&gt; 2020-08-02 20:09:43
+33: 19        1      0.269 &lt;ResampleResult[18]&gt; &lt;list[2]&gt; 2020-08-02 20:09:43
+34: 19        2      0.269 &lt;ResampleResult[18]&gt; &lt;list[2]&gt; 2020-08-02 20:09:43
+35: 20        1      0.268 &lt;ResampleResult[18]&gt; &lt;list[2]&gt; 2020-08-02 20:09:43
+36: 20        2      0.269 &lt;ResampleResult[18]&gt; &lt;list[2]&gt; 2020-08-02 20:09:43
+     k distance classif.ce      resample_result  x_domain           timestamp
+    batch_nr
+ 1:        1
+ 2:        1
+ 3:        1
+ 4:        1
+ 5:        1
+ 6:        1
+ 7:        1
+ 8:        1
+ 9:        1
+10:        1
+11:        1
+12:        1
+13:        1
+14:        1
+15:        1
+16:        1
+17:        1
+18:        1
+19:        1
+20:        1
+21:        1
+22:        1
+23:        1
+24:        1
+25:        1
+26:        1
+27:        1
+28:        1
+29:        1
+30:        1
+31:        1
+32:        1
+33:        1
+34:        1
+35:        1
+36:        1
+    batch_nr</code></pre>
 </div>
+<p>We plot the performances depending on the sampled <code>k</code> and <code>distance</code>.</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
-ggplot(perfdata, aes(x = k, y = classif.ce, color = as.factor(distance))) +
+ggplot(instance_grid$archive$data(), aes(x = k, y = classif.ce, color = as.factor(distance))) +
   geom_line() + geom_point(size = 3)</code></pre>
 <p><img src="2020-03-11-mlr3tuning_tutorial_german_credit_files/figure-html5/unnamed-chunk-16-1.png" width="624" /></p>
 </div>
 <p>On average, the Euclidean distance (<code>distance</code> = 2) seems to work better. However, there is much randomness introduced by the resampling instance. So you, the reader, may see a different result, when you run the experiment yourself. For <code>k</code>, we find that values between 7 and 13 perform well.</p>
 <h3 id="random-search-and-transformation">Random Search and Transformation</h3>
 <p>Let’s have a look at a larger search space. For example, we could tune <em>all</em> available parameters and limit <code>k</code> to large values (50).</p>
-<p>We may find ttwoo problems when doing so:</p>
+<p>We may find two problems when doing so:</p>
 <p>First, the resulting difference in performance between <code>k</code> = 3 and <code>k</code> = 4 is probably larger than the difference between <code>k</code> = 49 and <code>k</code> = 50. While 4 is 33% larger than 3, 50 is only 2 percent larger than 49. To account for this we will use a <strong>transformation function</strong> for <code>k</code> and sample values on the log-space. We define the range for <code>k</code> from <code>log(3)</code> to <code>log(50)</code> and exponentiate in the transformation. Now, <code>k</code> is not necessarily an integer anymore. So, we must use <code>ParamDbl</code> instead of <code>ParamInt</code>:</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
@@ -1603,153 +1615,237 @@ large_searchspace$trafo = function(x, param_set) {
 <pre class="r"><code>
 tuner_random = tnr(&quot;random_search&quot;, batch_size = 36)
 
-instance_random = TuningInstance$new(
+instance_random = TuningInstanceSingleCrit$new(
   task = task,
   learner = knn,
   resampling = cv10_instance,
-  measures = msr(&quot;classif.ce&quot;),
-  param_set = large_searchspace,
-  terminator = term(&quot;evals&quot;, n_evals = 36)
+  measure = msr(&quot;classif.ce&quot;),
+  search_space = large_searchspace,
+  terminator = trm(&quot;evals&quot;, n_evals = 36)
 )</code></pre>
 </div>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
-tuner_random$tune(instance_random)
-instance_random$result</code></pre>
+tuner_random$optimize(instance_random)</code></pre>
 <pre><code>
-$tune_x
-$tune_x$k
-[1] 2.444957
-
-$tune_x$distance
-[1] 1.54052
-
-$tune_x$kernel
-[1] &quot;optimal&quot;
-
-$tune_x$scale
-[1] TRUE
-
-
-$params
-$params$kernel
-[1] &quot;optimal&quot;
-
-$params$k
-[1] 12
-
-$params$distance
-[1] 1.54052
-
-$params$scale
-[1] TRUE
-
-
-$perf
-classif.ce 
-     0.249 </code></pre>
+          k distance kernel scale learner_param_vals  x_domain classif.ce
+1: 2.441256 1.650704   rank  TRUE          &lt;list[4]&gt; &lt;list[4]&gt;      0.246</code></pre>
 </div>
-<p>Like before, we can review the <code>archive</code>. We can do so in two ways: First, we can expand the <code>"tune_x"</code> parameters (the points we sampled on the search space, before transformation):</p>
+<p>Like before, we can review the <code>Archive</code>. It includes the points before and after the transformation. The archive includes a column for each parameter the <code>Tuner</code> sampled on the search space (points before the transformation).</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
-perfdata = instance_random$archive(&quot;tune_x&quot;)
-perfdata[, c(&quot;k&quot;, &quot;distance&quot;, &quot;kernel&quot;, &quot;scale&quot;, &quot;classif.ce&quot;)]</code></pre>
+instance_random$archive$data()</code></pre>
 <pre><code>
-           k distance      kernel scale classif.ce
- 1: 2.654531 2.921236 rectangular FALSE      0.314
- 2: 2.588931 1.869319        rank  TRUE      0.254
- 3: 3.319396 2.425029 rectangular  TRUE      0.272
- 4: 1.164253 1.799989    gaussian FALSE      0.364
- 5: 2.441256 1.650704        rank  TRUE      0.253
- 6: 3.158912 2.514174     optimal FALSE      0.305
- 7: 3.047551 1.405385    gaussian  TRUE      0.257
- 8: 2.442352 2.422242    gaussian  TRUE      0.270
- 9: 3.521548 1.243384 rectangular  TRUE      0.271
-10: 2.331159 1.490977     optimal  TRUE      0.252
-11: 1.787328 1.286609    gaussian FALSE      0.345
-12: 1.297461 1.479259        rank  TRUE      0.274
-13: 1.378451 1.117869 rectangular FALSE      0.357
-14: 1.988414 2.284577 rectangular FALSE      0.313
-15: 2.557743 2.752538        rank  TRUE      0.267
-16: 2.961104 2.557829        rank  TRUE      0.264
-17: 2.243193 2.594618 rectangular  TRUE      0.256
-18: 3.666907 1.910549 rectangular FALSE      0.292
-19: 1.924639 1.820168        rank  TRUE      0.256
-20: 2.390153 2.621740     optimal FALSE      0.339
-21: 2.033775 2.209867        rank FALSE      0.332
-22: 2.929778 2.309448        rank FALSE      0.302
-23: 1.824519 1.706395        rank  TRUE      0.261
-24: 2.444957 1.540520     optimal  TRUE      0.249
-25: 3.254559 2.985368        rank FALSE      0.302
-26: 1.335633 2.266987        rank FALSE      0.361
-27: 3.561251 1.426416        rank FALSE      0.296
-28: 2.052564 1.258745 rectangular FALSE      0.324
-29: 3.460303 1.956236    gaussian FALSE      0.296
-30: 2.073975 2.848149        rank  TRUE      0.269
-31: 2.037658 2.197522    gaussian  TRUE      0.267
-32: 2.438784 2.952341 rectangular FALSE      0.308
-33: 3.608733 2.463585        rank FALSE      0.294
-34: 3.530354 1.713454 rectangular FALSE      0.297
-35: 2.195813 1.862947     optimal  TRUE      0.257
-36: 3.285535 1.296423        rank FALSE      0.300
-           k distance      kernel scale classif.ce</code></pre>
+           k distance      kernel scale classif.ce      resample_result
+ 1: 2.919058 1.779979    gaussian FALSE      0.299 &lt;ResampleResult[18]&gt;
+ 2: 3.301324 2.554641 rectangular FALSE      0.294 &lt;ResampleResult[18]&gt;
+ 3: 2.654531 2.921236 rectangular FALSE      0.315 &lt;ResampleResult[18]&gt;
+ 4: 2.588931 1.869319        rank  TRUE      0.254 &lt;ResampleResult[18]&gt;
+ 5: 3.319396 2.425029 rectangular  TRUE      0.268 &lt;ResampleResult[18]&gt;
+ 6: 1.164253 1.799989    gaussian FALSE      0.364 &lt;ResampleResult[18]&gt;
+ 7: 2.441256 1.650704        rank  TRUE      0.246 &lt;ResampleResult[18]&gt;
+ 8: 3.158912 2.514174     optimal FALSE      0.305 &lt;ResampleResult[18]&gt;
+ 9: 3.047551 1.405385    gaussian  TRUE      0.257 &lt;ResampleResult[18]&gt;
+10: 2.442352 2.422242    gaussian  TRUE      0.270 &lt;ResampleResult[18]&gt;
+11: 3.521548 1.243384 rectangular  TRUE      0.266 &lt;ResampleResult[18]&gt;
+12: 2.331159 1.490977     optimal  TRUE      0.252 &lt;ResampleResult[18]&gt;
+13: 1.787328 1.286609    gaussian FALSE      0.345 &lt;ResampleResult[18]&gt;
+14: 1.297461 1.479259        rank  TRUE      0.272 &lt;ResampleResult[18]&gt;
+15: 1.378451 1.117869 rectangular FALSE      0.355 &lt;ResampleResult[18]&gt;
+16: 1.988414 2.284577 rectangular FALSE      0.313 &lt;ResampleResult[18]&gt;
+17: 2.557743 2.752538        rank  TRUE      0.267 &lt;ResampleResult[18]&gt;
+18: 2.961104 2.557829        rank  TRUE      0.265 &lt;ResampleResult[18]&gt;
+19: 2.243193 2.594618 rectangular  TRUE      0.256 &lt;ResampleResult[18]&gt;
+20: 3.666907 1.910549 rectangular FALSE      0.292 &lt;ResampleResult[18]&gt;
+21: 1.924639 1.820168        rank  TRUE      0.255 &lt;ResampleResult[18]&gt;
+22: 2.390153 2.621740     optimal FALSE      0.339 &lt;ResampleResult[18]&gt;
+23: 2.033775 2.209867        rank FALSE      0.342 &lt;ResampleResult[18]&gt;
+24: 2.929778 2.309448        rank FALSE      0.303 &lt;ResampleResult[18]&gt;
+25: 1.824519 1.706395        rank  TRUE      0.261 &lt;ResampleResult[18]&gt;
+26: 2.444957 1.540520     optimal  TRUE      0.249 &lt;ResampleResult[18]&gt;
+27: 3.254559 2.985368        rank FALSE      0.302 &lt;ResampleResult[18]&gt;
+28: 1.335633 2.266987        rank FALSE      0.362 &lt;ResampleResult[18]&gt;
+29: 3.561251 1.426416        rank FALSE      0.297 &lt;ResampleResult[18]&gt;
+30: 2.052564 1.258745 rectangular FALSE      0.320 &lt;ResampleResult[18]&gt;
+31: 3.460303 1.956236    gaussian FALSE      0.296 &lt;ResampleResult[18]&gt;
+32: 2.073975 2.848149        rank  TRUE      0.269 &lt;ResampleResult[18]&gt;
+33: 2.037658 2.197522    gaussian  TRUE      0.267 &lt;ResampleResult[18]&gt;
+34: 2.438784 2.952341 rectangular FALSE      0.308 &lt;ResampleResult[18]&gt;
+35: 3.608733 2.463585        rank FALSE      0.294 &lt;ResampleResult[18]&gt;
+36: 3.530354 1.713454 rectangular FALSE      0.294 &lt;ResampleResult[18]&gt;
+           k distance      kernel scale classif.ce      resample_result
+     x_domain           timestamp batch_nr
+ 1: &lt;list[4]&gt; 2020-08-02 20:10:24        1
+ 2: &lt;list[4]&gt; 2020-08-02 20:10:24        1
+ 3: &lt;list[4]&gt; 2020-08-02 20:10:24        1
+ 4: &lt;list[4]&gt; 2020-08-02 20:10:24        1
+ 5: &lt;list[4]&gt; 2020-08-02 20:10:24        1
+ 6: &lt;list[4]&gt; 2020-08-02 20:10:24        1
+ 7: &lt;list[4]&gt; 2020-08-02 20:10:24        1
+ 8: &lt;list[4]&gt; 2020-08-02 20:10:24        1
+ 9: &lt;list[4]&gt; 2020-08-02 20:10:24        1
+10: &lt;list[4]&gt; 2020-08-02 20:10:24        1
+11: &lt;list[4]&gt; 2020-08-02 20:10:24        1
+12: &lt;list[4]&gt; 2020-08-02 20:10:24        1
+13: &lt;list[4]&gt; 2020-08-02 20:10:24        1
+14: &lt;list[4]&gt; 2020-08-02 20:10:24        1
+15: &lt;list[4]&gt; 2020-08-02 20:10:24        1
+16: &lt;list[4]&gt; 2020-08-02 20:10:24        1
+17: &lt;list[4]&gt; 2020-08-02 20:10:24        1
+18: &lt;list[4]&gt; 2020-08-02 20:10:24        1
+19: &lt;list[4]&gt; 2020-08-02 20:10:24        1
+20: &lt;list[4]&gt; 2020-08-02 20:10:24        1
+21: &lt;list[4]&gt; 2020-08-02 20:10:24        1
+22: &lt;list[4]&gt; 2020-08-02 20:10:24        1
+23: &lt;list[4]&gt; 2020-08-02 20:10:24        1
+24: &lt;list[4]&gt; 2020-08-02 20:10:24        1
+25: &lt;list[4]&gt; 2020-08-02 20:10:24        1
+26: &lt;list[4]&gt; 2020-08-02 20:10:24        1
+27: &lt;list[4]&gt; 2020-08-02 20:10:24        1
+28: &lt;list[4]&gt; 2020-08-02 20:10:24        1
+29: &lt;list[4]&gt; 2020-08-02 20:10:24        1
+30: &lt;list[4]&gt; 2020-08-02 20:10:24        1
+31: &lt;list[4]&gt; 2020-08-02 20:10:24        1
+32: &lt;list[4]&gt; 2020-08-02 20:10:24        1
+33: &lt;list[4]&gt; 2020-08-02 20:10:24        1
+34: &lt;list[4]&gt; 2020-08-02 20:10:24        1
+35: &lt;list[4]&gt; 2020-08-02 20:10:24        1
+36: &lt;list[4]&gt; 2020-08-02 20:10:24        1
+     x_domain           timestamp batch_nr</code></pre>
 </div>
-<p>Second, we can look at the <code>"params"</code> parameters (the points the <code>Learner</code> was used with – these are the <code>exp()</code>’d parameters, after transformation of the sampled points):</p>
+<p>The parameters used by the learner (points after the transformation) are stored in in the <code>x_domain</code> column as lists. By using <code>unnest = x_domain</code>, the list elements are expanded to separate columns.</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
-perfdata = instance_random$archive(&quot;params&quot;)
-perfdata[, c(&quot;k&quot;, &quot;distance&quot;, &quot;kernel&quot;, &quot;scale&quot;, &quot;classif.ce&quot;)]</code></pre>
+instance_random$archive$data(unnest = &quot;x_domain&quot;)</code></pre>
 <pre><code>
-     k distance      kernel scale classif.ce
- 1: 14 2.921236 rectangular FALSE      0.314
- 2: 13 1.869319        rank  TRUE      0.254
- 3: 28 2.425029 rectangular  TRUE      0.272
- 4:  3 1.799989    gaussian FALSE      0.364
- 5: 11 1.650704        rank  TRUE      0.253
- 6: 24 2.514174     optimal FALSE      0.305
- 7: 21 1.405385    gaussian  TRUE      0.257
- 8: 12 2.422242    gaussian  TRUE      0.270
- 9: 34 1.243384 rectangular  TRUE      0.271
-10: 10 1.490977     optimal  TRUE      0.252
-11:  6 1.286609    gaussian FALSE      0.345
-12:  4 1.479259        rank  TRUE      0.274
-13:  4 1.117869 rectangular FALSE      0.357
-14:  7 2.284577 rectangular FALSE      0.313
-15: 13 2.752538        rank  TRUE      0.267
-16: 19 2.557829        rank  TRUE      0.264
-17:  9 2.594618 rectangular  TRUE      0.256
-18: 39 1.910549 rectangular FALSE      0.292
-19:  7 1.820168        rank  TRUE      0.256
-20: 11 2.621740     optimal FALSE      0.339
-21:  8 2.209867        rank FALSE      0.332
-22: 19 2.309448        rank FALSE      0.302
-23:  6 1.706395        rank  TRUE      0.261
-24: 12 1.540520     optimal  TRUE      0.249
-25: 26 2.985368        rank FALSE      0.302
-26:  4 2.266987        rank FALSE      0.361
-27: 35 1.426416        rank FALSE      0.296
-28:  8 1.258745 rectangular FALSE      0.324
-29: 32 1.956236    gaussian FALSE      0.296
-30:  8 2.848149        rank  TRUE      0.269
-31:  8 2.197522    gaussian  TRUE      0.267
-32: 11 2.952341 rectangular FALSE      0.308
-33: 37 2.463585        rank FALSE      0.294
-34: 34 1.713454 rectangular FALSE      0.297
-35:  9 1.862947     optimal  TRUE      0.257
-36: 27 1.296423        rank FALSE      0.300
-     k distance      kernel scale classif.ce</code></pre>
+           k distance      kernel scale classif.ce      resample_result
+ 1: 2.919058 1.779979    gaussian FALSE      0.299 &lt;ResampleResult[18]&gt;
+ 2: 3.301324 2.554641 rectangular FALSE      0.294 &lt;ResampleResult[18]&gt;
+ 3: 2.654531 2.921236 rectangular FALSE      0.315 &lt;ResampleResult[18]&gt;
+ 4: 2.588931 1.869319        rank  TRUE      0.254 &lt;ResampleResult[18]&gt;
+ 5: 3.319396 2.425029 rectangular  TRUE      0.268 &lt;ResampleResult[18]&gt;
+ 6: 1.164253 1.799989    gaussian FALSE      0.364 &lt;ResampleResult[18]&gt;
+ 7: 2.441256 1.650704        rank  TRUE      0.246 &lt;ResampleResult[18]&gt;
+ 8: 3.158912 2.514174     optimal FALSE      0.305 &lt;ResampleResult[18]&gt;
+ 9: 3.047551 1.405385    gaussian  TRUE      0.257 &lt;ResampleResult[18]&gt;
+10: 2.442352 2.422242    gaussian  TRUE      0.270 &lt;ResampleResult[18]&gt;
+11: 3.521548 1.243384 rectangular  TRUE      0.266 &lt;ResampleResult[18]&gt;
+12: 2.331159 1.490977     optimal  TRUE      0.252 &lt;ResampleResult[18]&gt;
+13: 1.787328 1.286609    gaussian FALSE      0.345 &lt;ResampleResult[18]&gt;
+14: 1.297461 1.479259        rank  TRUE      0.272 &lt;ResampleResult[18]&gt;
+15: 1.378451 1.117869 rectangular FALSE      0.355 &lt;ResampleResult[18]&gt;
+16: 1.988414 2.284577 rectangular FALSE      0.313 &lt;ResampleResult[18]&gt;
+17: 2.557743 2.752538        rank  TRUE      0.267 &lt;ResampleResult[18]&gt;
+18: 2.961104 2.557829        rank  TRUE      0.265 &lt;ResampleResult[18]&gt;
+19: 2.243193 2.594618 rectangular  TRUE      0.256 &lt;ResampleResult[18]&gt;
+20: 3.666907 1.910549 rectangular FALSE      0.292 &lt;ResampleResult[18]&gt;
+21: 1.924639 1.820168        rank  TRUE      0.255 &lt;ResampleResult[18]&gt;
+22: 2.390153 2.621740     optimal FALSE      0.339 &lt;ResampleResult[18]&gt;
+23: 2.033775 2.209867        rank FALSE      0.342 &lt;ResampleResult[18]&gt;
+24: 2.929778 2.309448        rank FALSE      0.303 &lt;ResampleResult[18]&gt;
+25: 1.824519 1.706395        rank  TRUE      0.261 &lt;ResampleResult[18]&gt;
+26: 2.444957 1.540520     optimal  TRUE      0.249 &lt;ResampleResult[18]&gt;
+27: 3.254559 2.985368        rank FALSE      0.302 &lt;ResampleResult[18]&gt;
+28: 1.335633 2.266987        rank FALSE      0.362 &lt;ResampleResult[18]&gt;
+29: 3.561251 1.426416        rank FALSE      0.297 &lt;ResampleResult[18]&gt;
+30: 2.052564 1.258745 rectangular FALSE      0.320 &lt;ResampleResult[18]&gt;
+31: 3.460303 1.956236    gaussian FALSE      0.296 &lt;ResampleResult[18]&gt;
+32: 2.073975 2.848149        rank  TRUE      0.269 &lt;ResampleResult[18]&gt;
+33: 2.037658 2.197522    gaussian  TRUE      0.267 &lt;ResampleResult[18]&gt;
+34: 2.438784 2.952341 rectangular FALSE      0.308 &lt;ResampleResult[18]&gt;
+35: 3.608733 2.463585        rank FALSE      0.294 &lt;ResampleResult[18]&gt;
+36: 3.530354 1.713454 rectangular FALSE      0.294 &lt;ResampleResult[18]&gt;
+           k distance      kernel scale classif.ce      resample_result
+              timestamp batch_nr x_domain_k x_domain_distance x_domain_kernel
+ 1: 2020-08-02 20:10:24        1         19          1.779979        gaussian
+ 2: 2020-08-02 20:10:24        1         27          2.554641     rectangular
+ 3: 2020-08-02 20:10:24        1         14          2.921236     rectangular
+ 4: 2020-08-02 20:10:24        1         13          1.869319            rank
+ 5: 2020-08-02 20:10:24        1         28          2.425029     rectangular
+ 6: 2020-08-02 20:10:24        1          3          1.799989        gaussian
+ 7: 2020-08-02 20:10:24        1         11          1.650704            rank
+ 8: 2020-08-02 20:10:24        1         24          2.514174         optimal
+ 9: 2020-08-02 20:10:24        1         21          1.405385        gaussian
+10: 2020-08-02 20:10:24        1         12          2.422242        gaussian
+11: 2020-08-02 20:10:24        1         34          1.243384     rectangular
+12: 2020-08-02 20:10:24        1         10          1.490977         optimal
+13: 2020-08-02 20:10:24        1          6          1.286609        gaussian
+14: 2020-08-02 20:10:24        1          4          1.479259            rank
+15: 2020-08-02 20:10:24        1          4          1.117869     rectangular
+16: 2020-08-02 20:10:24        1          7          2.284577     rectangular
+17: 2020-08-02 20:10:24        1         13          2.752538            rank
+18: 2020-08-02 20:10:24        1         19          2.557829            rank
+19: 2020-08-02 20:10:24        1          9          2.594618     rectangular
+20: 2020-08-02 20:10:24        1         39          1.910549     rectangular
+21: 2020-08-02 20:10:24        1          7          1.820168            rank
+22: 2020-08-02 20:10:24        1         11          2.621740         optimal
+23: 2020-08-02 20:10:24        1          8          2.209867            rank
+24: 2020-08-02 20:10:24        1         19          2.309448            rank
+25: 2020-08-02 20:10:24        1          6          1.706395            rank
+26: 2020-08-02 20:10:24        1         12          1.540520         optimal
+27: 2020-08-02 20:10:24        1         26          2.985368            rank
+28: 2020-08-02 20:10:24        1          4          2.266987            rank
+29: 2020-08-02 20:10:24        1         35          1.426416            rank
+30: 2020-08-02 20:10:24        1          8          1.258745     rectangular
+31: 2020-08-02 20:10:24        1         32          1.956236        gaussian
+32: 2020-08-02 20:10:24        1          8          2.848149            rank
+33: 2020-08-02 20:10:24        1          8          2.197522        gaussian
+34: 2020-08-02 20:10:24        1         11          2.952341     rectangular
+35: 2020-08-02 20:10:24        1         37          2.463585            rank
+36: 2020-08-02 20:10:24        1         34          1.713454     rectangular
+              timestamp batch_nr x_domain_k x_domain_distance x_domain_kernel
+    x_domain_scale
+ 1:          FALSE
+ 2:          FALSE
+ 3:          FALSE
+ 4:           TRUE
+ 5:           TRUE
+ 6:          FALSE
+ 7:           TRUE
+ 8:          FALSE
+ 9:           TRUE
+10:           TRUE
+11:           TRUE
+12:           TRUE
+13:          FALSE
+14:           TRUE
+15:          FALSE
+16:          FALSE
+17:           TRUE
+18:           TRUE
+19:           TRUE
+20:          FALSE
+21:           TRUE
+22:          FALSE
+23:          FALSE
+24:          FALSE
+25:           TRUE
+26:           TRUE
+27:          FALSE
+28:          FALSE
+29:          FALSE
+30:          FALSE
+31:          FALSE
+32:           TRUE
+33:           TRUE
+34:          FALSE
+35:          FALSE
+36:          FALSE
+    x_domain_scale</code></pre>
 </div>
 <p>Let’s now investigate the performance by parameters. This is especially easy using visualization:</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
-ggplot(perfdata, aes(x = k, y = classif.ce, color = scale)) +
+ggplot(instance_random$archive$data(unnest = &quot;x_domain&quot;),
+  aes(x = x_domain_k, y = classif.ce, color = x_domain_scale)) +
   geom_point(size = 3) + geom_line()</code></pre>
 <p><img src="2020-03-11-mlr3tuning_tutorial_german_credit_files/figure-html5/unnamed-chunk-22-1.png" width="624" /></p>
 </div>
 <p>The previous plot suggests that <code>scale</code> has a strong influence on performance. For the kernel, there does not seem to be a strong influence:</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
-ggplot(perfdata, aes(x = k, y = classif.ce, color = kernel)) +
+ggplot(instance_random$archive$data(unnest = &quot;x_domain&quot;),
+  aes(x = x_domain_k, y = classif.ce, color = x_domain_kernel)) +
   geom_point(size = 3) + geom_line()</code></pre>
 <p><img src="2020-03-11-mlr3tuning_tutorial_german_credit_files/figure-html5/unnamed-chunk-23-1.png" width="624" /></p>
 </div>
@@ -1757,12 +1853,12 @@ ggplot(perfdata, aes(x = k, y = classif.ce, color = kernel)) +
 <p>Having determined tuned configurations that seem to work well, we want to find out which performance we can expect from them. However, this may require more than this naive approach:</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
-instance_random$result$perf</code></pre>
+instance_random$result_y</code></pre>
 <pre><code>
 classif.ce 
-     0.249 </code></pre>
+     0.246 </code></pre>
 <pre class="r"><code>
-instance_grid$result$perf</code></pre>
+instance_grid$result_y</code></pre>
 <pre><code>
 classif.ce 
       0.25 </code></pre>
@@ -1781,16 +1877,27 @@ classif.ce
 grid_auto = AutoTuner$new(
   learner = knn,
   resampling = rsmp(&quot;cv&quot;, folds = 5), # we can NOT use fixed resampling here
-  measures = msr(&quot;classif.ce&quot;),
-  tune_ps = searchspace,
-  terminator = term(&quot;none&quot;),
+  measure = msr(&quot;classif.ce&quot;),
+  search_space = search_space,
+  terminator = trm(&quot;none&quot;),
   tuner = tnr(&quot;grid_search&quot;, resolution = 18)
 )</code></pre>
 </div>
 <p>The <code>AutoTuner</code> behaves just like a regular <code>Learner</code>. It can be used to combine the steps of hyperparameter tuning and model fitting but is especially useful for resampling and <em>fair</em> comparison of performance through benchmarking:</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
-resample(task, grid_auto, cv10_instance)$aggregate()</code></pre>
+rr = resample(task, grid_auto, cv10_instance)</code></pre>
+</div>
+<p>We aggregate the performances of all resampling iterations.</p>
+<div class="layout-chunk" data-layout="l-body">
+
+</div>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+rr$aggregate()</code></pre>
+<pre><code>
+classif.ce 
+     0.265 </code></pre>
 </div>
 <p>Essentially, this is the performance of a “knn with optimal hyperparameters found by grid search”.</p>
 <h2 id="appendix">Appendix</h2>
@@ -1824,14 +1931,14 @@ perfdata</code></pre>
 <pre class="r"><code>
 ggplot(perfdata, aes(x = k, y = classif.ce, color = scale)) +
   geom_point(size = 2, alpha = 0.3)</code></pre>
-<p><img src="2020-03-11-mlr3tuning_tutorial_german_credit_files/figure-html5/unnamed-chunk-30-1.png" width="624" /></p>
+<p><img src="2020-03-11-mlr3tuning_tutorial_german_credit_files/figure-html5/unnamed-chunk-32-1.png" width="624" /></p>
 </div>
 <p>Now, there seems to be a visible pattern by kernel as well:</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
 ggplot(perfdata, aes(x = k, y = classif.ce, color = kernel)) +
   geom_point(size = 2, alpha = 0.3)</code></pre>
-<p><img src="2020-03-11-mlr3tuning_tutorial_german_credit_files/figure-html5/unnamed-chunk-31-1.png" width="624" /></p>
+<p><img src="2020-03-11-mlr3tuning_tutorial_german_credit_files/figure-html5/unnamed-chunk-33-1.png" width="624" /></p>
 </div>
 <p>In fact, if we zoom in to <code>(5, 35)</code> <span class="math inline">\(\times\)</span> <code>(0.23, 0.28)</code> and do decrease smoothing we see that different kernels have their optimum at different values of <code>k</code>:</p>
 <div class="layout-chunk" data-layout="l-body">
@@ -1840,7 +1947,7 @@ ggplot(perfdata, aes(x = k, y = classif.ce, color = kernel,
   group = interaction(kernel, scale))) +
   geom_point(size = 2, alpha = 0.3) + geom_smooth() +
   xlim(5, 35) + ylim(0.23, 0.28)</code></pre>
-<p><img src="2020-03-11-mlr3tuning_tutorial_german_credit_files/figure-html5/unnamed-chunk-32-1.png" width="624" /></p>
+<p><img src="2020-03-11-mlr3tuning_tutorial_german_credit_files/figure-html5/unnamed-chunk-34-1.png" width="624" /></p>
 </div>
 <p>What about the <code>distance</code> parameter? If we select all results with <code>k</code> between 10 and 20 and plot distance and kernel we see an approximate relationship:</p>
 <div class="layout-chunk" data-layout="l-body">
@@ -1848,7 +1955,7 @@ ggplot(perfdata, aes(x = k, y = classif.ce, color = kernel,
 ggplot(perfdata[k &gt; 10 &amp; k &lt; 20 &amp; scale == TRUE],
   aes(x = distance, y = classif.ce, color = kernel)) +
   geom_point(size = 2) + geom_smooth()</code></pre>
-<p><img src="2020-03-11-mlr3tuning_tutorial_german_credit_files/figure-html5/unnamed-chunk-33-1.png" width="624" /></p>
+<p><img src="2020-03-11-mlr3tuning_tutorial_german_credit_files/figure-html5/unnamed-chunk-35-1.png" width="624" /></p>
 </div>
 <p>In sum our observations are: The <code>scale</code> parameter is very influential. The <code>distance</code> type seems to be the least influential. If we had performed a grid search, we would have wasted a lot of evaluations on trying different <code>distance</code> values that usually give similar results. This is why random search tends to work well. One could also observe that <code>scale = FALSE</code> performs badly. Then, we should not try out so many points with this option.</p>
 <h3 id="very-quick-paradox-primer">Very quick paradox primer</h3>
