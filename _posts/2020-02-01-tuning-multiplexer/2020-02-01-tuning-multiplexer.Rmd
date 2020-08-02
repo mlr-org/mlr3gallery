@@ -134,7 +134,7 @@ glrn = GraphLearner$new(pipe, id = "g") # connect pipe to mlr3
 ps = ParamSet$new(list(
   ParamFct$new("branch.selection", levels = c("rf", "xgb"))
 ))
-instance = TuningInstance$new(
+instance = TuningInstanceSingleCrit$new(
   task = task,
   learner = glrn,
   resampling = cv1,
@@ -210,7 +210,7 @@ Very similar code as before, we just swap out the search space.
 And now use random search.
 
 ```{r}
-instance = TuningInstance$new(
+instance = TuningInstanceSingleCrit$new(
   task = task,
   learner = glrn,
   resampling = cv1,
