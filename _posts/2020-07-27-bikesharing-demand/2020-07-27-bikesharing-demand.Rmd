@@ -437,7 +437,7 @@ resampling_cv_5 = rsmp("cv", folds = 5L)
 resampling_outer_cv3 = rsmp("cv", folds = 3L)
 measures = msr("regr.rmse")
 tuner_grid_10 = mlr3tuning::tnr("grid_search", resolution = 10L)
-term_evals20 = term("evals", n_evals = 20L)
+term_evals20 = trm("evals", n_evals = 20L)
 ```
 
 
@@ -521,8 +521,8 @@ set.seed(123456)
 ppl_kknn = log1p_target_trafo(kknn_learner)
 at_kknn = AutoTuner$new(ppl_kknn,
   resampling = resampling_cv_5,
-  measures = measures,
-  tune_ps = param_set_kknn,
+  measure = measures,
+  search_space = param_set_kknn,
   terminator = term_evals20,
   tuner = tuner_grid_10
 )
@@ -617,8 +617,8 @@ set.seed(123456)
 ppl_rpart = log1p_target_trafo(rpart_learner)
 at_rpart = AutoTuner$new(ppl_rpart,
   resampling = resampling_cv_5,
-  measures = measures,
-  tune_ps = param_set_cart,
+  measure = measures,
+  search_space = param_set_cart,
   terminator = term_evals20,
   tuner = tuner_grid_10
 )
@@ -797,9 +797,9 @@ set.seed(123456)
 ranger_feature = log1p_target_trafo(po_flt)
 at_ranger = AutoTuner$new(ranger_feature,
   resampling = resampling_cv_5,
-  measures = measures,
-  tune_ps = param_set_ranger,
-  terminator = term("evals", n_evals = 28L),
+  measure = measures,
+  search_space = param_set_ranger,
+  terminator = trm("evals", n_evals = 28L),
   tuner = mlr3tuning::tnr("design_points", design = grid$data)
 )
 # at_ranger$store_tuning_instance = FALSE
@@ -1021,9 +1021,9 @@ We can save the tuned learners in our resampling result by setting
 multi_at = AutoTuner$new(
     learner = GraphLearner$new(pipe, task_type = "regr"),
     resampling =  rsmp("cv", folds = 5),
-    measures = measures,
-    tune_ps = ps,
-    term = term("evals", n_evals = 21),
+    measure = measures,
+    search_space = ps,
+    term = trm("evals", n_evals = 21),
     tuner = mlr3tuning::tnr("random_search")
     )
 set.seed(12345)
