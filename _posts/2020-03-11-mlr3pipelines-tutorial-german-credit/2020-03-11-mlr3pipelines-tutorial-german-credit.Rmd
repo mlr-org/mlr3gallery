@@ -28,6 +28,7 @@ library(mlr3book)
 if (require("data.table")) data.table::setDTthreads(1)
 set.seed(20191101)
 lgr::get_logger("mlr3")$set_threshold("warn")
+lgr::get_logger("bbotk")$set_threshold("warn")
 ```
 
 ## Outline
@@ -197,9 +198,9 @@ Thus, we make use of a grid search.
 For higher dimensions, strategies like random search are more appropriate.
 
 ```{r}
-inst = TuningInstance$new(
+inst = TuningInstanceSingleCrit$new(
   task, fpipe %>>% lrn("classif.ranger"), cv10_instance, msr("classif.ce"),
-  searchspace, term("none")
+  searchspace, trm("none")
 )
 tuner = tnr("grid_search")
 ```
@@ -207,14 +208,14 @@ tuner = tnr("grid_search")
 The tuning procedure may take some time:
 
 ```{r, warning=FALSE}
-tuner$tune(inst)
+tuner$optimize(inst)
 ```
 
 We can plot the performance against the number of features.
 If we do so, we see the possible trade-off between sparsity and predictive performance:
 
 ```{r}
-arx = inst$archive("params")
+arx = inst$archive$data()
 ggplot(arx, aes(x = mim.filter.nfeat, y = classif.ce)) + geom_line()
 ```
 
