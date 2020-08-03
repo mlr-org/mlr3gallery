@@ -96,7 +96,7 @@ After having predicted from the `Learner` we could then proceed to apply the inv
 trafo$param_set$values$inverter = function(x) list(response = exp(x$response))
 ```
 
-Internally, this function will be applied to the `$data$tab` slot of a `r ref("Prediction", "Prediction")` object without the `$row_id` and `$truth` columns, and we specify that the `$response` column should be transformed.
+Internally, this function will be applied to the `$data$tab` slot of a `r ref("Prediction", "Prediction")` object without the `$row_id` and `$truth` columns, and we specify that the `$response` column should be transformed. Note that applying the inverse transformation will typically only be done to the `$response` column, because transforming standard errors or probabilities is often not straightforward.
 
 To actually carry out the inverse transformation function after predicting from the `Learner`, we then rely on `PipeOpTargetInvert`. `PipeOpTargetInvert` has an empty `r ref("ParamSet", "ParamSet")` and its sole purpose is to apply the inverse transformation function after having predicted from a `Learner` (note that this whole design of target transformations may seem somewhat over-engineered, however, we will learn of its advantages when we later move to the advanced section).
 
@@ -143,12 +143,10 @@ This graph (which is conceptually the same graph as constructed via the `ppl("ta
 g$plot()
 ```
 
-FIXME: change the following sentence once predict type can be passed along
-
-We can then finally call `$train()` and `$predict()` (prior to this we wrap the `Graph` in a `r ref("GraphLearner", "GraphLearner")` and here we do have to set the `task_type` manually, because `PipeOpTargetInvert` does not expose its prediction type):
+We can then finally call `$train()` and `$predict()` (prior to this we wrap the `Graph` in a `r ref("GraphLearner", "GraphLearner")`):
 
 ```{r}
-gl = GraphLearner$new(g, task_type = "regr")
+gl = GraphLearner$new(g)
 gl$train(task)
 gl$state
 gl$predict(task)
@@ -352,6 +350,8 @@ PipeOpTargetTrafoBoxCox = R6Class("PipeOpTargetTrafoBoxCox",
 )
 ```
 
+Note that this `PipeOp` is ill-equipped to handle the case of `predict_type = "se"`, i.e., we always only return a `response` prediction (as outlined above, this is the case for most target transformations, because transforming the standard errors or probabilities of a prediction is often not straightforward). We could of course check whether the `predict_type` is set to `"se"` and if this is the case, return `NA` as the standard errors.
+
 To construct our final target transformation `Graph` with our linear regression learner, we again simply make use of `ppl("targettrafo")`:
 
 ```{r}
@@ -368,7 +368,7 @@ g_bc$plot()
 Finally we `$train()` and `$predict()` on the task (again, we wrap the `Graph` in a `GraphLearner`):
 
 ```{r}
-gl_bc = GraphLearner$new(g_bc, task_type = "regr")
+gl_bc = GraphLearner$new(g_bc)
 gl_bc$train(task)
 gl_bc$state
 gl_bc$predict(task)
