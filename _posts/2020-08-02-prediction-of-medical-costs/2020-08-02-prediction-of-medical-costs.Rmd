@@ -421,13 +421,14 @@ grid.arrange(plot_hp_knn, plot_hp_rpart_1, plot_hp_rpart_2, plot_hp_ranger_1, pl
   top = textGrob("Tuning Results: Hyperparameter Settings", gp = gpar(fontface = 2, fontsize = 14)))
 ```
 
-```{r grid1rds, echo=FALSE}
+```{r gridrds, echo=FALSE}
 # saveRDS(grid1, "grid1.rds")
-plot(readRDS("grid1.rds"))
+grid1 <- readRDS("grid1.rds")
+grid.arrange(grid1)
 ```
 
 
-These plots show the range of optimal hyperparameters obtained by the inner resampling loop. So, each boxplot is based on 5 values. The red lines (dashed) indicate the range, within which the hyperparameters were optimised. It can, for example, be seen that while various different $k$-values are deemed optimal for kNN, $mtry = 4$ is determined the optimal setting for the Ranger algorithm in every iteration. Also, the optimal $cp$ in CART seems to lie within a small range, while the best-performing $minsplit$-parameter is rather volatile. However, the illustration neglects the fact that in tuning we are looking at combinations of hyperparameters and the more dimensions we consider, the fewer of the hyperparameter space we are investigating with a fixed number of evaluations in the tuning.    
+These plots show the range of optimal hyperparameters obtained by the inner resampling loop. So, each boxplot is based on 5 values. The red lines (dashed) indicate the range, within which the hyperparameters were optimized. It can, for example, be seen that while various different $k$-values are deemed optimal for kNN, $mtry = 4$ is determined the optimal setting for the Ranger algorithm in every iteration. Also, the optimal $cp$ in CART seems to lie within a small range, while the best-performing $minsplit$-parameter is rather volatile. However, the illustration neglects the fact that in tuning we are looking at combinations of hyperparameters and the more dimensions we consider, the fewer of the hyperparameter space we are investigating with a fixed number of evaluations in the tuning.    
 
 
 ## Outer Loop: Model Selection
