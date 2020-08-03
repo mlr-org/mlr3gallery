@@ -34,12 +34,10 @@ Bike sharing is a network of publicly shared bicycles that can be rented for a c
 For the suppliers of those networks, it is important to always have enough bicycles available, whereby the demand depends on a variety of factors.
 Therefore it is essential to have a forecasting system that predicts the demand taking into account several variables.
 In this document, we develop such a system using the `mlr3verse` package.
-For our analysis, we used the [Kaggle Bike Sharing Demand](https://www.kaggle.com/c/bike-sharing-demand/data)
-dataset, which was provided by Hadi Fanaee Tork using data from Capital Bikeshare.
-[@Fanaee]
+For our analysis, we used the [Kaggle Bike Sharing Demand](https://www.kaggle.com/c/bike-sharing-demand/data) data set, which was provided by Hadi Fanaee Tork using data from Capital Bikeshare. [@Fanaee]
 After ingesting the data into R we continue with some descriptive statistics for our training data set. 
 We then preprocess the data and carry out feature and target engineering.
-Afterwards we proceed with the modelling process in which we fit, tune and benchmark the *KNN*, *CART* and *RandomForest* learner of the `mlr3verse` package.
+Afterwards we proceed with the modeling process in which we fit, tune and benchmark the *KNN*, *CART* and *RandomForest* learner of the `mlr3verse` package.
 We conclude with our model prediction for the data.
 
 ## Prerequisites
@@ -80,7 +78,7 @@ nrow_train = nrow(train)
 ncol_train = ncol(train)
 ```
 
-The Bike Sharing Demand dataset contains `r nrow_train` rows and `r ncol_train` columns.
+The Bike Sharing Demand data set contains `r nrow_train` rows and `r ncol_train` columns.
 
 ```{r tw, echo=FALSE}
 column_descr = data.frame(
@@ -143,8 +141,7 @@ Since there are no missing values in our data, we do not need to apply any furth
 ## Descriptive Statistics
 
 In Figure 1 we show the density estimates of the continuous variables in the training data.
-We find that our target variable `count` is highly right-skewed, which we
-examine further during preprocessing in chapter 2.3. 
+We find that our target variable `count` is highly right-skewed, which we examine further during pre-processing in chapter 2.3. 
 
 ```{r dense, echo=FALSE, fig.cap="Density estimates of the continuous variables in training data", fig.height=3.3}
 plot_density(train,
@@ -175,7 +172,7 @@ ggcorr(train[, c("count", "windspeed", "humidity", "atemp", "temp")], geom = "bl
 ```
 
 Figure 3 shows the Bike Sharing demand over the entire time frame of our training data. 
-We find an overall positive trend with seasonalities, whereby the demand is higher in summer than in winter.
+We find an overall positive trend with seasonality, whereby the demand is higher in summer than in winter.
 
 ```{r bbytime, echo=FALSE, message=FALSE, fig.cap="Bike Sharing demand over time"}
 ggplot(train, aes(x = as.POSIXct(datetime), y = count)) + 
@@ -187,8 +184,7 @@ ggplot(train, aes(x = as.POSIXct(datetime), y = count)) +
 ```
 
 As we can see in Figure 4, the bike sharing demand is fairly evenly distributed over a month.
-Note that we have no values for days after the 19th day of each month in our 
-training data since those days are included in our test data.
+Note that we have no values for days after the 19th day of each month in our training data since those days are included in our test data.
 
 ```{r grouped, echo=FALSE, warning=FALSE, fig.cap="Distribution of Bike Sharing demand over a month", fig.height=2}
 df_grouped_day = train %>% 
@@ -235,7 +231,7 @@ cor(train$atem, train$temp)
 Therefore we omit `temp` feature during the modeling process to
 reduce the number of features and the complexity of our data structure. 
 Additionally, we convert nominal and ordinal features to factors and `datetime` to 
-POSIXct. The structure of our preprocessed data is shown in Table 3.
+POSIXct. The structure of our pre-processed data is shown in Table 3.
 
 ```{r, echo = FALSE}
 preprocess = function(df, null = c("casual", "registered")){
@@ -268,9 +264,9 @@ train %>% summary.default %>% as.data.frame %>%
 
 ## Feature engineering
 
-Since we have one observation at each time, each timestamp (`datetime`) is a unique value 
+Since we have one observation at each time, each time stamp (`datetime`) is a unique value 
 and therefore has no predictive quality. However, if we split it into `hour`, `weekday`, `month` 
-and `year` we obtain useful predictors. The structure of our preprocessed training data is visualized 
+and `year` we obtain useful predictors. The structure of our pre-processed training data is visualized 
 in Table 4.
 
 ```{r, echo=FALSE}
@@ -349,7 +345,7 @@ ggplot(train, aes(log1p(count))) +
 For predictions we have to transform it back to the original scale with $x = exp(z) - 1$. \
 (Note that $exp(log(x + 1)) - 1 = x$)
 mlr3 simplifies this process by offering Pipeline Operators (PipeOps for short).
-These `PipeOps` are computational steps that can be arranged into Pipelines to manage dataflow in mlr3.
+These `PipeOps` are computational steps that can be arranged into Pipelines to manage data flow in mlr3.
 
 Using `PipeOpTargetTrafo` we can dynamically transform our target before the prediction and transform it back
 into our original scale afterwards.
@@ -369,7 +365,7 @@ log1p_target_trafo = function(learner, graph = TRUE) {
 ## Task Initialization
 
 First, we have to initialize our bike task. 
-As backend, we use our training data and as target variable `count`.
+As back-end, we use our training data and as target variable `count`.
 
 ```{r taskinit}
 bike_task = TaskRegr$new("bike_sharing", backend = train, target = "count")
@@ -392,10 +388,8 @@ autoplot(bike_task) +
   theme_bw()
 ```
 
-To examine relationships between variables in train data, we can also use the `autoplot` function
-and set the `type` argument to "pairs". 
-We make use of this option to further investigate the relationship between `atemp`, `windspeed`
-and `count` and compare it over the two years of our data.
+To examine relationships between variables in train data, we can also use the `autoplot` function and set the `type` argument to "pairs". 
+We make use of this option to further investigate the relationship between `atemp`, `windspeed` and `count` and compare it over the two years of our data.
 The result is visualized in Figure 8.
 In the upper left graph, we notice that there the value of `log1p_count` is higher in 2012 than in 2011.
 In contrast, the distribtions of `atemp` and `windspeed`  do not seem to differ between the years.
@@ -422,14 +416,13 @@ autoplot(bike_task,
 
 ## Model training
 
-In our modelling process, we consider three learners: `kknn`, `rpart` and `ranger`.
+In our modeling process, we consider three learners: `kknn`, `rpart` and `ranger`.
 For parameter optimization, we use the so-called `autotuner`.
 An `Autotuner` is a learner, that tunes its hyperparameters during training.
 The technical implementation is provided by `mlr3tuning`.
 For more details see the [mlr3manual](https://mlr3book.mlr-org.com/tuning.html).  
 
-In order to achieve maximum comparability between the learners the `Resampling` objects and 
-which enable us to measure a learner-configuration's performance as well as the tuning strategy are kept fixed for all compared learners.
+In order to achieve maximum comparability between the learners the `Resampling` objects and which enable us to measure a learner-configuration's performance as well as the tuning strategy are kept fixed for all compared learners.
 If a learner's settings differ from the general case, the reason is given in the 
 section on the `autotuner` concerned.
 
@@ -443,34 +436,25 @@ term_evals20 = trm("evals", n_evals = 20L)
 
 * `nested resampling` is a method to obtain an unbiased performance estimation for each learner.
 For more information see [Nested Resamling](https://mlr3book.mlr-org.com/nested-resampling.html).
-During our modelling process, we use 5-fold CV for `inner resampling` to avoid 
-overfitting when optimizing the model parameters (`resampling_cv_5`).
-In order to avoid overfitting during hyperparameter tuning, we use 3-fold CV as 
-`outer resampling` method (`resampling_outer_cv3`). Nested resampling is 
-done in our Chapter 5 "Nested Resampling" where we evaluate and 
-compare the performance of the learners in a single Graph Learner. 
+During our modeling process, we use 5-fold CV for `inner resampling` to avoid overfitting when optimizing the model parameters (`resampling_cv_5`).
+In order to avoid overfitting during hyperparameter tuning, we use 3-fold CV as `outer resampling` method (`resampling_outer_cv3`).
+Nested resampling is done in our Chapter 5 "Nested Resampling" where we evaluate and compare the performance of the learners in a single Graph Learner. 
 
 * `measure` defines the loss function that the autotuner evaluates during training.
-As the Kaggle competition requires participants to minimize the `RMSLE` we use the
-`RMSE measure` since our target variable is already log-transformed.
+As the Kaggle competition requires participants to minimize the `RMSLE` we use the `RMSE measure` since our target variable is already log-transformed.
 
 * `tuning method` will be Grid Search with a grid resolution of 10.
-As we chose two hyperparameters to tune over, the two-dimensional grid consists 
-of $10^{2} = 100$ configurations. The tuner grid is called `tuner_grid_10`.
+As we chose two hyperparameters to tune over, the two-dimensional grid consists of $10^{2} = 100$ configurations. The tuner grid is called `tuner_grid_10`.
  
-* `terminator` limits the tuning process to 20 hyperparameter combinations,
-which will be drawn randomly from the `tuner_grid_10`.
+* `terminator` limits the tuning process to 20 hyperparameter combinations, which will be drawn randomly from the `tuner_grid_10`.
 The terminator is called `term_evals20`.
 
-As the computational time of `nested resampling` is high and tuning over
-multiple parameters would be very complex, the `autotuners` are be
-restricted to two hyperparameters, that seem to have a strong influence on the `regr.rmse`. 
-The hyperparameter space of numeric hyperparameter is set around their default values 
-for tuning.
+As the computational time of `nested resampling` is high and tuning over multiple parameters would be very complex, the `autotuners` are be restricted to two hyperparameters, that seem to have a strong influence on the `regr.rmse`. 
+The hyperparameter space of numeric hyperparameter is set around their default values for tuning.
 
-Resampling and Terminator during Autotuning are set to relatively small iterations to save up computational effort.
-In regular cases we would suggest using 5- or 10-fold crossvalidiations.
-Autotuning should exploid enough gridpoints to give the user an impression about the whole Hyperparameterspace.
+Resampling and Terminator during auto tuning are set to relatively small iterations to save up computational effort.
+In regular cases we would suggest using 5- or 10-fold crossvalidiation.
+Auto tuning should exploit enough grid points to give the user an impression about the whole hyperparameter space.
 
 ### KNN
 
@@ -511,7 +495,7 @@ param_set_kknn = ParamSet$new(
 )
 ```
 
-Now we set up the autotuner for the kknn learner and train it.
+Now we set up the autotuner for the `kknn` learner and train it.
 
 ```{r kknn, message=FALSE, eval=FALSE}
 set.seed(123456)
@@ -535,11 +519,10 @@ archive_kknn = at_kknn$archive("tune_x")[, c("regr.rmse",
 archive_kknn = readRDS("archive_kknn.rds")
 ```
 
-In Figure 9 we see the RMSE for the considered hyperparameter of the kknn autotuner.
-It seems that a higher order `p` of the Minowski distance leads to a lower `RMSE`. 
-Moreover, we see that the `RMSE` is lowest around `k = 10` neighbours.
-For smaller `k` the estimation might be too wiggly, for higher `k` it might be
-too global (Bias-Variance tradeoff). 
+In Figure 9 we see the RMSE for the considered hyperparameter of the `kknn` autotuner.
+It seems that a higher order `p` of the Minkowski distance leads to a lower `RMSE`. 
+Moreover, we see that the `RMSE` is lowest around `k = 10` neighbors.
+For smaller `k` the estimation might be too wiggly, for higher `k` it might be too global (Bias-Variance trade off). 
 The minimal RMSE that the `autotuner` could find is given for `p = 3` and `k = 12`.
 
 ```{r, echo=FALSE, fig.cap="RMSE on tuning grid of kknn autotuner"}
@@ -595,8 +578,7 @@ Any split that does not decrease the overall lack of fit by a factor of cp is
 not attempted.
 [...]
 
-For more information see the
-[rpart Documentation](https://cran.r-project.org/web/packages/rpart/rpart.pdf).
+For more information browse the [rpart Documentation](https://cran.r-project.org/web/packages/rpart/rpart.pdf).
 
 ```{r}
 param_set_cart = ParamSet$new(
@@ -607,7 +589,7 @@ param_set_cart = ParamSet$new(
 )
 ```
 
-Now we set up the autotuner for the rpart learner and train it.
+Now we set up the autotuner for the `rpart` learner and train it.
 
 ```{r rpart, message=FALSE, eval=FALSE}
 set.seed(123456)
@@ -630,10 +612,9 @@ archive_rpart = at_rpart$archive("tune_x")[, c("regr.rmse",
 archive_rpart = readRDS("archive_rpart.rds")
 ```
 
-In Figure 10 we see the RMSE for the considered hyperparameter of the rpart autotuner.
+In Figure 10 we see the RMSE for the considered hyperparameter of the `rpart` autotuner.
 The learner performs the worst if we set the minimum size of nodes in `minsplit < 3`.
-For splitting criteria `minsplit > 3` seems to have no significant influence 
-on the RMSE in the given hyperparameter space.
+For splitting criteria `minsplit > 3` seems to have no significant influence on the RMSE in the given hyperparameter space.
 In contrast, we find that for relatively low `cp` the error decreases considerably.
 Lowering `cp` reduces the level of pruning, resulting in larger trees.
 We reach the minimal `regr.rmse` at the lowest considered `cp = 0.001`. 
@@ -687,10 +668,8 @@ kable_styling(full_width = TRUE, latex_options = "repeat_header")
 
 **Feature Importance**  
 
-First, we take advantage of the ability of the `ranger_learner` to calculate 
-the importance of its features.
-The `importance filter` implemented in `mlr3filters` provides the possibility to
-access this calculation via `mlr3` syntax.
+First, we take advantage of the ability of the `ranger_learner` to calculate the importance of its features.
+The `importance filter` implemented in `mlr3filters` provides the possibility to access this calculation via `mlr3` syntax.
 
 ```{r}
 filter_ranger = flt("importance", learner = ranger_learner)
@@ -699,10 +678,8 @@ feature_importance = as.data.table(filter_ranger)
 ```
 
 In Figure 11 we see there is a difference in features.
-Some features don't seem to make a contribution to the model performance that is 
-worthwhile to implement to the learner's architecture.
-To test this hypothesis we are going to set up a learner that can test different
-feature combinations.
+Some features don't seem to make a contribution to the model performance that is worthwhile to implement to the learner's architecture.
+To test this hypothesis we are going to set up a learner that can test different feature combinations.
 
 ```{r, echo=FALSE, fig.cap="Feature importance in ranger learner"}
 ggplot(feature_importance, aes(reorder(feature, score), y = score)) +
@@ -714,16 +691,14 @@ ggplot(feature_importance, aes(reorder(feature, score), y = score)) +
 ```
 
 We use the features in decreasing order of feature importance.
-Say, if we use $n$ features to predict the target we use the $n$ most important
-features according to their `impurity`.
+Say, if we use $n$ features to predict the target we use the $n$ most important features according to their `impurity`.
 Therefore, we set up a graph learner in the next step.  
 
 **Ranger Pipe** 
 
-Setting up the Ranger Pipe enables us to compare models with different feature 
-combinations. Therefore we use the `mlr3` packages `mlr3pipelines` and `mlr3filters`
-and create a new learner `ranger_feature`. This learner is now able to select the most
-important features from the impurity filtering.
+Setting up the Ranger Pipe enables us to compare models with different feature combinations.
+Therefore we use the `mlr3` packages `mlr3pipelines` and `mlr3filters` and create a new learner `ranger_feature`.
+This learner is now able to select the most important features from the impurity filtering.
 
 ```{r}
 po_flt = po("filter", filter_ranger, param_vals = list(filter.nfeat = 11L)) %>>%
@@ -732,8 +707,7 @@ po_flt = po("filter", filter_ranger, param_vals = list(filter.nfeat = 11L)) %>>%
 
 **Tuning Random Forest**
 
-In addition to the regular `ranger` features, we are now able to tune on any 
-parameter from the importance `PipeOp`.
+In addition to the regular `ranger` features, we are now able to tune on any parameter from the importance `PipeOp`.
 
 Again, for simplicity, we tune only two of those parameters:
 
@@ -757,11 +731,9 @@ param_set_ranger = ParamSet$new(
 )
 ```
 
-To ensure that `regr.ranger.mtry` never exceeds `importance.filter.nfeat`, we
-define the searchspace for the tuner manually. We constraint the possible number 
-of features to the 1, 6 , 10 and 11 most important feature(s).
-The resulting grid shown in Figure 12, expands to over 28 combinations 
-to tune our learner on.
+To ensure that `regr.ranger.mtry` never exceeds `importance.filter.nfeat`, we define the search space for the tuner manually.
+We constraint the possible number of features to the 1, 6 , 10 and 11 most important feature(s).
+The resulting grid shown in Figure 12, expands to over 28 combinations to tune our learner on.
 
 ```{r}
 grid = generate_design_grid(param_set_ranger, resolution = 11)
@@ -781,8 +753,8 @@ ggplot(grid$data, aes(x = importance.filter.nfeat,
     legend.title = element_text(size = 9))
 ```
 
-To ensure that `regr.ranger.mtry` never exceeds, `importance.filter.nfeat` we define a searchspace.
-Since the space for hyperparameters is limited, one could consider here to exploid the whole Parameterspace for nfeat and mtry.
+To ensure that `regr.ranger.mtry` never exceeds, `importance.filter.nfeat` we define a search space.
+Since the space for hyperparameters is limited, one could consider here to exploit the whole parameter space for `nfeat` and `mtry`.
 To save up time we will stick to 28 combinations here, including all possible combinations at 1, 6, 10 and 11 levels.
 
 ```{r ranger, message=FALSE, eval=FALSE}
@@ -811,9 +783,7 @@ archive_ranger = readRDS("archive_ranger.rds")
 
 In Figure 13 we see the RMSE for the evaluated hyperparameter of the ranger autotuner.
 With increasing `mtry` and the number `features` used in the model, the RMSE decreases.
-The best considered combination is achieved with 11 `features` and
-`mtry = 10`. For higher values of `mtry` and number of features `features` the 
-`RMSE` is slightly higher.
+The best considered combination is achieved with 11 `features` and `mtry = 10`. For higher values of `mtry` and number of features `features` the `RMSE` is slightly higher.
 
 ```{r, echo=FALSE, fig.cap="RMSE on tuning grid ranger learner"}
 ggplot(archive_ranger, aes(x = importance.filter.nfeat,
@@ -847,13 +817,9 @@ ggplot(archive_ranger, aes(x = importance.filter.nfeat,
 
 Benchmarking has two objectives. First, we want to obtain a performance measure for all the fitted models through resampling.
 
-Second, we want to compare the models with each other and examine how tuning
-improved each of them.
-As stated in Chapter 3.3 we use a 3-fold CV as our benchmarking resampling method,
-a 5-fold CV is evaluated inside each autotuning object to obtain the best
-hyperparameter combination.
-Note, that this method does not lead to an unbiased GE, but rather is a step to compare the learners to
-each other.
+Second, we want to compare the models with each other and examine how tuning improved each of them.
+As stated in Chapter 3.3 we use a 3-fold CV as our benchmarking resampling method, a 5-fold CV is evaluated inside each auto tuned object to obtain the best hyperparameter combination.
+Note, that this method does not lead to an unbiased GE, but rather is a step to compare the learners to each other.
 
 ```{r bmr, message=FALSE, results='hide', eval=FALSE}
 lrns = list(
@@ -891,23 +857,15 @@ column_spec(1, width = "8cm")
 ```
 
 Tuning enables us to optimize hyperparameters in our model via trial and error.
-For more details see
-[mlr3tuning](https://mlr3book.mlr-org.com/optimization.html).  
-To evaluate each tuned learners' performance and compare it, we set up 
-benchmarking.
+For more details see [mlr3tuning](https://mlr3book.mlr-org.com/optimization.html).  
+To evaluate each tuned learners' performance and compare it, we set up  benchmarking.
 Results are shown in Table 8 and Figure 14.  
-In the boxplot resulting RMSE from the outer resampling are shown for each
-tuned learner from chapter 3.3 and its untuned equivalent.
-The benchmarking resampling validates our results from hyperparameter tuning
-for each autotuner in a 3-fold-crossvalidation.
-We find that with autotuning each of the learners could increase its
-performance compared to its' equivalent that is using default hyperparameters.
-However, for `rpart` not only perfomance is increasing but also
-variance.  
-That does not apply to  the tuned `kknn` and `ranger` learners for which the results 
-seem to be comparatively stable.
-With a RMSE of 0.31 the tuned random forest performs the best among tuned and
-untuned learners compared in benchmarking.  
+In the boxplot resulting RMSE from the outer resampling are shown for each tuned learner from chapter 3.3 and its non-tuned equivalent.
+The benchmarking resampling validates our results from hyperparameter tuning for each autotuner in a 3-fold-cross-validation.
+We find that with auto tuning each of the learners could increase its performance compared to its' equivalent that is using default hyperparameters.
+However, for `rpart` not only performance is increasing but also variance.  
+That does not apply to  the tuned `kknn` and `ranger` learners for which the results seem to be comparatively stable.
+With a RMSE of 0.31 the tuned random forest performs the best among tuned and untuned learners compared in benchmarking.  
 Consequently, the tuned `ranger` is our learner of choice for prediction.
 
 ```{r, eval=FALSE, warning=FALSE}
@@ -926,32 +884,21 @@ autoplot(bmr, measure = msr("regr.rmse")) +
 # Nested Resampling - Autotune a Graphlearner
 
 Benchmarking is a fast and simple way to compare different approaches to each other.
-However, from a theoretical perspective, this approach does not lead to unbiased
-general error estimators. Since we only used three different learners for benchmarking this
-bias should be insignificant.
-Nevertheless, we would like to provide a showcase for how to obtain unbiased 
-results with more advanced techniques that are available in `mlr3`.
-Therefore we evaluate the performance of our learners by "true" unbiased
-nested resampling.
-In this case, tuning and model selection is only performed during inner 
-resampling. The purpose of outer resampling is to evaluate the unbiased
-score from inner resampling.
-This method is also more exhaustive, as it 
-tunes the graph learner in each of the three outer resampling CVs
-again.
-Benchmarking on the other hand, "only" tunes each autotuner once and crossvalidates
-with the optimized hyperparams from the first iteration.
+However, from a theoretical perspective, this approach does not lead to unbiased general error estimators.
+Since we only used three different learners for benchmarking this bias should be insignificant.
+Nevertheless, we would like to provide a showcase for how to obtain unbiased results with more advanced techniques that are available in `mlr3`.
+Therefore we evaluate the performance of our learners by "true" unbiased nested resampling.
+In this case, tuning and model selection is only performed during inner resampling.
+The purpose of outer resampling is to evaluate the unbiased score from inner resampling.
+This method is also more exhaustive, as it tunes the graph learner in each of the three outer resampling CVs again.
+Benchmarking on the other hand, "only" tunes each autotuner once and cross-validates with the optimized hyperparameters from the first iteration.
 
 
 ## The Pipe
 
-We create a simple branched pipe, with our already known learners from the
-previous chapters.
-Note that we do not implement the autotuners but the actual learners here, since we
-aim to tune over the whole pipeline as a learner here, rather than over each
-learner individually.
-Therefore our selected learners `kknn`, `rpart` and `importance.ranger` can be
-considered as hyperparams in a more universal graphlearner `glrn`.
+We create a simple branched pipe, with our already known learners from the previous chapters.
+Note that we do not implement the autotuners but the actual learners here, since we aim to tune over the whole pipeline as a learner here, rather than over each learner individually.
+Therefore our selected learners `kknn`, `rpart` and `importance.ranger` can be considered as hyperparameters in a more universal graph-learner `glrn`.
 For more information see [mlr3pipelines](https://mlr3book.mlr-org.com/pipelines.html).  
 
 ```{r pipelinie, fig.cap="Pipeline Learner", fig.width = 5, fig.height = 4.3, eval=FALSE}
@@ -964,17 +911,13 @@ pipe$plot()
 
 ## The Parameter Set
 
-A few words should be said about this rather complex paramset:
+A few words should be said about this rather complex parameter set:
 
 - We tune over the same hyperparameter spaces as in the autotuners before.
-- The only exception is the `importance.ranger`, for which we tune over
-$\{6, 10, 11\}$ features because the autotuners had the best performance at 
-these values.
-- Logically, `k` or `distance` can only be called if the selected branch is 
-`regr.kknn`. The same applies to the params of the other learners.
+- The only exception is the `importance.ranger`, for which we tune over $\{6, 10, 11\}$ features because the autotuners had the best performance at these values.
+- Logically, `k` or `distance` can only be called if the selected branch is `regr.kknn`. The same applies to the parameters of the other learners.
 For this purpose we add *dependencies* to the parameter.
-- In the `ParameterSet` `nfeat` is set to `levels`.
-This is used to control the levels, a grid can tune over. 
+- In the `ParameterSet` `nfeat` is set to `levels`. This is used to control the levels, a grid can tune over. 
 `mtry` is initialized in the transformation depending on the randomly chosen `nfeat`.
 
 ```{r graphparamset, message=FALSE, results='hide', eval=FALSE}
@@ -1006,8 +949,7 @@ ps$trafo = function(x, param_set) {
 
 Now we can perform nested resampling using our previously created pipe.
 We directly resample this autotuner to reduce computing time.
-We can save the tuned learners in our resampling result by setting 
-`store_model = TRUE`.
+We can save the tuned learners in our resampling result by setting `store_model = TRUE`.
 
 ```{r noevalmultiat, eval=FALSE}
 multi_at = AutoTuner$new(
@@ -1055,8 +997,7 @@ Nested resampling carries out very similar results as Benchmarking in the previo
 
 Now we use our tuned random forest model to predict the Bike Sharing demand for the train and test data.
 
-Before we can make the predictions, we have to preprocess the test data and engineer features in
-the same way we did for our training data.
+Before we can make the predictions, we have to preprocess the test data and engineer features in the same way we did for our training data.
 
 ```{r}
 test = readRDS("test.rds")
@@ -1092,8 +1033,7 @@ data_total = readRDS("data_total.rds")
 A visual comparison between the predicted demand with the actual demand is shown in Figure 15.
 The points depict the actual values and the green bars show our predicted values.
 The spaces with no points are the 19th day until the end of each month for which we only have test data.
-We find that overall the model predictions are quite close to the actual values and that 
-the forecast seems reasonable for the test data.
+We find that overall the model predictions are quite close to the actual values and that the forecast seems reasonable for the test data.
 
 ```{r, warning=FALSE, echo=FALSE, fig.cap="Bike Sharing Demand: Forecast vs. Actual", fig.height=2.5}
 data_temp = data_total
@@ -1147,24 +1087,14 @@ ggplot(data_grouped_day, aes(x = day, y = count)) +
 
 # Conclusion
 
-The `mlr3verse`  makes the process of model fitting, tuning, benchmarking and 
-nested resampling intuitive and fast.
-The included packages provide access to a set of commonly used learners and their train
-and predict methods using R6 classes.
-Moreover one can increase the capabilities of learners of the original packages
-through tuning, benchmarking as well as imputing and even ensembling.
-`mlr3` provides these methods in a simple syntax to create understandable and 
-comparable code architectures.   
-Using these resources we set up a generalized tuning process for
-`kknn`, `rpart` and `ranger` learners.
-By tuning two hyperparameters of each learner, we were able to considerably increase
-performance of each learner.
-Performance comparison through nested resampling provided a
-solid foundation for choosing the best learner to predict the test set.
-With a rather simple random forest learner, we made it into the top 15% of Kaggle
-competition results.
-Further research can be carried out with regard to the apparent issue of systematic
-underestimation. A model with more affinity to the risk of a higher `count` could 
-improve performance.
-To obtain such a model, one could, for example, try to increase the variability of 
-the model by choosing a smaller `min.nodesize`.
+The `mlr3verse`  makes the process of model fitting, tuning, benchmarking and nested resampling intuitive and fast.
+The included packages provide access to a set of commonly used learners and their train and predict methods using R6 classes.
+Moreover one can increase the capabilities of learners of the original packages through tuning, benchmarking as well as imputing and even ensembling.
+`mlr3` provides these methods in a simple syntax to create understandable and comparable code architectures.   
+Using these resources we set up a generalized tuning process for `kknn`, `rpart` and `ranger` learners.
+By tuning two hyperparameters of each learner, we were able to considerably increase performance of each learner.
+Performance comparison through nested resampling provided a solid foundation for choosing the best learner to predict the test set.
+With a rather simple random forest learner, we made it into the top 15% of Kaggle competition results.
+Further research can be carried out with regard to the apparent issue of systematic underestimation.
+A model with more affinity to the risk of a higher `count` could improve performance.
+To obtain such a model, one could, for example, try to increase the variability of the model by choosing a smaller `min.nodesize`.
