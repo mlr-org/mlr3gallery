@@ -25,6 +25,7 @@ library(mlr3book)
 if (require("data.table")) data.table::setDTthreads(1)
 set.seed(8008135)
 lgr::get_logger("mlr3")$set_threshold("warn")
+lgr::get_logger("bbotk")$set_threshold("warn")
 ```
 
 ## Intro
@@ -64,7 +65,7 @@ task = tsk("german_credit")
 ```
 
 Also, because tuning often takes a long time, we want to make more efficient use of our multi-core CPUs.
-Don't do this on Rstudio cloud, however.
+Don't do this on RStudio cloud, however.
 
 ```{r, warning=FALSE}
 # future::plan("multiprocess") # uncomment for parallelization
@@ -72,7 +73,7 @@ Don't do this on Rstudio cloud, however.
 
 ### Evaluation
 
-We will evaluate all algorithms using 10-fold cross-validation.
+We will evaluate all  hyperparameter configurations using 10-fold cross-validation.
 We use a *fixed* train-test split, i.e. the same splits for each evaluation.
 Otherwise, some evaluation could get unusually "hard" splits, which would make comparisons unfair.
 
@@ -119,13 +120,13 @@ We aim to keep it simple and only tune over the L1 and L2 distance.
 To do so, we use the `paradox` package to define a search space (see [Appendix](#very-quick-paradox-primer) for a short list of possible parameter types).
 
 ```{r}
-searchspace = ParamSet$new(list(
+search_space = ParamSet$new(list(
   ParamInt$new("k", lower = 3, upper = 20),
   ParamInt$new("distance", lower = 1, upper = 2)
 ))
 ```
 
-As a next step, we define a `r ref("TuningInstance")` that represents the problem we are trying to optimize.
+As a next step, we define a `r ref("TuningInstanceSingleCrit")` that represents the problem we are trying to optimize.
 
 Typically a tuning instance needs to be supplied with:
 
@@ -137,13 +138,13 @@ Typically a tuning instance needs to be supplied with:
   - The end of tuning (`Terminator`) (ignore this for now)
 
 ```{r}
-instance_grid = TuningInstance$new(
+instance_grid = TuningInstanceSingleCrit$new(
   task = task,
   learner = knn,
   resampling = cv10_instance,
-  measures = msr("classif.ce"),
-  param_set = searchspace,
-  terminator = term("none")
+  measure = msr("classif.ce"),
+  search_space = search_space,
+  terminator = trm("none")
 )
 ```
 
@@ -161,7 +162,8 @@ set.seed(1)
 tuner_grid = tnr("grid_search", resolution = 18, batch_size = 36)
 ```
 
-Tuning works by calling `$tune()`.
+
+Tuning works by calling `$optimize()`.
 Note that the tuning procedure *modifies* our tuning instance (as usual for `R6` class objects).
 The result can be found in the `instance` object.
 Before tuning it is empty:
@@ -173,25 +175,26 @@ instance_grid$result
 Now, we tune:
 
 ```{r}
-tuner_grid$tune(instance_grid)
+tuner_grid$optimize(instance_grid)
 ```
 
-The result of tuning can now be found in the `$result` slot -- together with its performance:
+The result is returned by `$optimize()` together with its performance. It can
+be also accessed with the  `$result` slot.
 
 ```{r}
 instance_grid$result
 ```
 
-We can also look at the `archive` of evaluated configurations.
-We do so by expanding the `"params"` (the parameters that the `Learner` actually saw):
+We can also look at the `Archive` of evaluated configurations.
 
 ```{r}
-perfdata = instance_grid$archive("params")
-perfdata[, c("nr", "k", "distance", "classif.ce")]
+instance_grid$archive$data()
 ```
 
+We plot the performances depending on the sampled `k` and `distance`.
+
 ```{r}
-ggplot(perfdata, aes(x = k, y = classif.ce, color = as.factor(distance))) +
+ggplot(instance_grid$archive$data(), aes(x = k, y = classif.ce, color = as.factor(distance))) +
   geom_line() + geom_point(size = 3)
 ```
 
@@ -205,7 +208,7 @@ For `k`, we find that values between 7 and 13 perform well.
 Let's have a look at a larger search space.
 For example, we could tune *all* available parameters and limit `k` to large values (50).
 
-We may find ttwoo problems when doing so:
+We may find two problems when doing so:
 
 First, the resulting difference in performance between `k` = 3 and `k` = 4 is probably larger than the difference between `k` = 49 and `k` = 50.
 While 4 is 33% larger than 3, 50 is only 2 percent larger than 49.
@@ -238,42 +241,41 @@ Here, we will terminate after 36 evaluations:
 ```{r}
 tuner_random = tnr("random_search", batch_size = 36)
 
-instance_random = TuningInstance$new(
+instance_random = TuningInstanceSingleCrit$new(
   task = task,
   learner = knn,
   resampling = cv10_instance,
-  measures = msr("classif.ce"),
-  param_set = large_searchspace,
-  terminator = term("evals", n_evals = 36)
+  measure = msr("classif.ce"),
+  search_space = large_searchspace,
+  terminator = trm("evals", n_evals = 36)
 )
 ```
 
 ```{r}
-tuner_random$tune(instance_random)
-instance_random$result
+tuner_random$optimize(instance_random)
 ```
 
-Like before, we can review the `archive`.
-We can do so in two ways:
-First, we can expand the `"tune_x"` parameters (the points we sampled on the search space, before transformation):
+Like before, we can review the `Archive`. It includes the points before and after the transformation.
+The archive includes a column for each parameter the `Tuner` sampled on the search space (points before the transformation).
 
 ```{r}
-perfdata = instance_random$archive("tune_x")
-perfdata[, c("k", "distance", "kernel", "scale", "classif.ce")]
+instance_random$archive$data()
 ```
 
-Second, we can look at the `"params"` parameters (the points the `Learner` was used with -- these are the `exp()`'d parameters, after transformation of the sampled points):
+The parameters used by the learner (points after the transformation) are stored in
+in the `x_domain` column as lists. By using `unnest = x_domain`, the list elements are expanded
+to separate columns.
 
 ```{r}
-perfdata = instance_random$archive("params")
-perfdata[, c("k", "distance", "kernel", "scale", "classif.ce")]
+instance_random$archive$data(unnest = "x_domain")
 ```
 
 Let's now investigate the performance by parameters.
 This is especially easy using visualization:
 
 ```{r}
-ggplot(perfdata, aes(x = k, y = classif.ce, color = scale)) +
+ggplot(instance_random$archive$data(unnest = "x_domain"),
+  aes(x = x_domain_k, y = classif.ce, color = x_domain_scale)) +
   geom_point(size = 3) + geom_line()
 ```
 
@@ -281,7 +283,8 @@ The previous plot suggests that `scale` has a strong influence on performance.
 For the kernel, there does not seem to be a strong influence:
 
 ```{r}
-ggplot(perfdata, aes(x = k, y = classif.ce, color = kernel)) +
+ggplot(instance_random$archive$data(unnest = "x_domain"),
+  aes(x = x_domain_k, y = classif.ce, color = x_domain_kernel)) +
   geom_point(size = 3) + geom_line()
 ```
 
@@ -291,8 +294,8 @@ Having determined tuned configurations that seem to work well, we want to find o
 However, this may require more than this naive approach:
 
 ```{r}
-instance_random$result$perf
-instance_grid$result$perf
+instance_random$result_y
+instance_grid$result_y
 ```
 
 The problem associated with evaluating tuned models is *overtuning*.
@@ -318,9 +321,9 @@ The `AutoTuner` finds the best parameters and uses them for training:
 grid_auto = AutoTuner$new(
   learner = knn,
   resampling = rsmp("cv", folds = 5), # we can NOT use fixed resampling here
-  measures = msr("classif.ce"),
-  tune_ps = searchspace,
-  terminator = term("none"),
+  measure = msr("classif.ce"),
+  search_space = search_space,
+  terminator = trm("none"),
   tuner = tnr("grid_search", resolution = 18)
 )
 ```
@@ -328,8 +331,18 @@ grid_auto = AutoTuner$new(
 The `AutoTuner` behaves just like a regular `Learner`.
 It can be used to combine the steps of hyperparameter tuning and model fitting but is especially useful for resampling and *fair* comparison of performance through benchmarking:
 
-```{r, eval=FALSE}
-resample(task, grid_auto, cv10_instance)$aggregate()
+```{r, eval = FALSE}
+rr = resample(task, grid_auto, cv10_instance)
+```
+
+We aggregate the performances of all resampling iterations.
+
+```{r, echo=FALSE}
+rr = readRDS("resample_result.rds")
+```
+
+```{r}
+rr$aggregate()
 ```
 
 Essentially, this is the performance of a "knn with optimal hyperparameters found by grid search".
@@ -342,15 +355,15 @@ It is always interesting to look at what could have been. The following dataset 
 
 ```{r, echo=FALSE, eval=FALSE}
 set.seed(2409)
-instance_random = TuningInstance$new(
+instance_random = TuningInstanceSingleCrit$new(
   task = task,
   learner = knn,
   resampling = cv10_instance,
-  measures = msr("classif.ce"),
-  param_set = large_searchspace,
-  terminator = term("evals", n_evals = 3600)
+  measure = msr("classif.ce"),
+  search_space = large_searchspace,
+  terminator = trm("evals", n_evals = 3600)
 )
-tuner_random$tune(instance_random)
+tuner_random$optimize(instance_random)
 instance_random$result
 ```
 
