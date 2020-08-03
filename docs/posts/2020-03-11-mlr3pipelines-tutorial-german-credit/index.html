@@ -1406,15 +1406,17 @@ cv10_instance = rsmp(&quot;cv&quot;)$instantiate(task)</code></pre>
 <pre class="r"><code>
 mlr_pipeops</code></pre>
 <pre><code>
-&lt;DictionaryPipeOp&gt; with 42 stored values
+&lt;DictionaryPipeOp&gt; with 55 stored values
 Keys: boxcox, branch, chunk, classbalancing, classifavg, classweights,
-  colapply, collapsefactors, copy, encode, encodeimpact, encodelmer,
-  featureunion, filter, fixfactors, histbin, ica, imputehist,
-  imputemean, imputemedian, imputenewlvl, imputesample, kernelpca,
-  learner, learner_cv, missind, modelmatrix, mutate, nop, pca,
-  quantilebin, regravg, removeconstants, scale, scalemaxabs,
-  scalerange, select, smote, spatialsign, subsample, unbranch,
-  yeojohnson</code></pre>
+  colapply, collapsefactors, copy, datefeatures, encode, encodeimpact,
+  encodelmer, featureunion, filter, fixfactors, histbin, ica,
+  imputeconstant, imputehist, imputelearner, imputemean, imputemedian,
+  imputemode, imputeoor, imputesample, kernelpca, learner, learner_cv,
+  missind, modelmatrix, mutate, nop, pca, proxy, quantilebin,
+  randomresponse, regravg, removeconstants, renamecolumns, scale,
+  scalemaxabs, scalerange, select, smote, spatialsign, subsample,
+  targetinverter, targettrafoscalerange, targettrafosimple,
+  textvectorizer, threshold, unbranch, update_target, yeojohnson</code></pre>
 </div>
 <h2 id="missing-value-imputation">Missing Value Imputation</h2>
 <p>We have just introduced missing values into our data. While some <code>Learner</code>s can deal with missing value, many cannot. Trying to train a random forest fails because of this.</p>
@@ -1430,12 +1432,13 @@ Error: Missing data in columns: credit_history, employment_duration, foreign_wor
 <pre class="r"><code>
 mlr_pipeops$keys(&quot;^impute&quot;)</code></pre>
 <pre><code>
-[1] &quot;imputehist&quot;   &quot;imputemean&quot;   &quot;imputemedian&quot; &quot;imputenewlvl&quot; &quot;imputesample&quot;</code></pre>
+[1] &quot;imputeconstant&quot; &quot;imputehist&quot;     &quot;imputelearner&quot;  &quot;imputemean&quot;    
+[5] &quot;imputemedian&quot;   &quot;imputemode&quot;     &quot;imputeoor&quot;      &quot;imputesample&quot;  </code></pre>
 </div>
-<p>We choose to impute factorial features using a new level (via <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_imputenewlvl.html"><code>PipeOpImputeNewlvl</code></a>). Let’s use the <code>PipeOp</code> itself to create an imputed <code>Task</code>. This shows us how the <code>PipeOp</code> actually works:</p>
+<p>We choose to impute factorial features using a new level (via <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_imputeoor.html"><code>PipeOpImputeOOR</code></a>). Let’s use the <code>PipeOp</code> itself to create an imputed <code>Task</code>. This shows us how the <code>PipeOp</code> actually works:</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
-imputer = po(&quot;imputenewlvl&quot;)
+imputer = po(&quot;imputeoor&quot;)
 task_imputed = imputer$train(list(task))[[1]]
 task_imputed$missings()</code></pre>
 <pre><code>
@@ -1501,7 +1504,7 @@ head(task_imputed$data())</code></pre>
 <p>If we used the imputed <code>Task</code> for Resampling, we would <em>leak</em> information from the test set into the training set. Therefore, it is mandatory to attach the imputation operator to the <code>Learner</code> itself, creating a <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_learners_graph.html"><code>GraphLearner</code></a>:</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
-imp_ranger = GraphLearner$new(po(&quot;imputenewlvl&quot;) %&gt;&gt;% ranger)
+imp_ranger = GraphLearner$new(po(&quot;imputeoor&quot;) %&gt;&gt;% ranger)
 
 imp_ranger$train(task)</code></pre>
 </div>
@@ -1547,7 +1550,7 @@ filter$calculate(task_imputed)$scores</code></pre>
 <p>Making use of this <code>Filter</code>, you may wonder at which costs the reduction of the feature space comes. We can investigate the trade-off between features and performance by tuning. We incorporate our filtering strategy into the pipeline using <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_filter.html"><code>PipeOpFilter</code></a>. Like before, we need to perform imputation as the <code>Filter</code> also relies on complete data:</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
-fpipe = po(&quot;imputenewlvl&quot;) %&gt;&gt;% po(&quot;filter&quot;, flt(&quot;mim&quot;), filter.nfeat = 3)
+fpipe = po(&quot;imputeoor&quot;) %&gt;&gt;% po(&quot;filter&quot;, flt(&quot;mim&quot;), filter.nfeat = 3)
 fpipe$train(task)[[1]]$head()</code></pre>
 <pre><code>
    credit_risk                              credit_history
@@ -1575,21 +1578,24 @@ searchspace = ParamSet$new(list(
 <p>The problem is one-dimensional (i.e. only one parameter is tuned). Thus, we make use of a grid search. For higher dimensions, strategies like random search are more appropriate.</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
-inst = TuningInstance$new(
+inst = TuningInstanceSingleCrit$new(
   task, fpipe %&gt;&gt;% lrn(&quot;classif.ranger&quot;), cv10_instance, msr(&quot;classif.ce&quot;),
-  searchspace, term(&quot;none&quot;)
+  searchspace, trm(&quot;none&quot;)
 )
 tuner = tnr(&quot;grid_search&quot;)</code></pre>
 </div>
 <p>The tuning procedure may take some time:</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
-tuner$tune(inst)</code></pre>
+tuner$optimize(inst)</code></pre>
+<pre><code>
+   mim.filter.nfeat learner_param_vals  x_domain classif.ce
+1:               12          &lt;list[4]&gt; &lt;list[1]&gt;      0.247</code></pre>
 </div>
 <p>We can plot the performance against the number of features. If we do so, we see the possible trade-off between sparsity and predictive performance:</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
-arx = inst$archive(&quot;params&quot;)
+arx = inst$archive$data()
 ggplot(arx, aes(x = mim.filter.nfeat, y = classif.ce)) + geom_line()</code></pre>
 <p><img src="2020-03-11-mlr3pipelines-tutorial-german-credit_files/figure-html5/unnamed-chunk-19-1.png" width="624" /></p>
 </div>
@@ -1597,7 +1603,7 @@ ggplot(arx, aes(x = mim.filter.nfeat, y = classif.ce)) + geom_line()</code></pre
 <p>We want to build a model that is based on the predictions of other <code>Learner</code>s. This means that we are in the state that we need predictions already during training. This is a very specific case that is luckily handled by <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_learner_cv.html"><code>PipeOpLearnerCV</code></a>. <code>PipeOpLearnerCV</code> performs cross-validation during the training phase and returns the cross-validated predictions. We use <code>"prob"</code> predictions because they carry more information than response prediction:</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
-stackgraph = po(&quot;imputenewlvl&quot;) %&gt;&gt;%
+stackgraph = po(&quot;imputeoor&quot;) %&gt;&gt;%
   list(
     po(&quot;learner_cv&quot;, lrn(&quot;classif.ranger&quot;, predict_type = &quot;prob&quot;)),
     po(&quot;learner_cv&quot;, lrn(&quot;classif.kknn&quot;, predict_type = &quot;prob&quot;))
@@ -1617,17 +1623,17 @@ bmr = benchmark(data.table(
   task = list(task),
   learner = list(
     stackgraph,
-    GraphLearner$new(po(&quot;imputenewlvl&quot;) %&gt;&gt;% lrn(&quot;classif.ranger&quot;)),
-    GraphLearner$new(po(&quot;imputenewlvl&quot;) %&gt;&gt;% lrn(&quot;classif.kknn&quot;)),
-    GraphLearner$new(po(&quot;imputenewlvl&quot;) %&gt;&gt;% lrn(&quot;classif.log_reg&quot;))),
+    GraphLearner$new(po(&quot;imputeoor&quot;) %&gt;&gt;% lrn(&quot;classif.ranger&quot;)),
+    GraphLearner$new(po(&quot;imputeoor&quot;) %&gt;&gt;% lrn(&quot;classif.kknn&quot;)),
+    GraphLearner$new(po(&quot;imputeoor&quot;) %&gt;&gt;% lrn(&quot;classif.log_reg&quot;))),
   resampling = list(cv10_instance)))
 bmr$aggregate()[, c(&quot;learner_id&quot;, &quot;classif.ce&quot;)]</code></pre>
 <pre><code>
-                                                              learner_id
-1: imputenewlvl.classif.ranger.classif.kknn.featureunion.classif.log_reg
-2:                                           imputenewlvl.classif.ranger
-3:                                             imputenewlvl.classif.kknn
-4:                                          imputenewlvl.classif.log_reg
+                                                           learner_id
+1: imputeoor.classif.ranger.classif.kknn.featureunion.classif.log_reg
+2:                                           imputeoor.classif.ranger
+3:                                             imputeoor.classif.kknn
+4:                                          imputeoor.classif.log_reg
    classif.ce
 1:      0.256
 2:      0.259

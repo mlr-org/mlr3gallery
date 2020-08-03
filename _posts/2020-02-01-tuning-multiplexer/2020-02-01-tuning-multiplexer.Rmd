@@ -13,6 +13,10 @@ output:
     self_contained: false
     css: ../../custom.css
 ---
+```{r setup, include = FALSE}
+library("mlr3book")
+```
+
 
 This use case shows how to tune over multiple learners for a single task.
 You will learn the following:
@@ -104,7 +108,7 @@ The pipe consists of three elements:
 
 * `r ref("mlr_pipeops_branch", text = "branch")` pipes incoming data to one of the following elements, on different data channels. We can name these channel on construction with `options`.
 * our learners (combined with `r ref("gunion")`)
-* `r ref("mlr_pipelines_unbranch", text = "unbranch")` combines the forked paths at the end.
+* `r ref("mlr_pipeops_unbranch", text = "unbranch")` combines the forked paths at the end.
 
 ```{r}
 pipe =
@@ -134,17 +138,17 @@ glrn = GraphLearner$new(pipe, id = "g") # connect pipe to mlr3
 ps = ParamSet$new(list(
   ParamFct$new("branch.selection", levels = c("rf", "xgb"))
 ))
-instance = TuningInstance$new(
+instance = TuningInstanceSingleCrit$new(
   task = task,
   learner = glrn,
   resampling = cv1,
-  measures = msr("classif.ce"),
-  param_set = ps,
-  terminator = term("none")
+  measure = msr("classif.ce"),
+  search_space = ps,
+  terminator = trm("none")
 )
 tuner = tnr("grid_search")
-tuner$tune(instance)
-instance$archive(unnest = "tune_x")
+tuner$optimize(instance)
+instance$archive$data("x_domain")
 instance$result
 ```
 
@@ -154,16 +158,16 @@ But: Via this approach we can now get unbiased performance results via nested re
 at = AutoTuner$new(
   learner = glrn,
   resampling = cv1,
-  measures = msr("classif.ce"),
-  tune_ps = ps,
-  terminator = term("none"),
+  measure = msr("classif.ce"),
+  search_space = ps,
+  terminator = trm("none"),
   tuner = tuner
 )
 rr = resample(task, at, cv2, store_models = TRUE)
 # access 1st inner tuning result
 ll = rr$data$learner[[1]]
 ll$tuning_result
-ll$archive(unnest = "tune_x")
+ll$archive$data("x_domain")
 ```
 
 ## Model-Selection and Tuning with Pipelines
@@ -210,24 +214,24 @@ Very similar code as before, we just swap out the search space.
 And now use random search.
 
 ```{r}
-instance = TuningInstance$new(
+instance = TuningInstanceSingleCrit$new(
   task = task,
   learner = glrn,
   resampling = cv1,
-  measures = msr("classif.ce"),
-  param_set = ps,
-  terminator = term("evals", n_evals = 10)
+  measure = msr("classif.ce"),
+  search_space = ps,
+  terminator = trm("evals", n_evals = 10)
 )
 tuner = tnr("random_search")
-tuner$tune(instance)
-instance$archive(unnest = "tune_x")
+tuner$optimize(instance)
+instance$archive$data(unnest = "x_domain")
 instance$result
 ```
 
 The following shows a quick way to visualize the tuning results.
 
 ```{r}
-resdf = instance$archive(unnest = "tune_x")
+resdf = instance$archive$data(unnest = "x_domain")
 resdf = reshape(resdf,
   varying = c("xgb.nrounds","rf.mtry"),
   v.name = "param_value",
@@ -247,14 +251,14 @@ Nested resampling, now really needed:
 at = AutoTuner$new(
   learner = glrn,
   resampling = cv1,
-  measures = msr("classif.ce"),
-  tune_ps = ps,
-  terminator = term("evals", n_evals = 10),
+  measure = msr("classif.ce"),
+  search_space = ps,
+  terminator = trm("evals", n_evals = 10),
   tuner = tuner
 )
 rr = resample(task, at, cv2, store_models = TRUE)
 # access 1st inner tuning result
 ll = rr$data$learner[[1]]
 ll$tuning_result
-ll$archive(unnest = "tune_x")
+ll$archive$data(unnest = "x_domain")
 ```

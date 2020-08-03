@@ -177,25 +177,25 @@ learns = list(
   AutoTuner$new(
     learner = lrn_under,
     resampling = inner_cv3,
-    measures = measure,
-    tune_ps = ps_under,
-    terminator = term("none"),
+    measure = measure,
+    search_space = ps_under,
+    terminator = trm("none"),
     tuner = tnr("grid_search", resolution = 6)
   ),
   AutoTuner$new(
     learner = lrn_over,
     resampling = inner_cv3,
-    measures = measure,
-    tune_ps = ps_over,
-    terminator = term("none"),
+    measure = measure,
+    search_space = ps_over,
+    terminator = trm("none"),
     tuner = tnr("grid_search", resolution = 6)
   ),
   AutoTuner$new(
     learner = lrn_smote,
     resampling = inner_cv3,
-    measures = measure,
-    tune_ps = ps_smote,
-    terminator = term("none"),
+    measure = measure,
+    search_space = ps_smote,
+    terminator = trm("none"),
     tuner = tnr("grid_search", resolution = 6)
   )
 )
@@ -238,17 +238,17 @@ Therefore, we can plot the tuning path of the best learner from the subsampling 
 
 ```{r}
 library(ggplot2)
-utune_path = bmr$data$learner[[1]]$archive("params")
+utune_path = bmr$data$learner[[1]]$archive$data()
 utune_gg = ggplot(utune_path, aes(x = undersample.ratio, y = classif.fbeta)) +
   geom_point(size = 3) +
   geom_line() + ylim(0.9, 1)
 
-otune_path = bmr$data$learner[[2]]$archive("params")
+otune_path = bmr$data$learner[[2]]$archive$data()
 otune_gg = ggplot(otune_path, aes(x = oversample.ratio, y = classif.fbeta)) +
   geom_point(size = 3) +
   geom_line() + ylim(0.9, 1)
 
-stune_path = bmr$data$learner[[3]]$archive("params")
+stune_path = bmr$data$learner[[3]]$archive$data()
 stune_gg = ggplot(stune_path, aes(
   x = smote.dup_size,
   y = classif.fbeta, col = factor(smote.K))) +
