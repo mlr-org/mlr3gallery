@@ -223,6 +223,7 @@ For example, a logistic regression can be initialized in the following manner (l
 ```{r}
 library("mlr3learners")
 learner_logreg = lrn("classif.log_reg")
+print(learner_logreg)
 ```
 
 ### Training
@@ -265,13 +266,13 @@ learner_logreg$train(task, row_ids = train_set)
 
 The fitted model can be accessed via:
 
-```{r, eval=FALSE}
+```{r, eval=TRUE}
 learner_logreg$model
 ```
 
 The stored object is a normal `glm` object and all its `S3` methods work as expected.
 
-```{r eval=FALSE}
+```{r eval=TRUE}
 class(learner_logreg$model)
 summary(learner_logreg$model)
 ```
@@ -292,7 +293,7 @@ learner_rf$train(task, row_ids = train_set)
 
 We can access the importance values using `$importance()`.
 
-```{r, eval=FALSE}
+```{r, eval=TRUE}
 learner_rf$importance()
 ```
 
@@ -301,9 +302,6 @@ In order to obtain a plot for the importance values, we convert the importance t
 ```{r}
 importance = as.data.table(learner_rf$importance(), keep.rownames = TRUE)
 colnames(importance) = c("Feature", "Importance")
-```
-
-```{r}
 ggplot(importance, aes(x = reorder(Feature, Importance), y = Importance)) +
   geom_col() + coord_flip() + xlab("")
 ```
@@ -466,7 +464,7 @@ For parallelization, `mlr3` relies on the `r cran_pkg("future")` package:
 ```
 
 In the benchmark we can compare different measures.
-We compare `r ref("mlr_measures_classif.ce", text = "misclassification rate")` and `r ref("mlr_measures_classif.auc", text = "AUC")`.
+Here, we look at the `r ref("mlr_measures_classif.ce", text = "misclassification rate")` and the `r ref("mlr_measures_classif.auc", text = "AUC")`.
 
 ```{r}
 measures = msrs(c("classif.ce", "classif.auc"))
@@ -484,7 +482,7 @@ While many R packages have carefully selected default settings, they will not pe
 Typically, we can select the values of such hyperparameters.
 The (hyper)parameters of a `r ref("Learner")` can be accessed and set via its `r ref("ParamSet")` `$param_set`:
 
-```{r, eval=FALSE}
+```{r, eval=TRUE}
 learner_rf$param_set
 learner_rf$param_set$values = list(verbose = FALSE)
 ```
@@ -536,6 +534,7 @@ bm_design = benchmark_grid(
 
 ```{r}
 bmr = benchmark(bm_design)
+print(bmr)
 ```
 
 We compare misclassification rate and AUC again:
