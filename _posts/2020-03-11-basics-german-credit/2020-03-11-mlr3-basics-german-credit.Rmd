@@ -60,7 +60,7 @@ library("ggplot2")
 
 The German credit data was originally donated in 1994 by Prof. Dr. Hans Hoffman of the University of Hamburg.
 A description can be found at the [UCI repository](https://archive.ics.uci.edu/ml/datasets/Statlog+%28German+Credit+Data%29).
-The goal is to classify people by their credit risk (good or bad) using 20 personal, demographic and financial features.
+The goal is to classify people by their credit risk (good or bad) using 20 personal, demographic and financial features:
 
 | Feature Name            | Description                                            |
 | ------------------------| ------------------------------------------------------ |
@@ -87,7 +87,7 @@ The goal is to classify people by their credit risk (good or bad) using 20 perso
 
 ### Importing the Data
 
-The dataset we are going to use is a transformed version of this German credit dataset, as provided by the `r cran_pkg("rchallenge")` package (this transformed dataset was proposed by Ulrike Grömping, with factors instead of dummy variables and corrected features).
+The dataset we are going to use is a transformed version of this German credit dataset, as provided by the `r cran_pkg("rchallenge")` package (this transformed dataset was proposed by Ulrike Grömping, with factors instead of dummy variables and corrected features):
 
 ```{r, message=FALSE}
 data("german", package = "rchallenge")
@@ -107,7 +107,7 @@ str(german)
 Our dataset has `r nrow(german)` observations and `r ncol(german)` columns.
 The variable we want to predict is `credit_risk` (either good or bad), i.e., we aim to classify people by their credit risk.
 
-We also recommend the packages `r cran_pkg("skimr")` (`r ref("skimr::skim()")`) and `r cran_pkg("DataExplorer")` (`r ref("DataExplorer::plot_bar()")`, `r ref("DataExplorer::plot_histogram()")`, `r ref("DataExplorer::plot_boxplot()")`) as they create very well readable and understandable overviews.
+We also recommend the packages `r cran_pkg("skimr")` (`r ref("skimr::skim()")`) and `r cran_pkg("DataExplorer")` (`r ref("DataExplorer::plot_bar()")`, `r ref("DataExplorer::plot_histogram()")`, `r ref("DataExplorer::plot_boxplot()")`) as they create very well readable and understandable overviews:
 
 ```{r, R.options=list(width = 120)}
 skimr::skim(german)
@@ -179,7 +179,7 @@ If we want to solve a classification problem, we define a classification task --
 For a regression problem, we define a regression task -- `r ref("TaskRegr")`.
 
 In our case it is clearly our objective to model or predict the binary `factor` variable `credit_risk`.
-Thus, we define a `TaskClassif`.
+Thus, we define a `TaskClassif`:
 
 ```{r}
 task = TaskClassif$new("GermanCredit", backend = german, target = "credit_risk")
@@ -231,7 +231,7 @@ Training is the procedure, where a model is fitted on the (training) data.
 We start with the example of the logistic regression.
 However, you will immediately see that the procedure generalizes to any learner very easily.
 
-An initialized learner can be trained on data using `$train()`.
+An initialized learner can be trained on data using `$train()`:
 
 ```{r}
 learner_logreg$train(task)
@@ -266,7 +266,7 @@ The fitted model can be accessed via:
 learner_logreg$model
 ```
 
-The stored object is a normal `glm` object and all its `S3` methods work as expected.
+The stored object is a normal `glm` object and all its `S3` methods work as expected:
 
 ```{r eval=TRUE}
 class(learner_logreg$model)
@@ -280,14 +280,14 @@ We use the fast implementation from the `r cran_pkg("ranger")` package.
 For this, we first need to define the learner and then actually train it.
 
 We now additionally supply the importance argument (`importance = "permutation"`).
-Doing so, we override the default and let the learner do feature importance determination based on permutation feature importance.
+Doing so, we override the default and let the learner do feature importance determination based on permutation feature importance:
 
 ```{r}
 learner_rf = lrn("classif.ranger", importance = "permutation")
 learner_rf$train(task, row_ids = train_set)
 ```
 
-We can access the importance values using `$importance()`.
+We can access the importance values using `$importance()`:
 
 ```{r, eval=TRUE}
 learner_rf$importance()
@@ -317,7 +317,7 @@ Based on these values, one can derive class predictions.
 
 #### Predict Classes
 
-First, we directly predict classes.
+First, we directly predict classes:
 
 ```{r}
 pred_logreg = learner_logreg$predict(task, row_ids = test_set)
@@ -335,7 +335,7 @@ pred_rf
 The `$predict()` method returns  a `r ref("Prediction")` object.
 It can be converted to a `data.table` if one wants to use it downstream.
 
-We can also display the prediction results aggregated in a confusion matrix.
+We can also display the prediction results aggregated in a confusion matrix:
 
 ```{r}
 pred_logreg$confusion
@@ -393,7 +393,7 @@ Lower is better.
 We can easily run different resampling strategies, e.g. repeated holdout (`"subsampling"`), or cross validation.
 Most methods perform repeated train/predict cycles on different data subsets and aggregate the result (usually as the mean).
 Doing this manually would require us to write loops.
-`mlr3` does the job for us.
+`mlr3` does the job for us:
 
 ```{r}
 resampling = rsmp("subsampling", repeats = 10)
@@ -401,7 +401,7 @@ rr = resample(task, learner = learner_logreg, resampling = resampling)
 rr$aggregate()
 ```
 
-Instead, we could also run cross-validation.
+Instead, we could also run cross-validation:
 
 ```{r}
 resampling = resampling = rsmp("cv", folds = 10)
@@ -460,7 +460,7 @@ For parallelization, `mlr3` relies on the `r cran_pkg("future")` package:
 ```
 
 In the benchmark we can compare different measures.
-Here, we look at the `r ref("mlr_measures_classif.ce", text = "misclassification rate")` and the `r ref("mlr_measures_classif.auc", text = "AUC")`.
+Here, we look at the `r ref("mlr_measures_classif.ce", text = "misclassification rate")` and the `r ref("mlr_measures_classif.auc", text = "AUC")`:
 
 ```{r}
 measures = msrs(c("classif.ce", "classif.auc"))
