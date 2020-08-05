@@ -1375,7 +1375,7 @@ library(mlr3pipelines)
 library(mlr3learners)
 library(paradox)
 lgr::get_logger(&quot;mlr3&quot;)$set_threshold(&quot;warn&quot;)
-lgr::get_logger(&quot;mlr3tuning&quot;)$set_threshold(&quot;warn&quot;)
+lgr::get_logger(&quot;bbotk&quot;)$set_threshold(&quot;warn&quot;)
 
 learns = list(
   lrn(&quot;classif.xgboost&quot;, id = &quot;xgb&quot;),
@@ -1495,28 +1495,14 @@ instance = TuningInstanceSingleCrit$new(
 tuner = tnr(&quot;grid_search&quot;)
 tuner$optimize(instance)</code></pre>
 <pre><code>
-INFO  [14:57:57.969] Starting to optimize 1 parameter(s) with &#39;&lt;OptimizerGridSearch&gt;&#39; and &#39;&lt;TerminatorNone&gt;&#39; 
-INFO  [14:57:57.974] Evaluating 1 configuration(s) 
-INFO  [14:57:59.033] Result of batch 1: 
-INFO  [14:57:59.036]  branch.selection classif.ce      resample_result 
-INFO  [14:57:59.036]               xgb  0.2932692 &lt;ResampleResult[18]&gt; 
-INFO  [14:57:59.038] Evaluating 1 configuration(s) 
-INFO  [14:58:00.255] Result of batch 2: 
-INFO  [14:58:00.257]  branch.selection classif.ce      resample_result 
-INFO  [14:58:00.257]                rf  0.2067308 &lt;ResampleResult[18]&gt; 
-INFO  [14:58:00.353] Finished optimizing after 2 evaluation(s) 
-INFO  [14:58:00.355] Result: 
-INFO  [14:58:00.357]  branch.selection learner_param_vals  x_domain classif.ce 
-INFO  [14:58:00.357]                rf          &lt;list[3]&gt; &lt;list[1]&gt;  0.2067308 </code></pre>
-<pre><code>
    branch.selection learner_param_vals  x_domain classif.ce
 1:               rf          &lt;list[3]&gt; &lt;list[1]&gt;  0.2067308</code></pre>
 <pre class="r"><code>
 instance$archive$data(&quot;x_domain&quot;)</code></pre>
 <pre><code>
    branch.selection classif.ce      resample_result           timestamp
-1:              xgb  0.2932692 &lt;ResampleResult[18]&gt; 2020-08-05 14:57:59
-2:               rf  0.2067308 &lt;ResampleResult[18]&gt; 2020-08-05 14:58:00
+1:              xgb  0.2932692 &lt;ResampleResult[18]&gt; 2020-08-05 17:07:06
+2:               rf  0.2067308 &lt;ResampleResult[18]&gt; 2020-08-05 17:07:08
    batch_nr x_domain_branch.selection
 1:        1                       xgb
 2:        2                        rf</code></pre>
@@ -1537,74 +1523,7 @@ at = AutoTuner$new(
   terminator = trm(&quot;none&quot;),
   tuner = tuner
 )
-rr = resample(task, at, cv2, store_models = TRUE)</code></pre>
-<pre><code>
-INFO  [14:58:01.151] Starting to optimize 1 parameter(s) with &#39;&lt;OptimizerGridSearch&gt;&#39; and &#39;&lt;TerminatorNone&gt;&#39; 
-INFO  [14:58:01.166] Evaluating 1 configuration(s) 
-INFO  [14:58:02.264] Result of batch 1: 
-INFO  [14:58:02.267]  branch.selection classif.ce      resample_result 
-INFO  [14:58:02.267]               xgb  0.3253012 &lt;ResampleResult[18]&gt; 
-INFO  [14:58:02.270] Evaluating 1 configuration(s) 
-INFO  [14:58:03.461] Result of batch 2: 
-INFO  [14:58:03.464]  branch.selection classif.ce      resample_result 
-INFO  [14:58:03.464]                rf   0.253012 &lt;ResampleResult[18]&gt; 
-INFO  [14:58:03.577] Finished optimizing after 2 evaluation(s) 
-INFO  [14:58:03.579] Result: 
-INFO  [14:58:03.582]  branch.selection learner_param_vals  x_domain classif.ce 
-INFO  [14:58:03.582]                rf          &lt;list[3]&gt; &lt;list[1]&gt;   0.253012 
-INFO  [14:58:05.040] Starting to optimize 1 parameter(s) with &#39;&lt;OptimizerGridSearch&gt;&#39; and &#39;&lt;TerminatorNone&gt;&#39; 
-INFO  [14:58:05.045] Evaluating 1 configuration(s) 
-INFO  [14:58:06.320] Result of batch 1: 
-INFO  [14:58:06.323]  branch.selection classif.ce      resample_result 
-INFO  [14:58:06.323]                rf  0.1686747 &lt;ResampleResult[18]&gt; 
-INFO  [14:58:06.325] Evaluating 1 configuration(s) 
-INFO  [14:58:07.476] Result of batch 2: 
-INFO  [14:58:07.479]  branch.selection classif.ce      resample_result 
-INFO  [14:58:07.479]               xgb  0.3614458 &lt;ResampleResult[18]&gt; 
-INFO  [14:58:07.588] Finished optimizing after 2 evaluation(s) 
-INFO  [14:58:07.589] Result: 
-INFO  [14:58:07.592]  branch.selection learner_param_vals  x_domain classif.ce 
-INFO  [14:58:07.592]                rf          &lt;list[3]&gt; &lt;list[1]&gt;  0.1686747 
-INFO  [14:58:09.031] Starting to optimize 1 parameter(s) with &#39;&lt;OptimizerGridSearch&gt;&#39; and &#39;&lt;TerminatorNone&gt;&#39; 
-INFO  [14:58:09.035] Evaluating 1 configuration(s) 
-INFO  [14:58:10.235] Result of batch 1: 
-INFO  [14:58:10.238]  branch.selection classif.ce      resample_result 
-INFO  [14:58:10.238]                rf  0.2349398 &lt;ResampleResult[18]&gt; 
-INFO  [14:58:10.241] Evaluating 1 configuration(s) 
-INFO  [14:58:11.429] Result of batch 2: 
-INFO  [14:58:11.432]  branch.selection classif.ce      resample_result 
-INFO  [14:58:11.432]               xgb  0.3192771 &lt;ResampleResult[18]&gt; 
-INFO  [14:58:11.574] Finished optimizing after 2 evaluation(s) 
-INFO  [14:58:11.575] Result: 
-INFO  [14:58:11.577]  branch.selection learner_param_vals  x_domain classif.ce 
-INFO  [14:58:11.577]                rf          &lt;list[3]&gt; &lt;list[1]&gt;  0.2349398 
-INFO  [14:58:13.046] Starting to optimize 1 parameter(s) with &#39;&lt;OptimizerGridSearch&gt;&#39; and &#39;&lt;TerminatorNone&gt;&#39; 
-INFO  [14:58:13.051] Evaluating 1 configuration(s) 
-INFO  [14:58:14.216] Result of batch 1: 
-INFO  [14:58:14.219]  branch.selection classif.ce      resample_result 
-INFO  [14:58:14.219]               xgb  0.3057229 &lt;ResampleResult[18]&gt; 
-INFO  [14:58:14.222] Evaluating 1 configuration(s) 
-INFO  [14:58:15.531] Result of batch 2: 
-INFO  [14:58:15.534]  branch.selection classif.ce      resample_result 
-INFO  [14:58:15.534]                rf  0.2274814 &lt;ResampleResult[18]&gt; 
-INFO  [14:58:15.667] Finished optimizing after 2 evaluation(s) 
-INFO  [14:58:15.668] Result: 
-INFO  [14:58:15.671]  branch.selection learner_param_vals  x_domain classif.ce 
-INFO  [14:58:15.671]                rf          &lt;list[3]&gt; &lt;list[1]&gt;  0.2274814 
-INFO  [14:58:17.169] Starting to optimize 1 parameter(s) with &#39;&lt;OptimizerGridSearch&gt;&#39; and &#39;&lt;TerminatorNone&gt;&#39; 
-INFO  [14:58:17.174] Evaluating 1 configuration(s) 
-INFO  [14:58:18.719] Result of batch 1: 
-INFO  [14:58:18.721]  branch.selection classif.ce      resample_result 
-INFO  [14:58:18.721]               xgb  0.2576736 &lt;ResampleResult[18]&gt; 
-INFO  [14:58:18.723] Evaluating 1 configuration(s) 
-INFO  [14:58:19.829] Result of batch 2: 
-INFO  [14:58:19.832]  branch.selection classif.ce      resample_result 
-INFO  [14:58:19.832]                rf  0.2573867 &lt;ResampleResult[18]&gt; 
-INFO  [14:58:19.931] Finished optimizing after 2 evaluation(s) 
-INFO  [14:58:19.933] Result: 
-INFO  [14:58:19.935]  branch.selection learner_param_vals  x_domain classif.ce 
-INFO  [14:58:19.935]                rf          &lt;list[3]&gt; &lt;list[1]&gt;  0.2573867 </code></pre>
-<pre class="r"><code>
+rr = resample(task, at, cv2, store_models = TRUE)
 # access 1st inner tuning result
 ll = rr$data$learner[[1]]
 ll$tuning_result</code></pre>
@@ -1615,8 +1534,8 @@ ll$tuning_result</code></pre>
 ll$archive$data(&quot;x_domain&quot;)</code></pre>
 <pre><code>
    branch.selection classif.ce      resample_result           timestamp
-1:              xgb  0.3253012 &lt;ResampleResult[18]&gt; 2020-08-05 14:58:02
-2:               rf  0.2530120 &lt;ResampleResult[18]&gt; 2020-08-05 14:58:03
+1:              xgb  0.3253012 &lt;ResampleResult[18]&gt; 2020-08-05 17:07:10
+2:               rf  0.2530120 &lt;ResampleResult[18]&gt; 2020-08-05 17:07:11
    batch_nr x_domain_branch.selection
 1:        1                       xgb
 2:        2                        rf</code></pre>
@@ -1750,52 +1669,6 @@ instance = TuningInstanceSingleCrit$new(
 tuner = tnr(&quot;random_search&quot;)
 tuner$optimize(instance)</code></pre>
 <pre><code>
-INFO  [14:58:21.516] Starting to optimize 3 parameter(s) with &#39;&lt;OptimizerRandomSearch&gt;&#39; and &#39;&lt;TerminatorEvals&gt;&#39; 
-INFO  [14:58:21.559] Evaluating 1 configuration(s) 
-INFO  [14:58:22.800] Result of batch 1: 
-INFO  [14:58:22.803]  branch.selection rf.mtry xgb.nrounds classif.ce      resample_result 
-INFO  [14:58:22.803]                rf      13          NA  0.1778846 &lt;ResampleResult[18]&gt; 
-INFO  [14:58:22.824] Evaluating 1 configuration(s) 
-INFO  [14:58:24.175] Result of batch 2: 
-INFO  [14:58:24.178]  branch.selection rf.mtry xgb.nrounds classif.ce      resample_result 
-INFO  [14:58:24.178]               xgb      NA         371  0.2019231 &lt;ResampleResult[18]&gt; 
-INFO  [14:58:24.204] Evaluating 1 configuration(s) 
-INFO  [14:58:25.464] Result of batch 3: 
-INFO  [14:58:25.467]  branch.selection rf.mtry xgb.nrounds classif.ce      resample_result 
-INFO  [14:58:25.467]                rf       1          NA  0.1682692 &lt;ResampleResult[18]&gt; 
-INFO  [14:58:25.487] Evaluating 1 configuration(s) 
-INFO  [14:58:26.799] Result of batch 4: 
-INFO  [14:58:26.801]  branch.selection rf.mtry xgb.nrounds classif.ce      resample_result 
-INFO  [14:58:26.801]               xgb      NA         337  0.2019231 &lt;ResampleResult[18]&gt; 
-INFO  [14:58:26.823] Evaluating 1 configuration(s) 
-INFO  [14:58:28.219] Result of batch 5: 
-INFO  [14:58:28.222]  branch.selection rf.mtry xgb.nrounds classif.ce      resample_result 
-INFO  [14:58:28.222]               xgb      NA         354  0.2019231 &lt;ResampleResult[18]&gt; 
-INFO  [14:58:28.242] Evaluating 1 configuration(s) 
-INFO  [14:58:29.558] Result of batch 6: 
-INFO  [14:58:29.561]  branch.selection rf.mtry xgb.nrounds classif.ce      resample_result 
-INFO  [14:58:29.561]               xgb      NA         339  0.2019231 &lt;ResampleResult[18]&gt; 
-INFO  [14:58:29.582] Evaluating 1 configuration(s) 
-INFO  [14:58:30.929] Result of batch 7: 
-INFO  [14:58:30.932]  branch.selection rf.mtry xgb.nrounds classif.ce      resample_result 
-INFO  [14:58:30.932]                rf      15          NA  0.1826923 &lt;ResampleResult[18]&gt; 
-INFO  [14:58:30.954] Evaluating 1 configuration(s) 
-INFO  [14:58:32.330] Result of batch 8: 
-INFO  [14:58:32.333]  branch.selection rf.mtry xgb.nrounds classif.ce      resample_result 
-INFO  [14:58:32.333]                rf       9          NA  0.1682692 &lt;ResampleResult[18]&gt; 
-INFO  [14:58:32.354] Evaluating 1 configuration(s) 
-INFO  [14:58:33.688] Result of batch 9: 
-INFO  [14:58:33.690]  branch.selection rf.mtry xgb.nrounds classif.ce      resample_result 
-INFO  [14:58:33.690]               xgb      NA         294  0.2019231 &lt;ResampleResult[18]&gt; 
-INFO  [14:58:33.712] Evaluating 1 configuration(s) 
-INFO  [14:58:35.081] Result of batch 10: 
-INFO  [14:58:35.085]  branch.selection rf.mtry xgb.nrounds classif.ce      resample_result 
-INFO  [14:58:35.085]                rf      12          NA  0.1826923 &lt;ResampleResult[18]&gt; 
-INFO  [14:58:35.214] Finished optimizing after 10 evaluation(s) 
-INFO  [14:58:35.216] Result: 
-INFO  [14:58:35.219]  branch.selection rf.mtry xgb.nrounds learner_param_vals  x_domain classif.ce 
-INFO  [14:58:35.219]                rf       1          NA          &lt;list[4]&gt; &lt;list[2]&gt;  0.1682692 </code></pre>
-<pre><code>
    branch.selection rf.mtry xgb.nrounds learner_param_vals  x_domain classif.ce
 1:               rf       1          NA          &lt;list[4]&gt; &lt;list[2]&gt;  0.1682692</code></pre>
 <pre class="r"><code>
@@ -1813,16 +1686,16 @@ instance$archive$data(unnest = &quot;x_domain&quot;)</code></pre>
  9:              xgb      NA         294  0.2019231 &lt;ResampleResult[18]&gt;
 10:               rf      12          NA  0.1826923 &lt;ResampleResult[18]&gt;
               timestamp batch_nr x_domain_branch.selection x_domain_rf.mtry
- 1: 2020-08-05 14:58:22        1                        rf               13
- 2: 2020-08-05 14:58:24        2                       xgb               NA
- 3: 2020-08-05 14:58:25        3                        rf                1
- 4: 2020-08-05 14:58:26        4                       xgb               NA
- 5: 2020-08-05 14:58:28        5                       xgb               NA
- 6: 2020-08-05 14:58:29        6                       xgb               NA
- 7: 2020-08-05 14:58:30        7                        rf               15
- 8: 2020-08-05 14:58:32        8                        rf                9
- 9: 2020-08-05 14:58:33        9                       xgb               NA
-10: 2020-08-05 14:58:35       10                        rf               12
+ 1: 2020-08-05 17:07:34        1                        rf               13
+ 2: 2020-08-05 17:07:35        2                       xgb               NA
+ 3: 2020-08-05 17:07:36        3                        rf                1
+ 4: 2020-08-05 17:07:38        4                       xgb               NA
+ 5: 2020-08-05 17:07:39        5                       xgb               NA
+ 6: 2020-08-05 17:07:41        6                       xgb               NA
+ 7: 2020-08-05 17:07:42        7                        rf               15
+ 8: 2020-08-05 17:07:44        8                        rf                9
+ 9: 2020-08-05 17:07:45        9                       xgb               NA
+10: 2020-08-05 17:07:47       10                        rf               12
     x_domain_xgb.nrounds
  1:                   NA
  2:                  371
@@ -1868,234 +1741,7 @@ at = AutoTuner$new(
   terminator = trm(&quot;evals&quot;, n_evals = 10),
   tuner = tuner
 )
-rr = resample(task, at, cv2, store_models = TRUE)</code></pre>
-<pre><code>
-INFO  [14:58:36.285] Starting to optimize 3 parameter(s) with &#39;&lt;OptimizerRandomSearch&gt;&#39; and &#39;&lt;TerminatorEvals&gt;&#39; 
-INFO  [14:58:36.328] Evaluating 1 configuration(s) 
-INFO  [14:58:37.635] Result of batch 1: 
-INFO  [14:58:37.639]  branch.selection rf.mtry xgb.nrounds classif.ce      resample_result 
-INFO  [14:58:37.639]               xgb      NA         178  0.2048193 &lt;ResampleResult[18]&gt; 
-INFO  [14:58:37.660] Evaluating 1 configuration(s) 
-INFO  [14:58:38.934] Result of batch 2: 
-INFO  [14:58:38.938]  branch.selection rf.mtry xgb.nrounds classif.ce      resample_result 
-INFO  [14:58:38.938]               xgb      NA         106  0.2048193 &lt;ResampleResult[18]&gt; 
-INFO  [14:58:38.964] Evaluating 1 configuration(s) 
-INFO  [14:58:40.349] Result of batch 3: 
-INFO  [14:58:40.352]  branch.selection rf.mtry xgb.nrounds classif.ce      resample_result 
-INFO  [14:58:40.352]                rf      17          NA  0.2168675 &lt;ResampleResult[18]&gt; 
-INFO  [14:58:40.376] Evaluating 1 configuration(s) 
-INFO  [14:58:41.881] Result of batch 4: 
-INFO  [14:58:41.884]  branch.selection rf.mtry xgb.nrounds classif.ce      resample_result 
-INFO  [14:58:41.884]               xgb      NA         428  0.2048193 &lt;ResampleResult[18]&gt; 
-INFO  [14:58:41.910] Evaluating 1 configuration(s) 
-INFO  [14:58:43.291] Result of batch 5: 
-INFO  [14:58:43.294]  branch.selection rf.mtry xgb.nrounds classif.ce      resample_result 
-INFO  [14:58:43.294]                rf      11          NA  0.2048193 &lt;ResampleResult[18]&gt; 
-INFO  [14:58:43.325] Evaluating 1 configuration(s) 
-INFO  [14:58:44.679] Result of batch 6: 
-INFO  [14:58:44.682]  branch.selection rf.mtry xgb.nrounds classif.ce      resample_result 
-INFO  [14:58:44.682]               xgb      NA         193  0.2048193 &lt;ResampleResult[18]&gt; 
-INFO  [14:58:44.704] Evaluating 1 configuration(s) 
-INFO  [14:58:46.159] Result of batch 7: 
-INFO  [14:58:46.162]  branch.selection rf.mtry xgb.nrounds classif.ce      resample_result 
-INFO  [14:58:46.162]                rf      10          NA  0.2228916 &lt;ResampleResult[18]&gt; 
-INFO  [14:58:46.182] Evaluating 1 configuration(s) 
-INFO  [14:58:47.507] Result of batch 8: 
-INFO  [14:58:47.510]  branch.selection rf.mtry xgb.nrounds classif.ce      resample_result 
-INFO  [14:58:47.510]               xgb      NA         137  0.2048193 &lt;ResampleResult[18]&gt; 
-INFO  [14:58:47.536] Evaluating 1 configuration(s) 
-INFO  [14:58:48.973] Result of batch 9: 
-INFO  [14:58:48.976]  branch.selection rf.mtry xgb.nrounds classif.ce      resample_result 
-INFO  [14:58:48.976]                rf       8          NA  0.2228916 &lt;ResampleResult[18]&gt; 
-INFO  [14:58:49.002] Evaluating 1 configuration(s) 
-INFO  [14:58:50.487] Result of batch 10: 
-INFO  [14:58:50.490]  branch.selection rf.mtry xgb.nrounds classif.ce      resample_result 
-INFO  [14:58:50.490]               xgb      NA         332  0.2048193 &lt;ResampleResult[18]&gt; 
-INFO  [14:58:50.654] Finished optimizing after 10 evaluation(s) 
-INFO  [14:58:50.655] Result: 
-INFO  [14:58:50.657]  branch.selection rf.mtry xgb.nrounds learner_param_vals  x_domain classif.ce 
-INFO  [14:58:50.657]               xgb      NA         178          &lt;list[3]&gt; &lt;list[2]&gt;  0.2048193 
-INFO  [14:58:52.260] Starting to optimize 3 parameter(s) with &#39;&lt;OptimizerRandomSearch&gt;&#39; and &#39;&lt;TerminatorEvals&gt;&#39; 
-INFO  [14:58:52.315] Evaluating 1 configuration(s) 
-INFO  [14:58:53.834] Result of batch 1: 
-INFO  [14:58:53.838]  branch.selection rf.mtry xgb.nrounds classif.ce      resample_result 
-INFO  [14:58:53.838]                rf      17          NA  0.2590361 &lt;ResampleResult[18]&gt; 
-INFO  [14:58:53.865] Evaluating 1 configuration(s) 
-INFO  [14:58:55.272] Result of batch 2: 
-INFO  [14:58:55.276]  branch.selection rf.mtry xgb.nrounds classif.ce      resample_result 
-INFO  [14:58:55.276]               xgb      NA         190  0.2650602 &lt;ResampleResult[18]&gt; 
-INFO  [14:58:55.302] Evaluating 1 configuration(s) 
-INFO  [14:58:57.025] Result of batch 3: 
-INFO  [14:58:57.028]  branch.selection rf.mtry xgb.nrounds classif.ce      resample_result 
-INFO  [14:58:57.028]               xgb      NA          75  0.2650602 &lt;ResampleResult[18]&gt; 
-INFO  [14:58:57.051] Evaluating 1 configuration(s) 
-INFO  [14:58:58.266] Result of batch 4: 
-INFO  [14:58:58.268]  branch.selection rf.mtry xgb.nrounds classif.ce      resample_result 
-INFO  [14:58:58.268]               xgb      NA         238  0.2650602 &lt;ResampleResult[18]&gt; 
-INFO  [14:58:58.291] Evaluating 1 configuration(s) 
-INFO  [14:58:59.468] Result of batch 5: 
-INFO  [14:58:59.470]  branch.selection rf.mtry xgb.nrounds classif.ce      resample_result 
-INFO  [14:58:59.470]                rf       7          NA  0.2349398 &lt;ResampleResult[18]&gt; 
-INFO  [14:58:59.491] Evaluating 1 configuration(s) 
-INFO  [14:59:00.588] Result of batch 6: 
-INFO  [14:59:00.591]  branch.selection rf.mtry xgb.nrounds classif.ce      resample_result 
-INFO  [14:59:00.591]               xgb      NA          68  0.2831325 &lt;ResampleResult[18]&gt; 
-INFO  [14:59:00.613] Evaluating 1 configuration(s) 
-INFO  [14:59:01.748] Result of batch 7: 
-INFO  [14:59:01.752]  branch.selection rf.mtry xgb.nrounds classif.ce      resample_result 
-INFO  [14:59:01.752]               xgb      NA          89  0.2650602 &lt;ResampleResult[18]&gt; 
-INFO  [14:59:01.776] Evaluating 1 configuration(s) 
-INFO  [14:59:03.020] Result of batch 8: 
-INFO  [14:59:03.023]  branch.selection rf.mtry xgb.nrounds classif.ce      resample_result 
-INFO  [14:59:03.023]                rf       7          NA  0.2168675 &lt;ResampleResult[18]&gt; 
-INFO  [14:59:03.048] Evaluating 1 configuration(s) 
-INFO  [14:59:04.408] Result of batch 9: 
-INFO  [14:59:04.411]  branch.selection rf.mtry xgb.nrounds classif.ce      resample_result 
-INFO  [14:59:04.411]                rf       1          NA  0.2650602 &lt;ResampleResult[18]&gt; 
-INFO  [14:59:04.436] Evaluating 1 configuration(s) 
-INFO  [14:59:05.967] Result of batch 10: 
-INFO  [14:59:05.970]  branch.selection rf.mtry xgb.nrounds classif.ce      resample_result 
-INFO  [14:59:05.970]               xgb      NA         367  0.2650602 &lt;ResampleResult[18]&gt; 
-INFO  [14:59:06.106] Finished optimizing after 10 evaluation(s) 
-INFO  [14:59:06.108] Result: 
-INFO  [14:59:06.110]  branch.selection rf.mtry xgb.nrounds learner_param_vals  x_domain classif.ce 
-INFO  [14:59:06.110]                rf       7          NA          &lt;list[4]&gt; &lt;list[2]&gt;  0.2168675 
-INFO  [14:59:07.585] Starting to optimize 3 parameter(s) with &#39;&lt;OptimizerRandomSearch&gt;&#39; and &#39;&lt;TerminatorEvals&gt;&#39; 
-INFO  [14:59:07.630] Evaluating 1 configuration(s) 
-INFO  [14:59:08.878] Result of batch 1: 
-INFO  [14:59:08.881]  branch.selection rf.mtry xgb.nrounds classif.ce      resample_result 
-INFO  [14:59:08.881]                rf       5          NA  0.2771084 &lt;ResampleResult[18]&gt; 
-INFO  [14:59:08.908] Evaluating 1 configuration(s) 
-INFO  [14:59:10.201] Result of batch 2: 
-INFO  [14:59:10.204]  branch.selection rf.mtry xgb.nrounds classif.ce      resample_result 
-INFO  [14:59:10.204]               xgb      NA         226  0.3192771 &lt;ResampleResult[18]&gt; 
-INFO  [14:59:10.225] Evaluating 1 configuration(s) 
-INFO  [14:59:11.467] Result of batch 3: 
-INFO  [14:59:11.469]  branch.selection rf.mtry xgb.nrounds classif.ce      resample_result 
-INFO  [14:59:11.469]               xgb      NA         233  0.3192771 &lt;ResampleResult[18]&gt; 
-INFO  [14:59:11.491] Evaluating 1 configuration(s) 
-INFO  [14:59:12.776] Result of batch 4: 
-INFO  [14:59:12.779]  branch.selection rf.mtry xgb.nrounds classif.ce      resample_result 
-INFO  [14:59:12.779]                rf       2          NA  0.2771084 &lt;ResampleResult[18]&gt; 
-INFO  [14:59:12.801] Evaluating 1 configuration(s) 
-INFO  [14:59:14.092] Result of batch 5: 
-INFO  [14:59:14.095]  branch.selection rf.mtry xgb.nrounds classif.ce      resample_result 
-INFO  [14:59:14.095]               xgb      NA         312  0.3192771 &lt;ResampleResult[18]&gt; 
-INFO  [14:59:14.118] Evaluating 1 configuration(s) 
-INFO  [14:59:15.541] Result of batch 6: 
-INFO  [14:59:15.545]  branch.selection rf.mtry xgb.nrounds classif.ce      resample_result 
-INFO  [14:59:15.545]               xgb      NA         481  0.3192771 &lt;ResampleResult[18]&gt; 
-INFO  [14:59:15.568] Evaluating 1 configuration(s) 
-INFO  [14:59:16.861] Result of batch 7: 
-INFO  [14:59:16.864]  branch.selection rf.mtry xgb.nrounds classif.ce      resample_result 
-INFO  [14:59:16.864]                rf      18          NA  0.2891566 &lt;ResampleResult[18]&gt; 
-INFO  [14:59:16.887] Evaluating 1 configuration(s) 
-INFO  [14:59:18.159] Result of batch 8: 
-INFO  [14:59:18.163]  branch.selection rf.mtry xgb.nrounds classif.ce      resample_result 
-INFO  [14:59:18.163]                rf       6          NA  0.2650602 &lt;ResampleResult[18]&gt; 
-INFO  [14:59:18.184] Evaluating 1 configuration(s) 
-INFO  [14:59:19.465] Result of batch 9: 
-INFO  [14:59:19.468]  branch.selection rf.mtry xgb.nrounds classif.ce      resample_result 
-INFO  [14:59:19.468]                rf      18          NA  0.2831325 &lt;ResampleResult[18]&gt; 
-INFO  [14:59:19.489] Evaluating 1 configuration(s) 
-INFO  [14:59:20.759] Result of batch 10: 
-INFO  [14:59:20.762]  branch.selection rf.mtry xgb.nrounds classif.ce      resample_result 
-INFO  [14:59:20.762]                rf       8          NA  0.2831325 &lt;ResampleResult[18]&gt; 
-INFO  [14:59:20.886] Finished optimizing after 10 evaluation(s) 
-INFO  [14:59:20.888] Result: 
-INFO  [14:59:20.891]  branch.selection rf.mtry xgb.nrounds learner_param_vals  x_domain classif.ce 
-INFO  [14:59:20.891]                rf       6          NA          &lt;list[4]&gt; &lt;list[2]&gt;  0.2650602 
-INFO  [14:59:22.389] Starting to optimize 3 parameter(s) with &#39;&lt;OptimizerRandomSearch&gt;&#39; and &#39;&lt;TerminatorEvals&gt;&#39; 
-INFO  [14:59:22.427] Evaluating 1 configuration(s) 
-INFO  [14:59:23.694] Result of batch 1: 
-INFO  [14:59:23.697]  branch.selection rf.mtry xgb.nrounds classif.ce      resample_result 
-INFO  [14:59:23.697]               xgb      NA         249  0.2335055 &lt;ResampleResult[18]&gt; 
-INFO  [14:59:23.719] Evaluating 1 configuration(s) 
-INFO  [14:59:24.886] Result of batch 2: 
-INFO  [14:59:24.889]  branch.selection rf.mtry xgb.nrounds classif.ce      resample_result 
-INFO  [14:59:24.889]               xgb      NA          53  0.2036001 &lt;ResampleResult[18]&gt; 
-INFO  [14:59:24.910] Evaluating 1 configuration(s) 
-INFO  [14:59:26.246] Result of batch 3: 
-INFO  [14:59:26.249]  branch.selection rf.mtry xgb.nrounds classif.ce      resample_result 
-INFO  [14:59:26.249]                rf      17          NA  0.2156483 &lt;ResampleResult[18]&gt; 
-INFO  [14:59:26.271] Evaluating 1 configuration(s) 
-INFO  [14:59:27.457] Result of batch 4: 
-INFO  [14:59:27.459]  branch.selection rf.mtry xgb.nrounds classif.ce      resample_result 
-INFO  [14:59:27.459]               xgb      NA         126  0.2335055 &lt;ResampleResult[18]&gt; 
-INFO  [14:59:27.479] Evaluating 1 configuration(s) 
-INFO  [14:59:28.889] Result of batch 5: 
-INFO  [14:59:28.892]  branch.selection rf.mtry xgb.nrounds classif.ce      resample_result 
-INFO  [14:59:28.892]               xgb      NA         475  0.2335055 &lt;ResampleResult[18]&gt; 
-INFO  [14:59:28.913] Evaluating 1 configuration(s) 
-INFO  [14:59:30.238] Result of batch 6: 
-INFO  [14:59:30.241]  branch.selection rf.mtry xgb.nrounds classif.ce      resample_result 
-INFO  [14:59:30.241]               xgb      NA         294  0.2335055 &lt;ResampleResult[18]&gt; 
-INFO  [14:59:30.273] Evaluating 1 configuration(s) 
-INFO  [14:59:31.603] Result of batch 7: 
-INFO  [14:59:31.605]  branch.selection rf.mtry xgb.nrounds classif.ce      resample_result 
-INFO  [14:59:31.605]                rf      13          NA  0.2096959 &lt;ResampleResult[18]&gt; 
-INFO  [14:59:31.626] Evaluating 1 configuration(s) 
-INFO  [14:59:32.892] Result of batch 8: 
-INFO  [14:59:32.895]  branch.selection rf.mtry xgb.nrounds classif.ce      resample_result 
-INFO  [14:59:32.895]                rf       3          NA  0.2337206 &lt;ResampleResult[18]&gt; 
-INFO  [14:59:32.916] Evaluating 1 configuration(s) 
-INFO  [14:59:34.306] Result of batch 9: 
-INFO  [14:59:34.308]  branch.selection rf.mtry xgb.nrounds classif.ce      resample_result 
-INFO  [14:59:34.308]                rf      15          NA  0.2636976 &lt;ResampleResult[18]&gt; 
-INFO  [14:59:34.329] Evaluating 1 configuration(s) 
-INFO  [14:59:35.466] Result of batch 10: 
-INFO  [14:59:35.469]  branch.selection rf.mtry xgb.nrounds classif.ce      resample_result 
-INFO  [14:59:35.469]               xgb      NA          22  0.2035284 &lt;ResampleResult[18]&gt; 
-INFO  [14:59:35.595] Finished optimizing after 10 evaluation(s) 
-INFO  [14:59:35.597] Result: 
-INFO  [14:59:35.599]  branch.selection rf.mtry xgb.nrounds learner_param_vals  x_domain classif.ce 
-INFO  [14:59:35.599]               xgb      NA          22          &lt;list[3]&gt; &lt;list[2]&gt;  0.2035284 
-INFO  [14:59:36.949] Starting to optimize 3 parameter(s) with &#39;&lt;OptimizerRandomSearch&gt;&#39; and &#39;&lt;TerminatorEvals&gt;&#39; 
-INFO  [14:59:36.989] Evaluating 1 configuration(s) 
-INFO  [14:59:38.326] Result of batch 1: 
-INFO  [14:59:38.329]  branch.selection rf.mtry xgb.nrounds classif.ce      resample_result 
-INFO  [14:59:38.329]                rf      19          NA  0.2577453 &lt;ResampleResult[18]&gt; 
-INFO  [14:59:38.350] Evaluating 1 configuration(s) 
-INFO  [14:59:39.651] Result of batch 2: 
-INFO  [14:59:39.654]  branch.selection rf.mtry xgb.nrounds classif.ce      resample_result 
-INFO  [14:59:39.654]               xgb      NA         228    0.21572 &lt;ResampleResult[18]&gt; 
-INFO  [14:59:39.679] Evaluating 1 configuration(s) 
-INFO  [14:59:41.044] Result of batch 3: 
-INFO  [14:59:41.047]  branch.selection rf.mtry xgb.nrounds classif.ce      resample_result 
-INFO  [14:59:41.047]               xgb      NA         276    0.21572 &lt;ResampleResult[18]&gt; 
-INFO  [14:59:41.068] Evaluating 1 configuration(s) 
-INFO  [14:59:42.392] Result of batch 4: 
-INFO  [14:59:42.396]  branch.selection rf.mtry xgb.nrounds classif.ce      resample_result 
-INFO  [14:59:42.396]                rf       1          NA  0.2340075 &lt;ResampleResult[18]&gt; 
-INFO  [14:59:42.420] Evaluating 1 configuration(s) 
-INFO  [14:59:43.797] Result of batch 5: 
-INFO  [14:59:43.801]  branch.selection rf.mtry xgb.nrounds classif.ce      resample_result 
-INFO  [14:59:43.801]                rf      14          NA  0.2457688 &lt;ResampleResult[18]&gt; 
-INFO  [14:59:43.828] Evaluating 1 configuration(s) 
-INFO  [14:59:45.124] Result of batch 6: 
-INFO  [14:59:45.126]  branch.selection rf.mtry xgb.nrounds classif.ce      resample_result 
-INFO  [14:59:45.126]               xgb      NA         140    0.21572 &lt;ResampleResult[18]&gt; 
-INFO  [14:59:45.147] Evaluating 1 configuration(s) 
-INFO  [14:59:46.729] Result of batch 7: 
-INFO  [14:59:46.733]  branch.selection rf.mtry xgb.nrounds classif.ce      resample_result 
-INFO  [14:59:46.733]               xgb      NA         409    0.21572 &lt;ResampleResult[18]&gt; 
-INFO  [14:59:46.755] Evaluating 1 configuration(s) 
-INFO  [14:59:48.283] Result of batch 8: 
-INFO  [14:59:48.287]  branch.selection rf.mtry xgb.nrounds classif.ce      resample_result 
-INFO  [14:59:48.287]               xgb      NA         420    0.21572 &lt;ResampleResult[18]&gt; 
-INFO  [14:59:48.313] Evaluating 1 configuration(s) 
-INFO  [14:59:49.668] Result of batch 9: 
-INFO  [14:59:49.671]  branch.selection rf.mtry xgb.nrounds classif.ce      resample_result 
-INFO  [14:59:49.671]                rf      17          NA  0.2516495 &lt;ResampleResult[18]&gt; 
-INFO  [14:59:49.692] Evaluating 1 configuration(s) 
-INFO  [14:59:51.154] Result of batch 10: 
-INFO  [14:59:51.157]  branch.selection rf.mtry xgb.nrounds classif.ce      resample_result 
-INFO  [14:59:51.157]               xgb      NA         447    0.21572 &lt;ResampleResult[18]&gt; 
-INFO  [14:59:51.343] Finished optimizing after 10 evaluation(s) 
-INFO  [14:59:51.345] Result: 
-INFO  [14:59:51.348]  branch.selection rf.mtry xgb.nrounds learner_param_vals  x_domain classif.ce 
-INFO  [14:59:51.348]               xgb      NA         228          &lt;list[3]&gt; &lt;list[2]&gt;    0.21572 </code></pre>
-<pre class="r"><code>
+rr = resample(task, at, cv2, store_models = TRUE)
 # access 1st inner tuning result
 ll = rr$data$learner[[1]]
 ll$tuning_result</code></pre>
@@ -2117,16 +1763,16 @@ ll$archive$data(unnest = &quot;x_domain&quot;)</code></pre>
  9:               rf       8          NA  0.2228916 &lt;ResampleResult[18]&gt;
 10:              xgb      NA         332  0.2048193 &lt;ResampleResult[18]&gt;
               timestamp batch_nr x_domain_branch.selection x_domain_xgb.nrounds
- 1: 2020-08-05 14:58:37        1                       xgb                  178
- 2: 2020-08-05 14:58:38        2                       xgb                  106
- 3: 2020-08-05 14:58:40        3                        rf                   NA
- 4: 2020-08-05 14:58:41        4                       xgb                  428
- 5: 2020-08-05 14:58:43        5                        rf                   NA
- 6: 2020-08-05 14:58:44        6                       xgb                  193
- 7: 2020-08-05 14:58:46        7                        rf                   NA
- 8: 2020-08-05 14:58:47        8                       xgb                  137
- 9: 2020-08-05 14:58:48        9                        rf                   NA
-10: 2020-08-05 14:58:50       10                       xgb                  332
+ 1: 2020-08-05 17:07:49        1                       xgb                  178
+ 2: 2020-08-05 17:07:51        2                       xgb                  106
+ 3: 2020-08-05 17:07:52        3                        rf                   NA
+ 4: 2020-08-05 17:07:54        4                       xgb                  428
+ 5: 2020-08-05 17:07:55        5                        rf                   NA
+ 6: 2020-08-05 17:07:56        6                       xgb                  193
+ 7: 2020-08-05 17:07:58        7                        rf                   NA
+ 8: 2020-08-05 17:07:59        8                       xgb                  137
+ 9: 2020-08-05 17:08:01        9                        rf                   NA
+10: 2020-08-05 17:08:02       10                       xgb                  332
     x_domain_rf.mtry
  1:               NA
  2:               NA

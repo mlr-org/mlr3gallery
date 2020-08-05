@@ -35,14 +35,20 @@
 <meta property="og:type" content="article"/>
 <meta property="og:description" content="This use case shows how to make use of OpenML data and how to impute missing values in a ML problem."/>
 <meta property="og:url" content="https://mlr3gallery.mlr-org.com/posts/2020-05-04-moneyball/"/>
+<meta property="og:image" content="https://mlr3gallery.mlr-org.com/posts/2020-05-04-moneyball/2020-05-04-moneyball_files/figure-html5/unnamed-chunk-9-1.png"/>
+<meta property="og:image:width" content="1248"/>
+<meta property="og:image:height" content="768"/>
 <meta property="og:locale" content="en_US"/>
 <meta property="og:site_name" content="mlr3gallery"/>
 
 <!--  https://dev.twitter.com/cards/types/summary -->
-<meta property="twitter:card" content="summary"/>
+<meta property="twitter:card" content="summary_large_image"/>
 <meta property="twitter:title" content="mlr3gallery: mlr3 and OpenML - Moneyball use case"/>
 <meta property="twitter:description" content="This use case shows how to make use of OpenML data and how to impute missing values in a ML problem."/>
 <meta property="twitter:url" content="https://mlr3gallery.mlr-org.com/posts/2020-05-04-moneyball/"/>
+<meta property="twitter:image" content="https://mlr3gallery.mlr-org.com/posts/2020-05-04-moneyball/2020-05-04-moneyball_files/figure-html5/unnamed-chunk-9-1.png"/>
+<meta property="twitter:image:width" content="1248"/>
+<meta property="twitter:image:height" content="768"/>
 
 <!--  https://scholar.google.com/intl/en/scholar/inclusion.html#indexing -->
 <meta name="citation_title" content="mlr3gallery: mlr3 and OpenML - Moneyball use case"/>
@@ -59,7 +65,7 @@
 <!--/radix_placeholder_rmarkdown_metadata-->
   
   <script type="text/json" id="radix-resource-manifest">
-  {"type":"NULL"}
+  {"type":"character","attributes":{},"value":["2020-05-04-moneyball_files/figure-html5/unnamed-chunk-15-1.png","2020-05-04-moneyball_files/figure-html5/unnamed-chunk-23-1.png","2020-05-04-moneyball_files/figure-html5/unnamed-chunk-9-1.png"]}
   </script>
   <!--radix_placeholder_navigation_in_header-->
 
@@ -1284,10 +1290,6 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 <!--/radix_placeholder_distill-->
-  <script src="../../site_libs/htmlwidgets-1.5.1/htmlwidgets.js"></script>
-  <link href="../../site_libs/vis-4.20.1/vis.css" rel="stylesheet" />
-  <script src="../../site_libs/vis-4.20.1/vis.min.js"></script>
-  <script src="../../site_libs/visNetwork-binding-2.0.9/visNetwork.js"></script>
   <script src="../../site_libs/jquery-1.11.3/jquery.min.js"></script>
   <script src="../../site_libs/bowser-1.9.3/bowser.min.js"></script>
   <script src="../../site_libs/webcomponents-2.0.0/webcomponents.js"></script>
@@ -1470,9 +1472,8 @@ imp_num = po(&quot;imputehist&quot;, param_vals = list(affect_columns = selector
 <pre class="r"><code>
 imp_fct = po(&quot;imputeoor&quot;, param_vals = list(affect_columns = selector_type(&quot;factor&quot;)))
 graph = imp_num %&gt;&gt;% imp_fct
-graph$plot(html = TRUE)</code></pre>
-<div id="htmlwidget-d4fac0b2c897be5bc8ab" style="width:50%;height:400px;" class="visNetwork html-widget"></div>
-<script type="application/json" data-for="htmlwidget-d4fac0b2c897be5bc8ab">{"x":{"nodes":{"id":["imputehist","<INPUT>","imputeoor","<OUTPUT>"],"label":["imputehist","<INPUT>","imputeoor","<OUTPUT>"],"shape":["box","database","box","ellipse"],"color":["lightblue","rgba(0,204,102,0.2)","lightblue","rgba(255,51,51,0.2)"],"value":[1,0.8,1,0.8],"title":["<p>PipeOp: <b>imputehist<\/b> (not trained)<br>values: <b>affect_columns=<Selector><\/b><br>Input channels <b>name [train type, predict type]<\/b>:<br>  input [Task,Task]<br>Output channels <b>name [train type, predict type]<\/b>:<br>  output [Task,Task]<\/p>","<p>Input:<br>Name: imputehist.input<br>Train: Task<br>Predict: Task<\/p>","<p>PipeOp: <b>imputeoor<\/b> (not trained)<br>values: <b>min=TRUE, offset=1, multiplier=1, affect_columns=<Selector><\/b><br>Input channels <b>name [train type, predict type]<\/b>:<br>  input [Task,Task]<br>Output channels <b>name [train type, predict type]<\/b>:<br>  output [Task,Task]<\/p>","<p>Output:<br>Name: imputeoor.output<br>Train: Task<br>Predict: Task<\/p>"],"x":[0,0,0,0],"y":[-0.333333333333333,-1,0.333333333333333,1]},"edges":{"from":["imputehist","<INPUT>","imputeoor"],"to":["imputeoor","imputehist","<OUTPUT>"],"color":["lightblue","lightblue","lightblue"]},"nodesToDataframe":true,"edgesToDataframe":true,"options":{"width":"100%","height":"100%","nodes":{"shape":"dot","physics":false},"manipulation":{"enabled":false},"edges":{"arrows":"to","smooth":{"enabled":false,"forceDirection":"vertical"}},"physics":{"stabilization":false}},"groups":null,"width":"50%","height":"400px","idselection":{"enabled":false},"byselection":{"enabled":false},"main":null,"submain":null,"footer":null,"background":"rgba(0, 0, 0, 0)","igraphlayout":{"type":"full"}},"evals":[],"jsHooks":[]}</script>
+graph$plot()</code></pre>
+<p><img src="2020-05-04-moneyball_files/figure-html5/unnamed-chunk-9-1.png" width="624" /></p>
 </div>
 <p>So far we only prepared the pipeline without actually modeling. Before we come to this step, we perform a last preprocessing step manually. Namely, we make <code>G</code> (games played) a numerical feature.</p>
 <div class="layout-chunk" data-layout="l-body">
@@ -1524,9 +1525,8 @@ lrn = GraphLearner$new(graph = graph %&gt;&gt;% polrn)</code></pre>
 <p>The final graph looks like the following:</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
-plot(graph %&gt;&gt;% polrn, html = TRUE)</code></pre>
-<div id="htmlwidget-261702c78b38f51a7f49" style="width:50%;height:400px;" class="visNetwork html-widget"></div>
-<script type="application/json" data-for="htmlwidget-261702c78b38f51a7f49">{"x":{"nodes":{"id":["imputehist","imputeoor","<INPUT>","regr.ranger","<OUTPUT>"],"label":["imputehist","imputeoor","<INPUT>","regr.ranger","<OUTPUT>"],"shape":["box","box","database","box","ellipse"],"color":["lightblue","lightblue","rgba(0,204,102,0.2)","lightblue","rgba(255,51,51,0.2)"],"value":[1,1,0.8,1,0.8],"title":["<p>PipeOp: <b>imputehist<\/b> (not trained)<br>values: <b>affect_columns=<Selector><\/b><br>Input channels <b>name [train type, predict type]<\/b>:<br>  input [Task,Task]<br>Output channels <b>name [train type, predict type]<\/b>:<br>  output [Task,Task]<\/p>","<p>PipeOp: <b>imputeoor<\/b> (not trained)<br>values: <b>min=TRUE, offset=1, multiplier=1, affect_columns=<Selector><\/b><br>Input channels <b>name [train type, predict type]<\/b>:<br>  input [Task,Task]<br>Output channels <b>name [train type, predict type]<\/b>:<br>  output [Task,Task]<\/p>","<p>Input:<br>Name: imputehist.input<br>Train: Task<br>Predict: Task<\/p>","<p>PipeOp: <b>regr.ranger<\/b> (not trained)<br>values: <b>num.trees=1000, importance=permutation<\/b><br>Input channels <b>name [train type, predict type]<\/b>:<br>  input [TaskRegr,TaskRegr]<br>Output channels <b>name [train type, predict type]<\/b>:<br>  output [NULL,PredictionRegr]<\/p>","<p>Output:<br>Name: regr.ranger.output<br>Train: NULL<br>Predict: PredictionRegr<\/p>"],"x":[0,0,0,0,0],"y":[-0.5,0,-1,0.5,1]},"edges":{"from":["imputehist","imputeoor","<INPUT>","regr.ranger"],"to":["imputeoor","regr.ranger","imputehist","<OUTPUT>"],"color":["lightblue","lightblue","lightblue","lightblue"]},"nodesToDataframe":true,"edgesToDataframe":true,"options":{"width":"100%","height":"100%","nodes":{"shape":"dot","physics":false},"manipulation":{"enabled":false},"edges":{"arrows":"to","smooth":{"enabled":false,"forceDirection":"vertical"}},"physics":{"stabilization":false}},"groups":null,"width":"50%","height":"400px","idselection":{"enabled":false},"byselection":{"enabled":false},"main":null,"submain":null,"footer":null,"background":"rgba(0, 0, 0, 0)","igraphlayout":{"type":"full"}},"evals":[],"jsHooks":[]}</script>
+plot(graph %&gt;&gt;% polrn)</code></pre>
+<p><img src="2020-05-04-moneyball_files/figure-html5/unnamed-chunk-15-1.png" width="624" /></p>
 </div>
 <h2 id="train-and-predict">Train and predict</h2>
 <p>To get a feeling of how our model performs we simply train the <code>learner</code> on a subset of the data and predict the hold-out data.</p>
@@ -1650,9 +1650,8 @@ feature_names = c(
 na_select = po(&quot;select&quot;)
 na_select$param_set$values$selector = selector_name(feature_names)
 graph2 = graph2 %&gt;&gt;% na_select
-graph2$plot(html = TRUE)</code></pre>
-<div id="htmlwidget-edd4d90203ecc5735dba" style="width:50%;height:400px;" class="visNetwork html-widget"></div>
-<script type="application/json" data-for="htmlwidget-edd4d90203ecc5735dba">{"x":{"nodes":{"id":["imputeoor","<INPUT>","select","<OUTPUT>"],"label":["imputeoor","<INPUT>","select","<OUTPUT>"],"shape":["box","database","box","ellipse"],"color":["lightblue","rgba(0,204,102,0.2)","lightblue","rgba(255,51,51,0.2)"],"value":[1,0.8,1,0.8],"title":["<p>PipeOp: <b>imputeoor<\/b> (not trained)<br>values: <b>min=TRUE, offset=1, multiplier=1, affect_columns=<Selector><\/b><br>Input channels <b>name [train type, predict type]<\/b>:<br>  input [Task,Task]<br>Output channels <b>name [train type, predict type]<\/b>:<br>  output [Task,Task]<\/p>","<p>Input:<br>Name: imputeoor.input<br>Train: Task<br>Predict: Task<\/p>","<p>PipeOp: <b>select<\/b> (not trained)<br>values: <b>selector=<Selector><\/b><br>Input channels <b>name [train type, predict type]<\/b>:<br>  input [Task,Task]<br>Output channels <b>name [train type, predict type]<\/b>:<br>  output [Task,Task]<\/p>","<p>Output:<br>Name: select.output<br>Train: Task<br>Predict: Task<\/p>"],"x":[0,0,0,0],"y":[-0.333333333333333,-1,0.333333333333333,1]},"edges":{"from":["imputeoor","<INPUT>","select"],"to":["select","imputeoor","<OUTPUT>"],"color":["lightblue","lightblue","lightblue"]},"nodesToDataframe":true,"edgesToDataframe":true,"options":{"width":"100%","height":"100%","nodes":{"shape":"dot","physics":false},"manipulation":{"enabled":false},"edges":{"arrows":"to","smooth":{"enabled":false,"forceDirection":"vertical"}},"physics":{"stabilization":false}},"groups":null,"width":"50%","height":"400px","idselection":{"enabled":false},"byselection":{"enabled":false},"main":null,"submain":null,"footer":null,"background":"rgba(0, 0, 0, 0)","igraphlayout":{"type":"full"}},"evals":[],"jsHooks":[]}</script>
+graph2$plot()</code></pre>
+<p><img src="2020-05-04-moneyball_files/figure-html5/unnamed-chunk-23-1.png" width="624" /></p>
 </div>
 <p>Now we complete the learner and apply resampling as before.</p>
 <div class="layout-chunk" data-layout="l-body">
