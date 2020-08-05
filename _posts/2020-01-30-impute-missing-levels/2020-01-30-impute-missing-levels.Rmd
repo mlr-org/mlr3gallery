@@ -98,7 +98,7 @@ Since our task only has numeric features, we do not need to deal with imputing f
 and can instead concentrate on imputing numeric values:
 
 We do this in a two-step process:
-* For every column we create a new indicator column, that tells us whether the value is "missing" or "present".
+* We create new indicator columns, that tells us whether the value of a feature is "missing" or "present".
   We achieve this using the  `r ref("mlr_pipeops_missind", "missind")` `r ref("PipeOp")`.
 
 * Afterwards, we impute every missing value by sampling from the histogram of the respective column.
@@ -108,7 +108,7 @@ We also have to make sure to apply the pipe operators in the correct order!
 
 ```{r}
 imp_missind = po("missind")
-imp_num = po(selector_type("numeric")) %>>% po("imputehist")
+imp_num = po("imputehist", param_vals = list(affect_columns = selector_type("numeric")))
 ```
 
 In order to better understand we can look at the results of every `r ref("PipeOp")` separately.
@@ -201,6 +201,7 @@ This will simply replace every `NA` in each factor variable with a new value `mi
 A full graph might the look like this:
 
 ```{r}
+imp_missind = po("missind", param_vals = list(affect_columns = NULL, which = "all"))
 imp_fct = po("imputeoor",
   param_vals = list(affect_columns = selector_type("factor")))
 graph = po("copy", 2) %>>%
@@ -208,10 +209,13 @@ graph = po("copy", 2) %>>%
   po("featureunion")
 ```
 
+Note that we specify the parameter `affect_columns = NULL` when initializing `r ref("mlr_pipeops_missind", "missind")`, because we also want indicator columns for our `factor` features.
+By default, `affect_columns` would be set to `selector_invert(selector_type(c("factor", "ordered", "character")))`.
+We also set the parameter `which` to `"all"` to add indicator columns for all features, regardless whether values were missing during training or not.
+
 In order to test out our new graph, we again create a situation where our task has missing factor levels.
 As the (`r ref("mlr_tasks_pima", "pima")`) task does not have any factor levels, we use the
 famous (`r ref("mlr_tasks_boston_housing", "boston_housing")`) task.
-
 
 ```{r}
 # t1 is the training data without missings
