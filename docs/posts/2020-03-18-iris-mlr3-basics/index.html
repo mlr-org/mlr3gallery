@@ -1284,6 +1284,7 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 <!--/radix_placeholder_distill-->
+  <script src="../../site_libs/header-attrs-2.3/header-attrs.js"></script>
   <script src="../../site_libs/jquery-1.11.3/jquery.min.js"></script>
   <script src="../../site_libs/bowser-1.9.3/bowser.min.js"></script>
   <script src="../../site_libs/webcomponents-2.0.0/webcomponents.js"></script>
@@ -1300,7 +1301,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <!--radix_placeholder_front_matter-->
 
 <script id="distill-front-matter" type="text/json">
-{"title":"mlr3 basics on \"iris\" - Hello World!","description":"Basic ML operations on iris: Train, predict, score, resample and benchmark. A simple, hands-on intro to mlr3.","authors":[{"author":"Bernd Bischl","authorURL":"#","affiliation":"&nbsp;","affiliationURL":"#"}],"publishedDate":"2020-03-18T00:00:00.000+00:00","citationText":"Bischl, 2020"}
+{"title":"mlr3 basics on \"iris\" - Hello World!","description":"Basic ML operations on iris: Train, predict, score, resample and benchmark. A simple, hands-on intro to mlr3.","authors":[{"author":"Bernd Bischl","authorURL":"#","affiliation":"&nbsp;","affiliationURL":"#"}],"publishedDate":"2020-03-18T00:00:00.000+01:00","citationText":"Bischl, 2020"}
 </script>
 
 <!--/radix_placeholder_front_matter-->
@@ -1467,16 +1468,17 @@ response     setosa versicolor virginica
 print(learner1$param_set)</code></pre>
 <pre><code>
 &lt;ParamSet&gt;
-               id    class lower upper levels        default value
-1:       minsplit ParamInt     1   Inf                    20      
-2:      minbucket ParamInt     1   Inf        &lt;NoDefault[3]&gt;      
-3:             cp ParamDbl     0     1                  0.01      
-4:     maxcompete ParamInt     0   Inf                     4      
-5:   maxsurrogate ParamInt     0   Inf                     5      
-6:       maxdepth ParamInt     1    30                    30      
-7:   usesurrogate ParamInt     0     2                     2      
-8: surrogatestyle ParamInt     0     1                     0      
-9:           xval ParamInt     0   Inf                    10     0</code></pre>
+                id    class lower upper      levels        default value
+ 1:       minsplit ParamInt     1   Inf                         20      
+ 2:      minbucket ParamInt     1   Inf             &lt;NoDefault[3]&gt;      
+ 3:             cp ParamDbl     0     1                       0.01      
+ 4:     maxcompete ParamInt     0   Inf                          4      
+ 5:   maxsurrogate ParamInt     0   Inf                          5      
+ 6:       maxdepth ParamInt     1    30                         30      
+ 7:   usesurrogate ParamInt     0     2                          2      
+ 8: surrogatestyle ParamInt     0     1                          0      
+ 9:           xval ParamInt     0   Inf                         10     0
+10:     keep_model ParamLgl    NA    NA  TRUE,FALSE          FALSE      </code></pre>
 <pre class="r"><code>
 learner2 = lrn(&quot;classif.rpart&quot;, predict_type = &quot;prob&quot;, minsplit = 50)
 learner2$param_set$values$minsplit = 50</code></pre>
@@ -1597,34 +1599,43 @@ head(as.data.table(mlr_learners)[, c(&quot;key&quot;, &quot;packages&quot;)])</c
 library(mlr3learners.randomforest)
 print(as.data.table(mlr_learners)[, c(&quot;key&quot;, &quot;packages&quot;)])</code></pre>
 <pre><code>
-                     key     packages
- 1:    classif.cv_glmnet       glmnet
- 2:        classif.debug             
- 3:  classif.featureless             
- 4:       classif.glmnet       glmnet
- 5:         classif.kknn         kknn
- 6:          classif.lda         MASS
- 7:      classif.log_reg        stats
- 8:     classif.multinom         nnet
- 9:  classif.naive_bayes        e1071
-10:          classif.qda         MASS
-11: classif.randomForest randomForest
-12:       classif.ranger       ranger
-13:        classif.rpart        rpart
-14:          classif.svm        e1071
-15:      classif.xgboost      xgboost
-16:       regr.cv_glmnet       glmnet
-17:     regr.featureless        stats
-18:          regr.glmnet       glmnet
-19:            regr.kknn         kknn
-20:              regr.km  DiceKriging
-21:              regr.lm        stats
-22:    regr.randomForest randomForest
-23:          regr.ranger       ranger
-24:           regr.rpart        rpart
-25:             regr.svm        e1071
-26:         regr.xgboost      xgboost
-                     key     packages</code></pre>
+                     key              packages
+ 1:    classif.cv_glmnet                glmnet
+ 2:        classif.debug                      
+ 3:  classif.featureless                      
+ 4:       classif.glmnet                glmnet
+ 5:         classif.kknn                  kknn
+ 6:          classif.lda                  MASS
+ 7:      classif.log_reg                 stats
+ 8:     classif.multinom                  nnet
+ 9:  classif.naive_bayes                 e1071
+10:          classif.qda                  MASS
+11: classif.randomForest          randomForest
+12:       classif.ranger                ranger
+13:        classif.rpart                 rpart
+14:          classif.svm                 e1071
+15:      classif.xgboost               xgboost
+16:            dens.hist                distr6
+17:             dens.kde                distr6
+18:       regr.cv_glmnet                glmnet
+19:     regr.featureless                 stats
+20:          regr.glmnet                glmnet
+21:            regr.kknn                  kknn
+22:              regr.km           DiceKriging
+23:              regr.lm                 stats
+24:    regr.randomForest          randomForest
+25:          regr.ranger                ranger
+26:           regr.rpart                 rpart
+27:             regr.svm                 e1071
+28:         regr.xgboost               xgboost
+29:           surv.coxph       survival,distr6
+30:       surv.cv_glmnet                glmnet
+31:          surv.glmnet                glmnet
+32:          surv.kaplan       survival,distr6
+33:          surv.ranger                ranger
+34:           surv.rpart rpart,distr6,survival
+35:         surv.xgboost               xgboost
+                     key              packages</code></pre>
 </div>
 <h2 id="benchmarking-multiple-learners">Benchmarking multiple learners</h2>
 <p>The <code>benchmark()</code> function can conveniently compare learners on the same dataset(s).</p>
