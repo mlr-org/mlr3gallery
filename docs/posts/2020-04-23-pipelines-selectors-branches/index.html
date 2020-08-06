@@ -1870,7 +1870,7 @@ grph$param_set</code></pre>
  3:  &lt;Selector[1]&gt;
  4:  missing_train
  5:         factor
- 6:               
+ 6:  &lt;Selector[1]&gt;
  7:               
  8:               
  9:               
@@ -1916,7 +1916,7 @@ set.seed(321)
 tuner$optimize(instance)</code></pre>
 <pre><code>
    branch.selection classif.rpart.cp classif.rpart.minbucket learner_param_vals  x_domain
-1:    simple_median      0.005463608                       6          &lt;list[8]&gt; &lt;list[3]&gt;
+1:    simple_median      0.005463608                       6          &lt;list[9]&gt; &lt;list[3]&gt;
    classif.ce
 1:  0.2460938</code></pre>
 <pre class="r"><code>
@@ -1930,18 +1930,21 @@ instance$archive</code></pre>
 4:    simple_median      0.060966386                       4  0.2617188 &lt;ResampleResult[18]&gt;
 5:    simple_median      0.005463608                       6  0.2460938 &lt;ResampleResult[18]&gt;
     x_domain           timestamp batch_nr
-1: &lt;list[3]&gt; 2020-08-03 04:52:10        1
-2: &lt;list[3]&gt; 2020-08-03 04:52:12        2
-3: &lt;list[3]&gt; 2020-08-03 04:52:13        3
-4: &lt;list[3]&gt; 2020-08-03 04:52:15        4
-5: &lt;list[3]&gt; 2020-08-03 04:52:16        5</code></pre>
+1: &lt;list[3]&gt; 2020-08-06 08:58:27        1
+2: &lt;list[3]&gt; 2020-08-06 08:58:28        2
+3: &lt;list[3]&gt; 2020-08-06 08:58:30        3
+4: &lt;list[3]&gt; 2020-08-06 08:58:31        4
+5: &lt;list[3]&gt; 2020-08-06 08:58:32        5</code></pre>
 </div>
 <p>The best performance in this short tuned experiment was achieved with .</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
-instance$result$params</code></pre>
+instance$result</code></pre>
 <pre><code>
-NULL</code></pre>
+   branch.selection classif.rpart.cp classif.rpart.minbucket learner_param_vals  x_domain
+1:    simple_median      0.005463608                       6          &lt;list[9]&gt; &lt;list[3]&gt;
+   classif.ce
+1:  0.2460938</code></pre>
 </div>
 <h2 id="conclusion">Conclusion</h2>
 <p>This post shows ways on how to specify features on which preprocessing steps are to be performed. In addition it shows how to create alternative paths in the learner graph. The preprocessing steps that can be used are not limited to imputation. Check the list of available <a href="https://mlr3pipelines.mlr-org.com/reference/index.html"><code>PipeOp</code>s</a>.</p>
