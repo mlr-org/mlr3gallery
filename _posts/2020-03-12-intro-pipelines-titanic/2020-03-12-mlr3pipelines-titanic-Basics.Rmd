@@ -31,7 +31,7 @@ library(skimr)
 
 ## Intro
 
-First of all we are going to load required packages and the data. 
+First of all we are going to load required packages and the data.
 The data is part of the `mlr3data` package.
 
 ```{r}
@@ -44,20 +44,20 @@ library("mlr3viz")
 data("titanic")
 ```
 
-The titanic data is very interesting to analyze, even though it is part of many tutorials 
-and showcases. 
-This is because it requires many steps often required in real-world applications of machine 
+The titanic data is very interesting to analyze, even though it is part of many tutorials
+and showcases.
+This is because it requires many steps often required in real-world applications of machine
 learning techniques, such as **missing value imputation**, **handling factors** and others.
 
 Following features are illustrated in this use case section:
-  
+
 * Summarizing the data set
 * Visualizing data
 * Splitting data into train and test data sets
 * Defining a task and a learner
 
 In order to obtain solutions comparable to official leaderboards, such as the ones available from CRAN, we split the data into train and test set before doing any further analysis.
-Here we are using the predefined split used by Kaggle. 
+Here we are using the predefined split used by Kaggle.
 
 ```{r}
 titanic_train <- titanic[1:891, ]
@@ -92,7 +92,7 @@ skimr::skim(titanic_train)
 skimr::skim(titanic_test)
 ```
 
-Here we can also inspect the data for differences in the train and test set. 
+Here we can also inspect the data for differences in the train and test set.
 This might be important, as shifts in the data distribution often make our models unreliable.
 
 ```{r, out.width="100%", fig.height=7}
@@ -104,14 +104,14 @@ DataExplorer::plot_histogram(titanic_train, nrow = 2, ncol = 3)
 DataExplorer::plot_boxplot(titanic_train, by = "survived", nrow = 2, ncol = 3)
 ```
 
-We can now create a `Task` from our data. 
-As we want to classify whether the person survived or not, we will create a 
+We can now create a `Task` from our data.
+As we want to classify whether the person survived or not, we will create a
 `TaskClassif`. We'll ignore the 'titanic_test' data for now and come back to it later.
 
 ## A first model
 
 ```{r}
-task <- TaskClassif$new("titanic", titanic_train, target = "survived", positive = "1")
+task <- TaskClassif$new("titanic", titanic_train, target = "survived", positive = "yes")
 task
 ```
 
@@ -146,9 +146,9 @@ agg
 So our model should have a minimal accuracy of `r round(agg, 3)` in order to improve over the simple decision tree.
 In order to improve more, we might need to do some feature engineering.
 
-#Optimizing the model 
+# Optimizing the model
 
-If we now try to fit a 'ranger' random forest model, we will get an error, 
+If we now try to fit a 'ranger' random forest model, we will get an error,
 as 'ranger' models can not naturally handle missing values.
 
 ```{r, error = TRUE}
@@ -159,6 +159,5 @@ res <- resample(task, learner, rdesc, store_models = TRUE)
 
 This means we have to find a way to impute the missing values.
 To learn how to use more advanced commands of the mlr3pipelines package see:
-* [Part II - Pipelines](/2020-04-27-mlr3pipelines-titanic-advanced/)
 
-<!-- Note that the link here needs to be fixed -->
+* [Part II - Pipelines](https://mlr3gallery.mlr-org.com/posts/2020-04-27-mlr3pipelines-Imputation-titanic/)
