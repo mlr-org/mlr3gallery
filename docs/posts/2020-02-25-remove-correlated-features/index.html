@@ -61,7 +61,7 @@
 <!--/radix_placeholder_rmarkdown_metadata-->
   
   <script type="text/json" id="radix-resource-manifest">
-  {"type":"character","attributes":{},"value":["2020-02-25-remove-correlated-features_files/bowser-1.9.3/bowser.min.js","2020-02-25-remove-correlated-features_files/distill-2.2.21/template.v2.js","2020-02-25-remove-correlated-features_files/header-attrs-2.1/header-attrs.js","2020-02-25-remove-correlated-features_files/jquery-1.11.3/jquery.min.js","2020-02-25-remove-correlated-features_files/webcomponents-2.0.0/webcomponents.js"]}
+  {"type":"NULL"}
   </script>
   <!--radix_placeholder_navigation_in_header-->
 
@@ -751,6 +751,16 @@ d-appendix .citation-appendix,
 }
 
 
+.sidebar-section.custom {
+  font-size: 12px;
+  line-height: 1.6em;
+}
+
+.custom p {
+  margin-bottom: 0.5em;
+}
+
+
 /* Improve display for browsers without grid (IE/Edge <= 15) */
 
 .downlevel {
@@ -1276,7 +1286,6 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 <!--/radix_placeholder_distill-->
-  <script src="../../site_libs/header-attrs-2.1/header-attrs.js"></script>
   <script src="../../site_libs/jquery-1.11.3/jquery.min.js"></script>
   <script src="../../site_libs/bowser-1.9.3/bowser.min.js"></script>
   <script src="../../site_libs/webcomponents-2.0.0/webcomponents.js"></script>
@@ -1302,13 +1311,13 @@ document.addEventListener('DOMContentLoaded', function() {
 <nav class="distill-site-nav distill-site-header">
 <div class="nav-left">
 <a class="logo" href="https://mlr3.mlr-org.com">
-<img src="../../images/logo.png"/>
+<img src="../../images/logo.png" alt="Logo"/>
 </a>
 <a href="../../index.html" class="title">mlr3gallery</a>
 </div>
 <div class="nav-right">
 <a href="https://github.com/mlr-org/mlr3gallery">
-<i class="fab fa-github"></i>
+<i class="fab fa-github" aria-hidden="true"></i>
 </a>
 <a href="javascript:void(0);" class="nav-toggle">&#9776;</a>
 </div>
@@ -1332,7 +1341,7 @@ document.addEventListener('DOMContentLoaded', function() {
 </div>
 
 <div class="d-article">
-<p>The following example describes a situation where we aim to remove <strong>correlated features</strong>. This in essence means, that we drop features until no features have a correlation higher then a given <code>cutoff</code>. This is often useful when we for example want to use <strong>linear models</strong>.</p>
+<p>The following example describes a situation where we aim to remove <strong>correlated features</strong>. This in essence means, that we drop features until no features have a correlation higher than a given <code>cutoff</code>. This is often useful when we for example want to use <strong>linear models</strong>.</p>
 <h2 id="prerequisites">Prerequisites</h2>
 <p>This tutorial assumes familiarity with the basics of <a href="https://mlr3pipelines.mlr-org.com">mlr3pipelines</a>. Consult the <a href="https://mlr3book.mlr-org.com/pipelines.html">mlr3book</a> if some aspects are not fully understandable. Additionally, we compare different cutoff values via tuning using the <a href="https://mlr3tuning.mlr-org.com">mlr3tuning</a> package. Again, the <a href="https://mlr3book.mlr-org.com/paradox.html">mlr3book</a> has an intro to <a href="https://mlr3tuning.mlr-org.com">mlr3tuning</a> and <a href="https://paradox.mlr-org.com">paradox</a>.</p>
 <p>The example describes a very involved use-case, where the behavior of <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_select.html"><code>PipeOpSelect</code></a> is manipulated via a <strong>trafo</strong> on it’s <a href="https://paradox.mlr-org.com/reference/ParamSet.html"><code>ParamSet</code></a></p>
@@ -1350,7 +1359,7 @@ library(&quot;mlr3tuning&quot;)</code></pre>
 pipeline = po(&quot;select&quot;) %&gt;&gt;% lrn(&quot;classif.rpart&quot;)</code></pre>
 </div>
 <p>Now we get to the magic:</p>
-<p>We want to use the function <a href="https://www.rdocumentation.org/packages/caret/topics/findCorrelation"><code>caret::findCorrelation</code></a> from the <a href="https://cran.r-project.org/package=caret">caret</a> package in order to select uncorrelated variables. This function has a <code>cutoff</code> parameter, that specifies the maximum correlation allowed between variables. In order to expose this variable as a <code>numeric</code> parameter we can tune over we specify the following <a href="https://paradox.mlr-org.com/reference/ParamSet.html"><code>ParamSet</code></a>:</p>
+<p>We want to use the function <a href="https://www.rdocumentation.org/packages/caret/topics/findCorrelation"><code>caret::findCorrelation()</code></a> from the <a href="https://cran.r-project.org/package=caret">caret</a> package in order to select uncorrelated variables. This function has a <code>cutoff</code> parameter, that specifies the maximum correlation allowed between variables. In order to expose this variable as a <code>numeric</code> parameter we can tune over we specify the following <a href="https://paradox.mlr-org.com/reference/ParamSet.html"><code>ParamSet</code></a>:</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
 ps = ParamSet$new(list(ParamDbl$new(&quot;cutoff&quot;, 0, 1)))</code></pre>
@@ -1372,30 +1381,33 @@ ps$trafo = function(x, param_set) {
 }</code></pre>
 </div>
 <p>If you are not sure, you understand the <code>trafo</code> concept, consult the <a href="https://mlr3book.mlr-org.com/paradox.html">mlr3book</a>. It has a section on the <code>trafo</code> concept.</p>
-<p>To now tune over different values for <code>cutoff</code>, we first create a <a href="https://mlr3tuning.mlr-org.com/reference/TuningInstance.html"><code>TuningInstance</code></a>.</p>
+<p>To now tune over different values for <code>cutoff</code>, we first create a <a href="https://mlr3tuning.mlr-org.com/reference/TuningInstanceSingleCrit.html"><code>TuningInstanceSingleCrit</code></a>.</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
-inst = TuningInstance$new(
+inst = TuningInstanceSingleCrit$new(
   task = tsk(&quot;iris&quot;),
   learner = pipeline,
   resampling = rsmp(&quot;cv&quot;, folds = 3L),
-  measures = msr(&quot;classif.ce&quot;),
-  param_set = ps,
-  terminator = term(&quot;none&quot;),
+  measure = msr(&quot;classif.ce&quot;),
+  search_space = ps,
+  terminator = trm(&quot;none&quot;),
   # don&#39;t need the following line for optimization, this is for
   # demonstration that different features were selected
-  bm_args = list(store_models = TRUE)
+  store_models = TRUE
 )</code></pre>
 </div>
-<p>and run the tuning:</p>
+<p>Then we run the tuning:</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
-tnr(&quot;grid_search&quot;)$tune(inst)</code></pre>
+tnr(&quot;grid_search&quot;)$optimize(inst)</code></pre>
+<pre><code>
+      cutoff learner_param_vals  x_domain classif.ce
+1: 0.8888889          &lt;list[2]&gt; &lt;list[1]&gt;       0.04</code></pre>
 </div>
-<p>In order to demonstrate that different cutoff values result in different features being selected, we can run the following to inspect the trained models. Note this inspects only the trained models of the first CV fold of each evaluated model. The features being excluded depends on the training data seen by the pipeline and may be different in different folds, even at the same cutoff value</p>
+<p>In order to demonstrate that different cutoff values result in different features being selected, we can run the following to inspect the trained models. Note this inspects only the trained models of the first CV fold of each evaluated model. The features being excluded depends on the training data seen by the pipeline and may be different in different folds, even at the same cutoff value.</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
-inst$archive(unnest = &quot;tune_x&quot;)[
+inst$archive$data(&quot;x_domain&quot;)[
   order(cutoff),
   list(cutoff, classif.ce,
     featurenames = lapply(resample_result, function(x) {
@@ -1404,16 +1416,16 @@ inst$archive(unnest = &quot;tune_x&quot;)[
   ))]</code></pre>
 <pre><code>
        cutoff classif.ce                                      featurenames
- 1: 0.0000000  0.3200000                                      Sepal.Length
- 2: 0.1111111  0.3400000                                      Sepal.Length
- 3: 0.2222222  0.3866667                          Sepal.Length,Sepal.Width
- 4: 0.3333333  0.3866667                          Sepal.Length,Sepal.Width
- 5: 0.4444444  0.3866667                          Sepal.Length,Sepal.Width
- 6: 0.5555556  0.3866667                          Sepal.Length,Sepal.Width
- 7: 0.6666667  0.3866667                          Sepal.Length,Sepal.Width
- 8: 0.7777778  0.3866667                          Sepal.Length,Sepal.Width
- 9: 0.8888889  0.0400000              Petal.Width,Sepal.Length,Sepal.Width
-10: 1.0000000  0.0800000 Petal.Length,Petal.Width,Sepal.Length,Sepal.Width</code></pre>
+ 1: 0.0000000 0.30666667                                      Sepal.Length
+ 2: 0.1111111 0.31333333                          Sepal.Length,Sepal.Width
+ 3: 0.2222222 0.29333333                          Sepal.Length,Sepal.Width
+ 4: 0.3333333 0.29333333                          Sepal.Length,Sepal.Width
+ 5: 0.4444444 0.29333333                          Sepal.Length,Sepal.Width
+ 6: 0.5555556 0.29333333                          Sepal.Length,Sepal.Width
+ 7: 0.6666667 0.29333333                          Sepal.Length,Sepal.Width
+ 8: 0.7777778 0.29333333                          Sepal.Length,Sepal.Width
+ 9: 0.8888889 0.04000000              Petal.Width,Sepal.Length,Sepal.Width
+10: 1.0000000 0.07333333 Petal.Length,Petal.Width,Sepal.Length,Sepal.Width</code></pre>
 </div>
 <p>Voila, we created our own <a href="https://mlr3pipelines.mlr-org.com/reference/PipeOp.html"><code>PipeOp</code></a>, that uses very advanced knowledge of <a href="https://mlr3pipelines.mlr-org.com">mlr3pipelines</a> and <a href="https://paradox.mlr-org.com">paradox</a> in only few lines of code.</p>
 <!--radix_placeholder_article_footer-->

@@ -1,6 +1,6 @@
 ---
 title: House prices in King County
-categories: 
+categories:
   - regression
   - visualization
   - feature engineering
@@ -25,7 +25,7 @@ library(mlr3book)
 library(mlr3)
 library(mlr3tuning)
 lgr::get_logger("mlr3")$set_threshold("warn")
-lgr::get_logger("mlr3tuning")$set_threshold("warn")
+lgr::get_logger("bbotk")$set_threshold("warn")
 ```
 
 The use-case illustrated below touches on the following concepts:
@@ -120,7 +120,7 @@ We drop the id column which provides no information about the house prices:
 kc_housing$id = NULL
 ```
 
-Additionally we convert the price from Dollar to units of 1000 Dollar to improve readability.
+Additionally, we convert the price from Dollar to units of 1000 Dollar to improve readability.
 
 ```{r}
 kc_housing$price = kc_housing$price / 1000
@@ -148,7 +148,7 @@ There are few extreme values of up to 7.7 million dollars.
 Feature engineering often allows us to incorporate additional knowledge about the data and underlying processes.
 This can often greatly enhance predictive performance.
 A simple example: A house which has `yr_renovated == 0` means that is has not been renovated yet.
-Additionally we want to drop features which should not have any influence (`id column`).
+Additionally, we want to drop features which should not have any influence (`id column`).
 
 After those initial manipulations, we load all required packages and create a Task containing our data.
 
@@ -221,7 +221,7 @@ task_test  = tsk$clone()$filter(test.idx)
 Decision trees cannot only be used as a powerful tool for predictive models but also for exploratory data analysis.
 In order to fit a decision tree, we first get the `regr.rpart` learner from the `mlr_learners` dictionary by using the sugar function `r ref("lrn")`.
 
-For now we leave out the  `zipcode` variable, as we also have the `latitude` and `longitude` of each house.
+For now, we leave out the  `zipcode` variable, as we also have the `latitude` and `longitude` of each house.
 Again, we use `$clone()`, so we do not change the original task.
 
 ```{r}
@@ -274,7 +274,7 @@ For the cross-validation we only use the **training data** by cloning the task a
 ```{r}
 lrn_rpart = lrn("regr.rpart")
 res = resample(task = task_train, lrn_rpart, cv3)
-res$score(msr("regr.mse"))
+res$score(msr("regr.rmse"))
 sprintf("RMSE of the simple rpart: %s", round(sqrt(res$aggregate()), 2))
 ```
 
@@ -287,7 +287,7 @@ We first load the `r mlr_pkg("mlr3learners")` package, which contains the `r cra
 library(mlr3learners)
 lrn_ranger = lrn("regr.ranger", num.trees = 15L)
 res = resample(task = task_train, lrn_ranger, cv3)
-res$score(msr("regr.mse"))
+res$score(msr("regr.rmse"))
 sprintf("RMSE of the simple ranger: %s", round(sqrt(res$aggregate()), 2))
 ```
 
@@ -305,7 +305,7 @@ In this case, we resort to tune a different kind of model: **Gradient Boosted De
 Tuning can often further improve the performance.
 In this case, we *tune* the xgboost learner in order to see whether this can improve performance.
 For the `AutoTuner` we have to specify a **Termination Criterion** (how long the tuning should run) a **Tuner** (which tuning method to use) and a **ParamSet** (which space we might want to search through).
-For now we do not use the **zipcode** column, as `r cran_pkg("xgboost")` cannot naturally deal with categorical features.
+For now, we do not use the **zipcode** column, as `r cran_pkg("xgboost")` cannot naturally deal with categorical features.
 The **AutoTuner** automatically performs nested cross-validation.
 
 ```{r, eval = eval_tune}
@@ -326,8 +326,8 @@ ps = ParamSet$new(
 ))
 
 # Define the Terminator
-terminator = term("evals", n_evals = 10)
-at = AutoTuner$new(lrn_xgb, rsmp("holdout"), measures = msr("regr.mse"), ps,
+terminator = trm("evals", n_evals = 10)
+at = AutoTuner$new(lrn_xgb, rsmp("holdout"), msr("regr.rmse"), ps,
   terminator, tuner = tnr("random_search"))
 ```
 
@@ -337,18 +337,18 @@ res = resample(tsk_nozip, at, cv3, store_models = TRUE)
 ```
 
 ```{r, eval = eval_tune}
-res$score(msr("regr.mse"))
+res$score(msr("regr.rmse"))
 sprintf("RMSE of the tuned xgboost: %s", round(sqrt(res$aggregate()), 2))
 ```
 
-We can obtain the resulting params in the respective splits by accessing the `r ref("ResampleResult")`.
+We can obtain the resulting parameters in the respective splits by accessing the `r ref("ResampleResult")`.
 
 ```{r, eval = eval_tune}
 sapply(res$learners, function(x) x$param_set$values)[-2,]
 ```
 
 **NOTE:** To keep runtime low, we only tune parts of the hyperparameter space of `r cran_pkg("xgboost")` in this example.
-Additionally, we only allow for $10$ random search iterations, which is usually to little for real-world applications.
+Additionally, we only allow for $10$ random search iterations, which is usually too little for real-world applications.
 Nonetheless, we are able to obtain an improved performance when comparing to the `r cran_pkg("ranger")` model.
 
 In order to further improve our results we have several options:
@@ -365,24 +365,27 @@ In order to further improve our results we have several options:
 
 Below we will investigate some of those possibilities and investigate whether this improves performance.
 
-### Engineering Features: Mutating ZIP-Codes
+### Advanced: Engineering Features: Mutating ZIP-Codes
 
 In order to better cluster the zip codes, we compute a new feature: **med_price**:
 It computes the median price in each zip-code.
 This might help our model to improve the prediction.
+This is equivalent to **impact encoding**
+[more information](https://win-vector.com/2012/07/23/modeling-trick-impact-coding-of-categorical-variables-with-many-levels/):
+
+We can equip a learner with impact encoding using **mlr3pipelines**. More information on **mlr3pipelines** can be obtained from other posts.
+
 
 ```{r}
-data = task_train$data(cols = c("price", "zipcode"))
-data[, med_price := median(price), by = "zipcode"]
-task_train$cbind(data[, .(med_price)])
+library(mlr3pipelines)
+lrn_impact = po("encodeimpact", affect_columns = selector_name("zipcode")) %>>% lrn("regr.ranger")
 ```
 
 Again, we run `r ref("resample()")` and compute the **RMSE**.
 
 ```{r}
-lrn_ranger = lrn("regr.ranger")
-res = resample(task = task_train, lrn_ranger, cv3)
-res$score(msr("regr.mse"))
+res = resample(task = task_train, lrn_impact, cv3)
+res$score(msr("regr.rmse"))
 sprintf("RMSE of ranger with med_price: %s", round(sqrt(res$aggregate()), 2))
 ```
 
@@ -408,7 +411,7 @@ lrn_filter = GraphLearner$new(
   po("filter", filter, param_vals = list(filter.nfeat = 12)) %>>% po("learner", lrn("regr.ranger"))
   )
 res = resample(task = task_train, lrn_filter, cv3)
-res$score(msr("regr.mse"))
+res$score(msr("regr.rmse"))
 sprintf("RMSE of ranger with filtering: %s", round(sqrt(res$aggregate()), 2))
 ```
 
@@ -421,7 +424,7 @@ We have seen different ways to improve models with respect to our criteria by:
 * Filtering features
 * Engineering new features
 
-A combination of all of the above would most likely yield an even better model.
+A combination of all the above would most likely yield an even better model.
 This is left as an exercise to the reader.
 
 The best model we found in this example is the `ranger` model with the added `med_price` feature.
@@ -441,5 +444,5 @@ Now we can use the augmented `task_test` to predict on new data.
 ```{r}
 lrn_ranger$train(task_train)
 pred = lrn_ranger$predict(task_test)
-pred$score(msr("regr.mse"))
+pred$score(msr("regr.rmse"))
 ```

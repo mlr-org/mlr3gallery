@@ -20,18 +20,20 @@ output:
 library(knitr)
 opts_chunk$set(R.options = list(width = 100),
                echo = TRUE)
+lgr::get_logger("mlr3")$set_threshold("warn")
+lgr::get_logger("bbotk")$set_threshold("warn")
 ```
 
 [mlr3pipelines](https://mlr3pipelines.mlr-org.com/) offers a very flexible way to create data preprocessing steps.
-This is achieved by a modular approach using [`PipeOps`](https://mlr3pipelines.mlr-org.com/reference/PipeOp.html). 
-For detailed overview check the [mlr3book](https://mlr3book.mlr-org.com/pipelines.html).  
+This is achieved by a modular approach using [`PipeOps`](https://mlr3pipelines.mlr-org.com/reference/PipeOp.html).
+For detailed overview check the [mlr3book](https://mlr3book.mlr-org.com/pipelines.html).
 
 Recommended prior readings:
 
 - [mlr3pipelines tutorial - german credit](https://mlr3gallery.mlr-org.com/posts/2020-03-11-mlr3pipelines-tutorial-german-credit/)
-- [Impute missing variables](https://mlr3gallery.mlr-org.com/posts/2020-01-30-impute-missing-levels/) .  
+- [Impute missing variables](https://mlr3gallery.mlr-org.com/posts/2020-01-30-impute-missing-levels/) .
 
-This post covers:  
+This post covers:
 
 1. How to apply different preprocessing steps on different features
 2. How to branch different preprocessing steps, which allows to select the best performing path
@@ -56,7 +58,7 @@ skimr::skim(pima_tsk$data())
 
 ## Selection of features for preprocessing steps
 
-Several features of the `pima` task have missing values:  
+Several features of the `pima` task have missing values:
 
 ```{r}
 pima_tsk$missings()
@@ -66,7 +68,7 @@ A common approach in such situations is to impute the missing values and to add 
 Suppose we want to use
 
 - [`imputehist`](https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_imputehist.html)  on features "glucose", "mass" and "pressure" which have only few missing values and
-- [`imputemedian`](https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_imputemedian.html) on features "insulin" and "triceps" which have much more missing values.  
+- [`imputemedian`](https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_imputemedian.html) on features "insulin" and "triceps" which have much more missing values.
 
 In the following subsections, we show two approaches to implement this.
 
@@ -96,8 +98,8 @@ median_imp$train(list(pima_tsk))[[1]]$missings()
 
 We construct a pipeline that combines `hist_imp` and `median_imp`.
 Here, `hist_imp` will impute the features "glucose", "mass" and "pressure", and `median_imp` will impute "insulin" and "triceps".
-In each preprocessing step, all the input features are passed to the next step. 
-In the end, we obtain a data set without missing values:  
+In each preprocessing step, all the input features are passed to the next step.
+In the end, we obtain a data set without missing values:
 
 ```{r, fig.height = 6, fig.width = 6}
 # combine the two impuation methods
@@ -114,7 +116,7 @@ miss_ind$train(list(pima_tsk))[[1]]$data()
 
 Obviously, this step can not be applied to the already imputed data as there are no missing values.
 If we want to combine the previous two imputation steps with a third step that adds missing value indicators, we would need to [`copy`](https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_copy.html) the data two times and supply the first copy to `impute_graph` and the second copy to `miss_ind` using [`gunion`](https://mlr3pipelines.mlr-org.com/reference/gunion.html).
-Finally, the two outputs can be combined with [`featureunion`](https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_featureunion.html):  
+Finally, the two outputs can be combined with [`featureunion`](https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_featureunion.html):
 
 ```{r, fig.height = 6, fig.width = 6}
 impute_missind = po("copy", 2) %>>%
@@ -134,7 +136,7 @@ hist_imp2 = po("select",
   id = "slct1") %>>% # unique id so we can combine it in a pipeline with other select PipeOps
   po("imputehist")
 
-hist_imp2$plot(html = FALSE)  
+hist_imp2$plot(html = FALSE)
 
 hist_imp2$train(pima_tsk)[[1]]$data()
 
@@ -163,8 +165,8 @@ impute_missind2$plot(html = FALSE)
 impute_missind2$train(pima_tsk)[[1]]$data()
 ```
 
-Note that when there is one input channel, it is automatically copied as many times as needed for the downstream `PipeOp`s. 
-In other words, the code above works also without `po("copy", 4)`:  
+Note that when there is one input channel, it is automatically copied as many times as needed for the downstream `PipeOp`s.
+In other words, the code above works also without `po("copy", 4)`:
 
 ```{r}
 impute_missind3 = gunion(list(hist_imp2,
@@ -183,10 +185,10 @@ Usually, `po("copy")` is required when there are more than one input channels an
 We can not know if the combination of a learner with this preprocessing graph will benefit from the imputation steps and the added missing value indicators.
 Maybe it would have been better to just use [`imputemedian`](https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_imputemedian.html) on all the variables.
 We could investigate this assumption by adding an alternative path to the graph with the mentioned `imputemedian`.
-This is possible using the ["branch"](https://mlr3pipelines.mlr-org.com/reference/branch.html) `PipeOp`:  
+This is possible using the ["branch"](https://mlr3pipelines.mlr-org.com/reference/branch.html) `PipeOp`:
 
 ```{r, fig.height = 7, fig.width = 7}
-median_imp3 = po("imputemedian", id = "simple_median") # add the id so it does not clash with `median_imp` 
+median_imp3 = po("imputemedian", id = "simple_median") # add the id so it does not clash with `median_imp`
 
 branches = c("impute_missind", "simple_median") # names of the branches
 
@@ -199,7 +201,7 @@ graph_branch$plot(html = FALSE)
 
 ## Tuning the pipeline
 
-To finalize the graph, we combine it with a rpart learner:  
+To finalize the graph, we combine it with a rpart learner:
 
 ```{r, fig.height = 7, fig.width = 7}
 rpart_lrn = lrn("classif.rpart")
@@ -210,13 +212,13 @@ grph = graph_branch %>>%
 grph$plot(html = FALSE)
 ```
 
-To define the parameters to be tuned, we first check the available ones in the graph:  
+To define the parameters to be tuned, we first check the available ones in the graph:
 
 ```{r}
 grph$param_set
 ```
 
-We decide to jointly tune the "branch.selection", "classif.rpart.cp" and "classif.rpart.minbucket" hyperparameters:  
+We decide to jointly tune the "branch.selection", "classif.rpart.cp" and "classif.rpart.minbucket" hyperparameters:
 
 ```{r}
 ps = ParamSet$new(
@@ -227,7 +229,7 @@ ps = ParamSet$new(
   ))
 ```
 
-In order to tune the graph, it needs to be converted to a learner:  
+In order to tune the graph, it needs to be converted to a learner:
 
 ```{r}
 grph_lrn =  GraphLearner$new(grph)
@@ -237,28 +239,28 @@ cv3 = rsmp("cv", folds = 3)
 set.seed(123) # for reproducibility of the folds
 cv3$instantiate(pima_tsk) # to generate folds for cross validation
 
-instance = TuningInstance$new(
+instance = TuningInstanceSingleCrit$new(
   task = pima_tsk,
   learner = grph_lrn,
   resampling = rsmp("cv", folds = 3),
-  measures = msr("classif.ce"),
-  param_set = ps,
-  terminator = term("evals", n_evals = 5)
+  measure = msr("classif.ce"),
+  search_space = ps,
+  terminator = trm("evals", n_evals = 5)
 )
 
 tuner = TunerRandomSearch$new()
 set.seed(321)
-tuner$tune(instance)
+tuner$optimize(instance)
 
-instance$archive()
+instance$archive
 ```
 
-The best performance in this short tuned experiment was achieved with `r dQuote(instance$result$params$branch.selection)`.  
+The best performance in this short tuned experiment was achieved with `r dQuote(instance$result$params$branch.selection)`.
 
 ```{r}
-instance$result$params
+instance$result
 ```
 
 ## Conclusion
 
-This post shows ways on how to specify features on which preprocessing steps are to be performed. In addition it shows how to create alternative paths in the learner graph. The preprocessing steps that can be used are not limited to imputation. Check the list of available [`PipeOp`s](https://mlr3pipelines.mlr-org.com/reference/index.html).  
+This post shows ways on how to specify features on which preprocessing steps are to be performed. In addition it shows how to create alternative paths in the learner graph. The preprocessing steps that can be used are not limited to imputation. Check the list of available [`PipeOp`s](https://mlr3pipelines.mlr-org.com/reference/index.html).

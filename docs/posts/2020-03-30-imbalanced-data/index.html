@@ -58,7 +58,7 @@
 <meta name="citation_author" content="Giuseppe Casalicchio"/>
 <!--/radix_placeholder_meta_tags-->
   
-  <meta name="citation_reference" content="citation_title=SMOTE: Synthetic Minority Over-sampling Technique;citation_publication_date=2002;citation_publisher=AI Access Foundation;citation_volume=16;citation_doi=10.1613/jair.953;citation_author=N. V. Chawla;citation_author=K. W. Bowyer;citation_author=L. O. Hall;citation_author=W. P. Kegelmeyer"/>
+  <meta name="citation_reference" content="citation_title=SMOTE: Synthetic minority over-sampling technique;citation_publication_date=2002;citation_publisher=AI Access Foundation;citation_volume=16;citation_doi=10.1613/jair.953;citation_author=N. V. Chawla;citation_author=K. W. Bowyer;citation_author=L. O. Hall;citation_author=W. P. Kegelmeyer"/>
   <!--radix_placeholder_rmarkdown_metadata-->
 
 <script type="text/json" id="radix-rmarkdown-metadata">
@@ -67,7 +67,7 @@
 <!--/radix_placeholder_rmarkdown_metadata-->
   
   <script type="text/json" id="radix-resource-manifest">
-  {"type":"character","attributes":{},"value":["2020-03-30-imbalanced-data_files/bowser-1.9.3/bowser.min.js","2020-03-30-imbalanced-data_files/distill-2.2.21/template.v2.js","2020-03-30-imbalanced-data_files/figure-html5/unnamed-chunk-10-1.png","2020-03-30-imbalanced-data_files/figure-html5/unnamed-chunk-11-1.png","2020-03-30-imbalanced-data_files/figure-html5/unnamed-chunk-12-1.png","2020-03-30-imbalanced-data_files/header-attrs-2.1/header-attrs.js","2020-03-30-imbalanced-data_files/jquery-1.11.3/jquery.min.js","2020-03-30-imbalanced-data_files/webcomponents-2.0.0/webcomponents.js","biblio.bib"]}
+  {"type":"character","attributes":{},"value":["2020-03-30-imbalanced-data_files/figure-html5/unnamed-chunk-11-1.png","2020-03-30-imbalanced-data_files/figure-html5/unnamed-chunk-12-1.png","biblio.bib"]}
   </script>
   <!--radix_placeholder_navigation_in_header-->
 
@@ -757,6 +757,16 @@ d-appendix .citation-appendix,
 }
 
 
+.sidebar-section.custom {
+  font-size: 12px;
+  line-height: 1.6em;
+}
+
+.custom p {
+  margin-bottom: 0.5em;
+}
+
+
 /* Improve display for browsers without grid (IE/Edge <= 15) */
 
 .downlevel {
@@ -1282,7 +1292,6 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 <!--/radix_placeholder_distill-->
-  <script src="../../site_libs/header-attrs-2.1/header-attrs.js"></script>
   <script src="../../site_libs/jquery-1.11.3/jquery.min.js"></script>
   <script src="../../site_libs/bowser-1.9.3/bowser.min.js"></script>
   <script src="../../site_libs/webcomponents-2.0.0/webcomponents.js"></script>
@@ -1308,13 +1317,13 @@ document.addEventListener('DOMContentLoaded', function() {
 <nav class="distill-site-nav distill-site-header">
 <div class="nav-left">
 <a class="logo" href="https://mlr3.mlr-org.com">
-<img src="../../images/logo.png"/>
+<img src="../../images/logo.png" alt="Logo"/>
 </a>
 <a href="../../index.html" class="title">mlr3gallery</a>
 </div>
 <div class="nav-right">
 <a href="https://github.com/mlr-org/mlr3gallery">
-<i class="fab fa-github"></i>
+<i class="fab fa-github" aria-hidden="true"></i>
 </a>
 <a href="javascript:void(0);" class="nav-toggle">&#9776;</a>
 </div>
@@ -2441,25 +2450,25 @@ learns = list(
   AutoTuner$new(
     learner = lrn_under,
     resampling = inner_cv3,
-    measures = measure,
-    tune_ps = ps_under,
-    terminator = term(&quot;none&quot;),
+    measure = measure,
+    search_space = ps_under,
+    terminator = trm(&quot;none&quot;),
     tuner = tnr(&quot;grid_search&quot;, resolution = 6)
   ),
   AutoTuner$new(
     learner = lrn_over,
     resampling = inner_cv3,
-    measures = measure,
-    tune_ps = ps_over,
-    terminator = term(&quot;none&quot;),
+    measure = measure,
+    search_space = ps_over,
+    terminator = trm(&quot;none&quot;),
     tuner = tnr(&quot;grid_search&quot;, resolution = 6)
   ),
   AutoTuner$new(
     learner = lrn_smote,
     resampling = inner_cv3,
-    measures = measure,
-    tune_ps = ps_smote,
-    terminator = term(&quot;none&quot;),
+    measure = measure,
+    search_space = ps_smote,
+    terminator = trm(&quot;none&quot;),
     tuner = tnr(&quot;grid_search&quot;, resolution = 6)
   )
 )
@@ -2482,11 +2491,10 @@ design = benchmark_grid(
 )
 print(design)</code></pre>
 <pre><code>
-            task     learner          resampling
-          &lt;list&gt;      &lt;list&gt;              &lt;list&gt;
-1: &lt;TaskClassif&gt; &lt;AutoTuner&gt; &lt;ResamplingHoldout&gt;
-2: &lt;TaskClassif&gt; &lt;AutoTuner&gt; &lt;ResamplingHoldout&gt;
-3: &lt;TaskClassif&gt; &lt;AutoTuner&gt; &lt;ResamplingHoldout&gt;</code></pre>
+                task         learner              resampling
+1: &lt;TaskClassif[44]&gt; &lt;AutoTuner[37]&gt; &lt;ResamplingHoldout[19]&gt;
+2: &lt;TaskClassif[44]&gt; &lt;AutoTuner[37]&gt; &lt;ResamplingHoldout[19]&gt;
+3: &lt;TaskClassif[44]&gt; &lt;AutoTuner[37]&gt; &lt;ResamplingHoldout[19]&gt;</code></pre>
 <pre class="r"><code>
 set.seed(1)
 bmr = benchmark(design, store_models = TRUE)</code></pre>
@@ -2496,16 +2504,14 @@ bmr = benchmark(design, store_models = TRUE)</code></pre>
 <pre class="r"><code>
 bmr$aggregate(measure)</code></pre>
 <pre><code>
-      nr  resample_result   task_id                       learner_id
-   &lt;int&gt;           &lt;list&gt;    &lt;char&gt;                           &lt;char&gt;
-1:     1 &lt;ResampleResult&gt; optdigits undersample.classif.ranger.tuned
-2:     2 &lt;ResampleResult&gt; optdigits  oversample.classif.ranger.tuned
-3:     3 &lt;ResampleResult&gt; optdigits       smote.classif.ranger.tuned
+   nr      resample_result   task_id                       learner_id
+1:  1 &lt;ResampleResult[18]&gt; optdigits undersample.classif.ranger.tuned
+2:  2 &lt;ResampleResult[18]&gt; optdigits  oversample.classif.ranger.tuned
+3:  3 &lt;ResampleResult[18]&gt; optdigits       smote.classif.ranger.tuned
    resampling_id iters classif.fbeta
-          &lt;char&gt; &lt;int&gt;         &lt;num&gt;
-1:       holdout     1     0.9601990
+1:       holdout     1     0.9438776
 2:       holdout     1     0.9622166
-3:       holdout     1     0.9571788</code></pre>
+3:       holdout     1     0.9625935</code></pre>
 <pre class="r"><code>
 # one value per boxplot since we used holdout as outer resampling
 autoplot(bmr, measure = measure)</code></pre>
@@ -2516,17 +2522,17 @@ autoplot(bmr, measure = measure)</code></pre>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
 library(ggplot2)
-utune_path = bmr$data$learner[[1]]$archive(&quot;params&quot;)
+utune_path = bmr$data$learner[[1]]$archive$data()
 utune_gg = ggplot(utune_path, aes(x = undersample.ratio, y = classif.fbeta)) +
   geom_point(size = 3) +
   geom_line() + ylim(0.9, 1)
 
-otune_path = bmr$data$learner[[2]]$archive(&quot;params&quot;)
+otune_path = bmr$data$learner[[2]]$archive$data()
 otune_gg = ggplot(otune_path, aes(x = oversample.ratio, y = classif.fbeta)) +
   geom_point(size = 3) +
   geom_line() + ylim(0.9, 1)
 
-stune_path = bmr$data$learner[[3]]$archive(&quot;params&quot;)
+stune_path = bmr$data$learner[[3]]$archive$data()
 stune_gg = ggplot(stune_path, aes(
   x = smote.dup_size,
   y = classif.fbeta, col = factor(smote.K))) +
@@ -2540,7 +2546,7 @@ ggarrange(utune_gg, otune_gg, stune_gg, common.legend = TRUE, nrow = 1)</code></
 <p>The results show that oversampling the minority class (for simple oversampling as well as for SMOTE) and undersampling the majority class yield a better performance for this specific data set.</p>
 <h2 id="conclusion">Conclusion</h2>
 <p>In this post, we tuned and compared 5 different settings of sampling ratios for the undersampling method, the oversampling method and different SMOTE variants (using different values of <code>K</code> nearest neighbors during the sampling process). If you want to know more, read the <a href="https://mlr3book.mlr-org.com/">mlr3book</a> and the documentation of the mentioned packages.</p>
-<div id="refs" class="references hanging-indent" role="doc-bibliography">
+<div id="refs" class="references" role="doc-bibliography">
 <div id="ref-smote">
 <p>Chawla, N. V., K. W. Bowyer, L. O. Hall, and W. P. Kegelmeyer. 2002. “SMOTE: Synthetic Minority over-Sampling Technique.” <em>Journal of Artificial Intelligence Research</em> 16 (June): 321–57. <a href="https://doi.org/10.1613/jair.953">https://doi.org/10.1613/jair.953</a>.</p>
 </div>
