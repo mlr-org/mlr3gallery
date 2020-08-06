@@ -1359,7 +1359,7 @@ document.addEventListener('DOMContentLoaded', function() {
 </ul>
 <p>We will walk through this tutorial interactively. The text is kept short to be followed in real time.</p>
 <h2 id="prerequisites">Prerequisites</h2>
-<p>Ensure all packages used in this tutorial are installed. This includes packages from the <code>mlr3</code> family, as well as other packages for data handling, cleaning and visualization which we are going to use (<a href="https://cran.r-project.org/package=DataExplorer">DataExplorer</a>, <a href="https://cran.r-project.org/package=data.table">data.table</a>, <a href="https://cran.r-project.org/package=ggplot2">ggplot2</a>, and <a href="https://cran.r-project.org/package=skimr">skimr</a>).</p>
+<p>Ensure all packages used in this tutorial are installed. This includes packages from the <code>mlr3</code> family, as well as other packages for data handling, cleaning and visualization which we are going to use (<a href="https://cran.r-project.org/package=DataExplorer">DataExplorer</a>, <a href="https://cran.r-project.org/package=data.table">data.table</a>, <a href="https://cran.r-project.org/package=ggplot2">ggplot2</a>, <a href="https://cran.r-project.org/package=rchallenge">rchallenge</a>, and <a href="https://cran.r-project.org/package=skimr">skimr</a>).</p>
 <p>Then, load the main packages we are going to use:</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
@@ -1370,7 +1370,7 @@ library(&quot;mlr3viz&quot;)
 library(&quot;ggplot2&quot;)</code></pre>
 </div>
 <h2 id="machine-learning-use-case-german-credit-data">Machine Learning Use Case: German Credit Data</h2>
-<p>The German credit data was originally donated in 1994 by Prof. Dr. Hans Hoffman of the University of Hamburg. A Description can be found at the <a href="https://archive.ics.uci.edu/ml/datasets/Statlog+%28German+Credit+Data%29">UCI repository</a>. The Goal is to classify people by their credit risk (good or bad) using 20 personal, demographic and financial features.</p>
+<p>The German credit data was originally donated in 1994 by Prof. Dr. Hans Hoffman of the University of Hamburg. A description can be found at the <a href="https://archive.ics.uci.edu/ml/datasets/Statlog+%28German+Credit+Data%29">UCI repository</a>. The goal is to classify people by their credit risk (good or bad) using 20 personal, demographic and financial features:</p>
 <table>
 <thead>
 <tr class="header">
@@ -1462,8 +1462,7 @@ library(&quot;ggplot2&quot;)</code></pre>
 </tbody>
 </table>
 <h3 id="importing-the-data">Importing the Data</h3>
-<p>The dataset we are going to use is a transformed version of this German credit dataset, as provided by the <a href="https://cran.r-project.org/package=rchallenge">rchallenge</a> package (this transformed dataset was proposed by Ulrike Grömping, with factors instead of dummy variables and corrected features).</p>
-<p><a href="https://mlr3.mlr-org.com">mlr3</a> provides a predefined <a href="https://mlr3.mlr-org.com/reference/Task.html"><code>Task</code></a>, more precisely a <a href="https://mlr3.mlr-org.com/reference/TaskClassif.html"><code>classification task</code></a> for this dataset. We can load it using the <a href="https://mlr3.mlr-org.com/reference/mlr_sugar.html"><code>tsk()</code></a> function.</p>
+<p>The dataset we are going to use is a transformed version of this German credit dataset, as provided by the <a href="https://cran.r-project.org/package=rchallenge">rchallenge</a> package (this transformed dataset was proposed by Ulrike Grömping, with factors instead of dummy variables and corrected features):</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
 data(&quot;german&quot;, package = &quot;rchallenge&quot;)</code></pre>
@@ -1502,8 +1501,8 @@ str(german)</code></pre>
  $ foreign_worker         : Factor w/ 2 levels &quot;no&quot;,&quot;yes&quot;: 1 1 1 1 1 1 1 1 1 1 ...
  $ credit_risk            : Factor w/ 2 levels &quot;good&quot;,&quot;bad&quot;: 1 2 1 1 2 1 1 1 1 2 ...</code></pre>
 </div>
-<p>Our dataset has 1000 observations and 21 columns. The variable we want to predict is <code>credit_risk</code> (either good or bad). That means we aim to classify people by their credit risk (<code>"good"</code> or <code>"bad"</code>).</p>
-<p>We also recommend the packages <a href="https://cran.r-project.org/package=skimr">skimr</a> (<a href="https://www.rdocumentation.org/packages/skimr/topics/skim"><code>skimr::skim()</code></a>) and <a href="https://cran.r-project.org/package=DataExplorer">DataExplorer</a> (<a href="https://www.rdocumentation.org/packages/DataExplorer/topics/plot_bar"><code>DataExplorer::plot_bar()</code></a>, <a href="https://www.rdocumentation.org/packages/DataExplorer/topics/plot_histogram"><code>DataExplorer::plot_histogram()</code></a>, <a href="https://www.rdocumentation.org/packages/DataExplorer/topics/plot_boxplot"><code>DataExplorer::plot_boxplot()</code></a>) packages as they create very well readable and understandable overviews.</p>
+<p>Our dataset has 1000 observations and 21 columns. The variable we want to predict is <code>credit_risk</code> (either good or bad), i.e., we aim to classify people by their credit risk.</p>
+<p>We also recommend the packages <a href="https://cran.r-project.org/package=skimr">skimr</a> and <a href="https://cran.r-project.org/package=DataExplorer">DataExplorer</a> as they create very well readable and understandable overviews:</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
 skimr::skim(german)</code></pre>
@@ -1767,8 +1766,15 @@ skimr::skim(german)</code></pre>
 </tbody>
 </table>
 </div>
+Prior to calling <a href="https://cran.r-project.org/package=DataExplorer">DataExplorer</a>, we shorten the (very lengthy) factor levels of the german credit data set to get plots which nicely fit on the screen (no need to dig into this):
 <div class="layout-chunk" data-layout="l-body">
-
+<pre class="r"><code>
+german_short = german
+is_factor = sapply(german_short, is.factor)
+german_short[is_factor] = lapply(german[is_factor], function(x) {
+  levels(x) = abbreviate(mlr3misc::str_trunc(levels(x), 16, &quot;...&quot;), 12)
+  x
+})</code></pre>
 </div>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
@@ -1814,12 +1820,12 @@ DataExplorer::plot_boxplot(german_short, by = &quot;credit_risk&quot;, nrow = 1,
 <h3 id="task-definition">Task Definition</h3>
 <p>First, we are interested in the target which we want to model. Most supervised machine learning problems are <strong>regression</strong> or <strong>classification</strong> problems. However, note that other problems include unsupervised learning or time-to-event data (covered in <a href="https://mlr3proba.mlr-org.com">mlr3proba</a>).</p>
 <p>Within <code>mlr3</code>, to distinguish between these problems, we define <a href="https://mlr3.mlr-org.com/reference/Task.html"><code>Tasks</code></a>. If we want to solve a classification problem, we define a classification task – <a href="https://mlr3.mlr-org.com/reference/TaskClassif.html"><code>TaskClassif</code></a>. For a regression problem, we define a regression task – <a href="https://mlr3.mlr-org.com/reference/TaskRegr.html"><code>TaskRegr</code></a>.</p>
-<p>In our case it is clearly our objective to model or predict the binary <code>factor</code> variable <code>credit_risk</code>. Thus, we define a <code>TaskClassif</code>.</p>
+<p>In our case it is clearly our objective to model or predict the binary <code>factor</code> variable <code>credit_risk</code>. Thus, we define a <code>TaskClassif</code>:</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
 task = TaskClassif$new(&quot;GermanCredit&quot;, backend = german, target = &quot;credit_risk&quot;)</code></pre>
 </div>
-<p>Note that this task is an example task which ships with the <code>mlr3</code> package. Thus, you actually don’t need to construct it yourself, just call <code>tsk("german_credit")</code> to retrieve the object from the dictionary <a href="https://mlr3.mlr-org.com/reference/mlr_tasks.html"><code>mlr_tasks</code></a>.</p>
+<p>Note that the German credit data is also given as an example task which ships with the <code>mlr3</code> package. Thus, you actually don’t need to construct it yourself, just call <code>tsk("german_credit")</code> to retrieve the object from the dictionary <a href="https://mlr3.mlr-org.com/reference/mlr_tasks.html"><code>mlr_tasks</code></a>.</p>
 <h3 id="learner-definition">Learner Definition</h3>
 <p>After having decided <em>what</em> should be modeled, we need to decide on <em>how</em>. This means we need to decide which learning algorithms, or <a href="https://mlr3.mlr-org.com/reference/Learner.html"><code>Learners</code></a> are appropriate. Using prior knowledge (e.g. knowing that it is a classification task or assuming that the classes are linearly separable) one ends up with one or more suitable <code>Learner</code>s.</p>
 <p>Many learners can be obtained via the <a href="https://mlr3learners.mlr-org.com">mlr3learners</a> package. Additionally, many learners are provided via the <code>mlr3learners</code> <a href="https://github.com/mlr3learners">github organization</a>. These two resources combined account for a large fraction of standard learning algorithms. As <code>mlr3</code> usually only wraps learners from packages, it is even easy to create a formal <code>Learner</code> by yourself. You may find the section about <a href="https://mlr3book.mlr-org.com/extending.html">extending mlr3</a> in the <a href="https://mlr3book.mlr-org.com">mlr3book</a> very helpful. If you happen to write your own <a href="https://mlr3.mlr-org.com/reference/Learner.html"><code>Learner</code></a> in <code>mlr3</code>, we would be happy if you share it with the <code>mlr3</code> community.</p>
@@ -1836,7 +1842,7 @@ Keys: classif.cv_glmnet, classif.debug, classif.featureless,
   regr.featureless, regr.glmnet, regr.kknn, regr.km, regr.lm,
   regr.ranger, regr.rpart, regr.svm, regr.xgboost</code></pre>
 </div>
-<p>For our problem, a suitable learner could be one of the following: Logistic regression, CART, Random Forest (or many more).</p>
+<p>For our problem, a suitable learner could be one of the following: Logistic regression, CART, random forest (or many more).</p>
 <p>A learner can be initialized with the <a href="https://mlr3.mlr-org.com/reference/mlr_sugar.html"><code>lrn()</code></a> function and the name of the learner, e.g., <code>lrn("classif.xxx")</code>. Use <code>?mlr_learners_xxx</code> to open the help page of a learner named <code>xxx</code>, or follow the link on the <a href="https://mlr3learners.mlr-org.com/reference/index.html">rendered overview page</a>.</p>
 <p>For example, a logistic regression can be initialized in the following manner (logistic regression uses R’s <code>glm()</code> function and is provided by the <code>mlr3learners</code> package):</p>
 <div class="layout-chunk" data-layout="l-body">
@@ -1857,7 +1863,7 @@ print(learner_logreg)</code></pre>
 <p>Training is the procedure, where a model is fitted on the (training) data.</p>
 <h4 id="logistic-regression">Logistic Regression</h4>
 <p>We start with the example of the logistic regression. However, you will immediately see that the procedure generalizes to any learner very easily.</p>
-<p>An initialized learner can be trained on data using <code>$train()</code>.</p>
+<p>An initialized learner can be trained on data using <code>$train()</code>:</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
 learner_logreg$train(task)</code></pre>
@@ -2005,7 +2011,7 @@ Degrees of Freedom: 799 Total (i.e. Null);  745 Residual
 Null Deviance:      993.7 
 Residual Deviance: 702.9    AIC: 812.9</code></pre>
 </div>
-<p>The stored object is a normal <code>glm</code> object and all its <code>S3</code> methods work as expected.</p>
+<p>The stored object is a normal <code>glm</code> object and all its <code>S3</code> methods work as expected:</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
 class(learner_logreg$model)</code></pre>
@@ -2148,13 +2154,13 @@ Number of Fisher Scoring iterations: 5</code></pre>
 </div>
 <h4 id="random-forest">Random Forest</h4>
 <p>Just like the logistic regression, we could train a random forest instead. We use the fast implementation from the <a href="https://cran.r-project.org/package=ranger">ranger</a> package. For this, we first need to define the learner and then actually train it.</p>
-<p>We now additionally supply the importance argument (<code>importance = "permutation"</code>). Doing so, we override the default and let the learner do feature importance determination based on permutation feature importance.</p>
+<p>We now additionally supply the importance argument (<code>importance = "permutation"</code>). Doing so, we override the default and let the learner do feature importance determination based on permutation feature importance:</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
 learner_rf = lrn(&quot;classif.ranger&quot;, importance = &quot;permutation&quot;)
 learner_rf$train(task, row_ids = train_set)</code></pre>
 </div>
-<p>We can access the importance values using <code>$importance()</code>.</p>
+<p>We can access the importance values using <code>$importance()</code>:</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
 learner_rf$importance()</code></pre>
@@ -2188,7 +2194,7 @@ ggplot(importance, aes(x = reorder(Feature, Importance), y = Importance)) +
 <p>After training a model, the model can be used for prediction. Usually, prediction is the main purpose of machine learning models.</p>
 <p>In our case, the model can be used to classify new credit applicants w.r.t. their associated credit risk (good vs. bad) on the basis of the features. Typically, machine learning models predict numeric values. In the regression case this is very natural. For classification, most models predict scores or probabilities. Based on these values, one can derive class predictions.</p>
 <h4 id="predict-classes">Predict Classes</h4>
-<p>First, we directly predict classes.</p>
+<p>First, we directly predict classes:</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
 pred_logreg = learner_logreg$predict(task, row_ids = test_set)
@@ -2223,7 +2229,7 @@ pred_rf</code></pre>
       1000  good      bad</code></pre>
 </div>
 <p>The <code>$predict()</code> method returns a <a href="https://mlr3.mlr-org.com/reference/Prediction.html"><code>Prediction</code></a> object. It can be converted to a <code>data.table</code> if one wants to use it downstream.</p>
-<p>We can also display the prediction results aggregated in a confusion matrix.</p>
+<p>We can also display the prediction results aggregated in a confusion matrix:</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
 pred_logreg$confusion</code></pre>
@@ -2294,7 +2300,7 @@ classif.ce
  0.2642643 </code></pre>
 </div>
 <p>The default measure in this scenario is the <a href="https://mlr3.mlr-org.com/reference/mlr_measures_classif.ce.html"><code>classification error</code></a>. Lower is better.</p>
-<p>We can easily run different resampling strategies, e.g. repeated holdout (<code>"subsampling"</code>), or cross validation. Most methods perform repeated train/predict cycles on different data subsets and aggregate the result (usually as the mean). Doing this manually would require us to write loops. <code>mlr3</code> does the job for us.</p>
+<p>We can easily run different resampling strategies, e.g. repeated holdout (<code>"subsampling"</code>), or cross validation. Most methods perform repeated train/predict cycles on different data subsets and aggregate the result (usually as the mean). Doing this manually would require us to write loops. <code>mlr3</code> does the job for us:</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
 resampling = rsmp(&quot;subsampling&quot;, repeats = 10)
@@ -2304,7 +2310,7 @@ rr$aggregate()</code></pre>
 classif.ce 
  0.2510511 </code></pre>
 </div>
-<p>Instead, we could also run cross-validation.</p>
+<p>Instead, we could also run cross-validation:</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
 resampling = resampling = rsmp(&quot;cv&quot;, folds = 10)
@@ -2373,7 +2379,7 @@ bmr = benchmark(bm_design)</code></pre>
 <pre class="r"><code>
 #future::plan(&quot;multiprocess&quot;) # uncomment for parallelization</code></pre>
 </div>
-<p>In the benchmark we can compare different measures. Here, we look at the <a href="https://mlr3.mlr-org.com/reference/mlr_measures_classif.ce.html"><code>misclassification rate</code></a> and the <a href="https://mlr3.mlr-org.com/reference/mlr_measures_classif.auc.html"><code>AUC</code></a>.</p>
+<p>In the benchmark we can compare different measures. Here, we look at the <a href="https://mlr3.mlr-org.com/reference/mlr_measures_classif.ce.html"><code>misclassification rate</code></a> and the <a href="https://mlr3.mlr-org.com/reference/mlr_measures_classif.auc.html"><code>AUC</code></a>:</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
 measures = msrs(c(&quot;classif.ce&quot;, &quot;classif.auc&quot;))
@@ -2488,7 +2494,7 @@ learner_rf$param_set</code></pre>
 <pre class="r"><code>
 learner_rf$param_set$values = list(verbose = FALSE)</code></pre>
 </div>
-<p>We can choose parameters for our learners in two distinct manners. If we have prior knowledge on how the learner should be (hyper-)parameterized, the way to go would be manually entering the parameters in the parameter set. In most cases, however, we would want to tune the learner so that it can search good model configurations itself. For now, we only want to compare a few models.</p>
+<p>We can choose parameters for our learners in two distinct manners. If we have prior knowledge on how the learner should be (hyper-)parameterized, the way to go would be manually entering the parameters in the parameter set. In most cases, however, we would want to tune the learner so that it can search “good” model configurations itself. For now, we only want to compare a few models.</p>
 <p>To get an idea on which parameters can be manipulated, we can investigate the parameters of the original package version or look into the parameter set of the learner:</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
@@ -2592,7 +2598,7 @@ autoplot(bmr)</code></pre>
 <h2 id="appendix">Appendix</h2>
 <h3 id="tips">Tips</h3>
 <ul>
-<li>What are the arguments of <code>tsk()</code>, <code>lrn()</code>, <code>rsmp()</code>, <code>msr()</code> etc. again? <span class="math inline">\(\rightarrow\)</span> Think about the corresponding dictionary.</li>
+<li>What are the arguments of <code>tsk()</code>, <code>lrn()</code>, <code>rsmp()</code>, <code>msr()</code> etc. again? <span class="math inline">\(\rightarrow\)</span> Think about the corresponding dictionary:</li>
 </ul>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
@@ -2634,25 +2640,10 @@ Keys: classif.acc, classif.auc, classif.bacc, classif.bbrier,
   selected_features, time_both, time_predict, time_train</code></pre>
 </div>
 <ul>
-<li>What are the arguments of a <code>$new()</code> constructor?</li>
-</ul>
-<div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-formals(TaskClassif$public_methods$initialize)</code></pre>
-<pre><code>
-$id
-
-
-$backend
-
-
-$target
-
-
-$positive
-NULL</code></pre>
-</div>
+<li>What are the arguments of a <code>$new()</code> constructor?
 <ul>
+<li>Check the corresponding help page.</li>
+</ul></li>
 <li>What are the possible slots and functions of an object?
 <ul>
 <li>Writing <code>pred_rf$</code>, and pressing &lt;TAB&gt; should work. Otherwise:</li>
