@@ -1,5 +1,5 @@
 ---
-title: A pipeline for the titanic data set - Advanced 
+title: A pipeline for the titanic data set - Advanced
 categories:
   - imputation
   - classification
@@ -17,12 +17,12 @@ output:
 ---
 
 This is the second post of the titanic use case series.
-You can find the first use case [here](/2020-03-12-intro-pipelines-titanic/).
-<!-- Need to fix hyperlink -->
+You can find the first use case [here](https://mlr3gallery.mlr-org.com/posts/2020-03-12-intro-pipelines-titanic/).
+
 In this section we will focus on more advanced usage of `mlr3pipelines`.
 Specifically, this section illustrates the different options when it comes to data imputation and feature engineering.
 Furthermore, the section shows how to **benchmark**, **feature engineer** and compare our results.
-Again, we need to take some prepatory steps: 
+Again, we need to take some preparatory steps:
 
 ```{r, include = FALSE, warning = FALSE, message = FALSE}
 # Just some preparation
@@ -37,7 +37,7 @@ lgr::get_logger("mlr3")$set_threshold("warn")
 library(skimr)
 ```
 
-For the case that you are only tuning in for the second part, we need to load some packages: 
+For the case that you are only tuning in for the second part, we need to load some packages:
 The data is part of the `mlr3data` package.
 
 ```{r}
@@ -56,19 +56,19 @@ To recap we have undertaken the following steps:
 
 ```{r}
 # splitting the data set
-titanic_train <- titanic[1:891, ]
-titanic_test <- titanic[892:1309, ]
+titanic_train = titanic[1:891, ]
+titanic_test = titanic[892:1309, ]
 
-# setting up the task 
-task <- TaskClassif$new("titanic", titanic_train, target = "survived", positive = "1")
+# setting up the task
+task = TaskClassif$new("titanic", titanic_train, target = "survived", positive = "yes")
 task$select(cols = setdiff(task$feature_names, c("cabin", "name", "ticket")))
 
 # setting up the learner
-learner <- lrn("classif.rpart")
+learner = lrn("classif.rpart")
 
 #setting up our resampling method
-rdesc <- rsmp("cv", folds = 3L)$instantiate(task)
-res <- resample(task, learner, rdesc, store_models = TRUE)
+rdesc = rsmp("cv", folds = 3L)$instantiate(task)
+res = resample(task, learner, rdesc, store_models = TRUE)
 
 ```
 
@@ -88,9 +88,9 @@ As a result, instead of imputing a constant value, we will do two things:
   If the information that a value was missing is important, this column contains this information.
 
 This imputation scheme is called 'imputation with constants' and is already implemented in `mlr3pipelines`.
-It can be done using `PipeOpImputeConstant`.
+It can be done using `r ref("PipeOpImputeConstant")`.
 
-Remember that we are trying to optimize our predictive power by using a random forest model ('classif.ranger').
+Remember that we are trying to optimize our predictive power by using a random forest model (`r ref("mlr_learners_classif.ranger")`).
 Now, random forest models do not naturally handle missing values which is the reason why we need imputation.
 Before imputation, our data looks as follows:
 
@@ -102,11 +102,11 @@ task$missings()
 Let's first deal with the categorical variables:
 
 ```{r}
-po_newlvl <- po("imputenewlvl")
-task_newlvl <- po_newlvl$train(list(task))[[1]]
+po_newlvl = po("imputeoor")
+task_newlvl = po_newlvl$train(list(task))[[1]]
 ```
 
-Note that we use the `PipeOp` in an unusual way, which is why the syntax does not look very clean.
+Note that we use the `r ref("PipeOp")` in an unusual way, which is why the syntax does not look very clean.
 We'll learn how to use a full graph below.
 
 First, let's look at the result:
@@ -115,8 +115,8 @@ First, let's look at the result:
 task_newlvl$missings()
 ```
 
-Cool! `embarked` does not have missing values anymore. 
-Note that `PipeOpImputeNewLvl` by default affects `character`, `factor` and `ordered` columns.
+Cool! `embarked` does not have missing values anymore.
+Note that `PipeOpImputeOOR` by default affects `character`, `factor` and `ordered` columns.
 
 For the `numeric` features we want to do two things, impute values and add an indicator column.
 In order to do this, we need a more complicated structure, a `Graph`.
@@ -125,30 +125,30 @@ Our `po_indicator` creates the indicator column.
 We tell it to only do this for `numeric` and `integer` columns via its `param_vals`, and additionally tell it to create a numeric column (0 = "not missing", 1 = "missing").
 
 ```{r}
-po_indicator <- po("missind",
+po_indicator = po("missind",
   param_vals = list(affect_columns = selector_type(c("numeric", "integer")), type = "numeric")
 )
 ```
 
 Now we can simultaneously impute features from the histogram and create indicator columns.
-This can be achieved using the `gunion` function, which puts two operations in parallel:
+This can be achieved using the `r ref("gunion")` function, which puts two operations in parallel:
 
 ```{r}
-gr <- gunion(list(po_indicator, po("imputehist")))
-gr <- gr %>>% po("featureunion")
+gr = gunion(list(po_indicator, po("imputehist")))
+gr = gr %>>% po("featureunion")
 ```
 
 Afterwards, we `cbind` the resulting data using `po("featureunion")`, connecting the different operations using our **graph connector**: `%>>%`.
 We can now also connect the newlvl imputation:
 
 ```{r}
-gr <- gr %>>% po("imputenewlvl")
+gr = gr %>>% po("imputeoor")
 ```
 
 and see what happens when we now train the whole **Graph**:
 
 ```{r}
-task_imputed <- gr$clone()$train(task)[[1]]
+task_imputed = gr$clone()$train(task)[[1]]
 task_imputed$missings()
 ```
 
@@ -159,15 +159,15 @@ autoplot(task_imputed)
 ```
 
 We could now use `task_imputed` for resampling and see whether a **ranger** model does better.
-But this is dangerous! 
+But this is dangerous!
 If we preprocess all training data at once, data could leak through the different cross-validation folds.
 In order to do this properly, we have to process the training data in every fold separately.
 Luckily, this is automatically handled in our `Graph`, if we use it through a `GraphLearner`.
 
-We can simple append a `ranger` learner to the Graph and create a `GraphLearner` from this.
+We can simply append a `ranger` learner to the Graph and create a `GraphLearner` from this.
 
 ```{r}
-glrn <- GraphLearner$new(gr$clone() %>>% 
+glrn = GraphLearner$new(gr$clone() %>>%
   po("imputesample") %>>%
   po("fixfactors") %>>%
   po(learner))
@@ -175,11 +175,11 @@ glrn <- GraphLearner$new(gr$clone() %>>%
 
 We needed to use the following commands for the Graph:
 * `fixfactors`: Removes empty factor levels and removes factor levels that do not exist during training.
-* `imputesample`: In some cases, if missing factor levels do not occur during training but only while predicting, `imputenewlvl` does not create a new level. For those, we sample a random value.
+* `imputesample`: In some cases, if missing factor levels do not occur during training but only while predicting, `imputeoor` does not create a new level. For those, we sample a random value.
 
 ```{r}
-res <- resample(task, glrn, rdesc, store_models = TRUE)
-agg <- res$aggregate(msr("classif.acc"))
+res = resample(task, glrn, rdesc, store_models = TRUE)
+agg = res$aggregate(msr("classif.acc"))
 agg
 ```
 
@@ -192,12 +192,12 @@ Additionally, we will make use of the `character` columns.
 Hence, we will re-select them:
 
 ```{r}
-task$col_roles$feature <- c(task$feature_names, c("cabin", "name", "ticket"))
+task$col_roles$feature = c(task$feature_names, c("cabin", "name", "ticket"))
 ```
 
 ```{r}
 library("stringi")
-po_ftextract <- po("mutate", param_vals = list(
+po_ftextract = po("mutate", param_vals = list(
   mutation = list(
     fare_per_person = ~ fare / (parch + sib_sp + 1),
     deck = ~ factor(stri_sub(cabin, 1, 1)),
@@ -211,7 +211,7 @@ po_ftextract <- po("mutate", param_vals = list(
 Quickly checking what happens:
 
 ```{r}
-task_eng <- po_ftextract$clone()$train(list(task))[[1]]
+task_eng = po_ftextract$clone()$train(list(task))[[1]]
 task_eng$data()
 ```
 
@@ -222,7 +222,7 @@ autoplot(task_eng$clone()$select(c("sex", "age")), type = "pairs")
 Now we can put everything together again, we concatenate our new `PipeOp` with the `Graph` created above and use `PipeOpSelect` in order to de-select the `character` features we used for feature extraction.
 Additionally, we collapse the 'surname', so only surnames that make up more than 0.6 \% of the data are kept.
 
-In summary we do the following: 
+In summary, we do the following:
 
 * `mutate`: The `po_ftextract` we defined above extracts additional features from the data.
 * `collapsefactors`: Removes factor levels that make up less then 3 \% of the data.
@@ -231,69 +231,67 @@ In summary we do the following:
   * `missind`: `po_indicator` adds a column for each numeric with the info whether the value is NA or not.
   * `imputehist`: Imputes numeric and integer columns by sampling from the histogram.
 * `featureunion`: Cbind's parallel data streams.
-* `imputenewlvl`: Imputes factor and ordered columns.
+* `imputeoor`: Imputes factor and ordered columns.
 * `fixfactors`: Removes empty factor levels and removes factor levels that do not exist during training.
-* `imputesample`: In some cases, if missing factor levels do not occur during training but only while predicting, `imputenewlvl` does not create a new level. For those, we sample a random value.
+* `imputesample`: In some cases, if missing factor levels do not occur during training but only while predicting, `imputeoor` does not create a new level. For those, we sample a random value.
 * `learner`: Appends a learner to the `Graph`.
 
 The full graph we created is the following:
 
 ```{r}
-learner <- lrn("classif.ranger")
-learner$param_set$values <- list(num.trees = 500, min.node.size = 4)
+learner = lrn("classif.ranger")
+learner$param_set$values = list(num.trees = 500, min.node.size = 4)
 ```
 
 ```{r}
-gr_final <- po_ftextract %>>%
+gr_final = po_ftextract %>>%
   po("collapsefactors", param_vals = list(no_collapse_above_prevalence = 0.03)) %>>%
   po("select", param_vals = list(selector = selector_invert(selector_type("character")))) %>>%
   gunion(list(po_indicator, po("imputehist"))) %>>%
   po("featureunion") %>>%
-  po("imputenewlvl") %>>%
+  po("imputeoor") %>>%
   po("fixfactors") %>>%
   po("imputesample") %>>%
   po(learner)
 ```
 
-## Evaluation 
+## Evaluation
 
 Let us see if things have improved:
 
 ```{r}
-glrn <- GraphLearner$new(gr_final)
-res <- resample(task, glrn, rdesc, store_models = TRUE)
-agg_ranger <- res$aggregate(msr("classif.acc"))
+glrn = GraphLearner$new(gr_final)
+res = resample(task, glrn, rdesc, store_models = TRUE)
+agg_ranger = res$aggregate(msr("classif.acc"))
 agg_ranger
 ```
 
 We have improved even more!
 
-## Benchmarking 
+## Benchmarking
 
 To undertake benchmarking, we need to set up a benchmarking design.
 The first step is creating a list with the learners we used, namely the learners form the first and second part of this use case.
 
 ```{r}
-lrn_list <- list(
+lrn_list = list(
   lrn("classif.rpart", predict_type = "prob"),
   lrn("classif.ranger", predict_type = "prob")
 )
 ```
 
-After having done that, we can set up our benchmark grid: 
-?lrn
 Now we can define our benchmark design.
 This is done to ensure exhaustive and consistent resampling for all learners.
 This step is needed to execute over the same train/test split for each task.
 
 ```{r}
-bm_design <- benchmark_grid(task = task_imputed, resamplings = rsmp("cv", folds = 10), learners = lrn_list)
-bmr <- benchmark(bm_design, store_models = TRUE)
+bm_design = benchmark_grid(task = task_imputed, resamplings = rsmp("cv", folds = 10), learners = lrn_list)
+bmr = benchmark(bm_design, store_models = TRUE)
 print(bmr)
 ```
 
 So, where do we go from here?
-We could for instance use a boxplot: 
+We could for instance use a boxplot:
 
 ```{r}
 autoplot(bmr) + theme(axis.text.x = element_text(angle = 45, hjust = 1))
@@ -306,7 +304,7 @@ Here we need to ensure that the benchmark results only contain a single Task:
 autoplot(bmr$clone()$filter(task_id = "titanic"), type = "roc")
 ```
 
-Moreover, one can compare the the precision-recall: 
+Moreover, one can compare the precision-recall:
 
 ```{r}
 # Precision vs Recall

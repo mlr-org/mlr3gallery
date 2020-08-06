@@ -65,7 +65,7 @@
 <!--/radix_placeholder_rmarkdown_metadata-->
   
   <script type="text/json" id="radix-resource-manifest">
-  {"type":"character","attributes":{},"value":["2020-01-30-house-prices-in-king-county_files/bowser-1.9.3/bowser.min.js","2020-01-30-house-prices-in-king-county_files/distill-2.2.21/template.v2.js","2020-01-30-house-prices-in-king-county_files/figure-html5/unnamed-chunk-10-1.png","2020-01-30-house-prices-in-king-county_files/figure-html5/unnamed-chunk-12-1.png","2020-01-30-house-prices-in-king-county_files/figure-html5/unnamed-chunk-13-1.png","2020-01-30-house-prices-in-king-county_files/figure-html5/unnamed-chunk-14-1.png","2020-01-30-house-prices-in-king-county_files/figure-html5/unnamed-chunk-15-1.png","2020-01-30-house-prices-in-king-county_files/figure-html5/unnamed-chunk-19-1.png","2020-01-30-house-prices-in-king-county_files/figure-html5/unnamed-chunk-20-1.png","2020-01-30-house-prices-in-king-county_files/figure-html5/unnamed-chunk-20-2.png","2020-01-30-house-prices-in-king-county_files/header-attrs-2.1/header-attrs.js","2020-01-30-house-prices-in-king-county_files/jquery-1.11.3/jquery.min.js","2020-01-30-house-prices-in-king-county_files/webcomponents-2.0.0/webcomponents.js"]}
+  {"type":"character","attributes":{},"value":["2020-01-30-house-prices-in-king-county_files/figure-html5/unnamed-chunk-10-1.png","2020-01-30-house-prices-in-king-county_files/figure-html5/unnamed-chunk-12-1.png","2020-01-30-house-prices-in-king-county_files/figure-html5/unnamed-chunk-13-1.png","2020-01-30-house-prices-in-king-county_files/figure-html5/unnamed-chunk-14-1.png","2020-01-30-house-prices-in-king-county_files/figure-html5/unnamed-chunk-15-1.png","2020-01-30-house-prices-in-king-county_files/figure-html5/unnamed-chunk-19-1.png","2020-01-30-house-prices-in-king-county_files/figure-html5/unnamed-chunk-20-1.png","2020-01-30-house-prices-in-king-county_files/figure-html5/unnamed-chunk-20-2.png"]}
   </script>
   <!--radix_placeholder_navigation_in_header-->
 
@@ -755,6 +755,16 @@ d-appendix .citation-appendix,
 }
 
 
+.sidebar-section.custom {
+  font-size: 12px;
+  line-height: 1.6em;
+}
+
+.custom p {
+  margin-bottom: 0.5em;
+}
+
+
 /* Improve display for browsers without grid (IE/Edge <= 15) */
 
 .downlevel {
@@ -1280,7 +1290,6 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 <!--/radix_placeholder_distill-->
-  <script src="../../site_libs/header-attrs-2.1/header-attrs.js"></script>
   <script src="../../site_libs/jquery-1.11.3/jquery.min.js"></script>
   <script src="../../site_libs/bowser-1.9.3/bowser.min.js"></script>
   <script src="../../site_libs/webcomponents-2.0.0/webcomponents.js"></script>
@@ -1306,13 +1315,13 @@ document.addEventListener('DOMContentLoaded', function() {
 <nav class="distill-site-nav distill-site-header">
 <div class="nav-left">
 <a class="logo" href="https://mlr3.mlr-org.com">
-<img src="../../images/logo.png"/>
+<img src="../../images/logo.png" alt="Logo"/>
 </a>
 <a href="../../index.html" class="title">mlr3gallery</a>
 </div>
 <div class="nav-right">
 <a href="https://github.com/mlr-org/mlr3gallery">
-<i class="fab fa-github"></i>
+<i class="fab fa-github" aria-hidden="true"></i>
 </a>
 <a href="javascript:void(0);" class="nav-toggle">&#9776;</a>
 </div>
@@ -1447,7 +1456,7 @@ kc_housing$has_basement = as.numeric(!is.na(kc_housing$sqft_basement))</code></p
 <pre class="r"><code>
 kc_housing$id = NULL</code></pre>
 </div>
-<p>Additionally we convert the price from Dollar to units of 1000 Dollar to improve readability.</p>
+<p>Additionally, we convert the price from Dollar to units of 1000 Dollar to improve readability.</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
 kc_housing$price = kc_housing$price / 1000</code></pre>
@@ -1466,7 +1475,7 @@ ggplot(kc_housing, aes(x = price)) + geom_density()</code></pre>
 <p><img src="2020-01-30-house-prices-in-king-county_files/figure-html5/unnamed-chunk-10-1.png" width="624" /></p>
 </div>
 <p>We can see that the prices for most houses lie between 75.000 and 1.5 million dollars. There are few extreme values of up to 7.7 million dollars.</p>
-<p>Feature engineering often allows us to incorporate additional knowledge about the data and underlying processes. This can often greatly enhance predictive performance. A simple example: A house which has <code>yr_renovated == 0</code> means that is has not been renovated yet. Additionally we want to drop features which should not have any influence (<code>id column</code>).</p>
+<p>Feature engineering often allows us to incorporate additional knowledge about the data and underlying processes. This can often greatly enhance predictive performance. A simple example: A house which has <code>yr_renovated == 0</code> means that is has not been renovated yet. Additionally, we want to drop features which should not have any influence (<code>id column</code>).</p>
 <p>After those initial manipulations, we load all required packages and create a Task containing our data.</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
@@ -1521,7 +1530,7 @@ task_test  = tsk$clone()$filter(test.idx)</code></pre>
 </div>
 <h3 id="a-first-model-decision-tree">A first model: Decision Tree</h3>
 <p>Decision trees cannot only be used as a powerful tool for predictive models but also for exploratory data analysis. In order to fit a decision tree, we first get the <code>regr.rpart</code> learner from the <code>mlr_learners</code> dictionary by using the sugar function <a href="https://mlr3.mlr-org.com/reference/mlr_sugar.html"><code>lrn</code></a>.</p>
-<p>For now we leave out the <code>zipcode</code> variable, as we also have the <code>latitude</code> and <code>longitude</code> of each house. Again, we use <code>$clone()</code>, so we do not change the original task.</p>
+<p>For now, we leave out the <code>zipcode</code> variable, as we also have the <code>latitude</code> and <code>longitude</code> of each house. Again, we use <code>$clone()</code>, so we do not change the original task.</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
 tsk_nozip = task_train$clone()$select(setdiff(tsk$feature_names, &quot;zipcode&quot;))
@@ -1566,16 +1575,16 @@ cv3 = rsmp(&quot;cv&quot;, folds = 3)</code></pre>
 <pre class="r"><code>
 lrn_rpart = lrn(&quot;regr.rpart&quot;)
 res = resample(task = task_train, lrn_rpart, cv3)
-res$score(msr(&quot;regr.mse&quot;))</code></pre>
+res$score(msr(&quot;regr.rmse&quot;))</code></pre>
 <pre><code>
-         task task_id            learner learner_id     resampling
-1: &lt;TaskRegr&gt;   sales &lt;LearnerRegrRpart&gt; regr.rpart &lt;ResamplingCV&gt;
-2: &lt;TaskRegr&gt;   sales &lt;LearnerRegrRpart&gt; regr.rpart &lt;ResamplingCV&gt;
-3: &lt;TaskRegr&gt;   sales &lt;LearnerRegrRpart&gt; regr.rpart &lt;ResamplingCV&gt;
-   resampling_id iteration prediction regr.mse
-1:            cv         1     &lt;list&gt; 45415.78
-2:            cv         2     &lt;list&gt; 49598.67
-3:            cv         3     &lt;list&gt; 42517.76</code></pre>
+             task task_id                learner learner_id         resampling
+1: &lt;TaskRegr[41]&gt;   sales &lt;LearnerRegrRpart[32]&gt; regr.rpart &lt;ResamplingCV[19]&gt;
+2: &lt;TaskRegr[41]&gt;   sales &lt;LearnerRegrRpart[32]&gt; regr.rpart &lt;ResamplingCV[19]&gt;
+3: &lt;TaskRegr[41]&gt;   sales &lt;LearnerRegrRpart[32]&gt; regr.rpart &lt;ResamplingCV[19]&gt;
+   resampling_id iteration prediction regr.rmse
+1:            cv         1  &lt;list[1]&gt;  213.1098
+2:            cv         2  &lt;list[1]&gt;  222.7076
+3:            cv         3  &lt;list[1]&gt;  206.1984</code></pre>
 <pre class="r"><code>
 sprintf(&quot;RMSE of the simple rpart: %s&quot;, round(sqrt(res$aggregate()), 2))</code></pre>
 <pre><code>
@@ -1588,20 +1597,20 @@ sprintf(&quot;RMSE of the simple rpart: %s&quot;, round(sqrt(res$aggregate()), 2
 library(mlr3learners)
 lrn_ranger = lrn(&quot;regr.ranger&quot;, num.trees = 15L)
 res = resample(task = task_train, lrn_ranger, cv3)
-res$score(msr(&quot;regr.mse&quot;))</code></pre>
+res$score(msr(&quot;regr.rmse&quot;))</code></pre>
 <pre><code>
-         task task_id             learner  learner_id     resampling
-1: &lt;TaskRegr&gt;   sales &lt;LearnerRegrRanger&gt; regr.ranger &lt;ResamplingCV&gt;
-2: &lt;TaskRegr&gt;   sales &lt;LearnerRegrRanger&gt; regr.ranger &lt;ResamplingCV&gt;
-3: &lt;TaskRegr&gt;   sales &lt;LearnerRegrRanger&gt; regr.ranger &lt;ResamplingCV&gt;
-   resampling_id iteration prediction regr.mse
-1:            cv         1     &lt;list&gt; 20254.29
-2:            cv         2     &lt;list&gt; 18892.31
-3:            cv         3     &lt;list&gt; 26758.39</code></pre>
+             task task_id                 learner  learner_id
+1: &lt;TaskRegr[41]&gt;   sales &lt;LearnerRegrRanger[32]&gt; regr.ranger
+2: &lt;TaskRegr[41]&gt;   sales &lt;LearnerRegrRanger[32]&gt; regr.ranger
+3: &lt;TaskRegr[41]&gt;   sales &lt;LearnerRegrRanger[32]&gt; regr.ranger
+           resampling resampling_id iteration prediction regr.rmse
+1: &lt;ResamplingCV[19]&gt;            cv         1  &lt;list[1]&gt;  137.9911
+2: &lt;ResamplingCV[19]&gt;            cv         2  &lt;list[1]&gt;  140.3811
+3: &lt;ResamplingCV[19]&gt;            cv         3  &lt;list[1]&gt;  156.6670</code></pre>
 <pre class="r"><code>
 sprintf(&quot;RMSE of the simple ranger: %s&quot;, round(sqrt(res$aggregate()), 2))</code></pre>
 <pre><code>
-[1] &quot;RMSE of the simple ranger: 148.22&quot;</code></pre>
+[1] &quot;RMSE of the simple ranger: 145.25&quot;</code></pre>
 </div>
 <p>Often tuning <strong>RandomForest</strong> methods does not increase predictive performances substantially. If time permits, it can nonetheless lead to improvements and should thus be performed. In this case, we resort to tune a different kind of model: <strong>Gradient Boosted Decision Trees</strong> from the package <a href="https://cran.r-project.org/package=xgboost">xgboost</a>.</p>
 <h3 id="a-better-baseline-autotuner">A better baseline: <code>AutoTuner</code></h3>
@@ -1609,7 +1618,7 @@ sprintf(&quot;RMSE of the simple ranger: %s&quot;, round(sqrt(res$aggregate()), 
 <div class="layout-chunk" data-layout="l-body">
 
 </div>
-<p>Tuning can often further improve the performance. In this case, we <em>tune</em> the xgboost learner in order to see whether this can improve performance. For the <code>AutoTuner</code> we have to specify a <strong>Termination Criterion</strong> (how long the tuning should run) a <strong>Tuner</strong> (which tuning method to use) and a <strong>ParamSet</strong> (which space we might want to search through). For now we do not use the <strong>zipcode</strong> column, as <a href="https://cran.r-project.org/package=xgboost">xgboost</a> cannot naturally deal with categorical features. The <strong>AutoTuner</strong> automatically performs nested cross-validation.</p>
+<p>Tuning can often further improve the performance. In this case, we <em>tune</em> the xgboost learner in order to see whether this can improve performance. For the <code>AutoTuner</code> we have to specify a <strong>Termination Criterion</strong> (how long the tuning should run) a <strong>Tuner</strong> (which tuning method to use) and a <strong>ParamSet</strong> (which space we might want to search through). For now, we do not use the <strong>zipcode</strong> column, as <a href="https://cran.r-project.org/package=xgboost">xgboost</a> cannot naturally deal with categorical features. The <strong>AutoTuner</strong> automatically performs nested cross-validation.</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
 set.seed(444L)
@@ -1629,8 +1638,8 @@ ps = ParamSet$new(
 ))
 
 # Define the Terminator
-terminator = term(&quot;evals&quot;, n_evals = 10)
-at = AutoTuner$new(lrn_xgb, rsmp(&quot;holdout&quot;), measures = msr(&quot;regr.mse&quot;), ps,
+terminator = trm(&quot;evals&quot;, n_evals = 10)
+at = AutoTuner$new(lrn_xgb, rsmp(&quot;holdout&quot;), msr(&quot;regr.rmse&quot;), ps,
   terminator, tuner = tnr(&quot;random_search&quot;))</code></pre>
 </div>
 <div class="layout-chunk" data-layout="l-body">
@@ -1638,35 +1647,35 @@ at = AutoTuner$new(lrn_xgb, rsmp(&quot;holdout&quot;), measures = msr(&quot;regr
 </div>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
-res$score(msr(&quot;regr.mse&quot;))</code></pre>
+res$score(msr(&quot;regr.rmse&quot;))</code></pre>
 <pre><code>
-         task task_id     learner         learner_id     resampling
-1: &lt;TaskRegr&gt;   sales &lt;AutoTuner&gt; regr.xgboost.tuned &lt;ResamplingCV&gt;
-2: &lt;TaskRegr&gt;   sales &lt;AutoTuner&gt; regr.xgboost.tuned &lt;ResamplingCV&gt;
-3: &lt;TaskRegr&gt;   sales &lt;AutoTuner&gt; regr.xgboost.tuned &lt;ResamplingCV&gt;
-   resampling_id iteration prediction regr.mse
-1:            cv         1     &lt;list&gt; 20849.30
-2:            cv         2     &lt;list&gt; 20365.25
-3:            cv         3     &lt;list&gt; 19136.54</code></pre>
+             task task_id         learner         learner_id         resampling
+1: &lt;TaskRegr[41]&gt;   sales &lt;AutoTuner[37]&gt; regr.xgboost.tuned &lt;ResamplingCV[19]&gt;
+2: &lt;TaskRegr[41]&gt;   sales &lt;AutoTuner[37]&gt; regr.xgboost.tuned &lt;ResamplingCV[19]&gt;
+3: &lt;TaskRegr[41]&gt;   sales &lt;AutoTuner[37]&gt; regr.xgboost.tuned &lt;ResamplingCV[19]&gt;
+   resampling_id iteration prediction regr.rmse
+1:            cv         1  &lt;list[1]&gt;  146.5375
+2:            cv         2  &lt;list[1]&gt;  142.9853
+3:            cv         3  &lt;list[1]&gt;  141.8297</code></pre>
 <pre class="r"><code>
 sprintf(&quot;RMSE of the tuned xgboost: %s&quot;, round(sqrt(res$aggregate()), 2))</code></pre>
 <pre><code>
-[1] &quot;RMSE of the tuned xgboost: 141.83&quot;</code></pre>
+[1] &quot;RMSE of the tuned xgboost: 143.8&quot;</code></pre>
 </div>
-<p>We can obtain the resulting params in the respective splits by accessing the <a href="https://mlr3.mlr-org.com/reference/ResampleResult.html"><code>ResampleResult</code></a>.</p>
+<p>We can obtain the resulting parameters in the respective splits by accessing the <a href="https://mlr3.mlr-org.com/reference/ResampleResult.html"><code>ResampleResult</code></a>.</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
 sapply(res$learners, function(x) x$param_set$values)[-2,]</code></pre>
 <pre><code>
                   [,1]      [,2]      [,3]     
-nrounds           24        19        22       
-eta               0.3026393 0.3725926 0.2348035
-min_child_weight  13.35305  16.98946  10.62785 
-subsample         0.7400116 0.7621237 0.7601959
-colsample_bytree  0.9716076 0.9236286 0.9987225
-colsample_bylevel 0.6090116 0.5194845 0.6217055</code></pre>
+nrounds           18        19        23       
+eta               0.3216396 0.2373166 0.3256245
+min_child_weight  6.121228  4.777913  13.20199 
+subsample         0.7349276 0.7553011 0.7438482
+colsample_bytree  0.9621787 0.9775707 0.9619294
+colsample_bylevel 0.6347809 0.5899552 0.6703639</code></pre>
 </div>
-<p><strong>NOTE:</strong> To keep runtime low, we only tune parts of the hyperparameter space of <a href="https://cran.r-project.org/package=xgboost">xgboost</a> in this example. Additionally, we only allow for <span class="math inline">\(10\)</span> random search iterations, which is usually to little for real-world applications. Nonetheless, we are able to obtain an improved performance when comparing to the <a href="https://cran.r-project.org/package=ranger">ranger</a> model.</p>
+<p><strong>NOTE:</strong> To keep runtime low, we only tune parts of the hyperparameter space of <a href="https://cran.r-project.org/package=xgboost">xgboost</a> in this example. Additionally, we only allow for <span class="math inline">\(10\)</span> random search iterations, which is usually too little for real-world applications. Nonetheless, we are able to obtain an improved performance when comparing to the <a href="https://cran.r-project.org/package=ranger">ranger</a> model.</p>
 <p>In order to further improve our results we have several options:</p>
 <ul>
 <li>Find or engineer better features</li>
@@ -1682,33 +1691,32 @@ colsample_bylevel 0.6090116 0.5194845 0.6217055</code></pre>
 <li>Stacking and Ensembles</li>
 </ul>
 <p>Below we will investigate some of those possibilities and investigate whether this improves performance.</p>
-<h3 id="engineering-features-mutating-zip-codes">Engineering Features: Mutating ZIP-Codes</h3>
-<p>In order to better cluster the zip codes, we compute a new feature: <strong>med_price</strong>: It computes the median price in each zip-code. This might help our model to improve the prediction.</p>
+<h3 id="advanced-engineering-features-mutating-zip-codes">Advanced: Engineering Features: Mutating ZIP-Codes</h3>
+<p>In order to better cluster the zip codes, we compute a new feature: <strong>med_price</strong>: It computes the median price in each zip-code. This might help our model to improve the prediction. This is equivalent to <strong>impact encoding</strong> <a href="https://win-vector.com/2012/07/23/modeling-trick-impact-coding-of-categorical-variables-with-many-levels/">more information</a>:</p>
+<p>We can equip a learner with impact encoding using <strong>mlr3pipelines</strong>. More information on <strong>mlr3pipelines</strong> can be obtained from other posts.</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
-data = task_train$data(cols = c(&quot;price&quot;, &quot;zipcode&quot;))
-data[, med_price := median(price), by = &quot;zipcode&quot;]
-task_train$cbind(data[, .(med_price)])</code></pre>
+library(mlr3pipelines)
+lrn_impact = po(&quot;encodeimpact&quot;, affect_columns = selector_name(&quot;zipcode&quot;)) %&gt;&gt;% lrn(&quot;regr.ranger&quot;)</code></pre>
 </div>
 <p>Again, we run <a href="https://mlr3.mlr-org.com/reference/resample.html"><code>resample()</code></a> and compute the <strong>RMSE</strong>.</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
-lrn_ranger = lrn(&quot;regr.ranger&quot;)
-res = resample(task = task_train, lrn_ranger, cv3)
-res$score(msr(&quot;regr.mse&quot;))</code></pre>
+res = resample(task = task_train, lrn_impact, cv3)
+res$score(msr(&quot;regr.rmse&quot;))</code></pre>
 <pre><code>
-         task task_id             learner  learner_id     resampling
-1: &lt;TaskRegr&gt;   sales &lt;LearnerRegrRanger&gt; regr.ranger &lt;ResamplingCV&gt;
-2: &lt;TaskRegr&gt;   sales &lt;LearnerRegrRanger&gt; regr.ranger &lt;ResamplingCV&gt;
-3: &lt;TaskRegr&gt;   sales &lt;LearnerRegrRanger&gt; regr.ranger &lt;ResamplingCV&gt;
-   resampling_id iteration prediction regr.mse
-1:            cv         1     &lt;list&gt; 22797.43
-2:            cv         2     &lt;list&gt; 18270.64
-3:            cv         3     &lt;list&gt; 13688.15</code></pre>
+             task task_id            learner               learner_id
+1: &lt;TaskRegr[41]&gt;   sales &lt;GraphLearner[31]&gt; encodeimpact.regr.ranger
+2: &lt;TaskRegr[41]&gt;   sales &lt;GraphLearner[31]&gt; encodeimpact.regr.ranger
+3: &lt;TaskRegr[41]&gt;   sales &lt;GraphLearner[31]&gt; encodeimpact.regr.ranger
+           resampling resampling_id iteration prediction regr.rmse
+1: &lt;ResamplingCV[19]&gt;            cv         1  &lt;list[1]&gt;  123.5802
+2: &lt;ResamplingCV[19]&gt;            cv         2  &lt;list[1]&gt;  143.0181
+3: &lt;ResamplingCV[19]&gt;            cv         3  &lt;list[1]&gt;  127.6488</code></pre>
 <pre class="r"><code>
 sprintf(&quot;RMSE of ranger with med_price: %s&quot;, round(sqrt(res$aggregate()), 2))</code></pre>
 <pre><code>
-[1] &quot;RMSE of ranger with med_price: 135.1&quot;</code></pre>
+[1] &quot;RMSE of ranger with med_price: 131.68&quot;</code></pre>
 </div>
 <h3 id="advanced-obtaining-a-sparser-model">Advanced: Obtaining a sparser model</h3>
 <p>In many cases, we might want to have a sparse model. For this purpose we can use a <a href="https://mlr3filters.mlr-org.com/reference/Filter.html"><code>mlr3filters::Filter</code></a> implemented in <code>mlr3filters</code>. This can prevent our learner from overfitting make it easier for humans to interpret models as fewer variables influence the resulting prediction.</p>
@@ -1726,20 +1734,20 @@ lrn_filter = GraphLearner$new(
   po(&quot;filter&quot;, filter, param_vals = list(filter.nfeat = 12)) %&gt;&gt;% po(&quot;learner&quot;, lrn(&quot;regr.ranger&quot;))
   )
 res = resample(task = task_train, lrn_filter, cv3)
-res$score(msr(&quot;regr.mse&quot;))</code></pre>
+res$score(msr(&quot;regr.rmse&quot;))</code></pre>
 <pre><code>
-         task task_id        learner       learner_id     resampling
-1: &lt;TaskRegr&gt;   sales &lt;GraphLearner&gt; mrmr.regr.ranger &lt;ResamplingCV&gt;
-2: &lt;TaskRegr&gt;   sales &lt;GraphLearner&gt; mrmr.regr.ranger &lt;ResamplingCV&gt;
-3: &lt;TaskRegr&gt;   sales &lt;GraphLearner&gt; mrmr.regr.ranger &lt;ResamplingCV&gt;
-   resampling_id iteration prediction regr.mse
-1:            cv         1     &lt;list&gt; 27312.88
-2:            cv         2     &lt;list&gt; 20360.36
-3:            cv         3     &lt;list&gt; 19823.75</code></pre>
+             task task_id            learner       learner_id
+1: &lt;TaskRegr[41]&gt;   sales &lt;GraphLearner[31]&gt; mrmr.regr.ranger
+2: &lt;TaskRegr[41]&gt;   sales &lt;GraphLearner[31]&gt; mrmr.regr.ranger
+3: &lt;TaskRegr[41]&gt;   sales &lt;GraphLearner[31]&gt; mrmr.regr.ranger
+           resampling resampling_id iteration prediction regr.rmse
+1: &lt;ResamplingCV[19]&gt;            cv         1  &lt;list[1]&gt;  137.7110
+2: &lt;ResamplingCV[19]&gt;            cv         2  &lt;list[1]&gt;  181.7631
+3: &lt;ResamplingCV[19]&gt;            cv         3  &lt;list[1]&gt;  154.0615</code></pre>
 <pre class="r"><code>
 sprintf(&quot;RMSE of ranger with filtering: %s&quot;, round(sqrt(res$aggregate()), 2))</code></pre>
 <pre><code>
-[1] &quot;RMSE of ranger with filtering: 150&quot;</code></pre>
+[1] &quot;RMSE of ranger with filtering: 158.89&quot;</code></pre>
 </div>
 <h2 id="summary">Summary:</h2>
 <p>We have seen different ways to improve models with respect to our criteria by:</p>
@@ -1749,7 +1757,7 @@ sprintf(&quot;RMSE of ranger with filtering: %s&quot;, round(sqrt(res$aggregate(
 <li>Filtering features</li>
 <li>Engineering new features</li>
 </ul>
-<p>A combination of all of the above would most likely yield an even better model. This is left as an exercise to the reader.</p>
+<p>A combination of all the above would most likely yield an even better model. This is left as an exercise to the reader.</p>
 <p>The best model we found in this example is the <code>ranger</code> model with the added <code>med_price</code> feature. In a final step, we now want to assess the model’s quality on the held-out data we stored in our <code>task_test</code>. In order to do so, and to prevent data leakage, we can only add the median price from the training data.</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
@@ -1764,10 +1772,10 @@ task_test$cbind(test)</code></pre>
 <pre class="r"><code>
 lrn_ranger$train(task_train)
 pred = lrn_ranger$predict(task_test)
-pred$score(msr(&quot;regr.mse&quot;))</code></pre>
+pred$score(msr(&quot;regr.rmse&quot;))</code></pre>
 <pre><code>
-regr.mse 
- 36238.5 </code></pre>
+regr.rmse 
+ 142.1535 </code></pre>
 </div>
 <!--radix_placeholder_article_footer-->
 <!--/radix_placeholder_article_footer-->
