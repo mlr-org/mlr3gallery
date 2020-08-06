@@ -57,7 +57,7 @@ library(mlr3pipelines)
 library(mlr3learners)
 library(paradox)
 lgr::get_logger("mlr3")$set_threshold("warn")
-lgr::get_logger("mlr3tuning")$set_threshold("warn")
+lgr::get_logger("bbotk")$set_threshold("warn")
 
 learns = list(
   lrn("classif.xgboost", id = "xgb"),
@@ -68,7 +68,6 @@ learns_ids = sapply(learns, function(x) x$id)
 task = tsk("sonar") # some random data for this demo
 cv1 = rsmp("cv", folds = 2) # inner loop for nested CV
 cv2 = rsmp("cv", folds = 5) # outer loop for nested CV
-
 ```
 
 ## Default Parameters
