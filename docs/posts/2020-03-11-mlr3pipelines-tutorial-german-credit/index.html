@@ -62,7 +62,7 @@
   <!--radix_placeholder_rmarkdown_metadata-->
 
 <script type="text/json" id="radix-rmarkdown-metadata">
-{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["title","categories","author","date","description","output","citation_url","canonical_url"]}},"value":[{"type":"character","attributes":{},"value":["mlr3pipelines tutorial - german credit"]},{"type":"character","attributes":{},"value":["mlr3pipelines","imputation","filtering","stacking"]},{"type":"list","attributes":{},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name"]}},"value":[{"type":"character","attributes":{},"value":["Martin Binder"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name"]}},"value":[{"type":"character","attributes":{},"value":["Florian Pfisterer"]}]}]},{"type":"character","attributes":{},"value":["03-11-2020"]},{"type":"character","attributes":{},"value":["In this use case, we continue working with the German credit dataset. We already used different Learners on it in previous posts and tried to optimize their hyperparameters. To make things interesting, we artificially introduce missing values into the dataset, perform imputation and filtering and stack Learners."]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["distill::distill_article"]}},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["self_contained","css"]}},"value":[{"type":"logical","attributes":{},"value":[false]},{"type":"character","attributes":{},"value":["../../custom.css"]}]}]},{"type":"character","attributes":{},"value":["https://mlr3gallery.mlr-org.com/posts/2020-03-11-mlr3pipelines-tutorial-german-credit/"]},{"type":"character","attributes":{},"value":["https://mlr3gallery.mlr-org.com/posts/2020-03-11-mlr3pipelines-tutorial-german-credit/"]}]}
+{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["title","categories","author","date","description","output","citation_url","canonical_url"]}},"value":[{"type":"character","attributes":{},"value":["mlr3pipelines tutorial - german credit"]},{"type":"character","attributes":{},"value":["mlr3pipelines","imputation","filtering","stacking","german credit"]},{"type":"list","attributes":{},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name"]}},"value":[{"type":"character","attributes":{},"value":["Martin Binder"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name"]}},"value":[{"type":"character","attributes":{},"value":["Florian Pfisterer"]}]}]},{"type":"character","attributes":{},"value":["03-11-2020"]},{"type":"character","attributes":{},"value":["In this use case, we continue working with the German credit dataset. We already used different Learners on it in previous posts and tried to optimize their hyperparameters. To make things interesting, we artificially introduce missing values into the dataset, perform imputation and filtering and stack Learners."]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["distill::distill_article"]}},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["self_contained","css"]}},"value":[{"type":"logical","attributes":{},"value":[false]},{"type":"character","attributes":{},"value":["../../custom.css"]}]}]},{"type":"character","attributes":{},"value":["https://mlr3gallery.mlr-org.com/posts/2020-03-11-mlr3pipelines-tutorial-german-credit/"]},{"type":"character","attributes":{},"value":["https://mlr3gallery.mlr-org.com/posts/2020-03-11-mlr3pipelines-tutorial-german-credit/"]}]}
 </script>
 <!--/radix_placeholder_rmarkdown_metadata-->
   
@@ -1406,17 +1406,18 @@ cv10_instance = rsmp(&quot;cv&quot;)$instantiate(task)</code></pre>
 <pre class="r"><code>
 mlr_pipeops</code></pre>
 <pre><code>
-&lt;DictionaryPipeOp&gt; with 55 stored values
+&lt;DictionaryPipeOp&gt; with 59 stored values
 Keys: boxcox, branch, chunk, classbalancing, classifavg, classweights,
   colapply, collapsefactors, copy, datefeatures, encode, encodeimpact,
   encodelmer, featureunion, filter, fixfactors, histbin, ica,
   imputeconstant, imputehist, imputelearner, imputemean, imputemedian,
   imputemode, imputeoor, imputesample, kernelpca, learner, learner_cv,
-  missind, modelmatrix, mutate, nop, pca, proxy, quantilebin,
-  randomresponse, regravg, removeconstants, renamecolumns, scale,
+  missind, modelmatrix, multiplicityexply, multiplicityimply, mutate,
+  nop, ovrsplit, ovrunite, pca, proxy, quantilebin, randomresponse,
+  regravg, removeconstants, renamecolumns, replicate, scale,
   scalemaxabs, scalerange, select, smote, spatialsign, subsample,
-  targetinverter, targettrafoscalerange, targettrafosimple,
-  textvectorizer, threshold, unbranch, update_target, yeojohnson</code></pre>
+  targetinvert, targetmutate, targettrafoscalerange, textvectorizer,
+  threshold, unbranch, yeojohnson</code></pre>
 </div>
 <h2 id="missing-value-imputation">Missing Value Imputation</h2>
 <p>We have just introduced missing values into our data. While some <code>Learner</code>s can deal with missing value, many cannot. Trying to train a random forest fails because of this.</p>

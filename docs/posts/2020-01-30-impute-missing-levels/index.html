@@ -1450,7 +1450,7 @@ dt[grepl(&quot;impute&quot;, dt$key) | grepl(&quot;miss&quot;, dt$key), ]</code>
 <h2 id="construct-operators">Construct Operators</h2>
 <p><a href="https://mlr3pipelines.mlr-org.com">mlr3pipelines</a> contains several imputation methods. We focus on rather simple ones, and show how to impute missing values for <code>factor</code> features and <code>numeric</code> features respectively.</p>
 <p>Since our task only has numeric features, we do not need to deal with imputing factor levels, and can instead concentrate on imputing numeric values:</p>
-<p>We do this in a two-step process: * For every column we create a new indicator column, that tells us whether the value is “missing” or “present”. We achieve this using the <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_missind.html"><code>missind</code></a> <a href="https://mlr3pipelines.mlr-org.com/reference/PipeOp.html"><code>PipeOp</code></a>.</p>
+<p>We do this in a two-step process: * We create new indicator columns, that tells us whether the value of a feature is “missing” or “present”. We achieve this using the <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_missind.html"><code>missind</code></a> <a href="https://mlr3pipelines.mlr-org.com/reference/PipeOp.html"><code>PipeOp</code></a>.</p>
 <ul>
 <li>Afterwards, we impute every missing value by sampling from the histogram of the respective column. We achieve this using the <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_imputehist.html"><code>imputehist</code></a> <a href="https://mlr3pipelines.mlr-org.com/reference/PipeOp.html"><code>PipeOp</code></a>.</li>
 </ul>
@@ -1581,12 +1581,14 @@ glearner$predict(task2)</code></pre>
 <p>A full graph might the look like this:</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
+imp_missind = po(&quot;missind&quot;, param_vals = list(affect_columns = NULL, which = &quot;all&quot;))
 imp_fct = po(&quot;imputeoor&quot;,
   param_vals = list(affect_columns = selector_type(&quot;factor&quot;)))
 graph = po(&quot;copy&quot;, 2) %&gt;&gt;%
   gunion(list(imp_missind, imp_num %&gt;&gt;% imp_fct)) %&gt;&gt;%
   po(&quot;featureunion&quot;)</code></pre>
 </div>
+<p>Note that we specify the parameter <code>affect_columns = NULL</code> when initializing <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_missind.html"><code>missind</code></a>, because we also want indicator columns for our <code>factor</code> features. By default, <code>affect_columns</code> would be set to <code>selector_invert(selector_type(c("factor", "ordered", "character")))</code>. We also set the parameter <code>which</code> to <code>"all"</code> to add indicator columns for all features, regardless whether values were missing during training or not.</p>
 <p>In order to test out our new graph, we again create a situation where our task has missing factor levels. As the (<a href="https://mlr3.mlr-org.com/reference/mlr_tasks_pima.html"><code>pima</code></a>) task does not have any factor levels, we use the famous (<a href="https://mlr3.mlr-org.com/reference/mlr_tasks_boston_housing.html"><code>boston_housing</code></a>) task.</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
@@ -1607,13 +1609,13 @@ gl$predict(t2)</code></pre>
 <pre><code>
 &lt;PredictionRegr&gt; for 506 observations:
     row_id truth response
-         1  24.0 24.80673
-         2  21.6 22.14716
-         3  34.7 34.31269
+         1  24.0 24.64824
+         2  21.6 22.08679
+         3  34.7 34.02308
 ---                      
-       504  23.9 23.81468
-       505  22.0 22.31162
-       506  11.9 15.68146</code></pre>
+       504  23.9 23.93832
+       505  22.0 22.57185
+       506  11.9 16.17228</code></pre>
 </div>
 <p>Success! We learned how to deal with missing values in less than 10 minutes.</p>
 <!--radix_placeholder_article_footer-->

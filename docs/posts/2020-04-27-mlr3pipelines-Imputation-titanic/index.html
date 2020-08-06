@@ -1343,7 +1343,8 @@ document.addEventListener('DOMContentLoaded', function() {
 </div>
 
 <div class="d-article">
-<p>This is the second post of the titanic use case series. You can find the first use case <a href="/2020-03-12-intro-pipelines-titanic/">here</a>. <!-- Need to fix hyperlink --> In this section we will focus on more advanced usage of <code>mlr3pipelines</code>. Specifically, this section illustrates the different options when it comes to data imputation and feature engineering. Furthermore, the section shows how to <strong>benchmark</strong>, <strong>feature engineer</strong> and compare our results. Again, we need to take some preparatory steps:</p>
+<p>This is the second post of the titanic use case series. You can find the first use case <a href="https://mlr3gallery.mlr-org.com/posts/2020-03-12-intro-pipelines-titanic/">here</a>.</p>
+<p>In this section we will focus on more advanced usage of <code>mlr3pipelines</code>. Specifically, this section illustrates the different options when it comes to data imputation and feature engineering. Furthermore, the section shows how to <strong>benchmark</strong>, <strong>feature engineer</strong> and compare our results. Again, we need to take some preparatory steps:</p>
 <p>For the case that you are only tuning in for the second part, we need to load some packages: The data is part of the <code>mlr3data</code> package.</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
@@ -1364,7 +1365,7 @@ titanic_train = titanic[1:891, ]
 titanic_test = titanic[892:1309, ]
 
 # setting up the task
-task = TaskClassif$new(&quot;titanic&quot;, titanic_train, target = &quot;survived&quot;, positive = &quot;1&quot;)
+task = TaskClassif$new(&quot;titanic&quot;, titanic_train, target = &quot;survived&quot;, positive = &quot;yes&quot;)
 task$select(cols = setdiff(task$feature_names, c(&quot;cabin&quot;, &quot;name&quot;, &quot;ticket&quot;)))
 
 # setting up the learner
@@ -1488,17 +1489,17 @@ task_eng = po_ftextract$clone()$train(list(task))[[1]]
 task_eng$data()</code></pre>
 <pre><code>
      survived age embarked    fare parch pclass    sex sib_sp cabin
-  1:        0  22        S  7.2500     0      3   male      1  &lt;NA&gt;
-  2:        1  38        C 71.2833     0      1 female      1   C85
-  3:        1  26        S  7.9250     0      3 female      0  &lt;NA&gt;
-  4:        1  35        S 53.1000     0      1 female      1  C123
-  5:        0  35        S  8.0500     0      3   male      0  &lt;NA&gt;
+  1:       no  22        S  7.2500     0      3   male      1  &lt;NA&gt;
+  2:      yes  38        C 71.2833     0      1 female      1   C85
+  3:      yes  26        S  7.9250     0      3 female      0  &lt;NA&gt;
+  4:      yes  35        S 53.1000     0      1 female      1  C123
+  5:       no  35        S  8.0500     0      3   male      0  &lt;NA&gt;
  ---                                                               
-887:        0  27        S 13.0000     0      2   male      0  &lt;NA&gt;
-888:        1  19        S 30.0000     0      1 female      0   B42
-889:        0  NA        S 23.4500     2      3 female      1  &lt;NA&gt;
-890:        1  26        C 30.0000     0      1   male      0  C148
-891:        0  32        Q  7.7500     0      3   male      0  &lt;NA&gt;
+887:       no  27        S 13.0000     0      2   male      0  &lt;NA&gt;
+888:      yes  19        S 30.0000     0      1 female      0   B42
+889:       no  NA        S 23.4500     2      3 female      1  &lt;NA&gt;
+890:      yes  26        C 30.0000     0      1   male      0  C148
+891:       no  32        Q  7.7500     0      3   male      0  &lt;NA&gt;
                                                     name           ticket
   1:                             Braund, Mr. Owen Harris        A/5 21171
   2: Cumings, Mrs. John Bradley (Florence Briggs Thayer)         PC 17599
