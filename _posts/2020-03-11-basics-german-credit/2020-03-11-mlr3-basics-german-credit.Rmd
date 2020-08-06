@@ -107,17 +107,18 @@ str(german)
 Our dataset has `r nrow(german)` observations and `r ncol(german)` columns.
 The variable we want to predict is `credit_risk` (either good or bad), i.e., we aim to classify people by their credit risk.
 
-We also recommend the packages `r cran_pkg("skimr")` (`r ref("skimr::skim()")`) and `r cran_pkg("DataExplorer")` (`r ref("DataExplorer::plot_bar()")`, `r ref("DataExplorer::plot_histogram()")`, `r ref("DataExplorer::plot_boxplot()")`) as they create very well readable and understandable overviews:
+We also recommend the packages `r cran_pkg("skimr")` and `r cran_pkg("DataExplorer")` as they create very well readable and understandable overviews:
 
 ```{r, R.options=list(width = 120)}
 skimr::skim(german)
 ```
 
-```{r, echo=FALSE}
-german_short = mlr3misc::map_dtc(german, function(x) {
-  if (is.factor(x) || is.character(x)) {
-    levels(x) = abbreviate(mlr3misc::str_trunc(levels(x), 16, "..."), 12)
-  }
+Prior to calling `r cran_pkg("DataExplorer")`, we shorten the (very lengthy) factor levels of the german credit data set to get plots which nicely fit on the screen (no need to dig into this):
+```{r, echo=TRUE}
+german_short = german
+is_factor = sapply(german_short, is.factor)
+german_short[is_factor] = lapply(german[is_factor], function(x) {
+  levels(x) = abbreviate(mlr3misc::str_trunc(levels(x), 16, "..."), 12)
   x
 })
 ```
@@ -575,10 +576,7 @@ mlr_measures
 ```
 
 - What are the arguments of a `$new()` constructor?
-
-```{r}
-formals(TaskClassif$public_methods$initialize)
-```
+  - Check the corresponding help page.
 
 - What are the possible slots and functions of an object?
   - Writing `pred_rf$`, and pressing \<TAB\> should work.
