@@ -1,5 +1,5 @@
 ---
-title: mlr3pipelines tutorial - german credit
+title: mlr3pipelines Tutorial - German Credit
 categories:
   - mlr3pipelines
   - imputation
@@ -112,7 +112,7 @@ mlr_pipeops
 
 We have just introduced missing values into our data.
 While some `Learner`s can deal with missing value, many cannot.
-Trying to train a random forest fails because of this.
+Trying to train a random forest fails because of this:
 
 ```{r, error=TRUE}
 ranger = lrn("classif.ranger")
@@ -196,7 +196,7 @@ searchspace = ParamSet$new(list(
 
 The problem is one-dimensional (i.e. only one parameter is tuned).
 Thus, we make use of a grid search.
-For higher dimensions, strategies like random search are more appropriate.
+For higher dimensions, strategies like random search are more appropriate:
 
 ```{r}
 inst = TuningInstanceSingleCrit$new(
@@ -230,10 +230,9 @@ We use `"prob"` predictions because they carry more information than response pr
 
 ```{r}
 stackgraph = po("imputeoor") %>>%
-  list(
+  gunion(list(
     po("learner_cv", lrn("classif.ranger", predict_type = "prob")),
-    po("learner_cv", lrn("classif.kknn", predict_type = "prob"))
-  ) %>>%
+    po("learner_cv", lrn("classif.kknn", predict_type = "prob")))) %>>%
   po("featureunion") %>>% lrn("classif.log_reg")
 ```
 

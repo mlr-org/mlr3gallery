@@ -118,7 +118,7 @@ We first tune the `k` parameter (i.e. the number of neighbors to be accounted fo
 A range from 3 to 20 seems reasonable for this.
 Second, we aim to tune the `distance` function.
 We aim to keep it simple and only tune over the L1 and L2 distance.
-To do so, we use the `paradox` package to define a search space (see [Appendix](#very-quick-paradox-primer) for a short list of possible parameter types).
+To do so, we use the `paradox` package to define a search space (see [Appendix](#very-quick-paradox-primer) for a short list of possible parameter types):
 
 ```{r}
 search_space = ParamSet$new(list(
@@ -153,7 +153,7 @@ instance_grid = TuningInstanceSingleCrit$new(
 
 After having set up a tuning instance, we can start tuning.
 Before that, we need a tuning strategy, though.
-A simple tuning method is to try all possible combinations of parameters: **Grid Search**
+A simple tuning method is to try all possible combinations of parameters: **Grid Search**.
 While it is very intuitive and simple, it is inefficient if the search space is large.
 For this simple use case, it suffices, though.
 We get the `r ref("TunerGridSearch", "grid_search tuner")` via:
@@ -179,20 +179,19 @@ Now, we tune:
 tuner_grid$optimize(instance_grid)
 ```
 
-The result is returned by `$optimize()` together with its performance. It can
-be also accessed with the  `$result` slot.
+The result is returned by `$optimize()` together with its performance. It can be also accessed with the  `$result` slot:
 
 ```{r}
 instance_grid$result
 ```
 
-We can also look at the `Archive` of evaluated configurations.
+We can also look at the `Archive` of evaluated configurations:
 
 ```{r}
 instance_grid$archive$data()
 ```
 
-We plot the performances depending on the sampled `k` and `distance`.
+We plot the performances depending on the sampled `k` and `distance`:
 
 ```{r}
 ggplot(instance_grid$archive$data(), aes(x = k, y = classif.ce, color = as.factor(distance))) +
@@ -201,7 +200,7 @@ ggplot(instance_grid$archive$data(), aes(x = k, y = classif.ce, color = as.facto
 
 On average, the Euclidean distance (`distance` = 2) seems to work better.
 However, there is much randomness introduced by the resampling instance.
-So you, the reader, may see a different result, when you run the experiment yourself.
+So you, the reader, may see a different result, when you run the experiment yourself and set a different random seed.
 For `k`, we find that values between 7 and 13 perform well.
 
 ### Random Search and Transformation
@@ -256,16 +255,16 @@ instance_random = TuningInstanceSingleCrit$new(
 tuner_random$optimize(instance_random)
 ```
 
-Like before, we can review the `Archive`. It includes the points before and after the transformation.
-The archive includes a column for each parameter the `Tuner` sampled on the search space (points before the transformation).
+Like before, we can review the `Archive`.
+It includes the points before and after the transformation.
+The archive includes a column for each parameter the `Tuner` sampled on the search space (points before the transformation):
 
 ```{r}
 instance_random$archive$data()
 ```
 
-The parameters used by the learner (points after the transformation) are stored in
-in the `x_domain` column as lists. By using `unnest = x_domain`, the list elements are expanded
-to separate columns.
+The parameters used by the learner (points after the transformation) are stored in in the `x_domain` column as lists.
+By using `unnest = x_domain`, the list elements are expanded to separate columns:
 
 ```{r}
 instance_random$archive$data(unnest = "x_domain")
@@ -332,11 +331,11 @@ grid_auto = AutoTuner$new(
 The `AutoTuner` behaves just like a regular `Learner`.
 It can be used to combine the steps of hyperparameter tuning and model fitting but is especially useful for resampling and *fair* comparison of performance through benchmarking:
 
-```{r, eval = FALSE}
+```{r, eval=FALSE}
 rr = resample(task, grid_auto, cv10_instance)
 ```
 
-We aggregate the performances of all resampling iterations.
+We aggregate the performances of all resampling iterations:
 
 ```{r, echo=FALSE}
 rr = readRDS("resample_result.rds")
