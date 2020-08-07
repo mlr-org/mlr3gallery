@@ -12,7 +12,7 @@ author:
 date: 03-11-2020
 description: |
   In this use case, we teach the basics of mlr3 by training different models on
-  the German credit dataset. 
+  the German credit dataset.
 output:
   distill::distill_article:
     self_contained: false
@@ -114,7 +114,9 @@ We also recommend the packages `r cran_pkg("skimr")` and `r cran_pkg("DataExplor
 skimr::skim(german)
 ```
 
+
 Prior to calling `r cran_pkg("DataExplorer")`, we shorten the (very lengthy) factor levels of the german credit data set to get plots which nicely fit on the screen (no need to dig into this):
+
 ```{r, echo=TRUE}
 german_short = german
 is_factor = sapply(german_short, is.factor)
@@ -184,7 +186,7 @@ In our case it is clearly our objective to model or predict the binary `factor` 
 Thus, we define a `TaskClassif`:
 
 ```{r}
-task = TaskClassif$new("GermanCredit", backend = german, target = "credit_risk")
+task = TaskClassif$new("GermanCredit", german, target = "credit_risk")
 ```
 
 Note that the German credit data is also given as an example task which ships with the `mlr3` package.
