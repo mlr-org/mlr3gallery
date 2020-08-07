@@ -1766,7 +1766,7 @@ skimr::skim(german)</code></pre>
 </tbody>
 </table>
 </div>
-Prior to calling <a href="https://cran.r-project.org/package=DataExplorer">DataExplorer</a>, we shorten the (very lengthy) factor levels of the german credit data set to get plots which nicely fit on the screen (no need to dig into this):
+<p>Prior to calling <a href="https://cran.r-project.org/package=DataExplorer">DataExplorer</a>, we shorten the (very lengthy) factor levels of the german credit data set to get plots which nicely fit on the screen (no need to dig into this):</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
 german_short = german
@@ -1823,7 +1823,7 @@ DataExplorer::plot_boxplot(german_short, by = &quot;credit_risk&quot;, nrow = 1,
 <p>In our case it is clearly our objective to model or predict the binary <code>factor</code> variable <code>credit_risk</code>. Thus, we define a <code>TaskClassif</code>:</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
-task = TaskClassif$new(&quot;GermanCredit&quot;, backend = german, target = &quot;credit_risk&quot;)</code></pre>
+task = TaskClassif$new(&quot;GermanCredit&quot;, german, target = &quot;credit_risk&quot;)</code></pre>
 </div>
 <p>Note that the German credit data is also given as an example task which ships with the <code>mlr3</code> package. Thus, you actually don’t need to construct it yourself, just call <code>tsk("german_credit")</code> to retrieve the object from the dictionary <a href="https://mlr3.mlr-org.com/reference/mlr_tasks.html"><code>mlr_tasks</code></a>.</p>
 <h3 id="learner-definition">Learner Definition</h3>
@@ -2341,8 +2341,8 @@ classif.fpr classif.fnr
 <pre class="r"><code>
 mlr_resamplings</code></pre>
 <pre><code>
-&lt;DictionaryResampling&gt; with 7 stored values
-Keys: bootstrap, custom, cv, holdout, insample, repeated_cv,
+&lt;DictionaryResampling&gt; with 8 stored values
+Keys: bootstrap, custom, cv, holdout, insample, loo, repeated_cv,
   subsampling</code></pre>
 <pre class="r"><code>
 mlr_measures</code></pre>
@@ -2604,9 +2604,9 @@ autoplot(bmr)</code></pre>
 <pre class="r"><code>
 mlr_tasks</code></pre>
 <pre><code>
-&lt;DictionaryTask&gt; with 9 stored values
-Keys: boston_housing, german_credit, iris, mtcars, pima, sonar, spam,
-  wine, zoo</code></pre>
+&lt;DictionaryTask&gt; with 10 stored values
+Keys: boston_housing, breast_cancer, german_credit, iris, mtcars, pima,
+  sonar, spam, wine, zoo</code></pre>
 <pre class="r"><code>
 mlr_learners</code></pre>
 <pre><code>
@@ -2620,8 +2620,8 @@ Keys: classif.cv_glmnet, classif.debug, classif.featureless,
 <pre class="r"><code>
 mlr_resamplings</code></pre>
 <pre><code>
-&lt;DictionaryResampling&gt; with 7 stored values
-Keys: bootstrap, custom, cv, holdout, insample, repeated_cv,
+&lt;DictionaryResampling&gt; with 8 stored values
+Keys: bootstrap, custom, cv, holdout, insample, loo, repeated_cv,
   subsampling</code></pre>
 <pre class="r"><code>
 mlr_measures</code></pre>
