@@ -65,7 +65,7 @@
 <!--/radix_placeholder_rmarkdown_metadata-->
   
   <script type="text/json" id="radix-resource-manifest">
-  {"type":"character","attributes":{},"value":["feature-engineering-of-date-time-variables_files/bowser-1.9.3/bowser.min.js","feature-engineering-of-date-time-variables_files/distill-2.2.21/template.v2.js","feature-engineering-of-date-time-variables_files/figure-html5/unnamed-chunk-1-1.png","feature-engineering-of-date-time-variables_files/header-attrs-2.1/header-attrs.js","feature-engineering-of-date-time-variables_files/jquery-1.11.3/jquery.min.js","feature-engineering-of-date-time-variables_files/webcomponents-2.0.0/webcomponents.js"]}
+  {"type":"character","attributes":{},"value":["feature-engineering-of-date-time-variables_files/figure-html5/unnamed-chunk-1-1.png"]}
   </script>
   <!--radix_placeholder_navigation_in_header-->
 
@@ -755,6 +755,16 @@ d-appendix .citation-appendix,
 }
 
 
+.sidebar-section.custom {
+  font-size: 12px;
+  line-height: 1.6em;
+}
+
+.custom p {
+  margin-bottom: 0.5em;
+}
+
+
 /* Improve display for browsers without grid (IE/Edge <= 15) */
 
 .downlevel {
@@ -1280,7 +1290,6 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 <!--/radix_placeholder_distill-->
-  <script src="../../site_libs/header-attrs-2.1/header-attrs.js"></script>
   <script src="../../site_libs/jquery-1.11.3/jquery.min.js"></script>
   <script src="../../site_libs/bowser-1.9.3/bowser.min.js"></script>
   <script src="../../site_libs/webcomponents-2.0.0/webcomponents.js"></script>
@@ -1297,7 +1306,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <!--radix_placeholder_front_matter-->
 
 <script id="distill-front-matter" type="text/json">
-{"title":"Feature Engineering of Date-Time Variables","description":"We show how to engineer features using date-time variables.","authors":[{"author":"Lennart Schneider","authorURL":"#","affiliation":"&nbsp;","affiliationURL":"#"}],"publishedDate":"2020-05-02T00:00:00.000+02:00","citationText":"Schneider, 2020"}
+{"title":"Feature Engineering of Date-Time Variables","description":"We show how to engineer features using date-time variables.","authors":[{"author":"Lennart Schneider","authorURL":"#","affiliation":"&nbsp;","affiliationURL":"#"}],"publishedDate":"2020-05-02T00:00:00.000+00:00","citationText":"Schneider, 2020"}
 </script>
 
 <!--/radix_placeholder_front_matter-->
@@ -1306,13 +1315,13 @@ document.addEventListener('DOMContentLoaded', function() {
 <nav class="distill-site-nav distill-site-header">
 <div class="nav-left">
 <a class="logo" href="https://mlr3.mlr-org.com">
-<img src="../../images/logo.png"/>
+<img src="../../images/logo.png" alt="Logo"/>
 </a>
 <a href="../../index.html" class="title">mlr3gallery</a>
 </div>
 <div class="nav-right">
 <a href="https://github.com/mlr-org/mlr3gallery">
-<i class="fab fa-github"></i>
+<i class="fab fa-github" aria-hidden="true"></i>
 </a>
 <a href="javascript:void(0);" class="nav-toggle">&#9776;</a>
 </div>
@@ -1337,11 +1346,13 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>In this tutorial, we demonstrate how <a href="https://mlr3pipelines.mlr-org.com">mlr3pipelines</a> can be used to easily engineer features based on date-time variables. Relying on the <a href="https://archive.ics.uci.edu/ml/datasets/bike+sharing+dataset">Bike Sharing Dataset</a> and the <a href="https://mlr3learners.mlr-org.com/reference/mlr_learners_regr.ranger.html"><code>ranger learner</code></a> we compare the RMSE of a random forest using the original features (baseline), to the RMSE of a random forest using newly engineered features on top of the original ones.</p>
 <h2 id="motivation">Motivation</h2>
 <p>A single date-time variable (i.e., a <code>POSIXct</code> column) contains plenty of information ranging from year, month, day, hour, minute and second to other features such as week of the year, or day of the week. Moreover, most of these features are of cyclical nature, i.e., the eleventh and twelfth hour of a day are one hour apart, but so are the 23rd hour and midnight of the other day (see also this <a href="http://blog.davidkaleko.com/feature-engineering-cyclical-features.html">blog post</a> and <a href="https://docs.fast.ai/tabular.transform.html#Treating-date-columns">fastai</a> for more information).</p>
-<p>Not respecting this cyclical nature results in treating hours on a linear continuum. One way to handle a cyclical feature <span class="math inline">\(\mathbf{x}\)</span> is to compute the sine and cosine transformation of <span class="math inline">\(\frac{2 \pi \mathbf{x}}{\mathbf{x}_{\text{max}}}\)</span>, with <span class="math inline">\(\mathbf{x}_{\text{max}} = 24\)</span> for hours and <span class="math inline">\(60\)</span> for minutes and seconds. This results in a two-dimensional representation of the feature:</p>
+<p>Not respecting this cyclical nature results in treating hours on a linear continuum. One way to handle a cyclical feature <span class="math inline">\(\mathbf{x}\)</span> is to compute the sine and cosine transformation of <span class="math inline">\(\frac{2 \pi \mathbf{x}}{\mathbf{x}_{\text{max}}}\)</span>, with <span class="math inline">\(\mathbf{x}_{\text{max}} = 24\)</span> for hours and <span class="math inline">\(60\)</span> for minutes and seconds.</p>
+<p>This results in a two-dimensional representation of the feature:</p>
 <div class="layout-chunk" data-layout="l-body">
 <p><img src="feature-engineering-of-date-time-variables_files/figure-html5/unnamed-chunk-1-1.png" width="960" style="display: block; margin: auto;" /></p>
 </div>
-<p><a href="https://mlr3pipelines.mlr-org.com">mlr3pipelines</a> provides the <code>PipeOpDateFeatures</code> pipeline which can be used to automatically engineer features based on <code>POSIXct</code> columns, including handling of cyclical features. This is useful as most learners naturally cannot handle dates and <code>POSIXct</code> variables and therefore require conversion prior to training.</p>
+<p><a href="https://mlr3pipelines.mlr-org.com">mlr3pipelines</a> provides the <code>PipeOpDateFeatures</code> pipeline which can be used to automatically engineer features based on <code>POSIXct</code> columns, including handling of cyclical features.</p>
+<p>This is useful as most learners naturally cannot handle dates and <code>POSIXct</code> variables and therefore require conversion prior to training.</p>
 <h2 id="bike-sharing">Bike Sharing</h2>
 <p>The <a href="https://archive.ics.uci.edu/ml/datasets/bike+sharing+dataset">Bike Sharing Dataset</a> contains the hourly count of rental bikes between years 2011 and 2012 in Capital bikeshare system with the corresponding weather and seasonal information. The dataset can be downloaded from the UCI Machine Learning Repository. After reading in the data, we fix some factor levels, and convert some data types:</p>
 <div class="layout-chunk" data-layout="l-body">
@@ -1410,11 +1421,13 @@ test.idx = setdiff(seq_len(tsk$nrow), train.idx)</code></pre>
 tsk_train = tsk$clone()$filter(train.idx)
 tsk_test = tsk$clone()$filter(test.idx)</code></pre>
 </div>
-<p>To estimate the performance on unseen data, we will use a <code>3-fold cross-validation</code>. Note that this involves validating on past data, which is usually a bad practice but should suffice for this example:</p>
+<p>To estimate the performance on unseen data, we will use a <code>3-fold cross-validation</code>.</p>
+<p>Note that this involves validating on past data, which is usually bad practice but should suffice for this example:</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
 cv3 = rsmp(&quot;cv&quot;, folds = 3)</code></pre>
 </div>
+<p>To obtain reliable estimates on how well our model generalizes to the future, we would have to split our training and test sets according to the date variable.</p>
 <p>As our baseline model, we use a random forest, ranger learner. For the baseline, we only use the original features that are sensible and drop <code>instant</code> (record index), <code>dteday</code> (year-month-day as a <code>character</code>, not usable) and <code>date</code> (our new <code>POSIXct</code> variable which we will only use later). We also do not use <code>casual</code> (count of casual users) and <code>registered</code> (count of registered users) as features as they together add up to <code>cnt</code> and could be used as different target variables if we were interested in only the casual or registered users.</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
@@ -1428,22 +1441,17 @@ tsk_train_rf = tsk_train$clone()$select(setdiff(
 <p>We can then use <code>resample</code> with <code>3-fold cross-validation</code>:</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
-res_rf = resample(tsk_train_rf, learner = lrn_rf, resampling = cv3)</code></pre>
-<pre><code>
-INFO  [15:00:45.471] Applying learner &#39;regr.ranger&#39; on task &#39;bikes&#39; (iter 1/3) 
-INFO  [15:00:48.105] Applying learner &#39;regr.ranger&#39; on task &#39;bikes&#39; (iter 2/3) 
-INFO  [15:00:49.743] Applying learner &#39;regr.ranger&#39; on task &#39;bikes&#39; (iter 3/3) </code></pre>
-<pre class="r"><code>
+res_rf = resample(tsk_train_rf, learner = lrn_rf, resampling = cv3)
 res_rf$score(msr(&quot;regr.mse&quot;))</code></pre>
 <pre><code>
-         task task_id             learner  learner_id     resampling
-1: &lt;TaskRegr&gt;   bikes &lt;LearnerRegrRanger&gt; regr.ranger &lt;ResamplingCV&gt;
-2: &lt;TaskRegr&gt;   bikes &lt;LearnerRegrRanger&gt; regr.ranger &lt;ResamplingCV&gt;
-3: &lt;TaskRegr&gt;   bikes &lt;LearnerRegrRanger&gt; regr.ranger &lt;ResamplingCV&gt;
-   resampling_id iteration prediction regr.mse
-1:            cv         1     &lt;list&gt; 4563.564
-2:            cv         2     &lt;list&gt; 4696.805
-3:            cv         3     &lt;list&gt; 4431.978</code></pre>
+             task task_id                 learner  learner_id
+1: &lt;TaskRegr[41]&gt;   bikes &lt;LearnerRegrRanger[32]&gt; regr.ranger
+2: &lt;TaskRegr[41]&gt;   bikes &lt;LearnerRegrRanger[32]&gt; regr.ranger
+3: &lt;TaskRegr[41]&gt;   bikes &lt;LearnerRegrRanger[32]&gt; regr.ranger
+           resampling resampling_id iteration prediction regr.mse
+1: &lt;ResamplingCV[19]&gt;            cv         1  &lt;list[1]&gt; 4492.038
+2: &lt;ResamplingCV[19]&gt;            cv         2  &lt;list[1]&gt; 4720.677
+3: &lt;ResamplingCV[19]&gt;            cv         3  &lt;list[1]&gt; 4381.281</code></pre>
 </div>
 <p>The average RMSE is given by:</p>
 <div class="layout-chunk" data-layout="l-body">
@@ -1451,7 +1459,7 @@ res_rf$score(msr(&quot;regr.mse&quot;))</code></pre>
 sprintf(&quot;RMSE ranger original features: %s&quot;, round(sqrt(res_rf$aggregate()),
   digits = 2))</code></pre>
 <pre><code>
-[1] &quot;RMSE ranger original features: 67.56&quot;</code></pre>
+[1] &quot;RMSE ranger original features: 67.32&quot;</code></pre>
 </div>
 <p>We now want to improve our baseline model by using newly engineered features based on the <code>date</code> <code>POSIXct</code> column.</p>
 <h2 id="pipeopdatefeatures">PipeOpDateFeatures</h2>
@@ -1509,22 +1517,17 @@ tsk_train_grl = tsk_train$clone()$select(setdiff(
   c(&quot;instant&quot;, &quot;dteday&quot;, &quot;yr&quot;, &quot;mnth&quot;, &quot;hr&quot;, &quot;weekday&quot;, &quot;casual&quot;, &quot;registered&quot;)
   )
 )
-res_grl = resample(tsk_train_grl, learner = grl, resampling = cv3)</code></pre>
-<pre><code>
-INFO  [15:00:52.515] Applying learner &#39;datefeatures.regr.ranger&#39; on task &#39;bikes&#39; (iter 1/3) 
-INFO  [15:00:55.643] Applying learner &#39;datefeatures.regr.ranger&#39; on task &#39;bikes&#39; (iter 2/3) 
-INFO  [15:00:58.512] Applying learner &#39;datefeatures.regr.ranger&#39; on task &#39;bikes&#39; (iter 3/3) </code></pre>
-<pre class="r"><code>
+res_grl = resample(tsk_train_grl, learner = grl, resampling = cv3)
 res_grl$score(msr(&quot;regr.mse&quot;))</code></pre>
 <pre><code>
-         task task_id        learner               learner_id     resampling
-1: &lt;TaskRegr&gt;   bikes &lt;GraphLearner&gt; datefeatures.regr.ranger &lt;ResamplingCV&gt;
-2: &lt;TaskRegr&gt;   bikes &lt;GraphLearner&gt; datefeatures.regr.ranger &lt;ResamplingCV&gt;
-3: &lt;TaskRegr&gt;   bikes &lt;GraphLearner&gt; datefeatures.regr.ranger &lt;ResamplingCV&gt;
-   resampling_id iteration prediction regr.mse
-1:            cv         1     &lt;list&gt; 2374.592
-2:            cv         2     &lt;list&gt; 2249.154
-3:            cv         3     &lt;list&gt; 2429.190</code></pre>
+             task task_id            learner               learner_id
+1: &lt;TaskRegr[41]&gt;   bikes &lt;GraphLearner[31]&gt; datefeatures.regr.ranger
+2: &lt;TaskRegr[41]&gt;   bikes &lt;GraphLearner[31]&gt; datefeatures.regr.ranger
+3: &lt;TaskRegr[41]&gt;   bikes &lt;GraphLearner[31]&gt; datefeatures.regr.ranger
+           resampling resampling_id iteration prediction regr.mse
+1: &lt;ResamplingCV[19]&gt;            cv         1  &lt;list[1]&gt; 2366.673
+2: &lt;ResamplingCV[19]&gt;            cv         2  &lt;list[1]&gt; 2688.929
+3: &lt;ResamplingCV[19]&gt;            cv         3  &lt;list[1]&gt; 2209.474</code></pre>
 </div>
 <p>The average RMSE is given by</p>
 <div class="layout-chunk" data-layout="l-body">
@@ -1532,9 +1535,9 @@ res_grl$score(msr(&quot;regr.mse&quot;))</code></pre>
 sprintf(&quot;RMSE graph learner date features: %s&quot;, round(sqrt(res_grl$aggregate()),
   digits = 2))</code></pre>
 <pre><code>
-[1] &quot;RMSE graph learner date features: 48.49&quot;</code></pre>
+[1] &quot;RMSE graph learner date features: 49.21&quot;</code></pre>
 </div>
-<p>and therefore improved by almost 30%.</p>
+<p>and therefore improved by almost 30%!</p>
 <p>Finally, we fit our <code>GraphLearner</code> on the complete training task and predict on the test task:</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
@@ -1556,7 +1559,15 @@ pred = grl$predict(tsk_test)
 pred$score(msr(&quot;regr.mse&quot;))</code></pre>
 <pre><code>
 regr.mse 
-1813.609 </code></pre>
+1832.432 </code></pre>
+</div>
+<p>Where we can obtain the RMSE on the held-out test data:</p>
+<div class="layout-chunk" data-layout="l-body">
+<pre class="r"><code>
+sprintf(&quot;RMSE graph learner date features: %s&quot;, round(sqrt(pred$score(msr(&quot;regr.mse&quot;))),
+  digits = 2))</code></pre>
+<pre><code>
+[1] &quot;RMSE graph learner date features: 42.81&quot;</code></pre>
 </div>
 <!--radix_placeholder_article_footer-->
 <!--/radix_placeholder_article_footer-->
