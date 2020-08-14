@@ -2440,7 +2440,7 @@ ps_smote$trafo = function(x, param_set) {
   x
 }</code></pre>
 </div>
-<p>We create an <code>AutoTuner</code> class from the learner to tune the graph (random forest learner + imbalance correction method) based on a 3-fold CV using the <code>classif.fbeta</code> as performance measure. To keep runtime low, we define the search space only for the imbalacy correction method. However, one can also jointly tune the hyperparameter of the learner along with the imbalance correction method by extending the search space with the learner’s hyperparameters. Note that SMOTE has two hyperparameters <code>K</code> and <code>dup_size</code>. While <code>K</code> changes the behavior of the SMOTE algorithm, <code>dup_size</code> will affect oversampling rate. To focus on the effect of the oversampling rate on the performance, we will consider SMOTE with K = 2 as a different imbalacy correction method as SMOTE with K = 4 (and so on). Hence, we use grid search with 5 different hyperparameter configurations for the undersampling method, the oversampling method and each SMOTE variant for tuning:</p>
+<p>We create an <code>AutoTuner</code> class from the learner to tune the graph (random forest learner + imbalance correction method) based on a 3-fold CV using the <code>classif.fbeta</code> as performance measure. To keep runtime low, we define the search space only for the imbalance correction method. However, one can also jointly tune the hyperparameter of the learner along with the imbalance correction method by extending the search space with the learner’s hyperparameters. Note that SMOTE has two hyperparameters <code>K</code> and <code>dup_size</code>. While <code>K</code> changes the behavior of the SMOTE algorithm, <code>dup_size</code> will affect oversampling rate. To focus on the effect of the oversampling rate on the performance, we will consider SMOTE with K = 2 as a different imbalance correction method as SMOTE with K = 4 (and so on). Hence, we use grid search with 5 different hyperparameter configurations for the undersampling method, the oversampling method and each SMOTE variant for tuning:</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
 inner_cv3 = rsmp(&quot;cv&quot;, folds = 3)
@@ -2450,25 +2450,25 @@ learns = list(
   AutoTuner$new(
     learner = lrn_under,
     resampling = inner_cv3,
-    measures = measure,
-    tune_ps = ps_under,
-    terminator = term(&quot;none&quot;),
+    measure = measure,
+    search_space = ps_under,
+    terminator = trm(&quot;none&quot;),
     tuner = tnr(&quot;grid_search&quot;, resolution = 6)
   ),
   AutoTuner$new(
     learner = lrn_over,
     resampling = inner_cv3,
-    measures = measure,
-    tune_ps = ps_over,
-    terminator = term(&quot;none&quot;),
+    measure = measure,
+    search_space = ps_over,
+    terminator = trm(&quot;none&quot;),
     tuner = tnr(&quot;grid_search&quot;, resolution = 6)
   ),
   AutoTuner$new(
     learner = lrn_smote,
     resampling = inner_cv3,
-    measures = measure,
-    tune_ps = ps_smote,
-    terminator = term(&quot;none&quot;),
+    measure = measure,
+    search_space = ps_smote,
+    terminator = trm(&quot;none&quot;),
     tuner = tnr(&quot;grid_search&quot;, resolution = 6)
   )
 )
@@ -2492,9 +2492,9 @@ design = benchmark_grid(
 print(design)</code></pre>
 <pre><code>
                 task         learner              resampling
-1: &lt;TaskClassif[44]&gt; &lt;AutoTuner[39]&gt; &lt;ResamplingHoldout[19]&gt;
-2: &lt;TaskClassif[44]&gt; &lt;AutoTuner[39]&gt; &lt;ResamplingHoldout[19]&gt;
-3: &lt;TaskClassif[44]&gt; &lt;AutoTuner[39]&gt; &lt;ResamplingHoldout[19]&gt;</code></pre>
+1: &lt;TaskClassif[44]&gt; &lt;AutoTuner[37]&gt; &lt;ResamplingHoldout[19]&gt;
+2: &lt;TaskClassif[44]&gt; &lt;AutoTuner[37]&gt; &lt;ResamplingHoldout[19]&gt;
+3: &lt;TaskClassif[44]&gt; &lt;AutoTuner[37]&gt; &lt;ResamplingHoldout[19]&gt;</code></pre>
 <pre class="r"><code>
 set.seed(1)
 bmr = benchmark(design, store_models = TRUE)</code></pre>
@@ -2522,17 +2522,17 @@ autoplot(bmr, measure = measure)</code></pre>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
 library(ggplot2)
-utune_path = bmr$data$learner[[1]]$archive(&quot;params&quot;)
+utune_path = bmr$data$learner[[1]]$archive$data()
 utune_gg = ggplot(utune_path, aes(x = undersample.ratio, y = classif.fbeta)) +
   geom_point(size = 3) +
   geom_line() + ylim(0.9, 1)
 
-otune_path = bmr$data$learner[[2]]$archive(&quot;params&quot;)
+otune_path = bmr$data$learner[[2]]$archive$data()
 otune_gg = ggplot(otune_path, aes(x = oversample.ratio, y = classif.fbeta)) +
   geom_point(size = 3) +
   geom_line() + ylim(0.9, 1)
 
-stune_path = bmr$data$learner[[3]]$archive(&quot;params&quot;)
+stune_path = bmr$data$learner[[3]]$archive$data()
 stune_gg = ggplot(stune_path, aes(
   x = smote.dup_size,
   y = classif.fbeta, col = factor(smote.K))) +

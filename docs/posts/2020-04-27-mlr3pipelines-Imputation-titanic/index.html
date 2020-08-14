@@ -1343,7 +1343,8 @@ document.addEventListener('DOMContentLoaded', function() {
 </div>
 
 <div class="d-article">
-<p>This is the second post of the titanic use case series. You can find the first use case <a href="/2020-03-12-intro-pipelines-titanic/">here</a>. <!-- Need to fix hyperlink --> In this section we will focus on more advanced usage of <code>mlr3pipelines</code>. Specifically, this section illustrates the different options when it comes to data imputation and feature engineering. Furthermore, the section shows how to <strong>benchmark</strong>, <strong>feature engineer</strong> and compare our results. Again, we need to take some prepatory steps:</p>
+<p>This is the second post of the titanic use case series. You can find the first use case <a href="https://mlr3gallery.mlr-org.com/posts/2020-03-12-intro-pipelines-titanic/">here</a>.</p>
+<p>In this section we will focus on more advanced usage of <code>mlr3pipelines</code>. Specifically, this section illustrates the different options when it comes to data imputation and feature engineering. Furthermore, the section shows how to <strong>benchmark</strong>, <strong>feature engineer</strong> and compare our results. Again, we need to take some preparatory steps:</p>
 <p>For the case that you are only tuning in for the second part, we need to load some packages: The data is part of the <code>mlr3data</code> package.</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
@@ -1360,19 +1361,19 @@ data(&quot;titanic&quot;)</code></pre>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
 # splitting the data set
-titanic_train &lt;- titanic[1:891, ]
-titanic_test &lt;- titanic[892:1309, ]
+titanic_train = titanic[1:891, ]
+titanic_test = titanic[892:1309, ]
 
-# setting up the task 
-task &lt;- TaskClassif$new(&quot;titanic&quot;, titanic_train, target = &quot;survived&quot;, positive = &quot;1&quot;)
+# setting up the task
+task = TaskClassif$new(&quot;titanic&quot;, titanic_train, target = &quot;survived&quot;, positive = &quot;yes&quot;)
 task$select(cols = setdiff(task$feature_names, c(&quot;cabin&quot;, &quot;name&quot;, &quot;ticket&quot;)))
 
 # setting up the learner
-learner &lt;- lrn(&quot;classif.rpart&quot;)
+learner = lrn(&quot;classif.rpart&quot;)
 
 #setting up our resampling method
-rdesc &lt;- rsmp(&quot;cv&quot;, folds = 3L)$instantiate(task)
-res &lt;- resample(task, learner, rdesc, store_models = TRUE)</code></pre>
+rdesc = rsmp(&quot;cv&quot;, folds = 3L)$instantiate(task)
+res = resample(task, learner, rdesc, store_models = TRUE)</code></pre>
 </div>
 <h2 id="imputation">Imputation</h2>
 <p>A very simple way to do this to just impute a constant value for each feature. We could i.e. impute every <code>character</code> or <code>factor</code> column with <code>missing</code> and every numeric column with <code>-999</code>. And depending on the model, this might actually be fine. This approach has a few drawbacks though:</p>
@@ -1381,8 +1382,8 @@ res &lt;- resample(task, learner, rdesc, store_models = TRUE)</code></pre>
 <li>imputing <code>-999</code> skews the distribution of the data, which might result in bad models.</li>
 </ul>
 <p>As a result, instead of imputing a constant value, we will do two things: * Draw samples from each numeric features’ histogram using <code>PipeOpImputeHist</code> * Add an additional column for each <code>variable</code> that indicates whether a value was missing or not. If the information that a value was missing is important, this column contains this information.</p>
-<p>This imputation scheme is called ‘imputation with constants’ and is already implemented in <code>mlr3pipelines</code>. It can be done using <code>PipeOpImputeConstant</code>.</p>
-<p>Remember that we are trying to optimize our predictive power by using a random forest model (‘classif.ranger’). Now, random forest models do not naturally handle missing values which is the reason why we need imputation. Before imputation, our data looks as follows:</p>
+<p>This imputation scheme is called ‘imputation with constants’ and is already implemented in <code>mlr3pipelines</code>. It can be done using <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_imputeconstant.html"><code>PipeOpImputeConstant</code></a>.</p>
+<p>Remember that we are trying to optimize our predictive power by using a random forest model (<a href="https://mlr3learners.mlr-org.com/reference/mlr_learners_classif.ranger.html"><code>mlr_learners_classif.ranger</code></a>). Now, random forest models do not naturally handle missing values which is the reason why we need imputation. Before imputation, our data looks as follows:</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
 task$missings()</code></pre>
@@ -1393,42 +1394,42 @@ survived      age embarked     fare    parch   pclass      sex   sib_sp
 <p>Let’s first deal with the categorical variables:</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
-po_newlvl &lt;- po(&quot;imputenewlvl&quot;)
-task_newlvl &lt;- po_newlvl$train(list(task))[[1]]</code></pre>
+po_newlvl = po(&quot;imputeoor&quot;)
+task_newlvl = po_newlvl$train(list(task))[[1]]</code></pre>
 </div>
-<p>Note that we use the <code>PipeOp</code> in an unusual way, which is why the syntax does not look very clean. We’ll learn how to use a full graph below.</p>
+<p>Note that we use the <a href="https://mlr3pipelines.mlr-org.com/reference/PipeOp.html"><code>PipeOp</code></a> in an unusual way, which is why the syntax does not look very clean. We’ll learn how to use a full graph below.</p>
 <p>First, let’s look at the result:</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
 task_newlvl$missings()</code></pre>
 <pre><code>
-survived      age     fare    parch   pclass      sex   sib_sp embarked 
-       0      177        0        0        0        0        0        0 </code></pre>
+survived     fare    parch   pclass      sex   sib_sp      age embarked 
+       0        0        0        0        0        0        0        0 </code></pre>
 </div>
-<p>Cool! <code>embarked</code> does not have missing values anymore. Note that <code>PipeOpImputeNewLvl</code> by default affects <code>character</code>, <code>factor</code> and <code>ordered</code> columns.</p>
+<p>Cool! <code>embarked</code> does not have missing values anymore. Note that <code>PipeOpImputeOOR</code> by default affects <code>character</code>, <code>factor</code> and <code>ordered</code> columns.</p>
 <p>For the <code>numeric</code> features we want to do two things, impute values and add an indicator column. In order to do this, we need a more complicated structure, a <code>Graph</code>.</p>
 <p>Our <code>po_indicator</code> creates the indicator column. We tell it to only do this for <code>numeric</code> and <code>integer</code> columns via its <code>param_vals</code>, and additionally tell it to create a numeric column (0 = “not missing”, 1 = “missing”).</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
-po_indicator &lt;- po(&quot;missind&quot;,
+po_indicator = po(&quot;missind&quot;,
   param_vals = list(affect_columns = selector_type(c(&quot;numeric&quot;, &quot;integer&quot;)), type = &quot;numeric&quot;)
 )</code></pre>
 </div>
-<p>Now we can simultaneously impute features from the histogram and create indicator columns. This can be achieved using the <code>gunion</code> function, which puts two operations in parallel:</p>
+<p>Now we can simultaneously impute features from the histogram and create indicator columns. This can be achieved using the <a href="https://mlr3pipelines.mlr-org.com/reference/gunion.html"><code>gunion</code></a> function, which puts two operations in parallel:</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
-gr &lt;- gunion(list(po_indicator, po(&quot;imputehist&quot;)))
-gr &lt;- gr %&gt;&gt;% po(&quot;featureunion&quot;)</code></pre>
+gr = gunion(list(po_indicator, po(&quot;imputehist&quot;)))
+gr = gr %&gt;&gt;% po(&quot;featureunion&quot;)</code></pre>
 </div>
 <p>Afterwards, we <code>cbind</code> the resulting data using <code>po("featureunion")</code>, connecting the different operations using our <strong>graph connector</strong>: <code>%&gt;&gt;%</code>. We can now also connect the newlvl imputation:</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
-gr &lt;- gr %&gt;&gt;% po(&quot;imputenewlvl&quot;)</code></pre>
+gr = gr %&gt;&gt;% po(&quot;imputeoor&quot;)</code></pre>
 </div>
 <p>and see what happens when we now train the whole <strong>Graph</strong>:</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
-task_imputed &lt;- gr$clone()$train(task)[[1]]
+task_imputed = gr$clone()$train(task)[[1]]
 task_imputed$missings()</code></pre>
 <pre><code>
    survived missing_age      pclass         sex        fare       parch 
@@ -1443,19 +1444,19 @@ autoplot(task_imputed)</code></pre>
 <p><img src="2020-04-27-mlr3pipelines-titanic-advanced_files/figure-html5/unnamed-chunk-11-1.png" width="624" /></p>
 </div>
 <p>We could now use <code>task_imputed</code> for resampling and see whether a <strong>ranger</strong> model does better. But this is dangerous! If we preprocess all training data at once, data could leak through the different cross-validation folds. In order to do this properly, we have to process the training data in every fold separately. Luckily, this is automatically handled in our <code>Graph</code>, if we use it through a <code>GraphLearner</code>.</p>
-<p>We can simple append a <code>ranger</code> learner to the Graph and create a <code>GraphLearner</code> from this.</p>
+<p>We can simply append a <code>ranger</code> learner to the Graph and create a <code>GraphLearner</code> from this.</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
-glrn &lt;- GraphLearner$new(gr$clone() %&gt;&gt;% 
+glrn = GraphLearner$new(gr$clone() %&gt;&gt;%
   po(&quot;imputesample&quot;) %&gt;&gt;%
   po(&quot;fixfactors&quot;) %&gt;&gt;%
   po(learner))</code></pre>
 </div>
-<p>We needed to use the following commands for the Graph: * <code>fixfactors</code>: Removes empty factor levels and removes factor levels that do not exist during training. * <code>imputesample</code>: In some cases, if missing factor levels do not occur during training but only while predicting, <code>imputenewlvl</code> does not create a new level. For those, we sample a random value.</p>
+<p>We needed to use the following commands for the Graph: * <code>fixfactors</code>: Removes empty factor levels and removes factor levels that do not exist during training. * <code>imputesample</code>: In some cases, if missing factor levels do not occur during training but only while predicting, <code>imputeoor</code> does not create a new level. For those, we sample a random value.</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
-res &lt;- resample(task, glrn, rdesc, store_models = TRUE)
-agg &lt;- res$aggregate(msr(&quot;classif.acc&quot;))
+res = resample(task, glrn, rdesc, store_models = TRUE)
+agg = res$aggregate(msr(&quot;classif.acc&quot;))
 agg</code></pre>
 <pre><code>
 classif.acc 
@@ -1466,12 +1467,12 @@ classif.acc
 <p>We will do this using <code>PipeOpMutate</code> in order to showcase the power of <code>mlr3pipelines</code>. Additionally, we will make use of the <code>character</code> columns. Hence, we will re-select them:</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
-task$col_roles$feature &lt;- c(task$feature_names, c(&quot;cabin&quot;, &quot;name&quot;, &quot;ticket&quot;))</code></pre>
+task$col_roles$feature = c(task$feature_names, c(&quot;cabin&quot;, &quot;name&quot;, &quot;ticket&quot;))</code></pre>
 </div>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
 library(&quot;stringi&quot;)
-po_ftextract &lt;- po(&quot;mutate&quot;, param_vals = list(
+po_ftextract = po(&quot;mutate&quot;, param_vals = list(
   mutation = list(
     fare_per_person = ~ fare / (parch + sib_sp + 1),
     deck = ~ factor(stri_sub(cabin, 1, 1)),
@@ -1484,21 +1485,21 @@ po_ftextract &lt;- po(&quot;mutate&quot;, param_vals = list(
 <p>Quickly checking what happens:</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
-task_eng &lt;- po_ftextract$clone()$train(list(task))[[1]]
+task_eng = po_ftextract$clone()$train(list(task))[[1]]
 task_eng$data()</code></pre>
 <pre><code>
      survived age embarked    fare parch pclass    sex sib_sp cabin
-  1:        0  22        S  7.2500     0      3   male      1  &lt;NA&gt;
-  2:        1  38        C 71.2833     0      1 female      1   C85
-  3:        1  26        S  7.9250     0      3 female      0  &lt;NA&gt;
-  4:        1  35        S 53.1000     0      1 female      1  C123
-  5:        0  35        S  8.0500     0      3   male      0  &lt;NA&gt;
+  1:       no  22        S  7.2500     0      3   male      1  &lt;NA&gt;
+  2:      yes  38        C 71.2833     0      1 female      1   C85
+  3:      yes  26        S  7.9250     0      3 female      0  &lt;NA&gt;
+  4:      yes  35        S 53.1000     0      1 female      1  C123
+  5:       no  35        S  8.0500     0      3   male      0  &lt;NA&gt;
  ---                                                               
-887:        0  27        S 13.0000     0      2   male      0  &lt;NA&gt;
-888:        1  19        S 30.0000     0      1 female      0   B42
-889:        0  NA        S 23.4500     2      3 female      1  &lt;NA&gt;
-890:        1  26        C 30.0000     0      1   male      0  C148
-891:        0  32        Q  7.7500     0      3   male      0  &lt;NA&gt;
+887:       no  27        S 13.0000     0      2   male      0  &lt;NA&gt;
+888:      yes  19        S 30.0000     0      1 female      0   B42
+889:       no  NA        S 23.4500     2      3 female      1  &lt;NA&gt;
+890:      yes  26        C 30.0000     0      1   male      0  C148
+891:       no  32        Q  7.7500     0      3   male      0  &lt;NA&gt;
                                                     name           ticket
   1:                             Braund, Mr. Owen Harris        A/5 21171
   2: Cumings, Mrs. John Bradley (Florence Briggs Thayer)         PC 17599
@@ -1530,7 +1531,7 @@ autoplot(task_eng$clone()$select(c(&quot;sex&quot;, &quot;age&quot;)), type = &q
 <p><img src="2020-04-27-mlr3pipelines-titanic-advanced_files/figure-html5/unnamed-chunk-17-1.png" width="624" /></p>
 </div>
 <p>Now we can put everything together again, we concatenate our new <code>PipeOp</code> with the <code>Graph</code> created above and use <code>PipeOpSelect</code> in order to de-select the <code>character</code> features we used for feature extraction. Additionally, we collapse the ‘surname’, so only surnames that make up more than 0.6 % of the data are kept.</p>
-<p>In summary we do the following:</p>
+<p>In summary, we do the following:</p>
 <ul>
 <li><code>mutate</code>: The <code>po_ftextract</code> we defined above extracts additional features from the data.</li>
 <li><code>collapsefactors</code>: Removes factor levels that make up less then 3 % of the data.</li>
@@ -1541,25 +1542,25 @@ autoplot(task_eng$clone()$select(c(&quot;sex&quot;, &quot;age&quot;)), type = &q
 <li><code>imputehist</code>: Imputes numeric and integer columns by sampling from the histogram.</li>
 </ul></li>
 <li><code>featureunion</code>: Cbind’s parallel data streams.</li>
-<li><code>imputenewlvl</code>: Imputes factor and ordered columns.</li>
+<li><code>imputeoor</code>: Imputes factor and ordered columns.</li>
 <li><code>fixfactors</code>: Removes empty factor levels and removes factor levels that do not exist during training.</li>
-<li><code>imputesample</code>: In some cases, if missing factor levels do not occur during training but only while predicting, <code>imputenewlvl</code> does not create a new level. For those, we sample a random value.</li>
+<li><code>imputesample</code>: In some cases, if missing factor levels do not occur during training but only while predicting, <code>imputeoor</code> does not create a new level. For those, we sample a random value.</li>
 <li><code>learner</code>: Appends a learner to the <code>Graph</code>.</li>
 </ul>
 <p>The full graph we created is the following:</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
-learner &lt;- lrn(&quot;classif.ranger&quot;)
-learner$param_set$values &lt;- list(num.trees = 500, min.node.size = 4)</code></pre>
+learner = lrn(&quot;classif.ranger&quot;)
+learner$param_set$values = list(num.trees = 500, min.node.size = 4)</code></pre>
 </div>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
-gr_final &lt;- po_ftextract %&gt;&gt;%
+gr_final = po_ftextract %&gt;&gt;%
   po(&quot;collapsefactors&quot;, param_vals = list(no_collapse_above_prevalence = 0.03)) %&gt;&gt;%
   po(&quot;select&quot;, param_vals = list(selector = selector_invert(selector_type(&quot;character&quot;)))) %&gt;&gt;%
   gunion(list(po_indicator, po(&quot;imputehist&quot;))) %&gt;&gt;%
   po(&quot;featureunion&quot;) %&gt;&gt;%
-  po(&quot;imputenewlvl&quot;) %&gt;&gt;%
+  po(&quot;imputeoor&quot;) %&gt;&gt;%
   po(&quot;fixfactors&quot;) %&gt;&gt;%
   po(&quot;imputesample&quot;) %&gt;&gt;%
   po(learner)</code></pre>
@@ -1568,9 +1569,9 @@ gr_final &lt;- po_ftextract %&gt;&gt;%
 <p>Let us see if things have improved:</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
-glrn &lt;- GraphLearner$new(gr_final)
-res &lt;- resample(task, glrn, rdesc, store_models = TRUE)
-agg_ranger &lt;- res$aggregate(msr(&quot;classif.acc&quot;))
+glrn = GraphLearner$new(gr_final)
+res = resample(task, glrn, rdesc, store_models = TRUE)
+agg_ranger = res$aggregate(msr(&quot;classif.acc&quot;))
 agg_ranger</code></pre>
 <pre><code>
 classif.acc 
@@ -1581,16 +1582,16 @@ classif.acc
 <p>To undertake benchmarking, we need to set up a benchmarking design. The first step is creating a list with the learners we used, namely the learners form the first and second part of this use case.</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
-lrn_list &lt;- list(
+lrn_list = list(
   lrn(&quot;classif.rpart&quot;, predict_type = &quot;prob&quot;),
   lrn(&quot;classif.ranger&quot;, predict_type = &quot;prob&quot;)
 )</code></pre>
 </div>
-<p>After having done that, we can set up our benchmark grid: ?lrn Now we can define our benchmark design. This is done to ensure exhaustive and consistent resampling for all learners. This step is needed to execute over the same train/test split for each task.</p>
+<p>Now we can define our benchmark design. This is done to ensure exhaustive and consistent resampling for all learners. This step is needed to execute over the same train/test split for each task.</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
-bm_design &lt;- benchmark_grid(task = task_imputed, resamplings = rsmp(&quot;cv&quot;, folds = 10), learners = lrn_list)
-bmr &lt;- benchmark(bm_design, store_models = TRUE)
+bm_design = benchmark_grid(task = task_imputed, resamplings = rsmp(&quot;cv&quot;, folds = 10), learners = lrn_list)
+bmr = benchmark(bm_design, store_models = TRUE)
 print(bmr)</code></pre>
 <pre><code>
 &lt;BenchmarkResult&gt; of 20 rows with 2 resampling runs
@@ -1610,7 +1611,7 @@ autoplot(bmr) + theme(axis.text.x = element_text(angle = 45, hjust = 1))</code><
 autoplot(bmr$clone()$filter(task_id = &quot;titanic&quot;), type = &quot;roc&quot;)</code></pre>
 <p><img src="2020-04-27-mlr3pipelines-titanic-advanced_files/figure-html5/unnamed-chunk-24-1.png" width="624" /></p>
 </div>
-<p>Moreover, one can compare the the precision-recall:</p>
+<p>Moreover, one can compare the precision-recall:</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
 # Precision vs Recall
