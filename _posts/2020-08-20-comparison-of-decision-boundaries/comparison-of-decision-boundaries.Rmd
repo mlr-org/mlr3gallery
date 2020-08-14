@@ -7,7 +7,7 @@ categories:
 author:
   - name: Michel Lang
 description: |
-  This post visuzalizes multiple decision boundaries on artificial data sets using the `mlr3viz` package.
+  Visuzalizes the decision boundaries of multiple classification learners on some artificial data sets.
 date: 08-14-2020
 output:
   distill::distill_article:
@@ -24,8 +24,8 @@ ggplot2::theme_set(ggplot2::theme_light())
 ```
 
 
-The visualization of decision boundaries help to understand what the pros and cons of individual classification learners are.
-This posts demonstrates how to create a comparison plot, including multiple tasks and classification learners.
+The visualization of decision boundaries helps to understand what the pros and cons of individual classification learners are.
+This posts demonstrates how to create such plots.
 
 ## Artificial Data Sets
 
@@ -127,10 +127,10 @@ knitr::kable(perf)
 
 ## Plotting
 
-To generate the plot, we iterate over the individual `r ref("ResampleResult")` objects stored in the `r ref("BenchmarkResult")`, and in each iteration we plot the learner prediction using the `r mlr_pkg("mlr3viz")` package.
+To generate the plots, we iterate over the individual `r ref("ResampleResult")` objects stored in the `r ref("BenchmarkResult")`, and in each iteration we plot the learner prediction using the `r mlr_pkg("mlr3viz")` package.
 Note that only observations from the test data is plotted as points.
 
-```{r, echo = FALSE, fig.width = 15, fig.height = 9}
+```{r, echo = TRUE}
 library("mlr3viz")
 
 n = bmr$n_resample_results
@@ -142,13 +142,14 @@ for (i in seq_len(n)) {
 ```
 
 We now have a list of plots.
-You can simply print each one individually:
+Each one can be printed individually:
 
 ```{r}
 print(plots[[1]])
 ```
 
 To get a nice annotated overview, we arranged all plots together in a single [PDF file](plot_learner_prediction.pdf).
+The number in the upper right is the respective accuracy on the test set.
 
 ```{r include = FALSE}
 pdf(file = "plot_learner_prediction.pdf", width = 20, height = 6)
@@ -176,9 +177,7 @@ gridExtra::grid.arrange(grobs = plots, nrow = length(tasks))
 dev.off()
 ```
 
-
-
-As you can see, the decision boundaries are very different.
+As you can see, the decision boundaries look very different.
 Some are linear, others are parallel to the axis, and yet others are highly non-linear.
 The boundaries are partly very smooth with a slow transition of probabilities, others are very abrupt.
 All these properties are important during model selection, and should be considered for your problem at hand.
