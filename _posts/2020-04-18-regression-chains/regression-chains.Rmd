@@ -29,6 +29,13 @@ In this tutorial we demonstrate how to use `r mlr_pkg("mlr3pipelines")` to handl
 
 In a simple regression chain, regression models are arranged in a linear sequence. Here, the first model will use the input to predict a single output and the second model will use the input and the output of the first model to make its own prediction and so on. For more details, see e.g. [Spyromitros-Xioufis, Tsoumakas, Groves & Vlahavas (2016)](https://doi.org/10.1007/s10994-016-5546-z).
 
+## Before you start
+
+The following sections describe an approach towards working with `Task`s that have multiple targets.
+E.g. in the example below, we have 3 target variables **y1** to **y3**.
+This type of Task can be created via the [mlr3multioutput](https://github.com/mlr-org/mlr3multioutput/) (currently under development) in the future.
+The current goal of this post is to show how such modeling steps can be written as a relatively small amount of pipeline steps and how such steps can be put together. Writing pipelines with such steps allows for great flexibility in modelling more complicated scenarios such as the ones described below.
+
 ## Data
 
 In the following, we rely on some toy data. We simulate 100 responses to three target variables, $y_{1}$, $y_{2}$, and $y_{3}$ following a multivariate normal distribution with a mean and covariance matrix of:
