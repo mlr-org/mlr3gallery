@@ -76,10 +76,9 @@ task_test$filter(64:83)
 
 ## Workflow
 
-Our graph will start with log transforming the features (base 10), followed by scaling the features. Then, either a `r ref("PipeOpPCA", "PCA")` or `r ref("PipeOpICA", "ICA")` is applied to extract principal/independent components followed by fitting a `r ref("mlr_learners_classif.lda", "LDA")` or a `r ref("mlr_learners_classif.ranger", "ranger random forest")` is fitted directly (note that we probably could skip the transformation and scaling for the `ranger`). Regarding the `PCA` and `ICA`, both the number of principal/independent components are a tuning parameter. Regarding the `LDA`, we can further choose different methods for estimating the mean and variance and regarding the `ranger` we want to tune the `mtry` and `num.tree` parameters. Note that the `PCA-LDA` combination has already been successfully applied in different cancer diagnostic contexts when the feature space is of high dimensionality [@morais2018].
+Our graph will start with log transforming the features (base 10), followed by scaling the features. Then, either a `r ref("PipeOpPCA", "PCA")` or `r ref("PipeOpICA", "ICA")` is applied to extract principal/independent components followed by fitting a `r ref("mlr_learners_classif.lda", "LDA")` or a `r ref("mlr_learners_classif.ranger", "ranger random forest")` (note that we probably could skip the transformation and scaling for the `ranger`). Regarding the `PCA` and `ICA`, both the number of principal/independent components are a tuning parameter. Regarding the `LDA`, we can further choose different methods for estimating the mean and variance and regarding the `ranger` we want to tune the `mtry` and `num.tree` parameters. Note that the `PCA-LDA` combination has already been successfully applied in different cancer diagnostic contexts when the feature space is of high dimensionality [@morais2018].
 
-<!-- FIXME: `r #ref("PipeOpProxy", "PipeOpProxy")` -->
-To allow for switching between the `PCA`/`ICA`-`LDA` and `ranger` we can either use branching or proxy pipelines, i.e., `r ref("PipeOpBranch", "PipeOpBranch")` and `r ref("PipeOpUnbranch", "PipeOpUnbranch")` or `PipeOpProxy`. We will first cover branching in detail and later show how the same can be done using `PipeOpProxy`.
+To allow for switching between the `PCA`/`ICA`-`LDA` and `ranger` we can either use branching or proxy pipelines, i.e., `r ref("PipeOpBranch", "PipeOpBranch")` and `r ref("PipeOpUnbranch", "PipeOpUnbranch")` or `r ref("PipeOpProxy", "PipeOpProxy")`. We will first cover branching in detail and later show how the same can be done using `PipeOpProxy`.
 
 ## Baseline
 
@@ -93,7 +92,7 @@ base = benchmark(benchmark_grid(task_train,
 base$aggregate(measures = msr("classif.acc"))
 ```
 
-The out of box `ranger` appears to already have good performance on the training task. Regarding the `LDA`, we do get a warning message, that some features are colinear. This strongly suggests to reduce the dimensionality of the feature space. Let's see if we can get some better performance, at least for the `LDA`.
+The out-of-box `ranger` appears to already have good performance on the training task. Regarding the `LDA`, we do get a warning message, that some features are colinear. This strongly suggests to reduce the dimensionality of the feature space. Let's see if we can get some better performance, at least for the `LDA`.
 
 ## Branching
 
@@ -131,7 +130,11 @@ Note that the `id`'s are prefixed by the respective `r ref("PipeOp", "PipeOp")` 
 
 ## Search Space
 
-Our graph either fits a `LDA` after applying `PCA` or `ICA` or fits a `ranger`. These two selections each define selection parameters that we can tune. Moreover, within the respective `PipeOp`'s we want to tune the following parameters: `pca.rank.`, `ica.n.comp`, `classif.lda.method`, `classif.ranger.mtry`, and `classif.ranger.num.trees`. The first two parameters are integers that in-principal could range from 1 to the number of features. However, for `ICA`, the upper bound must not exceed the number of observations and as we will later use `3-fold` `r ref("mlr_resamplings_cv", "cross-validation")` as the resampling method for the tuning, we just set the upper bound to 30 (and do the same for the `PCA`). Regarding the `classif.lda.method` we will only be interested in `moment` estimation vs. minimum volume ellipsoid covariance estimation (`mve`). Moreover, we set the lower bound of `classif.ranger.mtry` to 200 (which is around the number of features divided by ten) and the upper bound to 1000.
+Our graph either fits a `LDA` after applying `PCA` or `ICA`, or alternativelz `ranger` with no preprocessing. These two **options** each define selection parameters that we can tune. 
+Moreover, within the respective `PipeOp`'s we want to tune the following parameters: `pca.rank.`, `ica.n.comp`, `classif.lda.method`, `classif.ranger.mtry`, and `classif.ranger.num.trees`. 
+The first two parameters are integers that in-principal could range from 1 to the number of features.
+However, for `ICA`, the upper bound must not exceed the number of observations and as we will later use `3-fold` `r ref("mlr_resamplings_cv", "cross-validation")` as the resampling method for the tuning, we just set the upper bound to 30 (and do the same for the `PCA`). 
+Regarding the `classif.lda.method` we will only be interested in `moment` estimation vs. minimum volume ellipsoid covariance estimation (`mve`). Moreover, we set the lower bound of `classif.ranger.mtry` to 200 (which is around the number of features divided by ten) and the upper bound to 1000.
 
 ```{r}
 tune_ps1 = ParamSet$new(list(
@@ -185,7 +188,9 @@ tune_ps1$add_dep("classif.ranger.num.trees",
 
 ## Tuning
 
-We can now tune the parameters of our graph as defined in the search space with respect to a measure. Here, we will use the `classification accuracy`. As a resampling method we use `3-fold` `cross-validation`. We will use the `r ref("TerminatorNone", "TerminatorNone")` (i.e., no early termination) for terminating the tuning because we will apply a `grid search`:
+We can now tune the parameters of our graph as defined in the search space with respect to a measure. Here, we will use the `classification accuracy`.
+As a resampling method we use `3-fold` `cross-validation`. 
+We will use the `r ref("TerminatorNone", "TerminatorNone")` (i.e., no early termination) for terminating the tuning because we will apply a `grid search`:
 
 ```{r}
 set.seed(2409)
@@ -243,7 +248,10 @@ Note that we also could have wrapped our graph in a `r ref("GraphLearner", "Grap
 ## Proxy
 
 Instead of using branches to split our graph with respect to the learner and preprocessing options, we can also use `PipeOpProxy`.
-`PipeOpProxy` accepts a single `content` parameter that can contain any other `PipeOp` or `Graph`. This is extremely flexible in the sense that we do not have to specify our options during construction. However, the parameters of the contained `PipeOp` or `Graph` are no longer directly contained in the `ParamSet` of the resulting graph. Therefore, when tuning the graph, we do have to make use of a `trafo` function.
+`PipeOpProxy` accepts a single `content` parameter that can contain any other `PipeOp` or `Graph`.
+This is extremely flexible in the sense that we do not have to specify our options during construction. 
+However, the parameters of the contained `PipeOp` or `Graph` are no longer directly contained in the `ParamSet` of the resulting graph. 
+Therefore, when tuning the graph, we do have to make use of a `trafo` function.
 
 ```{r}
 graph2 =
@@ -283,8 +291,9 @@ proxy_options = list(
 )
 ```
 
-<!-- FIXME: `r #ref("ppl", "ppl")` -->
-Note that above we made use of the `branch` `ppl` which is syntactic sugar for doing branching. Of course we also could have use another nested `PipeOpProxy` to specify the preprocessing options (`"pca"` vs. `"ica"`) within `proxy_options` if for some reason we do not want to do branching at all. The `trafo` function then selects one of the `proxy_options` and sets the respective parameters for the `PCA`, `ICA`, `LDA` and `ranger`. Here, the argument `x` is a list which will contain sampled/selected parameters from our `ParamSet` (in our case, `tune_ps2`).
+Note that above we made use of the `branch` `r #ref("ppl", "ppl")` which is syntactic sugar for doing branching. Of course we also could have use another nested `PipeOpProxy` to specify the preprocessing options (`"pca"` vs. `"ica"`) within `proxy_options` if for some reason we do not want to do branching at all.
+The `trafo` function then selects one of the `proxy_options` and sets the respective parameters for the `PCA`, `ICA`, `LDA` and `ranger`.
+Here, the argument `x` is a list which will contain sampled/selected parameters from our `ParamSet` (in our case, `tune_ps2`).
 
 ```{r}
 tune_ps2$trafo = function(x, param_set) {
