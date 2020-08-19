@@ -1400,7 +1400,7 @@ cv10_instance = rsmp(&quot;cv&quot;)$instantiate(task)</code></pre>
 </div>
 <h2 id="intro">Intro</h2>
 <p>In this use case, we will take a look at composite machine learning algorithms that may incorporate data preprocessing or the combination of multiple <code>Learner</code>s (“ensemble methods”).</p>
-<p>We use the <a href="https://mlr3pipelines.mlr-org.com">mlr3pipelines</a> package that enables us to chain <a href="https://mlr3pipelines.mlr-org.com/reference/PipeOp.html"><code>PipeOps</code></a> into data flow graphs.</p>
+<p>We use the <a href="https://mlr3pipelines.mlr-org.com">mlr3pipelines</a> package that enables us to chain <a href="https://mlr3pipelines.mlr-org.com/reference/PipeOp.html"><code>PipeOps</code></a> into data flow <a href="https://mlr3pipelines.mlr-org.com/reference/Graph.html"><code>Graphs</code></a>.</p>
 <p>Available <code>PipeOp</code>s are listed in the <code>mlr_pipeops</code> dictionary:</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
@@ -1693,7 +1693,7 @@ logreg$predict(task)</code></pre>
 <pre><code>
 Error in model.frame.default(Terms, newdata, na.action = na.action, xlev = object$xlevels): factor job has new levels unemployed/unskilled - non-resident</code></pre>
 </div>
-<p>Not only logistic regression but also many other <code>Learner</code>s cannot handle new levels during prediction. Thus, we use <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_fixfactors.html"><code>PipeOpFixFactors</code></a> to prevent that. <code>PipeOpFixFactors</code> introduces <code>NA</code> values for unseen levels. This means that we may need to impute afterwards. To solve this issue we can use <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_imputesample.html"><code>PipeOpImputeSample</code></a>, but with <code>affect_cols</code> set to only <em>factorial</em> features.</p>
+<p>Not only logistic regression but also many other <code>Learner</code>s cannot handle new levels during prediction. Thus, we use <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_fixfactors.html"><code>PipeOpFixFactors</code></a> to prevent that. <code>PipeOpFixFactors</code> introduces <code>NA</code> values for unseen levels. This means that we may need to impute afterwards. To solve this issue we can use <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_imputesample.html"><code>PipeOpImputeSample</code></a>, but with <code>affect_columns</code> set to only <em>factorial</em> features.</p>
 <p>Another observation is that all-constant features may also be a problem:</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
@@ -1714,7 +1714,7 @@ robustify = po(&quot;fixfactors&quot;) %&gt;&gt;%
 robustify$plot()</code></pre>
 <p><img src="2020-03-11-mlr3pipelines-tutorial-german-credit_files/figure-html5/unnamed-chunk-27-1.png" width="624" /></p>
 </div>
-<p>This robust learner works even in very pathological conditions. You may need to combine it with imputation if the data may have missing values:</p>
+<p>This robust learner works even in very pathological conditions:</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
 roblogreg = GraphLearner$new(robustify %&gt;&gt;% logreg)
@@ -1733,7 +1733,7 @@ roblogreg$predict(task)</code></pre>
       1000  good      bad</code></pre>
 </div>
 <h2 id="your-ideas">Your Ideas</h2>
-<p>There are various possibilities for preprocessing with <code>PipeOp</code>s. You can try different methods for preprocessing and training. Feel free to discover this variety by yourself! There are only a few hints that help when working with <code>PipeOp</code>s:</p>
+<p>There are various possibilities for preprocessing with <code>PipeOp</code>s. You can try different methods for preprocessing and training. Feel free to discover this variety by yourself! Here are only a few hints that help when working with <code>PipeOp</code>s:</p>
 <ul>
 <li>It is not allowed to have two <code>PipeOp</code>s with the same <code>ID</code> in a <code>Graph</code>
 <ul>
