@@ -1501,7 +1501,7 @@ skimr::skim(titanic_train)</code></pre>
 <td style="text-align: right;">1</td>
 <td style="text-align: left;">FALSE</td>
 <td style="text-align: right;">2</td>
-<td style="text-align: left;">0: 549, 1: 342</td>
+<td style="text-align: left;">no: 549, yes: 342</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">pclass</td>
@@ -1714,7 +1714,7 @@ skimr::skim(titanic_test)</code></pre>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">FALSE</td>
 <td style="text-align: right;">0</td>
-<td style="text-align: left;">0: 0, 1: 0</td>
+<td style="text-align: left;">yes: 0, no: 0</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">pclass</td>
@@ -1833,7 +1833,7 @@ DataExplorer::plot_boxplot(titanic_train, by = &quot;survived&quot;, nrow = 2, n
 <h2 id="a-first-model">A first model</h2>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
-task &lt;- TaskClassif$new(&quot;titanic&quot;, titanic_train, target = &quot;survived&quot;, positive = &quot;1&quot;)
+task &lt;- TaskClassif$new(&quot;titanic&quot;, titanic_train, target = &quot;survived&quot;, positive = &quot;yes&quot;)
 task</code></pre>
 <pre><code>
 &lt;TaskClassif:titanic&gt; (891 x 11)
@@ -1872,7 +1872,7 @@ classif.acc
   0.8080808 </code></pre>
 </div>
 <p>So our model should have a minimal accuracy of 0.808 in order to improve over the simple decision tree. In order to improve more, we might need to do some feature engineering.</p>
-<p>#Optimizing the model</p>
+<h1 id="optimizing-the-model">Optimizing the model</h1>
 <p>If we now try to fit a ‘ranger’ random forest model, we will get an error, as ‘ranger’ models can not naturally handle missing values.</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
@@ -1882,8 +1882,10 @@ res &lt;- resample(task, learner, rdesc, store_models = TRUE)</code></pre>
 <pre><code>
 Error: Missing data in columns: age, embarked.</code></pre>
 </div>
-<p>This means we have to find a way to impute the missing values. To learn how to use more advanced commands of the mlr3pipelines package see: * <a href="/2020-04-27-mlr3pipelines-titanic-advanced/">Part II - Pipelines</a></p>
-<!-- Note that the link here needs to be fixed -->
+<p>This means we have to find a way to impute the missing values. To learn how to use more advanced commands of the mlr3pipelines package see:</p>
+<ul>
+<li><a href="https://mlr3gallery.mlr-org.com/posts/2020-04-27-mlr3pipelines-Imputation-titanic/">Part II - Pipelines</a></li>
+</ul>
 <!--radix_placeholder_article_footer-->
 <!--/radix_placeholder_article_footer-->
 </div>

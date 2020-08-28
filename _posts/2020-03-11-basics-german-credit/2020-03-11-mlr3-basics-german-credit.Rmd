@@ -4,13 +4,15 @@ categories:
   - visualization
   - classification
   - feature importance
+  - german credit
 author:
   - name: Martin Binder
   - name: Florian Pfisterer
   - name: Michel Lang
 date: 03-11-2020
 description: |
-  mlr3 is a machine learning framework for R. Together with other packages following the naming scheme "mlr3___", it offers functionality around developing, tuning, and evaluating machine learning workflows.
+  In this use case, we teach the basics of mlr3 by training different models on
+  the German credit dataset.
 output:
   distill::distill_article:
     self_contained: false
@@ -43,7 +45,7 @@ We will walk through this tutorial interactively. The text is kept short to be f
 ## Prerequisites
 
 Ensure all packages used in this tutorial are installed.
-This includes packages from the `mlr3` family, as well as other packages for data handling, cleaning and visualization which we are going to use (`r cran_pkg("DataExplorer")`, `r cran_pkg("data.table")`, `r cran_pkg("ggplot2")`, and `r cran_pkg("skimr")`).
+This includes packages from the `mlr3` family, as well as other packages for data handling, cleaning and visualization which we are going to use (`r cran_pkg("DataExplorer")`, `r cran_pkg("data.table")`, `r cran_pkg("ggplot2")`, `r cran_pkg("rchallenge")`, and `r cran_pkg("skimr")`).
 
 Then, load the main packages we are going to use:
 
@@ -58,8 +60,8 @@ library("ggplot2")
 ## Machine Learning Use Case: German Credit Data
 
 The German credit data was originally donated in 1994 by Prof. Dr. Hans Hoffman of the University of Hamburg.
-A Description can be found at the [UCI repository](https://archive.ics.uci.edu/ml/datasets/Statlog+%28German+Credit+Data%29).
-The Goal is to classify people by their credit risk (good or bad) using 20 personal, demographic and financial features.
+A description can be found at the [UCI repository](https://archive.ics.uci.edu/ml/datasets/Statlog+%28German+Credit+Data%29).
+The goal is to classify people by their credit risk (good or bad) using 20 personal, demographic and financial features:
 
 | Feature Name            | Description                                            |
 | ------------------------| ------------------------------------------------------ |
@@ -86,10 +88,7 @@ The Goal is to classify people by their credit risk (good or bad) using 20 perso
 
 ### Importing the Data
 
-The dataset we are going to use is a transformed version of this German credit dataset, as provided by the `r cran_pkg("rchallenge")` package (this transformed dataset was proposed by Ulrike Grömping, with factors instead of dummy variables and corrected features).
-
-`r mlr_pkg("mlr3")` provides a predefined `r ref("Task")`, more precisely a `r ref("TaskClassif", "classification task")` for this dataset.
-We can load it using the `r ref("tsk()")` function.
+The dataset we are going to use is a transformed version of this German credit dataset, as provided by the `r cran_pkg("rchallenge")` package (this transformed dataset was proposed by Ulrike Grömping, with factors instead of dummy variables and corrected features):
 
 ```{r, message=FALSE}
 data("german", package = "rchallenge")
@@ -107,20 +106,22 @@ str(german)
 ```
 
 Our dataset has `r nrow(german)` observations and `r ncol(german)` columns.
-The variable we want to predict is `credit_risk` (either good or bad).
-That means we aim to classify people by their credit risk (`"good"` or `"bad"`).
+The variable we want to predict is `credit_risk` (either good or bad), i.e., we aim to classify people by their credit risk.
 
-We also recommend the packages `r cran_pkg("skimr")` (`r ref("skimr::skim()")`) and `r cran_pkg("DataExplorer")` (`r ref("DataExplorer::plot_bar()")`, `r ref("DataExplorer::plot_histogram()")`, `r ref("DataExplorer::plot_boxplot()")`) packages as they create very well readable and understandable overviews.
+We also recommend the packages `r cran_pkg("skimr")` and `r cran_pkg("DataExplorer")` as they create very well readable and understandable overviews:
 
 ```{r, R.options=list(width = 120)}
 skimr::skim(german)
 ```
 
-```{r, echo=FALSE}
-german_short = mlr3misc::map_dtc(german, function(x) {
-  if (is.factor(x) || is.character(x)) {
-    levels(x) = abbreviate(mlr3misc::str_trunc(levels(x), 16, "..."), 12)
-  }
+
+Prior to calling `r cran_pkg("DataExplorer")`, we shorten the (very lengthy) factor levels of the german credit data set to get plots which nicely fit on the screen (no need to dig into this):
+
+```{r, echo=TRUE}
+german_short = german
+is_factor = sapply(german_short, is.factor)
+german_short[is_factor] = lapply(german[is_factor], function(x) {
+  levels(x) = abbreviate(mlr3misc::str_trunc(levels(x), 16, "..."), 12)
   x
 })
 ```
@@ -182,13 +183,13 @@ If we want to solve a classification problem, we define a classification task --
 For a regression problem, we define a regression task -- `r ref("TaskRegr")`.
 
 In our case it is clearly our objective to model or predict the binary `factor` variable `credit_risk`.
-Thus, we define a `TaskClassif`.
+Thus, we define a `TaskClassif`:
 
 ```{r}
-task = TaskClassif$new("GermanCredit", backend = german, target = "credit_risk")
+task = TaskClassif$new("GermanCredit", german, target = "credit_risk")
 ```
 
-Note that this task is an example task which ships with the `mlr3` package.
+Note that the German credit data is also given as an example task which ships with the `mlr3` package.
 Thus, you actually don't need to construct it yourself, just call `tsk("german_credit")` to retrieve the object from the dictionary `r ref("mlr_tasks")`.
 
 
@@ -212,7 +213,7 @@ mlr_learners
 ```
 
 For our problem, a suitable learner could be one of the following:
-Logistic regression, CART, Random Forest (or many more).
+Logistic regression, CART, random forest (or many more).
 
 A learner can be initialized with the `r ref("lrn()")` function and the name of the learner, e.g., `lrn("classif.xxx")`.
 Use `?mlr_learners_xxx` to open the help page of a learner named `xxx`, or follow the link on the [rendered overview page](https://mlr3learners.mlr-org.com/reference/index.html).
@@ -222,6 +223,7 @@ For example, a logistic regression can be initialized in the following manner (l
 ```{r}
 library("mlr3learners")
 learner_logreg = lrn("classif.log_reg")
+print(learner_logreg)
 ```
 
 ### Training
@@ -233,7 +235,7 @@ Training is the procedure, where a model is fitted on the (training) data.
 We start with the example of the logistic regression.
 However, you will immediately see that the procedure generalizes to any learner very easily.
 
-An initialized learner can be trained on data using `$train()`.
+An initialized learner can be trained on data using `$train()`:
 
 ```{r}
 learner_logreg$train(task)
@@ -264,13 +266,13 @@ learner_logreg$train(task, row_ids = train_set)
 
 The fitted model can be accessed via:
 
-```{r, eval=FALSE}
+```{r, eval=TRUE}
 learner_logreg$model
 ```
 
-The stored object is a normal `glm` object and all its `S3` methods work as expected.
+The stored object is a normal `glm` object and all its `S3` methods work as expected:
 
-```{r eval=FALSE}
+```{r eval=TRUE}
 class(learner_logreg$model)
 summary(learner_logreg$model)
 ```
@@ -282,16 +284,16 @@ We use the fast implementation from the `r cran_pkg("ranger")` package.
 For this, we first need to define the learner and then actually train it.
 
 We now additionally supply the importance argument (`importance = "permutation"`).
-Doing so, we override the default and let the learner do feature importance determination based on permutation feature importance.
+Doing so, we override the default and let the learner do feature importance determination based on permutation feature importance:
 
 ```{r}
 learner_rf = lrn("classif.ranger", importance = "permutation")
 learner_rf$train(task, row_ids = train_set)
 ```
 
-We can access the importance values using `$importance()`.
+We can access the importance values using `$importance()`:
 
-```{r, eval=FALSE}
+```{r, eval=TRUE}
 learner_rf$importance()
 ```
 
@@ -300,9 +302,6 @@ In order to obtain a plot for the importance values, we convert the importance t
 ```{r}
 importance = as.data.table(learner_rf$importance(), keep.rownames = TRUE)
 colnames(importance) = c("Feature", "Importance")
-```
-
-```{r}
 ggplot(importance, aes(x = reorder(Feature, Importance), y = Importance)) +
   geom_col() + coord_flip() + xlab("")
 ```
@@ -322,7 +321,7 @@ Based on these values, one can derive class predictions.
 
 #### Predict Classes
 
-First, we directly predict classes.
+First, we directly predict classes:
 
 ```{r}
 pred_logreg = learner_logreg$predict(task, row_ids = test_set)
@@ -340,7 +339,7 @@ pred_rf
 The `$predict()` method returns  a `r ref("Prediction")` object.
 It can be converted to a `data.table` if one wants to use it downstream.
 
-We can also display the prediction results aggregated in a confusion matrix.
+We can also display the prediction results aggregated in a confusion matrix:
 
 ```{r}
 pred_logreg$confusion
@@ -398,7 +397,7 @@ Lower is better.
 We can easily run different resampling strategies, e.g. repeated holdout (`"subsampling"`), or cross validation.
 Most methods perform repeated train/predict cycles on different data subsets and aggregate the result (usually as the mean).
 Doing this manually would require us to write loops.
-`mlr3` does the job for us.
+`mlr3` does the job for us:
 
 ```{r}
 resampling = rsmp("subsampling", repeats = 10)
@@ -406,7 +405,7 @@ rr = resample(task, learner = learner_logreg, resampling = resampling)
 rr$aggregate()
 ```
 
-Instead, we could also run cross-validation.
+Instead, we could also run cross-validation:
 
 ```{r}
 resampling = resampling = rsmp("cv", folds = 10)
@@ -415,7 +414,7 @@ rr$aggregate()
 ```
 
 `mlr3` features scores for many more measures.
-Here, we apply `r ref("mlr_measures_classif.fpr")`  for the false positive rate, and `r ref("mlr_measures_classif.fnr")` for the false negative rate.
+Here, we apply `r ref("mlr_measures_classif.fpr")` for the false positive rate, and `r ref("mlr_measures_classif.fnr")` for the false negative rate.
 Multiple measures can be provided as a list of measures (which can directly be constructed via `r ref("msrs()")`:
 
 ```{r}
@@ -465,7 +464,7 @@ For parallelization, `mlr3` relies on the `r cran_pkg("future")` package:
 ```
 
 In the benchmark we can compare different measures.
-We compare `r ref("mlr_measures_classif.ce", text = "misclassification rate")` and `r ref("mlr_measures_classif.auc", text = "AUC")`.
+Here, we look at the `r ref("mlr_measures_classif.ce", text = "misclassification rate")` and the `r ref("mlr_measures_classif.auc", text = "AUC")`:
 
 ```{r}
 measures = msrs(c("classif.ce", "classif.auc"))
@@ -483,14 +482,14 @@ While many R packages have carefully selected default settings, they will not pe
 Typically, we can select the values of such hyperparameters.
 The (hyper)parameters of a `r ref("Learner")` can be accessed and set via its `r ref("ParamSet")` `$param_set`:
 
-```{r, eval=FALSE}
+```{r, eval=TRUE}
 learner_rf$param_set
 learner_rf$param_set$values = list(verbose = FALSE)
 ```
 
 We can choose parameters for our learners in two distinct manners.
 If we have prior knowledge on how the learner should be (hyper-)parameterized, the way to go would be manually entering the parameters in the parameter set.
-In most cases, however, we would want to tune the learner so that it can search good model configurations itself.
+In most cases, however, we would want to tune the learner so that it can search "good" model configurations itself.
 For now, we only want to compare a few models.
 
 To get an idea on which parameters can be manipulated, we can investigate the parameters of the original package version or look into the parameter set of the learner:
@@ -535,6 +534,7 @@ bm_design = benchmark_grid(
 
 ```{r}
 bmr = benchmark(bm_design)
+print(bmr)
 ```
 
 We compare misclassification rate and AUC again:
@@ -566,7 +566,7 @@ The next parts of the tutorial will go more into depth into additional `mlr3` to
 
 ### Tips
 
-- What are the arguments of `tsk()`, `lrn()`, `rsmp()`, `msr()` etc. again? $\rightarrow$ Think about the corresponding dictionary.
+- What are the arguments of `tsk()`, `lrn()`, `rsmp()`, `msr()` etc. again? $\rightarrow$ Think about the corresponding dictionary:
 
 ```{r}
 mlr_tasks
@@ -579,10 +579,7 @@ mlr_measures
 ```
 
 - What are the arguments of a `$new()` constructor?
-
-```{r}
-formals(TaskClassif$public_methods$initialize)
-```
+  - Check the corresponding help page.
 
 - What are the possible slots and functions of an object?
   - Writing `pred_rf$`, and pressing \<TAB\> should work.
