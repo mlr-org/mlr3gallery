@@ -65,7 +65,7 @@
 {"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["title","categories","author","date","description","output","citation_url","canonical_url"]}},"value":[{"type":"character","attributes":{},"value":["Pipelines, selectors, branches"]},{"type":"character","attributes":{},"value":["mlr3pipelines"]},{"type":"list","attributes":{},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name"]}},"value":[{"type":"character","attributes":{},"value":["Milan Dragicevic"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name"]}},"value":[{"type":"character","attributes":{},"value":["Giuseppe Casalicchio"]}]}]},{"type":"character","attributes":{},"value":["04-23-2020"]},{"type":"character","attributes":{},"value":["This tutorial explains how applying different preprocessing steps on different features and branching of preprocessing steps can be achieved using the mlr3pipelines package."]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["distill::distill_article"]}},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["self_contained","css"]}},"value":[{"type":"logical","attributes":{},"value":[false]},{"type":"character","attributes":{},"value":["../../custom.css"]}]}]},{"type":"character","attributes":{},"value":["https://mlr3gallery.mlr-org.com/posts/2020-04-23-pipelines-selectors-branches/"]},{"type":"character","attributes":{},"value":["https://mlr3gallery.mlr-org.com/posts/2020-04-23-pipelines-selectors-branches/"]}]}
 </script>
 <!--/radix_placeholder_rmarkdown_metadata-->
-
+  
   <script type="text/json" id="radix-resource-manifest">
   {"type":"character","attributes":{},"value":["2020-04-23-pipelines-selectors-branches_files/figure-html5/unnamed-chunk-10-1.png","2020-04-23-pipelines-selectors-branches_files/figure-html5/unnamed-chunk-11-1.png","2020-04-23-pipelines-selectors-branches_files/figure-html5/unnamed-chunk-13-1.png","2020-04-23-pipelines-selectors-branches_files/figure-html5/unnamed-chunk-14-1.png","2020-04-23-pipelines-selectors-branches_files/figure-html5/unnamed-chunk-7-1.png","2020-04-23-pipelines-selectors-branches_files/figure-html5/unnamed-chunk-9-1.png"]}
   </script>
@@ -1339,10 +1339,10 @@ document.addEventListener('DOMContentLoaded', function() {
 </div>
 
 <div class="d-byline">
-  Milan Dragicevic
-
-,   Giuseppe Casalicchio
-
+  Milan Dragicevic  
+  
+,   Giuseppe Casalicchio  
+  
 <br/>04-23-2020
 </div>
 
@@ -1383,7 +1383,7 @@ pima_tsk$data()</code></pre>
   3:      pos  32     183      NA 23.3    0.672        8       64      NA
   4:      neg  21      89      94 28.1    0.167        1       66      23
   5:      pos  33     137     168 43.1    2.288        0       40      35
- ---
+ ---                                                                     
 764:      neg  63     101     180 32.9    0.171       10       76      48
 765:      neg  27     122      NA 36.8    0.340        2       70      27
 766:      neg  30     121     112 26.2    0.245        5       72      23
@@ -1586,7 +1586,7 @@ skimr::skim(pima_tsk$data())</code></pre>
 <pre class="r"><code>
 pima_tsk$missings()</code></pre>
 <pre><code>
-diabetes      age  glucose  insulin     mass pedigree pregnant pressure  triceps
+diabetes      age  glucose  insulin     mass pedigree pregnant pressure  triceps 
        0        0        5      374       11        0        0       35      227 </code></pre>
 </div>
 <p>A common approach in such situations is to impute the missing values and to add a missing indicator column as explained in the <a href="https://mlr3gallery.mlr-org.com/posts/2020-01-30-impute-missing-levels/">Impute missing variables</a> post. Suppose we want to use</p>
@@ -1614,13 +1614,13 @@ miss_ind = po(&quot;missind&quot;)</code></pre>
 # no missings in &quot;glucose&quot;, &quot;mass&quot; and &quot;pressure&quot;
 hist_imp$train(list(pima_tsk))[[1]]$missings()</code></pre>
 <pre><code>
-diabetes      age  insulin pedigree pregnant  triceps  glucose     mass pressure
+diabetes      age  insulin pedigree pregnant  triceps  glucose     mass pressure 
        0        0      374        0        0      227        0        0        0 </code></pre>
 <pre class="r"><code>
 # no missings in &quot;insulin&quot; and &quot;triceps&quot;
 median_imp$train(list(pima_tsk))[[1]]$missings()</code></pre>
 <pre><code>
-diabetes      age  glucose     mass pedigree pregnant pressure  insulin  triceps
+diabetes      age  glucose     mass pedigree pregnant pressure  insulin  triceps 
        0        0        5       11        0        0       35        0        0 </code></pre>
 </div>
 <p>We construct a pipeline that combines <code>hist_imp</code> and <code>median_imp</code>. Here, <code>hist_imp</code> will impute the features “glucose”, “mass” and “pressure”, and <code>median_imp</code> will impute “insulin” and “triceps”. In each preprocessing step, all the input features are passed to the next step. In the end, we obtain a data set without missing values:</p>
@@ -1633,7 +1633,7 @@ impute_graph$plot(html = FALSE)</code></pre>
 <pre class="r"><code>
 impute_graph$train(pima_tsk)[[1]]$missings()</code></pre>
 <pre><code>
-diabetes      age pedigree pregnant  glucose     mass pressure  insulin  triceps
+diabetes      age pedigree pregnant  glucose     mass pressure  insulin  triceps 
        0        0        0        0        0        0        0        0        0 </code></pre>
 </div>
 <p>The <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_missind.html"><code>missind</code></a> operator replaces features with missing values with a missing value indicator:</p>
@@ -1647,7 +1647,7 @@ miss_ind$train(list(pima_tsk))[[1]]$data()</code></pre>
   3:      pos         present         missing      present          present         missing
   4:      neg         present         present      present          present         present
   5:      pos         present         present      present          present         present
- ---
+ ---                                                                                       
 764:      neg         present         present      present          present         present
 765:      neg         present         missing      present          present         present
 766:      neg         present         present      present          present         present
@@ -1671,7 +1671,7 @@ impute_missind$train(pima_tsk)[[1]]$data()</code></pre>
   3:      pos  32    0.672        8     183 23.3       64     125      29         present
   4:      neg  21    0.167        1      89 28.1       66      94      23         present
   5:      pos  33    2.288        0     137 43.1       40     168      35         present
- ---
+ ---                                                                                     
 764:      neg  63    0.171       10     101 32.9       76     180      48         present
 765:      neg  27    0.340        2     122 36.8       70     125      27         present
 766:      neg  30    0.245        5     121 26.2       72     112      23         present
@@ -1683,7 +1683,7 @@ impute_missind$train(pima_tsk)[[1]]$data()</code></pre>
   3:         missing      present          present         missing
   4:         present      present          present         present
   5:         present      present          present         present
- ---
+ ---                                                              
 764:         present      present          present         present
 765:         missing      present          present         present
 766:         present      present          present         present
@@ -1710,7 +1710,7 @@ hist_imp2$train(pima_tsk)[[1]]$data()</code></pre>
   3:      pos     183 23.3       64
   4:      neg      89 28.1       66
   5:      pos     137 43.1       40
- ---
+ ---                               
 764:      neg     101 32.9       76
 765:      neg     122 36.8       70
 766:      neg     121 26.2       72
@@ -1728,7 +1728,7 @@ median_imp2$train(pima_tsk)[[1]]$data()</code></pre>
   3:      pos     125      29
   4:      neg      94      23
   5:      pos     168      35
- ---
+ ---                         
 764:      neg     180      48
 765:      neg     125      27
 766:      neg     112      23
@@ -1758,7 +1758,7 @@ impute_missind2$train(pima_tsk)[[1]]$data()</code></pre>
   3:      pos     183 23.3       64     125      29         present         missing      present
   4:      neg      89 28.1       66      94      23         present         present      present
   5:      pos     137 43.1       40     168      35         present         present      present
- ---
+ ---                                                                                            
 764:      neg     101 32.9       76     180      48         present         present      present
 765:      neg     122 36.8       70     125      27         present         missing      present
 766:      neg     121 26.2       72     112      23         present         present      present
@@ -1770,7 +1770,7 @@ impute_missind2$train(pima_tsk)[[1]]$data()</code></pre>
   3:          present         missing  32    0.672        8
   4:          present         present  21    0.167        1
   5:          present         present  33    2.288        0
- ---
+ ---                                                       
 764:          present         present  63    0.171       10
 765:          present         present  27    0.340        2
 766:          present         present  30    0.245        5
@@ -1794,7 +1794,7 @@ impute_missind3$train(pima_tsk)[[1]]$data()</code></pre>
   3:      pos     183 23.3       64     125      29         present         missing      present
   4:      neg      89 28.1       66      94      23         present         present      present
   5:      pos     137 43.1       40     168      35         present         present      present
- ---
+ ---                                                                                            
 764:      neg     101 32.9       76     180      48         present         present      present
 765:      neg     122 36.8       70     125      27         present         missing      present
 766:      neg     121 26.2       72     112      23         present         present      present
@@ -1806,7 +1806,7 @@ impute_missind3$train(pima_tsk)[[1]]$data()</code></pre>
   3:          present         missing  32    0.672        8
   4:          present         present  21    0.167        1
   5:          present         present  33    2.288        0
- ---
+ ---                                                       
 764:          present         present  63    0.171       10
 765:          present         present  27    0.340        2
 766:          present         present  30    0.245        5
@@ -1872,15 +1872,15 @@ grph$param_set</code></pre>
  4:  missing_train
  5:         factor
  6:  &lt;Selector[1]&gt;
- 7:
- 8:
- 9:
-10:
-11:
-12:
-13:
-14:
-15:
+ 7:               
+ 8:               
+ 9:               
+10:               
+11:               
+12:               
+13:               
+14:               
+15:               
 16:              0
 17:               </code></pre>
 </div>
@@ -1932,11 +1932,11 @@ instance$archive</code></pre>
 4:    simple_median      0.060966386                       4  0.2617188 &lt;ResampleResult[18]&gt;
 5:    simple_median      0.005463608                       6  0.2460938 &lt;ResampleResult[18]&gt;
     x_domain           timestamp batch_nr
-1: &lt;list[3]&gt; 2020-08-28 04:48:07        1
-2: &lt;list[3]&gt; 2020-08-28 04:48:08        2
-3: &lt;list[3]&gt; 2020-08-28 04:48:10        3
-4: &lt;list[3]&gt; 2020-08-28 04:48:11        4
-5: &lt;list[3]&gt; 2020-08-28 04:48:12        5</code></pre>
+1: &lt;list[3]&gt; 2020-08-28 13:26:28        1
+2: &lt;list[3]&gt; 2020-08-28 13:26:30        2
+3: &lt;list[3]&gt; 2020-08-28 13:26:31        3
+4: &lt;list[3]&gt; 2020-08-28 13:26:32        4
+5: &lt;list[3]&gt; 2020-08-28 13:26:34        5</code></pre>
 </div>
 <p>The best performance in this short tuned experiment was achieved with .</p>
 <div class="layout-chunk" data-layout="l-body">
