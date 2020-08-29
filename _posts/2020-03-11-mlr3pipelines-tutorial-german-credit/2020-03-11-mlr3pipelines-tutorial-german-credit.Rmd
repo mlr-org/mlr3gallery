@@ -100,7 +100,7 @@ You can uncomment the following line if you are running this locally:
 
 In this use case, we will take a look at composite machine learning algorithms that may incorporate data preprocessing or the combination of multiple `Learner`s ("ensemble methods").
 
-We use the `r mlr_pkg("mlr3pipelines")` package that enables us to chain `r ref("PipeOp", "PipeOps")` into data flow graphs.
+We use the `r mlr_pkg("mlr3pipelines")` package that enables us to chain `r ref("PipeOp", "PipeOps")` into data flow `r ref("Graph", "Graphs")`.
 
 Available `PipeOp`s are listed in the `mlr_pipeops` dictionary:
 
@@ -291,7 +291,7 @@ Not only logistic regression but also many other `Learner`s cannot handle new le
 Thus, we use `r ref("PipeOpFixFactors")` to prevent that.
 `PipeOpFixFactors` introduces `NA` values for unseen levels.
 This means that we may need to impute afterwards.
-To solve this issue we can use `r ref("PipeOpImputeSample")`, but with `affect_cols` set to only *factorial* features.
+To solve this issue we can use `r ref("PipeOpImputeSample")`, but with `affect_columns` set to only *factorial* features.
 
 Another observation is that all-constant features may also be a problem:
 
@@ -313,8 +313,7 @@ robustify = po("fixfactors") %>>%
 robustify$plot()
 ```
 
-This robust learner works even in very pathological conditions.
-You may need to combine it with imputation if the data may have missing values:
+This robust learner works even in very pathological conditions:
 
 ```{r, warning=FALSE}
 roblogreg = GraphLearner$new(robustify %>>% logreg)
@@ -328,7 +327,7 @@ roblogreg$predict(task)
 There are various possibilities for preprocessing with `PipeOp`s.
 You can try different methods for preprocessing and training.
 Feel free to discover this variety by yourself!
-There are only a few hints that help when working with `PipeOp`s:
+Here are only a few hints that help when working with `PipeOp`s:
 
 - It is not allowed to have two `PipeOp`s with the same `ID` in a `Graph`
   - Initialize a `PipeOp` with `po("...", id = "xyz")` to change its ID on construction
