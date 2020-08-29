@@ -130,10 +130,10 @@ Note that the `id`'s are prefixed by the respective `r ref("PipeOp", "PipeOp")` 
 
 ## Search Space
 
-Our graph either fits a `LDA` after applying `PCA` or `ICA`, or alternativelz `ranger` with no preprocessing. These two **options** each define selection parameters that we can tune. 
-Moreover, within the respective `PipeOp`'s we want to tune the following parameters: `pca.rank.`, `ica.n.comp`, `classif.lda.method`, `classif.ranger.mtry`, and `classif.ranger.num.trees`. 
+Our graph either fits a `LDA` after applying `PCA` or `ICA`, or alternativelz `ranger` with no preprocessing. These two **options** each define selection parameters that we can tune.
+Moreover, within the respective `PipeOp`'s we want to tune the following parameters: `pca.rank.`, `ica.n.comp`, `classif.lda.method`, `classif.ranger.mtry`, and `classif.ranger.num.trees`.
 The first two parameters are integers that in-principal could range from 1 to the number of features.
-However, for `ICA`, the upper bound must not exceed the number of observations and as we will later use `3-fold` `r ref("mlr_resamplings_cv", "cross-validation")` as the resampling method for the tuning, we just set the upper bound to 30 (and do the same for the `PCA`). 
+However, for `ICA`, the upper bound must not exceed the number of observations and as we will later use `3-fold` `r ref("mlr_resamplings_cv", "cross-validation")` as the resampling method for the tuning, we just set the upper bound to 30 (and do the same for the `PCA`).
 Regarding the `classif.lda.method` we will only be interested in `moment` estimation vs. minimum volume ellipsoid covariance estimation (`mve`). Moreover, we set the lower bound of `classif.ranger.mtry` to 200 (which is around the number of features divided by ten) and the upper bound to 1000.
 
 ```{r}
@@ -189,18 +189,18 @@ tune_ps1$add_dep("classif.ranger.num.trees",
 ## Tuning
 
 We can now tune the parameters of our graph as defined in the search space with respect to a measure. Here, we will use the `classification accuracy`.
-As a resampling method we use `3-fold` `cross-validation`. 
+As a resampling method we use `3-fold` `cross-validation`.
 We will use the `r ref("TerminatorNone", "TerminatorNone")` (i.e., no early termination) for terminating the tuning because we will apply a `grid search`:
 
 ```{r}
 set.seed(2409)
-tune1 = TuningInstance$new(
+tune1 = TuningInstanceSingleCrit$new(
   task_train,
   learner = graph1,
   resampling = rsmp("cv", folds = 3),
-  measures = msr("classif.acc"),
-  param_set = tune_ps1,
-  terminator = term("none")
+  measure = msr("classif.acc"),
+  search_space = tune_ps1,
+  terminator = trm("none")
 )
 ```
 
@@ -218,13 +218,13 @@ lgr::get_logger("mlr3tuning")$set_threshold("warn")
 ```
 
 ```{r}
-tnr("grid_search", resolution = 4)$tune(tune1)
+tnr("grid_search", resolution = 4)$optimize(tune1)
 ```
 
 Now, we can inspect the results ordered by the `classification accuracy`:
 
 ```{r}
-tune1_results = tune1$archive(unnest = "params")
+tune1_results = tune1$archive$data()
 tune1_results[order(classif.acc), ]
 ```
 
@@ -249,8 +249,8 @@ Note that we also could have wrapped our graph in a `r ref("GraphLearner", "Grap
 
 Instead of using branches to split our graph with respect to the learner and preprocessing options, we can also use `PipeOpProxy`.
 `PipeOpProxy` accepts a single `content` parameter that can contain any other `PipeOp` or `Graph`.
-This is extremely flexible in the sense that we do not have to specify our options during construction. 
-However, the parameters of the contained `PipeOp` or `Graph` are no longer directly contained in the `ParamSet` of the resulting graph. 
+This is extremely flexible in the sense that we do not have to specify our options during construction.
+However, the parameters of the contained `PipeOp` or `Graph` are no longer directly contained in the `ParamSet` of the resulting graph.
 Therefore, when tuning the graph, we do have to make use of a `trafo` function.
 
 ```{r}
@@ -291,7 +291,7 @@ proxy_options = list(
 )
 ```
 
-Note that above we made use of the `branch` `r #ref("ppl", "ppl")` which is syntactic sugar for doing branching. Of course we also could have use another nested `PipeOpProxy` to specify the preprocessing options (`"pca"` vs. `"ica"`) within `proxy_options` if for some reason we do not want to do branching at all.
+Note that above we made use of the `branch` `r ref("ppl", "ppl")` which is syntactic sugar for doing branching. Of course we also could have use another nested `PipeOpProxy` to specify the preprocessing options (`"pca"` vs. `"ica"`) within `proxy_options` if for some reason we do not want to do branching at all.
 The `trafo` function then selects one of the `proxy_options` and sets the respective parameters for the `PCA`, `ICA`, `LDA` and `ranger`.
 Here, the argument `x` is a list which will contain sampled/selected parameters from our `ParamSet` (in our case, `tune_ps2`).
 
@@ -316,19 +316,20 @@ tune_ps2$trafo = function(x, param_set) {
 }
 ```
 
-Tuning then can be carried out analogously as done above (note that setting `unnest = "tune_x"` allows us to inspect the parameters as they were selected prior to the trafo function being applied):
+Tuning then can be carried out analogously as done above (note that setting `unnest = "x_domain"` allows us to inspect the parameters as they were selected prior to the trafo function being applied):
 
 ```{r, eval = FALSE}
 set.seed(2409)
-tune2 = TuningInstance$new(
+tune2 = TuningInstanceSingleCrit$new(
   task_train,
   learner = graph2,
   resampling = rsmp("cv", folds = 3),
-  measures = msr("classif.acc"),
-  param_set = tune_ps2,
-  terminator = term("none")
+  measure = msr("classif.acc"),
+  search_space = tune_ps2,
+  terminator = trm("none")
 )
-tnr("grid_search", resolution = 4)$tune(tune2)
-tune2_results = tune2$archive(unnest = "tune_x")
+tnr("grid_search", resolution = 4)$optimize(tune2)
+
+tune2_results = tune2$archive$data(unnest = "x_domain")
 tune2_results[order(classif.acc), ]
 ```
