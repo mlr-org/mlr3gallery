@@ -1,0 +1,75 @@
+---
+title: "Multiclass to binary class reduction techniques"
+tags: ['mlr3pipelines', 'multiclass']
+author: Florian Pfisterer
+date: 27-08-2020
+description: |
+  In some situations, we want to use a learner that can only handle binary classification targets for a multi-class classification problem. Several reduction strategies that
+  enable this exist, ....
+output:
+  distill::distill_article:
+    self_contained: false
+    css: ../../custom.css
+---
+
+
+## Multiclass Tasks
+
+```{r}
+library(mlr3)
+library(mlr3misc)
+library(mlr3pipelines)
+library(mlr3learners)
+```
+
+Many tasks encountered in real life applications have multiple target classes.
+Those are called **multiclass** tasks.
+For illustration, we choose the simplest one: `iris`.
+
+```{r}
+task = tsk("iris")
+```
+
+It has three classes `r task$class_names` and the property `r task$properties`.
+
+
+Unfortunately not all learners know how to deal with multiple classes, and instead only perform **binary** classification.
+
+An example for this is  **logistic regression**, which has property **twoclass** and no **multiclass** property.
+
+```{r}
+lrn("classif.log_reg")
+```
+
+Fortunately, we can reduce multiclass classification to a series of binary class classification tasks using either the **one-vs-one** or the **one-vs-all** approach (Bishop, Christopher M. (2006). Pattern Recognition and Machine Learning. Springer).
+
+
+## Building the Pipeline
+
+We'll use a `Pipeline` implemented in **mlr3pipelines** in order to fit one learner for each target level. During each fit,
+all other target levels are assigned the `"rest"` class.
+
+For convenience, we can wrap any `Graph` that takes as input a `Task` during train and a `Prediction` during the predict phase.
+A simple version of such a `Graph` is using just a single `Learner`.
+
+In short, it can be obtained using `ppl`.
+
+```{r}
+gr = ppl('ovr', lrn('classif.log_reg'))
+```
+
+```{r}
+gr$plot()
+```
+
+and use a `GraphLearner` for `resample`.
+
+```{r}
+resample(tsk("iris"), GraphLearner$new(gr), rsmp("holdout"))
+```
+
+
+```{r}
+gr$train(tsk("iris")$filter(c(1:30, 51:80, 101:130)))
+gr$predict(tsk("iris")$filter(c(1:30, 51:80, 101:130)))
+```
