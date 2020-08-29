@@ -46,6 +46,46 @@ library(mlr3pipelines)
 library(mlr3tuning)
 ```
 
+
+
+## Thresholds: A short intro
+
+In order to understand thresholds, we will quickly showcase the effect of setting different thresholds:
+
+First we create a learner that predicts probabilities and use it to predict on holdout data, storing the prediction.
+
+```{r}
+learner = lrn("classif.rpart", predict_type = "prob")
+rr = resample(tsk('pima'), learner, rsmp("holdout"))
+prd = rr$prediction()
+prd
+```
+
+If we now look at the confusion matrix, the off-diagonal elements are errors made by our model (*false positives* and *true negatives*) while on-diago)ements are where our model predicted correctly.
+
+
+```{r}
+# Print confusion matrix
+prd$confusion
+# Print False Positives and False Negatives
+prd$score(list(msr("classif.fp"), msr("classif.fn")))
+```
+
+By adjusting the **classification threshold**, in this case the probability required to predict the positive class, we can now trade off predicting more positive cases (first row)
+against predicting fewer negative cases (second row) or vice versa.
+
+```{r}
+# Lower threshold: More positives
+prd$set_threshold(0.25)$confusion
+```
+
+```{r}
+# Higher threshold: Fewer positives
+prd$set_threshold(0.75)$confusion
+```
+
+This threshold value can now be adjusted optimially for a given measure, such as accuracy. How this can be done is discussed in the following section.
+
 ## Adjusting thresholds: Two strategies
 
 Currently `mlr3pipelines` offers two main strategies towards adjusting `classification thresholds`.
