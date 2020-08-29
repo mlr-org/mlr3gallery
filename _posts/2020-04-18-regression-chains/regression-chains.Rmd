@@ -103,7 +103,7 @@ In our regression chain, the first model will predict $y_{1}$. Therefore, we ini
 library(mlr3)
 library(mlr3learners)
 library(mlr3pipelines)
-task = TaskRegr$new("Multiregression", backend = dat, target = "y1")
+task = TaskRegr$new("multiregression", backend = dat, target = "y1")
 ```
 
 As learners we will use simple linear regression models, `r ref("mlr_learners_regr.lm", "lm learner")`. Our pipeline building the regression chain then has to do the following:
@@ -125,6 +125,11 @@ step1$plot()
 ```
 
 Within the second step we then have to define $y_{2}$ as the new target. This can be done using `PipeOpUpdateTarget` (note that `PipeOpUpdateTarget` by default drops the original target, here $y_{1}$). Typically one would use `PipeOpUpdateTarget` to apply a transformation function to the original target (possibly also renaming it) which must not be inverted later. However, in the special case of leaving the `trafo` at its default `identity` and providing a `new_target_name` that already matches a column of the input data, `PipeOpUpdateTarget` simply sets this column as the new target:
+
+```{r}
+#FIXME:
+mlr_pipeops$add("update_target", mlr3pipelines:::PipeOpUpdateTarget)
+```
 
 ```{r}
 step2 = po("update_target", id = "y2_target",
