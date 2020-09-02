@@ -9,6 +9,8 @@ author:
   - name: Veronika Kronseder
   - name: Melissa Schmoll
   - name: Eileen Wuest
+editor:
+  - name: Henri Funk
 date: 08-02-2020
 description: |
   Use case illustrating data vizualization and tuning via mlr3 on the "Medical Costs" dataset.
@@ -18,7 +20,7 @@ output:
     css: ../../custom.css
 ---
 
-```{r, include = FALSE}
+```{r, include=FALSE}
 knitr::opts_chunk$set(
   echo = TRUE,
   R.options = list(width = 80),
@@ -30,64 +32,28 @@ library(kableExtra)
 ```
 
 ```{r setup, include=FALSE}
+library(mlr3verse)
+library(ggplot2)
+library(grid)
+library(gridExtra)
+library(dplyr)
+library(tidyr)
+library(RCurl)
 
-# get operating system information
-os = Sys.info()[["sysname"]]
-
-# set corresponding installation type
-itype = ifelse(os == "Linux", "source", "binary")
-
-# a bunch of required packages
-# required packages
-packages_required = c(
-  "mlr3",
-  "mlr3learners",
-  "mlr3viz",
-  "mlr3tuning",
-  "mlr3filters",
-  "mlr3misc",
-  "ggplot2",
-  "grid",
-  "gridExtra",
-  "dplyr",
-  "tidyr",
-  "data.table",
-  "ranger",
-  "paradox",
-  "RCurl"
-)
-
-# check which ones are not installed
-not_installed = packages_required[!packages_required %in%
-  installed.packages()[, "Package"]]
-
-# install them
-if (length(not_installed) > 0) {
-  lapply(
-    not_installed,
-    install.packages,
-    repos = "http://cran.us.r-project.org",
-    dependencies = TRUE,
-    type = itype
-  )
-}
-
-# load them
-lapply(packages_required, library, character.only = TRUE)
+longrun = FALSE
 ```
 
 
 ## Introduction 
 
-Our project "Prediction of Medical Costs" is an implementation of supervised learning. The algorithms used and the topic of supervised learning more generally were covered in the course "Introduction to Machine Learning" as a subfield of Machine Learning, which in turn is a subfield of Artificial Intelligence. The main task of supervised learning is to find a function explaining an outcome, given a specified set of objects, for which all features as well as the outcome are known.
-
-Myriad implementations of supervised learning algorithms can be found in a wide range of fields of science and business. This project serves as an example for an implementation in the actuarial sciences. It analyses insurance costs based on the following data set: "https://www.kaggle.com/mirichoi0218/insurance". Applying supervised machine learning methods, we want to investigate the following questions:  
+Myriad implementations of supervised learning algorithms can be found in a wide range of fields of science and business.
+This project serves as an example for an implementation in the actuarial sciences.
+It analyses insurance costs based on the following data set: "https://www.kaggle.com/mirichoi0218/insurance".
+Applying supervised machine learning methods, we want to investigate the following questions:  
 
 1. Which learner qualifies best to explain insurance charges by means of the given covariates? 
 2. What is the unbiased generalisation error associated with the selected model? 
 3. Which tariffication criteria (= covariates) have the strongest impact on the charges?  
-
-Firstly, we will introduce the data set. We will then apply nested resampling in order to explain and predict insurance charges. Lastly, we will investigate the feature importance emerging from our final model.
 
 ## Descriptive Analysis of the Data
 
@@ -99,13 +65,16 @@ insurance = read.csv(text = url)
 set.seed(246)
 ```
 
-The data set consists of 1338 insurees and their respective information on age, sex, bmi, number of children, smoking behaviour and region. As mentioned above our defined target variable, the outcome, are insurance costs named charges. These shall be explained by the information given about each insuree.   
+The data set consists of 1338 insurees and their respective information on age, sex, bmi, number of children, smoking behaviour and region.
+As mentioned above our defined target variable, the outcome, are insurance costs named charges.
+These shall be explained by the information given about each insuree.   
 
 ```{r, echo = FALSE}
 head(insurance)
 ```
 
-The target variable, charges, is continuous and its distribution is shown below. It has to be noted, that the variable has been logarithmised in order to avoid the problem of non-normality.
+The target variable, charges, is continuous and its distribution is shown below.
+It has to be noted, that the variable has been logarithmised in order to avoid the problem of non-normality.
 
 ```{r, echo = FALSE}
 ggplot(insurance, aes(x = log(charges))) +
@@ -114,10 +83,14 @@ ggplot(insurance, aes(x = log(charges))) +
 
 insurance$charges = log(insurance$charges)
 ```
+Note, that the same result can be achieved more easily by using `PipeOpTargetTrafo` from mlr3pipelines.
+This PipeOp provides a smooth implementation to transform the target variable mlr3 tasks.
 
 The following plots give a brief overview of the distribution of the independent variables:   
 
 ```{r, echo = FALSE}
+
+
 age = ggplot(insurance, aes(x = age)) +
   geom_histogram(col = "darkgray", size = 0.5) +
   theme_bw()
@@ -152,23 +125,26 @@ region = ggplot(insurance, aes(x = region)) +
 grid.arrange(age, sex, bmi, children, smoker, region, nrow = 2)
 ```
 
-Before we resume in our analysis, all independent, metric variables will be standardised (i.e. each variable will be transformed to have a mean of 0 and standarad deviation of 1). This ensures commensurability of variables originally measured on differing metric scales and is particularly important for learners, which assess distances between individual observations.
-
+Before we resume in our analysis, all independent, metric variables will be standardized.
+This ensures commensurability of variables originally measured on differing metric scales and is particularly important for learners, which assess distances between individual observations.
+Therefore PipeOpScale from mlr3pipelines is used.
 
 ```{r}
 insurance[, c("age", "bmi", "children")] =
-  scale(insurance[, c("age", "bmi", "children")])
+ scale(insurance[, c("age", "bmi", "children")])
 ```
+Note, that the same result can be achieved more easily by using `PipeOpScale` from mlr3pipelines.
+This PipeOp provides a smooth implementation to scale numeric features for mlr3 tasks.
 
 
-
-Given the aforementioned continuity of our target variable, it is clear that we face a so-called *regression problem*. In regression problems a numeric output associated with the variables is predicted - opposed to a specific class as it is the case for so-called *classification problems*. First of all, we initiate our task which specifies the underlying data and the target variable:  
+Given the aforementioned continuity of our target variable, we initiate a regression task which specifies the underlying data and the target variable:  
 
 ```{r}
 ins_task = TaskRegr$new(id = "ins_task", backend = insurance, target = "charges")
 ```
 
-The plots below give a brief overview of the conditional distribution of charges given each independent variable. It can, for example, be seen that charges seem to increase with age or that smokers seem to face higher charges than non-smokers.  
+The plots below give a brief overview of the conditional distribution of charges given each independent variable.
+It can, for example, be seen that charges seem to increase with age or that smokers seem to face higher charges than non-smokers.  
 
 ```{r echo = FALSE}
 age = ggplot() +
@@ -217,10 +193,7 @@ region = ggplot() +
 grid.arrange(age, sex, bmi, children, smoker, region, nrow = 2)
 ```
 
-
-Different learners are available to solve regression problems and each learner produces a mapping function (also called model) from the observed dataset and its features.
-  
-The learners we use are Linear Model (LM), k-Nearest Neighbors (kNN), Decision Trees (CART) and Random Forest (Ranger). It may be interesting to note, that while the first learner is suitable for regression tasks only, the other ones are suitable for both, regression and classification tasks. Just like the task, the learners have to be initiated:  
+The learners we initiate are Linear Model (LM), k-Nearest Neighbors (kNN), Decision Trees (CART) and Random Forest (Ranger).  
 
 ```{r}
 lrn_lm = lrn("regr.lm")
@@ -229,16 +202,10 @@ lrn_rpart = lrn("regr.rpart")
 lrn_ranger = lrn("regr.ranger")
 ```
 
+## Model and Hyperparameter Tuning
 
-## Model Optimization: Nested Resampling
-
-To evaluate the performance of these learners, several resampling strategies exist. The mlr3 package contains 6 predefined options: Cross-validation, Leave-one-out cross validation, Repeated cross-validation, Out-of-bag bootstrap and other variants, Monte-Carlo cross-validation and Holdout.  
-
-Nested Resampling embedds all parts of model-building including hyperparameter tuning in the model-finding process. Some of the associated steps can require resampling themselves, which is done within the *inner loop*. To obtain unbiased performance estimates, all parts of the model-building should be based on training data. An untouched test set should be reserved for model evaluation in the *outer loop*, which again requires the application of resampling. The resampling strategies for the inner and the outer loop can be defined individually. We will, however, focus solely on "5-fold-cross-validation" as it has become one of the standard methods.
-
-## Inner Loop: Model and Hyperparameter Tuning
-
-Adressing the inner loop, we first specify the hyperparameters of each learning algorithm - if applicable. These hyperparameters can have a strong influence on the performance of the algorithm and it can be advantageous to try different settings before fitting the model on the training data. An example would be the specification of the number of neareast neighbours, $k$, for the kNN learner. This process is called *tuning* the model.
+We first specify the hyperparameters of each learning algorithm - if applicable.
+These hyperparameters can have a strong influence on the performance of the algorithm and it can be advantageous to try different settings before fitting the model on the training data.
 
 Depending on the selected learner, various hyperparameters are obtained. Each of them impacts the performance of the learning algorithm. In order to evaluate this performance, we then need to choose a resampling strategy and a performance measure.   
 
@@ -250,11 +217,8 @@ resampling_inner = rsmp("cv", folds = 5)
 measures = mlr_measures$mget(c("regr.mse", "regr.mae", "regr.rsq"))
 ```
 
-Before the actual tuning starts, we still need to select the way, in which the optimisation takes place. In other words, to find the optimal hyperparamters of a model, which result in the most accurate predictions, we need to choose an the parameter space as well as the class and termination criterion of our tuner.  
-
-*Grid search* is a technique, which attempts all hyperparameter combinations on a multi-dimensional discretized grid, in arbitrary order. This means, grid search builds a model for every combination of hyperparameters sepecified and evaluates each model. It scales, however, badly as the combinatorial possibilities explode.
-
-A more efficient technique for hyperparamter tuning is *random search*, where random combinations of hyperparamters are tested to find the best solution instead of all possible combinations exhaustively.  
+To find the optimal hyperparameter setting of a model, which result in the most accurate predictions, we need to define the parameter space as well as the class and termination criterion of our tuner.  
+This is done by *random search*, where random combinations of hyperparamters are tested to find the best solution in a given space.  
 
 ```{r}
 tuner_rs = mlr3tuning::tnr("random_search")
@@ -269,13 +233,19 @@ terminator = trm("evals", n_evals = 30)
 
 ## Automating the Tuning of kNN, CART and Ranger
 
-K-Nearest Neighbors is a computationally complex procedure but very simple in terms of understanding as well as implementation. Furthermore, the resulting models often have a high degree of accuracy. As shown below, the parameter $k$, the number of neighbors, will be optimized as part of the model development. We specify that $k$-values between 10 and 40 shall be taken into account. 
+*K-Nearest Neighbors* is a computationally complex procedure but very simple in terms of understanding as well as implementation.
+Furthermore, the resulting models often have a high degree of accuracy.
+As shown below, the parameter $k$, the number of neighbors, will be optimized as part of the model development.
+We specify that $k$-values between 10 and 40 shall be taken into account. 
 
 ```{r}
 param_set_knn = ParamSet$new(params = list(ParamInt$new("k", lower = 10, upper = 40)))
 ```
 
-For Classification Tree learners there are more options for hyperparameter optimisation. In our case we choose to optimise two hyperparameters: Firstly, the complexity parameter $cp$. It ensures that only splits that improve the overall fit by a factor of $cp$ are attempted. Secondly, the hyperparameter $minsplit$. It determines the minimal number of observations per leaf necessary for a split to be attempted.  
+For *CART learners* we choose to optimize two hyperparameters.
+
+- The complexity parameter $cp$ ensures that only splits that improve the overall fit by a factor of $cp$ are attempted. 
+- The hyperparameter $minsplit$ determines the minimal number of observations per leaf necessary for a split to be attempted.  
 
 ```{r}
 param_set_rpart =
@@ -284,7 +254,7 @@ param_set_rpart =
     ParamInt$new("minsplit", lower = 1, upper = 50)))
 ```
 
-Finally, for the Random Forest learner, the hyperparameters we choose to optimise are $mtry$, the number of randomly sampled features considered by each tree when splitting a node, and $min.node.size$, the minimum number of observations per node. An exemplary value of 20 means that no node with fewer than 20 cases will be split.  
+Finally, for the Random Forest learner, the hyperparameters we choose to optimize are $mtry$, the number of randomly sampled features considered by each tree when splitting a node, and $min.node.size$, the minimum number of observations per node.  
 
 ```{r}
 param_set_ranger =
@@ -293,9 +263,7 @@ param_set_ranger =
     ParamInt$new("min.node.size", lower = 1, upper = 50)))
 ```
 
-
-Automated hyperparameter tuning uses methods such as Gradient Decent, Bayesian Optimization or Evolutionary Algorithms to conduct a guided search for the best hyperparameters.
-The *AutoTuner* from the mlr3 package adjusts itself by first tuning the hyperparameters of the respective learner on the training data, then setting the optimal parameters in the learner and finally fitting the model on the complete training dataset.  
+The *AutoTuner* from the mlr3 package adjusts itself by first tuning the hyperparameters of the respective learner on the training data, then setting the optimal parameters in the learner and finally fitting the model on the complete training data set.  
 
 ```{r}
 at_knn = AutoTuner$new(
@@ -324,8 +292,7 @@ at_ranger = AutoTuner$new(
 )
 ```
 
-```{r grid1, echo=FALSE, eval=FALSE}
-# An dieser Stelle wird Code ausgeführt, aber noch nicht im Markdown angezeigt (wir interessieren uns an dieser Stelle nur für die Boxplots zu den Tuning-Ergebnissen)
+```{r grid1, echo=FALSE, eval=longrun}
 resampling_outer = rsmp("cv", folds = 5)
 
 grid = benchmark_grid(
@@ -335,7 +302,6 @@ grid = benchmark_grid(
 )
 
 bmr = benchmark(grid, store_models = TRUE)
-
 
 # Each fold of outer resampling computes tuning, i.e. there are different sets of tuned hyperparameters
 # Extract optimal HP for each fold of outer resampling:
@@ -421,23 +387,26 @@ grid.arrange(plot_hp_knn, plot_hp_rpart_1, plot_hp_rpart_2, plot_hp_ranger_1, pl
   top = textGrob("Tuning Results: Hyperparameter Settings", gp = gpar(fontface = 2, fontsize = 14)))
 ```
 
-```{r gridrds, echo=FALSE}
-# saveRDS(grid1, "grid1.rds")
-grid1 <- readRDS("grid1.rds")
-grid.arrange(grid1)
-```
+![Tuning Results: Hyperparameter Setting](hyperparam_setting.png)
 
+These plots show the range of optimal hyperparameters obtained by the inner resampling loop.
+So, each boxplot is based on 5 values. The red lines (dashed) indicate the range, within which the hyperparameters were optimized.
+It can, for example, be seen that while various different $k$-values are deemed optimal for kNN, $mtry = 4$ is determined the optimal setting for the Ranger algorithm in every iteration.
+Also, the optimal $cp$ in CART seems to lie within a small range, while the best-performing $minsplit$-parameter is rather volatile.
+However, the illustration neglects the fact that in tuning we are looking at combinations of hyperparameters and the more dimensions we consider, the fewer of the hyperparameter space we are investigating with a fixed number of evaluations in the tuning.    
 
-These plots show the range of optimal hyperparameters obtained by the inner resampling loop. So, each boxplot is based on 5 values. The red lines (dashed) indicate the range, within which the hyperparameters were optimized. It can, for example, be seen that while various different $k$-values are deemed optimal for kNN, $mtry = 4$ is determined the optimal setting for the Ranger algorithm in every iteration. Also, the optimal $cp$ in CART seems to lie within a small range, while the best-performing $minsplit$-parameter is rather volatile. However, the illustration neglects the fact that in tuning we are looking at combinations of hyperparameters and the more dimensions we consider, the fewer of the hyperparameter space we are investigating with a fixed number of evaluations in the tuning.    
+### Outer Loop: Model Selection
 
+For nested resampling, we also define a 5-fold cross validation as our  outer loop.
+This means, we obtain five pairs of training and test sets. Each of those initiates the tuning process for the hyperparameter spaces specified earlier. 
+For each of the five iterations, the learner is fitted on the outer training set while its performance is evaluated on the outer test set.
+By averaging these five performance estimates of the outer loops, we get an unbiased performance estimate for the learner.  
 
-## Outer Loop: Model Selection
+As mentioned earlier, we aim to compare the performance of different learning algorithms on the prediction of insurance costs.
+By initiating a benchmarking process, we can combine all candidate models in one single nested resampling process.
+All we have to do is to define a grid with the regression task, the (tuned) learners and the outer resampling strategy.  
 
-For the outer loop of our nested resampling, we also define a 5-fold cross validation as our resampling strategy. This means, we obtain five pairs of training and test sets. Each of those initiates the tuning process for the hyperparameter spaces specified earlier. It is possible - and depending on the individual case even likely - that the optimal hyperparameter settings derived from the five inner loops differ amongst each other. For each of the five iterations, the learner is fitted on the outer training set while its performance is evaluated on the outer test set. By averaging these five performance estimates of the outer loops, we get an unbiased performance estimate for the learner.  
-
-As mentioned earlier, we aim to compare the performance of different learning algorithms on the prediction of insurance costs. By initiating a benchmarking process, we can combine all candidate models in one single nested resampling process. All we have to do is to define a grid with the regression task, the (tuned) learners and the outer resampling strategy.  
-
-```{r benchmark, echo=TRUE, eval=FALSE}
+```{r benchmark, echo=TRUE, eval=longrun}
 resampling_outer = rsmp("cv", folds = 5)
 
 grid = benchmark_grid(
@@ -449,20 +418,14 @@ grid = benchmark_grid(
 bmr = benchmark(grid, store_models = TRUE)
 ```
 
-This part of the analysis can be computationally demanding. With our termination criterion of 30 evaluations in the tuning process, a 5-fold CV in the inner loop and another 5-fold CV in the outer loop, a total of 755 models is fitted for each learner that requires tuning and another 5 models for the Linear Model, which doesn't have hyperparamerters to optimize. Overall, in our example the benchmarking fits 2270 models, which in turn allow for us to make a decision on the best model and its generalisation error.  
+This part of the analysis can be computationally demanding.
+With our termination criterion of 30 evaluations in the tuning process, a 5-fold CV in the inner loop and another 5-fold CV in the outer loop, a total of 755 models is fitted for each learner that requires tuning and another 5 models for the Linear Model, which doesn't have hyperparameters to optimize.
+Overall, in our example the benchmarking fits 2270 models, which in turn allow for us to make a decision on the best model and its generalization error.  
 
 
-```{r echo=FALSE, eval=FALSE}
+```{r echo=FALSE, eval=longrun}
 scores = bmr$score(measures) %>%
   select(Learner = learner_id, Iteration = iteration, MSE = regr.mse)
-
-# Tabelle mit performance estimates, die den Boxplots zugrunde liegen: nicht in Markdown aufnehmen, aber vielleicht für Test nutzen?
-# scores %>% kable() %>%
-#   kable_styling(full_width = F)%>%
-#   pack_rows("Linear Model", 1, 5) %>%
-#   pack_rows("KNN", 6, 10) %>%
-#   pack_rows("CART", 11, 15) %>%
-#   pack_rows("Random Forest", 16, 20)
 
 plot_bmr = autoplot(bmr) +
   labs(x = "Learner", y = "MSE", title = "MSE-Score for each learner over the performance estimates") +
@@ -472,30 +435,34 @@ plot_bmr
 
 ![Benchmarking Boxplot](bmr_plot.png)
 
-Benchmarking generates scores for each learner and each outer loop iteration. Drawing boxplots over the performance estimates - here the Mean Squared Error - shows that kNN seems to work fine but produces some variation in performance estimates. The Linear Model doesn't deliver satisfactory results and produces large MSEs compared to the other candidate learners. Random Forest appears to be the best model producing accurate predictions in terms of the MSE. Finally, Decision Trees produce performance estimates similar to those of kNN, with even smaller variability.  
+Benchmarking generates scores for each learner and each outer loop iteration.
+Drawing boxplots over the performance estimates - here the Mean Squared Error - shows that kNN seems to work fine but produces some variation in performance estimates.
+The Linear Model doesn't deliver satisfactory results and produces large MSEs compared to the other candidate learners.
+Random Forest appears to be the best model producing accurate predictions in terms of the MSE.
+Finally, Decision Trees produce performance estimates similar to those of kNN, with even smaller variability.  
 
-One of our inintial questions was: Which learner qualifies best to predict insurance charges - that is, as accurately as possible?  
+One of our initial questions was: Which learner qualifies best to predict insurance charges - that is, as accurately as possible?  
 
-To come to answer this question, we do not necessarily have to study the boxplots - though it might be helpful. Instead, we can access the aggregated performance estimates for each learner, directly. In the graphic below the learners are ranked according to our three performance measures: MSE, MAE and $R^2$. The inverse value of $R^2$ has been computed and plotted to allow for easy comparison; improvements are indicated by lower values in each of the three plots.
+To come to answer this question, we do not necessarily have to study the boxplots - though it might be helpful.
+Instead, we can access the aggregated performance estimates for each learner, directly.
+In the graphic below the learners are ranked according to our three performance measures:
+MSE, MAE and $R^2$.
+The inverse value of $R^2$ has been computed and plotted to allow for easy comparison; improvements are indicated by lower values in each of the three plots.
 
-```{r, eval=FALSE, echo=FALSE}
+```{r, eval=longrun, echo=FALSE}
 tab = bmr$aggregate(measures)
 
 ranks = tab[, .(learner_id, regr.mse, rank_mse = rank(regr.mse), regr.mae, rank_mae = rank(regr.mae), inv_regr.rsq = 1 / regr.rsq, rank_rsq = rank(-regr.rsq))]
+
+saveRDS(ranks, "ranks.rds")
 ```
 
-```{r tabrds, echo=FALSE}
-# saveRDS(ranks, "ranks.rds")
+```{r tabrds, echo=FALSE, eval=!longrun}
 ranks = readRDS("ranks.rds")
 ```
 
 
 ```{r echo=FALSE, eval=TRUE}
-# Table of aggregated results with ranking
-# ranks[order(ranks$rank_mse),] %>%
-#   kable() %>%
-#   kable_styling(full_width = F)
-
 ranks = ranks %>% pivot_longer(c(regr.mse, regr.mae, inv_regr.rsq), names_to = "key", values_to = "value")
 ranks$key = factor(ranks$key, levels = c("regr.mse", "regr.mae", "inv_regr.rsq"))
 
@@ -516,12 +483,17 @@ ggplot(data = ranks) +
 ```
 
 
-But what about the hyperparameters? We just learned that from nested resampling we obtain five different sets of optimal combinations: Which one of them shall we use for the final model?  
+But what about the hyperparameters?
+We just learned that from nested resampling we obtain five different sets of optimal combinations:
+Which one of them shall we use for the final model?  
 
-The answer is: none of them. Unlike before, the final model is fit on the whole dataset and includes its own tuning step and resampling. The major difference is that there is no outer loop. Based on the tuning results, the model is trained on the whole dataset. 
+The answer is: none of them.
+Unlike before, the final model is fit on the whole dataset and includes its own tuning step and resampling.
+The major difference is that there is no outer loop.
+Based on the tuning results, the model is trained on the whole dataset. 
 
 
-```{r eval = FALSE}
+```{r eval=longrun}
 lgr::get_logger("mlr3")$set_threshold("warn")
 learner = lrn("regr.ranger", importance = "impurity")
 
@@ -541,24 +513,20 @@ at_ranger_final$store_tuning_instance = TRUE
 at_ranger_final$train(ins_task)
 ```
 
-```{r eval = FALSE, echo=FALSE}
+```{r eval=longrun, echo=FALSE}
 tab_tuning = at_ranger_final$archive$data()[, c("batch_nr", "regr.mse", "min.node.size", "mtry")]
 
-# tab_tuning[regr.mse == min(tab_tuning$regr.mse),]
-
-# tab_tuning %>%
-#   kable() %>%
-#   kable_styling(full_width = F) %>%
-#   row_spec(10, bold = T, background = "lightpink")
+saveRDS(tab_tuning, file = "tab_tuning.rds")
 ```
 
-```{r tabtuningrds, echo=FALSE}
-# saveRDS(tab_tuning, file = "tab_tuning.rds")
+```{r tabtuningrds, echo=FALSE, eval=!longrun}
 tab_tuning = readRDS("tab_tuning.rds")
 learner = lrn("regr.ranger", importance = "impurity")
 ```
 
-From the tuning process of our final model, we conlude that the optimal hyperparameter setting is achieved through the combination of $min.node.size = 30$ and $mtry = 4$. The figure below illustrates the investigated parameter combinations via random search. The color intensity matches the value of the respective MSE and the hyperparameter combination with the best performance, which is used to train the model, is highlighted in red.  
+From the tuning process of our final model, we conlude that the optimal hyperparameter setting is achieved through the combination of $min.node.size = 30$ and $mtry = 4$.
+The figure below illustrates the investigated parameter combinations via random search.
+The color intensity matches the value of the respective MSE and the hyperparameter combination with the best performance, which is used to train the model, is highlighted in red.  
 
 ```{r echo=FALSE, eval=TRUE}
 ggplot() +
@@ -572,11 +540,11 @@ ggplot() +
   labs(fill = "MSE", col = "MSE")
 ```
 
+Eventually, we want to investigate how well the final model can explain the data observed. Overall, the model fit does not seem too bad: the majority of observations are close to the diagonal.
+There is, however, a considerable number of observations with charges higher than the ones predicted by the model.
+This could indicate that features are not considered with their true functionality or that the insurance company uses additional tariffication criteria outside the data set.
 
-
-Eventually, we want to investigate how well the final model can explain the data observed. Overall, the model fit does not seem too bad: the majority of observations are close to the diagonal. There is, however, a considerable number of observations with charges higher than the ones predicted by the model. This could indicate that features are not considered with their true functionality or that the insurance company uses additional tariffication criteria outside the dataset.
-
-```{r echo = FALSE, eval=FALSE}
+```{r echo = FALSE, eval=longrun}
 # Compare predicted values to true values:
 autoplot(at_ranger_final$predict(ins_task)) +
   theme_bw()
@@ -586,7 +554,10 @@ autoplot(at_ranger_final$predict(ins_task)) +
 
 ## Feature Importance
 
-As a last step of our analysis, we want to shed some light onto the functionality of our final "black box" model. To get a better understanding of the predictions made, we investigate the importance of each individual covariate. This can be done with the help of filter methods, which assign an importance value to each feature, which will then be ranked. For the Ranger learning algorithm, we can make use of the filter methods embedded in the mlr3-package.  
+As a last step of our analysis, we want to shed some light onto the functionality of our final "black box" model.
+To get a better understanding of the predictions made, we investigate the importance of each individual covariate.
+This can be done with the help of filter methods, which assign an importance value to each feature, which will then be ranked.
+For the Ranger learning algorithm, we can make use of the filter methods embedded in the mlr3-package.  
 
 ```{r}
 filter = flt("importance", learner = learner)
@@ -608,11 +579,18 @@ ggplot(data = var, aes(x = feature, y = score)) +
 ```
 
 
-When looking at *impurity* as a measure of importance, we can see that first and foremost, the smoking status determines the predicted value of insurance charges. This is followed by age. The bmi, on the other hand, doesn't seem to have a strong impact on the predicted charges and similarly, the remaining features (children, region and sex) lead to minor improvments in impurity only. Overall, these findings are supported by domain knowledge and are in line with the descriptive analysis mentioned above.  
+When looking at *impurity* as a measure of importance, we can see that first and foremost, the smoking status determines the predicted value of insurance charges.
+This is followed by age.
+The bmi, on the other hand, doesn't seem to have a strong impact on the predicted charges and similarly, the remaining features (children, region and sex) lead to minor improvements in impurity only.
+Overall, these findings are supported by domain knowledge and are in line with the descriptive analysis mentioned above.  
 
 
 ## Summary and Implications
 
-Our analysis solves the regression task of predicting insurance charges by computing a supervised machine learning model. Among a selection of candidate models, we identify Random Forest as the preferred learning algorithm. To determine the optimal hyperparameter configuration, we include a tuning step which is embedded in a nested resampling approach. This way, we obtain unbiased performance estimators without reducing our dataset, which the model is trained on.  
+Our analysis solves the regression task of predicting insurance charges by computing a supervised machine learning model.
+Among a selection of candidate models, we identify Random Forest as the preferred learning algorithm.
 
-The scope of our project was limited by factors like time and computing power. To improve the analysis other learning algorithms, resampling strategies and tuning configurations could be tested. Moreover, advanced feature selection and feature engineering may improve the model's performance estimate. Lastly, to save computational power, the models could be refitted without those features, which were identified as least important based on the impurity measure.
+The scope of our project was limited by factors like time and computing power.
+To improve the analysis other learning algorithms, resampling strategies and tuning configurations could be tested.
+Moreover, advanced feature selection and feature engineering may improve the model's performance estimate.
+Lastly, to save computational power, the models could be refitted without those features, which were identified as least important based on the impurity measure.
