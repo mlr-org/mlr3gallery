@@ -161,7 +161,7 @@ Next, we append the second imputation job for factors.
 ```{r}
 imp_fct = po("imputeoor", param_vals = list(affect_columns = selector_type("factor")))
 graph = imp_num %>>% imp_fct
-graph$plot(html = TRUE)
+graph$plot()
 ```
 
 So far we only prepared the pipeline without actually modeling.
@@ -227,7 +227,7 @@ lrn = GraphLearner$new(graph = graph %>>% polrn)
 The final graph looks like the following:
 
 ```{r}
-plot(graph %>>% polrn, html = TRUE)
+plot(graph %>>% polrn)
 ```
 
 ## Train and predict
@@ -309,7 +309,7 @@ feature_names = c(
 na_select = po("select")
 na_select$param_set$values$selector = selector_name(feature_names)
 graph2 = graph2 %>>% na_select
-graph2$plot(html = TRUE)
+graph2$plot()
 ```
 
 Now we complete the learner and apply resampling as before.
