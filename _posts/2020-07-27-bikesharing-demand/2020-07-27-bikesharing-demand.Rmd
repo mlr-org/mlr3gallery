@@ -58,10 +58,16 @@ library(ggrepel)
 library(dplyr)
 library(lubridate)
 library(tidyr)
-library(scales)
 # analytic
 library(mlr3verse)
-library(data.table)
+```
+
+Expansive calculations are pre-saved in rds files in this tutorial to save up computational time.
+To recheck the code is still up to date and syntax sticks to the current mlr3 version initialize `long_run = TRUE`.
+This will run *all* code chunks no matter the computational effort.
+
+```{r}
+long_run = FALSE
 ```
 
 # Data
@@ -497,7 +503,7 @@ param_set_kknn = ParamSet$new(
 
 Now we set up the autotuner for the `kknn` learner and train it.
 
-```{r kknn, message=FALSE, eval=FALSE}
+```{r kknn, message=FALSE, eval=long_run}
 set.seed(123456)
 ppl_kknn = log1p_target_trafo(kknn_learner)
 at_kknn = AutoTuner$new(ppl_kknn,
@@ -514,8 +520,12 @@ archive_kknn = at_kknn$archive("tune_x")[, c("regr.rmse",
                                               "regr.kknn.distance")]
 ```
 
-```{r rdskknn, echo=FALSE}
-# saveRDS(archive_kknn, file = "archive_kknn.rds")
+```{r, echo=FALSE, eval=long_run}
+saveRDS(archive_kknn, file = "archive_kknn.rds")
+```
+
+
+```{r rdskknn, echo=FALSE, eval=!long_run}
 archive_kknn = readRDS("archive_kknn.rds")
 ```
 
@@ -591,7 +601,7 @@ param_set_cart = ParamSet$new(
 
 Now we set up the autotuner for the `rpart` learner and train it.
 
-```{r rpart, message=FALSE, eval=FALSE}
+```{r rpart, message=FALSE, eval=long_run}
 set.seed(123456)
 ppl_rpart = log1p_target_trafo(rpart_learner)
 at_rpart = AutoTuner$new(ppl_rpart,
@@ -607,8 +617,12 @@ archive_rpart = at_rpart$archive("tune_x")[, c("regr.rmse",
                                                 "regr.rpart.cp")]
 ```
 
-```{r rdsrpart, echo=FALSE}
-# saveRDS(archive_rpart, file = "archive_rpart.rds")
+```{r, echo=FALSE, eval=long_run}
+saveRDS(archive_rpart, file = "archive_rpart.rds")
+```
+
+
+```{r rdsrpart, echo=FALSE, eval=!long_run}
 archive_rpart = readRDS("archive_rpart.rds")
 ```
 
@@ -757,7 +771,7 @@ To ensure that `regr.ranger.mtry` never exceeds, `importance.filter.nfeat` we de
 Since the space for hyperparameters is limited, one could consider here to exploit the whole parameter space for `nfeat` and `mtry`.
 To save up time we will stick to 28 combinations here, including all possible combinations at 1, 6, 10 and 11 levels.
 
-```{r ranger, message=FALSE, eval=FALSE}
+```{r ranger, message=FALSE, eval=long_run}
 set.seed(123456)
 ranger_feature = log1p_target_trafo(po_flt)
 at_ranger = AutoTuner$new(ranger_feature,
@@ -775,8 +789,12 @@ archive_ranger = at_ranger$archive("tune_x")[, c("regr.rmse",
                                                   "regr.ranger.mtry")]
 ```
 
-```{r rdsranger, echo=FALSE}
-# saveRDS(archive_ranger, "archive_ranger.rds")
+```{r, echo=FALSE, eval=long_run}
+saveRDS(archive_ranger, "archive_ranger.rds")
+```
+
+
+```{r rdsranger, echo=FALSE, eval=!long_run}
 archive_ranger = readRDS("archive_ranger.rds")
 ```
 
@@ -821,7 +839,7 @@ Second, we want to compare the models with each other and examine how tuning imp
 As stated in Chapter 3.3 we use a 3-fold CV as our benchmarking resampling method, a 5-fold CV is evaluated inside each auto tuned object to obtain the best hyperparameter combination.
 Note, that this method does not lead to an unbiased GE, but rather is a step to compare the learners to each other.
 
-```{r bmr, message=FALSE, results='hide', eval=FALSE}
+```{r bmr, message=FALSE, results='hide', eval=long_run}
 lrns = list(
   rpart_learner, at_rpart,
   ranger_learner, at_ranger,
@@ -839,8 +857,12 @@ bmr_table = bmr$aggregate(msr("regr.rmse")) %>%
 
 ```
 
-```{r bmrrds, echo=FALSE}
-# saveRDS(bmr_table, "bmr_table.rds")
+```{r, echo=FALSE, eval=long_run}
+saveRDS(bmr_table, "bmr_table.rds")
+```
+
+
+```{r bmrrds, echo=FALSE, eval=!long_run}
 bmr_table = readRDS("bmr_table.rds")
 ```
 
@@ -868,7 +890,7 @@ That does not apply to  the tuned `kknn` and `ranger` learners for which the res
 With a RMSE of 0.31 the tuned random forest performs the best among tuned and untuned learners compared in benchmarking.  
 Consequently, the tuned `ranger` is our learner of choice for prediction.
 
-```{r, eval=FALSE, warning=FALSE}
+```{r, eval=long_run, warning=FALSE}
 autoplot(bmr, measure = msr("regr.rmse")) +
   theme_bw() +
   scale_x_discrete(labels = c("KNN", "Random Forest", "CART",
@@ -951,7 +973,7 @@ Now we can perform nested resampling using our previously created pipe.
 We directly resample this autotuner to reduce computing time.
 We can save the tuned learners in our resampling result by setting `store_model = TRUE`.
 
-```{r noevalmultiat, eval=FALSE}
+```{r noevalmultiat, eval=long_run}
 multi_at = AutoTuner$new(
     learner = GraphLearner$new(pipe, task_type = "regr"),
     resampling =  rsmp("cv", folds = 5),
@@ -976,10 +998,16 @@ multi_at_archiv = lapply(
 )
 ```
 
-```{r, echo=FALSE}
-# saveRDS(multi_at_archiv, "multi_at_archiv.rds")
-multi_at_archiv = readRDS("multi_at_archiv.rds")
+```{r, echo=FALSE, eval=long_run}
+saveRDS(multi_at_archiv, "multi_at_archiv.rds")
+```
 
+
+```{r, echo=FALSE, eval=!long_run}
+multi_at_archiv = readRDS("multi_at_archiv.rds")
+```
+
+```{r, echo=FALSE}
 kable(rbind(multi_at_archiv[[1]], multi_at_archiv[[2]], multi_at_archiv[[3]]), "html", booktabs = TRUE,  caption = "nested resampling outer-cv results",
       linesep = "\\addlinespace", col.names = c("RMSE", "learner-branch", "k", "distance", "minsplit", "cp", "nfeat", "mtry")) %>%
   kable_styling(full_width = TRUE) %>%
@@ -988,7 +1016,6 @@ kable(rbind(multi_at_archiv[[1]], multi_at_archiv[[2]], multi_at_archiv[[3]]), "
   pack_rows("Outer CV-3", 43, 63) %>%
   scroll_box(width = "100%", height = "200px")
 ```
-
 
 The table shows the results on the first of three outer resampling results.
 Nested resampling carries out very similar results as Benchmarking in the previous chapter.
@@ -1008,12 +1035,12 @@ test = engineer_features(test)
 
 Now we can use our random forest `autotuner` to predict the `log1p_count` variable.
 
-```{r, eval=FALSE}
+```{r, eval=long_run}
 pred_train = at_ranger$predict(bike_task)
 pred_test = at_ranger$predict_newdata(test)
 ```
 
-```{r, echo=FALSE, message=FALSE, eval=FALSE}
+```{r, echo=FALSE, message=FALSE, eval=long_run}
 data_train = data.frame("datetime" = ymd_hms(train_datetime),
                          "truth" = pred_train$truth,
                          "response" = pred_train$response)
@@ -1023,10 +1050,10 @@ data_test = data.frame("datetime" = ymd_hms(test_datetime),
                         "response" = pred_test$response)
 
 data_total = rbind(data_train, data_test)
+saveRDS(data_total, "data_total.rds")
 ```
 
-```{r, echo=FALSE}
-# saveRDS(data_total, "data_total.rds")
+```{r, echo=FALSE, eval=!long_run}
 data_total = readRDS("data_total.rds")
 ```
 
@@ -1045,7 +1072,7 @@ ggplot(data_temp) +
            position = "dodge") +
   geom_point(aes(x = datetime, y = truth), size = 0.1, alpha = 0.2) +
   labs(x = element_blank(), y = "Count") +
-  scale_x_datetime(labels = date_format("%b"), date_breaks = "2 month") +
+  scale_x_datetime(labels = scales::date_format("%b"), date_breaks = "2 month") +
   facet_grid(year ~ .) +
   theme_bw() + 
   theme(axis.title = element_text(size = 9))
