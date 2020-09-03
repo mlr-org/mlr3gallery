@@ -178,6 +178,11 @@ at2 = AutoTuner$new(
 at2$train(tsk("iris"))
 ```
 
+One drawback of this strategy is, that this requires us to fit a new model for each new threshold setting.
+While setting a threshold and computing performance is relatively cheap, fitting the learner is often
+more computationally demanding.
+A better strategy is therefore often to optimize the thresholds separately after each model fit.
+
 ## PipeOpTunethreshold
 
 `PipeOpTuneThreshold` on the other hand works together with `PipeOpLearnerCV`.
