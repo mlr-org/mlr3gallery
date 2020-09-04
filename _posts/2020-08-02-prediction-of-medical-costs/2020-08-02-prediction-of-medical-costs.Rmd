@@ -381,9 +381,11 @@ plot_hp_ranger_2 = ggplot(data = hp_ranger) +
   theme_bw() +
   theme(axis.text.x = element_blank())
 
+png("hyperparam_setting.png")
 grid.arrange(plot_hp_knn, plot_hp_rpart_1, plot_hp_rpart_2, plot_hp_ranger_1, plot_hp_ranger_2,
   nrow = 2,
   top = textGrob("Tuning Results: Hyperparameter Settings", gp = gpar(fontface = 2, fontsize = 14)))
+dev.off()
 ```
 
 ![Tuning Results: Hyperparameter Setting](hyperparam_setting.png)
@@ -426,10 +428,11 @@ Overall, in our example the benchmarking fits 2270 models, which in turn allow f
 scores = bmr$score(measures) %>%
   select(Learner = learner_id, Iteration = iteration, MSE = regr.mse)
 
+png("bmr_plot.png")
 plot_bmr = autoplot(bmr) +
   labs(x = "Learner", y = "MSE", title = "MSE-Score for each learner over the performance estimates") +
   theme_bw()
-plot_bmr
+dev.off()
 ```
 
 ![Benchmarking Boxplot](bmr_plot.png)
@@ -545,8 +548,10 @@ This could indicate that features are not considered with their true functionali
 
 ```{r echo = FALSE, eval=longrun}
 # Compare predicted values to true values:
+png("prediction_at_ranger.png")
 autoplot(at_ranger_final$predict(ins_task)) +
   theme_bw()
+dev.off()
 ```
 
 ![Prediction autotuned ranger](prediction_at_ranger.png)
