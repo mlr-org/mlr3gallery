@@ -26,7 +26,11 @@ knitr::opts_chunk$set(
   R.options = list(width = 80)
 )
 library(mlr3book)
+# Re-calculate all intermediary results instead of reading them from saved RDS
+long_run = FALSE
 ```
+
+
 
 # Intro
 
@@ -62,17 +66,15 @@ library(tidyr)
 library(mlr3verse)
 ```
 
-Expansive calculations are pre-saved in rds files in this tutorial to save up computational time.
+Note, that expensive calculations are pre-saved in rds files in this tutorial to save computational time.
+<!--
 To recheck the code is still up to date and syntax sticks to the current mlr3 version initialize `long_run = TRUE`.
 This will run *all* code chunks no matter the computational effort.
-
-```{r}
-long_run = FALSE
-```
+-->
 
 # Data
 
-Note that we use the data from [UCI Machinelearning Repository](http://archive.ics.uci.edu/ml/datasets/Bike+Sharing+Dataset) here instaed of the Kaggle data set due to License restrictions.
+Note that we use the data from [UCI Machinelearning Repository](http://archive.ics.uci.edu/ml/datasets/Bike+Sharing+Dataset) here instead of the Kaggle data set due to License restrictions. The UCI dataset is a slightly adjusted version of the same underlying data.
 
 ```{r, echo=FALSE}
 tmp <- tempfile()
@@ -160,12 +162,9 @@ kable(column_descr, escape = FALSE, booktabs = TRUE, longtable = TRUE,
 ```
 
 Table 1 gives a detailed overview of the columns of our training data set.
-Besides our target variable `count` we have several weather related variables we can use for our prediction.
+Besides our target variable `count`, we have several weather related variables we can use for our prediction.
 Moreover, we have the date and hour of the observation as well as holiday and workingday indicators.
 Since there are no missing values in our data, we do not need to apply any further imputation methods.
-
-
-
 
 ## Descriptive Statistics
 
@@ -314,7 +313,8 @@ engineer_features = function(df) {
 }
 ```
 
-Note that [PipeOpDateFeatures](https://github.com/mlr-org/mlr3pipelines/blob/master/R/PipeOpDateFeatures.R) provides an alternative to engineering such features by automatically extracting a set of date-related features from a `POSIXct` date variable.
+Note, that [PipeOpDateFeatures](https://github.com/mlr-org/mlr3pipelines/blob/master/R/PipeOpDateFeatures.R) provides an alternative to engineering such features by automatically extracting a set of date-related features from a `POSIXct` date variable.
+**Note**: In this scenario, we assume that we are not interested in forecasting the demand for the following years (provided the other information), but we instead try to obtain a model that describes the existing data as well as possible. In a forecasting scenario, we would need to use a different time-sensitvie resampling strategy in order to assure that our model generalizes to the data we are interested in predicting (the future).
 
 ```{r}
 train = engineer_features(train)
