@@ -72,10 +72,33 @@ long_run = FALSE
 
 # Data
 
+Note that we use the data from [UCI Machinelearning Repository](http://archive.ics.uci.edu/ml/datasets/Bike+Sharing+Dataset) here instaed of the Kaggle data set due to License restrictions.
+
+```{r, echo=FALSE}
+tmp <- tempfile()
+download.file(
+  "https://archive.ics.uci.edu/ml/machine-learning-databases/00275/Bike-Sharing-Dataset.zip",
+  tmp)
+
+bikes = read.csv(unz(tmp, filename = "hour.csv"), as.is = TRUE) %>%
+  mutate(datetime = ymd_h(paste(dteday, hr))) %>%
+  mutate(day = day(datetime)) %>%
+  select(datetime, season, holiday, workingday, weather = weathersit, temp, atemp, humidity = hum, windspeed, casual, registered, count = cnt, day)
+
+train <- bikes %>%
+  filter(day < 20) %>%
+  mutate(datetime = as.factor(datetime)) %>%
+  select(-day)
+
+test <- bikes %>%
+  filter(day >= 20) %>%
+  mutate(datetime = as.factor(datetime)) %>%
+  select(-day, -count, -registered, -casual)
+```
+
 ## Ingestion
 
 ```{r}
-train = readRDS("train.rds")
 train_datetime = train$datetime
 ```
 
@@ -312,6 +335,7 @@ train %>% summary.default %>% as.data.frame %>%
 ```
 
 In Figure 6 we use our engineered `hour` variable to plot the Bike Sharing demand by hour and temperature.
+Note, that the felt temperature `atemp` is normalized.
 We find that the highest demand occurs between 18h and 20h at higher temperatures.
 
 ```{r,echo=FALSE, warning=FALSE, fig.cap="Bike Sharing demand by hour and temperature", fig.height=3}
@@ -515,9 +539,11 @@ at_kknn = AutoTuner$new(ppl_kknn,
 )
 
 at_kknn$train(bike_task)
-archive_kknn = at_kknn$archive("tune_x")[, c("regr.rmse",
-                                              "regr.kknn.k",
-                                              "regr.kknn.distance")]
+
+
+archive_kknn = at_kknn$archive$data()[, c("regr.rmse",
+                                          "regr.kknn.k",
+                                          "regr.kknn.distance")]
 ```
 
 ```{r, echo=FALSE, eval=long_run}
@@ -612,9 +638,9 @@ at_rpart = AutoTuner$new(ppl_rpart,
   tuner = tuner_grid_10
 )
 at_rpart$train(bike_task)
-archive_rpart = at_rpart$archive("tune_x")[, c("regr.rmse",
-                                                "regr.rpart.minsplit",
-                                                "regr.rpart.cp")]
+archive_rpart = at_rpart$archive$data()[, c("regr.rmse",
+                                            "regr.rpart.minsplit",
+                                            "regr.rpart.cp")]
 ```
 
 ```{r, echo=FALSE, eval=long_run}
@@ -784,9 +810,9 @@ at_ranger = AutoTuner$new(ranger_feature,
 # at_ranger$store_tuning_instance = FALSE
 at_ranger$train(bike_task)
 
-archive_ranger = at_ranger$archive("tune_x")[, c("regr.rmse",
-                                                  "importance.filter.nfeat",
-                                                  "regr.ranger.mtry")]
+archive_ranger = at_ranger$archive$data()[, c("regr.rmse",
+                                              "importance.filter.nfeat",
+                                              "regr.ranger.mtry")]
 ```
 
 ```{r, echo=FALSE, eval=long_run}
@@ -891,6 +917,7 @@ With a RMSE of 0.31 the tuned random forest performs the best among tuned and un
 Consequently, the tuned `ranger` is our learner of choice for prediction.
 
 ```{r, eval=long_run, warning=FALSE}
+png("bmr.png")
 autoplot(bmr, measure = msr("regr.rmse")) +
   theme_bw() +
   scale_x_discrete(labels = c("KNN", "Random Forest", "CART",
@@ -898,6 +925,7 @@ autoplot(bmr, measure = msr("regr.rmse")) +
   labs(y = "RMSE") +
   coord_flip() +
   theme(axis.title = element_text(size = 9))
+dev.off()
 ```
 
 ![Autoplot benchmarking](bmr.png)
@@ -994,7 +1022,7 @@ cols = c("regr.rmse", "branch.selection",
           "importance.filter.nfeat", "importance.mtry")
 multi_at_archiv = lapply(
  1:3,
- function(x) multi_at_rr$data$learner[[x]]$archive(unnest = "tune_x")[, ..cols]
+ function(x) multi_at_rr$data$learner[[x]]$archive$data()[, ..cols]
 )
 ```
 
@@ -1027,7 +1055,6 @@ Now we use our tuned random forest model to predict the Bike Sharing demand for 
 Before we can make the predictions, we have to preprocess the test data and engineer features in the same way we did for our training data.
 
 ```{r}
-test = readRDS("test.rds")
 test_datetime = test$datetime
 test = preprocess(test)
 test = engineer_features(test)
