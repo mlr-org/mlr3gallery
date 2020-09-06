@@ -23,22 +23,27 @@ library(mlr3book)
 lgr::get_logger("mlr3")$set_threshold("warn")
 ```
 
-In this tutorial we demonstrate how to use `r mlr_pkg("mlr3pipelines")` to handle multi-target regression by arranging regression models into a chain, i.e., creating a linear sequence of regression models.
+In this tutorial we demonstrate how to use `r mlr_pkg("mlr3pipelines")` to handle multi-target regression by arranging regression models as a chain, i.e., creating a linear sequence of regression models.
 
 ## Regression Chains
 
-In a simple regression chain, regression models are arranged in a linear sequence. Here, the first model will use the input to predict a single output and the second model will use the input and the output of the first model to make its own prediction and so on. For more details, see e.g. [Spyromitros-Xioufis, Tsoumakas, Groves & Vlahavas (2016)](https://doi.org/10.1007/s10994-016-5546-z).
+In a simple regression chain, regression models are arranged in a linear sequence.
+Here, the first model will use the input to predict a single output and the second model will use the input and the prediction output of the first model to make its own prediction and so on.
+For more details, see e.g. [Spyromitros-Xioufis, Tsoumakas, Groves & Vlahavas (2016)](https://doi.org/10.1007/s10994-016-5546-z).
 
 ## Before you start
 
-The following sections describe an approach towards working with `Task`s that have multiple targets.
-E.g. in the example below, we have 3 target variables **y1** to **y3**.
-This type of Task can be created via the [mlr3multioutput](https://github.com/mlr-org/mlr3multioutput/) (currently under development) in the future.
-The current goal of this post is to show how such modeling steps can be written as a relatively small amount of pipeline steps and how such steps can be put together. Writing pipelines with such steps allows for great flexibility in modelling more complicated scenarios such as the ones described below.
+The following sections describe an approach towards working with `r ref("Task", "Tasks")` that have multiple targets.
+E.g., in the example below, we have three target variables $y_{1}$ to $y_{3}$.
+This type of `Task` can be created via the [mlr3multioutput](https://github.com/mlr-org/mlr3multioutput/) (currently under development) in the future.
+`mlr3multioutput` will also offer simple chaining approaches as pre-built pipelines (so called `r ref("ppl", "ppls")`).
+The current goal of this post is to show how such modeling steps can be written as a relatively small amount of pipeline steps and how such steps can be put together.
+Writing pipelines with such steps allows for great flexibility in modelling more complicated scenarios such as the ones described below.
 
 ## Data
 
-In the following, we rely on some toy data. We simulate 100 responses to three target variables, $y_{1}$, $y_{2}$, and $y_{3}$ following a multivariate normal distribution with a mean and covariance matrix of:
+In the following, we rely on some toy data.
+We simulate 100 responses to three target variables, $y_{1}$, $y_{2}$, and $y_{3}$ following a multivariate normal distribution with a mean and covariance matrix of:
 
 ```{r}
 library(data.table)
@@ -51,11 +56,11 @@ n = 100
 Y = rmvnorm(n, mean = mean, sigma = sigma)
 ```
 
-The feature variables $x_{1}$, and $x_{2}$ are simulated as follows: $x_{1}$ is simply given by $y_{1}$ and an independent standard normally distributed error term and $x_{2}$ is given by $y_{2}$ and an independent standard normally distributed error term.
+The feature variables $x_{1}$, and $x_{2}$ are simulated as follows: $x_{1}$ is simply given by $y_{1}$ and an independent normally distributed error term and $x_{2}$ is given by $y_{2}$ and an independent normally distributed error term.
 
 ```{r}
-x1 = Y[, 1] + rnorm(n)
-x2 = Y[, 2] + rnorm(n)
+x1 = Y[, 1] + rnorm(n, sd = 0.1)
+x2 = Y[, 2] + rnorm(n, sd = 0.1)
 ```
 
 The final data is given as:
@@ -65,9 +70,13 @@ dat = as.data.table(cbind(Y, x1, x2))
 str(dat)
 ```
 
+This simulates a situation where we have multiple target variables that are correlated with each other, such that predicting them along with each other can improve the resulting prediction model.
+As a real-world example for such a situation, consider e.g. hospital data, where time spent in the ICU (not known a priori) heavily influences the cost incurred by a patient's treatment.
+
 ## 3D Visualization of the Data
 
-If you feel confident to already have a good feeling of the data, feel free to skip this section. If not, you can use the `rgl` package to play around with the following three 3D plots with the feature variables on the x- and y-axis and the target variables on the respective z-axes:
+If you feel confident to already have a good feeling of the data, feel free to skip this section.
+If not, you can use the `r cran_pkg("rgl")` package to play around with the following four 3D plots with either the feature variables or $y_{1}$ and $y_{2}$ on the x- and y-axis and the target variables on the respective z-axes:
 
 ```{r, eval = FALSE}
 library(rgl)
@@ -95,9 +104,16 @@ plot3d(dat$x1, dat$x2, dat$y3,
   type = "s", radius = 0.1, col = colfun(n))
 ```
 
+```{r, eval = FALSE}
+setorder(dat, y3)
+plot3d(dat$y1, dat$y2, dat$y3,
+  xlab = "y1", ylab = "y2", zlab = "y3",
+  type = "s", radius = 0.1, col = colfun(n))
+```
+
 ## Building the Pipeline
 
-In our regression chain, the first model will predict $y_{1}$. Therefore, we initialize our task with respect to this target:
+In our regression chain, the first model will predict $y_{1}$. Therefore, we initialize our `Task` with respect to this target:
 
 ```{r}
 library(mlr3)
@@ -106,17 +122,21 @@ library(mlr3pipelines)
 task = TaskRegr$new("multiregression", backend = dat, target = "y1")
 ```
 
-As learners we will use simple linear regression models, `r ref("mlr_learners_regr.lm", "lm learner")`. Our pipeline building the regression chain then has to do the following:
+As `r ref("Learner", "Learners")` we will use simple linear regression models, `r ref("mlr_learners_regr.lm")`. Our pipeline building the regression chain then has to do the following:
 
-* Use the input to predict $y_{1}$ within the first learner (i.e., $y_{1} \sim x_{1} + x_{2} + y_{2} + y_{3}$).
-* Combine the input with the prediction of $y_{1}$, $\hat{y_{1}}$ and use this to predict $y_{2}$ within the second learner (i.e., $y_{2} \sim x_{1} + x_{2} + \hat{y_{1}} + y_{3}$).
-* Combine the input with the prediction of $y_{2}$ and use this to predict $y_{3}$ within the final learner (i.e., $y_{3} \sim x_{1} + x_{2} + \hat{y_{1}} + \hat{y_{2}}$).
+* Use the input to predict $y_{1}$ within the first learner (i.e., $y_{1} \sim x_{1} + x_{2}$).
+* Combine the input with the prediction of $y_{1}$, $\hat{y_{1}}$ and use this to predict $y_{2}$ within the second learner (i.e., $y_{2} \sim x_{1} + x_{2} + \hat{y_{1}}$).
+* Combine the input with the prediction of $y_{2}$ and use this to predict $y_{3}$ within the final third learner (i.e., $y_{3} \sim x_{1} + x_{2} + \hat{y_{1}} + \hat{y_{2}}$).
 
-To combine predictions of a learner with the previous input, we rely on `PipeOpLearnerCV` and `PipeOpNOP` arranged in parallel via `gunion` combined via `PipeOpFeatureUnion`, e.g., in the first step:
+To combine predictions of a `Learner` with the previous input, we rely on `r ref("PipeOpLearnerCV")` and `r ref("PipeOpNOP")` arranged in parallel via `r ref("gunion")` combined via `r ref("PipeOpFeatureUnion")`.
+To drop the respective remaining target variables as features, we rely on `r ref("PipeOpColRoles")`.
+The first step of predicting $y_{1}$ looks like the following:
 
 ```{r}
 step1 = po("copy", outnum = 2, id = "copy1") %>>%
   gunion(list(
+    po("colroles", id = "drop_y2_y3",
+      param_vals = list(new_role = list(y2 = character(), y3 = character()))) %>>%
     po("learner_cv", learner = lrn("regr.lm"), id = "y1_learner"),
     po("nop", id = "nop1")
   )) %>>%
@@ -124,35 +144,60 @@ step1 = po("copy", outnum = 2, id = "copy1") %>>%
 step1$plot()
 ```
 
-Within the second step we then have to define $y_{2}$ as the new target. This can be done using `PipeOpUpdateTarget` (note that `PipeOpUpdateTarget` by default drops the original target, here $y_{1}$). Typically one would use `PipeOpUpdateTarget` to apply a transformation function to the original target (possibly also renaming it) which must not be inverted later. However, in the special case of leaving the `trafo` at its default `identity` and providing a `new_target_name` that already matches a column of the input data, `PipeOpUpdateTarget` simply sets this column as the new target:
+Training using the input `Task`, shows us how the output and the `$state` look like:
 
 ```{r}
-#FIXME:
+step1_out = step1$train(task)[[1]]
+step1_out
+step1$state
+```
+
+Within the second step we then have to define $y_{2}$ as the new target.
+This can be done using `r ref("PipeOpUpdateTarget")` (note that `PipeOpUpdateTarget` currently is not exported but will be in a future version).
+By default, `PipeOpUpdateTarget` drops the original target from the feature set, here $y_{1}$.
+
+```{r}
 mlr_pipeops$add("update_target", mlr3pipelines:::PipeOpUpdateTarget)
 ```
 
 ```{r}
 step2 = po("update_target", id = "y2_target",
-    param_vals = list(new_target_name = "y2")
-  ) %>>%
+    param_vals = list(new_target_name = "y2")) %>>%
   po("copy", outnum = 2, id = "copy2") %>>%
   gunion(list(
-    po("nop", id = "nop2"),
-    po("learner_cv", learner = lrn("regr.lm"), id = "y2_learner")
+    po("colroles", id = "drop_y3",
+      param_vals = list(new_role = list(y3 = character()))) %>>%
+    po("learner_cv", learner = lrn("regr.lm"), id = "y2_learner"),
+    po("nop", id = "nop2")
   )) %>>%
   po("featureunion", id = "union2")
 ```
 
-In the final third step we define $y_{3}$ as the new target:
+Again, we can train to see how the output and `$state` look like, but now using the output of `step1`:
+
+```{r}
+step2_out = step2$train(step1_out)[[1]]
+step2_out
+step2$state
+```
+
+In the final third step we define $y_{3}$ as the new target (again, `PipeOpUpdateTarget` drops the original target from the feature set, here $y_{2}$):
 
 ```{r}
 step3 = po("update_target", id = "y3_target",
-    param_vals = list(new_target_name = "y3")
-  ) %>>%
+    param_vals = list(new_target_name = "y3")) %>>%
   po("learner", learner = lrn("regr.lm"), id = "y3_learner")
 ```
 
-The complete pipeline, more precisely `Graph`, looks like the following:
+Using the output of `step2`:
+
+```{r}
+step3_out = step3$train(step2_out)[[1]]
+step3_out
+step3$state
+```
+
+The complete pipeline, more precisely `r ref("Graph")`, looks like the following:
 
 ```{r}
 graph = step1 %>>% step2 %>>% step3
@@ -161,7 +206,7 @@ graph$plot()
 
 ## Evaluating the Pipeline
 
-By wrapping our `Graph` in a `GraphLearner`, we can perform `3-fold cross-validation` and get an average of the root-mean-square error (of course, in a real world setting splitting the data in a training and test set should have been done):
+By wrapping our `Graph` in a `r ref("GraphLearner")`, we can perform `3-fold` `r ref("ResamplingCV", "cross-validation")` and get an estimated average of the root-mean-square error (of course, in a real world setting splitting the data in a training and test set should have been done):
 
 ```{r}
 rr = resample(task, learner = GraphLearner$new(graph),
@@ -169,11 +214,15 @@ rr = resample(task, learner = GraphLearner$new(graph),
 rr$aggregate(msr("regr.mse"))
 ```
 
-We can compare this to a simple linear regression model only predicting $y_{3}$:
+## Predicting with the Pipeline
+
+For completeness, we also show how a prediction step without having any target variable data available would look like:
 
 ```{r}
-task_y3 = TaskRegr$new("y3", backend = dat, target = "y3")
-rr_y3 = resample(task_y3, learner = lrn("regr.lm"),
-  resampling = rsmp("cv", folds = 3))
-rr_y3$aggregate(msr("regr.mse"))
+dat_predict = as.data.table(cbind(x1, x2, y1 = NA, y2 = NA, y3 = NA))
+task_predict = TaskRegr$new("multiregression_predict", backend = dat_predict, target = "y1")
+graph$train(task)
+graph$predict(task_predict)
 ```
+
+Note that we have to initialize the `Task` with $y_{1}$ as the target but the pipeline will automatically predict $y_{3}$ in the final step as our final target, which was our ultimate goal.
