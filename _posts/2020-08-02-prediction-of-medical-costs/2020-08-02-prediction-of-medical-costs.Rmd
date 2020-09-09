@@ -43,7 +43,6 @@ library(RCurl)
 longrun = FALSE
 ```
 
-
 ## Introduction 
 
 Myriad implementations of supervised learning algorithms can be found in a wide range of fields of science and business.
@@ -133,18 +132,18 @@ Therefore PipeOpScale from mlr3pipelines is used.
 insurance[, c("age", "bmi", "children")] =
  scale(insurance[, c("age", "bmi", "children")])
 ```
+
 Note, that the same result can be achieved more easily by using `PipeOpScale` from mlr3pipelines.
 This PipeOp provides a smooth implementation to scale numeric features for mlr3 tasks.
 
-
-Given the aforementioned continuity of our target variable, we initiate a regression task which specifies the underlying data and the target variable:  
+Given the aforementioned continuity of our target variable, we instantiate a regression task which specifies the underlying data and the target variable:  
 
 ```{r}
 ins_task = TaskRegr$new(id = "ins_task", backend = insurance, target = "charges")
 ```
 
 The plots below give a brief overview of the conditional distribution of charges given each independent variable.
-It can, for example, be seen that charges seem to increase with age or that smokers seem to face higher charges than non-smokers.  
+It can, for example, be seen that charges seem to increase with age, or that smokers seem to face higher charges than non-smokers.  
 
 ```{r echo = FALSE}
 age = ggplot() +
@@ -193,7 +192,7 @@ region = ggplot() +
 grid.arrange(age, sex, bmi, children, smoker, region, nrow = 2)
 ```
 
-The learners we initiate are Linear Model (LM), k-Nearest Neighbors (kNN), Decision Trees (CART) and Random Forest (Ranger).  
+The learners we instantiate are Linear Model (LM), k-Nearest Neighbors (kNN), Decision Trees (CART) and Random Forest (Ranger).  
 
 ```{r}
 lrn_lm = lrn("regr.lm")
@@ -216,8 +215,8 @@ resampling_inner = rsmp("cv", folds = 5)
 measures = mlr_measures$mget(c("regr.mse", "regr.mae", "regr.rsq"))
 ```
 
-To find the optimal hyperparameter setting of a model, which result in the most accurate predictions, we need to define the parameter space as well as the class and termination criterion of our tuner.  
-This is done by *random search*, where random combinations of hyperparamters are tested to find the best solution in a given space.  
+To find the optimal hyperparameter setting of a model, which results in the most accurate predictions, we need to define the parameter space as well as the tuning approach.  
+In this example we use `r mlr3book::ref("TunerRandomSearch")`, where  random combinations of hyperparamters are tested to find the best solution in a given space.  
 
 ```{r}
 tuner_rs = mlr3tuning::tnr("random_search")
@@ -238,7 +237,7 @@ As shown below, the parameter $k$, the number of neighbors, will be optimized as
 We specify that $k$-values between 10 and 40 shall be taken into account. 
 
 ```{r}
-param_set_knn = ParamSet$new(params = list(ParamInt$new("k", lower = 10, upper = 40)))
+param_set_knn = ParamSet$new(params = list(ParamInt$new("k", lower = 1, upper = 40)))
 ```
 
 For *CART learners* we choose to optimize two hyperparameters.
@@ -262,7 +261,7 @@ param_set_ranger =
     ParamInt$new("min.node.size", lower = 1, upper = 50)))
 ```
 
-The *AutoTuner* from the mlr3 package adjusts itself by first tuning the hyperparameters of the respective learner on the training data, then setting the optimal parameters in the learner and finally fitting the model on the complete training data set.  
+The `r mlr3book::ref("AutoTuner")` from the mlr3 package adjusts itself by first tuning the hyperparameters of the respective learner on the training data, then setting the optimal parameters in the learner and finally fitting the model on the complete training data set.
 
 ```{r}
 at_knn = AutoTuner$new(
@@ -304,85 +303,35 @@ bmr = benchmark(grid, store_models = TRUE)
 
 # Each fold of outer resampling computes tuning, i.e. there are different sets of tuned hyperparameters
 # Extract optimal HP for each fold of outer resampling:
+```
 
-knn = bmr$score()[learner_id == "regr.kknn.tuned"]$learner
-hp_knn = data.frame(
-  iteration = seq(1:resampling_outer$iters),
-  k = NA)
-for (i in 1:resampling_outer$iters) {
-  hp_knn$k[i] = knn[[i]]$tuning_result$params
+```{r, echo=FALSE, eval=longrun}
+plot_tuning = function(benchmark = bmr, learner_ident, parameter, scale) {
+  learner = bmr$score()[learner_id == learner_ident]$learner
+  tuning_result = sapply(learner, FUN = function(x) x$tuning_result[[parameter]])
+  
+  qplot(y = tuning_result, x = 1, geom = "boxplot") +
+  ylim(scale) +
+  geom_hline(yintercept = scale[1], col = "red", linetype = "dashed") +
+  geom_hline(yintercept = scale[2], col = "red", linetype = "dashed") +
+  labs(y = parameter, x = "", subtitle = paste("Learner:", learner_ident, "\nHP:", parameter)) +
+  theme_bw() +
+  theme(axis.text.x = element_blank())
 }
 
-plot_hp_knn = ggplot(data = hp_knn) +
-  geom_boxplot(aes(x = 1, y = unlist(k))) +
-  ylim(c(10, 40)) +
-  geom_hline(yintercept = 10, col = "red", linetype = "dashed") +
-  geom_hline(yintercept = 40, col = "red", linetype = "dashed") +
-  labs(y = "k", x = "", subtitle = "Learner: kNN \nHP: k") +
-  theme_bw() +
-  theme(axis.text.x = element_blank())
 
-rpart = bmr$score()[learner_id == "regr.rpart.tuned"]$learner
-hp_rpart = data.frame(
-  iteration = seq(1:resampling_outer$iters),
-  cp = NA,
-  minsplit = NA)
-for (i in 1:resampling_outer$iters) {
-  hp_rpart$cp[i] = rpart[[i]]$tuning_result$params$cp
-  hp_rpart$minsplit[i] = rpart[[i]]$tuning_result$params$minsplit
-}
-
-plot_hp_rpart_1 = ggplot(data = hp_rpart) +
-  geom_boxplot(aes(x = 1, y = unlist(cp))) +
-  ylim(c(0.001, 0.5)) +
-  geom_hline(yintercept = 0.001, col = "red", linetype = "dashed") +
-  geom_hline(yintercept = 0.5, col = "red", linetype = "dashed") +
-  labs(y = "cp", x = "", subtitle = "Learner: Decision Trees \nHP: cp") +
-  theme_bw() +
-  theme(axis.text.x = element_blank())
-
-plot_hp_rpart_2 = ggplot(data = hp_rpart) +
-  geom_boxplot(aes(x = 1, y = unlist(minsplit))) +
-  ylim(c(1, 50)) +
-  geom_hline(yintercept = 1, col = "red", linetype = "dashed") +
-  geom_hline(yintercept = 50, col = "red", linetype = "dashed") +
-  labs(y = "minsplit", x = "", subtitle = "Learner: Decision Trees \nHP: minsplit") +
-  theme_bw() +
-  theme(axis.text.x = element_blank())
-
-ranger = bmr$score()[learner_id == "regr.ranger.tuned"]$learner
-hp_ranger = data.frame(
-  iteration = seq(1:resampling_outer$iters),
-  # num.trees = NA,
-  mtry = NA,
-  min.node.size = NA
+list_args = list(
+  knn_k = list(learner_ident = "regr.kknn.tuned", parameter = "k", scale = c(1, 40)),
+  rpart_cp = list(learner_ident = "regr.rpart.tuned", parameter = "cp", scale = c(0.001, 0.5)),
+  rpart_minsplit = list(learner_ident = "regr.rpart.tuned", parameter = "minsplit", scale = c(1, 50)),
+  ranger_minnode = list(learner_ident = "regr.ranger.tuned", parameter = "min.node.size", scale = c(1, 50)),
+  ranger_mtry = list(learner_ident = "regr.ranger.tuned", parameter = "mtry", scale = c(2, 6))
 )
-for (i in 1:resampling_outer$iters) {
-  hp_ranger$mtry[i] = ranger[[i]]$tuning_result$params$mtry
-  hp_ranger$min.node.size[i] = ranger[[i]]$tuning_result$params$min.node.size
-}
 
-
-plot_hp_ranger_1 = ggplot(data = hp_ranger) +
-  geom_boxplot(aes(x = 1, y = unlist(min.node.size))) +
-  ylim(c(1, 50)) +
-  geom_hline(yintercept = 1, col = "red", linetype = "dashed") +
-  geom_hline(yintercept = 50, col = "red", linetype = "dashed") +
-  labs(y = "min.node.size", x = "", subtitle = "Learner: Random Forest \nHP: min.node.size") +
-  theme_bw() +
-  theme(axis.text.x = element_blank())
-
-plot_hp_ranger_2 = ggplot(data = hp_ranger) +
-  geom_boxplot(aes(x = 1, y = unlist(mtry))) +
-  ylim(c(2, 6)) +
-  geom_hline(yintercept = 2, col = "red", linetype = "dashed") +
-  geom_hline(yintercept = 6, col = "red", linetype = "dashed") +
-  labs(y = "mtry", x = "", subtitle = "Learner: Random Forest \nHP: mtry") +
-  theme_bw() +
-  theme(axis.text.x = element_blank())
+plot_hyperparam <- lapply(list_args, function(x) mlr3misc::invoke(plot_tuning, .args = x))
 
 png("hyperparam_setting.png")
-grid.arrange(plot_hp_knn, plot_hp_rpart_1, plot_hp_rpart_2, plot_hp_ranger_1, plot_hp_ranger_2,
+grid.arrange(grobs = plot_hyperparam,
   nrow = 2,
   top = textGrob("Tuning Results: Hyperparameter Settings", gp = gpar(fontface = 2, fontsize = 14)))
 dev.off()
@@ -391,7 +340,8 @@ dev.off()
 ![Tuning Results: Hyperparameter Setting](hyperparam_setting.png)
 
 These plots show the range of optimal hyperparameters obtained by the inner resampling loop.
-So, each boxplot is based on 5 values. The red lines (dashed) indicate the range, within which the hyperparameters were optimized.
+So, each boxplot is based on 5 values.
+The red lines (dashed) indicate the range, within which the hyperparameters were optimized.
 It can, for example, be seen that while various different $k$-values are deemed optimal for kNN, $mtry = 4$ is determined the optimal setting for the Ranger algorithm in every iteration.
 Also, the optimal $cp$ in CART seems to lie within a small range, while the best-performing $minsplit$-parameter is rather volatile.
 However, the illustration neglects the fact that in tuning we are looking at combinations of hyperparameters and the more dimensions we consider, the fewer of the hyperparameter space we are investigating with a fixed number of evaluations in the tuning.    
@@ -407,7 +357,11 @@ As mentioned earlier, we aim to compare the performance of different learning al
 By initiating a benchmarking process, we can combine all candidate models in one single nested resampling process.
 All we have to do is to define a grid with the regression task, the (tuned) learners and the outer resampling strategy.  
 
-```{r benchmark, echo=TRUE, eval=longrun}
+This part of the analysis can be computationally demanding.
+With our termination criterion of 30 evaluations in the tuning process, a 5-fold CV in the inner loop and another 5-fold CV in the outer loop, a total of 755 models is fitted for each learner that requires tuning and another 5 models for the Linear Model, which doesn't have hyperparameters to optimize.
+Overall, in our example the benchmarking fits 2270 models, which in turn allow for us to make a decision on the best model and its generalization error.
+
+```{r visible, echo=TRUE, eval=FALSE}
 resampling_outer = rsmp("cv", folds = 5)
 
 grid = benchmark_grid(
@@ -419,17 +373,12 @@ grid = benchmark_grid(
 bmr = benchmark(grid, store_models = TRUE)
 ```
 
-This part of the analysis can be computationally demanding.
-With our termination criterion of 30 evaluations in the tuning process, a 5-fold CV in the inner loop and another 5-fold CV in the outer loop, a total of 755 models is fitted for each learner that requires tuning and another 5 models for the Linear Model, which doesn't have hyperparameters to optimize.
-Overall, in our example the benchmarking fits 2270 models, which in turn allow for us to make a decision on the best model and its generalization error.  
-
-
 ```{r echo=FALSE, eval=longrun}
 scores = bmr$score(measures) %>%
   select(Learner = learner_id, Iteration = iteration, MSE = regr.mse)
 
 png("bmr_plot.png")
-plot_bmr = autoplot(bmr) +
+autoplot(bmr) +
   labs(x = "Learner", y = "MSE", title = "MSE-Score for each learner over the performance estimates") +
   theme_bw()
 dev.off()
@@ -490,6 +439,7 @@ We just learned that from nested resampling we obtain five different sets of opt
 Which one of them shall we use for the final model?  
 
 The answer is: none of them.
+Nested resampling solely enabled us to obtain an unbiased measure of generalization error for each model.
 Unlike before, the final model is fit on the whole dataset and includes its own tuning step and resampling.
 The major difference is that there is no outer loop.
 Based on the tuning results, the model is trained on the whole dataset. 
@@ -568,6 +518,8 @@ filter = flt("importance", learner = learner)
 filter$calculate(ins_task)
 ```
 
+Note, that the feature importance computed here does not necessarily reflect the feature importance in the model trained above, as different sub-sets of the data and hyperparameters can influence the computed importance scores.
+A full set of post-hoc tools for post-hoc model interpretation for mlr3 models can be found in the [iml](https://cran.r-project.org/web/packages/iml/index.html) and [DALEX](https://cran.r-project.org/web/packages/DALEX/index.html) packages, the mlr3 book contains a section on how to use those packages together with mlr3. [Link to book](https://mlr3book.mlr-org.com/interpretation.html).
 
 ```{r echo = FALSE}
 var = as.data.table(filter)
