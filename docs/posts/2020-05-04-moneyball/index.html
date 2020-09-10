@@ -1543,13 +1543,13 @@ print(preds)</code></pre>
 <pre><code>
 &lt;PredictionRegr&gt; for 62 observations:
     row_id truth response
-         3   712 722.1862
-        17   701 685.8466
-        21   684 683.9213
+        24   619 597.0954
+        63   613 677.1543
+        90   655 655.7024
 ---                      
-      1216   707 701.2960
-      1218   682 667.8714
-      1221   745 709.9838</code></pre>
+      1181   621 634.9225
+      1186   569 571.0778
+      1189   663 675.7135</code></pre>
 </div>
 <p>Viewing the predicted values it seems like the model predicts reasonable values that are fairly close to the truth.</p>
 <h2 id="evaluation-resampling">Evaluation &amp; Resampling</h2>
@@ -1564,18 +1564,28 @@ r = resample(task, lrn, cv10)</code></pre>
 <pre class="r"><code>
 mlr_measures</code></pre>
 <pre><code>
-&lt;DictionaryMeasure&gt; with 53 stored values
+&lt;DictionaryMeasure&gt; with 97 stored values
 Keys: classif.acc, classif.auc, classif.bacc, classif.bbrier,
   classif.ce, classif.costs, classif.dor, classif.fbeta, classif.fdr,
   classif.fn, classif.fnr, classif.fomr, classif.fp, classif.fpr,
   classif.logloss, classif.mbrier, classif.mcc, classif.npv,
   classif.ppv, classif.precision, classif.recall, classif.sensitivity,
   classif.specificity, classif.tn, classif.tnr, classif.tp,
-  classif.tpr, debug, oob_error, regr.bias, regr.ktau, regr.mae,
-  regr.mape, regr.maxae, regr.medae, regr.medse, regr.mse, regr.msle,
-  regr.pbias, regr.rae, regr.rmse, regr.rmsle, regr.rrse, regr.rse,
-  regr.rsq, regr.sae, regr.smape, regr.srho, regr.sse,
-  selected_features, time_both, time_predict, time_train</code></pre>
+  classif.tpr, debug, dens.logloss, oob_error, regr.bias, regr.ktau,
+  regr.mae, regr.mape, regr.maxae, regr.medae, regr.medse, regr.mse,
+  regr.msle, regr.pbias, regr.rae, regr.rmse, regr.rmsle, regr.rrse,
+  regr.rse, regr.rsq, regr.sae, regr.smape, regr.srho, regr.sse,
+  selected_features, surv.beggC, surv.brier, surv.calib_alpha,
+  surv.calib_beta, surv.chambless_auc, surv.chamblessAUC, surv.cindex,
+  surv.gonenC, surv.graf, surv.grafSE, surv.harrellC, surv.hung_auc,
+  surv.hungAUC, surv.intlogloss, surv.intloglossSE, surv.logloss,
+  surv.loglossSE, surv.mae, surv.maeSE, surv.mse, surv.mseSE,
+  surv.nagelk_r2, surv.nagelkR2, surv.oquigley_r2, surv.oquigleyR2,
+  surv.rmse, surv.rmseSE, surv.schmid, surv.song_auc, surv.song_tnr,
+  surv.song_tpr, surv.songAUC, surv.songTNR, surv.songTPR,
+  surv.uno_auc, surv.uno_tnr, surv.uno_tpr, surv.unoAUC, surv.unoC,
+  surv.unoTNR, surv.unoTPR, surv.xu_r2, surv.xuR2, time_both,
+  time_predict, time_train</code></pre>
 </div>
 <p>We choose the mean absolute error (<code>regr.mae</code>) and the mean squared error (<code>regr.mse</code>).</p>
 <div class="layout-chunk" data-layout="l-body">
@@ -1606,16 +1616,16 @@ scores</code></pre>
  9: imputehist.imputeoor.regr.ranger &lt;ResamplingCV[19]&gt;            cv         9
 10: imputehist.imputeoor.regr.ranger &lt;ResamplingCV[19]&gt;            cv        10
     prediction regr.mae regr.mse
- 1:  &lt;list[1]&gt; 20.21775 635.0114
- 2:  &lt;list[1]&gt; 18.07976 484.5182
- 3:  &lt;list[1]&gt; 19.15435 613.7954
- 4:  &lt;list[1]&gt; 18.10894 550.2309
- 5:  &lt;list[1]&gt; 15.96443 411.4978
- 6:  &lt;list[1]&gt; 20.36535 654.1552
- 7:  &lt;list[1]&gt; 20.21560 687.0796
- 8:  &lt;list[1]&gt; 21.91446 700.3145
- 9:  &lt;list[1]&gt; 20.08404 599.9706
-10:  &lt;list[1]&gt; 19.62973 685.6413</code></pre>
+ 1:  &lt;list[1]&gt; 19.59415 619.0158
+ 2:  &lt;list[1]&gt; 18.26726 533.1473
+ 3:  &lt;list[1]&gt; 22.51755 792.7933
+ 4:  &lt;list[1]&gt; 19.83573 608.2372
+ 5:  &lt;list[1]&gt; 21.85814 785.5617
+ 6:  &lt;list[1]&gt; 18.59886 531.2656
+ 7:  &lt;list[1]&gt; 17.50763 495.5710
+ 8:  &lt;list[1]&gt; 18.05779 511.2827
+ 9:  &lt;list[1]&gt; 19.83747 725.6058
+10:  &lt;list[1]&gt; 18.28481 494.6057</code></pre>
 </div>
 <p>We can also compute now by how much our model was on average wrong when predicting the runs scored.</p>
 <div class="layout-chunk" data-layout="l-body">
@@ -1623,7 +1633,7 @@ scores</code></pre>
 r$aggregate(msr(&quot;regr.mae&quot;))</code></pre>
 <pre><code>
 regr.mae 
-19.37344 </code></pre>
+19.43594 </code></pre>
 </div>
 <p>That seems not too bad. Considering that on average approximately 715 runs per team per season have been scored.</p>
 <div class="layout-chunk" data-layout="l-body">
@@ -1661,7 +1671,7 @@ r2 = resample(task, lrn2, cv10)
 r2$aggregate(msr(&quot;regr.mae&quot;))</code></pre>
 <pre><code>
 regr.mae 
-19.10843 </code></pre>
+19.07802 </code></pre>
 </div>
 <p>Surprisingly, the performance seems to be approximately the same. That means that the imputed features seem not very helpful. We can use the <code>variable.importance</code> of the random forest.</p>
 <div class="layout-chunk" data-layout="l-body">
@@ -1669,11 +1679,11 @@ regr.mae
 sort(lrn$model$regr.ranger$model$variable.importance, decreasing = TRUE)</code></pre>
 <pre><code>
          SLG          OBP           BA            W           RA         Year 
- 3579.379908  2555.577051   873.020770   656.813845   458.959384   263.352337 
-  RankSeason RankPlayoffs     Playoffs         OOBP       League         OSLG 
-  119.256841   107.189738    88.720422    34.414328    26.042709    25.414907 
+ 3512.203339  2449.943573   965.535751   726.280524   496.904599   262.247266 
+  RankSeason     Playoffs RankPlayoffs         OOBP       League         OSLG 
+  134.992693   101.738630   101.592220    33.947123    32.336169    26.243414 
         Team            G 
-   23.328579     7.965304 </code></pre>
+   23.871012     5.670036 </code></pre>
 </div>
 <p>We see that according to this the left out <code>OOBP</code> and <code>OSLG</code> seem to have solely rudimentary explanatory power. This may be because there were simply too many instances or because the features are themselves not very powerful.</p>
 <h2 id="conclusion">Conclusion</h2>
