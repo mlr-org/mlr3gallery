@@ -175,7 +175,7 @@ Subclasses can overload up to four functions:
 
 * `.get_state()` takes the input `Task` and returns a `list()` which will internally be used to set the `$state`. Typically it is sensible to make use of the `$state` during `.transform()` and `.train_invert()`. The base implementation returns `list()` and should be overloaded if setting the state is desired.
 
-* `.transform()` takes the input `Task` and returns a modified `Task` (i.e., the `Task` with the transformed target). This is the main function for doing the actual target transformation. Note that `.get_state()` is evaluated a single time during training right before `.transform()` and therefore, you can rely on the `$state` that has been set. To update the input `Task` with respect to the transformed target, subclasses should make use of the `r ref("convert_task", "convert_task()")` function and drop the original target from the `Task`. `.transform()` also accepts a `phase` argument that will receive `"train"` during training and `"predict"` during prediction. This can be used to enable different behavior during training and prediction. `.transform()` should always be overloaded by subclasses.
+* `.transform()` takes the input `Task` and returns a modified `Task` (i.e., the `Task` with the transformed target). This is the main function for doing the actual target transformation. Note that `.get_state()` is evaluated a single time during training right before `.transform()` and therefore, you can rely on the `$state` that has been set. To update the input `Task` with respect to the transformed target, subclasses should make use of the `r ref("mlr3::convert_task", "convert_task()")` function and drop the original target from the `Task`. `.transform()` also accepts a `phase` argument that will receive `"train"` during training and `"predict"` during prediction. This can be used to enable different behavior during training and prediction. `.transform()` should always be overloaded by subclasses.
 
 * `.train_invert()` takes the input `Task` and returns a `predict_phase_state` object. This can be anything. Note that `.train_invert()` should not modify the input `Task`. The base implementation returns a list with a single argument, the `$truth` column of the input `Task` and should be overloaded if a more training-phase-dependent state is desired.
 
@@ -275,7 +275,7 @@ Next, we tackle `.transform()`. This is quite straightforward, because objects o
       new_target = as.data.table(predict(self$state$bc, newdata = target))
       colnames(new_target) = paste0(task$target_names, ".bc")
       task$cbind(new_target)
-      mlr3pipelines:::convert_task(task, new_target = colnames(new_target))
+      convert_task(task, target = colnames(new_target), drop_original_target = TRUE)
     },
 ```
 
@@ -335,7 +335,7 @@ PipeOpTargetTrafoBoxCox = R6Class("PipeOpTargetTrafoBoxCox",
       new_target = as.data.table(predict(self$state$bc, newdata = target))
       colnames(new_target) = paste0(task$target_names, ".bc")
       task$cbind(new_target)
-      mlr3pipelines:::convert_task(task, new_target = colnames(new_target))
+      convert_task(task, target = colnames(new_target), drop_original_target = TRUE)
     },
 
     .train_invert = function(task) {
