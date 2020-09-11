@@ -83,50 +83,27 @@ ggplot(insurance, aes(x = log(charges))) +
 insurance$charges = log(insurance$charges)
 ```
 Note, that the same result can be achieved more easily by using `PipeOpTargetTrafo` from mlr3pipelines.
-This PipeOp provides a smooth implementation to transform the target variable mlr3 tasks.
+This PipeOp provides a smooth implementation to transform the target variable in mlr3 tasks.
 
 The following plots give a brief overview of the distribution of the independent variables:   
 
 ```{r, echo = FALSE}
-
-
-age = ggplot(insurance, aes(x = age)) +
-  geom_histogram(col = "darkgray", size = 0.5) +
-  theme_bw()
-
-sex = ggplot(insurance, aes(sex)) +
-  geom_bar() +
-  theme_bw()
-
-bmi = ggplot(insurance, aes(x = bmi)) +
-  geom_histogram(col = "darkgray", size = 0.5) +
-  theme_bw()
-
-children = ggplot(insurance, aes(x = children)) +
-  geom_bar() +
-  theme_bw() +
-  scale_x_continuous(breaks = 0:6, labels = c("0", "1", "2", "3", "4", "5", "6"))
-
-smoker = ggplot(insurance, aes(x = smoker)) +
-  geom_bar() +
-  theme_bw()
 
 levels(insurance$region)[levels(insurance$region) == "northeast"] = "ne"
 levels(insurance$region)[levels(insurance$region) == "northwest"] = "nw"
 levels(insurance$region)[levels(insurance$region) == "southeast"] = "se"
 levels(insurance$region)[levels(insurance$region) == "southwest"] = "sw"
 
-region = ggplot(insurance, aes(x = region)) +
-  geom_bar() +
-  theme_bw() +
-  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1))
 
-grid.arrange(age, sex, bmi, children, smoker, region, nrow = 2)
+# autoplot(TaskRegr$new(id = "ins_task", backend = insurance, target = "charges")$select(c("age", "bmi", "children")), type = "pairs")
+histograms <- lapply(as.list(names(insurance)[-7]), function(x) qplot(insurance[ ,x], xlab = x))
+
+mlr3misc::invoke(grid.arrange, .args = c(histograms, nrow = 2))
+
 ```
 
 Before we resume in our analysis, all independent, metric variables will be standardized.
 This ensures commensurability of variables originally measured on differing metric scales and is particularly important for learners, which assess distances between individual observations.
-Therefore PipeOpScale from mlr3pipelines is used.
 
 ```{r}
 insurance[, c("age", "bmi", "children")] =
@@ -146,50 +123,33 @@ The plots below give a brief overview of the conditional distribution of charges
 It can, for example, be seen that charges seem to increase with age, or that smokers seem to face higher charges than non-smokers.  
 
 ```{r echo = FALSE}
-age = ggplot() +
-  geom_point(data = insurance, aes(x = age, y = charges), col = "grey30") +
-  ggtitle("age") +
-  xlab("age (standradised)") +
+
+plot_charges <- function(col, title, lab){
+  ggplot() +
+  geom_point(data = insurance, aes(x = col, y = charges), col = "grey30") +
+  ggtitle(title) +
+  xlab(lab) +
   theme_bw() +
   theme(plot.title = element_text(hjust = 0.5))
+}
 
-bmi = ggplot() +
-  geom_point(data = insurance, aes(x = bmi, y = charges), col = "grey30") +
-  ggtitle("bmi") +
-  xlab("bmi (standradised)") +
+plot_facet <- function(facet, title, ncol = 1) {
+  insurance1 <- insurance %>% mutate(facet = facet)
+  ggplot() +
+  geom_histogram(data = insurance1, aes(x = charges), col = "darkgray", size = 0.5) +
+  facet_wrap(~ facet, ncol = ncol) +
+  ggtitle(title) +
   theme_bw() +
   theme(plot.title = element_text(hjust = 0.5))
+}
 
-children = ggplot() +
-  geom_point(data = insurance, aes(x = children, y = charges), col = "grey30") +
-  ggtitle("children") +
-  xlab("children (standradised)") +
-  theme_bw() +
-  theme(plot.title = element_text(hjust = 0.5))
-
-sex = ggplot() +
-  geom_histogram(data = insurance, aes(x = charges), col = "darkgray", size = 0.5) +
-  facet_wrap(~sex, ncol = 1) +
-  ggtitle("sex") +
-  theme_bw() +
-  theme(plot.title = element_text(hjust = 0.5))
-
-smoker = ggplot() +
-  geom_histogram(data = insurance, aes(x = charges), col = "darkgray", size = 0.5) +
-  facet_wrap(~smoker, ncol = 1) +
-  ggtitle("smoker") +
-  theme_bw() +
-  theme(plot.title = element_text(hjust = 0.5))
-
-region = ggplot() +
-  geom_histogram(data = insurance, aes(x = charges), col = "darkgray", size = 0.25) +
-  facet_wrap(~region, ncol = 2) +
-  ggtitle("region") +
-  theme_bw() +
-  theme(plot.title = element_text(hjust = 0.5))
-
-
-grid.arrange(age, sex, bmi, children, smoker, region, nrow = 2)
+grid.arrange(plot_charges(insurance$age, "age", "age standardized"),
+             plot_charges(insurance$bmi, "bmi", "bmi standardized"),
+             plot_charges(insurance$children, "children", "children standardized"),
+             plot_facet(insurance$sex, "sex"),
+             plot_facet(insurance$smoker, "smoker"),
+             plot_facet(insurance$region, "region", ncol = 2),
+             nrow = 2)
 ```
 
 The learners we instantiate are Linear Model (LM), k-Nearest Neighbors (kNN), Decision Trees (CART) and Random Forest (Ranger).  
@@ -234,7 +194,7 @@ terminator = trm("evals", n_evals = 30)
 *K-Nearest Neighbors* is a computationally complex procedure but very simple in terms of understanding as well as implementation.
 Furthermore, the resulting models often have a high degree of accuracy.
 As shown below, the parameter $k$, the number of neighbors, will be optimized as part of the model development.
-We specify that $k$-values between 10 and 40 shall be taken into account. 
+We specify that $k$-values between 1 and 40 shall be taken into account. 
 
 ```{r}
 param_set_knn = ParamSet$new(params = list(ParamInt$new("k", lower = 1, upper = 40)))
@@ -290,7 +250,7 @@ at_ranger = AutoTuner$new(
 )
 ```
 
-```{r grid1, echo=FALSE, eval=longrun}
+```{r grid1, echo=FALSE, message=FALSE, results='hide', eval=longrun}
 resampling_outer = rsmp("cv", folds = 5)
 
 grid = benchmark_grid(
@@ -337,7 +297,9 @@ grid.arrange(grobs = plot_hyperparam,
 dev.off()
 ```
 
-![Tuning Results: Hyperparameter Setting](hyperparam_setting.png)
+```{r fig.cap="Tuning Results: Hyperparameter Setting", echo=FALSE, out.width = "400px"}
+knitr::include_graphics("hyperparam_setting.png")
+```
 
 These plots show the range of optimal hyperparameters obtained by the inner resampling loop.
 So, each boxplot is based on 5 values.
@@ -383,8 +345,9 @@ autoplot(bmr) +
   theme_bw()
 dev.off()
 ```
-
-![Benchmarking Boxplot](bmr_plot.png)
+```{r fig.cap="Benchmarking Boxplot", echo=FALSE, out.width = "400px"}
+knitr::include_graphics("bmr_plot.png")
+```
 
 Benchmarking generates scores for each learner and each outer loop iteration.
 Drawing boxplots over the performance estimates - here the Mean Squared Error - shows that kNN seems to work fine but produces some variation in performance estimates.
