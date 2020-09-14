@@ -21,6 +21,8 @@ output:
 ```{r, echo = FALSE}
 library(knitr)
 opts_chunk$set(R.options = list(width = 100))
+lgr::get_logger("mlr3")$set_threshold("warn")
+lgr::get_logger("bbotk")$set_threshold("warn")
 ```
 
 ```{r setup, include=FALSE}
@@ -37,17 +39,17 @@ library(glmnet)
 Multilevel stacking is an ensemble technique, where predictions of several learners are added as new features to extend the orginal data on different levels.
 On each level, the extended data is used to train a new level of learners.
 This can be repeated for several iterations until a final learner is trained.
-To avoid overfitting, it is advisable to use test set (out-of-bag) predictions in each level. 
+To avoid overfitting, it is advisable to use test set (out-of-bag) predictions in each level.
 
-In this post, a multilevel stacking example will be created using [mlr3pipelines](https://mlr3pipelines.mlr-org.com/articles/introduction.html) and tuned using [mlr3tuning](https://mlr3tuning.mlr-org.com/). 
-A similar example is available in the [mlr3book](https://mlr3book.mlr-org.com/pipe-nonlinear.html#multilevel-stacking). 
-However, we additionally explain how to tune the hyperparameters of the whole ensemble and each underlying learner jointly.  
+In this post, a multilevel stacking example will be created using [mlr3pipelines](https://mlr3pipelines.mlr-org.com/articles/introduction.html) and tuned using [mlr3tuning](https://mlr3tuning.mlr-org.com/).
+A similar example is available in the [mlr3book](https://mlr3book.mlr-org.com/pipe-nonlinear.html#multilevel-stacking).
+However, we additionally explain how to tune the hyperparameters of the whole ensemble and each underlying learner jointly.
 
 In our stacking example, we proceed as follows:
 
 1. **Level 0:** Based on the input data, we train three learners (`rpart`, `glmnet` and `lda`) on a sparser feature space obtained using different feature filter methods from [mlr3filters](https://mlr3filters.mlr-org.com/) to obtain slightly decorrelated predictions.
-The test set predictions of these learners are attached to the original data (used in level 0) and will serve as input for the learners in level 1. 
-2. **Level 1:** We transform this extended data using PCA, on which we then train additional three learners (`rpart`, `glmnet` and `lda`). 
+The test set predictions of these learners are attached to the original data (used in level 0) and will serve as input for the learners in level 1.
+2. **Level 1:** We transform this extended data using PCA, on which we then train additional three learners (`rpart`, `glmnet` and `lda`).
 The test set predictions of the level 1 learners are attached to input data used in level 1.
 3. Finally, we train a final `ranger` learner to the data extended by level 1. Note that the number of features selected by the feature filter method in level 0 and the number of principal components retained in level 1 will be jointly tuned with some other hyperparameters of the learners in each level.
 
@@ -72,7 +74,7 @@ sonar_task$col_roles$stratum = sonar_task$target_names #stratification
 
 ## Pipeline creation
 
-### Level 0 
+### Level 0
 
 As mentioned, the level 0 learners are `rpart`, `glmnet` and `lda`:
 
@@ -82,7 +84,7 @@ glmnet_lrn =  lrn("classif.glmnet", predict_type = "prob")
 lda_lrn = lrn("classif.lda", predict_type = "prob")
 ```
 
-To create the learner out-of-bag predictions, we use [PipeOpLearnerCV()](https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_learner_cv.html):  
+To create the learner out-of-bag predictions, we use [PipeOpLearnerCV()](https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_learner_cv.html):
 
 ```{r lrn2}
 rprt_cv1 = po("learner_cv", rprt_lrn, id = "rprt_1")
@@ -90,7 +92,7 @@ glmnet_cv1 = po("learner_cv", glmnet_lrn, id = "glmnet_1")
 lda_cv1 = po("learner_cv", lda_lrn, id = "lda_1")
 ```
 
-A sparser representation of the input data in level 0 is obtained using the following filters:  
+A sparser representation of the input data in level 0 is obtained using the following filters:
 
 ```{r filt}
 anova = po("filter", flt("anova"), id = "filt1")
@@ -98,8 +100,8 @@ mrmr = po("filter", flt("mrmr"), id = "filt2")
 find_cor = po("filter", flt("find_correlation"), id = "filt3")
 ```
 
-To summarize these steps into level 0, we use the [gunion](https://mlr3pipelines.mlr-org.com/reference/gunion.html) function. 
-The out-of-bag predictions of all level 0 learners is attached using [PipeOpFeatureUnion](https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_featureunion.html) along with the original data passed via [PipeOpNOP()](https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_nop.html):  
+To summarize these steps into level 0, we use the [gunion](https://mlr3pipelines.mlr-org.com/reference/gunion.html) function.
+The out-of-bag predictions of all level 0 learners is attached using [PipeOpFeatureUnion](https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_featureunion.html) along with the original data passed via [PipeOpNOP()](https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_nop.html):
 
 ```{r lrn3}
 level0 = gunion(list(
@@ -110,7 +112,7 @@ level0 = gunion(list(
   po("featureunion", id = "union1")
 ```
 
-We can have a look at the graph from level 0:  
+We can have a look at the graph from level 0:
 
 ```{r lrn4, fig.width=6, fig.height = 6}
 level0$plot(html = FALSE)
@@ -140,13 +142,13 @@ level1 = level0 %>>%
   po("featureunion", id = "union2")
 ```
 
-We can have a look at the graph from level 1:  
+We can have a look at the graph from level 1:
 
 ```{r lrn7, fig.width=6, fig.height = 7}
 level1$plot(html = FALSE)
 ```
 
-The out-of-bag predictions of the level 1 learners are attached to the input data from level 1 and a final ranger learner will be trained:  
+The out-of-bag predictions of the level 1 learners are attached to the input data from level 1 and a final ranger learner will be trained:
 
 ```{r lrn8, fig.width=6, fig.height = 7}
 ranger_lrn = lrn("classif.ranger", predict_type = "prob")
@@ -185,7 +187,7 @@ ps_ens = ParamSet$new(
 Even with a simple ensemble, there is quite a few things to setup.
 We compare the performance of the ensemble with a simple tuned ranger learner.
 
-To proceed, we convert the `ensemble` pipeline as a [GraphLearner](https://mlr3pipelines.mlr-org.com/reference/mlr_learners_graph.html):  
+To proceed, we convert the `ensemble` pipeline as a [GraphLearner](https://mlr3pipelines.mlr-org.com/reference/mlr_learners_graph.html):
 
 ```{r compare1}
 ens_lrn = GraphLearner$new(ensemble)
@@ -203,10 +205,10 @@ ps_ranger = ParamSet$new(
   ))
 ```
 
-For performance comparison, we use the [benchmark](https://mlr3.mlr-org.com/reference/benchmark.html) function that requires a design incorporating a list of learners and a list of tasks. 
-Here, we have two learners (the simple ranger learner and the ensemble) and one task. 
-Since we want to tune the simple ranger learner as well as the whole ensemble learner, we need to create an [AutoTuner](https://mlr3tuning.mlr-org.com/reference/AutoTuner.html) for each learner to be compared. 
-To do so, we need to define a resampling strategy for the tuning in the inner loop (we use `cv3`) and for the final evaluation use use `outer_hold`:  
+For performance comparison, we use the [benchmark](https://mlr3.mlr-org.com/reference/benchmark.html) function that requires a design incorporating a list of learners and a list of tasks.
+Here, we have two learners (the simple ranger learner and the ensemble) and one task.
+Since we want to tune the simple ranger learner as well as the whole ensemble learner, we need to create an [AutoTuner](https://mlr3tuning.mlr-org.com/reference/AutoTuner.html) for each learner to be compared.
+To do so, we need to define a resampling strategy for the tuning in the inner loop (we use `cv3`) and for the final evaluation use use `outer_hold`:
 
 ```{r compare3}
 cv3 = rsmp("cv", folds = 3)
@@ -215,9 +217,9 @@ cv3 = rsmp("cv", folds = 3)
 auto1 = AutoTuner$new(
     learner = ens_lrn,
     resampling = cv3,
-    measures = msr("classif.auc"),
-    tune_ps = ps_ens,
-    terminator = term("evals", n_evals = 3), # to limit running time
+    measure = msr("classif.auc"),
+    search_space = ps_ens,
+    terminator = trm("evals", n_evals = 3), # to limit running time
     tuner = tnr("random_search")
   )
 
@@ -225,9 +227,9 @@ auto1 = AutoTuner$new(
 auto2 = AutoTuner$new(
     learner = ranger_lrn,
     resampling = cv3,
-    measures = msr("classif.auc"),
-    tune_ps = ps_ranger,
-    terminator = term("evals", n_evals = 3), # to limit running time
+    measure = msr("classif.auc"),
+    search_space = ps_ranger,
+    terminator = trm("evals", n_evals = 3), # to limit running time
     tuner = tnr("random_search")
   )
 
@@ -249,10 +251,10 @@ bmr = benchmark(design, store_models = TRUE)
 bmr$aggregate(msr("classif.auc"))
 ```
 
-For a more reliable comparison, the number of evaluation of the random search should be increased. 
+For a more reliable comparison, the number of evaluation of the random search should be increased.
 
 ## Conclusion
 
 This example shows the versatility of [mlr3pipelines](https://mlr3pipelines.mlr-org.com/articles/introduction.html).
-By using more learners, varied representations of the data set as well as more levels, a powerful yet compute hungry pipeline can be created. 
-It is important to note that care should be taken to avoid name clashes of pipeline objects. 
+By using more learners, varied representations of the data set as well as more levels, a powerful yet compute hungry pipeline can be created.
+It is important to note that care should be taken to avoid name clashes of pipeline objects.

@@ -1345,8 +1345,8 @@ document.addEventListener('DOMContentLoaded', function() {
 <div class="d-article">
 <h2 id="prerequisites">Prerequisites</h2>
 <p>This tutorial assumes familiarity with the basics of <a href="https://mlr3pipelines.mlr-org.com">mlr3pipelines</a>. Consult the <a href="https://mlr3book.mlr-org.com/pipelines.html">mlr3book</a> if some aspects are not fully understandable. It deals with the problem of missing data.</p>
-<p>The random forest implementation in the package <a href="https://cran.r-project.org/package=ranger">ranger</a> unfortunately does not support missing values. Therefore it is required to impute missing features before passing the data to the learner.</p>
-<p>We show how to use <a href="https://mlr3pipelines.mlr-org.com">mlr3pipelines</a> to augment the <a href="https://mlr3learners.mlr-org.com/reference/mlr_learners_classif.ranger.html"><code>ranger learner</code></a> with automatic imputation.</p>
+<p>The random forest implementation in the package <a href="https://cran.r-project.org/package=ranger">ranger</a> unfortunately does not support missing values. Therefore, it is required to impute missing features before passing the data to the learner.</p>
+<p>We show how to use <a href="https://mlr3pipelines.mlr-org.com">mlr3pipelines</a> to augment the <a href="https://mlr3learners.mlr-org.com/reference/mlr_learners_classif.ranger.html"><code>ranger random forest learner</code></a> with automatic imputation.</p>
 <h2 id="construct-the-base-objects">Construct the Base Objects</h2>
 <p>First, we take an example task with missing values (<a href="https://mlr3.mlr-org.com/reference/mlr_tasks_pima.html"><code>pima</code></a>) and create the <a href="https://mlr3learners.mlr-org.com/reference/mlr_learners_classif.ranger.html"><code>ranger learner</code></a>:</p>
 <div class="layout-chunk" data-layout="l-body">
@@ -1415,30 +1415,46 @@ library(mlr3pipelines)
 dt = as.data.table(mlr_pipeops)
 dt[grepl(&quot;impute&quot;, dt$key) | grepl(&quot;miss&quot;, dt$key), ]</code></pre>
 <pre><code>
-            key packages input.num output.num input.type.train
-1:   imputehist graphics         1          1             Task
-2:   imputemean                  1          1             Task
-3: imputemedian    stats         1          1             Task
-4: imputenewlvl                  1          1             Task
-5: imputesample                  1          1             Task
-6:      missind                  1          1             Task
-   input.type.predict output.type.train output.type.predict
-1:               Task              Task                Task
-2:               Task              Task                Task
-3:               Task              Task                Task
-4:               Task              Task                Task
-5:               Task              Task                Task
-6:               Task              Task                Task</code></pre>
+              key packages                    tags
+1: imputeconstant                         missings
+2:     imputehist graphics                missings
+3:  imputelearner                         missings
+4:     imputemean                         missings
+5:   imputemedian    stats                missings
+6:     imputemode                         missings
+7:      imputeoor                         missings
+8:   imputesample                         missings
+9:        missind          missings,data transform
+                                          feature_types input.num output.num
+1: logical,integer,numeric,character,factor,ordered,...         1          1
+2:                                      integer,numeric         1          1
+3:                               logical,factor,ordered         1          1
+4:                                      numeric,integer         1          1
+5:                                      numeric,integer         1          1
+6:               factor,integer,logical,numeric,ordered         1          1
+7:             character,factor,integer,numeric,ordered         1          1
+8:               factor,integer,logical,numeric,ordered         1          1
+9: logical,integer,numeric,character,factor,ordered,...         1          1
+   input.type.train input.type.predict output.type.train output.type.predict
+1:             Task               Task              Task                Task
+2:             Task               Task              Task                Task
+3:             Task               Task              Task                Task
+4:             Task               Task              Task                Task
+5:             Task               Task              Task                Task
+6:             Task               Task              Task                Task
+7:             Task               Task              Task                Task
+8:             Task               Task              Task                Task
+9:             Task               Task              Task                Task</code></pre>
 </div>
 <!-- Replace with something using tags at some point-->
 <h2 id="construct-operators">Construct Operators</h2>
 <p><a href="https://mlr3pipelines.mlr-org.com">mlr3pipelines</a> contains several imputation methods. We focus on rather simple ones, and show how to impute missing values for <code>factor</code> features and <code>numeric</code> features respectively.</p>
 <p>Since our task only has numeric features, we do not need to deal with imputing factor levels, and can instead concentrate on imputing numeric values:</p>
-<p>We do this in a two-step process: * For every column we create a new indicator column, that tells us whether the value is “missing” or “present”. We achieve this using the <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_missind.html"><code>missind</code></a> <a href="https://mlr3pipelines.mlr-org.com/reference/PipeOp.html"><code>PipeOp</code></a>.</p>
+<p>We do this in a two-step process: * We create new indicator columns, that tells us whether the value of a feature is “missing” or “present”. We achieve this using the <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_missind.html"><code>missind</code></a> <a href="https://mlr3pipelines.mlr-org.com/reference/PipeOp.html"><code>PipeOp</code></a>.</p>
 <ul>
 <li>Afterwards, we impute every missing value by sampling from the histogram of the respective column. We achieve this using the <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_imputehist.html"><code>imputehist</code></a> <a href="https://mlr3pipelines.mlr-org.com/reference/PipeOp.html"><code>PipeOp</code></a>.</li>
 </ul>
-<p>We also have to make sure to apply the pipeops in the correct order!</p>
+<p>We also have to make sure to apply the pipe operators in the correct order!</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
 imp_missind = po(&quot;missind&quot;)
@@ -1561,16 +1577,18 @@ glearner$predict(task2)</code></pre>
        768   neg      neg</code></pre>
 </div>
 <h2 id="missing-factor-features">Missing factor features</h2>
-<p>For <code>factor</code> features, the process works analogously. Instead of using <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_imputehist.html"><code>imputehist</code></a>, we can for example use <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_imputenewlvl.html"><code>imputenewlvl</code></a>. This will simply replace every <code>NA</code> in each factor variable with a new value <code>missing</code>.</p>
+<p>For <code>factor</code> features, the process works analogously. Instead of using <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_imputehist.html"><code>imputehist</code></a>, we can for example use <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_imputeoor.html"><code>imputeoor</code></a>. This will simply replace every <code>NA</code> in each factor variable with a new value <code>missing</code>.</p>
 <p>A full graph might the look like this:</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
-imp_fct = po(&quot;imputenewlvl&quot;,
+imp_missind = po(&quot;missind&quot;, param_vals = list(affect_columns = NULL, which = &quot;all&quot;))
+imp_fct = po(&quot;imputeoor&quot;,
   param_vals = list(affect_columns = selector_type(&quot;factor&quot;)))
 graph = po(&quot;copy&quot;, 2) %&gt;&gt;%
   gunion(list(imp_missind, imp_num %&gt;&gt;% imp_fct)) %&gt;&gt;%
   po(&quot;featureunion&quot;)</code></pre>
 </div>
+<p>Note that we specify the parameter <code>affect_columns = NULL</code> when initializing <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_missind.html"><code>missind</code></a>, because we also want indicator columns for our <code>factor</code> features. By default, <code>affect_columns</code> would be set to <code>selector_invert(selector_type(c("factor", "ordered", "character")))</code>. We also set the parameter <code>which</code> to <code>"all"</code> to add indicator columns for all features, regardless whether values were missing during training or not.</p>
 <p>In order to test out our new graph, we again create a situation where our task has missing factor levels. As the (<a href="https://mlr3.mlr-org.com/reference/mlr_tasks_pima.html"><code>pima</code></a>) task does not have any factor levels, we use the famous (<a href="https://mlr3.mlr-org.com/reference/mlr_tasks_boston_housing.html"><code>boston_housing</code></a>) task.</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
@@ -1591,15 +1609,15 @@ gl$predict(t2)</code></pre>
 <pre><code>
 &lt;PredictionRegr&gt; for 506 observations:
     row_id truth response
-         1  24.0 24.80673
-         2  21.6 22.14716
-         3  34.7 34.31269
+         1  24.0 24.64824
+         2  21.6 22.08679
+         3  34.7 34.02308
 ---                      
-       504  23.9 23.81468
-       505  22.0 22.31162
-       506  11.9 15.68146</code></pre>
+       504  23.9 23.93832
+       505  22.0 22.57185
+       506  11.9 16.17228</code></pre>
 </div>
-<p>Success! We learned how to deal with missing values in less then 10 minutes.</p>
+<p>Success! We learned how to deal with missing values in less than 10 minutes.</p>
 <!--radix_placeholder_article_footer-->
 <!--/radix_placeholder_article_footer-->
 </div>

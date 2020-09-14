@@ -1,6 +1,6 @@
 ---
 title: mlr3 and OpenML - Moneyball use case
-categories: 
+categories:
   - imputation
   - regression
   - feature importance
@@ -45,13 +45,13 @@ library("mlr3learners")
 library("mlr3pipelines")
 # lots of measures for evaluation
 library("mlr3measures")
-# Retreiving the data
+# Retrieving the data
 library("OpenML")
 ```
 
 ## Retrieving the data from OpenML
 
-We can use the `OpenML` package to retrieve data (and more) straight away.
+We can use the `r cran_pkg("OpenML")` package to retrieve data (and more) straight away.
 `OpenML` is is an inclusive movement to build an open, organized, online ecosystem for machine learning.
 Typically, you can retrieve the data with an `id`.
 The `id` can be found on [OpenML](https://www.openml.org/).
@@ -73,17 +73,17 @@ oml_dat
 However, the description within the `OpenML` object is not very detailed.
 The previously referenced [page](https://www.openml.org/d/41021) however states the following:
 
-In the early 2000s, Billy Beane and Paul DePodesta worked for the Oakland Athletics. 
-During their work there, they disrupted the game of baseball. 
-They didn't do it using a bat or glove, and they certainly didn't do it by throwing money at the issue; in fact, money was the issue. 
-They didn't have enough of it, but they were still expected to keep up with teams that had more substantial endorsements. 
-This is where Statistics came riding down the hillside on a white horse to save the day. 
+In the early 2000s, Billy Beane and Paul DePodesta worked for the Oakland Athletics.
+During their work there, they disrupted the game of baseball.
+They didn't do it using a bat or glove, and they certainly didn't do it by throwing money at the issue; in fact, money was the issue.
+They didn't have enough of it, but they were still expected to keep up with teams that had more substantial endorsements.
+This is where Statistics came riding down the hillside on a white horse to save the day.
 This data set contains some of the information that was available to Beane and DePodesta in the early 2000s, and it can be used to better understand their methods.
 
-This data set contains a set of variables that Beane and DePodesta emphasized in their work. 
-They determined that statistics like on-base percentage (OBP) and slugging percentage (SLG) were very important when it came to scoring runs, however, they were largely undervalued by most scouts at the time. 
-This translated to a gold mine for Beane and DePodesta. 
-Since these players weren't being looked at by other teams, they could recruit these players on a small budget. 
+This data set contains a set of variables that Beane and DePodesta emphasized in their work.
+They determined that statistics like on-base percentage (OBP) and slugging percentage (SLG) were very important when it came to scoring runs, however, they were largely undervalued by most scouts at the time.
+This translated to a gold mine for Beane and DePodesta.
+Since these players weren't being looked at by other teams, they could recruit these players on a small budget.
 The variables are as follows:
 
 * Team
@@ -118,14 +118,14 @@ There are $39$ teams with each maximally $47$ years ($1962$ - $2012$).
 For $988$ cases the information on `RankSeason` and `RankPlayoffs` is missing.
 This is since these simply did not reach the playoffs and hence have no reported rank.
 
-```{r} 
+```{r}
 summary(data[data$Playoffs == 0, c("RankSeason", "RankPlayoffs")])
 ```
 
 On the other hand, `OOBP` and `OSLG` have $812$ missing values.
 It seems as if these measures were not available before $1998$.
 
-```{r} 
+```{r}
 summary(data[is.na(data$OOBP), "Year"])
 ```
 
@@ -143,42 +143,25 @@ Usually, missing value imputation is preferred over the first two.
 However, in machine learning, one can try out all options and see which performs best for the underlying problem.
 For now, we limit ourselves to a rather simple imputation technique, imputation by randomly sampling from the univariate distribution.
 Note that this does not take the multivariate distribution into account properly and that there are more elaborate approaches.
-We only aim to impute `OOBP` and `OSLG`. 
+We only aim to impute `OOBP` and `OSLG`.
 For the other missing (categorical) features, we simply add a new level which indicates that information is missing (i.e. all missing values belong to.
 
 It is important to note that in this case here the vast majority of information on the features is missing.
 In this case, imputation is performed to not throw away the existing information of the features.
 
 `mlr3` has some solutions for that within the `mlr3pipelines` package.
-We start with an easy graph which only performs numeric imputation.
-We create a graph that copies the data.
-After this gateway, the data is simply passed through for the first node. 
-On the other one numeric imputation is performed.
-The results are combined via the `featureunion` `PipeOp`.
-We end up with a data set where all numeric features are imputed.
+We start with an easy `PipeOp` which only performs numeric imputation.
 
 ```{r}
-nop = po("nop")
 imp_num = po("imputehist", param_vals = list(affect_columns = selector_type("numeric")))
-graph = po("copy", 2) %>>% gunion(list(nop, imp_num)) %>>% po("featureunion")
 ```
 
-We can visualise the preprocessing graph by its own `plot` method:
+Next, we append the second imputation job for factors.
 
 ```{r}
-graph$plot(html = TRUE)
-```
-
-We still have to append the second imputation job for factors.
-We pretty much construct the same pipeline again only for factors.
-However, we have to make sure that the operator `id`s are unique.
-
-```{r}
-nop2 = po("nop", id = "nop2")
-imp_fct = po("imputenewlvl", param_vals = list(affect_columns = selector_type("factor")))
-graph = graph %>>% po("copy", 2, id = "copy2") %>>% gunion(list(nop2, imp_fct)) %>>%
-  po("featureunion", id = "featureunion2")
-graph$plot(html = TRUE)
+imp_fct = po("imputeoor", param_vals = list(affect_columns = selector_type("factor")))
+graph = imp_num %>>% imp_fct
+graph$plot()
 ```
 
 So far we only prepared the pipeline without actually modeling.
@@ -189,7 +172,7 @@ Namely, we make `G` (games played) a numerical feature.
 data$G = as.numeric(data$G)
 ```
 
-Additionally, the row names (starting with $0$) are changed. 
+Additionally, the row names (starting with $0$) are changed.
 
 ```{r}
 rownames(data) <- 1:nrow(data)
@@ -213,7 +196,7 @@ task$missings()
 ```
 
 The `missings` method indicates what we already knew: our missing values.
-Missing values are not always a problem. 
+Missing values are not always a problem.
 Some learners can deal with them pretty well.
 However, we want to use a random forest for our task.
 
@@ -241,10 +224,10 @@ polrn$param_set$values = list(num.trees = 1000, importance = "permutation")
 lrn = GraphLearner$new(graph = graph %>>% polrn)
 ```
 
-The final graph looks like the following: 
+The final graph looks like the following:
 
 ```{r}
-plot(graph %>>% polrn, html = TRUE)
+plot(graph %>>% polrn)
 ```
 
 ## Train and predict
@@ -292,7 +275,7 @@ scores
 We can also compute now by how much our model was on average wrong when predicting the runs scored.
 
 ```{r}
-mean(scores$regr.mae)
+r$aggregate(msr("regr.mae"))
 ```
 
 That seems not too bad.
@@ -309,26 +292,24 @@ Normally, one would set up a benchmark for this.
 However, we want to keep things short in this use case.
 Thus, we only set up the alternative learner (with identical hyperparameters) and compare the 10-fold-cross-validated mean absolute error.
 
-We can easily ignore features by a specific `PipeOp`
 As we are mostly interested in the numeric imputation we leave the remaining graph as it is.
 
 ```{r}
-nop = po("nop")
-imp_fct = po("imputenewlvl", param_vals = list(affect_columns = selector_type("factor")))
-graph2 = po("copy", 2) %>>% gunion(list(nop, imp_fct)) %>>% po("featureunion")
+imp_fct = po("imputeoor", param_vals = list(affect_columns = selector_type("factor")))
+graph2 = as_graph(imp_fct)
 ```
 
 Subsequently, we add the `PipeOpSelect` `PipeOp` to the pipeline.
 
 ```{r}
-feature_names = colnames(data)[apply(!is.na(data), 2, all)]
+feature_names = colnames(data)[!sapply(data, anyNA)]
 feature_names = c(
   feature_names[feature_names %in% task$feature_names],
   "RankSeason", "RankPlayoffs")
 na_select = po("select")
 na_select$param_set$values$selector = selector_name(feature_names)
 graph2 = graph2 %>>% na_select
-graph2$plot(html = TRUE)
+graph2$plot()
 ```
 
 Now we complete the learner and apply resampling as before.
@@ -336,8 +317,7 @@ Now we complete the learner and apply resampling as before.
 ```{r}
 lrn2 = GraphLearner$new(graph = graph2 %>>% polrn)
 r2 = resample(task, lrn2, cv10)
-scores2 = r2$score(msrs(c("regr.mae", "regr.mse")))
-mean(scores2$regr.mae)
+r2$aggregate(msr("regr.mae"))
 ```
 
 Surprisingly, the performance seems to be approximately the same.
@@ -345,7 +325,7 @@ That means that the imputed features seem not very helpful.
 We can use the `variable.importance` of the random forest.
 
 ```{r}
-sort(lrn$model$regr.ranger$model$variable.importance)
+sort(lrn$model$regr.ranger$model$variable.importance, decreasing = TRUE)
 ```
 
 We see that according to this the left out `OOBP` and `OSLG` seem to have solely rudimentary explanatory power.
