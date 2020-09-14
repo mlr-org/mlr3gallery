@@ -98,7 +98,12 @@ The sugar functions `trm()` and `trms()` can be used to retrieve terminators fro
 library(mlr3fselect)
 
 terminator = trm("run_time", secs = 10)
-FSelectInstanceSingleCrit$new(task, learner, resampling, measure, terminator)
+FSelectInstanceSingleCrit$new(
+  task = task, 
+  learner = learner, 
+  resampling = resampling, 
+  measure = measure, 
+  terminator = terminator)
 ```
 
 The `FSelector` subclasses describe the feature selection strategy. The sugar function `fs()` can be used to retrieve feature selection algorithms from the `mlr_fselectors` dictionary.
@@ -114,8 +119,14 @@ We set the `n_evals` parameter to `10` which means that 10 feature sets are eval
 
 ```{r random search}
 set.seed(7832)
+
 terminator = trm("evals", n_evals = 10)
-instance = FSelectInstanceSingleCrit$new(task, learner, resampling, measure, terminator)
+instance = FSelectInstanceSingleCrit$new(
+  task = task, 
+  learner = learner, 
+  resampling = resampling, 
+  measure = measure, 
+  terminator = terminator)
 fselector = fs("random_search", batch_size = 5)
 ```
 
@@ -150,14 +161,17 @@ We try sequential forward selection. We chose the `stagnation` terminator that s
 
 ```{r sfs}
 set.seed(7832)
+
 terminator = trm("stagnation", iters = 5)
-instance = FSelectInstanceSingleCrit$new(task, learner, resampling, measure, terminator)
+instance = FSelectInstanceSingleCrit$new(
+  task = task, 
+  learner = learner, 
+  resampling = resampling, 
+  measure = measure, 
+  terminator = terminator)
+
 fselector = fs("sequential")
 fselector$optimize(instance)
-```
-
-```{r sfs result}
-instance$result
 ```
 
 ## Nested resampling
@@ -232,9 +246,17 @@ The recrusive version (`recursive = TRUE`) recomputes the feature importance on 
 
 ```{r rfe}
 set.seed(7832)
+
 learner = lrn("classif.ranger", importance = "impurity")
 terminator = trm("none")
-instance = FSelectInstanceSingleCrit$new(task, learner, resampling, measure, terminator, store_models = TRUE)
+instance = FSelectInstanceSingleCrit$new(
+  task = task, 
+  learner = learner, 
+  resampling = resampling, 
+  measure = measure, 
+  terminator = terminator,
+  store_models = TRUE)
+
 fselector = fs("rfe", recursive = FALSE)
 fselector$optimize(instance)
 ```
