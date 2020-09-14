@@ -164,9 +164,9 @@ at = AutoTuner$new(
 )
 rr = resample(task, at, cv2, store_models = TRUE)
 # access 1st inner tuning result
-ll = rr$data$learner[[1]]
-ll$tuning_result
-ll$archive$data("x_domain")
+ll <- rr$data$state[[1]]$model$tuning_instance
+ll$result
+ll$archive$data()
 ```
 
 ## Model-Selection and Tuning with Pipelines
@@ -257,7 +257,7 @@ at = AutoTuner$new(
 )
 rr = resample(task, at, cv2, store_models = TRUE)
 # access 1st inner tuning result
-ll = rr$data$learner[[1]]
-ll$tuning_result
-ll$archive$data(unnest = "x_domain")
+ll <- rr$data$state[[1]]$model$tuning_instance
+ll$result
+ll$archive$data()
 ```
