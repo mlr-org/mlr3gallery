@@ -275,7 +275,8 @@ Next, we tackle `.transform()`. This is quite straightforward, because objects o
       new_target = as.data.table(predict(self$state$bc, newdata = target))
       colnames(new_target) = paste0(task$target_names, ".bc")
       task$cbind(new_target)
-      convert_task(task, target = colnames(new_target), drop_original_target = TRUE)
+      convert_task(task, target = colnames(new_target),
+        drop_original_target = TRUE)
     },
 ```
 
@@ -294,8 +295,8 @@ Finally, we overload `.invert()`. We extract the truth from the `predict_phase_s
       truth = predict_phase_state$truth
       response = predict(predict_phase_state$bc, newdata = prediction$response,
         inverse = TRUE)
-      mlr3misc::invoke(get(mlr_reflections$task_types["regr"]$prediction)$new,
-        row_ids = prediction$row_ids, truth = truth, response = response)
+      PredictionRegr$new(row_ids = prediction$row_ids, truth = truth,
+        response = response)
     }
 ```
 
@@ -335,7 +336,8 @@ PipeOpTargetTrafoBoxCox = R6Class("PipeOpTargetTrafoBoxCox",
       new_target = as.data.table(predict(self$state$bc, newdata = target))
       colnames(new_target) = paste0(task$target_names, ".bc")
       task$cbind(new_target)
-      convert_task(task, target = colnames(new_target), drop_original_target = TRUE)
+      convert_task(task, target = colnames(new_target),
+        drop_original_target = TRUE)
     },
 
     .train_invert = function(task) {
@@ -346,8 +348,8 @@ PipeOpTargetTrafoBoxCox = R6Class("PipeOpTargetTrafoBoxCox",
       truth = predict_phase_state$truth
       response = predict(predict_phase_state$bc, newdata = prediction$response,
         inverse = TRUE)
-      mlr3misc::invoke(get(mlr_reflections$task_types["regr"]$prediction)$new,
-        row_ids = prediction$row_ids, truth = truth, response = response)
+      PredictionRegr$new(row_ids = prediction$row_ids, truth = truth,
+        response = response)
     }
   )
 )
