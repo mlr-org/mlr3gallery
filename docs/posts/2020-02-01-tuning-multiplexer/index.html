@@ -1501,11 +1501,11 @@ tuner$optimize(instance)</code></pre>
 instance$archive$data(&quot;x_domain&quot;)</code></pre>
 <pre><code>
    branch.selection classif.ce                                uhash
-1:              xgb  0.2932692 d47d4a90-8431-42b8-879f-f93827a51089
-2:               rf  0.2067308 0612b0e8-c1cb-476d-bb89-9214ede492e9
+1:              xgb  0.2932692 c93c2122-72ad-46f8-9881-185069e60deb
+2:               rf  0.2067308 926299da-575f-44bc-9e22-a332c34b0e86
              timestamp batch_nr x_domain_branch.selection
-1: 2020-09-18 06:37:07        1                       xgb
-2: 2020-09-18 06:37:08        2                        rf</code></pre>
+1: 2020-09-22 04:40:40        1                       xgb
+2: 2020-09-22 04:40:41        2                        rf</code></pre>
 <pre class="r"><code>
 instance$result</code></pre>
 <pre><code>
@@ -1534,11 +1534,11 @@ ll$result</code></pre>
 ll$archive$data()</code></pre>
 <pre><code>
    branch.selection classif.ce                                uhash  x_domain
-1:              xgb  0.3253012 62347059-62b8-4bd4-a15d-8a0271579854 &lt;list[1]&gt;
-2:               rf  0.2530120 50972afb-2cf7-481e-8c1c-d43bcf2e9496 &lt;list[1]&gt;
+1:              xgb  0.3253012 f6726a02-3a02-4158-a7f7-042ff858bab2 &lt;list[1]&gt;
+2:               rf  0.2530120 3831b669-678b-412d-be19-6a24bf9a7d36 &lt;list[1]&gt;
              timestamp batch_nr
-1: 2020-09-18 06:37:09        1
-2: 2020-09-18 06:37:10        2</code></pre>
+1: 2020-09-22 04:40:43        1
+2: 2020-09-22 04:40:44        2</code></pre>
 </div>
 <h2 id="model-selection-and-tuning-with-pipelines">Model-Selection and Tuning with Pipelines</h2>
 <p>Now let’s select from our given set of models and tune their hyperparameters. One way to do this is to define a search space for each individual learner, wrap them all with the <code>AutoTuner</code>, then call <a href="https://mlr3.mlr-org.com/reference/benchmark.html"><code>benchmark()</code></a> on them. As this is pretty standard, we will skip this here, and show an even neater option, where you can tune over models and hyperparameters in one go. If you have quite a large space of potential learners and combine this with an efficient tuning algorithm, this can save quite some time in tuning as you can learn during optimization which options work best and focus on them. NB: Many AutoML systems work in a very similar way.</p>
@@ -1686,16 +1686,16 @@ instance$archive$data(unnest = &quot;x_domain&quot;)</code></pre>
  9:              xgb      NA         294  0.2019231
 10:               rf      12          NA  0.1826923
                                    uhash           timestamp batch_nr
- 1: 94a2a43e-1544-44a9-a83c-0ffcbb657069 2020-09-18 06:37:23        1
- 2: 90c00c2e-7052-4eda-8523-0cd43a9f64a3 2020-09-18 06:37:24        2
- 3: 580b9485-33e0-4464-af1e-2357c98685ae 2020-09-18 06:37:25        3
- 4: 78306ac0-cbd9-414e-8cc3-b80b80ecb08c 2020-09-18 06:37:26        4
- 5: d5999bc9-5a84-4b09-8af4-258c3a911b04 2020-09-18 06:37:27        5
- 6: c3deeb96-fd92-4f3b-a1a4-8ae877778ca2 2020-09-18 06:37:28        6
- 7: e553a14c-f136-44c0-85ce-e758d9752b40 2020-09-18 06:37:29        7
- 8: 8c22f6f5-2605-4a99-89b5-c30436dbb556 2020-09-18 06:37:30        8
- 9: 9574d4ac-2e46-4785-a915-d5c67410e4d4 2020-09-18 06:37:31        9
-10: a2a14f65-2355-4081-b4f9-ff4b5373d3da 2020-09-18 06:37:32       10
+ 1: 96a039b6-5428-4c46-8730-0b26674b585c 2020-09-22 04:40:58        1
+ 2: 483ee0a5-934c-455c-8f7b-acb83be2a627 2020-09-22 04:40:59        2
+ 3: 782790bf-d0a2-4ae2-9ac2-431151714e51 2020-09-22 04:41:00        3
+ 4: 38787bec-8de3-4cf1-8a60-e4e3cba23789 2020-09-22 04:41:01        4
+ 5: 33deaa20-9563-4685-9dfe-f33987ee1987 2020-09-22 04:41:02        5
+ 6: 13fd57b0-fb19-4a35-9c53-732b197d7652 2020-09-22 04:41:03        6
+ 7: 99b78866-eb3c-4192-ad7f-1f224d34aeeb 2020-09-22 04:41:04        7
+ 8: 8c1425a9-313e-4cf9-9d8a-c6c654421c6a 2020-09-22 04:41:05        8
+ 9: dcadd696-9ff7-4e4d-bf35-5bf63f450e25 2020-09-22 04:41:06        9
+10: 47432a33-8774-45a0-b608-a1f42597563a 2020-09-22 04:41:07       10
     x_domain_branch.selection x_domain_rf.mtry x_domain_xgb.nrounds
  1:                        rf               13                   NA
  2:                       xgb               NA                  371
@@ -1763,16 +1763,16 @@ ll$archive$data()</code></pre>
  9:               rf       8          NA  0.2228916
 10:              xgb      NA         332  0.2048193
                                    uhash  x_domain           timestamp batch_nr
- 1: 9272abe7-cf0e-4d9d-b6a7-e37af04e6914 &lt;list[2]&gt; 2020-09-18 06:37:33        1
- 2: c7e9960d-8aac-4896-8989-92f95944273d &lt;list[2]&gt; 2020-09-18 06:37:34        2
- 3: 56b32205-7930-456e-91cb-d588ee212419 &lt;list[2]&gt; 2020-09-18 06:37:35        3
- 4: 75f69fb1-9730-4d2c-b806-fe8f0a46fbf8 &lt;list[2]&gt; 2020-09-18 06:37:36        4
- 5: 11047d49-0223-428c-a222-ff8a6706fa2c &lt;list[2]&gt; 2020-09-18 06:37:37        5
- 6: 9f4ed203-c3c7-43df-bc7f-5bb689f23d89 &lt;list[2]&gt; 2020-09-18 06:37:38        6
- 7: b4a7ec9d-691f-4735-9e4c-73f8876dfed5 &lt;list[2]&gt; 2020-09-18 06:37:39        7
- 8: 1045df61-e0a2-4234-9d7d-98100dd03a13 &lt;list[2]&gt; 2020-09-18 06:37:40        8
- 9: 689f4ed2-bbe0-4498-bb5e-240c17dc15f6 &lt;list[2]&gt; 2020-09-18 06:37:41        9
-10: 70eea0e2-9ff6-428b-bc28-52ae2b7748ab &lt;list[2]&gt; 2020-09-18 06:37:42       10</code></pre>
+ 1: 47ea548d-9f4f-4623-acc9-d04ee975c9a8 &lt;list[2]&gt; 2020-09-22 04:41:09        1
+ 2: b9f58e34-e6ff-4c5e-b77d-37be7e0edfba &lt;list[2]&gt; 2020-09-22 04:41:10        2
+ 3: 661c1321-8607-4167-9dda-7cfc94314529 &lt;list[2]&gt; 2020-09-22 04:41:11        3
+ 4: 17b9d4e9-707c-45ab-9f27-b1881a3b5ae2 &lt;list[2]&gt; 2020-09-22 04:41:12        4
+ 5: 8df8ce86-8eb3-44fd-9e84-a3e1cb1c9a32 &lt;list[2]&gt; 2020-09-22 04:41:13        5
+ 6: f7507a6a-d85d-41f7-b787-51c67d19c53d &lt;list[2]&gt; 2020-09-22 04:41:14        6
+ 7: 03a6a9e1-f44e-44a0-a8fb-1d39fe52cd50 &lt;list[2]&gt; 2020-09-22 04:41:15        7
+ 8: a8682a2c-a445-46bd-9401-23b089b4ecc7 &lt;list[2]&gt; 2020-09-22 04:41:16        8
+ 9: 66a103fa-b39c-4adf-a412-cf4f18181709 &lt;list[2]&gt; 2020-09-22 04:41:17        9
+10: 915c410f-34b6-4215-983c-aa47db9373c2 &lt;list[2]&gt; 2020-09-22 04:41:18       10</code></pre>
 </div>
 <!--radix_placeholder_article_footer-->
 <!--/radix_placeholder_article_footer-->
