@@ -214,7 +214,7 @@ Before starting the tuning we set some logging thresholds:
 
 ```{r}
 lgr::get_logger("mlr3")$set_threshold("warn")
-lgr::get_logger("mlr3tuning")$set_threshold("warn")
+lgr::get_logger("bbotk")$set_threshold("warn")
 ```
 
 ```{r}
@@ -228,7 +228,7 @@ tune1_results = tune1$archive$data()
 tune1_results[order(classif.acc), ]
 ```
 
-We achieve very good accuracy using `ranger` with a higher number of `mtry` and `num.trees` (which in hindsight makes sense because our feature space is high dimensional). However, the `LDA` also shows very good accuracy when combined with `PCA` or `ICA` retaining 30 components.
+We achieve very good accuracy using `ranger`, more or less regardless how `mtry` and `num.trees` are set. However, the `LDA` also shows very good accuracy when combined with `PCA` or `ICA` retaining 30 components.
 
 For now, we decide to use `ranger` with `mtry` set to 200 and `num.trees` set to 1000.
 
