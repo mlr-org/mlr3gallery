@@ -209,8 +209,8 @@ graph$plot()
 By wrapping our `Graph` in a `r ref("GraphLearner")`, we can perform `3-fold` `r ref("ResamplingCV", "cross-validation")` and get an estimated average of the root-mean-square error (of course, in a real world setting splitting the data in a training and test set should have been done):
 
 ```{r}
-rr = resample(task, learner = GraphLearner$new(graph),
-  resampling = rsmp("cv", folds = 3))
+learner = GraphLearner$new(graph)
+rr = resample(task, learner = learner, resampling = rsmp("cv", folds = 3))
 rr$aggregate(msr("regr.mse"))
 ```
 
@@ -220,9 +220,8 @@ For completeness, we also show how a prediction step without having any target v
 
 ```{r}
 dat_predict = as.data.table(cbind(x1, x2, y1 = NA, y2 = NA, y3 = NA))
-task_predict = TaskRegr$new("multiregression_predict", backend = dat_predict, target = "y1")
-graph$train(task)
-graph$predict(task_predict)
+learner$train(task)
+learner$predict_newdata(dat_predict)
 ```
 
 Note that we have to initialize the `Task` with $y_{1}$ as the target but the pipeline will automatically predict $y_{3}$ in the final step as our final target, which was our ultimate goal.
