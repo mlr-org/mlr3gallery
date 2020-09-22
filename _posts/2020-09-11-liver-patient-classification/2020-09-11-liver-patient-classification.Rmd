@@ -5,27 +5,28 @@ author:
   - name: Jae-Eun Nam
   - name: Viet Tran
   - name: Simon Wiegrebe
-editor:
-  - name: Henri Funk
+  - name: Henri Funk (editor)
 date: 09-11-2020
 description: |
   This use case provides an example on tuning and benchmarking in mlr3verse using data from Liver Patient DataSet.
 categories:
   - 'tuning'
-  - 'benchmarking'
-  - 'nested resampling'
-  - 'filter'
-  - 'branching'
-#bibliography: bs.bib
+  - 'i2ml'
+  - 'oversampling'
+  - 'binary calissification'
+bibliography: bs.bib
+header-includes:
+  - \usepackage{caption}
+  - \usepackage{float}
+  - \captionsetup{labelformat=empty}
+  - \usepackage{multirow}
+  - \usepackage{graphicx}
+  - \usepackage{booktabs}
 output:
   distill::distill_article:
     self_contained: false
     css: ../../custom.css
 ---
-
-<!-- \nocite{*} -->
-<!-- \defcitealias{LabTests2019}{AACC 2019} -->
-<!-- \defcitealias{Dua2017}{Dua and Graff 2017} -->
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(
@@ -36,6 +37,14 @@ library(mlr3book)
 # Re-calculate all intermediary results instead of reading them from saved RDS
 long_run = FALSE
 ```
+
+# Preamble
+
+The following examples were created as part of the Introduction to Machine Learning Lecture at LMU Munich.
+The goal of the project was to create and compare one or several machine learning pipelines for the problem at hand together with exploratory analysis and an exposition of results.
+The posts were contributed to the mlr3gallery by the authors and edited for better legibility by the editor.
+We want to thank the authors for allowing us to publish their results.
+Note, that correctness of the results can not be guaranteed. 
 
 ## Prerequisites
 
@@ -56,6 +65,7 @@ library(GGally)
 library(precrec)
 library(ggcorrplot)
 library(caret)
+library(pander)
 ```
 
 Note, that expensive calculations are pre-saved in rds files in this tutorial to save computational time.
@@ -100,38 +110,36 @@ Section 3 presents learners and their hyperparameter tuning while section 4, dea
 
 # Indian Liver Patient Dataset
 
-The data set we used for our project is the "Indian Liver Patient Dataset" which can be obtained from the UCI Machine Learning Repository; it was donated by three professors from India in 2012 (\citetalias{Dua2017}).
+The data set we used for our project is the "Indian Liver Patient Dataset" which can be obtained from the UCI Machine Learning Repository; it was donated by three professors from India in 2012.@Dua2017
 It contains data for 583 patients collected in the north east of Andhra Pradesh, one of the 28 states of India.
 The observations are divided into two classes based on the patient having liver disease or not.
 Besides the class variable, which is our target, ten, mostly numerical, features are provided.
 To describe the features in more detail, the table below lists the variables included in the dataset.
 
-\begin{table}[!htbp]
-\centering
-\begin{tabular}{ll} 
-\hline
-\textbf{Variable}             & \textbf{Description}                        \\ 
-\hline
-\verb|age|              & Age of the patient (all patients above 89 are labelled as 90) \\
-\verb|gender|                 & Sex of the patient (1 = female, 0 = male)   \\
-\verb|total_bilirubin|        & Total serum bilirubin (in mg/dL)            \\
-\verb|direct_bilirubin|       & Direct bilirubin level (in mg/dL)           \\
-\verb|alkaline_phosphatase|   & Serum alkaline phosphatase level (in U/L)   \\
-\verb|alanine_transaminase|   & Serum alanine transaminase level (in U/L)   \\
-\verb|aspartate_transaminase| & Serum aspartate transaminase level (in U/L) \\
-\verb|total_protein|          & Total serum protein (in g/dL)               \\
-\verb|albumin|                & Serum albumin level (in g/dL)               \\
-\verb|albumin_globulin_ratio| & Albumin-to-globulin ratio                   \\
-\verb|class|                  & Target variable (1 = liver disease, 0 = no liver disease)\\
-\hline
-\end{tabular}
-\end{table}
+```{r, echo=FALSE}
+col_descr <- cbind.data.frame(Variable = colnames(liver_df),
+                              Description = c("Age of the patient (all patients above 89 are labelled as 90",
+                                              "Sex of the patient (1 = female, 0 = male)",
+                                              "Total serum bilirubin (in mg/dL)",
+                                              "Direct bilirubin level (in mg/dL)",
+                                              "Serum alkaline phosphatase level (in U/L)",
+                                              "Serum alanine transaminase level (in U/L)",
+                                              "Serum aspartate transaminase level (in U/L)",
+                                              "Total serum protein (in g/dL)",
+                                              "Serum albumin level (in g/dL)",
+                                              "Albumin-to-globulin ratio",
+                                              "Target variable (1 = liver disease, 0 = no liver disease)"
+                                              )
+                              )
+
+kable(col_descr)
+```
 
 As one can see, besides age and gender, the dataset contains eight additional numerical features.
 While the names and corresponding measurements look rather cryptic to the uninformed eye, they are all part of standard blood tests conducted to gather information about the state of a patient's liver, so-called liver function tests.
 All of these measurements are frequently used markers for liver disease.
-For the first five, measuring the chemical compound bilirubin and the three enzymes alkaline phosphatase, alanine transaminase and aspartate transaminase, elevated levels indicate liver disease (\citealt{Gowda2009}; \citealt{Oh2011}).
-For the remaining three, which concern protein levels, lower-than-normal values suggest a liver problem (\citealt{Carvalho2018}; \citetalias{LabTests2019}).
+For the first five, measuring the chemical compound bilirubin and the three enzymes alkaline phosphatase, alanine transaminase and aspartate transaminase, elevated levels indicate liver disease @Gowda2009 @Oh2011.
+For the remaining three, which concern protein levels, lower-than-normal values suggest a liver problem @Carvalho2018 @LabTests2019.
 Lastly, one should note that some of the measurements are part of more than one variable. For example, the total serum bilirubin is simply the sum of both the direct and indirect bilirubin levels and the amount of albumin is used to calculate the values of the total serum protein as well as the albumin-to-globulin ratio. So, one might already suspect that some of the features are highly correlated to one another, but more on that kind of analysis in the following section. 
 
 # Data exporation
@@ -158,8 +166,7 @@ liver_df[rowSums(is.na(liver_df)) > 0, ]
 ```
 
 The only missing values, totalling four, are albumin-to-globulin ratios.
-One possibility to deal with those observations would be to omit them, as the dataset has about 600 observations.
-However, as it turned out this was not necessary, because we ended up not using the ratio due to high correlations with other features. 
+As it turned out omitting or imputation techniques were not necessary, because we ended up not using the ratio due to high correlations with other features. 
 Thus, we were left with no missing value problems to deal with.
 
 ## Univariate distribution
@@ -273,6 +280,9 @@ ggplot(data = gather(liver_df[, -2], "variable", "value", 1:9),
   theme_minimal()
 ```
 
+Note, that the same result can be achieved more easily by using `r ref("PipeOpMutate")` from mlr3pipelines.
+This PipeOp provides a smooth implementation to scale numeric features for mlr3 tasks.
+
 ## Correlation
 
 As we mentioned in the description of the data, there are features that are indirectly measured by another one.
@@ -324,8 +334,6 @@ liver_df_scaled = liver_df %>%
 
 ```
 
-Note, that `r mlr3book::ref("PipeOpMutate")` provides an alternative to transform features within the mlr3 workflow. 
-
 ```{r finalData, include=FALSE}
 # Structure of the final, transformed dataset
 str(liver_df_scaled) 
@@ -334,22 +342,14 @@ str(liver_df_scaled)
 Lastly, we standardized all metric features, as different ranges and units might weight features. This is especially important for the k-NN model.
 The following table shows the final dataset and the transformations we applied.
 
-\begin{table}[!htbp]
-\centering
-\begin{tabular}{ll} 
-\hline
-\textbf{Variable}        & \textbf{Transformation}              \\ 
-\hline
-\verb|age|                     & scaled                         \\
-\verb|gender|                  &                                \\
-\verb|direct_bilirubin|        & scaled and log-transformed     \\
-\verb|alkaline_phosphatase|    & scaled and log-transformed     \\
-\verb|aspartate_transaminase|  & scaled and log-transformed     \\
-\verb|albumin|                 & scaled                         \\
-\verb|class|                   &                                \\
-\hline
-\end{tabular}
-\end{table}
+```{r, echo=FALSE}
+coldescr_scaled <- cbind.data.frame(
+  Variable = colnames(liver_df_scaled),
+  Transformation = c("scaled", "", "scaled and log-transformed", "scaled and log-transformed", "scaled and log-transformed", "scaled", "")
+)
+
+kable(coldescr_scaled)
+```
 
 # Learners and tuning
 
@@ -360,8 +360,7 @@ The specification of the positive class has an impact on the evaluation later on
 ```{r task definition}
 ## Task definition
 task_liver = TaskClassif$new(id = "task_liver", backend = liver_df_scaled, 
-                              target = "class")
-task_liver$positive = "1" # Switching the positive class
+                              target = "class", positive = "1")
 ```
 
 In the following we are going to evaluate logistic regression, linear discriminant analysis (LDA), quadratic discriminant analysis (QDA), naive Bayes, k-nearest neighbour (k-NN), classification trees (CART) and random forest on the binary target. 
@@ -370,17 +369,16 @@ In the following we are going to evaluate logistic regression, linear discrimina
 ## Learner definition
 # Use predict type "prob" for the AUC score. Predict on train and test sets to
 # detect overfitting
-learner_logreg = lrn("classif.log_reg", predict_type = "prob", 
-                      predict_sets = c("train", "test"))
-learner_lda = lrn("classif.lda", predict_type = "prob", 
-                   predict_sets = c("train", "test"))
-learner_qda = lrn("classif.qda", predict_type = "prob", 
-                   predict_sets = c("train", "test"))
-learner_nb = lrn("classif.naive_bayes", predict_type = "prob", 
-                  predict_sets = c("train", "test"))
-learner_knn = lrn("classif.kknn", scale = FALSE, predict_type = "prob")
-learner_rpart = lrn("classif.rpart", predict_type = "prob")
-learner_rf = lrn("classif.ranger", num.trees = 1000, predict_type = "prob")
+
+learners <- list(
+  learner_logreg = lrn("classif.log_reg", predict_type = "prob", predict_sets = c("train", "test")),
+  learner_lda = lrn("classif.lda", predict_type = "prob", predict_sets = c("train", "test")),
+  learner_qda = lrn("classif.qda", predict_type = "prob", predict_sets = c("train", "test")),
+  learner_nb = lrn("classif.naive_bayes", predict_type = "prob", predict_sets = c("train", "test")),
+  learner_knn = lrn("classif.kknn", scale = FALSE, predict_type = "prob"),
+  learner_rpart = lrn("classif.rpart", predict_type = "prob"),
+  learner_rf = lrn("classif.ranger", num.trees = 1000, predict_type = "prob")
+)
 ```
 
 In order to find optimal hyperparameters through tuning, we used random search to better cover the hyperparameter space.
@@ -442,45 +440,45 @@ tune_ps_rf = ParamSet$new(list(
 ))
 ```
 
-The next step is to initiate the AutoTuner from `mlr3tuning`.
+The next step is to instantiate the AutoTuner from `mlr3tuning`.
 
 ```{r AutoTuner definition}
 # AutoTuner for k-NN, CART and random forest
-at_knn = AutoTuner$new(
-  learner = learner_knn,
+learners$learner_knn = AutoTuner$new(
+  learner = learners$learner_knn,
   resampling = resampling_inner,
   measure = measure,
   search_space = tune_ps_knn,
   terminator = terminator,
   tuner = tuner
 )
-at_knn$predict_sets = c("train", "test")
+learners$learner_knn$predict_sets = c("train", "test")
 
-at_rpart = AutoTuner$new(
-  learner = learner_rpart,
+learners$learner_rpart = AutoTuner$new(
+  learner = learners$learner_rpart,
   resampling = resampling_inner,
   measure = measure,
   search_space = tune_ps_rpart,
   terminator = terminator,
   tuner = tuner
 )
-at_rpart$predict_sets = c("train", "test")
+learners$learner_rpart$predict_sets = c("train", "test")
 
-at_rf = AutoTuner$new(
-  learner = learner_rf,
+learners$learner_rf = AutoTuner$new(
+  learner = learners$learner_rf,
   resampling = resampling_inner,
   measure = measure,
   search_space = tune_ps_rf,
   terminator = terminator,
   tuner = tuner
 )
-at_rf$predict_sets = c("train", "test")
+learners$learner_rf$predict_sets = c("train", "test")
 ```
 
 During our research we found that oversampling can potentially increase the performance of the learners.
 As mentioned in section 2.2, we opted for perfectly balancing the classes. By using `mlr3pipelines` we can apply the benchmark function later on. 
 
-```{r oversampling and corresponding learners}
+```{r oversampling and corresponding learners, results="hide"}
 # Oversampling minority class to get perfectly balanced classes
 set.seed(123)
 po_over = po("classbalancing", id = "oversample", adjust = "minor",
@@ -488,27 +486,8 @@ po_over = po("classbalancing", id = "oversample", adjust = "minor",
 table(po_over$train(list(task_liver))$output$truth()) # Check class balance
 
 # Learners with balanced/oversampled data
-learner_logreg_bal = GraphLearner$new(po_over %>>% learner_logreg)
-learner_logreg_bal$predict_type = "prob"
-learner_logreg_bal$predict_sets = c("train", "test")
-learner_lda_bal = GraphLearner$new(po_over %>>% learner_lda)
-learner_lda_bal$predict_type = "prob"
-learner_lda_bal$predict_sets = c("train", "test")
-learner_qda_bal = GraphLearner$new(po_over %>>% learner_qda)
-learner_qda_bal$predict_type = "prob"
-learner_qda_bal$predict_sets = c("train", "test")
-learner_nb_bal = GraphLearner$new(po_over %>>% learner_nb)
-learner_nb_bal$predict_type = "prob"
-learner_nb_bal$predict_sets = c("train", "test")
-at_knn_bal = GraphLearner$new(po_over %>>% at_knn)
-at_knn_bal$predict_type = "prob"
-at_knn_bal$predict_sets = c("train", "test")
-at_rpart_bal = GraphLearner$new(po_over %>>% at_rpart)
-at_rpart_bal$predict_type = "prob"
-at_rpart_bal$predict_sets = c("train", "test")
-at_rf_bal = GraphLearner$new(po_over %>>% at_rf)
-at_rf_bal$predict_type = "prob"
-at_rf_bal$predict_sets = c("train", "test")
+learners_bal = lapply(learners, function(x) GraphLearner$new(po_over %>>% x))
+lapply(learners_bal, function(x) x$predict_sets = c("train", "test"))
 ```
 
 # Model fitting and benchmarking
@@ -529,10 +508,7 @@ The following code chunk executes our benchmarking with all learners.
 set.seed(123)
 bm_design = benchmark_grid(
   tasks = task_liver,
-  learners = list(learner_logreg, learner_lda, learner_qda,
-                  learner_nb, at_knn, at_rpart, at_rf,
-                  learner_logreg_bal, learner_lda_bal, learner_qda_bal,
-                  learner_nb_bal, at_knn_bal, at_rpart_bal, at_rf_bal),
+  learners = c(learners, learners_bal),
   resamplings = resampling_outer
 )
 bmr = benchmark(bm_design, store_models = FALSE)
@@ -708,207 +684,22 @@ ggplot(compare_df3[which(compare_df3$learner_id_wo == "classif.ranger.tuned"), ]
 
 To get a look at performance from yet another angle, we next considered the confusion matrix for each learner, which simply contrasts the absolute numbers of predictions and true values by category, with and without oversampling.
 
-\begin{table}[H]
-  \caption{Confusion matrices for logistic regression}
-    \begin{minipage}{.5\linewidth}
-      \caption{Original dataset}
-      \centering
-        \begin{tabular}{@{}cc|cc}
-        \multicolumn{1}{c}{} &\multicolumn{1}{c}{} &\multicolumn{2}{c}{Actual} \\ 
-        \multirow{4}{*}{\rotatebox[origin=cr]{90}{Predicted}} & \multicolumn{1}{c|}{} &            \multicolumn{1}{c}{1} & \multicolumn{1}{c}{0} \\ 
-        \cline{2-4}
-        & 1  & `r bmr$resample_result(1)$prediction()$confusion[1,1]` & `r bmr$resample_result(1)$prediction()$confusion[1,2]` \\[1.5ex]
-        & 0  & `r bmr$resample_result(1)$prediction()$confusion[2,1]` & `r bmr$resample_result(1)$prediction()$confusion[2,2]` \\ 
-        \cline{2-4}
-        \end{tabular}
-    \end{minipage}%
-    \begin{minipage}{.5\linewidth}
-      \centering
-      \caption{Oversampled dataset}
-        \begin{tabular}{@{}cc|cc}
-          \multicolumn{1}{c}{} &\multicolumn{1}{c}{} &\multicolumn{2}{c}{Actual} \\ 
-          \multirow{4}{*}{\rotatebox[origin=cr]{90}{Predicted}} & \multicolumn{1}{c|}{} &            \multicolumn{1}{c}{1} & \multicolumn{1}{c}{0} \\ 
-          \cline{2-4}
-           & 1  & `r bmr$resample_result(8)$prediction()$confusion[1,1]` & `r bmr$resample_result(8)$prediction()$confusion[1,2]`  \\[1.5ex]
-        & 0  & `r bmr$resample_result(8)$prediction()$confusion[2,1]` & `r bmr$resample_result(8)$prediction()$confusion[2,2]`  \\           
-          \cline{2-4}
-        \end{tabular}
-    \end{minipage} 
-\end{table}
+the solution is to wrap it minipages making sure to use a % and leave no spaces to join the two tables.
 
+```{r two-column, results='asis', echo=FALSE, out.extra=''}
+panderOptions("table.style", "grid")
+cat("<h1>confusion matrices</h1>")
+names <- sapply(1:14, function(x) bmr$resample_result(x)$learner$id)
+cat("<table class='container'><tr>")
+cat("<td>")
+pander(lapply(setNames(1:7, names[1:7]), function(x) ftable(bmr$resample_result(x)$prediction()$confusion))) 
+cat("</td>")
+cat("<td>")
+pander(lapply(setNames(8:14, names[8:14]), function(x) ftable(bmr$resample_result(x)$prediction()$confusion)))
+cat("</td>")
+cat("</tr></table>")
+```
 
-\begin{table}[H]
-  \caption{Confusion matrices for LDA}
-    \begin{minipage}{.5\linewidth}
-      \caption{Original dataset}
-      \centering
-        \begin{tabular}{@{}cc|cc}
-        \multicolumn{1}{c}{} &\multicolumn{1}{c}{} &\multicolumn{2}{c}{Actual} \\ 
-        \multirow{4}{*}{\rotatebox[origin=cr]{90}{Predicted}} & \multicolumn{1}{c|}{} &            \multicolumn{1}{c}{1} & \multicolumn{1}{c}{0} \\ 
-        \cline{2-4}
-        & 1  & `r bmr$resample_result(2)$prediction()$confusion[1,1]` & `r bmr$resample_result(2)$prediction()$confusion[1,2]`  \\[1.5ex]
-        & 0  & `r bmr$resample_result(2)$prediction()$confusion[2,1]` & `r bmr$resample_result(2)$prediction()$confusion[2,2]`  \\ 
-        \cline{2-4}
-        \end{tabular}
-    \end{minipage}%
-    \begin{minipage}{.5\linewidth}
-      \centering
-      \caption{Oversampled dataset}
-        \begin{tabular}{@{}cc|cc}
-          \multicolumn{1}{c}{} &\multicolumn{1}{c}{} &\multicolumn{2}{c}{Actual} \\ 
-          \multirow{4}{*}{\rotatebox[origin=cr]{90}{Predicted}} & \multicolumn{1}{c|}{} &            \multicolumn{1}{c}{1} & \multicolumn{1}{c}{0} \\ 
-          \cline{2-4}
-           & 1  & `r bmr$resample_result(9)$prediction()$confusion[1,1]` & `r bmr$resample_result(9)$prediction()$confusion[1,2]`  \\[1.5ex]
-        & 0  & `r bmr$resample_result(9)$prediction()$confusion[2,1]` & `r bmr$resample_result(9)$prediction()$confusion[2,2]`  \\           
-          \cline{2-4}
-        \end{tabular}
-    \end{minipage} 
-\end{table}
-
-
-\begin{table}[H]
-  \caption{Confusion matrices for QDA}
-    \begin{minipage}{.5\linewidth}
-      \caption{Original dataset}
-      \centering
-        \begin{tabular}{@{}cc|cc}
-        \multicolumn{1}{c}{} &\multicolumn{1}{c}{} &\multicolumn{2}{c}{Actual} \\ 
-        \multirow{4}{*}{\rotatebox[origin=cr]{90}{Predicted}} & \multicolumn{1}{c|}{} &            \multicolumn{1}{c}{1} & \multicolumn{1}{c}{0} \\ 
-        \cline{2-4}
-        & 1  & `r bmr$resample_result(3)$prediction()$confusion[1,1]` & `r bmr$resample_result(3)$prediction()$confusion[1,2]`  \\[1.5ex]
-        & 0  & `r bmr$resample_result(3)$prediction()$confusion[2,1]` & `r bmr$resample_result(3)$prediction()$confusion[2,2]`  \\ 
-        \cline{2-4}
-        \end{tabular}
-    \end{minipage}%
-    \begin{minipage}{.5\linewidth}
-      \centering
-      \caption{Oversampled dataset}
-        \begin{tabular}{@{}cc|cc}
-          \multicolumn{1}{c}{} &\multicolumn{1}{c}{} &\multicolumn{2}{c}{Actual} \\ 
-          \multirow{4}{*}{\rotatebox[origin=cr]{90}{Predicted}} & \multicolumn{1}{c|}{} &            \multicolumn{1}{c}{1} & \multicolumn{1}{c}{0} \\ 
-          \cline{2-4}
-           & 1  & `r bmr$resample_result(10)$prediction()$confusion[1,1]` & `r bmr$resample_result(10)$prediction()$confusion[1,2]`  \\[1.5ex]
-        & 0  & `r bmr$resample_result(10)$prediction()$confusion[2,1]` & `r bmr$resample_result(10)$prediction()$confusion[2,2]`  \\           
-          \cline{2-4}
-        \end{tabular}
-    \end{minipage} 
-\end{table}
-
-
-\begin{table}[H]
-  \caption{Confusion matrices for naive Bayes}
-    \begin{minipage}{.5\linewidth}
-      \caption{Original dataset}
-      \centering
-        \begin{tabular}{@{}cc|cc}
-        \multicolumn{1}{c}{} &\multicolumn{1}{c}{} &\multicolumn{2}{c}{Actual} \\ 
-        \multirow{4}{*}{\rotatebox[origin=cr]{90}{Predicted}} & \multicolumn{1}{c|}{} &            \multicolumn{1}{c}{1} & \multicolumn{1}{c}{0} \\ 
-        \cline{2-4}
-        & 1  & `r bmr$resample_result(4)$prediction()$confusion[1,1]` & `r bmr$resample_result(4)$prediction()$confusion[1,2]`  \\[1.5ex]
-        & 0  & `r bmr$resample_result(4)$prediction()$confusion[2,1]` & `r bmr$resample_result(4)$prediction()$confusion[2,2]`  \\ 
-        \cline{2-4}
-        \end{tabular}
-    \end{minipage}%
-    \begin{minipage}{.5\linewidth}
-      \centering
-      \caption{Oversampled dataset}
-        \begin{tabular}{@{}cc|cc}
-          \multicolumn{1}{c}{} &\multicolumn{1}{c}{} &\multicolumn{2}{c}{Actual} \\ 
-          \multirow{4}{*}{\rotatebox[origin=cr]{90}{Predicted}} & \multicolumn{1}{c|}{} &            \multicolumn{1}{c}{1} & \multicolumn{1}{c}{0} \\ 
-          \cline{2-4}
-           & 1  & `r bmr$resample_result(11)$prediction()$confusion[1,1]` & `r bmr$resample_result(11)$prediction()$confusion[1,2]`  \\[1.5ex]
-        & 0  & `r bmr$resample_result(11)$prediction()$confusion[2,1]` & `r bmr$resample_result(11)$prediction()$confusion[2,2]`  \\           
-          \cline{2-4}
-        \end{tabular}
-    \end{minipage} 
-\end{table}
-
-
-\begin{table}[H]
-  \caption{Confusion matrices for k-NN}
-    \begin{minipage}{.5\linewidth}
-      \caption{Original dataset}
-      \centering
-        \begin{tabular}{@{}cc|cc}
-        \multicolumn{1}{c}{} &\multicolumn{1}{c}{} &\multicolumn{2}{c}{Actual} \\ 
-        \multirow{4}{*}{\rotatebox[origin=cr]{90}{Predicted}} & \multicolumn{1}{c|}{} &            \multicolumn{1}{c}{1} & \multicolumn{1}{c}{0} \\ 
-        \cline{2-4}
-        & 1  & `r bmr$resample_result(5)$prediction()$confusion[1,1]` & `r bmr$resample_result(5)$prediction()$confusion[1,2]`  \\[1.5ex]
-        & 0  & `r bmr$resample_result(5)$prediction()$confusion[2,1]` & `r bmr$resample_result(5)$prediction()$confusion[2,2]`  \\ 
-        \cline{2-4}
-        \end{tabular}
-    \end{minipage}%
-    \begin{minipage}{.5\linewidth}
-      \centering
-      \caption{Oversampled dataset}
-        \begin{tabular}{@{}cc|cc}
-          \multicolumn{1}{c}{} &\multicolumn{1}{c}{} &\multicolumn{2}{c}{Actual} \\ 
-          \multirow{4}{*}{\rotatebox[origin=cr]{90}{Predicted}} & \multicolumn{1}{c|}{} &            \multicolumn{1}{c}{1} & \multicolumn{1}{c}{0} \\ 
-          \cline{2-4}
-           & 1  & `r bmr$resample_result(12)$prediction()$confusion[1,1]` & `r bmr$resample_result(12)$prediction()$confusion[1,2]`  \\[1.5ex]
-        & 0  & `r bmr$resample_result(12)$prediction()$confusion[2,1]` & `r bmr$resample_result(12)$prediction()$confusion[2,2]`  \\           
-          \cline{2-4}
-        \end{tabular}
-    \end{minipage} 
-\end{table}
-
-
-\begin{table}[H]
-  \caption{Confusion matrices for CART}
-    \begin{minipage}{.5\linewidth}
-      \caption{Original dataset}
-      \centering
-        \begin{tabular}{@{}cc|cc}
-        \multicolumn{1}{c}{} &\multicolumn{1}{c}{} &\multicolumn{2}{c}{Actual} \\ 
-        \multirow{4}{*}{\rotatebox[origin=cr]{90}{Predicted}} & \multicolumn{1}{c|}{} &            \multicolumn{1}{c}{1} & \multicolumn{1}{c}{0} \\ 
-        \cline{2-4}
-        & 1  & `r bmr$resample_result(6)$prediction()$confusion[1,1]` & `r bmr$resample_result(6)$prediction()$confusion[1,2]`  \\[1.5ex]
-        & 0  & `r bmr$resample_result(6)$prediction()$confusion[2,1]` & `r bmr$resample_result(6)$prediction()$confusion[2,2]`  \\ 
-        \cline{2-4}
-        \end{tabular}
-    \end{minipage}%
-    \begin{minipage}{.5\linewidth}
-      \centering
-      \caption{Oversampled dataset}
-        \begin{tabular}{@{}cc|cc}
-          \multicolumn{1}{c}{} &\multicolumn{1}{c}{} &\multicolumn{2}{c}{Actual} \\ 
-          \multirow{4}{*}{\rotatebox[origin=cr]{90}{Predicted}} & \multicolumn{1}{c|}{} &            \multicolumn{1}{c}{1} & \multicolumn{1}{c}{0} \\ 
-          \cline{2-4}
-           & 1  & `r bmr$resample_result(13)$prediction()$confusion[1,1]` & `r bmr$resample_result(13)$prediction()$confusion[1,2]`  \\[1.5ex]
-        & 0  & `r bmr$resample_result(13)$prediction()$confusion[2,1]` & `r bmr$resample_result(13)$prediction()$confusion[2,2]`  \\           
-          \cline{2-4}
-        \end{tabular}
-    \end{minipage} 
-\end{table}
-
-
-\begin{table}[H]
-  \caption{Confusion matrices for random forest}
-    \begin{minipage}{.5\linewidth}
-      \caption{Original dataset}
-      \centering
-        \begin{tabular}{@{}cc|cc}
-        \multicolumn{1}{c}{} &\multicolumn{1}{c}{} &\multicolumn{2}{c}{Actual} \\ 
-        \multirow{4}{*}{\rotatebox[origin=cr]{90}{Predicted}} & \multicolumn{1}{c|}{} &            \multicolumn{1}{c}{1} & \multicolumn{1}{c}{0} \\ 
-        \cline{2-4}
-        & 1  & `r bmr$resample_result(7)$prediction()$confusion[1,1]` & `r bmr$resample_result(7)$prediction()$confusion[1,2]`  \\[1.5ex]
-        & 0  & `r bmr$resample_result(7)$prediction()$confusion[2,1]` & `r bmr$resample_result(7)$prediction()$confusion[2,2]`  \\ 
-        \cline{2-4}
-        \end{tabular}
-    \end{minipage}%
-    \begin{minipage}{.5\linewidth}
-      \centering
-      \caption{Oversampled dataset}
-        \begin{tabular}{@{}cc|cc}
-          \multicolumn{1}{c}{} &\multicolumn{1}{c}{} &\multicolumn{2}{c}{Actual} \\ 
-          \multirow{4}{*}{\rotatebox[origin=cr]{90}{Predicted}} & \multicolumn{1}{c|}{} &            \multicolumn{1}{c}{1} & \multicolumn{1}{c}{0} \\ 
-          \cline{2-4}
-           & 1  & `r bmr$resample_result(14)$prediction()$confusion[1,1]` & `r bmr$resample_result(14)$prediction()$confusion[1,2]`  \\[1.5ex]
-        & 0  & `r bmr$resample_result(14)$prediction()$confusion[2,1]` & `r bmr$resample_result(14)$prediction()$confusion[2,2]`  \\           
-          \cline{2-4}
-        \end{tabular}
-    \end{minipage} 
-\end{table}
 
 The confusion matrices confirm the above conclusions: without oversampling, all learners (except QDA and naive Bayes) display very high numbers of true positives, but also of false positives, implying high sensitivity and low specificity.
 Also note that a trivial model classifying all individuals as "1" would cause fewer misclassifications than all of our models except random forest, casting doubt on the predictive power of the features in our dataset.  
@@ -934,5 +725,3 @@ Regarding hyperparameter tuning, different hyperparameters with larger hyperpara
 Furthermore, tuning could also be applied to some of those learners that we labeled as baseline learners, though to a lesser extent.  
 Finally, we limited ourselves to those classifiers discussed in detail in the course.
 More classifiers exist, however; in particular, gradient boosting and support vector machines could additionally be applied to this task and potentially yield better results.
-
-# References
