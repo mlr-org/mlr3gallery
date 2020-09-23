@@ -1578,13 +1578,13 @@ res = resample(task = task_train, lrn_rpart, cv3)
 res$score(msr(&quot;regr.rmse&quot;))</code></pre>
 <pre><code>
              task task_id                learner learner_id         resampling
-1: &lt;TaskRegr[41]&gt;   sales &lt;LearnerRegrRpart[32]&gt; regr.rpart &lt;ResamplingCV[19]&gt;
-2: &lt;TaskRegr[41]&gt;   sales &lt;LearnerRegrRpart[32]&gt; regr.rpart &lt;ResamplingCV[19]&gt;
-3: &lt;TaskRegr[41]&gt;   sales &lt;LearnerRegrRpart[32]&gt; regr.rpart &lt;ResamplingCV[19]&gt;
-   resampling_id iteration prediction regr.rmse
-1:            cv         1  &lt;list[1]&gt;  213.1098
-2:            cv         2  &lt;list[1]&gt;  222.7076
-3:            cv         3  &lt;list[1]&gt;  206.1984</code></pre>
+1: &lt;TaskRegr[42]&gt;   sales &lt;LearnerRegrRpart[32]&gt; regr.rpart &lt;ResamplingCV[19]&gt;
+2: &lt;TaskRegr[42]&gt;   sales &lt;LearnerRegrRpart[32]&gt; regr.rpart &lt;ResamplingCV[19]&gt;
+3: &lt;TaskRegr[42]&gt;   sales &lt;LearnerRegrRpart[32]&gt; regr.rpart &lt;ResamplingCV[19]&gt;
+   resampling_id iteration           prediction regr.rmse
+1:            cv         1 &lt;PredictionRegr[18]&gt;  213.1098
+2:            cv         2 &lt;PredictionRegr[18]&gt;  222.7076
+3:            cv         3 &lt;PredictionRegr[18]&gt;  206.1984</code></pre>
 <pre class="r"><code>
 sprintf(&quot;RMSE of the simple rpart: %s&quot;, round(sqrt(res$aggregate()), 2))</code></pre>
 <pre><code>
@@ -1600,13 +1600,13 @@ res = resample(task = task_train, lrn_ranger, cv3)
 res$score(msr(&quot;regr.rmse&quot;))</code></pre>
 <pre><code>
              task task_id                 learner  learner_id
-1: &lt;TaskRegr[41]&gt;   sales &lt;LearnerRegrRanger[32]&gt; regr.ranger
-2: &lt;TaskRegr[41]&gt;   sales &lt;LearnerRegrRanger[32]&gt; regr.ranger
-3: &lt;TaskRegr[41]&gt;   sales &lt;LearnerRegrRanger[32]&gt; regr.ranger
-           resampling resampling_id iteration prediction regr.rmse
-1: &lt;ResamplingCV[19]&gt;            cv         1  &lt;list[1]&gt;  137.9911
-2: &lt;ResamplingCV[19]&gt;            cv         2  &lt;list[1]&gt;  140.3811
-3: &lt;ResamplingCV[19]&gt;            cv         3  &lt;list[1]&gt;  156.6670</code></pre>
+1: &lt;TaskRegr[42]&gt;   sales &lt;LearnerRegrRanger[32]&gt; regr.ranger
+2: &lt;TaskRegr[42]&gt;   sales &lt;LearnerRegrRanger[32]&gt; regr.ranger
+3: &lt;TaskRegr[42]&gt;   sales &lt;LearnerRegrRanger[32]&gt; regr.ranger
+           resampling resampling_id iteration           prediction regr.rmse
+1: &lt;ResamplingCV[19]&gt;            cv         1 &lt;PredictionRegr[18]&gt;  137.9911
+2: &lt;ResamplingCV[19]&gt;            cv         2 &lt;PredictionRegr[18]&gt;  140.3811
+3: &lt;ResamplingCV[19]&gt;            cv         3 &lt;PredictionRegr[18]&gt;  156.6670</code></pre>
 <pre class="r"><code>
 sprintf(&quot;RMSE of the simple ranger: %s&quot;, round(sqrt(res$aggregate()), 2))</code></pre>
 <pre><code>
@@ -1650,13 +1650,13 @@ at = AutoTuner$new(lrn_xgb, rsmp(&quot;holdout&quot;), msr(&quot;regr.rmse&quot;
 res$score(msr(&quot;regr.rmse&quot;))</code></pre>
 <pre><code>
              task task_id         learner         learner_id         resampling
-1: &lt;TaskRegr[41]&gt;   sales &lt;AutoTuner[37]&gt; regr.xgboost.tuned &lt;ResamplingCV[19]&gt;
-2: &lt;TaskRegr[41]&gt;   sales &lt;AutoTuner[37]&gt; regr.xgboost.tuned &lt;ResamplingCV[19]&gt;
-3: &lt;TaskRegr[41]&gt;   sales &lt;AutoTuner[37]&gt; regr.xgboost.tuned &lt;ResamplingCV[19]&gt;
-   resampling_id iteration prediction regr.rmse
-1:            cv         1  &lt;list[1]&gt;  146.5375
-2:            cv         2  &lt;list[1]&gt;  142.9853
-3:            cv         3  &lt;list[1]&gt;  141.8297</code></pre>
+1: &lt;TaskRegr[42]&gt;   sales &lt;AutoTuner[37]&gt; regr.xgboost.tuned &lt;ResamplingCV[19]&gt;
+2: &lt;TaskRegr[42]&gt;   sales &lt;AutoTuner[37]&gt; regr.xgboost.tuned &lt;ResamplingCV[19]&gt;
+3: &lt;TaskRegr[42]&gt;   sales &lt;AutoTuner[37]&gt; regr.xgboost.tuned &lt;ResamplingCV[19]&gt;
+   resampling_id iteration           prediction regr.rmse
+1:            cv         1 &lt;PredictionRegr[18]&gt;  146.5375
+2:            cv         2 &lt;PredictionRegr[18]&gt;  142.9853
+3:            cv         3 &lt;PredictionRegr[18]&gt;  141.8297</code></pre>
 <pre class="r"><code>
 sprintf(&quot;RMSE of the tuned xgboost: %s&quot;, round(sqrt(res$aggregate()), 2))</code></pre>
 <pre><code>
@@ -1706,13 +1706,13 @@ res = resample(task = task_train, lrn_impact, cv3)
 res$score(msr(&quot;regr.rmse&quot;))</code></pre>
 <pre><code>
              task task_id            learner               learner_id
-1: &lt;TaskRegr[41]&gt;   sales &lt;GraphLearner[31]&gt; encodeimpact.regr.ranger
-2: &lt;TaskRegr[41]&gt;   sales &lt;GraphLearner[31]&gt; encodeimpact.regr.ranger
-3: &lt;TaskRegr[41]&gt;   sales &lt;GraphLearner[31]&gt; encodeimpact.regr.ranger
-           resampling resampling_id iteration prediction regr.rmse
-1: &lt;ResamplingCV[19]&gt;            cv         1  &lt;list[1]&gt;  123.5802
-2: &lt;ResamplingCV[19]&gt;            cv         2  &lt;list[1]&gt;  143.0181
-3: &lt;ResamplingCV[19]&gt;            cv         3  &lt;list[1]&gt;  127.6488</code></pre>
+1: &lt;TaskRegr[42]&gt;   sales &lt;GraphLearner[31]&gt; encodeimpact.regr.ranger
+2: &lt;TaskRegr[42]&gt;   sales &lt;GraphLearner[31]&gt; encodeimpact.regr.ranger
+3: &lt;TaskRegr[42]&gt;   sales &lt;GraphLearner[31]&gt; encodeimpact.regr.ranger
+           resampling resampling_id iteration           prediction regr.rmse
+1: &lt;ResamplingCV[19]&gt;            cv         1 &lt;PredictionRegr[18]&gt;  123.5802
+2: &lt;ResamplingCV[19]&gt;            cv         2 &lt;PredictionRegr[18]&gt;  143.0181
+3: &lt;ResamplingCV[19]&gt;            cv         3 &lt;PredictionRegr[18]&gt;  127.6488</code></pre>
 <pre class="r"><code>
 sprintf(&quot;RMSE of ranger with med_price: %s&quot;, round(sqrt(res$aggregate()), 2))</code></pre>
 <pre><code>
@@ -1737,13 +1737,13 @@ res = resample(task = task_train, lrn_filter, cv3)
 res$score(msr(&quot;regr.rmse&quot;))</code></pre>
 <pre><code>
              task task_id            learner       learner_id
-1: &lt;TaskRegr[41]&gt;   sales &lt;GraphLearner[31]&gt; mrmr.regr.ranger
-2: &lt;TaskRegr[41]&gt;   sales &lt;GraphLearner[31]&gt; mrmr.regr.ranger
-3: &lt;TaskRegr[41]&gt;   sales &lt;GraphLearner[31]&gt; mrmr.regr.ranger
-           resampling resampling_id iteration prediction regr.rmse
-1: &lt;ResamplingCV[19]&gt;            cv         1  &lt;list[1]&gt;  137.7110
-2: &lt;ResamplingCV[19]&gt;            cv         2  &lt;list[1]&gt;  181.7631
-3: &lt;ResamplingCV[19]&gt;            cv         3  &lt;list[1]&gt;  154.0615</code></pre>
+1: &lt;TaskRegr[42]&gt;   sales &lt;GraphLearner[31]&gt; mrmr.regr.ranger
+2: &lt;TaskRegr[42]&gt;   sales &lt;GraphLearner[31]&gt; mrmr.regr.ranger
+3: &lt;TaskRegr[42]&gt;   sales &lt;GraphLearner[31]&gt; mrmr.regr.ranger
+           resampling resampling_id iteration           prediction regr.rmse
+1: &lt;ResamplingCV[19]&gt;            cv         1 &lt;PredictionRegr[18]&gt;  137.7110
+2: &lt;ResamplingCV[19]&gt;            cv         2 &lt;PredictionRegr[18]&gt;  181.7631
+3: &lt;ResamplingCV[19]&gt;            cv         3 &lt;PredictionRegr[18]&gt;  154.0615</code></pre>
 <pre class="r"><code>
 sprintf(&quot;RMSE of ranger with filtering: %s&quot;, round(sqrt(res$aggregate()), 2))</code></pre>
 <pre><code>
