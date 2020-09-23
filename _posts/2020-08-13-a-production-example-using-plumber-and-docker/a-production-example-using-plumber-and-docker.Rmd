@@ -1,0 +1,253 @@
+---
+title: "A production example using plumber and Docker"
+categories:
+  - mlr3pipelines
+  - production
+author:
+  - name: Lennart Schneider
+date: 08-13-2020
+description: |
+  We write a REST API using plumber and deploy it using Docker.
+output:
+  distill::distill_article:
+    self_contained: false
+    css: ../../custom.css
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  R.options = list(width = 80)
+)
+library(mlr3book)
+```
+
+Production with R has come a long way.
+In this tutorial, we give a brief example on how to write a REST API and deploy it (relying on the `mlr3` ecosystem for the actual training and predicting).
+Most of this tutorial was inspired by other excellent posts and vignettes:
+
+* [R can API and So Can You!](https://medium.com/tmobile-tech/r-can-api-c184951a24a3)
+* [Using docker to deploy an R plumber API](https://medium.com/tmobile-tech/using-docker-to-deploy-an-r-plumber-api-863ccf91516d)
+* `AzureContainer`'s vignette: `vignette("vig01_plumber_deploy", package = "AzureContainers")`
+
+All files presented in this tutorial are available [here](https://github.com/mlr-org/mlr3gallery/_posts/2020-08-13-a-production-example-using-plumber-and-docker/mlr3_api).
+
+### Modeling Background
+
+```{r}
+library(data.table)
+library(mlr3)
+library(mlr3pipelines)
+```
+
+We will use a subset of the `r ref("mlr_tasks_boston_housing", "boston_housing")` `r ref("Task", "Task")`.
+Our goal is to predict the median value of owner-occupied homes in USD 1000's (target `medv`), using the features `crim`, `tax` and `town` (just to have `factor`, `integer`, and `numeric` feature types):
+
+```{r}
+data = tsk("boston_housing")$data()
+data = data[, c("medv", "crim", "tax", "town")]
+```
+
+```{r}
+task = TaskRegr$new("boston", backend = data, target = "medv")
+```
+
+Let's create a toy pipeline:
+
+Regarding modeling, we will keep it very simple and use the `r ref("mlr_learners_regr.rpart", "rpart learner")`. Missing numerical features (which could happen during prediction) will be imputed by their median via `r ref("PipeOpImputeMedian", "PipeOpImputeMedian")`, while missing factorial features will be imputed using a new level via `r ref("PipeOpImputeOOR", "PipeOpImputeOOR")`. As `PipeOpImputeOOR` will introduce a new `level`, `".MISSING"` to impute missing values, we also use `r ref("PipeOpFixFactors", "PipeOpFixFactors")`:
+
+```{r}
+g = po("imputemedian") %>>%
+  po("imputeoor") %>>%
+  po("fixfactors") %>>%
+  lrn("regr.rpart")
+```
+
+We wrap this `r ref("Graph")` in a `r ref("GraphLearner")` and can train on the `Task`:
+
+```{r}
+gl = GraphLearner$new(g)
+gl$train(task)
+```
+
+We can inspect the trained pipeline looking at:
+
+```{r, eval=FALSE}
+gl$model
+```
+
+Furthermore, we can save the trained pipeline, i.e., as `"gl.rds"`:
+
+```{r, eval=FALSE}
+saveRDS(gl, "gl.rds")
+```
+
+We will also store some information regarding the features, i.e., the feature names, types and levels (you will later see, why we need to do this):
+
+```{r, eval=FALSE}
+feature_info = list(
+  feature_names = task$feature_names,
+  feature_types = task$feature_types,
+  levels = task$levels()
+)
+saveRDS(feature_info, "feature_info.rds")
+```
+
+Putting everything in a file, `train_gl.R` looks like the following, which we can then source before moving on:
+
+```{r, eval=FALSE,code=readLines("mlr3_api/train_gl.R")}
+```
+
+Our goal of our REST (representational state transfer) API (application programming interface) will be to predict the `medv` of a new observation, i.e., it should do something like the following:
+
+```{r}
+newdata = data.table(crim = 3.14, tax = 691, town = "Newton")
+gl$predict_newdata(newdata)
+```
+
+However, in our REST API, the `newdata` will be received at an endpoint that accepts a particular input. In the next section we will use `plumber` to set up our web service.
+
+### Using plumber to set up our REST API
+
+The package `r cran_pkg("plumber")` allows us to create a REST API by simply commenting existing R code. `plumber` makes use of these comments to define the web service. Running `plumber::plumb` on the commented R file then results in a runnable web service that other systems can interact with over a network.
+
+As an endpoint for predicting the `medv`, we will use a `POST` request. This will allow us to enclose data in the body of the request message. More precisely, we assume that the data will be provided in the JSON format.
+
+When a `POST` request containing the data (in JSON format) is received our code must then:
+
+1. convert the input (in JSON format) to a `data.table` with all feature columns matching their feature type
+
+2. predict the `medv` based on the input using our trained pipeline and provide an output that can be understood by the client
+
+To make sure that all features match their feature type, we will later use the following function stored in the R file `fix_feature_types.R`:
+
+```{r, eval=FALSE,code=readLines("mlr3_api/fix_feature_types.R")}
+```
+
+`fix_feature_types()` can later be applied to the `newdata`, and will make sure, that all incoming features are converted to their expected feature type as in the original `Task` we used for training our pipeline (and this is the reason, why we stored the information about the features earlier).
+Note that in our tutorial we only have `factor`, `integer`, and `numeric` features, but `fix_feature_types()` should also work for all other supported `feature_types` listed in `mlr_reflections$task_feature_types`. However, it may need some customization depending on your own production environment to make the conversions meaningful.
+
+The following R file, `predict_gl.R` loads our trained pipepline and feature information and provides an endpoint for a `POST` request, `"/predict_medv"`. The incoming data then is converted using `jsonlite::fromJSON`. We expect the incoming data to either be JSON objects in an array or nested JSON objects and therefore we bind the converted vectors row-wise to a `data.table` using  `data.table::rbindlist`. We then convert all features to their expected `feature_types` (using the `fix_feature_types()` function as defined above) and can finally predict the `medv` using our trained pipeline. As no default serialization from `R6` objects to JSON objects exists (yet), we wrap the `r ref("Prediction", "Prediction")` in a `data.table` (of course we could also only return the numeric prediction values):
+
+```{r, eval=FALSE,code=readLines("mlr3_api/predict_gl.R")}
+```
+
+Note that the only difference to a regular R file is the comment
+
+```{r, eval=FALSE}
+#* @post /predict_medv`
+```
+
+telling `plumber` to construct the endpoint `"/predict_medv"` for a `POST` request.
+
+We can then run `plumber::plumb`. The following code sets up the web service locally on your personal machine at port 1030 (we use such a high number because some systems require administrator rights to allow processes to listen to lower ports):
+
+```{r, eval=FALSE}
+library(plumber)
+r = plumb("predict_gl.R")
+r$run(port = 1030, host = "0.0.0.0")
+```
+
+Congratulations, your first REST API is running on your local machine. We can test it by providing some data, using `curl` via the command line:
+
+```{r, engine="bash",eval=FALSE}
+curl --data '[{"crim":3.14, "tax":691, "town":"Newton"}]' "http://127.0.0.1:1030/predict_medv"
+```
+
+This should return the predicted `medv`:
+
+```{r, engine="bash",eval=FALSE}
+[{"row_id":1,"response":"32.2329"}]
+```
+
+Alternatively, we can also use the `httr::POST` function within R:
+
+```{r, eval=FALSE}
+newdata = '[{"crim":3.14, "tax":691, "town":"Newton"}]'
+resp = httr::POST(url = "http://127.0.0.1:1030/predict_medv",
+  body = newdata, encode = "json")
+httr::content(resp)
+```
+
+We can further play around a bit more and provide more than a single new observation and also check whether our feature type conversion and missing value imputation works:
+
+```{r, eval=FALSE}
+newdata = '[
+  {"crim":3.14, "tax":691, "town":"Newton"},
+  {"crim":"not_a_number", "tax":3.14, "town":"Munich"},
+  {"tax":"not_a_number", "town":31, "crim":99}
+]'
+resp = httr::POST(url = "http://127.0.0.1:1030/predict_medv",
+  body = newdata, encode = "json")
+httr::content(resp)
+```
+
+Note that you can also use `jsonlite::toJSON` to convert a `data.frame` to JSON data for your toy examples here.
+
+In the following final section we want to use `Docker` to run a virtual machine as a container (an instance of a snapshot of a machine at a moment in time).
+
+### Using Docker to Deploy our REST API
+
+A [`Docker`](https://www.docker.com/) container image is a lightweight, standalone, executable package of software that includes everything needed to run an application. Suppose we want to run our REST API on an Amazon Web Service or Microsoft's Azure Cloud. Then we can use a `Docker` container to easily set up our web service without going through the hassle of configuring manually our hosting instance.
+
+We are going to need two things: An image and a container. An image defines the OS and software while the container is the actual running instance of the image. To build a `Docker` image we have to specify a `Dockerfile`. Note that it is sensible to set up the whole project in its own directory, e.g., `~/mlr3_api`.
+
+Every `Dockerfile` starts with a `FROM` statement describing the image we are building our image from. In our case we want an R based image that ideally already has `plumber` and its dependencies installed. Luckily, the `trestletech/plumber` image exists:
+
+```{r, engine="bash",eval=FALSE}
+FROM trestletech/plumber
+```
+
+We then install the R packages needed to set up our REST API (note that we can skip `jsonlite`, because `plumber` already depends on it):
+
+```{r, engine="bash",eval=FALSE}
+RUN R -e 'install.packages(c("data.table", "mlr3", "mlr3pipelines"))'
+```
+
+Next, we copy our trained pipeline (`gl.rds`), our stored feature information (`feature_info.rds`), our R file to convert features, (`fix_feature_types.R`) and our R file to predict (`predict_gl.R`) to a new directory `/data` and set this as the working directory:
+
+```{r, engine="bash",eval=FALSE}
+RUN mkdir /data
+COPY gl.rds /data
+COPY feature_info.rds /data
+COPY fix_feature_types.R /data
+COPY predict_gl.R /data
+WORKDIR /data
+```
+
+Finally, we listen on port 1030 and start the server (this is analogously done as manually calling `plumber::plumb` on the `predict_gl.R` file and running it):
+
+```{r, engine="bash",eval=FALSE}
+EXPOSE 1030
+ENTRYPOINT ["R", "-e", \
+    "r = plumber::plumb('/data/predict_gl.R'); r$run(port = 1030, host = '0.0.0.0')"]
+```
+
+The complete `Dockerfile` looks like the following:
+
+```{r, engine="bash",eval=FALSE,code=readLines("mlr3_api/Dockerfile")}
+```
+
+To build the image we open a terminal in the `mlr3_api` directory and run:
+
+```{r, engine="bash",eval=FALSE}
+docker build -t mlr3-plumber-demo .
+```
+
+This may take quite some time.
+
+To finally run the container, simply use:
+
+```{r, engine="bash",eval=FALSE}
+docker run --rm -p 1030:1030 mlr3-plumber-demo
+```
+
+You can then proceed to provide some data via `curl` or `httr::POST` (to the same local address, because the `Docker` container is still running on your local machine).
+
+To stop all running containers use:
+
+```{r, engine="bash",eval=FALSE}
+docker stop $(docker ps -a -q)
+```
+
+Finally, you can proceed to deploy your container to an Amazon Web Service or an Azure Cloud. For the latter, the package `r cran_pkg("AzureContainers")` is especially helpful. If you do plan to do this note that the `plumber` service above is exposed over HTTP, and there is no authentication layer making it insecure. You may think about adding a layer of authentification and restricting the service to HTTPS.
