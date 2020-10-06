@@ -1402,7 +1402,7 @@ inst = TuningInstanceSingleCrit$new(
 tnr(&quot;grid_search&quot;)$optimize(inst)</code></pre>
 <pre><code>
       cutoff learner_param_vals  x_domain classif.ce
-1: 0.8888889          &lt;list[2]&gt; &lt;list[1]&gt;       0.04</code></pre>
+1: 0.8888889          &lt;list[2]&gt; &lt;list[1]&gt; 0.04666667</code></pre>
 </div>
 <p>In order to demonstrate that different cutoff values result in different features being selected, we can run the following to inspect the trained models. Note this inspects only the trained models of the first CV fold of each evaluated model. The features being excluded depends on the training data seen by the pipeline and may be different in different folds, even at the same cutoff value.</p>
 <div class="layout-chunk" data-layout="l-body">
@@ -1419,16 +1419,16 @@ inst$archive$data(&quot;x_domain&quot;)[
   ))]</code></pre>
 <pre><code>
        cutoff classif.ce featurenames
- 1: 0.0000000 0.30666667             
- 2: 0.1111111 0.31333333             
- 3: 0.2222222 0.29333333             
- 4: 0.3333333 0.29333333             
- 5: 0.4444444 0.29333333             
- 6: 0.5555556 0.29333333             
- 7: 0.6666667 0.29333333             
- 8: 0.7777778 0.29333333             
- 9: 0.8888889 0.04000000             
-10: 1.0000000 0.07333333             </code></pre>
+ 1: 0.0000000 0.29333333             
+ 2: 0.1111111 0.29333333             
+ 3: 0.2222222 0.28666667             
+ 4: 0.3333333 0.28666667             
+ 5: 0.4444444 0.28666667             
+ 6: 0.5555556 0.28666667             
+ 7: 0.6666667 0.28666667             
+ 8: 0.7777778 0.28666667             
+ 9: 0.8888889 0.04666667             
+10: 1.0000000 0.06666667             </code></pre>
 </div>
 <p>Voila, we created our own <a href="https://mlr3pipelines.mlr-org.com/reference/PipeOp.html"><code>PipeOp</code></a>, that uses very advanced knowledge of <a href="https://mlr3pipelines.mlr-org.com">mlr3pipelines</a> and <a href="https://paradox.mlr-org.com">paradox</a> in only few lines of code.</p>
 <!--radix_placeholder_article_footer-->

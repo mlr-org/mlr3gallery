@@ -1396,9 +1396,9 @@ bg = benchmark_grid(task, learns, cv2)
 b = benchmark(bg)
 b$aggregate(measures = msr(&quot;classif.ce&quot;))</code></pre>
 <pre><code>
-        resample_result nr task_id learner_id resampling_id iters classif.ce
-1: &lt;ResampleResult[19]&gt;  1   sonar        xgb            cv     5  0.2743322
-2: &lt;ResampleResult[19]&gt;  2   sonar         rf            cv     5  0.1728223</code></pre>
+   nr      resample_result task_id learner_id resampling_id iters classif.ce
+1:  1 &lt;ResampleResult[21]&gt;   sonar        xgb            cv     5  0.2743322
+2:  2 &lt;ResampleResult[21]&gt;   sonar         rf            cv     5  0.1728223</code></pre>
 </div>
 <h3 id="the-pipelines-approach">The Pipelines Approach</h3>
 <p>Ok, why would we ever want to change the simple approach above - and use pipelines / tuning for this? Three reasons:</p>
@@ -1496,21 +1496,16 @@ tuner = tnr(&quot;grid_search&quot;)
 tuner$optimize(instance)</code></pre>
 <pre><code>
    branch.selection learner_param_vals  x_domain classif.ce
-1:               rf          &lt;list[3]&gt; &lt;list[1]&gt;  0.2067308</code></pre>
+1:               rf          &lt;list[3]&gt; &lt;list[1]&gt;  0.2355769</code></pre>
 <pre class="r"><code>
 instance$archive$data(&quot;x_domain&quot;)</code></pre>
 <pre><code>
    branch.selection classif.ce                                uhash
-1:              xgb  0.2932692 769de6ae-d543-42f9-b32b-6ddcdbcaea1c
-2:               rf  0.2067308 bc844615-1856-48ce-9a81-69c910158ede
+1:              xgb  0.3413462 1de2f5c0-1f53-49e4-8d4c-b739b0ba5adc
+2:               rf  0.2355769 2a5776af-edd8-4158-b756-b889a6dd72b7
              timestamp batch_nr x_domain_branch.selection
-1: 2020-09-21 04:40:35        1                       xgb
-2: 2020-09-21 04:40:36        2                        rf</code></pre>
-<pre class="r"><code>
-instance$result</code></pre>
-<pre><code>
-   branch.selection learner_param_vals  x_domain classif.ce
-1:               rf          &lt;list[3]&gt; &lt;list[1]&gt;  0.2067308</code></pre>
+1: 2020-10-06 11:25:09        1                       xgb
+2: 2020-10-06 11:25:10        2                        rf</code></pre>
 </div>
 <p>But: Via this approach we can now get unbiased performance results via nested resampling and using the <a href="https://mlr3tuning.mlr-org.com/reference/AutoTuner.html"><code>AutoTuner</code></a> (which would make much more sense if we would select from 100 models and not 2).</p>
 <div class="layout-chunk" data-layout="l-body">
@@ -1525,20 +1520,20 @@ at = AutoTuner$new(
 )
 rr = resample(task, at, cv2, store_models = TRUE)
 # access 1st inner tuning result
-ll = rr$data$state[[1]]$model$tuning_instance
+ll = rr$learners[[1]]$model$tuning_instance
 ll$result</code></pre>
 <pre><code>
    branch.selection learner_param_vals  x_domain classif.ce
-1:               rf          &lt;list[3]&gt; &lt;list[1]&gt;   0.253012</code></pre>
+1:               rf          &lt;list[3]&gt; &lt;list[1]&gt;   0.246988</code></pre>
 <pre class="r"><code>
 ll$archive$data()</code></pre>
 <pre><code>
    branch.selection classif.ce                                uhash  x_domain
-1:              xgb  0.3253012 af993056-dc61-4b1e-8116-eee365b42acb &lt;list[1]&gt;
-2:               rf  0.2530120 fe617833-2829-41e1-b1a9-88234347d3e7 &lt;list[1]&gt;
+1:              xgb  0.3253012 4c6f5cd1-baf4-49b4-a41b-bb8c59ac65e4 &lt;list[1]&gt;
+2:               rf  0.2469880 59f700e4-bbb7-430c-bb36-3209a2fd3bfc &lt;list[1]&gt;
              timestamp batch_nr
-1: 2020-09-21 04:40:37        1
-2: 2020-09-21 04:40:38        2</code></pre>
+1: 2020-10-06 11:25:16        1
+2: 2020-10-06 11:25:17        2</code></pre>
 </div>
 <h2 id="model-selection-and-tuning-with-pipelines">Model-Selection and Tuning with Pipelines</h2>
 <p>Now let’s select from our given set of models and tune their hyperparameters. One way to do this is to define a search space for each individual learner, wrap them all with the <code>AutoTuner</code>, then call <a href="https://mlr3.mlr-org.com/reference/benchmark.html"><code>benchmark()</code></a> on them. As this is pretty standard, we will skip this here, and show an even neater option, where you can tune over models and hyperparameters in one go. If you have quite a large space of potential learners and combine this with an efficient tuning algorithm, this can save quite some time in tuning as you can learn during optimization which options work best and focus on them. NB: Many AutoML systems work in a very similar way.</p>
@@ -1670,48 +1665,43 @@ tuner = tnr(&quot;random_search&quot;)
 tuner$optimize(instance)</code></pre>
 <pre><code>
    branch.selection rf.mtry xgb.nrounds learner_param_vals  x_domain classif.ce
-1:               rf       1          NA          &lt;list[4]&gt; &lt;list[2]&gt;  0.1682692</code></pre>
+1:               rf       1          NA          &lt;list[4]&gt; &lt;list[2]&gt;  0.2355769</code></pre>
 <pre class="r"><code>
 instance$archive$data(unnest = &quot;x_domain&quot;)</code></pre>
 <pre><code>
     branch.selection rf.mtry xgb.nrounds classif.ce
- 1:               rf      13          NA  0.1778846
- 2:              xgb      NA         371  0.2019231
- 3:               rf       1          NA  0.1682692
- 4:              xgb      NA         337  0.2019231
- 5:              xgb      NA         354  0.2019231
- 6:              xgb      NA         339  0.2019231
- 7:               rf      15          NA  0.1826923
- 8:               rf       9          NA  0.1682692
- 9:              xgb      NA         294  0.2019231
-10:               rf      12          NA  0.1826923
+ 1:               rf      13          NA  0.2403846
+ 2:              xgb      NA          23  0.2884615
+ 3:              xgb      NA         351  0.2548077
+ 4:              xgb      NA         339  0.2548077
+ 5:               rf       6          NA  0.2403846
+ 6:               rf      12          NA  0.2451923
+ 7:              xgb      NA         176  0.2548077
+ 8:               rf      20          NA  0.2548077
+ 9:               rf       1          NA  0.2355769
+10:               rf       9          NA  0.2355769
                                    uhash           timestamp batch_nr
- 1: 21e3b3b1-6e1d-4573-9582-8a91ecd29688 2020-09-21 04:40:52        1
- 2: e3908051-fcd5-4fa9-b5ad-fb0d5d0d859e 2020-09-21 04:40:53        2
- 3: 0fb8f19a-11c5-4ea5-bd72-fea72fb89869 2020-09-21 04:40:54        3
- 4: 276bd9d0-6505-4490-bc40-b4e1e6b0c366 2020-09-21 04:40:55        4
- 5: 28c964b4-be57-47ec-b70e-c8a21a90e2a9 2020-09-21 04:40:56        5
- 6: f467fe96-72fb-43b0-9e4e-0364d845222a 2020-09-21 04:40:57        6
- 7: d5fa5556-10e6-469d-a022-417746f9603d 2020-09-21 04:40:58        7
- 8: 752c869d-4be7-4c80-b066-b2c2f31522a5 2020-09-21 04:40:59        8
- 9: 895084ba-588f-4c2f-a5cf-a5676913a100 2020-09-21 04:40:59        9
-10: 3963602e-0f39-42c1-ab65-7b929de0f8b8 2020-09-21 04:41:00       10
+ 1: 00bf139e-dc9b-4634-874a-2ca36f91057e 2020-10-06 11:25:33        1
+ 2: 8db2d51e-7be0-4e40-8479-da1fa558157f 2020-10-06 11:25:35        2
+ 3: a5e32141-dfaf-433b-861a-f91301aa49a3 2020-10-06 11:25:37        3
+ 4: 2e5ccb4f-975e-4f0c-90a4-b11c225ec6dc 2020-10-06 11:25:38        4
+ 5: 4e4637b8-f6cf-4ec5-bd76-c84aaf5c5306 2020-10-06 11:25:39        5
+ 6: f86b87a5-b6d4-41b8-b10c-7df58f8474d4 2020-10-06 11:25:40        6
+ 7: 7ecc4086-201b-4c22-a273-f9dc062b45a0 2020-10-06 11:25:42        7
+ 8: 639f2a35-00e4-4def-9de5-92043dec0850 2020-10-06 11:25:43        8
+ 9: f1a22a21-99ea-417e-a8c7-ed5143cafa15 2020-10-06 11:25:44        9
+10: f499dfd8-d4a3-4eb6-9318-669284cb1d1e 2020-10-06 11:25:45       10
     x_domain_branch.selection x_domain_rf.mtry x_domain_xgb.nrounds
  1:                        rf               13                   NA
- 2:                       xgb               NA                  371
- 3:                        rf                1                   NA
- 4:                       xgb               NA                  337
- 5:                       xgb               NA                  354
- 6:                       xgb               NA                  339
- 7:                        rf               15                   NA
- 8:                        rf                9                   NA
- 9:                       xgb               NA                  294
-10:                        rf               12                   NA</code></pre>
-<pre class="r"><code>
-instance$result</code></pre>
-<pre><code>
-   branch.selection rf.mtry xgb.nrounds learner_param_vals  x_domain classif.ce
-1:               rf       1          NA          &lt;list[4]&gt; &lt;list[2]&gt;  0.1682692</code></pre>
+ 2:                       xgb               NA                   23
+ 3:                       xgb               NA                  351
+ 4:                       xgb               NA                  339
+ 5:                        rf                6                   NA
+ 6:                        rf               12                   NA
+ 7:                       xgb               NA                  176
+ 8:                        rf               20                   NA
+ 9:                        rf                1                   NA
+10:                        rf                9                   NA</code></pre>
 </div>
 <p>The following shows a quick way to visualize the tuning results.</p>
 <div class="layout-chunk" data-layout="l-body">
@@ -1743,36 +1733,36 @@ at = AutoTuner$new(
 )
 rr = resample(task, at, cv2, store_models = TRUE)
 # access 1st inner tuning result
-ll = rr$data$state[[1]]$model$tuning_instance
+ll = rr$learners[[1]]$model$tuning_instance
 ll$result</code></pre>
 <pre><code>
    branch.selection rf.mtry xgb.nrounds learner_param_vals  x_domain classif.ce
-1:              xgb      NA         178          &lt;list[3]&gt; &lt;list[2]&gt;  0.2048193</code></pre>
+1:               rf       6          NA          &lt;list[4]&gt; &lt;list[2]&gt;  0.2048193</code></pre>
 <pre class="r"><code>
 ll$archive$data()</code></pre>
 <pre><code>
     branch.selection rf.mtry xgb.nrounds classif.ce
- 1:              xgb      NA         178  0.2048193
- 2:              xgb      NA         106  0.2048193
- 3:               rf      17          NA  0.2168675
- 4:              xgb      NA         428  0.2048193
- 5:               rf      11          NA  0.2048193
- 6:              xgb      NA         193  0.2048193
- 7:               rf      10          NA  0.2228916
- 8:              xgb      NA         137  0.2048193
- 9:               rf       8          NA  0.2228916
-10:              xgb      NA         332  0.2048193
+ 1:               rf      18          NA  0.2289157
+ 2:               rf       6          NA  0.2048193
+ 3:               rf      14          NA  0.2168675
+ 4:              xgb      NA         341  0.2469880
+ 5:              xgb      NA         377  0.2469880
+ 6:               rf       9          NA  0.2228916
+ 7:              xgb      NA          51  0.2469880
+ 8:               rf       6          NA  0.2228916
+ 9:               rf      17          NA  0.2168675
+10:              xgb      NA         121  0.2469880
                                    uhash  x_domain           timestamp batch_nr
- 1: c2eb2aa7-7433-449f-b256-be4b69f3fb1f &lt;list[2]&gt; 2020-09-21 04:41:02        1
- 2: f476243c-4f1f-4b7b-a571-fae83e78c7a1 &lt;list[2]&gt; 2020-09-21 04:41:03        2
- 3: ffaa15c0-b294-47a4-abfe-e64bb514c5e6 &lt;list[2]&gt; 2020-09-21 04:41:04        3
- 4: 8fdd5683-6d46-4ceb-b7cc-32a4c95f3031 &lt;list[2]&gt; 2020-09-21 04:41:05        4
- 5: f5f6eda0-4c06-45a0-8e85-76fbac2db02d &lt;list[2]&gt; 2020-09-21 04:41:06        5
- 6: a88fed67-b8c5-4a88-80ec-e9eb63583bd9 &lt;list[2]&gt; 2020-09-21 04:41:07        6
- 7: 03eea410-2c40-4f14-9027-80dbc9b56b76 &lt;list[2]&gt; 2020-09-21 04:41:08        7
- 8: d24f6aa2-fb0d-469f-9f1b-334e0b1e049a &lt;list[2]&gt; 2020-09-21 04:41:09        8
- 9: 6072311d-56e9-41c8-a8a7-a3e1c1ba0fa4 &lt;list[2]&gt; 2020-09-21 04:41:09        9
-10: 0d0bd0da-3c89-47e3-89b8-d92cfe8c9927 &lt;list[2]&gt; 2020-09-21 04:41:10       10</code></pre>
+ 1: a9ee1957-873d-4585-8ba0-049eb8439e02 &lt;list[2]&gt; 2020-10-06 11:26:34        1
+ 2: 704e3d9d-56b6-4f59-badd-f1aa269dbfea &lt;list[2]&gt; 2020-10-06 11:26:35        2
+ 3: fd260bb2-675e-412c-aff9-3e734ab1d36e &lt;list[2]&gt; 2020-10-06 11:26:37        3
+ 4: 3479b722-0511-47f9-92a4-8cc96ea9d7dd &lt;list[2]&gt; 2020-10-06 11:26:39        4
+ 5: 8932851d-a957-46c2-9b0c-2589775940c9 &lt;list[2]&gt; 2020-10-06 11:26:40        5
+ 6: 83304ef4-e85c-4b2f-b533-1f06f68b8698 &lt;list[2]&gt; 2020-10-06 11:26:42        6
+ 7: 40298059-d5f1-4e26-9c7e-f70ff7ae0aa7 &lt;list[2]&gt; 2020-10-06 11:26:43        7
+ 8: 1ca09383-6a2e-47a7-ae13-2ca865a7ab05 &lt;list[2]&gt; 2020-10-06 11:26:45        8
+ 9: a9d59c3c-1387-4d37-9004-ea87f9059f6e &lt;list[2]&gt; 2020-10-06 11:26:47        9
+10: e78767cc-823a-4b38-b3ed-bff29a857aa7 &lt;list[2]&gt; 2020-10-06 11:26:48       10</code></pre>
 </div>
 <!--radix_placeholder_article_footer-->
 <!--/radix_placeholder_article_footer-->
