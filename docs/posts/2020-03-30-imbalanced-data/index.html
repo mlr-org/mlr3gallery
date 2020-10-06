@@ -2504,14 +2504,14 @@ bmr = benchmark(design, store_models = TRUE)</code></pre>
 <pre class="r"><code>
 bmr$aggregate(measure)</code></pre>
 <pre><code>
-        resample_result nr   task_id                       learner_id
-1: &lt;ResampleResult[19]&gt;  1 optdigits undersample.classif.ranger.tuned
-2: &lt;ResampleResult[19]&gt;  2 optdigits  oversample.classif.ranger.tuned
-3: &lt;ResampleResult[19]&gt;  3 optdigits       smote.classif.ranger.tuned
+   nr      resample_result   task_id                       learner_id
+1:  1 &lt;ResampleResult[21]&gt; optdigits undersample.classif.ranger.tuned
+2:  2 &lt;ResampleResult[21]&gt; optdigits  oversample.classif.ranger.tuned
+3:  3 &lt;ResampleResult[21]&gt; optdigits       smote.classif.ranger.tuned
    resampling_id iters classif.fbeta
-1:       holdout     1     0.9438776
-2:       holdout     1     0.9622166
-3:       holdout     1     0.9625935</code></pre>
+1:       holdout     1     0.9651741
+2:       holdout     1     0.9571788
+3:       holdout     1     0.9651741</code></pre>
 <pre class="r"><code>
 # one value per boxplot since we used holdout as outer resampling
 autoplot(bmr, measure = measure)</code></pre>
@@ -2522,21 +2522,21 @@ autoplot(bmr, measure = measure)</code></pre>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
 library(ggplot2)
-utune_path = bmr$data$state[[1]]$model$tuning_instance$archive$data()
+utune_path = bmr$data$learners()[[2]][[1]]$model$tuning_instance$archive$data()
 
 utune_gg = ggplot(utune_path, aes(x = undersample.ratio, y = classif.fbeta)) +
   geom_point(size = 3) +
   geom_line() + ylim(0.9, 1)
 
-otune_path = bmr$data$state[[2]]$model$tuning_instance$archive$data()
-otune_gg = ggplot(otune_path, aes(x = oversample.ratio, y = classif.fbeta)) +
-  geom_point(size = 3) +
-  geom_line() + ylim(0.9, 1)
-
-stune_path = bmr$data$state[[3]]$model$tuning_instance$archive$data()
+stune_path = bmr$data$learners()[[2]][[2]]$model$tuning_instance$archive$data()
 stune_gg = ggplot(stune_path, aes(
   x = smote.dup_size,
   y = classif.fbeta, col = factor(smote.K))) +
+  geom_point(size = 3) +
+  geom_line() + ylim(0.9, 1)
+
+otune_path = bmr$data$learners()[[2]][[3]]$model$tuning_instance$archive$data()
+otune_gg = ggplot(otune_path, aes(x = oversample.ratio, y = classif.fbeta)) +
   geom_point(size = 3) +
   geom_line() + ylim(0.9, 1)
 
