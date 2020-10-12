@@ -28,7 +28,7 @@ if (require("data.table")) data.table::setDTthreads(1)
 set.seed(8008135)
 lgr::get_logger("mlr3")$set_threshold("warn")
 # SET BBOTK TO 'info' IF YOU PLAY AROUND WITH THIS!
-lgr::get_logger("bbotk")$set_threshold("warn") 
+lgr::get_logger("bbotk")$set_threshold("warn")
 ```
 
 ## Intro
@@ -197,7 +197,7 @@ For `k`, we find that values between 7 and 13 perform well.
 
 Let's have a look at a larger search space.
 For example, we could tune *all* available parameters and limit `k` to large values (50).
-We also now tune the distance param continuously from 1 to 3 as a double and tune 
+We also now tune the distance param continuously from 1 to 3 as a double and tune
 distance kernel and whether we scale the features.
 
 We may find two problems when doing so:
@@ -206,7 +206,7 @@ First, the resulting difference in performance between `k` = 3 and `k` = 4 is pr
 While 4 is 33% larger than 3, 50 is only 2 percent larger than 49.
 To account for this we will use a **transformation function** for `k` and optimize in log-space.
 We define the range for `k` from `log(3)` to `log(50)` and exponentiate in the transformation.
-Now, as `k` has become a double instead of an int (in the search space, before transformation), 
+Now, as `k` has become a double instead of an int (in the search space, before transformation),
 we aösp round it in the trafo.
 
 ```{r}
@@ -329,12 +329,12 @@ rr = readRDS("resample_result.rds")
 rr$aggregate()
 ```
 
-Essentially, this is the performance of a "knn with optimal hyperparameters found by grid search". Note that `grid_auto` is not changed since `resample()` creates a clone for each 
+Essentially, this is the performance of a "knn with optimal hyperparameters found by grid search". Note that `grid_auto` is not changed since `resample()` creates a clone for each
 resampling iteration. The trained `AutoTuner` objects can be accessed by using
 
 ```{r}
-rr$data$learner[[1]]
-rr$data$learner[[1]]$tuning_result
+rr$learners[[1]]
+rr$learners[[1]]$tuning_result
 ```
 
 
@@ -369,21 +369,21 @@ perfdata
 The scale effect is just as visible as before with fewer data:
 
 ```{r}
-ggplot(perfdata, aes(x = k, y = classif.ce, color = scale)) +
+ggplot(perfdata, aes(x = x_domain_k, y = classif.ce, color = scale)) +
   geom_point(size = 2, alpha = 0.3)
 ```
 
 Now, there seems to be a visible pattern by kernel as well:
 
 ```{r}
-ggplot(perfdata, aes(x = k, y = classif.ce, color = kernel)) +
+ggplot(perfdata, aes(x = x_domain_k, y = classif.ce, color = kernel)) +
   geom_point(size = 2, alpha = 0.3)
 ```
 
 In fact, if we zoom in to `(5, 35)` $\times$ `(0.23, 0.28)` and do decrease smoothing we see that different kernels have their optimum at different values of `k`:
 
 ```{r, warning=FALSE}
-ggplot(perfdata, aes(x = k, y = classif.ce, color = kernel,
+ggplot(perfdata, aes(x = x_domain_k, y = classif.ce, color = kernel,
   group = interaction(kernel, scale))) +
   geom_point(size = 2, alpha = 0.3) + geom_smooth() +
   xlim(5, 35) + ylim(0.23, 0.28)
@@ -393,7 +393,7 @@ What about the `distance` parameter?
 If we select all results with `k` between 10 and 20 and plot distance and kernel we see an approximate relationship:
 
 ```{r, warning=FALSE}
-ggplot(perfdata[k > 10 & k < 20 & scale == TRUE],
+ggplot(perfdata[x_domain_k > 10 & x_domain_k < 20 & scale == TRUE],
   aes(x = distance, y = classif.ce, color = kernel)) +
   geom_point(size = 2) + geom_smooth()
 ```

@@ -1543,13 +1543,13 @@ print(preds)</code></pre>
 <pre><code>
 &lt;PredictionRegr&gt; for 62 observations:
     row_id truth response
-        24   619 597.0954
-        63   613 677.1543
-        90   655 655.7024
+        24   619 598.1560
+        63   613 675.8026
+        90   655 655.8345
 ---                      
-      1181   621 634.9225
-      1186   569 571.0778
-      1189   663 675.7135</code></pre>
+      1183   614 580.0988
+      1188   693 686.3181
+      1191   715 729.2207</code></pre>
 </div>
 <p>Viewing the predicted values it seems like the model predicts reasonable values that are fairly close to the truth.</p>
 <h2 id="evaluation-resampling">Evaluation &amp; Resampling</h2>
@@ -1564,28 +1564,28 @@ r = resample(task, lrn, cv10)</code></pre>
 <pre class="r"><code>
 mlr_measures</code></pre>
 <pre><code>
-&lt;DictionaryMeasure&gt; with 97 stored values
+&lt;DictionaryMeasure&gt; with 98 stored values
 Keys: classif.acc, classif.auc, classif.bacc, classif.bbrier,
   classif.ce, classif.costs, classif.dor, classif.fbeta, classif.fdr,
   classif.fn, classif.fnr, classif.fomr, classif.fp, classif.fpr,
   classif.logloss, classif.mbrier, classif.mcc, classif.npv,
-  classif.ppv, classif.precision, classif.recall, classif.sensitivity,
-  classif.specificity, classif.tn, classif.tnr, classif.tp,
-  classif.tpr, debug, dens.logloss, oob_error, regr.bias, regr.ktau,
-  regr.mae, regr.mape, regr.maxae, regr.medae, regr.medse, regr.mse,
-  regr.msle, regr.pbias, regr.rae, regr.rmse, regr.rmsle, regr.rrse,
-  regr.rse, regr.rsq, regr.sae, regr.smape, regr.srho, regr.sse,
-  selected_features, surv.beggC, surv.brier, surv.calib_alpha,
-  surv.calib_beta, surv.chambless_auc, surv.chamblessAUC, surv.cindex,
-  surv.gonenC, surv.graf, surv.grafSE, surv.harrellC, surv.hung_auc,
-  surv.hungAUC, surv.intlogloss, surv.intloglossSE, surv.logloss,
-  surv.loglossSE, surv.mae, surv.maeSE, surv.mse, surv.mseSE,
-  surv.nagelk_r2, surv.nagelkR2, surv.oquigley_r2, surv.oquigleyR2,
-  surv.rmse, surv.rmseSE, surv.schmid, surv.song_auc, surv.song_tnr,
-  surv.song_tpr, surv.songAUC, surv.songTNR, surv.songTPR,
-  surv.uno_auc, surv.uno_tnr, surv.uno_tpr, surv.unoAUC, surv.unoC,
-  surv.unoTNR, surv.unoTPR, surv.xu_r2, surv.xuR2, time_both,
-  time_predict, time_train</code></pre>
+  classif.ppv, classif.prauc, classif.precision, classif.recall,
+  classif.sensitivity, classif.specificity, classif.tn, classif.tnr,
+  classif.tp, classif.tpr, debug, dens.logloss, oob_error, regr.bias,
+  regr.ktau, regr.mae, regr.mape, regr.maxae, regr.medae, regr.medse,
+  regr.mse, regr.msle, regr.pbias, regr.rae, regr.rmse, regr.rmsle,
+  regr.rrse, regr.rse, regr.rsq, regr.sae, regr.smape, regr.srho,
+  regr.sse, selected_features, surv.beggC, surv.brier,
+  surv.calib_alpha, surv.calib_beta, surv.chambless_auc,
+  surv.chamblessAUC, surv.cindex, surv.gonenC, surv.graf, surv.grafSE,
+  surv.harrellC, surv.hung_auc, surv.hungAUC, surv.intlogloss,
+  surv.intloglossSE, surv.logloss, surv.loglossSE, surv.mae,
+  surv.maeSE, surv.mse, surv.mseSE, surv.nagelk_r2, surv.nagelkR2,
+  surv.oquigley_r2, surv.oquigleyR2, surv.rmse, surv.rmseSE,
+  surv.schmid, surv.song_auc, surv.song_tnr, surv.song_tpr,
+  surv.songAUC, surv.songTNR, surv.songTPR, surv.uno_auc, surv.uno_tnr,
+  surv.uno_tpr, surv.unoAUC, surv.unoC, surv.unoTNR, surv.unoTPR,
+  surv.xu_r2, surv.xuR2, time_both, time_predict, time_train</code></pre>
 </div>
 <p>We choose the mean absolute error (<code>regr.mae</code>) and the mean squared error (<code>regr.mse</code>).</p>
 <div class="layout-chunk" data-layout="l-body">
@@ -1594,16 +1594,16 @@ scores = r$score(msrs(c(&quot;regr.mae&quot;, &quot;regr.mse&quot;)))
 scores</code></pre>
 <pre><code>
               task   task_id            learner
- 1: &lt;TaskRegr[42]&gt; moneyball &lt;GraphLearner[31]&gt;
- 2: &lt;TaskRegr[42]&gt; moneyball &lt;GraphLearner[31]&gt;
- 3: &lt;TaskRegr[42]&gt; moneyball &lt;GraphLearner[31]&gt;
- 4: &lt;TaskRegr[42]&gt; moneyball &lt;GraphLearner[31]&gt;
- 5: &lt;TaskRegr[42]&gt; moneyball &lt;GraphLearner[31]&gt;
- 6: &lt;TaskRegr[42]&gt; moneyball &lt;GraphLearner[31]&gt;
- 7: &lt;TaskRegr[42]&gt; moneyball &lt;GraphLearner[31]&gt;
- 8: &lt;TaskRegr[42]&gt; moneyball &lt;GraphLearner[31]&gt;
- 9: &lt;TaskRegr[42]&gt; moneyball &lt;GraphLearner[31]&gt;
-10: &lt;TaskRegr[42]&gt; moneyball &lt;GraphLearner[31]&gt;
+ 1: &lt;TaskRegr[42]&gt; moneyball &lt;GraphLearner[32]&gt;
+ 2: &lt;TaskRegr[42]&gt; moneyball &lt;GraphLearner[32]&gt;
+ 3: &lt;TaskRegr[42]&gt; moneyball &lt;GraphLearner[32]&gt;
+ 4: &lt;TaskRegr[42]&gt; moneyball &lt;GraphLearner[32]&gt;
+ 5: &lt;TaskRegr[42]&gt; moneyball &lt;GraphLearner[32]&gt;
+ 6: &lt;TaskRegr[42]&gt; moneyball &lt;GraphLearner[32]&gt;
+ 7: &lt;TaskRegr[42]&gt; moneyball &lt;GraphLearner[32]&gt;
+ 8: &lt;TaskRegr[42]&gt; moneyball &lt;GraphLearner[32]&gt;
+ 9: &lt;TaskRegr[42]&gt; moneyball &lt;GraphLearner[32]&gt;
+10: &lt;TaskRegr[42]&gt; moneyball &lt;GraphLearner[32]&gt;
                           learner_id         resampling resampling_id iteration
  1: imputehist.imputeoor.regr.ranger &lt;ResamplingCV[19]&gt;            cv         1
  2: imputehist.imputeoor.regr.ranger &lt;ResamplingCV[19]&gt;            cv         2
@@ -1671,7 +1671,7 @@ r2 = resample(task, lrn2, cv10)
 r2$aggregate(msr(&quot;regr.mae&quot;))</code></pre>
 <pre><code>
 regr.mae 
-19.07802 </code></pre>
+18.92482 </code></pre>
 </div>
 <p>Surprisingly, the performance seems to be approximately the same. That means that the imputed features seem not very helpful. We can use the <code>variable.importance</code> of the random forest.</p>
 <div class="layout-chunk" data-layout="l-body">
@@ -1679,11 +1679,11 @@ regr.mae
 sort(lrn$model$regr.ranger$model$variable.importance, decreasing = TRUE)</code></pre>
 <pre><code>
          SLG          OBP           BA            W           RA         Year 
- 3512.203339  2449.943573   965.535751   726.280524   496.904599   262.247266 
-  RankSeason     Playoffs RankPlayoffs         OOBP       League         OSLG 
-  134.992693   101.738630   101.592220    33.947123    32.336169    26.243414 
+ 3435.643552  2485.771229   936.206663   715.235512   501.303163   269.429878 
+  RankSeason RankPlayoffs     Playoffs       League         OOBP         OSLG 
+  132.335915   106.292475    97.366197    35.753015    25.235380    25.087355 
         Team            G 
-   23.871012     5.670036 </code></pre>
+   16.611604     9.464481 </code></pre>
 </div>
 <p>We see that according to this the left out <code>OOBP</code> and <code>OSLG</code> seem to have solely rudimentary explanatory power. This may be because there were simply too many instances or because the features are themselves not very powerful.</p>
 <h2 id="conclusion">Conclusion</h2>
