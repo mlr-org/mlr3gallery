@@ -369,21 +369,21 @@ perfdata
 The scale effect is just as visible as before with fewer data:
 
 ```{r}
-ggplot(perfdata, aes(x = k, y = classif.ce, color = scale)) +
+ggplot(perfdata, aes(x = x_domain_k, y = classif.ce, color = scale)) +
   geom_point(size = 2, alpha = 0.3)
 ```
 
 Now, there seems to be a visible pattern by kernel as well:
 
 ```{r}
-ggplot(perfdata, aes(x = k, y = classif.ce, color = kernel)) +
+ggplot(perfdata, aes(x = x_domain_k, y = classif.ce, color = kernel)) +
   geom_point(size = 2, alpha = 0.3)
 ```
 
 In fact, if we zoom in to `(5, 35)` $\times$ `(0.23, 0.28)` and do decrease smoothing we see that different kernels have their optimum at different values of `k`:
 
 ```{r, warning=FALSE}
-ggplot(perfdata, aes(x = k, y = classif.ce, color = kernel,
+ggplot(perfdata, aes(x = x_domain_k, y = classif.ce, color = kernel,
   group = interaction(kernel, scale))) +
   geom_point(size = 2, alpha = 0.3) + geom_smooth() +
   xlim(5, 35) + ylim(0.23, 0.28)
@@ -393,7 +393,7 @@ What about the `distance` parameter?
 If we select all results with `k` between 10 and 20 and plot distance and kernel we see an approximate relationship:
 
 ```{r, warning=FALSE}
-ggplot(perfdata[k > 10 & k < 20 & scale == TRUE],
+ggplot(perfdata[x_domain_k > 10 & x_domain_k < 20 & scale == TRUE],
   aes(x = distance, y = classif.ce, color = kernel)) +
   geom_point(size = 2) + geom_smooth()
 ```
