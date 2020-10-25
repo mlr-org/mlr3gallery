@@ -2309,7 +2309,7 @@ rr = resample(task, learner = learner_logreg, resampling = resampling)
 rr$aggregate()</code></pre>
 <pre><code>
 classif.ce 
- 0.2510511 </code></pre>
+ 0.2567568 </code></pre>
 </div>
 <p>Instead, we could also run cross-validation:</p>
 <div class="layout-chunk" data-layout="l-body">
@@ -2319,7 +2319,7 @@ rr = resample(task, learner = learner_logreg, resampling = resampling)
 rr$aggregate()</code></pre>
 <pre><code>
 classif.ce 
-     0.254 </code></pre>
+     0.253 </code></pre>
 </div>
 <p><code>mlr3</code> features scores for many more measures. Here, we apply <a href="https://mlr3.mlr-org.com/reference/mlr_measures_classif.fpr.html"><code>mlr_measures_classif.fpr</code></a> for the false positive rate, and <a href="https://mlr3.mlr-org.com/reference/mlr_measures_classif.fnr.html"><code>mlr_measures_classif.fnr</code></a> for the false negative rate. Multiple measures can be provided as a list of measures (which can directly be constructed via <a href="https://mlr3.mlr-org.com/reference/mlr_sugar.html"><code>msrs()</code></a>:</p>
 <div class="layout-chunk" data-layout="l-body">
@@ -2328,14 +2328,14 @@ classif.ce
 rr$aggregate(msr(&quot;classif.fpr&quot;))</code></pre>
 <pre><code>
 classif.fpr 
-   0.526609 </code></pre>
+  0.5144825 </code></pre>
 <pre class="r"><code>
 # false positive rate and false negative
 measures = msrs(c(&quot;classif.fpr&quot;, &quot;classif.fnr&quot;))
 rr$aggregate(measures)</code></pre>
 <pre><code>
 classif.fpr classif.fnr 
-  0.5266090   0.1374399 </code></pre>
+  0.5144825   0.1445804 </code></pre>
 </div>
 <p>There are a few more resampling methods, and quite a few more measures (implemented in <a href="https://mlr3measures.mlr-org.com">mlr3measures</a>). They are automatically registered in the respective dictionaries:</p>
 <div class="layout-chunk" data-layout="l-body">
@@ -2348,17 +2348,17 @@ Keys: bootstrap, custom, cv, holdout, insample, loo, repeated_cv,
 <pre class="r"><code>
 mlr_measures</code></pre>
 <pre><code>
-&lt;DictionaryMeasure&gt; with 53 stored values
+&lt;DictionaryMeasure&gt; with 54 stored values
 Keys: classif.acc, classif.auc, classif.bacc, classif.bbrier,
   classif.ce, classif.costs, classif.dor, classif.fbeta, classif.fdr,
   classif.fn, classif.fnr, classif.fomr, classif.fp, classif.fpr,
   classif.logloss, classif.mbrier, classif.mcc, classif.npv,
-  classif.ppv, classif.precision, classif.recall, classif.sensitivity,
-  classif.specificity, classif.tn, classif.tnr, classif.tp,
-  classif.tpr, debug, oob_error, regr.bias, regr.ktau, regr.mae,
-  regr.mape, regr.maxae, regr.medae, regr.medse, regr.mse, regr.msle,
-  regr.pbias, regr.rae, regr.rmse, regr.rmsle, regr.rrse, regr.rse,
-  regr.rsq, regr.sae, regr.smape, regr.srho, regr.sse,
+  classif.ppv, classif.prauc, classif.precision, classif.recall,
+  classif.sensitivity, classif.specificity, classif.tn, classif.tnr,
+  classif.tp, classif.tpr, debug, oob_error, regr.bias, regr.ktau,
+  regr.mae, regr.mape, regr.maxae, regr.medae, regr.medse, regr.mse,
+  regr.msle, regr.pbias, regr.rae, regr.rmse, regr.rmsle, regr.rrse,
+  regr.rse, regr.rsq, regr.sae, regr.smape, regr.srho, regr.sse,
   selected_features, time_both, time_predict, time_train</code></pre>
 </div>
 <p>To get help on a resampling method, use <code>?mlr_resamplings_xxx</code>, for a measure do <code>?mlr_measures_xxx</code>. You can also browse the <a href="https://mlr3.mlr-org.com/reference/index.html">mlr3 reference</a> online.</p>
@@ -2388,8 +2388,8 @@ performances = bmr$aggregate(measures)
 performances[, c(&quot;learner_id&quot;, &quot;classif.ce&quot;, &quot;classif.auc&quot;)]</code></pre>
 <pre><code>
         learner_id classif.ce classif.auc
-1: classif.log_reg      0.254   0.7867055
-2:  classif.ranger      0.232   0.7989985</code></pre>
+1: classif.log_reg      0.244   0.7865278
+2:  classif.ranger      0.228   0.8101353</code></pre>
 </div>
 <p>We see that the two models perform very similarly.</p>
 <h2 id="deviating-from-hyperparameters-defaults">Deviating from hyperparameters defaults</h2>
@@ -2581,9 +2581,9 @@ performances = bmr$aggregate(measures)
 performances[, .(learner_id, classif.ce, classif.auc)]</code></pre>
 <pre><code>
    learner_id classif.ce classif.auc
-1:        low      0.276   0.7189220
-2:        med      0.227   0.8050173
-3:       high      0.232   0.8043044</code></pre>
+1:        low      0.275   0.7271936
+2:        med      0.235   0.7961501
+3:       high      0.246   0.7937442</code></pre>
 <pre class="r"><code>
 autoplot(bmr)</code></pre>
 <p><img src="2020-03-11-mlr3-basics-german-credit_files/figure-html5/unnamed-chunk-44-1.png" width="624" /></p>
@@ -2628,17 +2628,17 @@ Keys: bootstrap, custom, cv, holdout, insample, loo, repeated_cv,
 <pre class="r"><code>
 mlr_measures</code></pre>
 <pre><code>
-&lt;DictionaryMeasure&gt; with 53 stored values
+&lt;DictionaryMeasure&gt; with 54 stored values
 Keys: classif.acc, classif.auc, classif.bacc, classif.bbrier,
   classif.ce, classif.costs, classif.dor, classif.fbeta, classif.fdr,
   classif.fn, classif.fnr, classif.fomr, classif.fp, classif.fpr,
   classif.logloss, classif.mbrier, classif.mcc, classif.npv,
-  classif.ppv, classif.precision, classif.recall, classif.sensitivity,
-  classif.specificity, classif.tn, classif.tnr, classif.tp,
-  classif.tpr, debug, oob_error, regr.bias, regr.ktau, regr.mae,
-  regr.mape, regr.maxae, regr.medae, regr.medse, regr.mse, regr.msle,
-  regr.pbias, regr.rae, regr.rmse, regr.rmsle, regr.rrse, regr.rse,
-  regr.rsq, regr.sae, regr.smape, regr.srho, regr.sse,
+  classif.ppv, classif.prauc, classif.precision, classif.recall,
+  classif.sensitivity, classif.specificity, classif.tn, classif.tnr,
+  classif.tp, classif.tpr, debug, oob_error, regr.bias, regr.ktau,
+  regr.mae, regr.mape, regr.maxae, regr.medae, regr.medse, regr.mse,
+  regr.msle, regr.pbias, regr.rae, regr.rmse, regr.rmsle, regr.rrse,
+  regr.rse, regr.rsq, regr.sae, regr.smape, regr.srho, regr.sse,
   selected_features, time_both, time_predict, time_train</code></pre>
 </div>
 <ul>

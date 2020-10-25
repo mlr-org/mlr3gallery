@@ -1445,9 +1445,9 @@ res_rf = resample(tsk_train_rf, learner = lrn_rf, resampling = cv3)
 res_rf$score(msr(&quot;regr.mse&quot;))</code></pre>
 <pre><code>
              task task_id                 learner  learner_id
-1: &lt;TaskRegr[42]&gt;   bikes &lt;LearnerRegrRanger[32]&gt; regr.ranger
-2: &lt;TaskRegr[42]&gt;   bikes &lt;LearnerRegrRanger[32]&gt; regr.ranger
-3: &lt;TaskRegr[42]&gt;   bikes &lt;LearnerRegrRanger[32]&gt; regr.ranger
+1: &lt;TaskRegr[42]&gt;   bikes &lt;LearnerRegrRanger[33]&gt; regr.ranger
+2: &lt;TaskRegr[42]&gt;   bikes &lt;LearnerRegrRanger[33]&gt; regr.ranger
+3: &lt;TaskRegr[42]&gt;   bikes &lt;LearnerRegrRanger[33]&gt; regr.ranger
            resampling resampling_id iteration           prediction regr.mse
 1: &lt;ResamplingCV[19]&gt;            cv         1 &lt;PredictionRegr[18]&gt; 4492.038
 2: &lt;ResamplingCV[19]&gt;            cv         2 &lt;PredictionRegr[18]&gt; 4720.677
@@ -1521,13 +1521,13 @@ res_grl = resample(tsk_train_grl, learner = grl, resampling = cv3)
 res_grl$score(msr(&quot;regr.mse&quot;))</code></pre>
 <pre><code>
              task task_id            learner               learner_id
-1: &lt;TaskRegr[42]&gt;   bikes &lt;GraphLearner[31]&gt; datefeatures.regr.ranger
-2: &lt;TaskRegr[42]&gt;   bikes &lt;GraphLearner[31]&gt; datefeatures.regr.ranger
-3: &lt;TaskRegr[42]&gt;   bikes &lt;GraphLearner[31]&gt; datefeatures.regr.ranger
+1: &lt;TaskRegr[42]&gt;   bikes &lt;GraphLearner[32]&gt; datefeatures.regr.ranger
+2: &lt;TaskRegr[42]&gt;   bikes &lt;GraphLearner[32]&gt; datefeatures.regr.ranger
+3: &lt;TaskRegr[42]&gt;   bikes &lt;GraphLearner[32]&gt; datefeatures.regr.ranger
            resampling resampling_id iteration           prediction regr.mse
-1: &lt;ResamplingCV[19]&gt;            cv         1 &lt;PredictionRegr[18]&gt; 2366.673
-2: &lt;ResamplingCV[19]&gt;            cv         2 &lt;PredictionRegr[18]&gt; 2688.929
-3: &lt;ResamplingCV[19]&gt;            cv         3 &lt;PredictionRegr[18]&gt; 2209.474</code></pre>
+1: &lt;ResamplingCV[19]&gt;            cv         1 &lt;PredictionRegr[18]&gt; 2373.215
+2: &lt;ResamplingCV[19]&gt;            cv         2 &lt;PredictionRegr[18]&gt; 2444.656
+3: &lt;ResamplingCV[19]&gt;            cv         3 &lt;PredictionRegr[18]&gt; 2377.041</code></pre>
 </div>
 <p>The average RMSE is given by</p>
 <div class="layout-chunk" data-layout="l-body">
@@ -1535,7 +1535,7 @@ res_grl$score(msr(&quot;regr.mse&quot;))</code></pre>
 sprintf(&quot;RMSE graph learner date features: %s&quot;, round(sqrt(res_grl$aggregate()),
   digits = 2))</code></pre>
 <pre><code>
-[1] &quot;RMSE graph learner date features: 49.21&quot;</code></pre>
+[1] &quot;RMSE graph learner date features: 48.97&quot;</code></pre>
 </div>
 <p>and therefore improved by almost 30%!</p>
 <p>Finally, we fit our <code>GraphLearner</code> on the complete training task and predict on the test task:</p>
@@ -1559,7 +1559,7 @@ pred = grl$predict(tsk_test)
 pred$score(msr(&quot;regr.mse&quot;))</code></pre>
 <pre><code>
 regr.mse 
-1832.432 </code></pre>
+1839.529 </code></pre>
 </div>
 <p>Where we can obtain the RMSE on the held-out test data:</p>
 <div class="layout-chunk" data-layout="l-body">
@@ -1567,7 +1567,7 @@ regr.mse
 sprintf(&quot;RMSE graph learner date features: %s&quot;, round(sqrt(pred$score(msr(&quot;regr.mse&quot;))),
   digits = 2))</code></pre>
 <pre><code>
-[1] &quot;RMSE graph learner date features: 42.81&quot;</code></pre>
+[1] &quot;RMSE graph learner date features: 42.89&quot;</code></pre>
 </div>
 <!--radix_placeholder_article_footer-->
 <!--/radix_placeholder_article_footer-->
