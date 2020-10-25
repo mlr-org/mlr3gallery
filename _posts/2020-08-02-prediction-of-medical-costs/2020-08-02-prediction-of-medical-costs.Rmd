@@ -96,7 +96,6 @@ This PipeOp provides a smooth implementation to transform the target variable in
 The following plots give a brief overview of the distribution of the independent variables:   
 
 ```{r, echo = FALSE}
-
 levels(insurance$region)[levels(insurance$region) == "northeast"] = "ne"
 levels(insurance$region)[levels(insurance$region) == "northwest"] = "nw"
 levels(insurance$region)[levels(insurance$region) == "southeast"] = "se"
@@ -127,37 +126,11 @@ Given the aforementioned continuity of our target variable, we instantiate a reg
 ins_task = TaskRegr$new(id = "ins_task", backend = insurance, target = "charges")
 ```
 
-The plots below give a brief overview of the conditional distribution of charges given each independent variable.
+The plots below give a brief overview of the conditional distribution of charges given example independent variables.
 It can, for example, be seen that charges seem to increase with age, or that smokers seem to face higher charges than non-smokers.  
 
-```{r echo = FALSE}
-
-plot_charges <- function(col, title, lab){
-  ggplot() +
-  geom_point(data = insurance, aes(x = col, y = charges), col = "grey30") +
-  ggtitle(title) +
-  xlab(lab) +
-  theme_bw() +
-  theme(plot.title = element_text(hjust = 0.5))
-}
-
-plot_facet <- function(facet, title, ncol = 1) {
-  insurance1 <- insurance %>% mutate(facet = facet)
-  ggplot() +
-  geom_histogram(data = insurance1, aes(x = charges), col = "darkgray", size = 0.5) +
-  facet_wrap(~ facet, ncol = ncol) +
-  ggtitle(title) +
-  theme_bw() +
-  theme(plot.title = element_text(hjust = 0.5))
-}
-
-grid.arrange(plot_charges(insurance$age, "age", "age standardized"),
-             plot_charges(insurance$bmi, "bmi", "bmi standardized"),
-             plot_charges(insurance$children, "children", "children standardized"),
-             plot_facet(insurance$sex, "sex"),
-             plot_facet(insurance$smoker, "smoker"),
-             plot_facet(insurance$region, "region", ncol = 2),
-             nrow = 2)
+```{r echo = FALSE, message=FALSE}
+autoplot(ins_task$clone(deep = TRUE)$select(c("age", "smoker")), type = "pairs")
 ```
 
 The learners we instantiate are Linear Model (LM), k-Nearest Neighbors (kNN), Decision Trees (CART) and Random Forest (Ranger).  
