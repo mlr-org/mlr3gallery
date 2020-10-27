@@ -18,6 +18,73 @@
  <!--radix_placeholder_import_source-->
  <!--/radix_placeholder_import_source-->
 
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css" data-origin="pandoc">
+code.sourceCode > span { display: inline-block; line-height: 1.25; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #545454; font-weight: bold; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #a1024a; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007faa; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #008000; } /* Char */
+code span.cn { color: #d91e18; } /* Constant */
+code span.co { color: #545454; } /* Comment */
+code span.cv { color: #545454; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #aa5d00; } /* DataType */
+code span.dv { color: #a1024a; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #a1024a; } /* Float */
+code span.fu { color: #4254a7; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #545454; font-weight: bold; } /* Information */
+code span.kw { color: #007faa; font-weight: bold; } /* Keyword */
+code span.op { color: #696969; } /* Operator */
+code span.ot { color: #007faa; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #008000; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #008000; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #008000; } /* VerbatimString */
+code span.wa { color: #545454; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
   <!--radix_placeholder_meta_tags-->
 <title>mlr3gallery: A production example using plumber and Docker</title>
 
@@ -62,6 +129,7 @@
   {"type":"character","attributes":{},"value":["mlr3_api/Dockerfile","mlr3_api/feature_info.rds","mlr3_api/fix_feature_types.R","mlr3_api/gl.rds","mlr3_api/predict_gl.R","mlr3_api/train_gl.R"]}
   </script>
   <!--radix_placeholder_navigation_in_header-->
+<meta name="distill:offset" content="../.."/>
 
 <script type="application/javascript">
 
@@ -121,7 +189,7 @@
 
 .distill-site-nav {
   color: rgba(255, 255, 255, 0.8);
-  background-color: #455a64;
+  background-color: #0F2E3D;
   font-size: 15px;
   font-weight: 300;
 }
@@ -184,6 +252,7 @@
 
 .distill-site-header .title {
   font-size: 18px;
+  min-width: 150px;
 }
 
 .distill-site-header .logo {
@@ -325,7 +394,7 @@
 
 
 @media screen and (max-width: 768px) {
-  .distill-site-header.responsive {position: relative;}
+  .distill-site-header.responsive {position: relative; min-height: 500px; }
   .distill-site-header.responsive a.nav-toggle {
     position: absolute;
     right: 0;
@@ -399,6 +468,267 @@ d-title {
 <link href="../../site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet"/>
 <link href="../../site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet"/>
 <script src="../../site_libs/headroom-0.9.4/headroom.min.js"></script>
+<script src="../../site_libs/autocomplete-0.37.1/autocomplete.min.js"></script>
+<script src="../../site_libs/fuse-6.4.1/fuse.min.js"></script>
+
+<script type="application/javascript">
+
+function getMeta(metaName) {
+  var metas = document.getElementsByTagName('meta');
+  for (let i = 0; i < metas.length; i++) {
+    if (metas[i].getAttribute('name') === metaName) {
+      return metas[i].getAttribute('content');
+    }
+  }
+  return '';
+}
+
+function offsetURL(url) {
+  var offset = getMeta('distill:offset');
+  return offset ? offset + '/' + url : url;
+}
+
+function createIndex() {
+  var options = {
+    keys: [
+      "title",
+      "categories",
+      "description",
+      "contents"
+    ]
+  };
+  return new window.Fuse([],options);
+}
+
+function createFuseIndex() {
+
+  // create fuse index
+  var options = { keys: ["title", "description", "contents"] };
+  var fuse = new window.Fuse([], options);
+
+  // fetch the main search.json
+  return fetch(offsetURL('search.json'))
+    .then(function(response) {
+      if (response.status == 200) {
+        return response.json().then(function(json) {
+          // index main articles
+          json.articles.forEach(function(article) {
+            fuse.add(article);
+          });
+          // download collections and index their articles
+          return Promise.all(json.collections.map(function(collection) {
+            return fetch(offsetURL(collection)).then(function(response) {
+              if (response.status === 200) {
+                return response.json().then(function(articles) {
+                  articles.forEach(function(article) {
+                    fuse.add(article);
+                  });
+                })
+              } else {
+                return Promise.reject(
+                  new Error('Unexpected status from search index request: ' +
+                            response.status)
+                );
+              }
+            });
+          })).then(function() {
+            return fuse;
+          });
+        });
+
+      } else {
+        return Promise.reject(
+          new Error('Unexpected status from search index request: ' +
+                      response.status)
+        );
+      }
+    });
+}
+
+window.document.addEventListener("DOMContentLoaded", function (event) {
+
+  // get search element (bail if we don't have one)
+  var searchEl = window.document.getElementById('distill-search');
+  if (!searchEl)
+    return;
+
+  createFuseIndex()
+    .then(function(fuse) {
+
+      // make search box visible
+      searchEl.classList.remove('hidden');
+
+      // initialize autocomplete
+      var options = {
+        autoselect: true,
+        hint: false,
+        minLength: 2,
+      };
+      window.autocomplete(searchEl, options, [{
+        source: function(query, callback) {
+          const searchOptions = {
+            isCaseSensitive: false,
+            shouldSort: true,
+            minMatchCharLength: 2,
+            limit: 10,
+            keys: [
+              { name: 'title', weight: 20 },
+              { name: 'categories', weight: 15 },
+              { name: 'description', weight: 10 },
+              { name: 'contents', weight: 5 },
+            ],
+          };
+          var results = fuse.search(query, searchOptions);
+          callback(results
+            .map(function(result) { return result.item; })
+            .filter(function(item) { return !!item.description; })
+          );
+        },
+        templates: {
+          suggestion: function(suggestion) {
+            var html = `
+              <div class="search-item">
+                <h3>${suggestion.title}</h3>
+                <div class="search-item-description">
+                  ${suggestion.description}
+                </div>
+                <div class="search-item-preview">
+                  <img src="${suggestion.preview ? offsetURL(suggestion.preview) : ''}"</img>
+                </div>
+              </div>
+            `;
+            return html;
+          }
+        }
+      }]).on('autocomplete:selected', function(event, suggestion) {
+        window.location.href = offsetURL(suggestion.path);
+      });
+      // remove inline display style on autocompleter (we want to
+      // manage responsive display via css)
+      $('.algolia-autocomplete').css("display", "");
+    })
+    .catch(function(error) {
+      console.log(error);
+    });
+
+});
+
+</script>
+
+<style type="text/css">
+
+/* Algolioa Autocomplete */
+
+.algolia-autocomplete {
+  display: inline-block;
+  margin-left: 10px;
+  vertical-align: sub;
+  background-color: white;
+  color: black;
+  padding: 6px;
+  padding-top: 8px;
+  padding-bottom: 0;
+  border-radius: 6px;
+  border: 1px #0F2E3D solid;
+  width: 180px;
+}
+
+
+@media screen and (max-width: 768px) {
+  .distill-site-nav .algolia-autocomplete {
+    display: none;
+    visibility: hidden;
+  }
+  .distill-site-nav.responsive .algolia-autocomplete {
+    display: inline-block;
+    visibility: visible;
+  }
+  .distill-site-nav.responsive .algolia-autocomplete .aa-dropdown-menu {
+    margin-left: 0;
+    width: 400px;
+    max-height: 400px;
+  }
+}
+
+.algolia-autocomplete .aa-input, .algolia-autocomplete .aa-hint {
+  width: 90%;
+  outline: none;
+  border: none;
+}
+
+.algolia-autocomplete .aa-hint {
+  color: #999;
+}
+.algolia-autocomplete .aa-dropdown-menu {
+  width: 550px;
+  max-height: 70vh;
+  overflow-x: visible;
+  overflow-y: scroll;
+  padding: 5px;
+  margin-top: 3px;
+  margin-left: -150px;
+  background-color: #fff;
+  border-radius: 5px;
+  border: 1px solid #999;
+  border-top: none;
+}
+
+.algolia-autocomplete .aa-dropdown-menu .aa-suggestion {
+  cursor: pointer;
+  padding: 5px 4px;
+  border-bottom: 1px solid #eee;
+}
+
+.algolia-autocomplete .aa-dropdown-menu .aa-suggestion:last-of-type {
+  border-bottom: none;
+  margin-bottom: 2px;
+}
+
+.algolia-autocomplete .aa-dropdown-menu .aa-suggestion .search-item {
+  overflow: hidden;
+  font-size: 0.8em;
+  line-height: 1.4em;
+}
+
+.algolia-autocomplete .aa-dropdown-menu .aa-suggestion .search-item h3 {
+  margin-block-start: 0;
+  margin-block-end: 5px;
+}
+
+.algolia-autocomplete .aa-dropdown-menu .aa-suggestion .search-item-description {
+  display: inline-block;
+  overflow: hidden;
+  height: 2.8em;
+  width: 80%;
+  margin-right: 4%;
+}
+
+.algolia-autocomplete .aa-dropdown-menu .aa-suggestion .search-item-preview {
+  display: inline-block;
+  width: 15%;
+}
+
+.algolia-autocomplete .aa-dropdown-menu .aa-suggestion .search-item-preview img {
+  height: 3em;
+  width: auto;
+  display: none;
+}
+
+.algolia-autocomplete .aa-dropdown-menu .aa-suggestion .search-item-preview img[src] {
+  display: initial;
+}
+
+.algolia-autocomplete .aa-dropdown-menu .aa-suggestion.aa-cursor {
+  background-color: #eee;
+}
+.algolia-autocomplete .aa-dropdown-menu .aa-suggestion em {
+  font-weight: bold;
+  font-style: normal;
+}
+
+</style>
+
+
 <!--/radix_placeholder_navigation_in_header-->
   <!--radix_placeholder_distill-->
 
@@ -422,6 +752,51 @@ body {
 
 .pagedtable-footer {
   font-size: 15px;
+}
+
+d-byline .byline {
+  grid-template-columns: 2fr 2fr;
+}
+
+d-byline .byline h3 {
+  margin-block-start: 1.5em;
+}
+
+d-byline .byline .authors-affiliations h3 {
+  margin-block-start: 0.5em;
+}
+
+.authors-affiliations .orcid-id {
+  width: 16px;
+  height:16px;
+  margin-left: 4px;
+  margin-right: 4px;
+  vertical-align: middle;
+  padding-bottom: 2px;
+}
+
+d-title .dt-tags {
+  margin-top: 1em;
+  grid-column: text;
+}
+
+.dt-tags .dt-tag {
+  text-decoration: none;
+  display: inline-block;
+  color: rgba(0,0,0,0.6);
+  padding: 0em 0.4em;
+  margin-right: 0.5em;
+  margin-bottom: 0.4em;
+  font-size: 70%;
+  border: 1px solid rgba(0,0,0,0.2);
+  border-radius: 3px;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+d-article table.gt_table td,
+d-article table.gt_table th {
+  border-bottom: none;
 }
 
 .html-widget {
@@ -463,6 +838,7 @@ body {
 }
 
 d-article {
+  padding-top: 2.5rem;
   padding-bottom: 30px;
 }
 
@@ -474,91 +850,48 @@ d-article>p>img {
   width: 100%;
 }
 
+d-article h2 {
+  margin: 1rem 0 1.5rem 0;
+}
+
+d-article h3 {
+  margin-top: 1.5rem;
+}
+
 d-article iframe {
   border: 1px solid rgba(0, 0, 0, 0.1);
   margin-bottom: 2.0em;
   width: 100%;
 }
 
-figure img.external {
-  background: white;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.1);
-  padding: 18px;
-  box-sizing: border-box;
+/* Tweak code blocks */
+
+d-article div.sourceCode code,
+d-article pre code {
+  font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
 }
 
-/* CSS for table of contents */
-
-.d-toc {
-  color: rgba(0,0,0,0.8);
-  font-size: 0.8em;
-  line-height: 1em;
+d-article pre,
+d-article div.sourceCode,
+d-article div.sourceCode pre {
+  overflow: hidden;
 }
 
-.d-toc-header {
-  font-size: 0.6rem;
-  font-weight: 400;
-  color: rgba(0, 0, 0, 0.5);
-  text-transform: uppercase;
-  margin-top: 0;
-  margin-bottom: 1.3em;
+d-article div.sourceCode {
+  background-color: white;
 }
 
-.d-toc a {
-  border-bottom: none;
-}
-
-.d-toc ul {
-  padding-left: 0;
-}
-
-.d-toc li>ul {
-  padding-top: 0.8em;
-  padding-left: 16px;
-  margin-bottom: 0.6em;
-}
-
-.d-toc ul,
-.d-toc li {
-  list-style-type: none;
-}
-
-.d-toc li {
-  margin-bottom: 0.9em;
-}
-
-.d-toc-separator {
-  margin-top: 20px;
-  margin-bottom: 2em;
-}
-
-.d-article-with-toc {
-  border-top: none;
-  padding-top: 0;
-}
-
-
-
-/* Tweak code blocks (note that this CSS is repeated above in an injection
-   into the d-code shadow dom) */
-
-d-code {
-  overflow-x: auto !important;
-}
-
-pre.d-code code.d-code {
+d-article div.sourceCode pre {
   padding-left: 10px;
   font-size: 12px;
   border-left: 2px solid rgba(0,0,0,0.1);
 }
 
-pre.text-output {
-
+d-article pre {
   font-size: 12px;
   color: black;
   background: none;
-  font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+  margin-top: 0;
   text-align: left;
   white-space: pre;
   word-spacing: normal;
@@ -576,20 +909,123 @@ pre.text-output {
   hyphens: none;
 }
 
+d-article pre a {
+  border-bottom: none;
+}
+
+d-article pre a:hover {
+  border-bottom: none;
+  text-decoration: underline;
+}
+
 @media(min-width: 768px) {
 
-d-code {
-  overflow-x: visible !important;
+d-article pre,
+d-article div.sourceCode,
+d-article div.sourceCode pre {
+  overflow: visible !important;
 }
 
-pre.d-code code.d-code  {
-    padding-left: 18px;
-    font-size: 14px;
-}
-pre.text-output {
+d-article div.sourceCode pre {
+  padding-left: 18px;
   font-size: 14px;
 }
+
+d-article pre {
+  font-size: 14px;
 }
+
+}
+
+figure img.external {
+  background: white;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.1);
+  padding: 18px;
+  box-sizing: border-box;
+}
+
+/* CSS for d-contents */
+
+.d-contents {
+  grid-column: text;
+  color: rgba(0,0,0,0.8);
+  font-size: 0.9em;
+  padding-bottom: 1em;
+  margin-bottom: 1em;
+  padding-bottom: 0.5em;
+  margin-bottom: 1em;
+  padding-left: 0.25em;
+  justify-self: start;
+}
+
+@media(min-width: 1000px) {
+  .d-contents.d-contents-float {
+    height: 0;
+    grid-column-start: 1;
+    grid-column-end: 4;
+    justify-self: center;
+    padding-right: 3em;
+    padding-left: 2em;
+  }
+}
+
+.d-contents nav h3 {
+  font-size: 18px;
+  margin-top: 0;
+  margin-bottom: 1em;
+}
+
+.d-contents li {
+  list-style-type: none
+}
+
+.d-contents nav > ul {
+  padding-left: 0;
+}
+
+.d-contents ul {
+  padding-left: 1em
+}
+
+.d-contents nav ul li {
+  margin-top: 0.6em;
+  margin-bottom: 0.2em;
+}
+
+.d-contents nav a {
+  font-size: 13px;
+  border-bottom: none;
+  text-decoration: none
+  color: rgba(0, 0, 0, 0.8);
+}
+
+.d-contents nav a:hover {
+  text-decoration: underline solid rgba(0, 0, 0, 0.6)
+}
+
+.d-contents nav > ul > li > a {
+  font-weight: 600;
+}
+
+.d-contents nav > ul > li > ul {
+  font-weight: inherit;
+}
+
+.d-contents nav > ul > li > ul > li {
+  margin-top: 0.2em;
+}
+
+
+.d-contents nav ul {
+  margin-top: 0;
+  margin-bottom: 0.25em;
+}
+
+.d-article-with-toc h2:nth-child(2) {
+  margin-top: 0;
+}
+
 
 /* Figure */
 
@@ -627,6 +1063,16 @@ pre.text-output {
   color: rgba(0, 0, 0, 1.0);
 }
 
+/* Citations */
+
+d-article .citation {
+  color: inherit;
+  cursor: inherit;
+}
+
+div.hanging-indent{
+  margin-left: 1em; text-indent: -1em;
+}
 
 
 /* Tweak 1000px media break to show more text */
@@ -702,6 +1148,91 @@ d-appendix .citation-appendix,
   word-wrap: break-word;
 }
 
+/* Include appendix styles here so they can be overridden */
+
+d-appendix {
+  contain: layout style;
+  font-size: 0.8em;
+  line-height: 1.7em;
+  margin-top: 60px;
+  margin-bottom: 0;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  color: rgba(0,0,0,0.5);
+  padding-top: 60px;
+  padding-bottom: 48px;
+}
+
+d-appendix h3 {
+  grid-column: page-start / text-start;
+  font-size: 15px;
+  font-weight: 500;
+  margin-top: 1em;
+  margin-bottom: 0;
+  color: rgba(0,0,0,0.65);
+}
+
+d-appendix h3 + * {
+  margin-top: 1em;
+}
+
+d-appendix ol {
+  padding: 0 0 0 15px;
+}
+
+@media (min-width: 768px) {
+  d-appendix ol {
+    padding: 0 0 0 30px;
+    margin-left: -30px;
+  }
+}
+
+d-appendix li {
+  margin-bottom: 1em;
+}
+
+d-appendix a {
+  color: rgba(0, 0, 0, 0.6);
+}
+
+d-appendix > * {
+  grid-column: text;
+}
+
+d-appendix > d-footnote-list,
+d-appendix > d-citation-list,
+d-appendix > distill-appendix {
+  grid-column: screen;
+}
+
+/* Include footnote styles here so they can be overridden */
+
+d-footnote-list {
+  contain: layout style;
+}
+
+d-footnote-list > * {
+  grid-column: text;
+}
+
+d-footnote-list a.footnote-backlink {
+  color: rgba(0,0,0,0.3);
+  padding-left: 0.5em;
+}
+
+
+
+/* Anchor.js */
+
+.anchorjs-link {
+  /*transition: all .25s linear; */
+  text-decoration: none;
+  border-bottom: none;
+}
+*:hover > .anchorjs-link {
+  margin-left: -1.125em !important;
+  text-decoration: none;
+  border-bottom: none;
+}
 
 /* Social footer */
 
@@ -756,6 +1287,211 @@ d-appendix .citation-appendix,
 
 .custom p {
   margin-bottom: 0.5em;
+}
+
+/* Styles for listing layout (hide title) */
+.layout-listing d-title, .layout-listing .d-title {
+  display: none;
+}
+
+/* Styles for posts lists (not auto-injected) */
+
+
+.posts-with-sidebar {
+  padding-left: 45px;
+  padding-right: 45px;
+}
+
+.posts-list .description h2,
+.posts-list .description p {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", Arial, sans-serif;
+}
+
+.posts-list .description h2 {
+  font-weight: 700;
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.posts-list h2.post-tag {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+  padding-bottom: 12px;
+}
+.posts-list {
+  margin-top: 60px;
+  margin-bottom: 24px;
+}
+
+.posts-list .post-preview {
+  text-decoration: none;
+  overflow: hidden;
+  display: block;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  padding: 24px 0;
+}
+
+.post-preview-last {
+  border-bottom: none !important;
+}
+
+.posts-list .posts-list-caption {
+  grid-column: screen;
+  font-weight: 400;
+}
+
+.posts-list .post-preview h2 {
+  margin: 0 0 6px 0;
+  line-height: 1.2em;
+  font-style: normal;
+  font-size: 24px;
+}
+
+.posts-list .post-preview p {
+  margin: 0 0 12px 0;
+  line-height: 1.4em;
+  font-size: 16px;
+}
+
+.posts-list .post-preview .thumbnail {
+  box-sizing: border-box;
+  margin-bottom: 24px;
+  position: relative;
+  max-width: 500px;
+}
+.posts-list .post-preview img {
+  width: 100%;
+  display: block;
+}
+
+.posts-list .metadata {
+  font-size: 12px;
+  line-height: 1.4em;
+  margin-bottom: 18px;
+}
+
+.posts-list .metadata > * {
+  display: inline-block;
+}
+
+.posts-list .metadata .publishedDate {
+  margin-right: 2em;
+}
+
+.posts-list .metadata .dt-authors {
+  display: block;
+  margin-top: 0.3em;
+  margin-right: 2em;
+}
+
+.posts-list .dt-tags {
+  display: block;
+  line-height: 1em;
+}
+
+.posts-list .dt-tags .dt-tag {
+  display: inline-block;
+  color: rgba(0,0,0,0.6);
+  padding: 0.3em 0.4em;
+  margin-right: 0.2em;
+  margin-bottom: 0.4em;
+  font-size: 60%;
+  border: 1px solid rgba(0,0,0,0.2);
+  border-radius: 3px;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+.posts-list img {
+  opacity: 1;
+}
+
+.posts-list img[data-src] {
+  opacity: 0;
+}
+
+.posts-more {
+  clear: both;
+}
+
+
+.posts-sidebar {
+  font-size: 16px;
+}
+
+.posts-sidebar h3 {
+  font-size: 16px;
+  margin-top: 0;
+  margin-bottom: 0.5em;
+  font-weight: 400;
+  text-transform: uppercase;
+}
+
+.sidebar-section {
+  margin-bottom: 30px;
+}
+
+.categories ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+.categories li {
+  color: rgba(0, 0, 0, 0.8);
+  margin-bottom: 0;
+}
+
+.categories li>a {
+  border-bottom: none;
+}
+
+.categories li>a:hover {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.4);
+}
+
+.categories .active {
+  font-weight: 600;
+}
+
+.categories .category-count {
+  color: rgba(0, 0, 0, 0.4);
+}
+
+
+@media(min-width: 768px) {
+  .posts-list .post-preview h2 {
+    font-size: 26px;
+  }
+  .posts-list .post-preview .thumbnail {
+    float: right;
+    width: 30%;
+    margin-bottom: 0;
+  }
+  .posts-list .post-preview .description {
+    float: left;
+    width: 45%;
+  }
+  .posts-list .post-preview .metadata {
+    float: left;
+    width: 20%;
+    margin-top: 8px;
+  }
+  .posts-list .post-preview p {
+    margin: 0 0 12px 0;
+    line-height: 1.5em;
+    font-size: 16px;
+  }
+  .posts-with-sidebar .posts-list {
+    float: left;
+    width: 75%;
+  }
+  .posts-with-sidebar .posts-sidebar {
+    float: right;
+    width: 20%;
+    margin-top: 60px;
+    padding-top: 24px;
+    padding-bottom: 24px;
+  }
 }
 
 
@@ -887,6 +1623,12 @@ d-appendix .citation-appendix,
   hyphens: none;
 }
 
+.downlevel .posts-list .post-preview {
+  color: inherit;
+}
+
+
+
 </style>
 
 <script type="application/javascript">
@@ -902,6 +1644,13 @@ function is_downlevel_browser() {
 
 // show body when load is complete
 function on_load_complete() {
+
+  // add anchors
+  if (window.anchors) {
+    window.anchors.options.placement = 'left';
+    window.anchors.add('d-article > h2, d-article > h3, d-article > h4, d-article > h5');
+  }
+
 
   // set body to visible
   document.body.style.visibility = 'visible';
@@ -948,23 +1697,8 @@ function init_distill() {
   // create d-appendix
   $('.d-appendix').changeElementType('d-appendix');
 
-  // create d-bibliography
-  var bibliography = $('<d-bibliography></d-bibliography>');
-  $('#distill-bibliography').wrap(bibliography);
-
   // flag indicating that we have appendix items
   var appendix = $('.appendix-bottom').children('h3').length > 0;
-
-  // replace citations with <d-cite>
-  $('.citation').each(function(i, val) {
-    appendix = true;
-    var cites = $(this).attr('data-cites').split(" ");
-    var dt_cite = $('<d-cite></d-cite>');
-    dt_cite.attr('key', cites.join());
-    $(this).replaceWith(dt_cite);
-  });
-  // remove refs
-  $('#refs').remove();
 
   // replace footnotes with <d-footnote>
   $('.footnote-ref').each(function(i, val) {
@@ -982,39 +1716,21 @@ function init_distill() {
   // remove footnotes
   $('.footnotes').remove();
 
+  // move refs into #references-listing
+  $('#references-listing').replaceWith($('#refs'));
+
   $('h1.appendix, h2.appendix').each(function(i, val) {
     $(this).changeElementType('h3');
   });
   $('h3.appendix').each(function(i, val) {
     var id = $(this).attr('id');
-    $('.d-toc a[href="#' + id + '"]').parent().remove();
+    $('.d-contents a[href="#' + id + '"]').parent().remove();
     appendix = true;
     $(this).nextUntil($('h1, h2, h3')).addBack().appendTo($('d-appendix'));
   });
 
   // show d-appendix if we have appendix content
   $("d-appendix").css('display', appendix ? 'grid' : 'none');
-
-  // replace code blocks with d-code
-  $('pre>code').each(function(i, val) {
-    var code = $(this);
-    var pre = code.parent();
-    var clz = "";
-    var language = pre.attr('class');
-    if (language) {
-      // map unknown languages to "clike" (without this they just dissapear)
-      if ($.inArray(language, ["bash", "clike", "css", "go", "html",
-                               "javascript", "js", "julia", "lua", "markdown",
-                               "markup", "mathml", "python", "svg", "xml"]) == -1)
-        language = "clike";
-      language = ' language="' + language + '"';
-      var dt_code = $('<d-code block' + language + clz + '></d-code>');
-      dt_code.text(code.text());
-      pre.replaceWith(dt_code);
-    } else {
-      code.addClass('text-output').unwrap().changeElementType('pre');
-    }
-  });
 
   // localize layout chunks to just output
   $('.layout-chunk').each(function(i, val) {
@@ -1023,7 +1739,7 @@ function init_distill() {
     var layout = $(this).attr('data-layout');
 
     // apply layout to markdown level block elements
-    var elements = $(this).children().not('d-code, pre.text-output, script');
+    var elements = $(this).children().not('div.sourceCode, pre, script');
     elements.each(function(i, el) {
       var layout_div = $('<div class="' + layout + '"></div>');
       if (layout_div.hasClass('shaded')) {
@@ -1040,6 +1756,13 @@ function init_distill() {
     $(this).children().unwrap();
   });
 
+  // remove code block used to force  highlighting css
+  $('.distill-force-highlighting-css').parent().remove();
+
+  // remove empty line numbers inserted by pandoc when using a
+  // custom syntax highlighting theme
+  $('code.sourceCode a:empty').remove();
+
   // load distill framework
   load_distill_framework();
 
@@ -1055,12 +1778,26 @@ function init_distill() {
     if (!have_authors)
       $('d-byline').addClass('hidden');
 
-    // table of contents
-    if (have_authors) // adjust border if we are in authors
-      $('.d-toc').parent().addClass('d-article-with-toc');
+    // article with toc class
+    $('.d-contents').parent().addClass('d-article-with-toc');
 
     // strip links that point to #
     $('.authors-affiliations').find('a[href="#"]').removeAttr('href');
+
+    // add orcid ids
+    $('.authors-affiliations').find('.author').each(function(i, el) {
+      var orcid_id = front_matter.authors[i].orcidID;
+      if (orcid_id) {
+        var a = $('<a></a>');
+        a.attr('href', 'https://orcid.org/' + orcid_id);
+        var img = $('<img></img>');
+        img.addClass('orcid-id');
+        img.attr('alt', 'ORCID ID');
+        img.attr('src','data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA2ZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo1N0NEMjA4MDI1MjA2ODExOTk0QzkzNTEzRjZEQTg1NyIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDozM0NDOEJGNEZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDozM0NDOEJGM0ZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M1IE1hY2ludG9zaCI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOkZDN0YxMTc0MDcyMDY4MTE5NUZFRDc5MUM2MUUwNEREIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjU3Q0QyMDgwMjUyMDY4MTE5OTRDOTM1MTNGNkRBODU3Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+84NovQAAAR1JREFUeNpiZEADy85ZJgCpeCB2QJM6AMQLo4yOL0AWZETSqACk1gOxAQN+cAGIA4EGPQBxmJA0nwdpjjQ8xqArmczw5tMHXAaALDgP1QMxAGqzAAPxQACqh4ER6uf5MBlkm0X4EGayMfMw/Pr7Bd2gRBZogMFBrv01hisv5jLsv9nLAPIOMnjy8RDDyYctyAbFM2EJbRQw+aAWw/LzVgx7b+cwCHKqMhjJFCBLOzAR6+lXX84xnHjYyqAo5IUizkRCwIENQQckGSDGY4TVgAPEaraQr2a4/24bSuoExcJCfAEJihXkWDj3ZAKy9EJGaEo8T0QSxkjSwORsCAuDQCD+QILmD1A9kECEZgxDaEZhICIzGcIyEyOl2RkgwAAhkmC+eAm0TAAAAABJRU5ErkJggg==');
+        a.append(img);
+        $(this).append(a);
+      }
+    });
 
     // hide elements of author/affiliations grid that have no value
     function hide_byline_column(caption) {
@@ -1110,14 +1847,9 @@ function init_distill() {
       grid.children('h3:contains("Affiliations")').text('Affiliation');
     }
 
-    // inject pre code styles (can't do this with a global stylesheet b/c a shadow root is used)
-    $('d-code').each(function(i, val) {
-      var style = document.createElement('style');
-      style.innerHTML = 'pre code { padding-left: 10px; font-size: 12px; border-left: 2px solid rgba(0,0,0,0.1); } ' +
-                        '@media(min-width: 768px) { pre code { padding-left: 18px; font-size: 14px; } }';
-      if (this.shadowRoot)
-        this.shadowRoot.appendChild(style);
-    });
+    // remove d-appendix and d-footnote-list local styles
+    $('d-appendix > style:first-child').remove();
+    $('d-footnote-list > style:first-child').remove();
 
     // move appendix-bottom entries to the bottom
     $('.appendix-bottom').appendTo('d-appendix').children().unwrap();
@@ -1153,9 +1885,7 @@ function init_downlevel() {
   $('.d-byline a').remove();
 
   // remove toc
-  $('.d-toc-header').remove();
-  $('.d-toc').remove();
-  $('.d-toc-separator').remove();
+  $('.d-contents').remove();
 
   // move appendix elements
   $('h1.appendix, h2.appendix').each(function(i, val) {
@@ -1285,6 +2015,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 <!--/radix_placeholder_distill-->
   <script src="../../site_libs/jquery-1.11.3/jquery.min.js"></script>
+  <script src="../../site_libs/anchor-4.2.2/anchor.min.js"></script>
   <script src="../../site_libs/bowser-1.9.3/bowser.min.js"></script>
   <script src="../../site_libs/webcomponents-2.0.0/webcomponents.js"></script>
   <script src="../../site_libs/distill-2.2.21/template.v2.js"></script>
@@ -1300,7 +2031,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <!--radix_placeholder_front_matter-->
 
 <script id="distill-front-matter" type="text/json">
-{"title":"A production example using plumber and Docker","description":"We write a REST API using plumber and deploy it using Docker.","authors":[{"author":"Lennart Schneider","authorURL":"#","affiliation":"&nbsp;","affiliationURL":"#"}],"publishedDate":"2020-08-13T00:00:00.000+00:00","citationText":"Schneider, 2020"}
+{"title":"A production example using plumber and Docker","description":"We write a REST API using plumber and deploy it using Docker.","authors":[{"author":"Lennart Schneider","authorURL":"#","affiliation":"&nbsp;","affiliationURL":"#","orcidID":""}],"publishedDate":"2020-08-13T00:00:00.000+00:00","citationText":"Schneider, 2020"}
 </script>
 
 <!--/radix_placeholder_front_matter-->
@@ -1312,6 +2043,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <img src="../../images/logo.png" alt="Logo"/>
 </a>
 <a href="../../index.html" class="title">mlr3gallery</a>
+<input id="distill-search" class="nav-search hidden" type="text" placeholder="Search..."/>
 </div>
 <div class="nav-right">
 <a href="https://github.com/mlr-org/mlr3gallery">
@@ -1327,6 +2059,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
 <div class="d-title">
 <h1>A production example using plumber and Docker</h1>
+<!--radix_placeholder_categories-->
+<div class="dt-tags">
+  <a href="../../index.html#category:mlr3pipelines" class="dt-tag">mlr3pipelines</a>
+  <a href="../../index.html#category:production" class="dt-tag">production</a>
+</div>
+<!--/radix_placeholder_categories-->
 <p><p>We write a REST API using plumber and deploy it using Docker.</p></p>
 </div>
 
@@ -1346,94 +2084,113 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>All files presented in this tutorial are available <a href="https://github.com/mlr-org/mlr3gallery/_posts/2020-08-13-a-production-example-using-plumber-and-docker/mlr3_api">here</a>.</p>
 <h3 id="modeling-background">Modeling Background</h3>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-library(data.table)
-library(mlr3)
-library(mlr3pipelines)</code></pre>
+<div class="sourceCode">
+<pre><code><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='http://r-datatable.com'>data.table</a></span><span class='op'>)</span>
+<span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://mlr3.mlr-org.com'>mlr3</a></span><span class='op'>)</span>
+<span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://mlr3pipelines.mlr-org.com'>mlr3pipelines</a></span><span class='op'>)</span>
+</code></pre>
+</div>
 </div>
 <p>We will use a subset of the <a href="https://mlr3.mlr-org.com/reference/mlr_tasks_boston_housing.html"><code>boston_housing</code></a> <a href="https://mlr3.mlr-org.com/reference/Task.html"><code>Task</code></a>. Our goal is to predict the median value of owner-occupied homes in USD 1000’s (target <code>medv</code>), using the features <code>crim</code>, <code>tax</code> and <code>town</code> (just to have <code>factor</code>, <code>integer</code>, and <code>numeric</code> feature types):</p>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-data = tsk(&quot;boston_housing&quot;)$data()
-data = data[, c(&quot;medv&quot;, &quot;crim&quot;, &quot;tax&quot;, &quot;town&quot;)]</code></pre>
+<div class="sourceCode">
+<pre><code><span class='va'>data</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>tsk</a></span><span class='op'>(</span><span class='st'>"boston_housing"</span><span class='op'>)</span><span class='op'>$</span><span class='fu'>data</span><span class='op'>(</span><span class='op'>)</span>
+<span class='va'>data</span> <span class='op'>=</span> <span class='va'>data</span><span class='op'>[</span>, <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"medv"</span>, <span class='st'>"crim"</span>, <span class='st'>"tax"</span>, <span class='st'>"town"</span><span class='op'>)</span><span class='op'>]</span>
+</code></pre>
+</div>
 </div>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-task = TaskRegr$new(&quot;boston&quot;, backend = data, target = &quot;medv&quot;)</code></pre>
+<div class="sourceCode">
+<pre><code><span class='va'>task</span> <span class='op'>=</span> <span class='va'><a href='https://mlr3.mlr-org.com/reference/TaskRegr.html'>TaskRegr</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='st'>"boston"</span>, backend <span class='op'>=</span> <span class='va'>data</span>, target <span class='op'>=</span> <span class='st'>"medv"</span><span class='op'>)</span>
+</code></pre>
+</div>
 </div>
 <p>Let’s create a toy pipeline:</p>
 <p>Regarding modeling, we will keep it very simple and use the <a href="https://mlr3.mlr-org.com/reference/mlr_learners_regr.rpart.html"><code>rpart learner</code></a>. Missing numerical features (which could happen during prediction) will be imputed by their median via <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_imputemedian.html"><code>PipeOpImputeMedian</code></a>, while missing factorial features will be imputed using a new level via <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_imputeoor.html"><code>PipeOpImputeOOR</code></a>. As <code>PipeOpImputeOOR</code> will introduce a new <code>level</code>, <code>".MISSING"</code> to impute missing values, we also use <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_fixfactors.html"><code>PipeOpFixFactors</code></a>:</p>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-g = po(&quot;imputemedian&quot;) %&gt;&gt;%
-  po(&quot;imputeoor&quot;) %&gt;&gt;%
-  po(&quot;fixfactors&quot;) %&gt;&gt;%
-  lrn(&quot;regr.rpart&quot;)</code></pre>
+<div class="sourceCode">
+<pre><code><span class='va'>g</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"imputemedian"</span><span class='op'>)</span> <span class='op'>%&gt;&gt;%</span>
+  <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"imputeoor"</span><span class='op'>)</span> <span class='op'>%&gt;&gt;%</span>
+  <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"fixfactors"</span><span class='op'>)</span> <span class='op'>%&gt;&gt;%</span>
+  <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>lrn</a></span><span class='op'>(</span><span class='st'>"regr.rpart"</span><span class='op'>)</span>
+</code></pre>
+</div>
 </div>
 <p>We wrap this <a href="https://mlr3pipelines.mlr-org.com/reference/Graph.html"><code>Graph</code></a> in a <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_learners_graph.html"><code>GraphLearner</code></a> and can train on the <code>Task</code>:</p>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-gl = GraphLearner$new(g)
-gl$train(task)</code></pre>
+<div class="sourceCode">
+<pre><code><span class='va'>gl</span> <span class='op'>=</span> <span class='va'><a href='https://mlr3pipelines.mlr-org.com//reference/mlr_learners_graph.html'>GraphLearner</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='va'>g</span><span class='op'>)</span>
+<span class='va'>gl</span><span class='op'>$</span><span class='fu'>train</span><span class='op'>(</span><span class='va'>task</span><span class='op'>)</span>
+</code></pre>
+</div>
 </div>
 <p>We can inspect the trained pipeline looking at:</p>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-gl$model</code></pre>
+<div class="sourceCode">
+<pre><code><span class='va'>gl</span><span class='op'>$</span><span class='va'>model</span>
+</code></pre>
+</div>
 </div>
 <p>Furthermore, we can save the trained pipeline, i.e., as <code>"gl.rds"</code>:</p>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-saveRDS(gl, &quot;gl.rds&quot;)</code></pre>
+<div class="sourceCode">
+<pre><code><span class='fu'><a href='https://rdrr.io/r/base/readRDS.html'>saveRDS</a></span><span class='op'>(</span><span class='va'>gl</span>, <span class='st'>"gl.rds"</span><span class='op'>)</span>
+</code></pre>
+</div>
 </div>
 <p>We will also store some information regarding the features, i.e., the feature names, types and levels (you will later see, why we need to do this):</p>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-feature_info = list(
-  feature_names = task$feature_names,
-  feature_types = task$feature_types,
-  levels = task$levels()
-)
-saveRDS(feature_info, &quot;feature_info.rds&quot;)</code></pre>
+<div class="sourceCode">
+<pre><code><span class='va'>feature_info</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>
+  feature_names <span class='op'>=</span> <span class='va'>task</span><span class='op'>$</span><span class='va'>feature_names</span>,
+  feature_types <span class='op'>=</span> <span class='va'>task</span><span class='op'>$</span><span class='va'>feature_types</span>,
+  levels <span class='op'>=</span> <span class='va'>task</span><span class='op'>$</span><span class='fu'>levels</span><span class='op'>(</span><span class='op'>)</span>
+<span class='op'>)</span>
+<span class='fu'><a href='https://rdrr.io/r/base/readRDS.html'>saveRDS</a></span><span class='op'>(</span><span class='va'>feature_info</span>, <span class='st'>"feature_info.rds"</span><span class='op'>)</span>
+</code></pre>
+</div>
 </div>
 <p>Putting everything in a file, <code>train_gl.R</code> looks like the following, which we can then source before moving on:</p>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-# train_gl.R
+<div class="sourceCode">
+<pre><code><span class='co'># train_gl.R</span>
 
-library(mlr3)
-library(mlr3pipelines)
+<span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://mlr3.mlr-org.com'>mlr3</a></span><span class='op'>)</span>
+<span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://mlr3pipelines.mlr-org.com'>mlr3pipelines</a></span><span class='op'>)</span>
 
-data = tsk(&quot;boston_housing&quot;)$data()
-data = data[, c(&quot;medv&quot;, &quot;crim&quot;, &quot;tax&quot;, &quot;town&quot;)]
-task = TaskRegr$new(&quot;boston&quot;, backend = data, target = &quot;medv&quot;)
+<span class='va'>data</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>tsk</a></span><span class='op'>(</span><span class='st'>"boston_housing"</span><span class='op'>)</span><span class='op'>$</span><span class='fu'>data</span><span class='op'>(</span><span class='op'>)</span>
+<span class='va'>data</span> <span class='op'>=</span> <span class='va'>data</span><span class='op'>[</span>, <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"medv"</span>, <span class='st'>"crim"</span>, <span class='st'>"tax"</span>, <span class='st'>"town"</span><span class='op'>)</span><span class='op'>]</span>
+<span class='va'>task</span> <span class='op'>=</span> <span class='va'><a href='https://mlr3.mlr-org.com/reference/TaskRegr.html'>TaskRegr</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='st'>"boston"</span>, backend <span class='op'>=</span> <span class='va'>data</span>, target <span class='op'>=</span> <span class='st'>"medv"</span><span class='op'>)</span>
 
-g = po(&quot;imputemedian&quot;) %&gt;&gt;%
-  po(&quot;imputeoor&quot;) %&gt;&gt;%
-  po(&quot;fixfactors&quot;) %&gt;&gt;%
-  lrn(&quot;regr.rpart&quot;)
+<span class='va'>g</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"imputemedian"</span><span class='op'>)</span> <span class='op'>%&gt;&gt;%</span>
+  <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"imputeoor"</span><span class='op'>)</span> <span class='op'>%&gt;&gt;%</span>
+  <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"fixfactors"</span><span class='op'>)</span> <span class='op'>%&gt;&gt;%</span>
+  <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>lrn</a></span><span class='op'>(</span><span class='st'>"regr.rpart"</span><span class='op'>)</span>
 
-gl = GraphLearner$new(g)
+<span class='va'>gl</span> <span class='op'>=</span> <span class='va'><a href='https://mlr3pipelines.mlr-org.com//reference/mlr_learners_graph.html'>GraphLearner</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='va'>g</span><span class='op'>)</span>
 
-gl$train(task)
+<span class='va'>gl</span><span class='op'>$</span><span class='fu'>train</span><span class='op'>(</span><span class='va'>task</span><span class='op'>)</span>
 
-saveRDS(gl, &quot;gl.rds&quot;)
+<span class='fu'><a href='https://rdrr.io/r/base/readRDS.html'>saveRDS</a></span><span class='op'>(</span><span class='va'>gl</span>, <span class='st'>"gl.rds"</span><span class='op'>)</span>
 
-feature_info = list(
-  feature_names = task$feature_names,
-  feature_types = task$feature_types,
-  levels = task$levels()
-)
+<span class='va'>feature_info</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>
+  feature_names <span class='op'>=</span> <span class='va'>task</span><span class='op'>$</span><span class='va'>feature_names</span>,
+  feature_types <span class='op'>=</span> <span class='va'>task</span><span class='op'>$</span><span class='va'>feature_types</span>,
+  levels <span class='op'>=</span> <span class='va'>task</span><span class='op'>$</span><span class='fu'>levels</span><span class='op'>(</span><span class='op'>)</span>
+<span class='op'>)</span>
 
-saveRDS(feature_info, &quot;feature_info.rds&quot;)</code></pre>
+<span class='fu'><a href='https://rdrr.io/r/base/readRDS.html'>saveRDS</a></span><span class='op'>(</span><span class='va'>feature_info</span>, <span class='st'>"feature_info.rds"</span><span class='op'>)</span>
+</code></pre>
+</div>
 </div>
 <p>Our goal of our REST (representational state transfer) API (application programming interface) will be to predict the <code>medv</code> of a new observation, i.e., it should do something like the following:</p>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-newdata = data.table(crim = 3.14, tax = 691, town = &quot;Newton&quot;)
-gl$predict_newdata(newdata)</code></pre>
-<pre><code>
-&lt;PredictionRegr&gt; for 1 observations:
+<div class="sourceCode">
+<pre><code><span class='va'>newdata</span> <span class='op'>=</span> <span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/data.table.html'>data.table</a></span><span class='op'>(</span>crim <span class='op'>=</span> <span class='fl'>3.14</span>, tax <span class='op'>=</span> <span class='fl'>691</span>, town <span class='op'>=</span> <span class='st'>"Newton"</span><span class='op'>)</span>
+<span class='va'>gl</span><span class='op'>$</span><span class='fu'>predict_newdata</span><span class='op'>(</span><span class='va'>newdata</span><span class='op'>)</span>
+</code></pre>
+</div>
+<pre><code>&lt;PredictionRegr&gt; for 1 observations:
  row_id truth response
       1    NA 32.23288</code></pre>
 </div>
@@ -1448,101 +2205,111 @@ gl$predict_newdata(newdata)</code></pre>
 </ol>
 <p>To make sure that all features match their feature type, we will later use the following function stored in the R file <code>fix_feature_types.R</code>:</p>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-# fix_feature_types.R
+<div class="sourceCode">
+<pre><code><span class='co'># fix_feature_types.R</span>
 
-fix_feature_types = function(feature, feature_name, feature_info) {
-  id = match(feature_name, feature_info$feature_names)
-  feature_type = feature_info$feature_types$type[id]
-  switch(feature_type,
-    &quot;logical&quot;   = as.logical(feature),
-    &quot;integer&quot;   = as.integer(feature),
-    &quot;numeric&quot;   = as.numeric(feature),
-    &quot;character&quot; = as.character(feature),
-    &quot;factor&quot;    = factor(feature, levels = feature_info$levels[[feature_name]],
-      ordered = FALSE),
-    &quot;ordered&quot;   = factor(feature, levels = feature_info$levels[[feature_name]],
-      ordered = TRUE),
-    &quot;POSIXct&quot;   = as.POSIXct(feature)
-  )
-}</code></pre>
+<span class='va'>fix_feature_types</span> <span class='op'>=</span> <span class='kw'>function</span><span class='op'>(</span><span class='va'>feature</span>, <span class='va'>feature_name</span>, <span class='va'>feature_info</span><span class='op'>)</span> <span class='op'>{</span>
+  <span class='va'>id</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/match.html'>match</a></span><span class='op'>(</span><span class='va'>feature_name</span>, <span class='va'>feature_info</span><span class='op'>$</span><span class='va'>feature_names</span><span class='op'>)</span>
+  <span class='va'>feature_type</span> <span class='op'>=</span> <span class='va'>feature_info</span><span class='op'>$</span><span class='va'>feature_types</span><span class='op'>$</span><span class='va'>type</span><span class='op'>[</span><span class='va'>id</span><span class='op'>]</span>
+  <span class='kw'><a href='https://rdrr.io/r/base/switch.html'>switch</a></span><span class='op'>(</span><span class='va'>feature_type</span>,
+    <span class='st'>"logical"</span>   <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/logical.html'>as.logical</a></span><span class='op'>(</span><span class='va'>feature</span><span class='op'>)</span>,
+    <span class='st'>"integer"</span>   <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/integer.html'>as.integer</a></span><span class='op'>(</span><span class='va'>feature</span><span class='op'>)</span>,
+    <span class='st'>"numeric"</span>   <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/numeric.html'>as.numeric</a></span><span class='op'>(</span><span class='va'>feature</span><span class='op'>)</span>,
+    <span class='st'>"character"</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/character.html'>as.character</a></span><span class='op'>(</span><span class='va'>feature</span><span class='op'>)</span>,
+    <span class='st'>"factor"</span>    <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/factor.html'>factor</a></span><span class='op'>(</span><span class='va'>feature</span>, levels <span class='op'>=</span> <span class='va'>feature_info</span><span class='op'>$</span><span class='va'>levels</span><span class='op'>[[</span><span class='va'>feature_name</span><span class='op'>]</span><span class='op'>]</span>,
+      ordered <span class='op'>=</span> <span class='cn'>FALSE</span><span class='op'>)</span>,
+    <span class='st'>"ordered"</span>   <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/factor.html'>factor</a></span><span class='op'>(</span><span class='va'>feature</span>, levels <span class='op'>=</span> <span class='va'>feature_info</span><span class='op'>$</span><span class='va'>levels</span><span class='op'>[[</span><span class='va'>feature_name</span><span class='op'>]</span><span class='op'>]</span>,
+      ordered <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>,
+    <span class='st'>"POSIXct"</span>   <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/as.POSIXlt.html'>as.POSIXct</a></span><span class='op'>(</span><span class='va'>feature</span><span class='op'>)</span>
+  <span class='op'>)</span>
+<span class='op'>}</span>
+</code></pre>
+</div>
 </div>
 <p><code>fix_feature_types()</code> can later be applied to the <code>newdata</code>, and will make sure, that all incoming features are converted to their expected feature type as in the original <code>Task</code> we used for training our pipeline (and this is the reason, why we stored the information about the features earlier). Note that in our tutorial we only have <code>factor</code>, <code>integer</code>, and <code>numeric</code> features, but <code>fix_feature_types()</code> should also work for all other supported <code>feature_types</code> listed in <code>mlr_reflections$task_feature_types</code>. However, it may need some customization depending on your own production environment to make the conversions meaningful.</p>
 <p>The following R file, <code>predict_gl.R</code> loads our trained pipepline and feature information and provides an endpoint for a <code>POST</code> request, <code>"/predict_medv"</code>. The incoming data then is converted using <code>jsonlite::fromJSON</code>. We expect the incoming data to either be JSON objects in an array or nested JSON objects and therefore we bind the converted vectors row-wise to a <code>data.table</code> using <code>data.table::rbindlist</code>. We then convert all features to their expected <code>feature_types</code> (using the <code>fix_feature_types()</code> function as defined above) and can finally predict the <code>medv</code> using our trained pipeline. As no default serialization from <code>R6</code> objects to JSON objects exists (yet), we wrap the <a href="https://mlr3.mlr-org.com/reference/Prediction.html"><code>Prediction</code></a> in a <code>data.table</code> (of course we could also only return the numeric prediction values):</p>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-# predict_gl.R
+<div class="sourceCode">
+<pre><code><span class='co'># predict_gl.R</span>
 
-library(data.table)
-library(jsonlite)
-library(mlr3)
-library(mlr3pipelines)
+<span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='http://r-datatable.com'>data.table</a></span><span class='op'>)</span>
+<span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://arxiv.org/abs/1403.2805'>jsonlite</a></span><span class='op'>)</span>
+<span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://mlr3.mlr-org.com'>mlr3</a></span><span class='op'>)</span>
+<span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://mlr3pipelines.mlr-org.com'>mlr3pipelines</a></span><span class='op'>)</span>
 
-source(&quot;fix_feature_types.R&quot;)
+<span class='kw'><a href='https://rdrr.io/r/base/source.html'>source</a></span><span class='op'>(</span><span class='st'>"fix_feature_types.R"</span><span class='op'>)</span>
 
-gl = readRDS(&quot;gl.rds&quot;)
+<span class='va'>gl</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/readRDS.html'>readRDS</a></span><span class='op'>(</span><span class='st'>"gl.rds"</span><span class='op'>)</span>
 
-feature_info = readRDS(&quot;feature_info.rds&quot;)
+<span class='va'>feature_info</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/readRDS.html'>readRDS</a></span><span class='op'>(</span><span class='st'>"feature_info.rds"</span><span class='op'>)</span>
 
-#* @post /predict_medv
-function(req) {
-  # get the JSON string from the post body
-  newdata = fromJSON(req$postBody, simplifyVector = FALSE)
-  # expect either JSON objects in an array or nested JSON objects
-  newdata = rbindlist(newdata, use.names = TRUE)
-  # convert all features in place to their expected feature_type
-  newdata[, colnames(newdata) := mlr3misc::pmap(
-    list(.SD, colnames(newdata)),
-    fix_feature_types,
-    feature_info = feature_info)]
-  # predict and return as a data.table
-  as.data.table(gl$predict_newdata(newdata))
-  # or only the numeric values
-  # gl$predict_newdata(newdata)$response
-}</code></pre>
+<span class='co'>#* @post /predict_medv</span>
+<span class='kw'>function</span><span class='op'>(</span><span class='va'>req</span><span class='op'>)</span> <span class='op'>{</span>
+  <span class='co'># get the JSON string from the post body</span>
+  <span class='va'>newdata</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/pkg/jsonlite/man/fromJSON.html'>fromJSON</a></span><span class='op'>(</span><span class='va'>req</span><span class='op'>$</span><span class='va'>postBody</span>, simplifyVector <span class='op'>=</span> <span class='cn'>FALSE</span><span class='op'>)</span>
+  <span class='co'># expect either JSON objects in an array or nested JSON objects</span>
+  <span class='va'>newdata</span> <span class='op'>=</span> <span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/rbindlist.html'>rbindlist</a></span><span class='op'>(</span><span class='va'>newdata</span>, use.names <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>
+  <span class='co'># convert all features in place to their expected feature_type</span>
+  <span class='va'>newdata</span><span class='op'>[</span>, <span class='fu'><a href='https://rdrr.io/r/base/colnames.html'>colnames</a></span><span class='op'>(</span><span class='va'>newdata</span><span class='op'>)</span> <span class='op'>:=</span> <span class='fu'>mlr3misc</span><span class='fu'>::</span><span class='fu'><a href='https://mlr3misc.mlr-org.com/reference/compat-map.html'>pmap</a></span><span class='op'>(</span>
+    <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='va'>.SD</span>, <span class='fu'><a href='https://rdrr.io/r/base/colnames.html'>colnames</a></span><span class='op'>(</span><span class='va'>newdata</span><span class='op'>)</span><span class='op'>)</span>,
+    <span class='va'>fix_feature_types</span>,
+    feature_info <span class='op'>=</span> <span class='va'>feature_info</span><span class='op'>)</span><span class='op'>]</span>
+  <span class='co'># predict and return as a data.table</span>
+  <span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/as.data.table.html'>as.data.table</a></span><span class='op'>(</span><span class='va'>gl</span><span class='op'>$</span><span class='fu'>predict_newdata</span><span class='op'>(</span><span class='va'>newdata</span><span class='op'>)</span><span class='op'>)</span>
+  <span class='co'># or only the numeric values</span>
+  <span class='co'># gl$predict_newdata(newdata)$response</span>
+<span class='op'>}</span>
+</code></pre>
+</div>
 </div>
 <p>Note that the only difference to a regular R file is the comment</p>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-#* @post /predict_medv`</code></pre>
+<div class="sourceCode">
+<pre><code><span class='co'>#* @post /predict_medv`</span>
+</code></pre>
+</div>
 </div>
 <p>telling <code>plumber</code> to construct the endpoint <code>"/predict_medv"</code> for a <code>POST</code> request.</p>
 <p>We can then run <code>plumber::plumb</code>. The following code sets up the web service locally on your personal machine at port 1030 (we use such a high number because some systems require administrator rights to allow processes to listen to lower ports):</p>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-library(plumber)
-r = plumb(&quot;predict_gl.R&quot;)
-r$run(port = 1030, host = &quot;0.0.0.0&quot;)</code></pre>
+<div class="sourceCode">
+<pre><code><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'>plumber</span><span class='op'>)</span>
+<span class='va'>r</span> <span class='op'>=</span> <span class='fu'>plumb</span><span class='op'>(</span><span class='st'>"predict_gl.R"</span><span class='op'>)</span>
+<span class='va'>r</span><span class='op'>$</span><span class='fu'>run</span><span class='op'>(</span>port <span class='op'>=</span> <span class='fl'>1030</span>, host <span class='op'>=</span> <span class='st'>"0.0.0.0"</span><span class='op'>)</span>
+</code></pre>
+</div>
 </div>
 <p>Congratulations, your first REST API is running on your local machine. We can test it by providing some data, using <code>curl</code> via the command line:</p>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="bash"><code>
-curl --data &#39;[{&quot;crim&quot;:3.14, &quot;tax&quot;:691, &quot;town&quot;:&quot;Newton&quot;}]&#39; &quot;http://127.0.0.1:1030/predict_medv&quot;</code></pre>
+<div class="sourceCode" id="cb2"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1"></a><span class="ex">curl</span> --data <span class="st">&#39;[{&quot;crim&quot;:3.14, &quot;tax&quot;:691, &quot;town&quot;:&quot;Newton&quot;}]&#39;</span> <span class="st">&quot;http://127.0.0.1:1030/predict_medv&quot;</span></span></code></pre></div>
 </div>
 <p>This should return the predicted <code>medv</code>:</p>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="bash"><code>
-[{&quot;row_id&quot;:1,&quot;response&quot;:&quot;32.2329&quot;}]</code></pre>
+<div class="sourceCode" id="cb3"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1"></a>[<span class="dt">{&quot;row_id&quot;:1,&quot;response&quot;:&quot;32.2329&quot;}</span>]</span></code></pre></div>
 </div>
 <p>Alternatively, we can also use the <code>httr::POST</code> function within R:</p>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-newdata = &#39;[{&quot;crim&quot;:3.14, &quot;tax&quot;:691, &quot;town&quot;:&quot;Newton&quot;}]&#39;
-resp = httr::POST(url = &quot;http://127.0.0.1:1030/predict_medv&quot;,
-  body = newdata, encode = &quot;json&quot;)
-httr::content(resp)</code></pre>
+<div class="sourceCode">
+<pre><code><span class='va'>newdata</span> <span class='op'>=</span> <span class='st'>'[{"crim":3.14, "tax":691, "town":"Newton"}]'</span>
+<span class='va'>resp</span> <span class='op'>=</span> <span class='fu'>httr</span><span class='fu'>::</span><span class='fu'><a href='https://httr.r-lib.org/reference/POST.html'>POST</a></span><span class='op'>(</span>url <span class='op'>=</span> <span class='st'>"http://127.0.0.1:1030/predict_medv"</span>,
+  body <span class='op'>=</span> <span class='va'>newdata</span>, encode <span class='op'>=</span> <span class='st'>"json"</span><span class='op'>)</span>
+<span class='fu'>httr</span><span class='fu'>::</span><span class='fu'><a href='https://httr.r-lib.org/reference/content.html'>content</a></span><span class='op'>(</span><span class='va'>resp</span><span class='op'>)</span>
+</code></pre>
+</div>
 </div>
 <p>We can further play around a bit more and provide more than a single new observation and also check whether our feature type conversion and missing value imputation works:</p>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-newdata = &#39;[
-  {&quot;crim&quot;:3.14, &quot;tax&quot;:691, &quot;town&quot;:&quot;Newton&quot;},
-  {&quot;crim&quot;:&quot;not_a_number&quot;, &quot;tax&quot;:3.14, &quot;town&quot;:&quot;Munich&quot;},
-  {&quot;tax&quot;:&quot;not_a_number&quot;, &quot;town&quot;:31, &quot;crim&quot;:99}
-]&#39;
-resp = httr::POST(url = &quot;http://127.0.0.1:1030/predict_medv&quot;,
-  body = newdata, encode = &quot;json&quot;)
-httr::content(resp)</code></pre>
+<div class="sourceCode">
+<pre><code><span class='va'>newdata</span> <span class='op'>=</span> <span class='st'>'[
+  {"crim":3.14, "tax":691, "town":"Newton"},
+  {"crim":"not_a_number", "tax":3.14, "town":"Munich"},
+  {"tax":"not_a_number", "town":31, "crim":99}
+]'</span>
+<span class='va'>resp</span> <span class='op'>=</span> <span class='fu'>httr</span><span class='fu'>::</span><span class='fu'><a href='https://httr.r-lib.org/reference/POST.html'>POST</a></span><span class='op'>(</span>url <span class='op'>=</span> <span class='st'>"http://127.0.0.1:1030/predict_medv"</span>,
+  body <span class='op'>=</span> <span class='va'>newdata</span>, encode <span class='op'>=</span> <span class='st'>"json"</span><span class='op'>)</span>
+<span class='fu'>httr</span><span class='fu'>::</span><span class='fu'><a href='https://httr.r-lib.org/reference/content.html'>content</a></span><span class='op'>(</span><span class='va'>resp</span><span class='op'>)</span>
+</code></pre>
+</div>
 </div>
 <p>Note that you can also use <code>jsonlite::toJSON</code> to convert a <code>data.frame</code> to JSON data for your toy examples here.</p>
 <p>In the following final section we want to use <code>Docker</code> to run a virtual machine as a container (an instance of a snapshot of a machine at a moment in time).</p>
@@ -1551,67 +2318,60 @@ httr::content(resp)</code></pre>
 <p>We are going to need two things: An image and a container. An image defines the OS and software while the container is the actual running instance of the image. To build a <code>Docker</code> image we have to specify a <code>Dockerfile</code>. Note that it is sensible to set up the whole project in its own directory, e.g., <code>~/mlr3_api</code>.</p>
 <p>Every <code>Dockerfile</code> starts with a <code>FROM</code> statement describing the image we are building our image from. In our case we want an R based image that ideally already has <code>plumber</code> and its dependencies installed. Luckily, the <code>trestletech/plumber</code> image exists:</p>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="bash"><code>
-FROM trestletech/plumber</code></pre>
+<div class="sourceCode" id="cb4"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1"></a><span class="ex">FROM</span> trestletech/plumber</span></code></pre></div>
 </div>
 <p>We then install the R packages needed to set up our REST API (note that we can skip <code>jsonlite</code>, because <code>plumber</code> already depends on it):</p>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="bash"><code>
-RUN R -e &#39;install.packages(c(&quot;data.table&quot;, &quot;mlr3&quot;, &quot;mlr3pipelines&quot;))&#39;</code></pre>
+<div class="sourceCode" id="cb5"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1"></a><span class="ex">RUN</span> R -e <span class="st">&#39;install.packages(c(&quot;data.table&quot;, &quot;mlr3&quot;, &quot;mlr3pipelines&quot;))&#39;</span></span></code></pre></div>
 </div>
 <p>Next, we copy our trained pipeline (<code>gl.rds</code>), our stored feature information (<code>feature_info.rds</code>), our R file to convert features, (<code>fix_feature_types.R</code>) and our R file to predict (<code>predict_gl.R</code>) to a new directory <code>/data</code> and set this as the working directory:</p>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="bash"><code>
-RUN mkdir /data
-COPY gl.rds /data
-COPY feature_info.rds /data
-COPY fix_feature_types.R /data
-COPY predict_gl.R /data
-WORKDIR /data</code></pre>
+<div class="sourceCode" id="cb6"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1"></a><span class="ex">RUN</span> mkdir /data</span>
+<span id="cb6-2"><a href="#cb6-2"></a><span class="ex">COPY</span> gl.rds /data</span>
+<span id="cb6-3"><a href="#cb6-3"></a><span class="ex">COPY</span> feature_info.rds /data</span>
+<span id="cb6-4"><a href="#cb6-4"></a><span class="ex">COPY</span> fix_feature_types.R /data</span>
+<span id="cb6-5"><a href="#cb6-5"></a><span class="ex">COPY</span> predict_gl.R /data</span>
+<span id="cb6-6"><a href="#cb6-6"></a><span class="ex">WORKDIR</span> /data</span></code></pre></div>
 </div>
 <p>Finally, we listen on port 1030 and start the server (this is analogously done as manually calling <code>plumber::plumb</code> on the <code>predict_gl.R</code> file and running it):</p>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="bash"><code>
-EXPOSE 1030
-ENTRYPOINT [&quot;R&quot;, &quot;-e&quot;, \
-    &quot;r = plumber::plumb(&#39;/data/predict_gl.R&#39;); r$run(port = 1030, host = &#39;0.0.0.0&#39;)&quot;]</code></pre>
+<div class="sourceCode" id="cb7"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1"></a><span class="ex">EXPOSE</span> 1030</span>
+<span id="cb7-2"><a href="#cb7-2"></a><span class="ex">ENTRYPOINT</span> [<span class="st">&quot;R&quot;</span>, <span class="st">&quot;-e&quot;</span>, \</span>
+<span id="cb7-3"><a href="#cb7-3"></a>    <span class="st">&quot;r = plumber::plumb(&#39;/data/predict_gl.R&#39;); r</span><span class="va">$run</span><span class="st">(port = 1030, host = &#39;0.0.0.0&#39;)&quot;</span>]</span></code></pre></div>
 </div>
 <p>The complete <code>Dockerfile</code> looks like the following:</p>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="bash"><code>
-FROM trestletech/plumber
-
-RUN R -e &#39;install.packages(c(&quot;data.table&quot;, &quot;mlr3&quot;, &quot;mlr3misc&quot;, &quot;mlr3pipelines&quot;))&#39;
-
-RUN mkdir /data
-COPY gl.rds /data
-COPY feature_info.rds /data
-COPY fix_feature_types.R /data
-COPY predict_gl.R /data
-WORKDIR /data
-
-EXPOSE 1030
-ENTRYPOINT [&quot;R&quot;, &quot;-e&quot;, \
-    &quot;r = plumber::plumb(&#39;/data/predict_gl.R&#39;); r$run(port = 1030, host = &#39;0.0.0.0&#39;)&quot;]</code></pre>
+<div class="sourceCode" id="cb8"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1"></a><span class="ex">FROM</span> trestletech/plumber</span>
+<span id="cb8-2"><a href="#cb8-2"></a></span>
+<span id="cb8-3"><a href="#cb8-3"></a><span class="ex">RUN</span> R -e <span class="st">&#39;install.packages(c(&quot;data.table&quot;, &quot;mlr3&quot;, &quot;mlr3misc&quot;, &quot;mlr3pipelines&quot;))&#39;</span></span>
+<span id="cb8-4"><a href="#cb8-4"></a></span>
+<span id="cb8-5"><a href="#cb8-5"></a><span class="ex">RUN</span> mkdir /data</span>
+<span id="cb8-6"><a href="#cb8-6"></a><span class="ex">COPY</span> gl.rds /data</span>
+<span id="cb8-7"><a href="#cb8-7"></a><span class="ex">COPY</span> feature_info.rds /data</span>
+<span id="cb8-8"><a href="#cb8-8"></a><span class="ex">COPY</span> fix_feature_types.R /data</span>
+<span id="cb8-9"><a href="#cb8-9"></a><span class="ex">COPY</span> predict_gl.R /data</span>
+<span id="cb8-10"><a href="#cb8-10"></a><span class="ex">WORKDIR</span> /data</span>
+<span id="cb8-11"><a href="#cb8-11"></a></span>
+<span id="cb8-12"><a href="#cb8-12"></a><span class="ex">EXPOSE</span> 1030</span>
+<span id="cb8-13"><a href="#cb8-13"></a><span class="ex">ENTRYPOINT</span> [<span class="st">&quot;R&quot;</span>, <span class="st">&quot;-e&quot;</span>, \</span>
+<span id="cb8-14"><a href="#cb8-14"></a>    <span class="st">&quot;r = plumber::plumb(&#39;/data/predict_gl.R&#39;); r</span><span class="va">$run</span><span class="st">(port = 1030, host = &#39;0.0.0.0&#39;)&quot;</span>]</span></code></pre></div>
 </div>
 <p>To build the image we open a terminal in the <code>mlr3_api</code> directory and run:</p>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="bash"><code>
-docker build -t mlr3-plumber-demo .</code></pre>
+<div class="sourceCode" id="cb9"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1"></a><span class="ex">docker</span> build -t mlr3-plumber-demo .</span></code></pre></div>
 </div>
 <p>This may take quite some time.</p>
 <p>To finally run the container, simply use:</p>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="bash"><code>
-docker run --rm -p 1030:1030 mlr3-plumber-demo</code></pre>
+<div class="sourceCode" id="cb10"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1"></a><span class="ex">docker</span> run --rm -p 1030:1030 mlr3-plumber-demo</span></code></pre></div>
 </div>
 <p>You can then proceed to provide some data via <code>curl</code> or <code>httr::POST</code> (to the same local address, because the <code>Docker</code> container is still running on your local machine).</p>
 <p>To stop all running containers use:</p>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="bash"><code>
-docker stop $(docker ps -a -q)</code></pre>
+<div class="sourceCode" id="cb11"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1"></a><span class="ex">docker</span> stop <span class="va">$(</span><span class="ex">docker</span> ps -a -q<span class="va">)</span></span></code></pre></div>
 </div>
 <p>Finally, you can proceed to deploy your container to an Amazon Web Service or an Azure Cloud. For the latter, the package <a href="https://cran.r-project.org/package=AzureContainers">AzureContainers</a> is especially helpful. If you do plan to do this note that the <code>plumber</code> service above is exposed over HTTP, and there is no authentication layer making it insecure. You may think about adding a layer of authentification and restricting the service to HTTPS.</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
 <!--radix_placeholder_article_footer-->
 <!--/radix_placeholder_article_footer-->
 </div>
