@@ -1,11 +1,3 @@
----
-output: github_document
-title: Readme
-editor_options:
-  markdown:
-    mode: gfm
----
-
 # mlr3gallery
 
 <!-- badges: start -->
@@ -19,7 +11,10 @@ editor_options:
 1. Add a setup chunk to your post
 
    ````r
-   
+    knitr::opts_chunk$set(
+     echo = TRUE,
+     R.options = list(width = 80)
+   )
    ````
 1. Write the post and select appropriate categories. Tags are not available.
 1. Add required packages to the DESCRIPTION file via `usethis::use_package(<package>)`.
