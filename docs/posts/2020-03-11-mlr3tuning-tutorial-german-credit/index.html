@@ -18,6 +18,73 @@
  <!--radix_placeholder_import_source-->
  <!--/radix_placeholder_import_source-->
 
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css" data-origin="pandoc">
+code.sourceCode > span { display: inline-block; line-height: 1.25; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #545454; font-weight: bold; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #a1024a; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007faa; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #008000; } /* Char */
+code span.cn { color: #d91e18; } /* Constant */
+code span.co { color: #545454; } /* Comment */
+code span.cv { color: #545454; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #aa5d00; } /* DataType */
+code span.dv { color: #a1024a; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #a1024a; } /* Float */
+code span.fu { color: #4254a7; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #545454; font-weight: bold; } /* Information */
+code span.kw { color: #007faa; font-weight: bold; } /* Keyword */
+code span.op { color: #696969; } /* Operator */
+code span.ot { color: #007faa; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #008000; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #008000; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #008000; } /* VerbatimString */
+code span.wa { color: #545454; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
   <!--radix_placeholder_meta_tags-->
 <title>mlr3gallery: mlr3tuning Tutorial - German Credit</title>
 
@@ -70,6 +137,7 @@
   {"type":"character","attributes":{},"value":["2020-03-11-mlr3tuning_tutorial_german_credit_files/figure-html5/unnamed-chunk-16-1.png","2020-03-11-mlr3tuning_tutorial_german_credit_files/figure-html5/unnamed-chunk-22-1.png","2020-03-11-mlr3tuning_tutorial_german_credit_files/figure-html5/unnamed-chunk-23-1.png","2020-03-11-mlr3tuning_tutorial_german_credit_files/figure-html5/unnamed-chunk-33-1.png","2020-03-11-mlr3tuning_tutorial_german_credit_files/figure-html5/unnamed-chunk-34-1.png","2020-03-11-mlr3tuning_tutorial_german_credit_files/figure-html5/unnamed-chunk-35-1.png","2020-03-11-mlr3tuning_tutorial_german_credit_files/figure-html5/unnamed-chunk-36-1.png"]}
   </script>
   <!--radix_placeholder_navigation_in_header-->
+<meta name="distill:offset" content="../.."/>
 
 <script type="application/javascript">
 
@@ -129,7 +197,7 @@
 
 .distill-site-nav {
   color: rgba(255, 255, 255, 0.8);
-  background-color: #455a64;
+  background-color: #0F2E3D;
   font-size: 15px;
   font-weight: 300;
 }
@@ -192,6 +260,7 @@
 
 .distill-site-header .title {
   font-size: 18px;
+  min-width: 150px;
 }
 
 .distill-site-header .logo {
@@ -333,7 +402,7 @@
 
 
 @media screen and (max-width: 768px) {
-  .distill-site-header.responsive {position: relative;}
+  .distill-site-header.responsive {position: relative; min-height: 500px; }
   .distill-site-header.responsive a.nav-toggle {
     position: absolute;
     right: 0;
@@ -407,6 +476,267 @@ d-title {
 <link href="../../site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet"/>
 <link href="../../site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet"/>
 <script src="../../site_libs/headroom-0.9.4/headroom.min.js"></script>
+<script src="../../site_libs/autocomplete-0.37.1/autocomplete.min.js"></script>
+<script src="../../site_libs/fuse-6.4.1/fuse.min.js"></script>
+
+<script type="application/javascript">
+
+function getMeta(metaName) {
+  var metas = document.getElementsByTagName('meta');
+  for (let i = 0; i < metas.length; i++) {
+    if (metas[i].getAttribute('name') === metaName) {
+      return metas[i].getAttribute('content');
+    }
+  }
+  return '';
+}
+
+function offsetURL(url) {
+  var offset = getMeta('distill:offset');
+  return offset ? offset + '/' + url : url;
+}
+
+function createIndex() {
+  var options = {
+    keys: [
+      "title",
+      "categories",
+      "description",
+      "contents"
+    ]
+  };
+  return new window.Fuse([],options);
+}
+
+function createFuseIndex() {
+
+  // create fuse index
+  var options = { keys: ["title", "description", "contents"] };
+  var fuse = new window.Fuse([], options);
+
+  // fetch the main search.json
+  return fetch(offsetURL('search.json'))
+    .then(function(response) {
+      if (response.status == 200) {
+        return response.json().then(function(json) {
+          // index main articles
+          json.articles.forEach(function(article) {
+            fuse.add(article);
+          });
+          // download collections and index their articles
+          return Promise.all(json.collections.map(function(collection) {
+            return fetch(offsetURL(collection)).then(function(response) {
+              if (response.status === 200) {
+                return response.json().then(function(articles) {
+                  articles.forEach(function(article) {
+                    fuse.add(article);
+                  });
+                })
+              } else {
+                return Promise.reject(
+                  new Error('Unexpected status from search index request: ' +
+                            response.status)
+                );
+              }
+            });
+          })).then(function() {
+            return fuse;
+          });
+        });
+
+      } else {
+        return Promise.reject(
+          new Error('Unexpected status from search index request: ' +
+                      response.status)
+        );
+      }
+    });
+}
+
+window.document.addEventListener("DOMContentLoaded", function (event) {
+
+  // get search element (bail if we don't have one)
+  var searchEl = window.document.getElementById('distill-search');
+  if (!searchEl)
+    return;
+
+  createFuseIndex()
+    .then(function(fuse) {
+
+      // make search box visible
+      searchEl.classList.remove('hidden');
+
+      // initialize autocomplete
+      var options = {
+        autoselect: true,
+        hint: false,
+        minLength: 2,
+      };
+      window.autocomplete(searchEl, options, [{
+        source: function(query, callback) {
+          const searchOptions = {
+            isCaseSensitive: false,
+            shouldSort: true,
+            minMatchCharLength: 2,
+            limit: 10,
+            keys: [
+              { name: 'title', weight: 20 },
+              { name: 'categories', weight: 15 },
+              { name: 'description', weight: 10 },
+              { name: 'contents', weight: 5 },
+            ],
+          };
+          var results = fuse.search(query, searchOptions);
+          callback(results
+            .map(function(result) { return result.item; })
+            .filter(function(item) { return !!item.description; })
+          );
+        },
+        templates: {
+          suggestion: function(suggestion) {
+            var html = `
+              <div class="search-item">
+                <h3>${suggestion.title}</h3>
+                <div class="search-item-description">
+                  ${suggestion.description}
+                </div>
+                <div class="search-item-preview">
+                  <img src="${suggestion.preview ? offsetURL(suggestion.preview) : ''}"</img>
+                </div>
+              </div>
+            `;
+            return html;
+          }
+        }
+      }]).on('autocomplete:selected', function(event, suggestion) {
+        window.location.href = offsetURL(suggestion.path);
+      });
+      // remove inline display style on autocompleter (we want to
+      // manage responsive display via css)
+      $('.algolia-autocomplete').css("display", "");
+    })
+    .catch(function(error) {
+      console.log(error);
+    });
+
+});
+
+</script>
+
+<style type="text/css">
+
+/* Algolioa Autocomplete */
+
+.algolia-autocomplete {
+  display: inline-block;
+  margin-left: 10px;
+  vertical-align: sub;
+  background-color: white;
+  color: black;
+  padding: 6px;
+  padding-top: 8px;
+  padding-bottom: 0;
+  border-radius: 6px;
+  border: 1px #0F2E3D solid;
+  width: 180px;
+}
+
+
+@media screen and (max-width: 768px) {
+  .distill-site-nav .algolia-autocomplete {
+    display: none;
+    visibility: hidden;
+  }
+  .distill-site-nav.responsive .algolia-autocomplete {
+    display: inline-block;
+    visibility: visible;
+  }
+  .distill-site-nav.responsive .algolia-autocomplete .aa-dropdown-menu {
+    margin-left: 0;
+    width: 400px;
+    max-height: 400px;
+  }
+}
+
+.algolia-autocomplete .aa-input, .algolia-autocomplete .aa-hint {
+  width: 90%;
+  outline: none;
+  border: none;
+}
+
+.algolia-autocomplete .aa-hint {
+  color: #999;
+}
+.algolia-autocomplete .aa-dropdown-menu {
+  width: 550px;
+  max-height: 70vh;
+  overflow-x: visible;
+  overflow-y: scroll;
+  padding: 5px;
+  margin-top: 3px;
+  margin-left: -150px;
+  background-color: #fff;
+  border-radius: 5px;
+  border: 1px solid #999;
+  border-top: none;
+}
+
+.algolia-autocomplete .aa-dropdown-menu .aa-suggestion {
+  cursor: pointer;
+  padding: 5px 4px;
+  border-bottom: 1px solid #eee;
+}
+
+.algolia-autocomplete .aa-dropdown-menu .aa-suggestion:last-of-type {
+  border-bottom: none;
+  margin-bottom: 2px;
+}
+
+.algolia-autocomplete .aa-dropdown-menu .aa-suggestion .search-item {
+  overflow: hidden;
+  font-size: 0.8em;
+  line-height: 1.4em;
+}
+
+.algolia-autocomplete .aa-dropdown-menu .aa-suggestion .search-item h3 {
+  margin-block-start: 0;
+  margin-block-end: 5px;
+}
+
+.algolia-autocomplete .aa-dropdown-menu .aa-suggestion .search-item-description {
+  display: inline-block;
+  overflow: hidden;
+  height: 2.8em;
+  width: 80%;
+  margin-right: 4%;
+}
+
+.algolia-autocomplete .aa-dropdown-menu .aa-suggestion .search-item-preview {
+  display: inline-block;
+  width: 15%;
+}
+
+.algolia-autocomplete .aa-dropdown-menu .aa-suggestion .search-item-preview img {
+  height: 3em;
+  width: auto;
+  display: none;
+}
+
+.algolia-autocomplete .aa-dropdown-menu .aa-suggestion .search-item-preview img[src] {
+  display: initial;
+}
+
+.algolia-autocomplete .aa-dropdown-menu .aa-suggestion.aa-cursor {
+  background-color: #eee;
+}
+.algolia-autocomplete .aa-dropdown-menu .aa-suggestion em {
+  font-weight: bold;
+  font-style: normal;
+}
+
+</style>
+
+
 <!--/radix_placeholder_navigation_in_header-->
   <!--radix_placeholder_distill-->
 
@@ -430,6 +760,51 @@ body {
 
 .pagedtable-footer {
   font-size: 15px;
+}
+
+d-byline .byline {
+  grid-template-columns: 2fr 2fr;
+}
+
+d-byline .byline h3 {
+  margin-block-start: 1.5em;
+}
+
+d-byline .byline .authors-affiliations h3 {
+  margin-block-start: 0.5em;
+}
+
+.authors-affiliations .orcid-id {
+  width: 16px;
+  height:16px;
+  margin-left: 4px;
+  margin-right: 4px;
+  vertical-align: middle;
+  padding-bottom: 2px;
+}
+
+d-title .dt-tags {
+  margin-top: 1em;
+  grid-column: text;
+}
+
+.dt-tags .dt-tag {
+  text-decoration: none;
+  display: inline-block;
+  color: rgba(0,0,0,0.6);
+  padding: 0em 0.4em;
+  margin-right: 0.5em;
+  margin-bottom: 0.4em;
+  font-size: 70%;
+  border: 1px solid rgba(0,0,0,0.2);
+  border-radius: 3px;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+d-article table.gt_table td,
+d-article table.gt_table th {
+  border-bottom: none;
 }
 
 .html-widget {
@@ -471,6 +846,7 @@ body {
 }
 
 d-article {
+  padding-top: 2.5rem;
   padding-bottom: 30px;
 }
 
@@ -482,91 +858,48 @@ d-article>p>img {
   width: 100%;
 }
 
+d-article h2 {
+  margin: 1rem 0 1.5rem 0;
+}
+
+d-article h3 {
+  margin-top: 1.5rem;
+}
+
 d-article iframe {
   border: 1px solid rgba(0, 0, 0, 0.1);
   margin-bottom: 2.0em;
   width: 100%;
 }
 
-figure img.external {
-  background: white;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.1);
-  padding: 18px;
-  box-sizing: border-box;
+/* Tweak code blocks */
+
+d-article div.sourceCode code,
+d-article pre code {
+  font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
 }
 
-/* CSS for table of contents */
-
-.d-toc {
-  color: rgba(0,0,0,0.8);
-  font-size: 0.8em;
-  line-height: 1em;
+d-article pre,
+d-article div.sourceCode,
+d-article div.sourceCode pre {
+  overflow: hidden;
 }
 
-.d-toc-header {
-  font-size: 0.6rem;
-  font-weight: 400;
-  color: rgba(0, 0, 0, 0.5);
-  text-transform: uppercase;
-  margin-top: 0;
-  margin-bottom: 1.3em;
+d-article div.sourceCode {
+  background-color: white;
 }
 
-.d-toc a {
-  border-bottom: none;
-}
-
-.d-toc ul {
-  padding-left: 0;
-}
-
-.d-toc li>ul {
-  padding-top: 0.8em;
-  padding-left: 16px;
-  margin-bottom: 0.6em;
-}
-
-.d-toc ul,
-.d-toc li {
-  list-style-type: none;
-}
-
-.d-toc li {
-  margin-bottom: 0.9em;
-}
-
-.d-toc-separator {
-  margin-top: 20px;
-  margin-bottom: 2em;
-}
-
-.d-article-with-toc {
-  border-top: none;
-  padding-top: 0;
-}
-
-
-
-/* Tweak code blocks (note that this CSS is repeated above in an injection
-   into the d-code shadow dom) */
-
-d-code {
-  overflow-x: auto !important;
-}
-
-pre.d-code code.d-code {
+d-article div.sourceCode pre {
   padding-left: 10px;
   font-size: 12px;
   border-left: 2px solid rgba(0,0,0,0.1);
 }
 
-pre.text-output {
-
+d-article pre {
   font-size: 12px;
   color: black;
   background: none;
-  font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+  margin-top: 0;
   text-align: left;
   white-space: pre;
   word-spacing: normal;
@@ -584,20 +917,123 @@ pre.text-output {
   hyphens: none;
 }
 
+d-article pre a {
+  border-bottom: none;
+}
+
+d-article pre a:hover {
+  border-bottom: none;
+  text-decoration: underline;
+}
+
 @media(min-width: 768px) {
 
-d-code {
-  overflow-x: visible !important;
+d-article pre,
+d-article div.sourceCode,
+d-article div.sourceCode pre {
+  overflow: visible !important;
 }
 
-pre.d-code code.d-code  {
-    padding-left: 18px;
-    font-size: 14px;
-}
-pre.text-output {
+d-article div.sourceCode pre {
+  padding-left: 18px;
   font-size: 14px;
 }
+
+d-article pre {
+  font-size: 14px;
 }
+
+}
+
+figure img.external {
+  background: white;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.1);
+  padding: 18px;
+  box-sizing: border-box;
+}
+
+/* CSS for d-contents */
+
+.d-contents {
+  grid-column: text;
+  color: rgba(0,0,0,0.8);
+  font-size: 0.9em;
+  padding-bottom: 1em;
+  margin-bottom: 1em;
+  padding-bottom: 0.5em;
+  margin-bottom: 1em;
+  padding-left: 0.25em;
+  justify-self: start;
+}
+
+@media(min-width: 1000px) {
+  .d-contents.d-contents-float {
+    height: 0;
+    grid-column-start: 1;
+    grid-column-end: 4;
+    justify-self: center;
+    padding-right: 3em;
+    padding-left: 2em;
+  }
+}
+
+.d-contents nav h3 {
+  font-size: 18px;
+  margin-top: 0;
+  margin-bottom: 1em;
+}
+
+.d-contents li {
+  list-style-type: none
+}
+
+.d-contents nav > ul {
+  padding-left: 0;
+}
+
+.d-contents ul {
+  padding-left: 1em
+}
+
+.d-contents nav ul li {
+  margin-top: 0.6em;
+  margin-bottom: 0.2em;
+}
+
+.d-contents nav a {
+  font-size: 13px;
+  border-bottom: none;
+  text-decoration: none
+  color: rgba(0, 0, 0, 0.8);
+}
+
+.d-contents nav a:hover {
+  text-decoration: underline solid rgba(0, 0, 0, 0.6)
+}
+
+.d-contents nav > ul > li > a {
+  font-weight: 600;
+}
+
+.d-contents nav > ul > li > ul {
+  font-weight: inherit;
+}
+
+.d-contents nav > ul > li > ul > li {
+  margin-top: 0.2em;
+}
+
+
+.d-contents nav ul {
+  margin-top: 0;
+  margin-bottom: 0.25em;
+}
+
+.d-article-with-toc h2:nth-child(2) {
+  margin-top: 0;
+}
+
 
 /* Figure */
 
@@ -635,6 +1071,16 @@ pre.text-output {
   color: rgba(0, 0, 0, 1.0);
 }
 
+/* Citations */
+
+d-article .citation {
+  color: inherit;
+  cursor: inherit;
+}
+
+div.hanging-indent{
+  margin-left: 1em; text-indent: -1em;
+}
 
 
 /* Tweak 1000px media break to show more text */
@@ -710,6 +1156,91 @@ d-appendix .citation-appendix,
   word-wrap: break-word;
 }
 
+/* Include appendix styles here so they can be overridden */
+
+d-appendix {
+  contain: layout style;
+  font-size: 0.8em;
+  line-height: 1.7em;
+  margin-top: 60px;
+  margin-bottom: 0;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  color: rgba(0,0,0,0.5);
+  padding-top: 60px;
+  padding-bottom: 48px;
+}
+
+d-appendix h3 {
+  grid-column: page-start / text-start;
+  font-size: 15px;
+  font-weight: 500;
+  margin-top: 1em;
+  margin-bottom: 0;
+  color: rgba(0,0,0,0.65);
+}
+
+d-appendix h3 + * {
+  margin-top: 1em;
+}
+
+d-appendix ol {
+  padding: 0 0 0 15px;
+}
+
+@media (min-width: 768px) {
+  d-appendix ol {
+    padding: 0 0 0 30px;
+    margin-left: -30px;
+  }
+}
+
+d-appendix li {
+  margin-bottom: 1em;
+}
+
+d-appendix a {
+  color: rgba(0, 0, 0, 0.6);
+}
+
+d-appendix > * {
+  grid-column: text;
+}
+
+d-appendix > d-footnote-list,
+d-appendix > d-citation-list,
+d-appendix > distill-appendix {
+  grid-column: screen;
+}
+
+/* Include footnote styles here so they can be overridden */
+
+d-footnote-list {
+  contain: layout style;
+}
+
+d-footnote-list > * {
+  grid-column: text;
+}
+
+d-footnote-list a.footnote-backlink {
+  color: rgba(0,0,0,0.3);
+  padding-left: 0.5em;
+}
+
+
+
+/* Anchor.js */
+
+.anchorjs-link {
+  /*transition: all .25s linear; */
+  text-decoration: none;
+  border-bottom: none;
+}
+*:hover > .anchorjs-link {
+  margin-left: -1.125em !important;
+  text-decoration: none;
+  border-bottom: none;
+}
 
 /* Social footer */
 
@@ -764,6 +1295,211 @@ d-appendix .citation-appendix,
 
 .custom p {
   margin-bottom: 0.5em;
+}
+
+/* Styles for listing layout (hide title) */
+.layout-listing d-title, .layout-listing .d-title {
+  display: none;
+}
+
+/* Styles for posts lists (not auto-injected) */
+
+
+.posts-with-sidebar {
+  padding-left: 45px;
+  padding-right: 45px;
+}
+
+.posts-list .description h2,
+.posts-list .description p {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", Arial, sans-serif;
+}
+
+.posts-list .description h2 {
+  font-weight: 700;
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.posts-list h2.post-tag {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+  padding-bottom: 12px;
+}
+.posts-list {
+  margin-top: 60px;
+  margin-bottom: 24px;
+}
+
+.posts-list .post-preview {
+  text-decoration: none;
+  overflow: hidden;
+  display: block;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  padding: 24px 0;
+}
+
+.post-preview-last {
+  border-bottom: none !important;
+}
+
+.posts-list .posts-list-caption {
+  grid-column: screen;
+  font-weight: 400;
+}
+
+.posts-list .post-preview h2 {
+  margin: 0 0 6px 0;
+  line-height: 1.2em;
+  font-style: normal;
+  font-size: 24px;
+}
+
+.posts-list .post-preview p {
+  margin: 0 0 12px 0;
+  line-height: 1.4em;
+  font-size: 16px;
+}
+
+.posts-list .post-preview .thumbnail {
+  box-sizing: border-box;
+  margin-bottom: 24px;
+  position: relative;
+  max-width: 500px;
+}
+.posts-list .post-preview img {
+  width: 100%;
+  display: block;
+}
+
+.posts-list .metadata {
+  font-size: 12px;
+  line-height: 1.4em;
+  margin-bottom: 18px;
+}
+
+.posts-list .metadata > * {
+  display: inline-block;
+}
+
+.posts-list .metadata .publishedDate {
+  margin-right: 2em;
+}
+
+.posts-list .metadata .dt-authors {
+  display: block;
+  margin-top: 0.3em;
+  margin-right: 2em;
+}
+
+.posts-list .dt-tags {
+  display: block;
+  line-height: 1em;
+}
+
+.posts-list .dt-tags .dt-tag {
+  display: inline-block;
+  color: rgba(0,0,0,0.6);
+  padding: 0.3em 0.4em;
+  margin-right: 0.2em;
+  margin-bottom: 0.4em;
+  font-size: 60%;
+  border: 1px solid rgba(0,0,0,0.2);
+  border-radius: 3px;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+.posts-list img {
+  opacity: 1;
+}
+
+.posts-list img[data-src] {
+  opacity: 0;
+}
+
+.posts-more {
+  clear: both;
+}
+
+
+.posts-sidebar {
+  font-size: 16px;
+}
+
+.posts-sidebar h3 {
+  font-size: 16px;
+  margin-top: 0;
+  margin-bottom: 0.5em;
+  font-weight: 400;
+  text-transform: uppercase;
+}
+
+.sidebar-section {
+  margin-bottom: 30px;
+}
+
+.categories ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+.categories li {
+  color: rgba(0, 0, 0, 0.8);
+  margin-bottom: 0;
+}
+
+.categories li>a {
+  border-bottom: none;
+}
+
+.categories li>a:hover {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.4);
+}
+
+.categories .active {
+  font-weight: 600;
+}
+
+.categories .category-count {
+  color: rgba(0, 0, 0, 0.4);
+}
+
+
+@media(min-width: 768px) {
+  .posts-list .post-preview h2 {
+    font-size: 26px;
+  }
+  .posts-list .post-preview .thumbnail {
+    float: right;
+    width: 30%;
+    margin-bottom: 0;
+  }
+  .posts-list .post-preview .description {
+    float: left;
+    width: 45%;
+  }
+  .posts-list .post-preview .metadata {
+    float: left;
+    width: 20%;
+    margin-top: 8px;
+  }
+  .posts-list .post-preview p {
+    margin: 0 0 12px 0;
+    line-height: 1.5em;
+    font-size: 16px;
+  }
+  .posts-with-sidebar .posts-list {
+    float: left;
+    width: 75%;
+  }
+  .posts-with-sidebar .posts-sidebar {
+    float: right;
+    width: 20%;
+    margin-top: 60px;
+    padding-top: 24px;
+    padding-bottom: 24px;
+  }
 }
 
 
@@ -895,6 +1631,12 @@ d-appendix .citation-appendix,
   hyphens: none;
 }
 
+.downlevel .posts-list .post-preview {
+  color: inherit;
+}
+
+
+
 </style>
 
 <script type="application/javascript">
@@ -910,6 +1652,13 @@ function is_downlevel_browser() {
 
 // show body when load is complete
 function on_load_complete() {
+
+  // add anchors
+  if (window.anchors) {
+    window.anchors.options.placement = 'left';
+    window.anchors.add('d-article > h2, d-article > h3, d-article > h4, d-article > h5');
+  }
+
 
   // set body to visible
   document.body.style.visibility = 'visible';
@@ -956,23 +1705,8 @@ function init_distill() {
   // create d-appendix
   $('.d-appendix').changeElementType('d-appendix');
 
-  // create d-bibliography
-  var bibliography = $('<d-bibliography></d-bibliography>');
-  $('#distill-bibliography').wrap(bibliography);
-
   // flag indicating that we have appendix items
   var appendix = $('.appendix-bottom').children('h3').length > 0;
-
-  // replace citations with <d-cite>
-  $('.citation').each(function(i, val) {
-    appendix = true;
-    var cites = $(this).attr('data-cites').split(" ");
-    var dt_cite = $('<d-cite></d-cite>');
-    dt_cite.attr('key', cites.join());
-    $(this).replaceWith(dt_cite);
-  });
-  // remove refs
-  $('#refs').remove();
 
   // replace footnotes with <d-footnote>
   $('.footnote-ref').each(function(i, val) {
@@ -990,39 +1724,21 @@ function init_distill() {
   // remove footnotes
   $('.footnotes').remove();
 
+  // move refs into #references-listing
+  $('#references-listing').replaceWith($('#refs'));
+
   $('h1.appendix, h2.appendix').each(function(i, val) {
     $(this).changeElementType('h3');
   });
   $('h3.appendix').each(function(i, val) {
     var id = $(this).attr('id');
-    $('.d-toc a[href="#' + id + '"]').parent().remove();
+    $('.d-contents a[href="#' + id + '"]').parent().remove();
     appendix = true;
     $(this).nextUntil($('h1, h2, h3')).addBack().appendTo($('d-appendix'));
   });
 
   // show d-appendix if we have appendix content
   $("d-appendix").css('display', appendix ? 'grid' : 'none');
-
-  // replace code blocks with d-code
-  $('pre>code').each(function(i, val) {
-    var code = $(this);
-    var pre = code.parent();
-    var clz = "";
-    var language = pre.attr('class');
-    if (language) {
-      // map unknown languages to "clike" (without this they just dissapear)
-      if ($.inArray(language, ["bash", "clike", "css", "go", "html",
-                               "javascript", "js", "julia", "lua", "markdown",
-                               "markup", "mathml", "python", "svg", "xml"]) == -1)
-        language = "clike";
-      language = ' language="' + language + '"';
-      var dt_code = $('<d-code block' + language + clz + '></d-code>');
-      dt_code.text(code.text());
-      pre.replaceWith(dt_code);
-    } else {
-      code.addClass('text-output').unwrap().changeElementType('pre');
-    }
-  });
 
   // localize layout chunks to just output
   $('.layout-chunk').each(function(i, val) {
@@ -1031,7 +1747,7 @@ function init_distill() {
     var layout = $(this).attr('data-layout');
 
     // apply layout to markdown level block elements
-    var elements = $(this).children().not('d-code, pre.text-output, script');
+    var elements = $(this).children().not('div.sourceCode, pre, script');
     elements.each(function(i, el) {
       var layout_div = $('<div class="' + layout + '"></div>');
       if (layout_div.hasClass('shaded')) {
@@ -1048,6 +1764,13 @@ function init_distill() {
     $(this).children().unwrap();
   });
 
+  // remove code block used to force  highlighting css
+  $('.distill-force-highlighting-css').parent().remove();
+
+  // remove empty line numbers inserted by pandoc when using a
+  // custom syntax highlighting theme
+  $('code.sourceCode a:empty').remove();
+
   // load distill framework
   load_distill_framework();
 
@@ -1063,12 +1786,26 @@ function init_distill() {
     if (!have_authors)
       $('d-byline').addClass('hidden');
 
-    // table of contents
-    if (have_authors) // adjust border if we are in authors
-      $('.d-toc').parent().addClass('d-article-with-toc');
+    // article with toc class
+    $('.d-contents').parent().addClass('d-article-with-toc');
 
     // strip links that point to #
     $('.authors-affiliations').find('a[href="#"]').removeAttr('href');
+
+    // add orcid ids
+    $('.authors-affiliations').find('.author').each(function(i, el) {
+      var orcid_id = front_matter.authors[i].orcidID;
+      if (orcid_id) {
+        var a = $('<a></a>');
+        a.attr('href', 'https://orcid.org/' + orcid_id);
+        var img = $('<img></img>');
+        img.addClass('orcid-id');
+        img.attr('alt', 'ORCID ID');
+        img.attr('src','data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA2ZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo1N0NEMjA4MDI1MjA2ODExOTk0QzkzNTEzRjZEQTg1NyIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDozM0NDOEJGNEZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDozM0NDOEJGM0ZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M1IE1hY2ludG9zaCI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOkZDN0YxMTc0MDcyMDY4MTE5NUZFRDc5MUM2MUUwNEREIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjU3Q0QyMDgwMjUyMDY4MTE5OTRDOTM1MTNGNkRBODU3Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+84NovQAAAR1JREFUeNpiZEADy85ZJgCpeCB2QJM6AMQLo4yOL0AWZETSqACk1gOxAQN+cAGIA4EGPQBxmJA0nwdpjjQ8xqArmczw5tMHXAaALDgP1QMxAGqzAAPxQACqh4ER6uf5MBlkm0X4EGayMfMw/Pr7Bd2gRBZogMFBrv01hisv5jLsv9nLAPIOMnjy8RDDyYctyAbFM2EJbRQw+aAWw/LzVgx7b+cwCHKqMhjJFCBLOzAR6+lXX84xnHjYyqAo5IUizkRCwIENQQckGSDGY4TVgAPEaraQr2a4/24bSuoExcJCfAEJihXkWDj3ZAKy9EJGaEo8T0QSxkjSwORsCAuDQCD+QILmD1A9kECEZgxDaEZhICIzGcIyEyOl2RkgwAAhkmC+eAm0TAAAAABJRU5ErkJggg==');
+        a.append(img);
+        $(this).append(a);
+      }
+    });
 
     // hide elements of author/affiliations grid that have no value
     function hide_byline_column(caption) {
@@ -1118,14 +1855,9 @@ function init_distill() {
       grid.children('h3:contains("Affiliations")').text('Affiliation');
     }
 
-    // inject pre code styles (can't do this with a global stylesheet b/c a shadow root is used)
-    $('d-code').each(function(i, val) {
-      var style = document.createElement('style');
-      style.innerHTML = 'pre code { padding-left: 10px; font-size: 12px; border-left: 2px solid rgba(0,0,0,0.1); } ' +
-                        '@media(min-width: 768px) { pre code { padding-left: 18px; font-size: 14px; } }';
-      if (this.shadowRoot)
-        this.shadowRoot.appendChild(style);
-    });
+    // remove d-appendix and d-footnote-list local styles
+    $('d-appendix > style:first-child').remove();
+    $('d-footnote-list > style:first-child').remove();
 
     // move appendix-bottom entries to the bottom
     $('.appendix-bottom').appendTo('d-appendix').children().unwrap();
@@ -1161,9 +1893,7 @@ function init_downlevel() {
   $('.d-byline a').remove();
 
   // remove toc
-  $('.d-toc-header').remove();
-  $('.d-toc').remove();
-  $('.d-toc-separator').remove();
+  $('.d-contents').remove();
 
   // move appendix elements
   $('h1.appendix, h2.appendix').each(function(i, val) {
@@ -1293,6 +2023,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 <!--/radix_placeholder_distill-->
   <script src="../../site_libs/jquery-1.11.3/jquery.min.js"></script>
+  <script src="../../site_libs/anchor-4.2.2/anchor.min.js"></script>
   <script src="../../site_libs/bowser-1.9.3/bowser.min.js"></script>
   <script src="../../site_libs/webcomponents-2.0.0/webcomponents.js"></script>
   <script src="../../site_libs/distill-2.2.21/template.v2.js"></script>
@@ -1308,7 +2039,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <!--radix_placeholder_front_matter-->
 
 <script id="distill-front-matter" type="text/json">
-{"title":"mlr3tuning Tutorial - German Credit","description":"In this use case, we continue working with the German credit dataset. We\nwork on hyperparameter tuning and apply nested resampling.","authors":[{"author":"Martin Binder","authorURL":"#","affiliation":"&nbsp;","affiliationURL":"#"},{"author":"Florian Pfisterer","authorURL":"#","affiliation":"&nbsp;","affiliationURL":"#"}],"publishedDate":"2020-03-11T00:00:00.000+00:00","citationText":"Binder & Pfisterer, 2020"}
+{"title":"mlr3tuning Tutorial - German Credit","description":"In this use case, we continue working with the German credit dataset. We\nwork on hyperparameter tuning and apply nested resampling.","authors":[{"author":"Martin Binder","authorURL":"#","affiliation":"&nbsp;","affiliationURL":"#","orcidID":""},{"author":"Florian Pfisterer","authorURL":"#","affiliation":"&nbsp;","affiliationURL":"#","orcidID":""}],"publishedDate":"2020-03-11T00:00:00.000+00:00","citationText":"Binder & Pfisterer, 2020"}
 </script>
 
 <!--/radix_placeholder_front_matter-->
@@ -1320,6 +2051,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <img src="../../images/logo.png" alt="Logo"/>
 </a>
 <a href="../../index.html" class="title">mlr3gallery</a>
+<input id="distill-search" class="nav-search hidden" type="text" placeholder="Search..."/>
 </div>
 <div class="nav-right">
 <a href="https://github.com/mlr-org/mlr3gallery">
@@ -1335,6 +2067,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
 <div class="d-title">
 <h1>mlr3tuning Tutorial - German Credit</h1>
+<!--radix_placeholder_categories-->
+<div class="dt-tags">
+  <a href="../../index.html#category:mlr3tuning" class="dt-tag">mlr3tuning</a>
+  <a href="../../index.html#category:tuning" class="dt-tag">tuning</a>
+  <a href="../../index.html#category:german_credit" class="dt-tag">german credit</a>
+</div>
+<!--/radix_placeholder_categories-->
 <p><p>In this use case, we continue working with the German credit dataset. We work on hyperparameter tuning and apply nested resampling.</p></p>
 </div>
 
@@ -1361,38 +2100,45 @@ document.addEventListener('DOMContentLoaded', function() {
 <h2 id="prerequisites">Prerequisites</h2>
 <p>First, load the packages we are going to use:</p>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-library(&quot;data.table&quot;)
-library(&quot;ggplot2&quot;)
-library(&quot;mlr3&quot;)
-library(&quot;mlr3learners&quot;)
-library(&quot;mlr3tuning&quot;)
-library(&quot;paradox&quot;)</code></pre>
+<div class="sourceCode">
+<pre><code><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='st'><a href='http://r-datatable.com'>"data.table"</a></span><span class='op'>)</span>
+<span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='st'><a href='http://ggplot2.tidyverse.org'>"ggplot2"</a></span><span class='op'>)</span>
+<span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='st'><a href='https://mlr3.mlr-org.com'>"mlr3"</a></span><span class='op'>)</span>
+<span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='st'><a href='https://mlr3learners.mlr-org.com'>"mlr3learners"</a></span><span class='op'>)</span>
+<span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='st'><a href='https://mlr3tuning.mlr-org.com'>"mlr3tuning"</a></span><span class='op'>)</span>
+<span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='st'><a href='https://paradox.mlr-org.com'>"paradox"</a></span><span class='op'>)</span>
+</code></pre>
+</div>
 </div>
 <p>We use the same <code>Task</code> as in Part I:</p>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-task = tsk(&quot;german_credit&quot;)</code></pre>
+<div class="sourceCode">
+<pre><code><span class='va'>task</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>tsk</a></span><span class='op'>(</span><span class='st'>"german_credit"</span><span class='op'>)</span>
+</code></pre>
+</div>
 </div>
 <p>We also might want to use multiple cores to reduce long run times of tuning runs.</p>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-# future::plan(&quot;multiprocess&quot;) # uncomment for parallelization</code></pre>
+<div class="sourceCode">
+<pre><code><span class='co'># future::plan("multiprocess") # uncomment for parallelization</span>
+</code></pre>
+</div>
 </div>
 <h3 id="evaluation">Evaluation</h3>
 <p>We will evaluate all hyperparameter configurations using 10-fold CV. We use a <em>fixed</em> train-test split, i.e. the same splits for each evaluation. Otherwise, some evaluation could get unusually “hard” splits, which would make comparisons unfair.</p>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-set.seed(8008135)
-cv10_instance = rsmp(&quot;cv&quot;, folds = 10)
+<div class="sourceCode">
+<pre><code><span class='fu'><a href='https://rdrr.io/r/base/Random.html'>set.seed</a></span><span class='op'>(</span><span class='fl'>8008135</span><span class='op'>)</span>
+<span class='va'>cv10_instance</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>rsmp</a></span><span class='op'>(</span><span class='st'>"cv"</span>, folds <span class='op'>=</span> <span class='fl'>10</span><span class='op'>)</span>
 
-# fix the train-test splits using the $instantiate() method
-cv10_instance$instantiate(task)
+<span class='co'># fix the train-test splits using the $instantiate() method</span>
+<span class='va'>cv10_instance</span><span class='op'>$</span><span class='fu'>instantiate</span><span class='op'>(</span><span class='va'>task</span><span class='op'>)</span>
 
-# have a look at the test set instances per fold
-cv10_instance$instance</code></pre>
-<pre><code>
-      row_id fold
+<span class='co'># have a look at the test set instances per fold</span>
+<span class='va'>cv10_instance</span><span class='op'>$</span><span class='va'>instance</span>
+</code></pre>
+</div>
+<pre><code>      row_id fold
    1:      5    1
    2:     20    1
    3:     28    1
@@ -1414,16 +2160,19 @@ cv10_instance$instance</code></pre>
 <h3 id="search-space-and-problem-definition">Search Space and Problem Definition</h3>
 <p>First, we need to decide what <a href="https://mlr3.mlr-org.com/reference/Learner.html"><code>Learner</code></a> we want to optimize. We will use <a href="https://mlr3learners.mlr-org.com/reference/mlr_learners_classif.kknn.html"><code>LearnerClassifKKNN</code></a>, the “kernelized” k-nearest neighbor classifier. We will use <code>kknn</code> as a normal kNN without weighting first (i.e., using the rectangular kernel):</p>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-knn = lrn(&quot;classif.kknn&quot;, predict_type = &quot;prob&quot;)
-knn$param_set$values$kernel = &quot;rectangular&quot;</code></pre>
+<div class="sourceCode">
+<pre><code><span class='va'>knn</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>lrn</a></span><span class='op'>(</span><span class='st'>"classif.kknn"</span>, predict_type <span class='op'>=</span> <span class='st'>"prob"</span><span class='op'>)</span>
+<span class='va'>knn</span><span class='op'>$</span><span class='va'>param_set</span><span class='op'>$</span><span class='va'>values</span><span class='op'>$</span><span class='va'>kernel</span> <span class='op'>=</span> <span class='st'>"rectangular"</span>
+</code></pre>
+</div>
 </div>
 <p>As a next step, we decide what parameters we optimize over. Before that, though, we are interested in the parameter set on which we could tune:</p>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-knn$param_set</code></pre>
-<pre><code>
-&lt;ParamSet&gt;
+<div class="sourceCode">
+<pre><code><span class='va'>knn</span><span class='op'>$</span><span class='va'>param_set</span>
+</code></pre>
+</div>
+<pre><code>&lt;ParamSet&gt;
          id    class lower upper
 1:        k ParamInt     1   Inf
 2: distance ParamDbl     0   Inf
@@ -1445,141 +2194,153 @@ knn$param_set</code></pre>
 </div>
 <p>We first tune the <code>k</code> parameter (i.e. the number of nearest neighbors), between 3 to 20. Second, we tune the <code>distance</code> function, allowing L1 and L2 distances. To do so, we use the <code>paradox</code> package to define a search space (see the <a href="https://mlr3book.mlr-org.com/paradox.html">online vignette</a> for a more complete introduction.</p>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-search_space = ParamSet$new(list(
-  ParamInt$new(&quot;k&quot;, lower = 3, upper = 20),
-  ParamInt$new(&quot;distance&quot;, lower = 1, upper = 2)
-))</code></pre>
+<div class="sourceCode">
+<pre><code><span class='va'>search_space</span> <span class='op'>=</span> <span class='va'><a href='https://paradox.mlr-org.com/reference/ParamSet.html'>ParamSet</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>
+  <span class='va'><a href='https://paradox.mlr-org.com/reference/ParamInt.html'>ParamInt</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='st'>"k"</span>, lower <span class='op'>=</span> <span class='fl'>3</span>, upper <span class='op'>=</span> <span class='fl'>20</span><span class='op'>)</span>,
+  <span class='va'><a href='https://paradox.mlr-org.com/reference/ParamInt.html'>ParamInt</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='st'>"distance"</span>, lower <span class='op'>=</span> <span class='fl'>1</span>, upper <span class='op'>=</span> <span class='fl'>2</span><span class='op'>)</span>
+<span class='op'>)</span><span class='op'>)</span>
+</code></pre>
+</div>
 </div>
 <p>As a next step, we define a <a href="https://mlr3tuning.mlr-org.com/reference/TuningInstanceSingleCrit.html"><code>TuningInstanceSingleCrit</code></a> that represents the problem we are trying to optimize.</p>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-instance_grid = TuningInstanceSingleCrit$new(
-  task = task,
-  learner = knn,
-  resampling = cv10_instance,
-  measure = msr(&quot;classif.ce&quot;),
-  search_space = search_space,
-  terminator = trm(&quot;none&quot;)
-)</code></pre>
+<div class="sourceCode">
+<pre><code><span class='va'>instance_grid</span> <span class='op'>=</span> <span class='va'><a href='https://mlr3tuning.mlr-org.com/reference/TuningInstanceSingleCrit.html'>TuningInstanceSingleCrit</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span>
+  task <span class='op'>=</span> <span class='va'>task</span>,
+  learner <span class='op'>=</span> <span class='va'>knn</span>,
+  resampling <span class='op'>=</span> <span class='va'>cv10_instance</span>,
+  measure <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>msr</a></span><span class='op'>(</span><span class='st'>"classif.ce"</span><span class='op'>)</span>,
+  search_space <span class='op'>=</span> <span class='va'>search_space</span>,
+  terminator <span class='op'>=</span> <span class='fu'><a href='https://bbotk.mlr-org.com/reference/trm.html'>trm</a></span><span class='op'>(</span><span class='st'>"none"</span><span class='op'>)</span>
+<span class='op'>)</span>
+</code></pre>
+</div>
 </div>
 <h3 id="grid-search">Grid Search</h3>
 <p>After having set up a tuning instance, we can start tuning. Before that, we need a tuning strategy, though. A simple tuning method is to try all possible combinations of parameters: <strong>Grid Search</strong>. While it is very intuitive and simple, it is inefficient if the search space is large. For this simple use case, it suffices, though. We get the <a href="https://mlr3tuning.mlr-org.com/reference/mlr_tuners_grid_search.html"><code>grid_search tuner</code></a> via:</p>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-set.seed(1)
-tuner_grid = tnr(&quot;grid_search&quot;, resolution = 18, batch_size = 36)</code></pre>
+<div class="sourceCode">
+<pre><code><span class='fu'><a href='https://rdrr.io/r/base/Random.html'>set.seed</a></span><span class='op'>(</span><span class='fl'>1</span><span class='op'>)</span>
+<span class='va'>tuner_grid</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3tuning.mlr-org.com/reference/tnr.html'>tnr</a></span><span class='op'>(</span><span class='st'>"grid_search"</span>, resolution <span class='op'>=</span> <span class='fl'>18</span>, batch_size <span class='op'>=</span> <span class='fl'>36</span><span class='op'>)</span>
+</code></pre>
+</div>
 </div>
 <p>Tuning works by calling <code>$optimize()</code>. Note that the tuning procedure <em>modifies</em> our tuning instance (as usual for <code>R6</code> class objects). The result can be found in the <code>instance</code> object. Before tuning it is empty:</p>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-instance_grid$result</code></pre>
-<pre><code>
-NULL</code></pre>
+<div class="sourceCode">
+<pre><code><span class='va'>instance_grid</span><span class='op'>$</span><span class='va'>result</span>
+</code></pre>
+</div>
+<pre><code>NULL</code></pre>
 </div>
 <p>Now, we tune:</p>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-tuner_grid$optimize(instance_grid)</code></pre>
-<pre><code>
-   k distance learner_param_vals  x_domain classif.ce
+<div class="sourceCode">
+<pre><code><span class='va'>tuner_grid</span><span class='op'>$</span><span class='fu'>optimize</span><span class='op'>(</span><span class='va'>instance_grid</span><span class='op'>)</span>
+</code></pre>
+</div>
+<pre><code>   k distance learner_param_vals  x_domain classif.ce
 1: 9        2          &lt;list[3]&gt; &lt;list[2]&gt;       0.25</code></pre>
 </div>
 <p>The result is returned by <code>$optimize()</code> together with its performance. It can be also accessed with the <code>$result</code> slot:</p>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-instance_grid$result</code></pre>
-<pre><code>
-   k distance learner_param_vals  x_domain classif.ce
+<div class="sourceCode">
+<pre><code><span class='va'>instance_grid</span><span class='op'>$</span><span class='va'>result</span>
+</code></pre>
+</div>
+<pre><code>   k distance learner_param_vals  x_domain classif.ce
 1: 9        2          &lt;list[3]&gt; &lt;list[2]&gt;       0.25</code></pre>
 </div>
 <p>We can also look at the <code>Archive</code> of evaluated configurations:</p>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-instance_grid$archive$data()</code></pre>
-<pre><code>
-     k distance classif.ce                                uhash  x_domain
- 1:  3        1      0.271 ece927f5-7531-4814-b9b7-74b54f33b1a6 &lt;list[2]&gt;
- 2:  3        2      0.273 c2afa7f2-6b37-4efa-8a4b-850bdd37bc42 &lt;list[2]&gt;
- 3:  4        1      0.292 4cff499e-e240-4a0d-bddb-634e024bd333 &lt;list[2]&gt;
- 4:  4        2      0.279 93d7ce7d-f3bc-4248-a415-d8319795f0e6 &lt;list[2]&gt;
- 5:  5        1      0.271 a7fcd5e4-76dd-473f-bbdd-f84691e0b6d3 &lt;list[2]&gt;
- 6:  5        2      0.274 944b18cb-8417-47bb-bd7e-4c9b16d1139c &lt;list[2]&gt;
- 7:  6        1      0.278 8eb33155-e592-4bd4-8283-9d5f8453c063 &lt;list[2]&gt;
- 8:  6        2      0.273 c58ffed7-0736-4ab5-9dbf-51a2175548ee &lt;list[2]&gt;
- 9:  7        1      0.257 e914c782-856a-4d72-b5ad-262e21b42b1e &lt;list[2]&gt;
-10:  7        2      0.258 02f7938f-001d-4a51-964b-5bbc8d1768c7 &lt;list[2]&gt;
-11:  8        1      0.264 99e157bb-b1eb-4bf7-b535-22e5ff8902ab &lt;list[2]&gt;
-12:  8        2      0.256 76d3bfd1-5367-4151-a7c5-b052a388cee8 &lt;list[2]&gt;
-13:  9        1      0.251 9260b9bd-5561-4362-87cc-6f5d854755b9 &lt;list[2]&gt;
-14:  9        2      0.250 f5d71d62-2a68-465d-ad6d-1cc095e523aa &lt;list[2]&gt;
-15: 10        1      0.261 ecc6ea25-0838-433f-b6a9-12057517a476 &lt;list[2]&gt;
-16: 10        2      0.250 218f3603-b650-47af-8ccd-3af29da361f4 &lt;list[2]&gt;
-17: 11        1      0.256 c7871e96-7572-44bc-95f0-e4f99d3aacb2 &lt;list[2]&gt;
-18: 11        2      0.254 eec899d5-ebb1-4ed1-8112-3491276b1f57 &lt;list[2]&gt;
-19: 12        1      0.260 abccce1a-a58b-42c4-ae68-57adc4ea47de &lt;list[2]&gt;
-20: 12        2      0.259 0b8f95a9-d18e-4daf-8d0f-e5b87b0a8af0 &lt;list[2]&gt;
-21: 13        1      0.268 5e99d6b3-559d-4fb6-bf59-284e11330e23 &lt;list[2]&gt;
-22: 13        2      0.258 373f0c0f-e4df-4324-b687-8406942d0840 &lt;list[2]&gt;
-23: 14        1      0.265 19589cda-1ca2-4069-ab9d-75d41f2aa990 &lt;list[2]&gt;
-24: 14        2      0.263 d50c23bd-b461-4cba-802c-276630f91662 &lt;list[2]&gt;
-25: 15        1      0.268 70f5ce40-87c3-4137-a83a-d6e45256682e &lt;list[2]&gt;
-26: 15        2      0.264 94f14f60-b78c-480b-a879-280a80b24454 &lt;list[2]&gt;
-27: 16        1      0.267 863e24ed-f9dc-425d-aad2-6ce173f2e414 &lt;list[2]&gt;
-28: 16        2      0.262 6c61b2fa-26b2-41c8-8f22-6485c01b73b8 &lt;list[2]&gt;
-29: 17        1      0.264 dd0c26d7-ad2a-41d9-9ce4-69648801413a &lt;list[2]&gt;
-30: 17        2      0.267 6f36a337-ebde-425a-9c74-352c0ea95352 &lt;list[2]&gt;
-31: 18        1      0.273 ef387df7-4e25-4024-85cb-dcf56a940dc2 &lt;list[2]&gt;
-32: 18        2      0.271 ff2c74ab-8124-4b57-9306-78186105f570 &lt;list[2]&gt;
-33: 19        1      0.269 02c25fb7-b852-4ca8-bd53-d613428be7b2 &lt;list[2]&gt;
-34: 19        2      0.269 8eb2d477-9236-4e75-ae20-0d14a28033cd &lt;list[2]&gt;
-35: 20        1      0.268 8a789c20-a9d6-4eb8-84c8-6de83dca8f5d &lt;list[2]&gt;
-36: 20        2      0.269 9ff2822d-5b79-478f-8ba8-c2404cfc393c &lt;list[2]&gt;
+<div class="sourceCode">
+<pre><code><span class='va'>instance_grid</span><span class='op'>$</span><span class='va'>archive</span><span class='op'>$</span><span class='fu'>data</span><span class='op'>(</span><span class='op'>)</span>
+</code></pre>
+</div>
+<pre><code>     k distance classif.ce                                uhash  x_domain
+ 1:  3        1      0.271 c2c28707-6004-4503-8b7e-f156b787b033 &lt;list[2]&gt;
+ 2:  3        2      0.273 aa489add-6883-4d3e-ac38-53d5a8ffe9b8 &lt;list[2]&gt;
+ 3:  4        1      0.292 cce2b5a6-0b92-411c-95ae-3d12502592ac &lt;list[2]&gt;
+ 4:  4        2      0.279 b2b5cd7e-c8a6-4036-a3bf-89d1f8b62017 &lt;list[2]&gt;
+ 5:  5        1      0.271 512149af-ef85-443c-86d4-efcb3fe0b0b3 &lt;list[2]&gt;
+ 6:  5        2      0.274 3234a8c8-4414-4c95-8326-0e8a9fbbe740 &lt;list[2]&gt;
+ 7:  6        1      0.278 72bcd89e-3b2e-4fad-9541-184a63af1ac0 &lt;list[2]&gt;
+ 8:  6        2      0.273 fefe82c4-a812-4eed-a8d9-e932ed53236a &lt;list[2]&gt;
+ 9:  7        1      0.257 eaa0a144-d36c-4465-8315-6be97494e5cb &lt;list[2]&gt;
+10:  7        2      0.258 afe18471-d860-4f04-b5d2-249e6666f7d5 &lt;list[2]&gt;
+11:  8        1      0.264 d54d96af-7115-424b-9c47-a467f0068d33 &lt;list[2]&gt;
+12:  8        2      0.256 4e224577-98ca-41c1-9d8e-61e6f176bd0a &lt;list[2]&gt;
+13:  9        1      0.251 450cbd36-cbe2-4cf9-b518-fd4ea9c87e8b &lt;list[2]&gt;
+14:  9        2      0.250 0dcec80d-906d-4897-aac7-3d5d176a26b8 &lt;list[2]&gt;
+15: 10        1      0.261 158ba343-6749-4082-a6b3-3c7261029327 &lt;list[2]&gt;
+16: 10        2      0.250 386bb248-43c0-4bd1-b139-07d09c3c53bd &lt;list[2]&gt;
+17: 11        1      0.256 46008092-0052-427c-b8d5-d8adcdd1c069 &lt;list[2]&gt;
+18: 11        2      0.254 536fbbeb-5de1-4e05-868e-9e4036400517 &lt;list[2]&gt;
+19: 12        1      0.260 f3152408-615d-49bf-bd0c-a6945a31b2fa &lt;list[2]&gt;
+20: 12        2      0.259 c2f31a81-3763-4a85-9a00-69d76029a95b &lt;list[2]&gt;
+21: 13        1      0.268 321fd453-4934-47c5-993a-b57656a49d2f &lt;list[2]&gt;
+22: 13        2      0.258 f5aa2450-d4cd-429b-8751-cd3d0e7199d7 &lt;list[2]&gt;
+23: 14        1      0.265 34960d6d-df13-4601-92f6-d7e0b3f4a2b2 &lt;list[2]&gt;
+24: 14        2      0.263 39f53484-8b0c-4121-a187-adbe92532d4f &lt;list[2]&gt;
+25: 15        1      0.268 80aae2a3-c76f-4003-9509-a6aad8703b6a &lt;list[2]&gt;
+26: 15        2      0.264 493b69fc-f2b2-4b5e-b35a-afdad2b83f51 &lt;list[2]&gt;
+27: 16        1      0.267 7eff707b-41b9-4f41-b098-092c90e91373 &lt;list[2]&gt;
+28: 16        2      0.262 e3b59ecf-c9e1-4dc9-aa8f-b9ad51855d53 &lt;list[2]&gt;
+29: 17        1      0.264 e6b265e0-e91b-4946-8b71-6b2470eeeaa5 &lt;list[2]&gt;
+30: 17        2      0.267 786e5442-6fa2-4e05-a926-fd59a9131095 &lt;list[2]&gt;
+31: 18        1      0.273 36b39013-0ba1-4ccb-8dc6-b945757ee500 &lt;list[2]&gt;
+32: 18        2      0.271 a55f5afa-1404-4f93-ba7d-cbad83094030 &lt;list[2]&gt;
+33: 19        1      0.269 778db1dc-926d-4a3e-97e4-0e110577aa3d &lt;list[2]&gt;
+34: 19        2      0.269 1aceec60-fc40-49f7-b21a-8ee575273f35 &lt;list[2]&gt;
+35: 20        1      0.268 b9e5978f-58dc-4be2-978b-f59eb8b8da20 &lt;list[2]&gt;
+36: 20        2      0.269 a4c57e8c-a9b3-437f-907b-9636ae518d6a &lt;list[2]&gt;
      k distance classif.ce                                uhash  x_domain
               timestamp batch_nr
- 1: 2020-10-22 04:43:59        1
- 2: 2020-10-22 04:43:59        1
- 3: 2020-10-22 04:43:59        1
- 4: 2020-10-22 04:43:59        1
- 5: 2020-10-22 04:43:59        1
- 6: 2020-10-22 04:43:59        1
- 7: 2020-10-22 04:43:59        1
- 8: 2020-10-22 04:43:59        1
- 9: 2020-10-22 04:43:59        1
-10: 2020-10-22 04:43:59        1
-11: 2020-10-22 04:43:59        1
-12: 2020-10-22 04:43:59        1
-13: 2020-10-22 04:43:59        1
-14: 2020-10-22 04:43:59        1
-15: 2020-10-22 04:43:59        1
-16: 2020-10-22 04:43:59        1
-17: 2020-10-22 04:43:59        1
-18: 2020-10-22 04:43:59        1
-19: 2020-10-22 04:43:59        1
-20: 2020-10-22 04:43:59        1
-21: 2020-10-22 04:43:59        1
-22: 2020-10-22 04:43:59        1
-23: 2020-10-22 04:43:59        1
-24: 2020-10-22 04:43:59        1
-25: 2020-10-22 04:43:59        1
-26: 2020-10-22 04:43:59        1
-27: 2020-10-22 04:43:59        1
-28: 2020-10-22 04:43:59        1
-29: 2020-10-22 04:43:59        1
-30: 2020-10-22 04:43:59        1
-31: 2020-10-22 04:43:59        1
-32: 2020-10-22 04:43:59        1
-33: 2020-10-22 04:43:59        1
-34: 2020-10-22 04:43:59        1
-35: 2020-10-22 04:43:59        1
-36: 2020-10-22 04:43:59        1
+ 1: 2020-10-27 16:28:27        1
+ 2: 2020-10-27 16:28:27        1
+ 3: 2020-10-27 16:28:27        1
+ 4: 2020-10-27 16:28:27        1
+ 5: 2020-10-27 16:28:27        1
+ 6: 2020-10-27 16:28:27        1
+ 7: 2020-10-27 16:28:27        1
+ 8: 2020-10-27 16:28:27        1
+ 9: 2020-10-27 16:28:27        1
+10: 2020-10-27 16:28:27        1
+11: 2020-10-27 16:28:27        1
+12: 2020-10-27 16:28:27        1
+13: 2020-10-27 16:28:27        1
+14: 2020-10-27 16:28:27        1
+15: 2020-10-27 16:28:27        1
+16: 2020-10-27 16:28:27        1
+17: 2020-10-27 16:28:27        1
+18: 2020-10-27 16:28:27        1
+19: 2020-10-27 16:28:27        1
+20: 2020-10-27 16:28:27        1
+21: 2020-10-27 16:28:27        1
+22: 2020-10-27 16:28:27        1
+23: 2020-10-27 16:28:27        1
+24: 2020-10-27 16:28:27        1
+25: 2020-10-27 16:28:27        1
+26: 2020-10-27 16:28:27        1
+27: 2020-10-27 16:28:27        1
+28: 2020-10-27 16:28:27        1
+29: 2020-10-27 16:28:27        1
+30: 2020-10-27 16:28:27        1
+31: 2020-10-27 16:28:27        1
+32: 2020-10-27 16:28:27        1
+33: 2020-10-27 16:28:27        1
+34: 2020-10-27 16:28:27        1
+35: 2020-10-27 16:28:27        1
+36: 2020-10-27 16:28:27        1
               timestamp batch_nr</code></pre>
 </div>
 <p>We plot the performances depending on the sampled <code>k</code> and <code>distance</code>:</p>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-ggplot(instance_grid$archive$data(), aes(x = k, y = classif.ce, color = as.factor(distance))) +
-  geom_line() + geom_point(size = 3)</code></pre>
+<div class="sourceCode">
+<pre><code><span class='fu'><a href='https://ggplot2.tidyverse.org/reference/ggplot.html'>ggplot</a></span><span class='op'>(</span><span class='va'>instance_grid</span><span class='op'>$</span><span class='va'>archive</span><span class='op'>$</span><span class='fu'>data</span><span class='op'>(</span><span class='op'>)</span>, <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/aes.html'>aes</a></span><span class='op'>(</span>x <span class='op'>=</span> <span class='va'>k</span>, y <span class='op'>=</span> <span class='va'>classif.ce</span>, color <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/factor.html'>as.factor</a></span><span class='op'>(</span><span class='va'>distance</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span>
+  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/geom_path.html'>geom_line</a></span><span class='op'>(</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/geom_point.html'>geom_point</a></span><span class='op'>(</span>size <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span>
+</code></pre>
+</div>
 <p><img src="2020-03-11-mlr3tuning_tutorial_german_credit_files/figure-html5/unnamed-chunk-16-1.png" width="624" /></p>
 </div>
 <p>On average, the Euclidean distance (<code>distance</code> = 2) seems to work better. However, there is much randomness introduced by the resampling instance. So you, the reader, may see a different result, when you run the experiment yourself and set a different random seed. For <code>k</code>, we find that values between 7 and 13 perform well.</p>
@@ -1588,46 +2349,52 @@ ggplot(instance_grid$archive$data(), aes(x = k, y = classif.ce, color = as.facto
 <p>We may find two problems when doing so:</p>
 <p>First, the resulting difference in performance between <code>k</code> = 3 and <code>k</code> = 4 is probably larger than the difference between <code>k</code> = 49 and <code>k</code> = 50. While 4 is 33% larger than 3, 50 is only 2 percent larger than 49. To account for this we will use a <strong>transformation function</strong> for <code>k</code> and optimize in log-space. We define the range for <code>k</code> from <code>log(3)</code> to <code>log(50)</code> and exponentiate in the transformation. Now, as <code>k</code> has become a double instead of an int (in the search space, before transformation), we aösp round it in the trafo.</p>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-large_searchspace = ParamSet$new(list(
-  ParamDbl$new(&quot;k&quot;, lower = log(3), upper = log(50)),
-  ParamDbl$new(&quot;distance&quot;, lower = 1, upper = 3),
-  ParamFct$new(&quot;kernel&quot;, c(&quot;rectangular&quot;, &quot;gaussian&quot;, &quot;rank&quot;, &quot;optimal&quot;)),
-  ParamLgl$new(&quot;scale&quot;)
-))
+<div class="sourceCode">
+<pre><code><span class='va'>large_searchspace</span> <span class='op'>=</span> <span class='va'><a href='https://paradox.mlr-org.com/reference/ParamSet.html'>ParamSet</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>
+  <span class='va'><a href='https://paradox.mlr-org.com/reference/ParamDbl.html'>ParamDbl</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='st'>"k"</span>, lower <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='fl'>3</span><span class='op'>)</span>, upper <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='fl'>50</span><span class='op'>)</span><span class='op'>)</span>,
+  <span class='va'><a href='https://paradox.mlr-org.com/reference/ParamDbl.html'>ParamDbl</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='st'>"distance"</span>, lower <span class='op'>=</span> <span class='fl'>1</span>, upper <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span>,
+  <span class='va'><a href='https://paradox.mlr-org.com/reference/ParamFct.html'>ParamFct</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='st'>"kernel"</span>, <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"rectangular"</span>, <span class='st'>"gaussian"</span>, <span class='st'>"rank"</span>, <span class='st'>"optimal"</span><span class='op'>)</span><span class='op'>)</span>,
+  <span class='va'><a href='https://paradox.mlr-org.com/reference/ParamLgl.html'>ParamLgl</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='st'>"scale"</span><span class='op'>)</span>
+<span class='op'>)</span><span class='op'>)</span>
 
-large_searchspace$trafo = function(x, param_set) {
-  x$k = round(exp(x$k))
-  x
-}</code></pre>
+<span class='va'>large_searchspace</span><span class='op'>$</span><span class='va'>trafo</span> <span class='op'>=</span> <span class='kw'>function</span><span class='op'>(</span><span class='va'>x</span>, <span class='va'>param_set</span><span class='op'>)</span> <span class='op'>{</span>
+  <span class='va'>x</span><span class='op'>$</span><span class='va'>k</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/Round.html'>round</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/Log.html'>exp</a></span><span class='op'>(</span><span class='va'>x</span><span class='op'>$</span><span class='va'>k</span><span class='op'>)</span><span class='op'>)</span>
+  <span class='va'>x</span>
+<span class='op'>}</span>
+</code></pre>
+</div>
 </div>
 <p>The second problem is that grid search may (and often will) take a long time. For instance, trying out three different values for <code>k</code>, <code>distance</code>, <code>kernel</code>, and the two values for <code>scale</code> will take 54 evaluations. Because of this, we use a different search algorithm, namely the <strong>Random Search</strong>. We need to specify in the <em>tuning instance</em> a <em>termination criterion</em>. The criterion tells the search algorithm when to stop. Here, we will terminate after 36 evaluations:</p>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-tuner_random = tnr(&quot;random_search&quot;, batch_size = 36)
+<div class="sourceCode">
+<pre><code><span class='va'>tuner_random</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3tuning.mlr-org.com/reference/tnr.html'>tnr</a></span><span class='op'>(</span><span class='st'>"random_search"</span>, batch_size <span class='op'>=</span> <span class='fl'>36</span><span class='op'>)</span>
 
-instance_random = TuningInstanceSingleCrit$new(
-  task = task,
-  learner = knn,
-  resampling = cv10_instance,
-  measure = msr(&quot;classif.ce&quot;),
-  search_space = large_searchspace,
-  terminator = trm(&quot;evals&quot;, n_evals = 36)
-)</code></pre>
+<span class='va'>instance_random</span> <span class='op'>=</span> <span class='va'><a href='https://mlr3tuning.mlr-org.com/reference/TuningInstanceSingleCrit.html'>TuningInstanceSingleCrit</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span>
+  task <span class='op'>=</span> <span class='va'>task</span>,
+  learner <span class='op'>=</span> <span class='va'>knn</span>,
+  resampling <span class='op'>=</span> <span class='va'>cv10_instance</span>,
+  measure <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>msr</a></span><span class='op'>(</span><span class='st'>"classif.ce"</span><span class='op'>)</span>,
+  search_space <span class='op'>=</span> <span class='va'>large_searchspace</span>,
+  terminator <span class='op'>=</span> <span class='fu'><a href='https://bbotk.mlr-org.com/reference/trm.html'>trm</a></span><span class='op'>(</span><span class='st'>"evals"</span>, n_evals <span class='op'>=</span> <span class='fl'>36</span><span class='op'>)</span>
+<span class='op'>)</span>
+</code></pre>
+</div>
 </div>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-tuner_random$optimize(instance_random)</code></pre>
-<pre><code>
-          k distance  kernel scale learner_param_vals  x_domain classif.ce
+<div class="sourceCode">
+<pre><code><span class='va'>tuner_random</span><span class='op'>$</span><span class='fu'>optimize</span><span class='op'>(</span><span class='va'>instance_random</span><span class='op'>)</span>
+</code></pre>
+</div>
+<pre><code>          k distance  kernel scale learner_param_vals  x_domain classif.ce
 1: 2.444957  1.54052 optimal  TRUE          &lt;list[4]&gt; &lt;list[4]&gt;      0.249</code></pre>
 </div>
 <p>Like before, we can review the <code>Archive</code>. It includes the points before and after the transformation. The archive includes a column for each parameter the <code>Tuner</code> sampled on the search space (points before the transformation):</p>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-instance_random$archive$data()</code></pre>
-<pre><code>
-           k distance      kernel scale classif.ce
+<div class="sourceCode">
+<pre><code><span class='va'>instance_random</span><span class='op'>$</span><span class='va'>archive</span><span class='op'>$</span><span class='fu'>data</span><span class='op'>(</span><span class='op'>)</span>
+</code></pre>
+</div>
+<pre><code>           k distance      kernel scale classif.ce
  1: 2.654531 2.921236 rectangular FALSE      0.314
  2: 2.588931 1.869319        rank  TRUE      0.254
  3: 3.319396 2.425029 rectangular  TRUE      0.272
@@ -1666,50 +2433,51 @@ instance_random$archive$data()</code></pre>
 36: 3.285535 1.296423        rank FALSE      0.300
            k distance      kernel scale classif.ce
                                    uhash  x_domain           timestamp batch_nr
- 1: c46e77c9-75ef-4219-af57-2638ecbb6efb &lt;list[4]&gt; 2020-10-22 04:44:31        1
- 2: a192bdd4-9463-4228-b612-ebd5a02b60dc &lt;list[4]&gt; 2020-10-22 04:44:31        1
- 3: 522a6dd7-5f35-4253-b4c2-cf8b7f14263b &lt;list[4]&gt; 2020-10-22 04:44:31        1
- 4: f3ddfcd5-7f72-418f-9048-a4a2ce31f6f3 &lt;list[4]&gt; 2020-10-22 04:44:31        1
- 5: db012fc7-4c79-46f5-9d4d-beb08b6d6185 &lt;list[4]&gt; 2020-10-22 04:44:31        1
- 6: 2286b78a-26e7-497e-9af2-94344b8936e4 &lt;list[4]&gt; 2020-10-22 04:44:31        1
- 7: 7850ccd9-b675-4d60-baa8-c737ca3bbc38 &lt;list[4]&gt; 2020-10-22 04:44:31        1
- 8: c6785f5b-7dd2-4270-a58c-82a0820f8f82 &lt;list[4]&gt; 2020-10-22 04:44:31        1
- 9: ac3d9a6b-22b6-4aae-a4dc-36252982c240 &lt;list[4]&gt; 2020-10-22 04:44:31        1
-10: 54518985-3f7e-4d1b-8667-2acf25298cb5 &lt;list[4]&gt; 2020-10-22 04:44:31        1
-11: 4ff92321-1b2b-4b35-b890-ff8454b1e960 &lt;list[4]&gt; 2020-10-22 04:44:31        1
-12: 4b398383-3c25-497a-8023-3c314216d60a &lt;list[4]&gt; 2020-10-22 04:44:31        1
-13: a9b67624-5d8e-4b91-b53c-4be57380c7c2 &lt;list[4]&gt; 2020-10-22 04:44:31        1
-14: 8458f970-9599-4d39-807b-4ce74be601e4 &lt;list[4]&gt; 2020-10-22 04:44:31        1
-15: 76a02640-2338-44f3-883e-c88710757ae6 &lt;list[4]&gt; 2020-10-22 04:44:31        1
-16: bfa0643f-6723-4dde-9117-ed18c691ac20 &lt;list[4]&gt; 2020-10-22 04:44:31        1
-17: 0a10fb12-e452-4b05-813b-341c1d542380 &lt;list[4]&gt; 2020-10-22 04:44:31        1
-18: 9e9939d4-e566-4ab3-8158-9d225138923a &lt;list[4]&gt; 2020-10-22 04:44:31        1
-19: bb410471-9640-491e-ab8b-9770e4a9100b &lt;list[4]&gt; 2020-10-22 04:44:31        1
-20: 799d3fe8-5a2b-4d7d-ab18-59037ae6c1c3 &lt;list[4]&gt; 2020-10-22 04:44:31        1
-21: 8ae23a5c-018b-464c-8206-2b127b8c342d &lt;list[4]&gt; 2020-10-22 04:44:31        1
-22: ea384a7e-3505-43d2-9fce-d03d47f431a1 &lt;list[4]&gt; 2020-10-22 04:44:31        1
-23: 9796f507-3992-4a23-8d55-8f10bfc13d09 &lt;list[4]&gt; 2020-10-22 04:44:31        1
-24: bf540878-ba97-4e01-a2ca-c539cdca8d95 &lt;list[4]&gt; 2020-10-22 04:44:31        1
-25: 5c74465c-51c3-4d23-9504-c6b75be29b7e &lt;list[4]&gt; 2020-10-22 04:44:31        1
-26: 677cf8ab-7af5-4c1b-95d9-8725a44bde1e &lt;list[4]&gt; 2020-10-22 04:44:31        1
-27: 18a72d88-0bd2-49be-a5a5-89db3beb4540 &lt;list[4]&gt; 2020-10-22 04:44:31        1
-28: 04e93c6d-4a35-4a82-afd6-ea7d9feec0db &lt;list[4]&gt; 2020-10-22 04:44:31        1
-29: db219e26-de00-4469-9e93-e2528c91126b &lt;list[4]&gt; 2020-10-22 04:44:31        1
-30: b73f6338-d456-4971-91f5-6a9effb5e260 &lt;list[4]&gt; 2020-10-22 04:44:31        1
-31: 2c17e106-49b5-49ca-89bd-3671aebcc3ee &lt;list[4]&gt; 2020-10-22 04:44:31        1
-32: 6cac0c99-f3ce-4477-adeb-6fd094ff2869 &lt;list[4]&gt; 2020-10-22 04:44:31        1
-33: c08d124b-cb31-4e02-a496-c3b184963f3e &lt;list[4]&gt; 2020-10-22 04:44:31        1
-34: c0f803f4-4fca-43a7-abfb-9661eff4431c &lt;list[4]&gt; 2020-10-22 04:44:31        1
-35: 7b8e449e-e335-4f06-8e93-57f22df25a0e &lt;list[4]&gt; 2020-10-22 04:44:31        1
-36: 54a0f289-8006-4498-a3c9-e9ee3f153b6d &lt;list[4]&gt; 2020-10-22 04:44:31        1
+ 1: 46d20ea5-313e-484d-890e-674df16d3a85 &lt;list[4]&gt; 2020-10-27 16:29:08        1
+ 2: aa0ee290-6a7e-4fad-af94-a6ba55d05d8e &lt;list[4]&gt; 2020-10-27 16:29:08        1
+ 3: 79ee3e36-8856-4089-b648-2a7fdbc05963 &lt;list[4]&gt; 2020-10-27 16:29:08        1
+ 4: 850ec811-5c4f-45ea-8426-2c88e0d66a45 &lt;list[4]&gt; 2020-10-27 16:29:08        1
+ 5: 5ed2fcbb-8167-416c-ae13-74d2502b5ada &lt;list[4]&gt; 2020-10-27 16:29:08        1
+ 6: a9eeea4c-632b-4c84-952f-53eba5647b99 &lt;list[4]&gt; 2020-10-27 16:29:08        1
+ 7: 4cefff3d-c03c-4d0c-a483-3bfeb4380085 &lt;list[4]&gt; 2020-10-27 16:29:08        1
+ 8: a1882967-f8fd-40c4-aeaf-80374727e7bb &lt;list[4]&gt; 2020-10-27 16:29:08        1
+ 9: a0fb6a58-f860-473a-87f0-357c9958091b &lt;list[4]&gt; 2020-10-27 16:29:08        1
+10: d28347d5-40eb-4cfd-a467-51b4af4d1ff6 &lt;list[4]&gt; 2020-10-27 16:29:08        1
+11: 657dce93-dc97-4310-bd1e-d9352633d40b &lt;list[4]&gt; 2020-10-27 16:29:08        1
+12: 40cb2e35-78d3-4691-abd7-11013b4ef4e0 &lt;list[4]&gt; 2020-10-27 16:29:08        1
+13: 68d4db40-e138-45e0-a14e-71eb5d0434fa &lt;list[4]&gt; 2020-10-27 16:29:08        1
+14: d0ff9c3e-1f2d-41f6-b937-612118286f33 &lt;list[4]&gt; 2020-10-27 16:29:08        1
+15: 0edb99a3-0542-444e-8fe9-7068e5a7a95c &lt;list[4]&gt; 2020-10-27 16:29:08        1
+16: bcffe1ba-a783-4010-bfa7-38ae6c326929 &lt;list[4]&gt; 2020-10-27 16:29:08        1
+17: ab7da4a3-f0b0-4ec3-9057-1309aadeed6d &lt;list[4]&gt; 2020-10-27 16:29:08        1
+18: 9accd5dc-7f30-473c-86bd-c640b6be1bce &lt;list[4]&gt; 2020-10-27 16:29:08        1
+19: d0cb823c-bb10-49ed-ad1f-95c30c7fdf63 &lt;list[4]&gt; 2020-10-27 16:29:08        1
+20: f388c39d-d1f1-4b98-8a50-af9c89a32958 &lt;list[4]&gt; 2020-10-27 16:29:08        1
+21: dcd2e6b3-fe8a-4fb1-a072-39c5d52f8141 &lt;list[4]&gt; 2020-10-27 16:29:08        1
+22: 86af74ae-f561-42b8-b367-ae38bfee4070 &lt;list[4]&gt; 2020-10-27 16:29:08        1
+23: 4b848f02-5420-4f74-bd31-1626a1727adf &lt;list[4]&gt; 2020-10-27 16:29:08        1
+24: cf2f0ea9-b5cc-4281-bf20-bf741e412d87 &lt;list[4]&gt; 2020-10-27 16:29:08        1
+25: 874f9764-5fb7-4abf-87f5-da93a7cf7967 &lt;list[4]&gt; 2020-10-27 16:29:08        1
+26: abbc5993-74c1-4a85-8a57-a0596543e7fe &lt;list[4]&gt; 2020-10-27 16:29:08        1
+27: a61b50c6-6ef8-4a0a-bf59-e7f76f345b46 &lt;list[4]&gt; 2020-10-27 16:29:08        1
+28: 78e24f4a-22f7-407b-9738-f3758de9ab53 &lt;list[4]&gt; 2020-10-27 16:29:08        1
+29: a171662c-fc38-4bc0-bfda-be4385010a44 &lt;list[4]&gt; 2020-10-27 16:29:08        1
+30: 84803dab-6e0c-4cc7-9cc3-580080eb2cdb &lt;list[4]&gt; 2020-10-27 16:29:08        1
+31: 46b5ab02-5964-4d21-a868-54240aa2e860 &lt;list[4]&gt; 2020-10-27 16:29:08        1
+32: 0732bc23-ed61-475b-84e1-31a9ff3d7a0a &lt;list[4]&gt; 2020-10-27 16:29:08        1
+33: e274ddf2-a829-4ae1-a89c-d23f125a6469 &lt;list[4]&gt; 2020-10-27 16:29:08        1
+34: c5e49972-4977-4099-972c-b2395ba1045b &lt;list[4]&gt; 2020-10-27 16:29:08        1
+35: e9c82388-2208-4150-9f28-3a325be3a6f6 &lt;list[4]&gt; 2020-10-27 16:29:08        1
+36: 6c7198c2-57a7-4ee7-8324-bde53ec9c612 &lt;list[4]&gt; 2020-10-27 16:29:08        1
                                    uhash  x_domain           timestamp batch_nr</code></pre>
 </div>
 <p>The parameters used by the learner (points after the transformation) are stored in in the <code>x_domain</code> column as lists. By using <code>unnest = x_domain</code>, the list elements are expanded to separate columns:</p>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-instance_random$archive$data(unnest = &quot;x_domain&quot;)</code></pre>
-<pre><code>
-           k distance      kernel scale classif.ce
+<div class="sourceCode">
+<pre><code><span class='va'>instance_random</span><span class='op'>$</span><span class='va'>archive</span><span class='op'>$</span><span class='fu'>data</span><span class='op'>(</span>unnest <span class='op'>=</span> <span class='st'>"x_domain"</span><span class='op'>)</span>
+</code></pre>
+</div>
+<pre><code>           k distance      kernel scale classif.ce
  1: 2.654531 2.921236 rectangular FALSE      0.314
  2: 2.588931 1.869319        rank  TRUE      0.254
  3: 3.319396 2.425029 rectangular  TRUE      0.272
@@ -1748,42 +2516,42 @@ instance_random$archive$data(unnest = &quot;x_domain&quot;)</code></pre>
 36: 3.285535 1.296423        rank FALSE      0.300
            k distance      kernel scale classif.ce
                                    uhash           timestamp batch_nr
- 1: c46e77c9-75ef-4219-af57-2638ecbb6efb 2020-10-22 04:44:31        1
- 2: a192bdd4-9463-4228-b612-ebd5a02b60dc 2020-10-22 04:44:31        1
- 3: 522a6dd7-5f35-4253-b4c2-cf8b7f14263b 2020-10-22 04:44:31        1
- 4: f3ddfcd5-7f72-418f-9048-a4a2ce31f6f3 2020-10-22 04:44:31        1
- 5: db012fc7-4c79-46f5-9d4d-beb08b6d6185 2020-10-22 04:44:31        1
- 6: 2286b78a-26e7-497e-9af2-94344b8936e4 2020-10-22 04:44:31        1
- 7: 7850ccd9-b675-4d60-baa8-c737ca3bbc38 2020-10-22 04:44:31        1
- 8: c6785f5b-7dd2-4270-a58c-82a0820f8f82 2020-10-22 04:44:31        1
- 9: ac3d9a6b-22b6-4aae-a4dc-36252982c240 2020-10-22 04:44:31        1
-10: 54518985-3f7e-4d1b-8667-2acf25298cb5 2020-10-22 04:44:31        1
-11: 4ff92321-1b2b-4b35-b890-ff8454b1e960 2020-10-22 04:44:31        1
-12: 4b398383-3c25-497a-8023-3c314216d60a 2020-10-22 04:44:31        1
-13: a9b67624-5d8e-4b91-b53c-4be57380c7c2 2020-10-22 04:44:31        1
-14: 8458f970-9599-4d39-807b-4ce74be601e4 2020-10-22 04:44:31        1
-15: 76a02640-2338-44f3-883e-c88710757ae6 2020-10-22 04:44:31        1
-16: bfa0643f-6723-4dde-9117-ed18c691ac20 2020-10-22 04:44:31        1
-17: 0a10fb12-e452-4b05-813b-341c1d542380 2020-10-22 04:44:31        1
-18: 9e9939d4-e566-4ab3-8158-9d225138923a 2020-10-22 04:44:31        1
-19: bb410471-9640-491e-ab8b-9770e4a9100b 2020-10-22 04:44:31        1
-20: 799d3fe8-5a2b-4d7d-ab18-59037ae6c1c3 2020-10-22 04:44:31        1
-21: 8ae23a5c-018b-464c-8206-2b127b8c342d 2020-10-22 04:44:31        1
-22: ea384a7e-3505-43d2-9fce-d03d47f431a1 2020-10-22 04:44:31        1
-23: 9796f507-3992-4a23-8d55-8f10bfc13d09 2020-10-22 04:44:31        1
-24: bf540878-ba97-4e01-a2ca-c539cdca8d95 2020-10-22 04:44:31        1
-25: 5c74465c-51c3-4d23-9504-c6b75be29b7e 2020-10-22 04:44:31        1
-26: 677cf8ab-7af5-4c1b-95d9-8725a44bde1e 2020-10-22 04:44:31        1
-27: 18a72d88-0bd2-49be-a5a5-89db3beb4540 2020-10-22 04:44:31        1
-28: 04e93c6d-4a35-4a82-afd6-ea7d9feec0db 2020-10-22 04:44:31        1
-29: db219e26-de00-4469-9e93-e2528c91126b 2020-10-22 04:44:31        1
-30: b73f6338-d456-4971-91f5-6a9effb5e260 2020-10-22 04:44:31        1
-31: 2c17e106-49b5-49ca-89bd-3671aebcc3ee 2020-10-22 04:44:31        1
-32: 6cac0c99-f3ce-4477-adeb-6fd094ff2869 2020-10-22 04:44:31        1
-33: c08d124b-cb31-4e02-a496-c3b184963f3e 2020-10-22 04:44:31        1
-34: c0f803f4-4fca-43a7-abfb-9661eff4431c 2020-10-22 04:44:31        1
-35: 7b8e449e-e335-4f06-8e93-57f22df25a0e 2020-10-22 04:44:31        1
-36: 54a0f289-8006-4498-a3c9-e9ee3f153b6d 2020-10-22 04:44:31        1
+ 1: 46d20ea5-313e-484d-890e-674df16d3a85 2020-10-27 16:29:08        1
+ 2: aa0ee290-6a7e-4fad-af94-a6ba55d05d8e 2020-10-27 16:29:08        1
+ 3: 79ee3e36-8856-4089-b648-2a7fdbc05963 2020-10-27 16:29:08        1
+ 4: 850ec811-5c4f-45ea-8426-2c88e0d66a45 2020-10-27 16:29:08        1
+ 5: 5ed2fcbb-8167-416c-ae13-74d2502b5ada 2020-10-27 16:29:08        1
+ 6: a9eeea4c-632b-4c84-952f-53eba5647b99 2020-10-27 16:29:08        1
+ 7: 4cefff3d-c03c-4d0c-a483-3bfeb4380085 2020-10-27 16:29:08        1
+ 8: a1882967-f8fd-40c4-aeaf-80374727e7bb 2020-10-27 16:29:08        1
+ 9: a0fb6a58-f860-473a-87f0-357c9958091b 2020-10-27 16:29:08        1
+10: d28347d5-40eb-4cfd-a467-51b4af4d1ff6 2020-10-27 16:29:08        1
+11: 657dce93-dc97-4310-bd1e-d9352633d40b 2020-10-27 16:29:08        1
+12: 40cb2e35-78d3-4691-abd7-11013b4ef4e0 2020-10-27 16:29:08        1
+13: 68d4db40-e138-45e0-a14e-71eb5d0434fa 2020-10-27 16:29:08        1
+14: d0ff9c3e-1f2d-41f6-b937-612118286f33 2020-10-27 16:29:08        1
+15: 0edb99a3-0542-444e-8fe9-7068e5a7a95c 2020-10-27 16:29:08        1
+16: bcffe1ba-a783-4010-bfa7-38ae6c326929 2020-10-27 16:29:08        1
+17: ab7da4a3-f0b0-4ec3-9057-1309aadeed6d 2020-10-27 16:29:08        1
+18: 9accd5dc-7f30-473c-86bd-c640b6be1bce 2020-10-27 16:29:08        1
+19: d0cb823c-bb10-49ed-ad1f-95c30c7fdf63 2020-10-27 16:29:08        1
+20: f388c39d-d1f1-4b98-8a50-af9c89a32958 2020-10-27 16:29:08        1
+21: dcd2e6b3-fe8a-4fb1-a072-39c5d52f8141 2020-10-27 16:29:08        1
+22: 86af74ae-f561-42b8-b367-ae38bfee4070 2020-10-27 16:29:08        1
+23: 4b848f02-5420-4f74-bd31-1626a1727adf 2020-10-27 16:29:08        1
+24: cf2f0ea9-b5cc-4281-bf20-bf741e412d87 2020-10-27 16:29:08        1
+25: 874f9764-5fb7-4abf-87f5-da93a7cf7967 2020-10-27 16:29:08        1
+26: abbc5993-74c1-4a85-8a57-a0596543e7fe 2020-10-27 16:29:08        1
+27: a61b50c6-6ef8-4a0a-bf59-e7f76f345b46 2020-10-27 16:29:08        1
+28: 78e24f4a-22f7-407b-9738-f3758de9ab53 2020-10-27 16:29:08        1
+29: a171662c-fc38-4bc0-bfda-be4385010a44 2020-10-27 16:29:08        1
+30: 84803dab-6e0c-4cc7-9cc3-580080eb2cdb 2020-10-27 16:29:08        1
+31: 46b5ab02-5964-4d21-a868-54240aa2e860 2020-10-27 16:29:08        1
+32: 0732bc23-ed61-475b-84e1-31a9ff3d7a0a 2020-10-27 16:29:08        1
+33: e274ddf2-a829-4ae1-a89c-d23f125a6469 2020-10-27 16:29:08        1
+34: c5e49972-4977-4099-972c-b2395ba1045b 2020-10-27 16:29:08        1
+35: e9c82388-2208-4150-9f28-3a325be3a6f6 2020-10-27 16:29:08        1
+36: 6c7198c2-57a7-4ee7-8324-bde53ec9c612 2020-10-27 16:29:08        1
                                    uhash           timestamp batch_nr
     x_domain_k x_domain_distance x_domain_kernel x_domain_scale
  1:         14          2.921236     rectangular          FALSE
@@ -1826,32 +2594,38 @@ instance_random$archive$data(unnest = &quot;x_domain&quot;)</code></pre>
 </div>
 <p>Let’s now investigate the performance by parameters. This is especially easy using visualization:</p>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-ggplot(instance_random$archive$data(unnest = &quot;x_domain&quot;),
-  aes(x = x_domain_k, y = classif.ce, color = x_domain_scale)) +
-  geom_point(size = 3) + geom_line()</code></pre>
+<div class="sourceCode">
+<pre><code><span class='fu'><a href='https://ggplot2.tidyverse.org/reference/ggplot.html'>ggplot</a></span><span class='op'>(</span><span class='va'>instance_random</span><span class='op'>$</span><span class='va'>archive</span><span class='op'>$</span><span class='fu'>data</span><span class='op'>(</span>unnest <span class='op'>=</span> <span class='st'>"x_domain"</span><span class='op'>)</span>,
+  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/aes.html'>aes</a></span><span class='op'>(</span>x <span class='op'>=</span> <span class='va'>x_domain_k</span>, y <span class='op'>=</span> <span class='va'>classif.ce</span>, color <span class='op'>=</span> <span class='va'>x_domain_scale</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span>
+  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/geom_point.html'>geom_point</a></span><span class='op'>(</span>size <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/geom_path.html'>geom_line</a></span><span class='op'>(</span><span class='op'>)</span>
+</code></pre>
+</div>
 <p><img src="2020-03-11-mlr3tuning_tutorial_german_credit_files/figure-html5/unnamed-chunk-22-1.png" width="624" /></p>
 </div>
 <p>The previous plot suggests that <code>scale</code> has a strong influence on performance. For the kernel, there does not seem to be a strong influence:</p>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-ggplot(instance_random$archive$data(unnest = &quot;x_domain&quot;),
-  aes(x = x_domain_k, y = classif.ce, color = x_domain_kernel)) +
-  geom_point(size = 3) + geom_line()</code></pre>
+<div class="sourceCode">
+<pre><code><span class='fu'><a href='https://ggplot2.tidyverse.org/reference/ggplot.html'>ggplot</a></span><span class='op'>(</span><span class='va'>instance_random</span><span class='op'>$</span><span class='va'>archive</span><span class='op'>$</span><span class='fu'>data</span><span class='op'>(</span>unnest <span class='op'>=</span> <span class='st'>"x_domain"</span><span class='op'>)</span>,
+  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/aes.html'>aes</a></span><span class='op'>(</span>x <span class='op'>=</span> <span class='va'>x_domain_k</span>, y <span class='op'>=</span> <span class='va'>classif.ce</span>, color <span class='op'>=</span> <span class='va'>x_domain_kernel</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span>
+  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/geom_point.html'>geom_point</a></span><span class='op'>(</span>size <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/geom_path.html'>geom_line</a></span><span class='op'>(</span><span class='op'>)</span>
+</code></pre>
+</div>
 <p><img src="2020-03-11-mlr3tuning_tutorial_german_credit_files/figure-html5/unnamed-chunk-23-1.png" width="624" /></p>
 </div>
 <h2 id="nested-resampling">Nested Resampling</h2>
 <p>Having determined tuned configurations that seem to work well, we want to find out which performance we can expect from them. However, this may require more than this naive approach:</p>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-instance_random$result_y</code></pre>
-<pre><code>
-classif.ce 
+<div class="sourceCode">
+<pre><code><span class='va'>instance_random</span><span class='op'>$</span><span class='va'>result_y</span>
+</code></pre>
+</div>
+<pre><code>classif.ce 
      0.249 </code></pre>
-<pre class="r"><code>
-instance_grid$result_y</code></pre>
-<pre><code>
-classif.ce 
+<div class="sourceCode">
+<pre><code><span class='va'>instance_grid</span><span class='op'>$</span><span class='va'>result_y</span>
+</code></pre>
+</div>
+<pre><code>classif.ce 
       0.25 </code></pre>
 </div>
 <p>The problem associated with evaluating tuned models is <em>overtuning</em>. The more we search, the more optimistically biased the associated performance metrics from tuning become.</p>
@@ -1859,48 +2633,55 @@ classif.ce
 <p>The <code>mlr3tuning</code> package provides an <a href="https://mlr3tuning.mlr-org.com/reference/AutoTuner.html"><code>AutoTuner</code></a> that acts like our tuning method but is actually a <code>Learner</code>. The <code>$train()</code> method facilitates tuning of hyperparameters on the training data, using a resampling strategy (below we use 5-fold cross-validation). Then, we actually train a model with optimal hyperparameters on the whole training data.</p>
 <p>The <code>AutoTuner</code> finds the best parameters and uses them for training:</p>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-grid_auto = AutoTuner$new(
-  learner = knn,
-  resampling = rsmp(&quot;cv&quot;, folds = 5), # we can NOT use fixed resampling here
-  measure = msr(&quot;classif.ce&quot;),
-  search_space = search_space,
-  terminator = trm(&quot;none&quot;),
-  tuner = tnr(&quot;grid_search&quot;, resolution = 18),
-)</code></pre>
+<div class="sourceCode">
+<pre><code><span class='va'>grid_auto</span> <span class='op'>=</span> <span class='va'><a href='https://mlr3tuning.mlr-org.com/reference/AutoTuner.html'>AutoTuner</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span>
+  learner <span class='op'>=</span> <span class='va'>knn</span>,
+  resampling <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>rsmp</a></span><span class='op'>(</span><span class='st'>"cv"</span>, folds <span class='op'>=</span> <span class='fl'>5</span><span class='op'>)</span>, <span class='co'># we can NOT use fixed resampling here</span>
+  measure <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>msr</a></span><span class='op'>(</span><span class='st'>"classif.ce"</span><span class='op'>)</span>,
+  search_space <span class='op'>=</span> <span class='va'>search_space</span>,
+  terminator <span class='op'>=</span> <span class='fu'><a href='https://bbotk.mlr-org.com/reference/trm.html'>trm</a></span><span class='op'>(</span><span class='st'>"none"</span><span class='op'>)</span>,
+  tuner <span class='op'>=</span> <span class='fu'><a href='https://mlr3tuning.mlr-org.com/reference/tnr.html'>tnr</a></span><span class='op'>(</span><span class='st'>"grid_search"</span>, resolution <span class='op'>=</span> <span class='fl'>18</span><span class='op'>)</span>,
+<span class='op'>)</span>
+</code></pre>
+</div>
 </div>
 <p>The <code>AutoTuner</code> behaves just like a regular <code>Learner</code>. It can be used to combine the steps of hyperparameter tuning and model fitting but is especially useful for resampling and <em>fair</em> comparison of performance through benchmarking:</p>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-rr = resample(task, grid_auto, cv10_instance, store_models = TRUE)</code></pre>
+<div class="sourceCode">
+<pre><code><span class='va'>rr</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/resample.html'>resample</a></span><span class='op'>(</span><span class='va'>task</span>, <span class='va'>grid_auto</span>, <span class='va'>cv10_instance</span>, store_models <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>
+</code></pre>
+</div>
 </div>
 <p>We aggregate the performances of all resampling iterations:</p>
 <div class="layout-chunk" data-layout="l-body">
 
 </div>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-rr$aggregate()</code></pre>
-<pre><code>
-classif.ce 
+<div class="sourceCode">
+<pre><code><span class='va'>rr</span><span class='op'>$</span><span class='fu'>aggregate</span><span class='op'>(</span><span class='op'>)</span>
+</code></pre>
+</div>
+<pre><code>classif.ce 
      0.256 </code></pre>
 </div>
 <p>Essentially, this is the performance of a “knn with optimal hyperparameters found by grid search”. Note that <code>grid_auto</code> is not changed since <code>resample()</code> creates a clone for each resampling iteration. The trained <code>AutoTuner</code> objects can be accessed by using</p>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-rr$learners[[1]]</code></pre>
-<pre><code>
-&lt;AutoTuner:classif.kknn.tuned&gt;
+<div class="sourceCode">
+<pre><code><span class='va'>rr</span><span class='op'>$</span><span class='va'>learners</span><span class='op'>[[</span><span class='fl'>1</span><span class='op'>]</span><span class='op'>]</span>
+</code></pre>
+</div>
+<pre><code>&lt;AutoTuner:classif.kknn.tuned&gt;
 * Model: list
 * Parameters: kernel=rectangular, k=9, distance=2
 * Packages: kknn
 * Predict Type: prob
 * Feature types: logical, integer, numeric, factor, ordered
 * Properties: multiclass, twoclass</code></pre>
-<pre class="r"><code>
-rr$learners[[1]]$tuning_result</code></pre>
-<pre><code>
-   k distance learner_param_vals  x_domain classif.ce
+<div class="sourceCode">
+<pre><code><span class='va'>rr</span><span class='op'>$</span><span class='va'>learners</span><span class='op'>[[</span><span class='fl'>1</span><span class='op'>]</span><span class='op'>]</span><span class='op'>$</span><span class='va'>tuning_result</span>
+</code></pre>
+</div>
+<pre><code>   k distance learner_param_vals  x_domain classif.ce
 1: 9        2          &lt;list[3]&gt; &lt;list[2]&gt;       0.26</code></pre>
 </div>
 <h2 id="appendix">Appendix</h2>
@@ -1913,10 +2694,11 @@ rr$learners[[1]]$tuning_result</code></pre>
 
 </div>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-perfdata</code></pre>
-<pre><code>
-             k distance   kernel scale classif.ce
+<div class="sourceCode">
+<pre><code><span class='va'>perfdata</span>
+</code></pre>
+</div>
+<pre><code>             k distance   kernel scale classif.ce
    1: 2.191216 2.232217 gaussian FALSE      0.312
    2: 3.549142 1.058476     rank FALSE      0.296
    3: 2.835727 2.121690  optimal  TRUE      0.251
@@ -1955,36 +2737,45 @@ perfdata</code></pre>
 </div>
 <p>The scale effect is just as visible as before with fewer data:</p>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-ggplot(perfdata, aes(x = x_domain_k, y = classif.ce, color = scale)) +
-  geom_point(size = 2, alpha = 0.3)</code></pre>
+<div class="sourceCode">
+<pre><code><span class='fu'><a href='https://ggplot2.tidyverse.org/reference/ggplot.html'>ggplot</a></span><span class='op'>(</span><span class='va'>perfdata</span>, <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/aes.html'>aes</a></span><span class='op'>(</span>x <span class='op'>=</span> <span class='va'>x_domain_k</span>, y <span class='op'>=</span> <span class='va'>classif.ce</span>, color <span class='op'>=</span> <span class='va'>scale</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span>
+  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/geom_point.html'>geom_point</a></span><span class='op'>(</span>size <span class='op'>=</span> <span class='fl'>2</span>, alpha <span class='op'>=</span> <span class='fl'>0.3</span><span class='op'>)</span>
+</code></pre>
+</div>
 <p><img src="2020-03-11-mlr3tuning_tutorial_german_credit_files/figure-html5/unnamed-chunk-33-1.png" width="624" /></p>
 </div>
 <p>Now, there seems to be a visible pattern by kernel as well:</p>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-ggplot(perfdata, aes(x = x_domain_k, y = classif.ce, color = kernel)) +
-  geom_point(size = 2, alpha = 0.3)</code></pre>
+<div class="sourceCode">
+<pre><code><span class='fu'><a href='https://ggplot2.tidyverse.org/reference/ggplot.html'>ggplot</a></span><span class='op'>(</span><span class='va'>perfdata</span>, <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/aes.html'>aes</a></span><span class='op'>(</span>x <span class='op'>=</span> <span class='va'>x_domain_k</span>, y <span class='op'>=</span> <span class='va'>classif.ce</span>, color <span class='op'>=</span> <span class='va'>kernel</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span>
+  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/geom_point.html'>geom_point</a></span><span class='op'>(</span>size <span class='op'>=</span> <span class='fl'>2</span>, alpha <span class='op'>=</span> <span class='fl'>0.3</span><span class='op'>)</span>
+</code></pre>
+</div>
 <p><img src="2020-03-11-mlr3tuning_tutorial_german_credit_files/figure-html5/unnamed-chunk-34-1.png" width="624" /></p>
 </div>
 <p>In fact, if we zoom in to <code>(5, 35)</code> <span class="math inline">\(\times\)</span> <code>(0.23, 0.28)</code> and do decrease smoothing we see that different kernels have their optimum at different values of <code>k</code>:</p>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-ggplot(perfdata, aes(x = x_domain_k, y = classif.ce, color = kernel,
-  group = interaction(kernel, scale))) +
-  geom_point(size = 2, alpha = 0.3) + geom_smooth() +
-  xlim(5, 35) + ylim(0.23, 0.28)</code></pre>
+<div class="sourceCode">
+<pre><code><span class='fu'><a href='https://ggplot2.tidyverse.org/reference/ggplot.html'>ggplot</a></span><span class='op'>(</span><span class='va'>perfdata</span>, <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/aes.html'>aes</a></span><span class='op'>(</span>x <span class='op'>=</span> <span class='va'>x_domain_k</span>, y <span class='op'>=</span> <span class='va'>classif.ce</span>, color <span class='op'>=</span> <span class='va'>kernel</span>,
+  group <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/interaction.html'>interaction</a></span><span class='op'>(</span><span class='va'>kernel</span>, <span class='va'>scale</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span>
+  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/geom_point.html'>geom_point</a></span><span class='op'>(</span>size <span class='op'>=</span> <span class='fl'>2</span>, alpha <span class='op'>=</span> <span class='fl'>0.3</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/geom_smooth.html'>geom_smooth</a></span><span class='op'>(</span><span class='op'>)</span> <span class='op'>+</span>
+  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/lims.html'>xlim</a></span><span class='op'>(</span><span class='fl'>5</span>, <span class='fl'>35</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/lims.html'>ylim</a></span><span class='op'>(</span><span class='fl'>0.23</span>, <span class='fl'>0.28</span><span class='op'>)</span>
+</code></pre>
+</div>
 <p><img src="2020-03-11-mlr3tuning_tutorial_german_credit_files/figure-html5/unnamed-chunk-35-1.png" width="624" /></p>
 </div>
 <p>What about the <code>distance</code> parameter? If we select all results with <code>k</code> between 10 and 20 and plot distance and kernel we see an approximate relationship:</p>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-ggplot(perfdata[x_domain_k &gt; 10 &amp; x_domain_k &lt; 20 &amp; scale == TRUE],
-  aes(x = distance, y = classif.ce, color = kernel)) +
-  geom_point(size = 2) + geom_smooth()</code></pre>
+<div class="sourceCode">
+<pre><code><span class='fu'><a href='https://ggplot2.tidyverse.org/reference/ggplot.html'>ggplot</a></span><span class='op'>(</span><span class='va'>perfdata</span><span class='op'>[</span><span class='va'>x_domain_k</span> <span class='op'>&gt;</span> <span class='fl'>10</span> <span class='op'>&amp;</span> <span class='va'>x_domain_k</span> <span class='op'>&lt;</span> <span class='fl'>20</span> <span class='op'>&amp;</span> <span class='va'>scale</span> <span class='op'>==</span> <span class='cn'>TRUE</span><span class='op'>]</span>,
+  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/aes.html'>aes</a></span><span class='op'>(</span>x <span class='op'>=</span> <span class='va'>distance</span>, y <span class='op'>=</span> <span class='va'>classif.ce</span>, color <span class='op'>=</span> <span class='va'>kernel</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span>
+  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/geom_point.html'>geom_point</a></span><span class='op'>(</span>size <span class='op'>=</span> <span class='fl'>2</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/geom_smooth.html'>geom_smooth</a></span><span class='op'>(</span><span class='op'>)</span>
+</code></pre>
+</div>
 <p><img src="2020-03-11-mlr3tuning_tutorial_german_credit_files/figure-html5/unnamed-chunk-36-1.png" width="624" /></p>
 </div>
 <p>In sum our observations are: The <code>scale</code> parameter is very influential, and scaling is beneficial. The <code>distance</code> type seems to be the least influential. Their seems to be an interaction between ‘k’ and ‘kernel’.</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
 <!--radix_placeholder_article_footer-->
 <!--/radix_placeholder_article_footer-->
 </div>
