@@ -12,6 +12,7 @@ output:
   distill::distill_article:
     self_contained: false
     css: ../../custom.css
+bibliography: biblio.bib
 ---
 
 ```{r setup, include=FALSE}
@@ -29,16 +30,16 @@ In this tutorial we demonstrate how to use `r mlr_pkg("mlr3pipelines")` to handl
 
 In a simple regression chain, regression models are arranged in a linear sequence.
 Here, the first model will use the input to predict a single output and the second model will use the input and the prediction output of the first model to make its own prediction and so on.
-For more details, see e.g. [Spyromitros-Xioufis, Tsoumakas, Groves & Vlahavas (2016)](https://doi.org/10.1007/s10994-016-5546-z).
+For more details, see e.g. Spyromitros-Xioufis et al. 2016 @spyromitros2016.
 
 ## Before you start
 
 The following sections describe an approach towards working with `r ref("Task", "Tasks")` that have multiple targets.
 E.g., in the example below, we have three target variables $y_{1}$ to $y_{3}$.
-This type of `Task` can be created via the [mlr3multioutput](https://github.com/mlr-org/mlr3multioutput/) (currently under development) in the future.
+This type of `Task` can be created via the [mlr3multioutput](https://github.com/mlr-org/mlr3multioutput/) package (currently under development) in the future.
 `mlr3multioutput` will also offer simple chaining approaches as pre-built pipelines (so called `r ref("ppl", "ppls")`).
 The current goal of this post is to show how such modeling steps can be written as a relatively small amount of pipeline steps and how such steps can be put together.
-Writing pipelines with such steps allows for great flexibility in modelling more complicated scenarios such as the ones described below.
+Writing pipelines with such steps allows for great flexibility in modeling more complicated scenarios such as the ones described below.
 
 ## Data
 
@@ -113,7 +114,8 @@ plot3d(dat$y1, dat$y2, dat$y3,
 
 ## Building the Pipeline
 
-In our regression chain, the first model will predict $y_{1}$. Therefore, we initialize our `Task` with respect to this target:
+In our regression chain, the first model will predict $y_{1}$.
+Therefore, we initialize our `Task` with respect to this target:
 
 ```{r}
 library(mlr3)
@@ -122,7 +124,8 @@ library(mlr3pipelines)
 task = TaskRegr$new("multiregression", backend = dat, target = "y1")
 ```
 
-As `r ref("Learner", "Learners")` we will use simple linear regression models, `r ref("mlr_learners_regr.lm")`. Our pipeline building the regression chain then has to do the following:
+As `r ref("Learner", "Learners")` we will use simple `r ref("mlr_learners_regr.lm", "linear regression models")`.
+Our pipeline building the regression chain then has to do the following:
 
 * Use the input to predict $y_{1}$ within the first learner (i.e., $y_{1} \sim x_{1} + x_{2}$).
 * Combine the input with the prediction of $y_{1}$, $\hat{y_{1}}$ and use this to predict $y_{2}$ within the second learner (i.e., $y_{2} \sim x_{1} + x_{2} + \hat{y_{1}}$).
@@ -173,7 +176,7 @@ step2 = po("update_target", id = "y2_target",
   po("featureunion", id = "union2")
 ```
 
-Again, we can train to see how the output and `$state` look like, but now using the output of `step1`:
+Again, we can train to see how the output and `$state` look like, but now using the output of `step1` as the input:
 
 ```{r}
 step2_out = step2$train(step1_out)[[1]]
@@ -181,7 +184,7 @@ step2_out
 step2$state
 ```
 
-In the final third step we define $y_{3}$ as the new target (again, `PipeOpUpdateTarget` drops the original target from the feature set, here $y_{2}$):
+In the final third step we define $y_{3}$ as the new target (again, `PipeOpUpdateTarget` drops the previous original target from the feature set, here $y_{2}$):
 
 ```{r}
 step3 = po("update_target", id = "y3_target",
@@ -189,7 +192,7 @@ step3 = po("update_target", id = "y3_target",
   po("learner", learner = lrn("regr.lm"), id = "y3_learner")
 ```
 
-Using the output of `step2`:
+Using the output of `step2` as input:
 
 ```{r}
 step3_out = step3$train(step2_out)[[1]]
@@ -206,7 +209,7 @@ graph$plot()
 
 ## Evaluating the Pipeline
 
-By wrapping our `Graph` in a `r ref("GraphLearner")`, we can perform `3-fold` `r ref("ResamplingCV", "cross-validation")` and get an estimated average of the root-mean-square error (of course, in a real world setting splitting the data in a training and test set should have been done):
+By wrapping our `Graph` in a `r ref("GraphLearner")`, we can perform `r ref("ResamplingCV", "3-fold cross-validation")` and get an estimated average of the root-mean-square error (of course, in a real world setting splitting the data in a training and test set should have been done):
 
 ```{r}
 learner = GraphLearner$new(graph)
@@ -224,4 +227,4 @@ learner$train(task)
 learner$predict_newdata(dat_predict)
 ```
 
-Note that we have to initialize the `Task` with $y_{1}$ as the target but the pipeline will automatically predict $y_{3}$ in the final step as our final target, which was our ultimate goal.
+Note that we have to initialize the `Task` with $y_{1}$ as the target but the pipeline will automatically predict $y_{3}$ in the final step as our final target, which was our ultimate goal here.
