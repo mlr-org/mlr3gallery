@@ -175,7 +175,9 @@ tune_ps1$add_dep("branch_preproc_lda.selection",
 Again, regarding the `pca.rank.` parameter, there is a dependency on that `"pca"` must have been selected in `branch_preproc_lda.selection` beforehand, which we have to explicitly specify:
 
 ```{r}
-tune_ps1$add_dep("pca.rank.", on = "branch_preproc_lda.selection", cond = CondEqual$new("pca"))
+tune_ps1$add_dep("pca.rank.",
+  on = "branch_preproc_lda.selection",
+  cond = CondEqual$new("pca"))
 ```
 The same holds for the following parameters analogously:
 
@@ -241,7 +243,8 @@ lgr::get_logger("bbotk")$set_threshold("warn")
 ```
 
 ```{r}
-tnr("grid_search", resolution = 4)$optimize(tune1)
+tuner_gs = tnr("grid_search", resolution = 4)
+tuner_gs$optimize(tune1)
 ```
 
 Now, we can inspect the results ordered by the `classification accuracy`:
@@ -345,10 +348,15 @@ I.e., suppose that the following parameters will be selected from our `ParamSet`
 x = list(branch_learner.selection = "ranger",
   classif.ranger.mtry = 200,
   classif.ranger.num.trees = 500)
+```
+
+The `trafo` function will then return:
+
+```{r}
 tune_ps2$trafo(x)
 ```
 
-Tuning then can be carried out analogously as done above (note that setting `unnest = "x_domain"` allows us to inspect the parameters as they were selected prior to the trafo function being applied):
+Tuning can be carried out analogously as done above:
 
 ```{r, eval = FALSE}
 set.seed(2409)
@@ -360,10 +368,10 @@ tune2 = TuningInstanceSingleCrit$new(
   search_space = tune_ps2,
   terminator = trm("none")
 )
-tnr("grid_search", resolution = 4)$optimize(tune2)
+tuner_gs$optimize(tune2)
 ```
 
 ```{r, eval = FALSE}
-tune2_results = tune2$archive$data(unnest = "x_domain")
+tune2_results = tune2$archive$data()
 tune2_results[order(classif.acc), ]
 ```
