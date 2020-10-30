@@ -18,6 +18,73 @@
  <!--radix_placeholder_import_source-->
  <!--/radix_placeholder_import_source-->
 
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css" data-origin="pandoc">
+code.sourceCode > span { display: inline-block; line-height: 1.25; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #545454; font-weight: bold; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #a1024a; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007faa; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #008000; } /* Char */
+code span.cn { color: #d91e18; } /* Constant */
+code span.co { color: #545454; } /* Comment */
+code span.cv { color: #545454; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #aa5d00; } /* DataType */
+code span.dv { color: #a1024a; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #a1024a; } /* Float */
+code span.fu { color: #4254a7; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #545454; font-weight: bold; } /* Information */
+code span.kw { color: #007faa; font-weight: bold; } /* Keyword */
+code span.op { color: #696969; } /* Operator */
+code span.ot { color: #007faa; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #008000; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #008000; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #008000; } /* VerbatimString */
+code span.wa { color: #545454; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
   <!--radix_placeholder_meta_tags-->
 <title>mlr3gallery: A pipeline for the titanic data set - Advanced</title>
 
@@ -68,6 +135,7 @@
   {"type":"character","attributes":{},"value":["2020-04-27-mlr3pipelines-titanic-advanced_files/figure-html5/unnamed-chunk-11-1.png","2020-04-27-mlr3pipelines-titanic-advanced_files/figure-html5/unnamed-chunk-17-1.png","2020-04-27-mlr3pipelines-titanic-advanced_files/figure-html5/unnamed-chunk-23-1.png","2020-04-27-mlr3pipelines-titanic-advanced_files/figure-html5/unnamed-chunk-24-1.png","2020-04-27-mlr3pipelines-titanic-advanced_files/figure-html5/unnamed-chunk-25-1.png"]}
   </script>
   <!--radix_placeholder_navigation_in_header-->
+<meta name="distill:offset" content="../.."/>
 
 <script type="application/javascript">
 
@@ -127,7 +195,7 @@
 
 .distill-site-nav {
   color: rgba(255, 255, 255, 0.8);
-  background-color: #455a64;
+  background-color: #0F2E3D;
   font-size: 15px;
   font-weight: 300;
 }
@@ -190,6 +258,7 @@
 
 .distill-site-header .title {
   font-size: 18px;
+  min-width: 150px;
 }
 
 .distill-site-header .logo {
@@ -331,7 +400,7 @@
 
 
 @media screen and (max-width: 768px) {
-  .distill-site-header.responsive {position: relative;}
+  .distill-site-header.responsive {position: relative; min-height: 500px; }
   .distill-site-header.responsive a.nav-toggle {
     position: absolute;
     right: 0;
@@ -405,6 +474,267 @@ d-title {
 <link href="../../site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet"/>
 <link href="../../site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet"/>
 <script src="../../site_libs/headroom-0.9.4/headroom.min.js"></script>
+<script src="../../site_libs/autocomplete-0.37.1/autocomplete.min.js"></script>
+<script src="../../site_libs/fuse-6.4.1/fuse.min.js"></script>
+
+<script type="application/javascript">
+
+function getMeta(metaName) {
+  var metas = document.getElementsByTagName('meta');
+  for (let i = 0; i < metas.length; i++) {
+    if (metas[i].getAttribute('name') === metaName) {
+      return metas[i].getAttribute('content');
+    }
+  }
+  return '';
+}
+
+function offsetURL(url) {
+  var offset = getMeta('distill:offset');
+  return offset ? offset + '/' + url : url;
+}
+
+function createIndex() {
+  var options = {
+    keys: [
+      "title",
+      "categories",
+      "description",
+      "contents"
+    ]
+  };
+  return new window.Fuse([],options);
+}
+
+function createFuseIndex() {
+
+  // create fuse index
+  var options = { keys: ["title", "description", "contents"] };
+  var fuse = new window.Fuse([], options);
+
+  // fetch the main search.json
+  return fetch(offsetURL('search.json'))
+    .then(function(response) {
+      if (response.status == 200) {
+        return response.json().then(function(json) {
+          // index main articles
+          json.articles.forEach(function(article) {
+            fuse.add(article);
+          });
+          // download collections and index their articles
+          return Promise.all(json.collections.map(function(collection) {
+            return fetch(offsetURL(collection)).then(function(response) {
+              if (response.status === 200) {
+                return response.json().then(function(articles) {
+                  articles.forEach(function(article) {
+                    fuse.add(article);
+                  });
+                })
+              } else {
+                return Promise.reject(
+                  new Error('Unexpected status from search index request: ' +
+                            response.status)
+                );
+              }
+            });
+          })).then(function() {
+            return fuse;
+          });
+        });
+
+      } else {
+        return Promise.reject(
+          new Error('Unexpected status from search index request: ' +
+                      response.status)
+        );
+      }
+    });
+}
+
+window.document.addEventListener("DOMContentLoaded", function (event) {
+
+  // get search element (bail if we don't have one)
+  var searchEl = window.document.getElementById('distill-search');
+  if (!searchEl)
+    return;
+
+  createFuseIndex()
+    .then(function(fuse) {
+
+      // make search box visible
+      searchEl.classList.remove('hidden');
+
+      // initialize autocomplete
+      var options = {
+        autoselect: true,
+        hint: false,
+        minLength: 2,
+      };
+      window.autocomplete(searchEl, options, [{
+        source: function(query, callback) {
+          const searchOptions = {
+            isCaseSensitive: false,
+            shouldSort: true,
+            minMatchCharLength: 2,
+            limit: 10,
+            keys: [
+              { name: 'title', weight: 20 },
+              { name: 'categories', weight: 15 },
+              { name: 'description', weight: 10 },
+              { name: 'contents', weight: 5 },
+            ],
+          };
+          var results = fuse.search(query, searchOptions);
+          callback(results
+            .map(function(result) { return result.item; })
+            .filter(function(item) { return !!item.description; })
+          );
+        },
+        templates: {
+          suggestion: function(suggestion) {
+            var html = `
+              <div class="search-item">
+                <h3>${suggestion.title}</h3>
+                <div class="search-item-description">
+                  ${suggestion.description}
+                </div>
+                <div class="search-item-preview">
+                  <img src="${suggestion.preview ? offsetURL(suggestion.preview) : ''}"</img>
+                </div>
+              </div>
+            `;
+            return html;
+          }
+        }
+      }]).on('autocomplete:selected', function(event, suggestion) {
+        window.location.href = offsetURL(suggestion.path);
+      });
+      // remove inline display style on autocompleter (we want to
+      // manage responsive display via css)
+      $('.algolia-autocomplete').css("display", "");
+    })
+    .catch(function(error) {
+      console.log(error);
+    });
+
+});
+
+</script>
+
+<style type="text/css">
+
+/* Algolioa Autocomplete */
+
+.algolia-autocomplete {
+  display: inline-block;
+  margin-left: 10px;
+  vertical-align: sub;
+  background-color: white;
+  color: black;
+  padding: 6px;
+  padding-top: 8px;
+  padding-bottom: 0;
+  border-radius: 6px;
+  border: 1px #0F2E3D solid;
+  width: 180px;
+}
+
+
+@media screen and (max-width: 768px) {
+  .distill-site-nav .algolia-autocomplete {
+    display: none;
+    visibility: hidden;
+  }
+  .distill-site-nav.responsive .algolia-autocomplete {
+    display: inline-block;
+    visibility: visible;
+  }
+  .distill-site-nav.responsive .algolia-autocomplete .aa-dropdown-menu {
+    margin-left: 0;
+    width: 400px;
+    max-height: 400px;
+  }
+}
+
+.algolia-autocomplete .aa-input, .algolia-autocomplete .aa-hint {
+  width: 90%;
+  outline: none;
+  border: none;
+}
+
+.algolia-autocomplete .aa-hint {
+  color: #999;
+}
+.algolia-autocomplete .aa-dropdown-menu {
+  width: 550px;
+  max-height: 70vh;
+  overflow-x: visible;
+  overflow-y: scroll;
+  padding: 5px;
+  margin-top: 3px;
+  margin-left: -150px;
+  background-color: #fff;
+  border-radius: 5px;
+  border: 1px solid #999;
+  border-top: none;
+}
+
+.algolia-autocomplete .aa-dropdown-menu .aa-suggestion {
+  cursor: pointer;
+  padding: 5px 4px;
+  border-bottom: 1px solid #eee;
+}
+
+.algolia-autocomplete .aa-dropdown-menu .aa-suggestion:last-of-type {
+  border-bottom: none;
+  margin-bottom: 2px;
+}
+
+.algolia-autocomplete .aa-dropdown-menu .aa-suggestion .search-item {
+  overflow: hidden;
+  font-size: 0.8em;
+  line-height: 1.4em;
+}
+
+.algolia-autocomplete .aa-dropdown-menu .aa-suggestion .search-item h3 {
+  margin-block-start: 0;
+  margin-block-end: 5px;
+}
+
+.algolia-autocomplete .aa-dropdown-menu .aa-suggestion .search-item-description {
+  display: inline-block;
+  overflow: hidden;
+  height: 2.8em;
+  width: 80%;
+  margin-right: 4%;
+}
+
+.algolia-autocomplete .aa-dropdown-menu .aa-suggestion .search-item-preview {
+  display: inline-block;
+  width: 15%;
+}
+
+.algolia-autocomplete .aa-dropdown-menu .aa-suggestion .search-item-preview img {
+  height: 3em;
+  width: auto;
+  display: none;
+}
+
+.algolia-autocomplete .aa-dropdown-menu .aa-suggestion .search-item-preview img[src] {
+  display: initial;
+}
+
+.algolia-autocomplete .aa-dropdown-menu .aa-suggestion.aa-cursor {
+  background-color: #eee;
+}
+.algolia-autocomplete .aa-dropdown-menu .aa-suggestion em {
+  font-weight: bold;
+  font-style: normal;
+}
+
+</style>
+
+
 <!--/radix_placeholder_navigation_in_header-->
   <!--radix_placeholder_distill-->
 
@@ -428,6 +758,51 @@ body {
 
 .pagedtable-footer {
   font-size: 15px;
+}
+
+d-byline .byline {
+  grid-template-columns: 2fr 2fr;
+}
+
+d-byline .byline h3 {
+  margin-block-start: 1.5em;
+}
+
+d-byline .byline .authors-affiliations h3 {
+  margin-block-start: 0.5em;
+}
+
+.authors-affiliations .orcid-id {
+  width: 16px;
+  height:16px;
+  margin-left: 4px;
+  margin-right: 4px;
+  vertical-align: middle;
+  padding-bottom: 2px;
+}
+
+d-title .dt-tags {
+  margin-top: 1em;
+  grid-column: text;
+}
+
+.dt-tags .dt-tag {
+  text-decoration: none;
+  display: inline-block;
+  color: rgba(0,0,0,0.6);
+  padding: 0em 0.4em;
+  margin-right: 0.5em;
+  margin-bottom: 0.4em;
+  font-size: 70%;
+  border: 1px solid rgba(0,0,0,0.2);
+  border-radius: 3px;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+d-article table.gt_table td,
+d-article table.gt_table th {
+  border-bottom: none;
 }
 
 .html-widget {
@@ -469,6 +844,7 @@ body {
 }
 
 d-article {
+  padding-top: 2.5rem;
   padding-bottom: 30px;
 }
 
@@ -480,91 +856,48 @@ d-article>p>img {
   width: 100%;
 }
 
+d-article h2 {
+  margin: 1rem 0 1.5rem 0;
+}
+
+d-article h3 {
+  margin-top: 1.5rem;
+}
+
 d-article iframe {
   border: 1px solid rgba(0, 0, 0, 0.1);
   margin-bottom: 2.0em;
   width: 100%;
 }
 
-figure img.external {
-  background: white;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.1);
-  padding: 18px;
-  box-sizing: border-box;
+/* Tweak code blocks */
+
+d-article div.sourceCode code,
+d-article pre code {
+  font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
 }
 
-/* CSS for table of contents */
-
-.d-toc {
-  color: rgba(0,0,0,0.8);
-  font-size: 0.8em;
-  line-height: 1em;
+d-article pre,
+d-article div.sourceCode,
+d-article div.sourceCode pre {
+  overflow: hidden;
 }
 
-.d-toc-header {
-  font-size: 0.6rem;
-  font-weight: 400;
-  color: rgba(0, 0, 0, 0.5);
-  text-transform: uppercase;
-  margin-top: 0;
-  margin-bottom: 1.3em;
+d-article div.sourceCode {
+  background-color: white;
 }
 
-.d-toc a {
-  border-bottom: none;
-}
-
-.d-toc ul {
-  padding-left: 0;
-}
-
-.d-toc li>ul {
-  padding-top: 0.8em;
-  padding-left: 16px;
-  margin-bottom: 0.6em;
-}
-
-.d-toc ul,
-.d-toc li {
-  list-style-type: none;
-}
-
-.d-toc li {
-  margin-bottom: 0.9em;
-}
-
-.d-toc-separator {
-  margin-top: 20px;
-  margin-bottom: 2em;
-}
-
-.d-article-with-toc {
-  border-top: none;
-  padding-top: 0;
-}
-
-
-
-/* Tweak code blocks (note that this CSS is repeated above in an injection
-   into the d-code shadow dom) */
-
-d-code {
-  overflow-x: auto !important;
-}
-
-pre.d-code code.d-code {
+d-article div.sourceCode pre {
   padding-left: 10px;
   font-size: 12px;
   border-left: 2px solid rgba(0,0,0,0.1);
 }
 
-pre.text-output {
-
+d-article pre {
   font-size: 12px;
   color: black;
   background: none;
-  font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+  margin-top: 0;
   text-align: left;
   white-space: pre;
   word-spacing: normal;
@@ -582,20 +915,123 @@ pre.text-output {
   hyphens: none;
 }
 
+d-article pre a {
+  border-bottom: none;
+}
+
+d-article pre a:hover {
+  border-bottom: none;
+  text-decoration: underline;
+}
+
 @media(min-width: 768px) {
 
-d-code {
-  overflow-x: visible !important;
+d-article pre,
+d-article div.sourceCode,
+d-article div.sourceCode pre {
+  overflow: visible !important;
 }
 
-pre.d-code code.d-code  {
-    padding-left: 18px;
-    font-size: 14px;
-}
-pre.text-output {
+d-article div.sourceCode pre {
+  padding-left: 18px;
   font-size: 14px;
 }
+
+d-article pre {
+  font-size: 14px;
 }
+
+}
+
+figure img.external {
+  background: white;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.1);
+  padding: 18px;
+  box-sizing: border-box;
+}
+
+/* CSS for d-contents */
+
+.d-contents {
+  grid-column: text;
+  color: rgba(0,0,0,0.8);
+  font-size: 0.9em;
+  padding-bottom: 1em;
+  margin-bottom: 1em;
+  padding-bottom: 0.5em;
+  margin-bottom: 1em;
+  padding-left: 0.25em;
+  justify-self: start;
+}
+
+@media(min-width: 1000px) {
+  .d-contents.d-contents-float {
+    height: 0;
+    grid-column-start: 1;
+    grid-column-end: 4;
+    justify-self: center;
+    padding-right: 3em;
+    padding-left: 2em;
+  }
+}
+
+.d-contents nav h3 {
+  font-size: 18px;
+  margin-top: 0;
+  margin-bottom: 1em;
+}
+
+.d-contents li {
+  list-style-type: none
+}
+
+.d-contents nav > ul {
+  padding-left: 0;
+}
+
+.d-contents ul {
+  padding-left: 1em
+}
+
+.d-contents nav ul li {
+  margin-top: 0.6em;
+  margin-bottom: 0.2em;
+}
+
+.d-contents nav a {
+  font-size: 13px;
+  border-bottom: none;
+  text-decoration: none
+  color: rgba(0, 0, 0, 0.8);
+}
+
+.d-contents nav a:hover {
+  text-decoration: underline solid rgba(0, 0, 0, 0.6)
+}
+
+.d-contents nav > ul > li > a {
+  font-weight: 600;
+}
+
+.d-contents nav > ul > li > ul {
+  font-weight: inherit;
+}
+
+.d-contents nav > ul > li > ul > li {
+  margin-top: 0.2em;
+}
+
+
+.d-contents nav ul {
+  margin-top: 0;
+  margin-bottom: 0.25em;
+}
+
+.d-article-with-toc h2:nth-child(2) {
+  margin-top: 0;
+}
+
 
 /* Figure */
 
@@ -633,6 +1069,16 @@ pre.text-output {
   color: rgba(0, 0, 0, 1.0);
 }
 
+/* Citations */
+
+d-article .citation {
+  color: inherit;
+  cursor: inherit;
+}
+
+div.hanging-indent{
+  margin-left: 1em; text-indent: -1em;
+}
 
 
 /* Tweak 1000px media break to show more text */
@@ -708,6 +1154,91 @@ d-appendix .citation-appendix,
   word-wrap: break-word;
 }
 
+/* Include appendix styles here so they can be overridden */
+
+d-appendix {
+  contain: layout style;
+  font-size: 0.8em;
+  line-height: 1.7em;
+  margin-top: 60px;
+  margin-bottom: 0;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  color: rgba(0,0,0,0.5);
+  padding-top: 60px;
+  padding-bottom: 48px;
+}
+
+d-appendix h3 {
+  grid-column: page-start / text-start;
+  font-size: 15px;
+  font-weight: 500;
+  margin-top: 1em;
+  margin-bottom: 0;
+  color: rgba(0,0,0,0.65);
+}
+
+d-appendix h3 + * {
+  margin-top: 1em;
+}
+
+d-appendix ol {
+  padding: 0 0 0 15px;
+}
+
+@media (min-width: 768px) {
+  d-appendix ol {
+    padding: 0 0 0 30px;
+    margin-left: -30px;
+  }
+}
+
+d-appendix li {
+  margin-bottom: 1em;
+}
+
+d-appendix a {
+  color: rgba(0, 0, 0, 0.6);
+}
+
+d-appendix > * {
+  grid-column: text;
+}
+
+d-appendix > d-footnote-list,
+d-appendix > d-citation-list,
+d-appendix > distill-appendix {
+  grid-column: screen;
+}
+
+/* Include footnote styles here so they can be overridden */
+
+d-footnote-list {
+  contain: layout style;
+}
+
+d-footnote-list > * {
+  grid-column: text;
+}
+
+d-footnote-list a.footnote-backlink {
+  color: rgba(0,0,0,0.3);
+  padding-left: 0.5em;
+}
+
+
+
+/* Anchor.js */
+
+.anchorjs-link {
+  /*transition: all .25s linear; */
+  text-decoration: none;
+  border-bottom: none;
+}
+*:hover > .anchorjs-link {
+  margin-left: -1.125em !important;
+  text-decoration: none;
+  border-bottom: none;
+}
 
 /* Social footer */
 
@@ -762,6 +1293,211 @@ d-appendix .citation-appendix,
 
 .custom p {
   margin-bottom: 0.5em;
+}
+
+/* Styles for listing layout (hide title) */
+.layout-listing d-title, .layout-listing .d-title {
+  display: none;
+}
+
+/* Styles for posts lists (not auto-injected) */
+
+
+.posts-with-sidebar {
+  padding-left: 45px;
+  padding-right: 45px;
+}
+
+.posts-list .description h2,
+.posts-list .description p {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", Arial, sans-serif;
+}
+
+.posts-list .description h2 {
+  font-weight: 700;
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.posts-list h2.post-tag {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+  padding-bottom: 12px;
+}
+.posts-list {
+  margin-top: 60px;
+  margin-bottom: 24px;
+}
+
+.posts-list .post-preview {
+  text-decoration: none;
+  overflow: hidden;
+  display: block;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  padding: 24px 0;
+}
+
+.post-preview-last {
+  border-bottom: none !important;
+}
+
+.posts-list .posts-list-caption {
+  grid-column: screen;
+  font-weight: 400;
+}
+
+.posts-list .post-preview h2 {
+  margin: 0 0 6px 0;
+  line-height: 1.2em;
+  font-style: normal;
+  font-size: 24px;
+}
+
+.posts-list .post-preview p {
+  margin: 0 0 12px 0;
+  line-height: 1.4em;
+  font-size: 16px;
+}
+
+.posts-list .post-preview .thumbnail {
+  box-sizing: border-box;
+  margin-bottom: 24px;
+  position: relative;
+  max-width: 500px;
+}
+.posts-list .post-preview img {
+  width: 100%;
+  display: block;
+}
+
+.posts-list .metadata {
+  font-size: 12px;
+  line-height: 1.4em;
+  margin-bottom: 18px;
+}
+
+.posts-list .metadata > * {
+  display: inline-block;
+}
+
+.posts-list .metadata .publishedDate {
+  margin-right: 2em;
+}
+
+.posts-list .metadata .dt-authors {
+  display: block;
+  margin-top: 0.3em;
+  margin-right: 2em;
+}
+
+.posts-list .dt-tags {
+  display: block;
+  line-height: 1em;
+}
+
+.posts-list .dt-tags .dt-tag {
+  display: inline-block;
+  color: rgba(0,0,0,0.6);
+  padding: 0.3em 0.4em;
+  margin-right: 0.2em;
+  margin-bottom: 0.4em;
+  font-size: 60%;
+  border: 1px solid rgba(0,0,0,0.2);
+  border-radius: 3px;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+.posts-list img {
+  opacity: 1;
+}
+
+.posts-list img[data-src] {
+  opacity: 0;
+}
+
+.posts-more {
+  clear: both;
+}
+
+
+.posts-sidebar {
+  font-size: 16px;
+}
+
+.posts-sidebar h3 {
+  font-size: 16px;
+  margin-top: 0;
+  margin-bottom: 0.5em;
+  font-weight: 400;
+  text-transform: uppercase;
+}
+
+.sidebar-section {
+  margin-bottom: 30px;
+}
+
+.categories ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+.categories li {
+  color: rgba(0, 0, 0, 0.8);
+  margin-bottom: 0;
+}
+
+.categories li>a {
+  border-bottom: none;
+}
+
+.categories li>a:hover {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.4);
+}
+
+.categories .active {
+  font-weight: 600;
+}
+
+.categories .category-count {
+  color: rgba(0, 0, 0, 0.4);
+}
+
+
+@media(min-width: 768px) {
+  .posts-list .post-preview h2 {
+    font-size: 26px;
+  }
+  .posts-list .post-preview .thumbnail {
+    float: right;
+    width: 30%;
+    margin-bottom: 0;
+  }
+  .posts-list .post-preview .description {
+    float: left;
+    width: 45%;
+  }
+  .posts-list .post-preview .metadata {
+    float: left;
+    width: 20%;
+    margin-top: 8px;
+  }
+  .posts-list .post-preview p {
+    margin: 0 0 12px 0;
+    line-height: 1.5em;
+    font-size: 16px;
+  }
+  .posts-with-sidebar .posts-list {
+    float: left;
+    width: 75%;
+  }
+  .posts-with-sidebar .posts-sidebar {
+    float: right;
+    width: 20%;
+    margin-top: 60px;
+    padding-top: 24px;
+    padding-bottom: 24px;
+  }
 }
 
 
@@ -893,6 +1629,12 @@ d-appendix .citation-appendix,
   hyphens: none;
 }
 
+.downlevel .posts-list .post-preview {
+  color: inherit;
+}
+
+
+
 </style>
 
 <script type="application/javascript">
@@ -908,6 +1650,13 @@ function is_downlevel_browser() {
 
 // show body when load is complete
 function on_load_complete() {
+
+  // add anchors
+  if (window.anchors) {
+    window.anchors.options.placement = 'left';
+    window.anchors.add('d-article > h2, d-article > h3, d-article > h4, d-article > h5');
+  }
+
 
   // set body to visible
   document.body.style.visibility = 'visible';
@@ -954,23 +1703,8 @@ function init_distill() {
   // create d-appendix
   $('.d-appendix').changeElementType('d-appendix');
 
-  // create d-bibliography
-  var bibliography = $('<d-bibliography></d-bibliography>');
-  $('#distill-bibliography').wrap(bibliography);
-
   // flag indicating that we have appendix items
   var appendix = $('.appendix-bottom').children('h3').length > 0;
-
-  // replace citations with <d-cite>
-  $('.citation').each(function(i, val) {
-    appendix = true;
-    var cites = $(this).attr('data-cites').split(" ");
-    var dt_cite = $('<d-cite></d-cite>');
-    dt_cite.attr('key', cites.join());
-    $(this).replaceWith(dt_cite);
-  });
-  // remove refs
-  $('#refs').remove();
 
   // replace footnotes with <d-footnote>
   $('.footnote-ref').each(function(i, val) {
@@ -988,39 +1722,21 @@ function init_distill() {
   // remove footnotes
   $('.footnotes').remove();
 
+  // move refs into #references-listing
+  $('#references-listing').replaceWith($('#refs'));
+
   $('h1.appendix, h2.appendix').each(function(i, val) {
     $(this).changeElementType('h3');
   });
   $('h3.appendix').each(function(i, val) {
     var id = $(this).attr('id');
-    $('.d-toc a[href="#' + id + '"]').parent().remove();
+    $('.d-contents a[href="#' + id + '"]').parent().remove();
     appendix = true;
     $(this).nextUntil($('h1, h2, h3')).addBack().appendTo($('d-appendix'));
   });
 
   // show d-appendix if we have appendix content
   $("d-appendix").css('display', appendix ? 'grid' : 'none');
-
-  // replace code blocks with d-code
-  $('pre>code').each(function(i, val) {
-    var code = $(this);
-    var pre = code.parent();
-    var clz = "";
-    var language = pre.attr('class');
-    if (language) {
-      // map unknown languages to "clike" (without this they just dissapear)
-      if ($.inArray(language, ["bash", "clike", "css", "go", "html",
-                               "javascript", "js", "julia", "lua", "markdown",
-                               "markup", "mathml", "python", "svg", "xml"]) == -1)
-        language = "clike";
-      language = ' language="' + language + '"';
-      var dt_code = $('<d-code block' + language + clz + '></d-code>');
-      dt_code.text(code.text());
-      pre.replaceWith(dt_code);
-    } else {
-      code.addClass('text-output').unwrap().changeElementType('pre');
-    }
-  });
 
   // localize layout chunks to just output
   $('.layout-chunk').each(function(i, val) {
@@ -1029,7 +1745,7 @@ function init_distill() {
     var layout = $(this).attr('data-layout');
 
     // apply layout to markdown level block elements
-    var elements = $(this).children().not('d-code, pre.text-output, script');
+    var elements = $(this).children().not('div.sourceCode, pre, script');
     elements.each(function(i, el) {
       var layout_div = $('<div class="' + layout + '"></div>');
       if (layout_div.hasClass('shaded')) {
@@ -1046,6 +1762,13 @@ function init_distill() {
     $(this).children().unwrap();
   });
 
+  // remove code block used to force  highlighting css
+  $('.distill-force-highlighting-css').parent().remove();
+
+  // remove empty line numbers inserted by pandoc when using a
+  // custom syntax highlighting theme
+  $('code.sourceCode a:empty').remove();
+
   // load distill framework
   load_distill_framework();
 
@@ -1061,12 +1784,26 @@ function init_distill() {
     if (!have_authors)
       $('d-byline').addClass('hidden');
 
-    // table of contents
-    if (have_authors) // adjust border if we are in authors
-      $('.d-toc').parent().addClass('d-article-with-toc');
+    // article with toc class
+    $('.d-contents').parent().addClass('d-article-with-toc');
 
     // strip links that point to #
     $('.authors-affiliations').find('a[href="#"]').removeAttr('href');
+
+    // add orcid ids
+    $('.authors-affiliations').find('.author').each(function(i, el) {
+      var orcid_id = front_matter.authors[i].orcidID;
+      if (orcid_id) {
+        var a = $('<a></a>');
+        a.attr('href', 'https://orcid.org/' + orcid_id);
+        var img = $('<img></img>');
+        img.addClass('orcid-id');
+        img.attr('alt', 'ORCID ID');
+        img.attr('src','data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA2ZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo1N0NEMjA4MDI1MjA2ODExOTk0QzkzNTEzRjZEQTg1NyIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDozM0NDOEJGNEZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDozM0NDOEJGM0ZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M1IE1hY2ludG9zaCI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOkZDN0YxMTc0MDcyMDY4MTE5NUZFRDc5MUM2MUUwNEREIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjU3Q0QyMDgwMjUyMDY4MTE5OTRDOTM1MTNGNkRBODU3Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+84NovQAAAR1JREFUeNpiZEADy85ZJgCpeCB2QJM6AMQLo4yOL0AWZETSqACk1gOxAQN+cAGIA4EGPQBxmJA0nwdpjjQ8xqArmczw5tMHXAaALDgP1QMxAGqzAAPxQACqh4ER6uf5MBlkm0X4EGayMfMw/Pr7Bd2gRBZogMFBrv01hisv5jLsv9nLAPIOMnjy8RDDyYctyAbFM2EJbRQw+aAWw/LzVgx7b+cwCHKqMhjJFCBLOzAR6+lXX84xnHjYyqAo5IUizkRCwIENQQckGSDGY4TVgAPEaraQr2a4/24bSuoExcJCfAEJihXkWDj3ZAKy9EJGaEo8T0QSxkjSwORsCAuDQCD+QILmD1A9kECEZgxDaEZhICIzGcIyEyOl2RkgwAAhkmC+eAm0TAAAAABJRU5ErkJggg==');
+        a.append(img);
+        $(this).append(a);
+      }
+    });
 
     // hide elements of author/affiliations grid that have no value
     function hide_byline_column(caption) {
@@ -1116,14 +1853,9 @@ function init_distill() {
       grid.children('h3:contains("Affiliations")').text('Affiliation');
     }
 
-    // inject pre code styles (can't do this with a global stylesheet b/c a shadow root is used)
-    $('d-code').each(function(i, val) {
-      var style = document.createElement('style');
-      style.innerHTML = 'pre code { padding-left: 10px; font-size: 12px; border-left: 2px solid rgba(0,0,0,0.1); } ' +
-                        '@media(min-width: 768px) { pre code { padding-left: 18px; font-size: 14px; } }';
-      if (this.shadowRoot)
-        this.shadowRoot.appendChild(style);
-    });
+    // remove d-appendix and d-footnote-list local styles
+    $('d-appendix > style:first-child').remove();
+    $('d-footnote-list > style:first-child').remove();
 
     // move appendix-bottom entries to the bottom
     $('.appendix-bottom').appendTo('d-appendix').children().unwrap();
@@ -1159,9 +1891,7 @@ function init_downlevel() {
   $('.d-byline a').remove();
 
   // remove toc
-  $('.d-toc-header').remove();
-  $('.d-toc').remove();
-  $('.d-toc-separator').remove();
+  $('.d-contents').remove();
 
   // move appendix elements
   $('h1.appendix, h2.appendix').each(function(i, val) {
@@ -1291,6 +2021,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 <!--/radix_placeholder_distill-->
   <script src="../../site_libs/jquery-1.11.3/jquery.min.js"></script>
+  <script src="../../site_libs/anchor-4.2.2/anchor.min.js"></script>
   <script src="../../site_libs/bowser-1.9.3/bowser.min.js"></script>
   <script src="../../site_libs/webcomponents-2.0.0/webcomponents.js"></script>
   <script src="../../site_libs/distill-2.2.21/template.v2.js"></script>
@@ -1306,7 +2037,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <!--radix_placeholder_front_matter-->
 
 <script id="distill-front-matter" type="text/json">
-{"title":"A pipeline for the titanic data set - Advanced","description":"This post shows how to build a Graph using the mlr3pipelines package on the \"titanic\" dataset. Moreover, feature engineering, data imputation and benchmarking are covered.","authors":[{"author":"Florian Pfisterer","authorURL":"#","affiliation":"&nbsp;","affiliationURL":"#"}],"publishedDate":"2020-04-27T00:00:00.000+00:00","citationText":"Pfisterer, 2020"}
+{"title":"A pipeline for the titanic data set - Advanced","description":"This post shows how to build a Graph using the mlr3pipelines package on the \"titanic\" dataset. Moreover, feature engineering, data imputation and benchmarking are covered.","authors":[{"author":"Florian Pfisterer","authorURL":"#","affiliation":"&nbsp;","affiliationURL":"#","orcidID":""}],"publishedDate":"2020-04-27T00:00:00.000+00:00","citationText":"Pfisterer, 2020"}
 </script>
 
 <!--/radix_placeholder_front_matter-->
@@ -1318,6 +2049,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <img src="../../images/logo.png" alt="Logo"/>
 </a>
 <a href="../../index.html" class="title">mlr3gallery</a>
+<input id="distill-search" class="nav-search hidden" type="text" placeholder="Search..."/>
 </div>
 <div class="nav-right">
 <a href="https://github.com/mlr-org/mlr3gallery">
@@ -1333,6 +2065,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
 <div class="d-title">
 <h1>A pipeline for the titanic data set - Advanced</h1>
+<!--radix_placeholder_categories-->
+<div class="dt-tags">
+  <a href="../../index.html#category:imputation" class="dt-tag">imputation</a>
+  <a href="../../index.html#category:classification" class="dt-tag">classification</a>
+  <a href="../../index.html#category:mlr3pipelines" class="dt-tag">mlr3pipelines</a>
+  <a href="../../index.html#category:feature_engineering" class="dt-tag">feature engineering</a>
+</div>
+<!--/radix_placeholder_categories-->
 <p><p>This post shows how to build a Graph using the mlr3pipelines package on the “titanic” dataset. Moreover, feature engineering, data imputation and benchmarking are covered.</p></p>
 </div>
 
@@ -1347,33 +2087,37 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>In this section we will focus on more advanced usage of <code>mlr3pipelines</code>. Specifically, this section illustrates the different options when it comes to data imputation and feature engineering. Furthermore, the section shows how to <strong>benchmark</strong>, <strong>feature engineer</strong> and compare our results. Again, we need to take some preparatory steps:</p>
 <p>For the case that you are only tuning in for the second part, we need to load some packages: The data is part of the <code>mlr3data</code> package.</p>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-library(&quot;mlr3&quot;)
-library(&quot;mlr3learners&quot;)
-library(&quot;mlr3pipelines&quot;)
-library(&quot;mlr3data&quot;)
-library(&quot;mlr3misc&quot;)
-library(&quot;ggplot2&quot;)
-library(&quot;mlr3viz&quot;)
-data(&quot;titanic&quot;)</code></pre>
+<div class="sourceCode">
+<pre><code><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='st'><a href='https://mlr3.mlr-org.com'>"mlr3"</a></span><span class='op'>)</span>
+<span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='st'><a href='https://mlr3learners.mlr-org.com'>"mlr3learners"</a></span><span class='op'>)</span>
+<span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='st'><a href='https://mlr3pipelines.mlr-org.com'>"mlr3pipelines"</a></span><span class='op'>)</span>
+<span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='st'><a href='https://github.com/mlr-org/mlr3data'>"mlr3data"</a></span><span class='op'>)</span>
+<span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='st'><a href='https://mlr3misc.mlr-org.com'>"mlr3misc"</a></span><span class='op'>)</span>
+<span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='st'><a href='http://ggplot2.tidyverse.org'>"ggplot2"</a></span><span class='op'>)</span>
+<span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='st'><a href='https://mlr3viz.mlr-org.com'>"mlr3viz"</a></span><span class='op'>)</span>
+<span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span><span class='op'>(</span><span class='st'>"titanic"</span><span class='op'>)</span>
+</code></pre>
+</div>
 </div>
 <p>As in the basics chapter, we use the titanic data set. To recap we have undertaken the following steps:</p>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-# splitting the data set
-titanic_train = titanic[1:891, ]
-titanic_test = titanic[892:1309, ]
+<div class="sourceCode">
+<pre><code><span class='co'># splitting the data set</span>
+<span class='va'>titanic_train</span> <span class='op'>=</span> <span class='va'>titanic</span><span class='op'>[</span><span class='fl'>1</span><span class='op'>:</span><span class='fl'>891</span>, <span class='op'>]</span>
+<span class='va'>titanic_test</span> <span class='op'>=</span> <span class='va'>titanic</span><span class='op'>[</span><span class='fl'>892</span><span class='op'>:</span><span class='fl'>1309</span>, <span class='op'>]</span>
 
-# setting up the task
-task = TaskClassif$new(&quot;titanic&quot;, titanic_train, target = &quot;survived&quot;, positive = &quot;yes&quot;)
-task$select(cols = setdiff(task$feature_names, c(&quot;cabin&quot;, &quot;name&quot;, &quot;ticket&quot;)))
+<span class='co'># setting up the task</span>
+<span class='va'>task</span> <span class='op'>=</span> <span class='va'><a href='https://mlr3.mlr-org.com/reference/TaskClassif.html'>TaskClassif</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='st'>"titanic"</span>, <span class='va'>titanic_train</span>, target <span class='op'>=</span> <span class='st'>"survived"</span>, positive <span class='op'>=</span> <span class='st'>"yes"</span><span class='op'>)</span>
+<span class='va'>task</span><span class='op'>$</span><span class='fu'>select</span><span class='op'>(</span>cols <span class='op'>=</span> <span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/setops.html'>setdiff</a></span><span class='op'>(</span><span class='va'>task</span><span class='op'>$</span><span class='va'>feature_names</span>, <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"cabin"</span>, <span class='st'>"name"</span>, <span class='st'>"ticket"</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>
 
-# setting up the learner
-learner = lrn(&quot;classif.rpart&quot;)
+<span class='co'># setting up the learner</span>
+<span class='va'>learner</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>lrn</a></span><span class='op'>(</span><span class='st'>"classif.rpart"</span><span class='op'>)</span>
 
-#setting up our resampling method
-rdesc = rsmp(&quot;cv&quot;, folds = 3L)$instantiate(task)
-res = resample(task, learner, rdesc, store_models = TRUE)</code></pre>
+<span class='co'>#setting up our resampling method</span>
+<span class='va'>rdesc</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>rsmp</a></span><span class='op'>(</span><span class='st'>"cv"</span>, folds <span class='op'>=</span> <span class='fl'>3L</span><span class='op'>)</span><span class='op'>$</span><span class='fu'>instantiate</span><span class='op'>(</span><span class='va'>task</span><span class='op'>)</span>
+<span class='va'>res</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/resample.html'>resample</a></span><span class='op'>(</span><span class='va'>task</span>, <span class='va'>learner</span>, <span class='va'>rdesc</span>, store_models <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>
+</code></pre>
+</div>
 </div>
 <h2 id="imputation">Imputation</h2>
 <p>A very simple way to do this to just impute a constant value for each feature. We could i.e. impute every <code>character</code> or <code>factor</code> column with <code>missing</code> and every numeric column with <code>-999</code>. And depending on the model, this might actually be fine. This approach has a few drawbacks though:</p>
@@ -1385,110 +2129,131 @@ res = resample(task, learner, rdesc, store_models = TRUE)</code></pre>
 <p>This imputation scheme is called ‘imputation with constants’ and is already implemented in <code>mlr3pipelines</code>. It can be done using <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_imputeconstant.html"><code>PipeOpImputeConstant</code></a>.</p>
 <p>Remember that we are trying to optimize our predictive power by using a random forest model (<a href="https://mlr3learners.mlr-org.com/reference/mlr_learners_classif.ranger.html"><code>mlr_learners_classif.ranger</code></a>). Now, random forest models do not naturally handle missing values which is the reason why we need imputation. Before imputation, our data looks as follows:</p>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-task$missings()</code></pre>
-<pre><code>
-survived      age embarked     fare    parch   pclass      sex   sib_sp 
+<div class="sourceCode">
+<pre><code><span class='va'>task</span><span class='op'>$</span><span class='fu'>missings</span><span class='op'>(</span><span class='op'>)</span>
+</code></pre>
+</div>
+<pre><code>survived      age embarked     fare    parch   pclass      sex   sib_sp 
        0      177        2        0        0        0        0        0 </code></pre>
 </div>
 <p>Let’s first deal with the categorical variables:</p>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-po_newlvl = po(&quot;imputeoor&quot;)
-task_newlvl = po_newlvl$train(list(task))[[1]]</code></pre>
+<div class="sourceCode">
+<pre><code><span class='va'>po_newlvl</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"imputeoor"</span><span class='op'>)</span>
+<span class='va'>task_newlvl</span> <span class='op'>=</span> <span class='va'>po_newlvl</span><span class='op'>$</span><span class='fu'>train</span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='va'>task</span><span class='op'>)</span><span class='op'>)</span><span class='op'>[[</span><span class='fl'>1</span><span class='op'>]</span><span class='op'>]</span>
+</code></pre>
+</div>
 </div>
 <p>Note that we use the <a href="https://mlr3pipelines.mlr-org.com/reference/PipeOp.html"><code>PipeOp</code></a> in an unusual way, which is why the syntax does not look very clean. We’ll learn how to use a full graph below.</p>
 <p>First, let’s look at the result:</p>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-task_newlvl$missings()</code></pre>
-<pre><code>
-survived     fare    parch   pclass      sex   sib_sp      age embarked 
+<div class="sourceCode">
+<pre><code><span class='va'>task_newlvl</span><span class='op'>$</span><span class='fu'>missings</span><span class='op'>(</span><span class='op'>)</span>
+</code></pre>
+</div>
+<pre><code>survived     fare    parch   pclass      sex   sib_sp      age embarked 
        0        0        0        0        0        0        0        0 </code></pre>
 </div>
 <p>Cool! <code>embarked</code> does not have missing values anymore. Note that <code>PipeOpImputeOOR</code> by default affects <code>character</code>, <code>factor</code> and <code>ordered</code> columns.</p>
 <p>For the <code>numeric</code> features we want to do two things, impute values and add an indicator column. In order to do this, we need a more complicated structure, a <code>Graph</code>.</p>
 <p>Our <code>po_indicator</code> creates the indicator column. We tell it to only do this for <code>numeric</code> and <code>integer</code> columns via its <code>param_vals</code>, and additionally tell it to create a numeric column (0 = “not missing”, 1 = “missing”).</p>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-po_indicator = po(&quot;missind&quot;,
-  param_vals = list(affect_columns = selector_type(c(&quot;numeric&quot;, &quot;integer&quot;)), type = &quot;numeric&quot;)
-)</code></pre>
+<div class="sourceCode">
+<pre><code><span class='va'>po_indicator</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"missind"</span>,
+  param_vals <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>affect_columns <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/Selector.html'>selector_type</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"numeric"</span>, <span class='st'>"integer"</span><span class='op'>)</span><span class='op'>)</span>, type <span class='op'>=</span> <span class='st'>"numeric"</span><span class='op'>)</span>
+<span class='op'>)</span>
+</code></pre>
+</div>
 </div>
 <p>Now we can simultaneously impute features from the histogram and create indicator columns. This can be achieved using the <a href="https://mlr3pipelines.mlr-org.com/reference/gunion.html"><code>gunion</code></a> function, which puts two operations in parallel:</p>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-gr = gunion(list(po_indicator, po(&quot;imputehist&quot;)))
-gr = gr %&gt;&gt;% po(&quot;featureunion&quot;)</code></pre>
+<div class="sourceCode">
+<pre><code><span class='va'>gr</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/gunion.html'>gunion</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='va'>po_indicator</span>, <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"imputehist"</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>
+<span class='va'>gr</span> <span class='op'>=</span> <span class='va'>gr</span> <span class='op'>%&gt;&gt;%</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"featureunion"</span><span class='op'>)</span>
+</code></pre>
+</div>
 </div>
 <p>Afterwards, we <code>cbind</code> the resulting data using <code>po("featureunion")</code>, connecting the different operations using our <strong>graph connector</strong>: <code>%&gt;&gt;%</code>. We can now also connect the newlvl imputation:</p>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-gr = gr %&gt;&gt;% po(&quot;imputeoor&quot;)</code></pre>
+<div class="sourceCode">
+<pre><code><span class='va'>gr</span> <span class='op'>=</span> <span class='va'>gr</span> <span class='op'>%&gt;&gt;%</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"imputeoor"</span><span class='op'>)</span>
+</code></pre>
+</div>
 </div>
 <p>and see what happens when we now train the whole <strong>Graph</strong>:</p>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-task_imputed = gr$clone()$train(task)[[1]]
-task_imputed$missings()</code></pre>
-<pre><code>
-   survived missing_age      pclass         sex        fare       parch 
+<div class="sourceCode">
+<pre><code><span class='va'>task_imputed</span> <span class='op'>=</span> <span class='va'>gr</span><span class='op'>$</span><span class='fu'>clone</span><span class='op'>(</span><span class='op'>)</span><span class='op'>$</span><span class='fu'>train</span><span class='op'>(</span><span class='va'>task</span><span class='op'>)</span><span class='op'>[[</span><span class='fl'>1</span><span class='op'>]</span><span class='op'>]</span>
+<span class='va'>task_imputed</span><span class='op'>$</span><span class='fu'>missings</span><span class='op'>(</span><span class='op'>)</span>
+</code></pre>
+</div>
+<pre><code>   survived missing_age      pclass         sex        fare       parch 
           0           0           0           0           0           0 
      sib_sp         age    embarked 
           0           0           0 </code></pre>
 </div>
 <p>Awesome, now we do not have any missing values!</p>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-autoplot(task_imputed)</code></pre>
+<div class="sourceCode">
+<pre><code><span class='fu'><a href='https://ggplot2.tidyverse.org/reference/autoplot.html'>autoplot</a></span><span class='op'>(</span><span class='va'>task_imputed</span><span class='op'>)</span>
+</code></pre>
+</div>
 <p><img src="2020-04-27-mlr3pipelines-titanic-advanced_files/figure-html5/unnamed-chunk-11-1.png" width="624" /></p>
 </div>
 <p>We could now use <code>task_imputed</code> for resampling and see whether a <strong>ranger</strong> model does better. But this is dangerous! If we preprocess all training data at once, data could leak through the different cross-validation folds. In order to do this properly, we have to process the training data in every fold separately. Luckily, this is automatically handled in our <code>Graph</code>, if we use it through a <code>GraphLearner</code>.</p>
 <p>We can simply append a <code>ranger</code> learner to the Graph and create a <code>GraphLearner</code> from this.</p>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-glrn = GraphLearner$new(gr$clone() %&gt;&gt;%
-  po(&quot;imputesample&quot;) %&gt;&gt;%
-  po(&quot;fixfactors&quot;) %&gt;&gt;%
-  po(learner))</code></pre>
+<div class="sourceCode">
+<pre><code><span class='va'>glrn</span> <span class='op'>=</span> <span class='va'><a href='https://mlr3pipelines.mlr-org.com//reference/mlr_learners_graph.html'>GraphLearner</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='va'>gr</span><span class='op'>$</span><span class='fu'>clone</span><span class='op'>(</span><span class='op'>)</span> <span class='op'>%&gt;&gt;%</span>
+  <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"imputesample"</span><span class='op'>)</span> <span class='op'>%&gt;&gt;%</span>
+  <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"fixfactors"</span><span class='op'>)</span> <span class='op'>%&gt;&gt;%</span>
+  <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='va'>learner</span><span class='op'>)</span><span class='op'>)</span>
+</code></pre>
+</div>
 </div>
 <p>We needed to use the following commands for the Graph: * <code>fixfactors</code>: Removes empty factor levels and removes factor levels that do not exist during training. * <code>imputesample</code>: In some cases, if missing factor levels do not occur during training but only while predicting, <code>imputeoor</code> does not create a new level. For those, we sample a random value.</p>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-res = resample(task, glrn, rdesc, store_models = TRUE)
-agg = res$aggregate(msr(&quot;classif.acc&quot;))
-agg</code></pre>
-<pre><code>
-classif.acc 
-  0.8024691 </code></pre>
+<div class="sourceCode">
+<pre><code><span class='va'>res</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/resample.html'>resample</a></span><span class='op'>(</span><span class='va'>task</span>, <span class='va'>glrn</span>, <span class='va'>rdesc</span>, store_models <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>
+<span class='va'>agg</span> <span class='op'>=</span> <span class='va'>res</span><span class='op'>$</span><span class='fu'>aggregate</span><span class='op'>(</span><span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>msr</a></span><span class='op'>(</span><span class='st'>"classif.acc"</span><span class='op'>)</span><span class='op'>)</span>
+<span class='va'>agg</span>
+</code></pre>
 </div>
-<p>So our model has not improved heavily, currently it has an accuracy of 0.802.</p>
+<pre><code>classif.acc 
+  0.7991021 </code></pre>
+</div>
+<p>So our model has not improved heavily, currently it has an accuracy of 0.799.</p>
 <h2 id="feature-engineering">Feature Engineering</h2>
 <p>We will do this using <code>PipeOpMutate</code> in order to showcase the power of <code>mlr3pipelines</code>. Additionally, we will make use of the <code>character</code> columns. Hence, we will re-select them:</p>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-task$col_roles$feature = c(task$feature_names, c(&quot;cabin&quot;, &quot;name&quot;, &quot;ticket&quot;))</code></pre>
+<div class="sourceCode">
+<pre><code><span class='va'>task</span><span class='op'>$</span><span class='va'>col_roles</span><span class='op'>$</span><span class='va'>feature</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='va'>task</span><span class='op'>$</span><span class='va'>feature_names</span>, <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"cabin"</span>, <span class='st'>"name"</span>, <span class='st'>"ticket"</span><span class='op'>)</span><span class='op'>)</span>
+</code></pre>
+</div>
 </div>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-library(&quot;stringi&quot;)
-po_ftextract = po(&quot;mutate&quot;, param_vals = list(
-  mutation = list(
-    fare_per_person = ~ fare / (parch + sib_sp + 1),
-    deck = ~ factor(stri_sub(cabin, 1, 1)),
-    title = ~ factor(stri_match(name, regex = &quot;, (.*)\\.&quot;)[, 2]),
-    surname = ~ factor(stri_match(name, regex = &quot;(.*),&quot;)[, 2]),
-    ticket_prefix = ~ factor(stri_replace_all_fixed(stri_trim(stri_match(ticket, regex = &quot;(.*) &quot;)[, 2]), &quot;.&quot;, &quot;&quot;))
-  )
-))</code></pre>
+<div class="sourceCode">
+<pre><code><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='st'><a href='https://stringi.gagolewski.com/'>"stringi"</a></span><span class='op'>)</span>
+<span class='va'>po_ftextract</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"mutate"</span>, param_vals <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>
+  mutation <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>
+    fare_per_person <span class='op'>=</span> <span class='op'>~</span> <span class='va'>fare</span> <span class='op'>/</span> <span class='op'>(</span><span class='va'>parch</span> <span class='op'>+</span> <span class='va'>sib_sp</span> <span class='op'>+</span> <span class='fl'>1</span><span class='op'>)</span>,
+    deck <span class='op'>=</span> <span class='op'>~</span> <span class='fu'><a href='https://rdrr.io/r/base/factor.html'>factor</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/pkg/stringi/man/stri_sub.html'>stri_sub</a></span><span class='op'>(</span><span class='va'>cabin</span>, <span class='fl'>1</span>, <span class='fl'>1</span><span class='op'>)</span><span class='op'>)</span>,
+    title <span class='op'>=</span> <span class='op'>~</span> <span class='fu'><a href='https://rdrr.io/r/base/factor.html'>factor</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/pkg/stringi/man/stri_match.html'>stri_match</a></span><span class='op'>(</span><span class='va'>name</span>, regex <span class='op'>=</span> <span class='st'>", (.*)\\."</span><span class='op'>)</span><span class='op'>[</span>, <span class='fl'>2</span><span class='op'>]</span><span class='op'>)</span>,
+    surname <span class='op'>=</span> <span class='op'>~</span> <span class='fu'><a href='https://rdrr.io/r/base/factor.html'>factor</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/pkg/stringi/man/stri_match.html'>stri_match</a></span><span class='op'>(</span><span class='va'>name</span>, regex <span class='op'>=</span> <span class='st'>"(.*),"</span><span class='op'>)</span><span class='op'>[</span>, <span class='fl'>2</span><span class='op'>]</span><span class='op'>)</span>,
+    ticket_prefix <span class='op'>=</span> <span class='op'>~</span> <span class='fu'><a href='https://rdrr.io/r/base/factor.html'>factor</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/pkg/stringi/man/stri_replace.html'>stri_replace_all_fixed</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/pkg/stringi/man/stri_trim.html'>stri_trim</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/pkg/stringi/man/stri_match.html'>stri_match</a></span><span class='op'>(</span><span class='va'>ticket</span>, regex <span class='op'>=</span> <span class='st'>"(.*) "</span><span class='op'>)</span><span class='op'>[</span>, <span class='fl'>2</span><span class='op'>]</span><span class='op'>)</span>, <span class='st'>"."</span>, <span class='st'>""</span><span class='op'>)</span><span class='op'>)</span>
+  <span class='op'>)</span>
+<span class='op'>)</span><span class='op'>)</span>
+</code></pre>
+</div>
 </div>
 <p>Quickly checking what happens:</p>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-task_eng = po_ftextract$clone()$train(list(task))[[1]]
-task_eng$data()</code></pre>
-<pre><code>
-     survived age embarked    fare parch pclass    sex sib_sp cabin
+<div class="sourceCode">
+<pre><code><span class='va'>task_eng</span> <span class='op'>=</span> <span class='va'>po_ftextract</span><span class='op'>$</span><span class='fu'>clone</span><span class='op'>(</span><span class='op'>)</span><span class='op'>$</span><span class='fu'>train</span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='va'>task</span><span class='op'>)</span><span class='op'>)</span><span class='op'>[[</span><span class='fl'>1</span><span class='op'>]</span><span class='op'>]</span>
+<span class='va'>task_eng</span><span class='op'>$</span><span class='fu'>data</span><span class='op'>(</span><span class='op'>)</span>
+</code></pre>
+</div>
+<pre><code>     survived age embarked    fare parch pclass    sex sib_sp cabin
   1:       no  22        S  7.2500     0      3   male      1  &lt;NA&gt;
   2:      yes  38        C 71.2833     0      1 female      1   C85
   3:      yes  26        S  7.9250     0      3 female      0  &lt;NA&gt;
@@ -1526,8 +2291,10 @@ task_eng$data()</code></pre>
 891:         7.75000 &lt;NA&gt;    Mr    Dooley          &lt;NA&gt;</code></pre>
 </div>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-autoplot(task_eng$clone()$select(c(&quot;sex&quot;, &quot;age&quot;)), type = &quot;pairs&quot;)</code></pre>
+<div class="sourceCode">
+<pre><code><span class='fu'><a href='https://ggplot2.tidyverse.org/reference/autoplot.html'>autoplot</a></span><span class='op'>(</span><span class='va'>task_eng</span><span class='op'>$</span><span class='fu'>clone</span><span class='op'>(</span><span class='op'>)</span><span class='op'>$</span><span class='fu'>select</span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"sex"</span>, <span class='st'>"age"</span><span class='op'>)</span><span class='op'>)</span>, type <span class='op'>=</span> <span class='st'>"pairs"</span><span class='op'>)</span>
+</code></pre>
+</div>
 <p><img src="2020-04-27-mlr3pipelines-titanic-advanced_files/figure-html5/unnamed-chunk-17-1.png" width="624" /></p>
 </div>
 <p>Now we can put everything together again, we concatenate our new <code>PipeOp</code> with the <code>Graph</code> created above and use <code>PipeOpSelect</code> in order to de-select the <code>character</code> features we used for feature extraction. Additionally, we collapse the ‘surname’, so only surnames that make up more than 0.6 % of the data are kept.</p>
@@ -1549,78 +2316,93 @@ autoplot(task_eng$clone()$select(c(&quot;sex&quot;, &quot;age&quot;)), type = &q
 </ul>
 <p>The full graph we created is the following:</p>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-learner = lrn(&quot;classif.ranger&quot;)
-learner$param_set$values = list(num.trees = 500, min.node.size = 4)</code></pre>
+<div class="sourceCode">
+<pre><code><span class='va'>learner</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>lrn</a></span><span class='op'>(</span><span class='st'>"classif.ranger"</span><span class='op'>)</span>
+<span class='va'>learner</span><span class='op'>$</span><span class='va'>param_set</span><span class='op'>$</span><span class='va'>values</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>num.trees <span class='op'>=</span> <span class='fl'>500</span>, min.node.size <span class='op'>=</span> <span class='fl'>4</span><span class='op'>)</span>
+</code></pre>
+</div>
 </div>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-gr_final = po_ftextract %&gt;&gt;%
-  po(&quot;collapsefactors&quot;, param_vals = list(no_collapse_above_prevalence = 0.03)) %&gt;&gt;%
-  po(&quot;select&quot;, param_vals = list(selector = selector_invert(selector_type(&quot;character&quot;)))) %&gt;&gt;%
-  gunion(list(po_indicator, po(&quot;imputehist&quot;))) %&gt;&gt;%
-  po(&quot;featureunion&quot;) %&gt;&gt;%
-  po(&quot;imputeoor&quot;) %&gt;&gt;%
-  po(&quot;fixfactors&quot;) %&gt;&gt;%
-  po(&quot;imputesample&quot;) %&gt;&gt;%
-  po(learner)</code></pre>
+<div class="sourceCode">
+<pre><code><span class='va'>gr_final</span> <span class='op'>=</span> <span class='va'>po_ftextract</span> <span class='op'>%&gt;&gt;%</span>
+  <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"collapsefactors"</span>, param_vals <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>no_collapse_above_prevalence <span class='op'>=</span> <span class='fl'>0.03</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>%&gt;&gt;%</span>
+  <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"select"</span>, param_vals <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>selector <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/Selector.html'>selector_invert</a></span><span class='op'>(</span><span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/Selector.html'>selector_type</a></span><span class='op'>(</span><span class='st'>"character"</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>%&gt;&gt;%</span>
+  <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/gunion.html'>gunion</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='va'>po_indicator</span>, <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"imputehist"</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>%&gt;&gt;%</span>
+  <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"featureunion"</span><span class='op'>)</span> <span class='op'>%&gt;&gt;%</span>
+  <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"imputeoor"</span><span class='op'>)</span> <span class='op'>%&gt;&gt;%</span>
+  <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"fixfactors"</span><span class='op'>)</span> <span class='op'>%&gt;&gt;%</span>
+  <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"imputesample"</span><span class='op'>)</span> <span class='op'>%&gt;&gt;%</span>
+  <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='va'>learner</span><span class='op'>)</span>
+</code></pre>
+</div>
 </div>
 <h2 id="evaluation">Evaluation</h2>
 <p>Let us see if things have improved:</p>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-glrn = GraphLearner$new(gr_final)
-res = resample(task, glrn, rdesc, store_models = TRUE)
-agg_ranger = res$aggregate(msr(&quot;classif.acc&quot;))
-agg_ranger</code></pre>
-<pre><code>
-classif.acc 
-  0.8271605 </code></pre>
+<div class="sourceCode">
+<pre><code><span class='va'>glrn</span> <span class='op'>=</span> <span class='va'><a href='https://mlr3pipelines.mlr-org.com//reference/mlr_learners_graph.html'>GraphLearner</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='va'>gr_final</span><span class='op'>)</span>
+<span class='va'>res</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/resample.html'>resample</a></span><span class='op'>(</span><span class='va'>task</span>, <span class='va'>glrn</span>, <span class='va'>rdesc</span>, store_models <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>
+<span class='va'>agg_ranger</span> <span class='op'>=</span> <span class='va'>res</span><span class='op'>$</span><span class='fu'>aggregate</span><span class='op'>(</span><span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>msr</a></span><span class='op'>(</span><span class='st'>"classif.acc"</span><span class='op'>)</span><span class='op'>)</span>
+<span class='va'>agg_ranger</span>
+</code></pre>
+</div>
+<pre><code>classif.acc 
+  0.8249158 </code></pre>
 </div>
 <p>We have improved even more!</p>
 <h2 id="benchmarking">Benchmarking</h2>
 <p>To undertake benchmarking, we need to set up a benchmarking design. The first step is creating a list with the learners we used, namely the learners form the first and second part of this use case.</p>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-lrn_list = list(
-  lrn(&quot;classif.rpart&quot;, predict_type = &quot;prob&quot;),
-  lrn(&quot;classif.ranger&quot;, predict_type = &quot;prob&quot;)
-)</code></pre>
+<div class="sourceCode">
+<pre><code><span class='va'>lrn_list</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>
+  <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>lrn</a></span><span class='op'>(</span><span class='st'>"classif.rpart"</span>, predict_type <span class='op'>=</span> <span class='st'>"prob"</span><span class='op'>)</span>,
+  <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>lrn</a></span><span class='op'>(</span><span class='st'>"classif.ranger"</span>, predict_type <span class='op'>=</span> <span class='st'>"prob"</span><span class='op'>)</span>
+<span class='op'>)</span>
+</code></pre>
+</div>
 </div>
 <p>Now we can define our benchmark design. This is done to ensure exhaustive and consistent resampling for all learners. This step is needed to execute over the same train/test split for each task.</p>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-bm_design = benchmark_grid(task = task_imputed, resamplings = rsmp(&quot;cv&quot;, folds = 10), learners = lrn_list)
-bmr = benchmark(bm_design, store_models = TRUE)
-print(bmr)</code></pre>
-<pre><code>
-&lt;BenchmarkResult&gt; of 20 rows with 2 resampling runs
+<div class="sourceCode">
+<pre><code><span class='va'>bm_design</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/benchmark_grid.html'>benchmark_grid</a></span><span class='op'>(</span>task <span class='op'>=</span> <span class='va'>task_imputed</span>, resamplings <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>rsmp</a></span><span class='op'>(</span><span class='st'>"cv"</span>, folds <span class='op'>=</span> <span class='fl'>10</span><span class='op'>)</span>, learners <span class='op'>=</span> <span class='va'>lrn_list</span><span class='op'>)</span>
+<span class='va'>bmr</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/benchmark.html'>benchmark</a></span><span class='op'>(</span><span class='va'>bm_design</span>, store_models <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>
+<span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span><span class='op'>(</span><span class='va'>bmr</span><span class='op'>)</span>
+</code></pre>
+</div>
+<pre><code>&lt;BenchmarkResult&gt; of 20 rows with 2 resampling runs
  nr task_id     learner_id resampling_id iters warnings errors
   1 titanic  classif.rpart            cv    10        0      0
   2 titanic classif.ranger            cv    10        0      0</code></pre>
 </div>
 <p>So, where do we go from here? We could for instance use a boxplot:</p>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-autoplot(bmr) + theme(axis.text.x = element_text(angle = 45, hjust = 1))</code></pre>
+<div class="sourceCode">
+<pre><code><span class='fu'><a href='https://ggplot2.tidyverse.org/reference/autoplot.html'>autoplot</a></span><span class='op'>(</span><span class='va'>bmr</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/theme.html'>theme</a></span><span class='op'>(</span>axis.text.x <span class='op'>=</span> <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/element.html'>element_text</a></span><span class='op'>(</span>angle <span class='op'>=</span> <span class='fl'>45</span>, hjust <span class='op'>=</span> <span class='fl'>1</span><span class='op'>)</span><span class='op'>)</span>
+</code></pre>
+</div>
 <p><img src="2020-04-27-mlr3pipelines-titanic-advanced_files/figure-html5/unnamed-chunk-23-1.png" width="624" /></p>
 </div>
 <p>Further we are able to compare sensitivity and specificity. Here we need to ensure that the benchmark results only contain a single Task:</p>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-autoplot(bmr$clone()$filter(task_id = &quot;titanic&quot;), type = &quot;roc&quot;)</code></pre>
+<div class="sourceCode">
+<pre><code><span class='fu'><a href='https://ggplot2.tidyverse.org/reference/autoplot.html'>autoplot</a></span><span class='op'>(</span><span class='va'>bmr</span><span class='op'>$</span><span class='fu'>clone</span><span class='op'>(</span><span class='op'>)</span><span class='op'>$</span><span class='fu'>filter</span><span class='op'>(</span>task_id <span class='op'>=</span> <span class='st'>"titanic"</span><span class='op'>)</span>, type <span class='op'>=</span> <span class='st'>"roc"</span><span class='op'>)</span>
+</code></pre>
+</div>
 <p><img src="2020-04-27-mlr3pipelines-titanic-advanced_files/figure-html5/unnamed-chunk-24-1.png" width="624" /></p>
 </div>
 <p>Moreover, one can compare the precision-recall:</p>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-# Precision vs Recall
-ggplot2::autoplot(bmr, type = &quot;prc&quot;)</code></pre>
+<div class="sourceCode">
+<pre><code><span class='co'># Precision vs Recall</span>
+<span class='fu'>ggplot2</span><span class='fu'>::</span><span class='fu'><a href='https://ggplot2.tidyverse.org/reference/autoplot.html'>autoplot</a></span><span class='op'>(</span><span class='va'>bmr</span>, type <span class='op'>=</span> <span class='st'>"prc"</span><span class='op'>)</span>
+</code></pre>
+</div>
 <p><img src="2020-04-27-mlr3pipelines-titanic-advanced_files/figure-html5/unnamed-chunk-25-1.png" width="624" /></p>
 </div>
 <p>As one can see, there are various options when it comes to benchmarking and visualizing. You could have a look at some other use cases in our gallery for inspiration.</p>
 <h2 id="future">Future</h2>
 <p>In this case we have examined a number of different features, but there are many more things to explore! We could extract even more information from the different features and see what happens. But now you are left to yourself! There are many <a href="https://www.kaggle.com/c/titanic">kaggle kernels</a> that treat the <strong>Titanic Dataset</strong> available. This can be a great starter to find even better models.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
 <!--radix_placeholder_article_footer-->
 <!--/radix_placeholder_article_footer-->
 </div>
