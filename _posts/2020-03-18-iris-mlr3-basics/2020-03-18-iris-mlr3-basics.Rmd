@@ -21,22 +21,23 @@ knitr::opts_chunk$set(
   R.options = list(width = 80)
 )
 lgr::get_logger("mlr3")$set_threshold("warn")
+library(mlr3book)
 ```
 
 ## Goals and Prerequisites
 
-This use case shows how to use the basic mlr3 package on the iris task, so it's our "Hello World" example.
-It assumes no prior knowledge in ML or mlr3.
+This use case shows how to use the basic `r mlr_pkg("mlr3")` package on the iris `r ref("Task")`, so it's our "Hello World" example.
+It assumes no prior knowledge in ML or `r mlr_pkg("mlr3")`.
 You can find most of the content here also in the [mlr3book](https://mlr3book.mlr-org.com/) in a more detailed way.
 Hence we will not make a lot of general comments, but keep it hands-on and short.
 
 The following operations are shown:
 
-* Creating tasks and learners
+* Creating `r ref("Task", "Tasks")` and `r ref("Learner", "Learners")`
 * Training and predicting
-* Resampling / Cross-validation
-* Installing more learners from mlr3's GitHub learner org
-* Benchmarking, to compare multiple learners
+* `r ref("Resampling")` / `r ref("ResamplingCV", "cross-validation")`
+* Installing more `r ref("Learner", "Learners")`
+* `r ref("benchmark", "Benchmarking")` to compare multiple `Learners`
 
 ## Loading basic packages
 
@@ -86,8 +87,8 @@ print(preds)
 
 ## Evaluation
 
-Let's score our prediction object with some metrics.
-And take a deeper look by inspecting the confusion matrix.
+Let's score our `r ref("Prediction")` object with some metrics.
+And take a deeper look by inspecting the `confusion matrix`.
 
 ```{r}
 head(as.data.table(mlr_measures))
@@ -101,7 +102,7 @@ print(cm)
 
 ## Changing hyperpars
 
-The learner contains information about all parameters that can be configured, including data type, constraints, defaults, etc.
+The `r ref("Learner")` contains information about all parameters that can be configured, including data type, constraints, defaults, etc.
 We can change the hyperparameters either during construction of later through an active binding.
 
 ```{r}
@@ -112,7 +113,7 @@ learner2$param_set$values$minsplit = 50
 
 ## Resampling
 
-Resampling simply repeats the train-predict-score loop and collects all results in a nice `data.table`.
+`r ref("Resampling")` simply repeats the train-predict-score loop and collects all results in a nice `data.table`.
 
 ```{r, size = "tiny"}
 cv10 = rsmp("cv", folds = 10)
@@ -129,22 +130,21 @@ print(cm)
 
 ## Populating the learner dictionary
 
-mlr3learners ships out with a dozen different popular learners.
+`r mlr_pkg("mlr3learners")` ships out with a dozen different popular `r ref("Learner", "Learners")`.
 We can list them from the dictionary.
-If we want more, we can load an extension package from mlr3's
-[learner-org](https://github.com/mlr-org/mlr3learners/wiki) on GitHub.
-Note how after the install the dictionary increases in size.
+If we want more, we can install an extension package, `r mlr_pkg("mlr3extralearners")`, from GitHub.
+Note how after the installation the dictionary increases in size.
 
-```{r}
+```{r, message = FALSE}
 head(as.data.table(mlr_learners)[, c("key", "packages")])
-# remotes::install_github("mlr3learners/mlr3learners.randomforest")
-library(mlr3learners.randomforest)
+# remotes::install_github("mlr-org/mlr3extralearners")
+library(mlr3extralearners)
 print(as.data.table(mlr_learners)[, c("key", "packages")])
 ```
 
 ## Benchmarking multiple learners
 
-The `benchmark()` function can conveniently compare learners on the same dataset(s).
+The `r ref("benchmark")` function can conveniently compare `r ref("Learner", "Learners") on the same dataset(s).
 
 ```{r}
 learners = list(learner1, learner2, lrn("classif.randomForest"))
