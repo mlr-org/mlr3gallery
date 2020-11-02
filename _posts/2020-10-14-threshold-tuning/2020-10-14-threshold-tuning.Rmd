@@ -3,13 +3,12 @@ title: "Threshold Tuning for Classification Tasks"
 categories:
   - mlr3pipelines
   - tuning
-tags: ['classification', 'threshold', 'tuning' ]
 author:
   - name: Florian Pfisterer
 date: 10-14-2020
 description: |
   Predicting probabilities in classification tasks allows us to adjust the probability thresholds required for
-  assigning an observation to a certain class. This can lead to improved ...
+  assigning an observation to a certain class. This can lead to improved predictive performance.
 output:
   distill::distill_article:
     self_contained: false
@@ -65,7 +64,7 @@ prd = rr$prediction()
 prd
 ```
 
-If we now look at the confusion matrix, the off-diagonal elements are errors made by our model (*false positives* and *true negatives*) while on-diago)ements are where our model predicted correctly.
+If we now look at the confusion matrix, the off-diagonal elements are errors made by our model (*false positives* and *false negatives*) while on-diagol ements are where our model predicted correctly.
 
 
 ```{r}
@@ -92,6 +91,9 @@ This threshold value can now be adjusted optimally for a given measure, such as 
 
 ## Adjusting thresholds: Two strategies
 
+```{r}
+set.seed(20201014)
+```
 Currently `mlr3pipelines` offers two main strategies towards adjusting `classification thresholds`.
 We can either expose the thresholds as a `hyperparameter` of the Learner by using `r ref("PipeOpThreshold")`.
 This allows us to tune the `thresholds` via an outside optimizer from `r mlr_pkg("mlr3tuning")`.
