@@ -47,14 +47,11 @@ Consult the [mlr3book](https://mlr3book.mlr-org.com/pipelines.html) if some aspe
 ```{r Preparation}
 library(dplyr)
 library(tidyr)
-library(stringr)
 library(knitr)
-library(skimr)
 library(DataExplorer)
 library(mlr3verse)
 library(ggplot2)
 library(gridExtra)
-library(ggcorrplot)
 library(pander)
 ```
 
@@ -100,7 +97,7 @@ Section 3 presents learners and their hyperparameter tuning while section 4, dea
 
 # Indian Liver Patient Dataset
 
-The data set we used for our project is the "Indian Liver Patient Dataset" which can be obtained from the UCI Machine Learning Repository; it was donated by three professors from India in 2012.@Dua2017
+The data set we used for our project is the "Indian Liver Patient Dataset" which can be obtained from the UCI Machine Learning Repository; it was donated by three professors from India in 2012 @Dua2017.
 It contains data for 583 patients collected in the north east of Andhra Pradesh, one of the 28 states of India.
 The observations are divided into two classes based on the patient having liver disease or not.
 Besides the class variable, which is our target, ten, mostly numerical, features are provided.
@@ -134,13 +131,6 @@ Lastly, one should note that some of the measurements are part of more than one 
 
 # Data exporation
 
-```{r overview, include=FALSE}
-## Data exploration
-str(liver_df)
-summary(liver_df)
-skim(liver_df)
-```
-
 ## Missing values  
 
 After we got an overview of the task and dataset, we analyzed the variables from an exploratory perspective and first checked for missing values.
@@ -160,20 +150,6 @@ As it turned out omitting or imputation techniques were not necessary, because w
 Thus, we were left with no missing value problems to deal with.
 
 ## Univariate distribution
-
-``` {r target, include=FALSE}
-### Target variable
-# Absolute number
-ggplot(liver_df, aes(x = class)) +
-  geom_bar() + 
-  theme_minimal() + 
-  theme(text = element_text(size = 15))
-# Relative number
-ggplot(liver_df, aes(x = class, y = (..count..) / sum(..count..))) +
-  geom_bar() +
-  ylab("Percentage") + 
-  theme_minimal()
-```
 
 Next, we looked into the univariate distribution of each of the variables. We began with the target and the only discrete feature, gender, which are both binary.
 
@@ -260,16 +236,6 @@ plot_boxplot(liver_df_log, by = "class", nrow = 3, ncol = 3,
              ggtheme = theme_minimal(base_size = 14))
 ```
 
-```{r density, include=FALSE}
-# Density plots by class for metric features
-ggplot(data = gather(liver_df[, -2], "variable", "value", 1:9), 
-       aes(x = value, fill = class, colour = class)) +
-  stat_density() +
-  labs(x = "Value", y = "Density") +
-  facet_wrap(~variable, scales = "free") + 
-  theme_minimal()
-```
-
 Note, that the same result can be achieved more easily by using `r ref("PipeOpMutate")` from mlr3pipelines.
 This PipeOp provides a smooth implementation to scale numeric features for mlr3 tasks.
 
@@ -290,10 +256,7 @@ liver_df_numeric = liver_df %>%
     class = as.numeric(ifelse(class == "disease", 1, 0))
   )
 
-corr = cor(liver_df_numeric)
-
-ggcorrplot(corr, type = "lower", legend.title = "Correlation", show.diag = TRUE, 
-           lab = TRUE, tl.cex = 7, lab_size = 2.8)
+GGally::ggcorr(liver_df_numeric, label = TRUE, label_color='white', hjust = .9)
 ```
 
 For four of the pairs we obtained a very high correlation coefficient. 
@@ -321,21 +284,20 @@ liver_df_scaled = liver_df %>%
   ) %>%
   mutate_at(c(1, 3:6), list(~ (c(scale(.))))) # Scaling all features except gender
 
-
 ```
 
-```{r finalData, include=FALSE}
-# Structure of the final, transformed dataset
-str(liver_df_scaled) 
-```
+Lastly, we standardized all metric features, as different ranges and units might weigh features. This is especially important for the k-NN model.
+The following table shows the final dataset and the transformations we applied.  
+**Note**: This should be regularly done by implementing a `r mlr3book::ref("PipeOpScale")` and other data dependent log transformations.
+As these features won't be unscaled in prediction this might lead to misinterpretation of the data.
+Furthermore updating the data set, or running the method on test sets requires to transform these new data by hand again.
+Therefore we strongly recommend the usage of `mlr3pipelines` in such cases.
 
-Lastly, we standardized all metric features, as different ranges and units might weight features. This is especially important for the k-NN model.
-The following table shows the final dataset and the transformations we applied.
 
 ```{r, echo=FALSE}
 coldescr_scaled <- cbind.data.frame(
   Variable = colnames(liver_df_scaled),
-  Transformation = c("scaled", "", "scaled and log-transformed", "scaled and log-transformed", "scaled and log-transformed", "scaled", "")
+  Transformation = c("scaled", "none", "scaled and log-transformed", "scaled and log-transformed", "scaled and log-transformed", "scaled", "none")
 )
 
 kable(coldescr_scaled)
@@ -392,9 +354,9 @@ The following table shows the assumptions of the methods we chose.
 | Linear discriminant analysis    | Normality of classes, equal covariance (target)   |
 | Quadratic discriminant analysis | Normality of classes                              |
 | Naive Bayes                     | Conditional independence of features              |
-| CART                            |                                                   |
-| k-NN                            |                                                   |
-| Random forest                   |                                                   |
+| CART                            | None                                              |
+| k-NN                            | None                                              |
+| Random forest                   | None                                              |
 
 The following table shows the hyperparameters we tuned.
 
@@ -608,7 +570,7 @@ compare_df2 = as.data.frame(bmr$aggregate(list(
     "learner_id", "classif.auc", "classif.sensitivity",
     "classif.specificity", "classif.fnr", "classif.fpr")]) %>%
   mutate(
-    learner_id_wo = str_remove(learner_id, "oversample."),
+    learner_id_wo = gsub("oversample.", "", learner_id),
     data_balanced = c(rep("imbalanced", 7), rep("balanced", 7))
   )
 
@@ -710,6 +672,7 @@ These results - and the ranking of learners in general, independent of the perfo
 
 The analysis we conducted is, however, by no means exhaustive.
 On the feature level, while we focused almost exclusively on the machine learning and statistical analysis aspect during our analysis, one could also dig deeper into the actual topic (liver disease) and try to understand the variables as well as potential correlations and interactions more thoroughly.
+This might also mean to consider already thrown out variables again.
 Furthermore, feature engineering as well as data preprocessing, for instance  using principal component analysis, could be applied to the dataset.
 Regarding hyperparameter tuning, different hyperparameters with larger hyperparameter spaces and numbers of evaluations could be considered.
 Furthermore, tuning could also be applied to some of those learners that we labeled as baseline learners, though to a lesser extent.  
