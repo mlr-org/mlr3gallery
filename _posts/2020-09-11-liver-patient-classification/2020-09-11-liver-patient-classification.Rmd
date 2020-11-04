@@ -52,7 +52,6 @@ library(DataExplorer)
 library(mlr3verse)
 library(ggplot2)
 library(gridExtra)
-library(pander)
 ```
 
 Note, that expensive calculations are pre-saved in rds files in this tutorial to save computational time.
@@ -104,7 +103,7 @@ Besides the class variable, which is our target, ten, mostly numerical, features
 To describe the features in more detail, the table below lists the variables included in the dataset.
 
 ```{r, echo=FALSE}
-col_descr <- cbind.data.frame(Variable = colnames(liver_df),
+col_descr = cbind.data.frame(Variable = colnames(liver_df),
                               Description = c("Age of the patient (all patients above 89 are labelled as 90",
                                               "Sex of the patient (1 = female, 0 = male)",
                                               "Total serum bilirubin (in mg/dL)",
@@ -272,7 +271,7 @@ Since we did not notice any fundamental differences in the data for these two fe
 
 ```{r reduceAndScale, include=FALSE}
 ## Reducing, transforming and scaling dataset
-liver_df_scaled = liver_df %>%
+liver_df_log = liver_df %>%
   select(-total_bilirubin, -alanine_transaminase, -total_protein, 
          -albumin_globulin_ratio) %>%
   mutate(
@@ -281,22 +280,24 @@ liver_df_scaled = liver_df %>%
     alkaline_phosphatase = log(alkaline_phosphatase), # Log for features with skewed distributions
     aspartate_transaminase = log(aspartate_transaminase),
     direct_bilirubin = log(direct_bilirubin)
-  ) %>%
-  mutate_at(c(1, 3:6), list(~ (c(scale(.))))) # Scaling all features except gender
+  )
 
+po_scale = po("scale")
+po_scale$param_set$values$affect_columns = selector_name(c("age", "direct_bilirubin", "alkaline_phosphatase",
+                                                           "aspartate_transaminase", "albumin"))
 ```
 
 Lastly, we standardized all metric features, as different ranges and units might weigh features. This is especially important for the k-NN model.
 The following table shows the final dataset and the transformations we applied.  
-**Note**: This should be regularly done by implementing a `r mlr3book::ref("PipeOpScale")` and other data dependent log transformations.
-As these features won't be unscaled in prediction this might lead to misinterpretation of the data.
-Furthermore updating the data set, or running the method on test sets requires to transform these new data by hand again.
-Therefore we strongly recommend the usage of `mlr3pipelines` in such cases.
-
+**Note**: 
+Different from `log` or other transformation, `scaling` depends on the data themselves.
+Scaling data before data are split leads to data leakage, were information of train and test set are shared.
+As Data Leakage causes higher performance, scaling should always be applied in each data split induced by the ML workflow separately.
+Therefore we strongly recommend the usage of `r mlr3book::ref("PipeOpScale")` in such cases.
 
 ```{r, echo=FALSE}
-coldescr_scaled <- cbind.data.frame(
-  Variable = colnames(liver_df_scaled),
+coldescr_scaled = cbind.data.frame(
+  Variable = colnames(liver_df_log),
   Transformation = c("scaled", "none", "scaled and log-transformed", "scaled and log-transformed", "scaled and log-transformed", "scaled", "none")
 )
 
@@ -311,7 +312,7 @@ The specification of the positive class has an impact on the evaluation later on
 
 ```{r task definition}
 ## Task definition
-task_liver = TaskClassif$new(id = "task_liver", backend = liver_df_scaled, 
+task_liver = TaskClassif$new(id = "task_liver", backend = liver_df_log, 
                               target = "class", positive = "1")
 ```
 
@@ -322,7 +323,7 @@ In the following we are going to evaluate logistic regression, linear discrimina
 # Use predict type "prob" for the AUC score. Predict on train and test sets to
 # detect overfitting
 
-learners <- list(
+learners = list(
   learner_logreg = lrn("classif.log_reg", predict_type = "prob", predict_sets = c("train", "test")),
   learner_lda = lrn("classif.lda", predict_type = "prob", predict_sets = c("train", "test")),
   learner_qda = lrn("classif.qda", predict_type = "prob", predict_sets = c("train", "test")),
@@ -438,7 +439,7 @@ po_over = po("classbalancing", id = "oversample", adjust = "minor",
 table(po_over$train(list(task_liver))$output$truth()) # Check class balance
 
 # Learners with balanced/oversampled data
-learners_bal = lapply(learners, function(x) GraphLearner$new(po_over %>>% x))
+learners_bal = lapply(learners, function(x) GraphLearner$new(po_scale %>>% po_over %>>% x))
 lapply(learners_bal, function(x) x$predict_sets = c("train", "test"))
 ```
 
@@ -635,21 +636,11 @@ ggplot(compare_df3[which(compare_df3$learner_id_wo == "classif.ranger.tuned"), ]
 ```
 
 To get a look at performance from yet another angle, we next considered the confusion matrix for each learner, which simply contrasts the absolute numbers of predictions and true values by category, with and without oversampling.
-
-the solution is to wrap it minipages making sure to use a % and leave no spaces to join the two tables.
+You can have a look at all the confusion matrices, if you run the script.
 
 ```{r two-column, results='asis', echo=FALSE, out.extra=''}
-panderOptions("table.style", "grid")
-cat("<h1>confusion matrices</h1>")
-names <- sapply(1:14, function(x) bmr$resample_result(x)$learner$id)
-cat("<table class='container'><tr>")
-cat("<td>")
-pander(lapply(setNames(1:7, names[1:7]), function(x) ftable(bmr$resample_result(x)$prediction()$confusion))) 
-cat("</td>")
-cat("<td>")
-pander(lapply(setNames(8:14, names[8:14]), function(x) ftable(bmr$resample_result(x)$prediction()$confusion)))
-cat("</td>")
-cat("</tr></table>")
+names = sapply(1:14, function(x) bmr$resample_result(x)$learner$id)
+confusion <- lapply(setNames(1:14, names), function(x) ftable(bmr$resample_result(x)$prediction()$confusion))
 ```
 
 
