@@ -36,9 +36,8 @@ library(ggplot2)
 library(gridExtra)
 library(dplyr)
 library(tidyr)
-library(RCurl)
 
-longrun = FALSE
+longrun = TRUE
 ```
 
 # Preamble
@@ -65,8 +64,7 @@ Applying supervised machine learning methods, we want to investigate the followi
 Below the data are imported and a seed is set for reproducibility.
 
 ```{r}
-url = getURL("https://raw.githubusercontent.com/stedy/Machine-Learning-with-R-datasets/master/insurance.csv")
-insurance = read.csv(text = url)
+insurance = read.csv(url("https://raw.githubusercontent.com/stedy/Machine-Learning-with-R-datasets/master/insurance.csv"))
 set.seed(246)
 ```
 
@@ -112,8 +110,8 @@ Before we resume in our analysis, all independent, metric variables will be stan
 This ensures commensurability of variables originally measured on differing metric scales and is particularly important for learners, which assess distances between individual observations.
 
 ```{r}
-insurance[, c("age", "bmi", "children")] =
- scale(insurance[, c("age", "bmi", "children")])
+po_scale = po("scale")
+po_scale$param_set$values$affect_columns = selector_name(c("age", "bmi", "children"))
 ```
 
 Note, that the same result can be achieved more easily by using `PipeOpScale` from mlr3pipelines.
@@ -228,6 +226,8 @@ at_ranger = AutoTuner$new(
   terminator = terminator,
   tuner = tuner_rs
 )
+
+scaled_learners = lapply(list(lrn_lm, at_knn, at_rpart, at_ranger), function(x) GraphLearner$new(po_scale %>>% x))
 ```
 
 ```{r grid1, echo=FALSE, message=FALSE, results='hide', eval=longrun}
@@ -235,7 +235,7 @@ resampling_outer = rsmp("cv", folds = 5)
 
 grid = benchmark_grid(
   task = ins_task,
-  learner = list(lrn_lm, at_knn, at_rpart, at_ranger),
+  learner = scaled_learners,
   resampling = resampling_outer
 )
 
@@ -245,8 +245,9 @@ bmr = benchmark(grid, store_models = TRUE)
 # Extract optimal HP for each fold of outer resampling:
 ```
 
-```{r, echo=FALSE, eval=longrun}
+```{r, echo=FALSE, eval=FALSE}
 plot_tuning = function(benchmark = bmr, learner_ident, parameter, scale) {
+  
   learner = bmr$score()[learner_id == learner_ident]$learner
   tuning_result = sapply(learner, FUN = function(x) x$tuning_result[[parameter]])
   
@@ -261,11 +262,11 @@ plot_tuning = function(benchmark = bmr, learner_ident, parameter, scale) {
 
 
 list_args = list(
-  knn_k = list(learner_ident = "regr.kknn.tuned", parameter = "k", scale = c(1, 40)),
-  rpart_cp = list(learner_ident = "regr.rpart.tuned", parameter = "cp", scale = c(0.001, 0.5)),
-  rpart_minsplit = list(learner_ident = "regr.rpart.tuned", parameter = "minsplit", scale = c(1, 50)),
-  ranger_minnode = list(learner_ident = "regr.ranger.tuned", parameter = "min.node.size", scale = c(1, 50)),
-  ranger_mtry = list(learner_ident = "regr.ranger.tuned", parameter = "mtry", scale = c(2, 6))
+  knn_k = list(learner_ident = "scale.regr.kknn.tuned", parameter = "k", scale = c(1, 40)),
+  rpart_cp = list(learner_ident = "scale.regr.rpart.tuned", parameter = "cp", scale = c(0.001, 0.5)),
+  rpart_minsplit = list(learner_ident = "scale.regr.rpart.tuned", parameter = "minsplit", scale = c(1, 50)),
+  ranger_minnode = list(learner_ident = "scale.regr.ranger.tuned", parameter = "min.node.size", scale = c(1, 50)),
+  ranger_mtry = list(learner_ident = "scale.regr.ranger.tuned", parameter = "mtry", scale = c(2, 6))
 )
 
 plot_hyperparam <- lapply(list_args, function(x) mlr3misc::invoke(plot_tuning, .args = x))
@@ -308,7 +309,7 @@ resampling_outer = rsmp("cv", folds = 5)
 
 grid = benchmark_grid(
   task = ins_task,
-  learner = list(lrn_lm, at_knn, at_rpart, at_ranger),
+  learner = scaled_learners,
   resampling = resampling_outer
 )
 
