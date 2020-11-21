@@ -102,20 +102,14 @@ code span.wa { color: #545454; font-weight: bold; font-style: italic; } /* Warni
 <meta property="og:type" content="article"/>
 <meta property="og:description" content="This post shows how to build a Graph using the mlr3pipelines package on the &quot;titanic&quot; dataset."/>
 <meta property="og:url" content="https://mlr3gallery.mlr-org.com/posts/2020-03-12-intro-pipelines-titanic/"/>
-<meta property="og:image" content="https://mlr3gallery.mlr-org.com/posts/2020-03-12-intro-pipelines-titanic/2020-03-12-mlr3pipelines-titanic-Basics_files/figure-html5/unnamed-chunk-5-1.png"/>
-<meta property="og:image:width" content="1248"/>
-<meta property="og:image:height" content="1344"/>
 <meta property="og:locale" content="en_US"/>
 <meta property="og:site_name" content="mlr3gallery"/>
 
 <!--  https://dev.twitter.com/cards/types/summary -->
-<meta property="twitter:card" content="summary_large_image"/>
+<meta property="twitter:card" content="summary"/>
 <meta property="twitter:title" content="mlr3gallery: A pipeline for the titanic data set - Basics"/>
 <meta property="twitter:description" content="This post shows how to build a Graph using the mlr3pipelines package on the &quot;titanic&quot; dataset."/>
 <meta property="twitter:url" content="https://mlr3gallery.mlr-org.com/posts/2020-03-12-intro-pipelines-titanic/"/>
-<meta property="twitter:image" content="https://mlr3gallery.mlr-org.com/posts/2020-03-12-intro-pipelines-titanic/2020-03-12-mlr3pipelines-titanic-Basics_files/figure-html5/unnamed-chunk-5-1.png"/>
-<meta property="twitter:image:width" content="1248"/>
-<meta property="twitter:image:height" content="1344"/>
 
 <!--  https://scholar.google.com/intl/en/scholar/inclusion.html#indexing -->
 <meta name="citation_title" content="mlr3gallery: A pipeline for the titanic data set - Basics"/>
@@ -132,7 +126,7 @@ code span.wa { color: #545454; font-weight: bold; font-style: italic; } /* Warni
 <!--/radix_placeholder_rmarkdown_metadata-->
   
   <script type="text/json" id="radix-resource-manifest">
-  {"type":"character","attributes":{},"value":["2020-03-12-mlr3pipelines-titanic-Basics/bowser-1.9.3/bowser.min.js","2020-03-12-mlr3pipelines-titanic-Basics/distill-2.2.21/template.v2.js","2020-03-12-mlr3pipelines-titanic-Basics/figure-html5/unnamed-chunk-5-1.png","2020-03-12-mlr3pipelines-titanic-Basics/figure-html5/unnamed-chunk-6-1.png","2020-03-12-mlr3pipelines-titanic-Basics/figure-html5/unnamed-chunk-6-2.png","2020-03-12-mlr3pipelines-titanic-Basics/header-attrs-2.1/header-attrs.js","2020-03-12-mlr3pipelines-titanic-Basics/jquery-1.11.3/jquery.min.js","2020-03-12-mlr3pipelines-titanic-Basics/webcomponents-2.0.0/webcomponents.js","2020-03-12-mlr3pipelines-titanic-Basics_files/figure-html5/unnamed-chunk-5-1.png","2020-03-12-mlr3pipelines-titanic-Basics_files/figure-html5/unnamed-chunk-6-1.png","2020-03-12-mlr3pipelines-titanic-Basics_files/figure-html5/unnamed-chunk-6-2.png"]}
+  {"type":"character","attributes":{},"value":["2020-03-12-mlr3pipelines-titanic-Basics/bowser-1.9.3/bowser.min.js","2020-03-12-mlr3pipelines-titanic-Basics/distill-2.2.21/template.v2.js","2020-03-12-mlr3pipelines-titanic-Basics/figure-html5/unnamed-chunk-5-1.png","2020-03-12-mlr3pipelines-titanic-Basics/figure-html5/unnamed-chunk-6-1.png","2020-03-12-mlr3pipelines-titanic-Basics/figure-html5/unnamed-chunk-6-2.png","2020-03-12-mlr3pipelines-titanic-Basics/header-attrs-2.1/header-attrs.js","2020-03-12-mlr3pipelines-titanic-Basics/jquery-1.11.3/jquery.min.js","2020-03-12-mlr3pipelines-titanic-Basics/webcomponents-2.0.0/webcomponents.js"]}
   </script>
   <!--radix_placeholder_navigation_in_header-->
 <meta name="distill:offset" content="../.."/>
@@ -2562,26 +2556,25 @@ embarked        Port of Embarkation
 </tbody>
 </table>
 </div>
-<p>Here we can also inspect the data for differences in the train and test set. This might be important, as shifts in the data distribution often make our models unreliable.</p>
+<!--
+Here we can also inspect the data for differences in the train and test set.
+This might be important, as shifts in the data distribution often make our models unreliable.
+
 <div class="layout-chunk" data-layout="l-body">
-<div class="sourceCode">
-<pre><code><span class='fu'>DataExplorer</span><span class='fu'>::</span><span class='fu'><a href='http://boxuancui.github.io/DataExplorer/reference/plot_bar.html'>plot_bar</a></span><span class='op'>(</span><span class='va'>titanic_train</span>, nrow <span class='op'>=</span> <span class='fl'>5</span>, ncol <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span>
-</code></pre>
+<div class="sourceCode"><pre><code><span class='co'>#DataExplorer::plot_bar(titanic_train, nrow = 5, ncol = 3)</span>
+</code></pre></div>
+
 </div>
-<p><img src="2020-03-12-mlr3pipelines-titanic-Basics_files/figure-html5/unnamed-chunk-5-1.png" width="100%" /></p>
-</div>
+
+
 <div class="layout-chunk" data-layout="l-body">
-<div class="sourceCode">
-<pre><code><span class='fu'>DataExplorer</span><span class='fu'>::</span><span class='fu'><a href='http://boxuancui.github.io/DataExplorer/reference/plot_histogram.html'>plot_histogram</a></span><span class='op'>(</span><span class='va'>titanic_train</span>, nrow <span class='op'>=</span> <span class='fl'>2</span>, ncol <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span>
-</code></pre>
+<div class="sourceCode"><pre><code><span class='co'>#DataExplorer::plot_histogram(titanic_train, nrow = 2, ncol = 3)</span>
+<span class='co'>#DataExplorer::plot_boxplot(titanic_train, by = "survived", nrow = 2, ncol = 3)</span>
+</code></pre></div>
+
 </div>
-<img src="2020-03-12-mlr3pipelines-titanic-Basics_files/figure-html5/unnamed-chunk-6-1.png" width="100%" />
-<div class="sourceCode">
-<pre><code><span class='fu'>DataExplorer</span><span class='fu'>::</span><span class='fu'><a href='http://boxuancui.github.io/DataExplorer/reference/plot_boxplot.html'>plot_boxplot</a></span><span class='op'>(</span><span class='va'>titanic_train</span>, by <span class='op'>=</span> <span class='st'>"survived"</span>, nrow <span class='op'>=</span> <span class='fl'>2</span>, ncol <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span>
-</code></pre>
-</div>
-<p><img src="2020-03-12-mlr3pipelines-titanic-Basics_files/figure-html5/unnamed-chunk-6-2.png" width="100%" /></p>
-</div>
+
+-->
 <p>We can now create a <code>Task</code> from our data. As we want to classify whether the person survived or not, we will create a <code>TaskClassif</code>. We’ll ignore the ‘titanic_test’ data for now and come back to it later.</p>
 <h2 id="a-first-model">A first model</h2>
 <div class="layout-chunk" data-layout="l-body">
