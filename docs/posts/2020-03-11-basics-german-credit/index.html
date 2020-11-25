@@ -104,9 +104,9 @@ code span.wa { color: #545454; font-weight: bold; font-style: italic; } /* Warni
 <meta property="og:type" content="article"/>
 <meta property="og:description" content="In this use case, we teach the basics of mlr3 by training different models on&#10;the German credit dataset."/>
 <meta property="og:url" content="https://mlr3gallery.mlr-org.com/posts/2020-03-11-basics-german-credit/"/>
-<meta property="og:image" content="https://mlr3gallery.mlr-org.com/posts/2020-03-11-basics-german-credit/2020-03-11-mlr3-basics-german-credit_files/figure-html5/unnamed-chunk-8-1.png"/>
+<meta property="og:image" content="https://mlr3gallery.mlr-org.com/posts/2020-03-11-basics-german-credit/2020-03-11-mlr3-basics-german-credit_files/figure-html5/unnamed-chunk-22-1.png"/>
 <meta property="og:image:width" content="1248"/>
-<meta property="og:image:height" content="3456"/>
+<meta property="og:image:height" content="768"/>
 <meta property="og:locale" content="en_US"/>
 <meta property="og:site_name" content="mlr3gallery"/>
 
@@ -115,9 +115,9 @@ code span.wa { color: #545454; font-weight: bold; font-style: italic; } /* Warni
 <meta property="twitter:title" content="mlr3gallery: mlr3 Basics - German Credit"/>
 <meta property="twitter:description" content="In this use case, we teach the basics of mlr3 by training different models on&#10;the German credit dataset."/>
 <meta property="twitter:url" content="https://mlr3gallery.mlr-org.com/posts/2020-03-11-basics-german-credit/"/>
-<meta property="twitter:image" content="https://mlr3gallery.mlr-org.com/posts/2020-03-11-basics-german-credit/2020-03-11-mlr3-basics-german-credit_files/figure-html5/unnamed-chunk-8-1.png"/>
+<meta property="twitter:image" content="https://mlr3gallery.mlr-org.com/posts/2020-03-11-basics-german-credit/2020-03-11-mlr3-basics-german-credit_files/figure-html5/unnamed-chunk-22-1.png"/>
 <meta property="twitter:image:width" content="1248"/>
-<meta property="twitter:image:height" content="3456"/>
+<meta property="twitter:image:height" content="768"/>
 
 <!--  https://scholar.google.com/intl/en/scholar/inclusion.html#indexing -->
 <meta name="citation_title" content="mlr3gallery: mlr3 Basics - German Credit"/>
@@ -136,7 +136,7 @@ code span.wa { color: #545454; font-weight: bold; font-style: italic; } /* Warni
 <!--/radix_placeholder_rmarkdown_metadata-->
   
   <script type="text/json" id="radix-resource-manifest">
-  {"type":"character","attributes":{},"value":["2020-03-11-mlr3-basics-german-credit_files/figure-html5/unnamed-chunk-10-1.png","2020-03-11-mlr3-basics-german-credit_files/figure-html5/unnamed-chunk-22-1.png","2020-03-11-mlr3-basics-german-credit_files/figure-html5/unnamed-chunk-44-1.png","2020-03-11-mlr3-basics-german-credit_files/figure-html5/unnamed-chunk-8-1.png","2020-03-11-mlr3-basics-german-credit_files/figure-html5/unnamed-chunk-9-1.png"]}
+  {"type":"character","attributes":{},"value":["2020-03-11-mlr3-basics-german-credit_files/figure-html5/unnamed-chunk-22-1.png","2020-03-11-mlr3-basics-german-credit_files/figure-html5/unnamed-chunk-44-1.png"]}
   </script>
   <!--radix_placeholder_navigation_in_header-->
 <meta name="distill:offset" content="../.."/>
@@ -2099,7 +2099,9 @@ document.addEventListener('DOMContentLoaded', function() {
 </ul>
 <p>We will walk through this tutorial interactively. The text is kept short to be followed in real time.</p>
 <h2 id="prerequisites">Prerequisites</h2>
-<p>Ensure all packages used in this tutorial are installed. This includes packages from the <code>mlr3</code> family, as well as other packages for data handling, cleaning and visualization which we are going to use (<a href="https://cran.r-project.org/package=DataExplorer">DataExplorer</a>, <a href="https://cran.r-project.org/package=data.table">data.table</a>, <a href="https://cran.r-project.org/package=ggplot2">ggplot2</a>, <a href="https://cran.r-project.org/package=rchallenge">rchallenge</a>, and <a href="https://cran.r-project.org/package=skimr">skimr</a>).</p>
+<p>Ensure all packages used in this tutorial are installed. <!--
+This includes packages from the `mlr3` family, as well as other packages for data handling, cleaning and visualization which we are going to use ([DataExplorer](https://cran.r-project.org/package=DataExplorer), [data.table](https://cran.r-project.org/package=data.table), [ggplot2](https://cran.r-project.org/package=ggplot2), [rchallenge](https://cran.r-project.org/package=rchallenge), and [skimr](https://cran.r-project.org/package=skimr)).
+--> This includes packages from the <code>mlr3</code> family, as well as other packages for data handling, cleaning and visualization which we are going to use (<a href="https://cran.r-project.org/package=data.table">data.table</a>, <a href="https://cran.r-project.org/package=ggplot2">ggplot2</a>, <a href="https://cran.r-project.org/package=rchallenge">rchallenge</a>, and <a href="https://cran.r-project.org/package=skimr">skimr</a>).</p>
 <p>Then, load the main packages we are going to use:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
@@ -2248,7 +2250,10 @@ document.addEventListener('DOMContentLoaded', function() {
  $ credit_risk            : Factor w/ 2 levels &quot;good&quot;,&quot;bad&quot;: 1 2 1 1 2 1 1 1 1 2 ...</code></pre>
 </div>
 <p>Our dataset has 1000 observations and 21 columns. The variable we want to predict is <code>credit_risk</code> (either good or bad), i.e., we aim to classify people by their credit risk.</p>
-<p>We also recommend the packages <a href="https://cran.r-project.org/package=skimr">skimr</a> and <a href="https://cran.r-project.org/package=DataExplorer">DataExplorer</a> as they create very well readable and understandable overviews:</p>
+<!--
+We also recommend the packages [skimr](https://cran.r-project.org/package=skimr) and [DataExplorer](https://cran.r-project.org/package=DataExplorer) as they create very well readable and understandable overviews:
+-->
+<p>We also recommend the <a href="https://cran.r-project.org/package=skimr">skimr</a> package as it creates very well readable and understandable overviews:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre><code><span class='fu'>skimr</span><span class='fu'>::</span><span class='fu'><a href='https://docs.ropensci.org/skimr/reference/skim.html'>skim</a></span><span class='op'>(</span><span class='va'>german</span><span class='op'>)</span>
@@ -2514,42 +2519,49 @@ document.addEventListener('DOMContentLoaded', function() {
 </tbody>
 </table>
 </div>
-<p>Prior to calling <a href="https://cran.r-project.org/package=DataExplorer">DataExplorer</a>, we shorten the (very lengthy) factor levels of the german credit data set to get plots which nicely fit on the screen (no need to dig into this):</p>
+<!--
+Prior to calling [DataExplorer](https://cran.r-project.org/package=DataExplorer), we shorten the (very lengthy) factor levels of the german credit data set to get plots which nicely fit on the screen (no need to dig into this):
+
 <div class="layout-chunk" data-layout="l-body">
-<div class="sourceCode">
-<pre><code><span class='va'>german_short</span> <span class='op'>=</span> <span class='va'>german</span>
-<span class='va'>is_factor</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/lapply.html'>sapply</a></span><span class='op'>(</span><span class='va'>german_short</span>, <span class='va'>is.factor</span><span class='op'>)</span>
-<span class='va'>german_short</span><span class='op'>[</span><span class='va'>is_factor</span><span class='op'>]</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/lapply.html'>lapply</a></span><span class='op'>(</span><span class='va'>german</span><span class='op'>[</span><span class='va'>is_factor</span><span class='op'>]</span>, <span class='kw'>function</span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span> <span class='op'>{</span>
-  <span class='fu'><a href='https://rdrr.io/r/base/levels.html'>levels</a></span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/abbreviate.html'>abbreviate</a></span><span class='op'>(</span><span class='fu'>mlr3misc</span><span class='fu'>::</span><span class='fu'><a href='https://mlr3misc.mlr-org.com/reference/str_trunc.html'>str_trunc</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/levels.html'>levels</a></span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span>, <span class='fl'>16</span>, <span class='st'>"..."</span><span class='op'>)</span>, <span class='fl'>12</span><span class='op'>)</span>
-  <span class='va'>x</span>
-<span class='op'>}</span><span class='op'>)</span>
-</code></pre>
+<div class="sourceCode"><pre><code><span class='co'>#german_short = german</span>
+<span class='co'>#is_factor = sapply(german_short, is.factor)</span>
+<span class='co'>#german_short[is_factor] = lapply(german[is_factor], function(x) {</span>
+<span class='co'>#  levels(x) = abbreviate(mlr3misc::str_trunc(levels(x), 16, "..."), 12)</span>
+<span class='co'>#  x</span>
+<span class='co'>#})</span>
+</code></pre></div>
+
 </div>
-</div>
+
+
 <div class="layout-chunk" data-layout="l-body">
-<div class="sourceCode">
-<pre><code><span class='fu'>DataExplorer</span><span class='fu'>::</span><span class='fu'><a href='http://boxuancui.github.io/DataExplorer/reference/plot_bar.html'>plot_bar</a></span><span class='op'>(</span><span class='va'>german_short</span>, nrow <span class='op'>=</span> <span class='fl'>6</span>, ncol <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span>
-</code></pre>
+<div class="sourceCode"><pre><code><span class='co'>#DataExplorer::plot_bar(german_short, nrow = 6, ncol = 3)</span>
+</code></pre></div>
+
 </div>
-</div>
+
+
 <div class="layout-chunk" data-layout="l-body">
-<p><img src="2020-03-11-mlr3-basics-german-credit_files/figure-html5/unnamed-chunk-8-1.png" width="100%" /></p>
+
+
 </div>
+
+
 <div class="layout-chunk" data-layout="l-body">
-<div class="sourceCode">
-<pre><code><span class='fu'>DataExplorer</span><span class='fu'>::</span><span class='fu'><a href='http://boxuancui.github.io/DataExplorer/reference/plot_histogram.html'>plot_histogram</a></span><span class='op'>(</span><span class='va'>german_short</span>, nrow <span class='op'>=</span> <span class='fl'>1</span>, ncol <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span>
-</code></pre>
+<div class="sourceCode"><pre><code><span class='co'>#DataExplorer::plot_histogram(german_short, nrow = 1, ncol = 3)</span>
+</code></pre></div>
+
 </div>
-<p><img src="2020-03-11-mlr3-basics-german-credit_files/figure-html5/unnamed-chunk-9-1.png" width="100%" /></p>
-</div>
+
+
 <div class="layout-chunk" data-layout="l-body">
-<div class="sourceCode">
-<pre><code><span class='fu'>DataExplorer</span><span class='fu'>::</span><span class='fu'><a href='http://boxuancui.github.io/DataExplorer/reference/plot_boxplot.html'>plot_boxplot</a></span><span class='op'>(</span><span class='va'>german_short</span>, by <span class='op'>=</span> <span class='st'>"credit_risk"</span>, nrow <span class='op'>=</span> <span class='fl'>1</span>, ncol <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span>
-</code></pre>
+<div class="sourceCode"><pre><code><span class='co'>#DataExplorer::plot_boxplot(german_short, by = "credit_risk", nrow = 1, ncol = 3)</span>
+</code></pre></div>
+
 </div>
-<p><img src="2020-03-11-mlr3-basics-german-credit_files/figure-html5/unnamed-chunk-10-1.png" width="100%" /></p>
-</div>
-<p>During this exploratory analysis meaningful discoveries could be:</p>
+
+-->
+<p>During an exploratory analysis meaningful discoveries could be:</p>
 <ul>
 <li>Skewed distributions</li>
 <li>Missing values</li>
@@ -2586,8 +2598,8 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>Note that the German credit data is also given as an example task which ships with the <code>mlr3</code> package. Thus, you actually don’t need to construct it yourself, just call <code>tsk("german_credit")</code> to retrieve the object from the dictionary <a href="https://mlr3.mlr-org.com/reference/mlr_tasks.html"><code>mlr_tasks</code></a>.</p>
 <h3 id="learner-definition">Learner Definition</h3>
 <p>After having decided <em>what</em> should be modeled, we need to decide on <em>how</em>. This means we need to decide which learning algorithms, or <a href="https://mlr3.mlr-org.com/reference/Learner.html"><code>Learners</code></a> are appropriate. Using prior knowledge (e.g. knowing that it is a classification task or assuming that the classes are linearly separable) one ends up with one or more suitable <code>Learner</code>s.</p>
-<p>Many learners can be obtained via the <a href="https://mlr3learners.mlr-org.com">mlr3learners</a> package. Additionally, many learners are provided via the <code>mlr3learners</code> <a href="https://github.com/mlr3learners">github organization</a>. These two resources combined account for a large fraction of standard learning algorithms. As <code>mlr3</code> usually only wraps learners from packages, it is even easy to create a formal <code>Learner</code> by yourself. You may find the section about <a href="https://mlr3book.mlr-org.com/extending.html">extending mlr3</a> in the <a href="https://mlr3book.mlr-org.com">mlr3book</a> very helpful. If you happen to write your own <a href="https://mlr3.mlr-org.com/reference/Learner.html"><code>Learner</code></a> in <code>mlr3</code>, we would be happy if you share it with the <code>mlr3</code> community.</p>
-<p>All available <code>Learner</code>s (i.e. all which you have installed from <code>mlr3</code>, <code>mlr3learners</code>, the <a href="https://github.com/mlr3learners/">mlr3learners github organization</a>, or self-written ones) are registered in the dictionary <a href="https://mlr3.mlr-org.com/reference/mlr_learners.html"><code>mlr_learners</code></a>:</p>
+<p>Many learners can be obtained via the <a href="https://mlr3learners.mlr-org.com">mlr3learners</a> package. Additionally, many learners are provided via the <a href="https://mlr3extralearners.mlr-org.com">mlr3extralearners</a> package, from GitHub. These two resources combined account for a large fraction of standard learning algorithms. As <code>mlr3</code> usually only wraps learners from packages, it is even easy to create a formal <code>Learner</code> by yourself. You may find the section about <a href="https://mlr3book.mlr-org.com/extending.html">extending mlr3</a> in the <a href="https://mlr3book.mlr-org.com">mlr3book</a> very helpful. If you happen to write your own <a href="https://mlr3.mlr-org.com/reference/Learner.html"><code>Learner</code></a> in <code>mlr3</code>, we would be happy if you share it with the <code>mlr3</code> community.</p>
+<p>All available <code>Learner</code>s (i.e. all which you have installed from <code>mlr3</code>, <code>mlr3learners</code>, <code>mlr3extralearners</code>, or self-written ones) are registered in the dictionary <a href="https://mlr3.mlr-org.com/reference/mlr_learners.html"><code>mlr_learners</code></a>:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre><code><span class='va'>mlr_learners</span>
@@ -2603,7 +2615,7 @@ Keys: classif.cv_glmnet, classif.debug, classif.featureless,
   surv.glmnet, surv.ranger, surv.xgboost</code></pre>
 </div>
 <p>For our problem, a suitable learner could be one of the following: Logistic regression, CART, random forest (or many more).</p>
-<p>A learner can be initialized with the <a href="https://mlr3.mlr-org.com/reference/mlr_sugar.html"><code>lrn()</code></a> function and the name of the learner, e.g., <code>lrn("classif.xxx")</code>. Use <code>?mlr_learners_xxx</code> to open the help page of a learner named <code>xxx</code>, or follow the link on the <a href="https://mlr3learners.mlr-org.com/reference/index.html">rendered overview page</a>.</p>
+<p>A learner can be initialized with the <a href="https://mlr3.mlr-org.com/reference/mlr_sugar.html"><code>lrn()</code></a> function and the name of the learner, e.g., <code>lrn("classif.xxx")</code>. Use <code>?mlr_learners_xxx</code> to open the help page of a learner named <code>xxx</code>.</p>
 <p>For example, a logistic regression can be initialized in the following manner (logistic regression uses R’s <code>glm()</code> function and is provided by the <code>mlr3learners</code> package):</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
@@ -3395,7 +3407,7 @@ Keys: classif.acc, classif.auc, classif.bacc, classif.bbrier,
 2:        med      0.235   0.7961501
 3:       high      0.246   0.7937442</code></pre>
 <div class="sourceCode">
-<pre><code><span class='fu'><a href='https://mlr3viz.mlr-org.com/reference/autoplot.html'>autoplot</a></span><span class='op'>(</span><span class='va'>bmr</span><span class='op'>)</span>
+<pre><code><span class='fu'><a href='https://ggplot2.tidyverse.org/reference/autoplot.html'>autoplot</a></span><span class='op'>(</span><span class='va'>bmr</span><span class='op'>)</span>
 </code></pre>
 </div>
 <p><img src="2020-03-11-mlr3-basics-german-credit_files/figure-html5/unnamed-chunk-44-1.png" width="624" /></p>
