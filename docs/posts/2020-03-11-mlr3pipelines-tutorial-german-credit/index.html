@@ -2283,10 +2283,10 @@ other_installment_plans           people_liable     personal_status_sex
 <pre><code><span class='va'>mlr_filters</span>
 </code></pre>
 </div>
-<pre><code>&lt;DictionaryFilter&gt; with 18 stored values
+<pre><code>&lt;DictionaryFilter&gt; with 19 stored values
 Keys: anova, auc, carscore, cmim, correlation, disr, find_correlation,
   importance, information_gain, jmi, jmim, kruskal_test, mim, mrmr,
-  njmim, performance, permutation, variance</code></pre>
+  njmim, performance, permutation, relief, variance</code></pre>
 </div>
 <p>We apply the <a href="https://mlr3filters.mlr-org.com/reference/mlr_filters_mim.html"><code>FilterMIM</code></a> (mutual information maximization) <code>Filter</code> as implemented in the <a href="https://cran.r-project.org/package=praznik">praznik</a> package. This <code>Filter</code> allows for the selection of the top-<code>k</code> features of best mutual information.</p>
 <div class="layout-chunk" data-layout="l-body">
@@ -2296,17 +2296,17 @@ Keys: anova, auc, carscore, cmim, correlation, disr, find_correlation,
 </code></pre>
 </div>
 <pre><code>                 status          credit_history                 savings 
-           0.0560477846            0.0272292095            0.0162383750 
+                 1.0000                  0.9375                  0.8750 
                 purpose                property                 housing 
-           0.0145509110            0.0117234634            0.0114749476 
+                 0.8125                  0.7500                  0.6875 
     employment_duration     personal_status_sex other_installment_plans 
-           0.0085307023            0.0056389930            0.0052711015 
+                 0.6250                  0.5625                  0.5000 
           other_debtors          foreign_worker       present_residence 
-           0.0032857631            0.0030732135            0.0018579748 
+                 0.4375                  0.3750                  0.3125 
        installment_rate           people_liable          number_credits 
-           0.0016124103            0.0014452494            0.0010182556 
+                 0.2500                  0.1875                  0.1250 
               telephone                     job 
-           0.0006202092            0.0003274007 </code></pre>
+                 0.0625                  0.0000 </code></pre>
 </div>
 <p>Making use of this <code>Filter</code>, you may wonder at which costs the reduction of the feature space comes. We can investigate the trade-off between features and performance by tuning. We incorporate our filtering strategy into the pipeline using <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_filter.html"><code>PipeOpFilter</code></a>. Like before, we need to perform imputation as the <code>Filter</code> also relies on complete data:</p>
 <div class="layout-chunk" data-layout="l-body">
