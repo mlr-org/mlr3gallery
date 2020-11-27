@@ -37,7 +37,7 @@ library(gridExtra)
 library(dplyr)
 library(tidyr)
 
-longrun = TRUE
+longrun = FALSE
 ```
 
 # Preamble
@@ -249,13 +249,13 @@ bmr = benchmark(grid, store_models = TRUE)
 plot_tuning = function(benchmark = bmr, learner_ident, parameter, scale) {
   
   learner = bmr$score()[learner_id == learner_ident]$learner
-  tuning_result = sapply(learner, FUN = function(x) x$tuning_result[[parameter]])
+  tuning_result = sapply(learner, FUN = function(x) x$model[[gsub('^.{6}', '', learner_ident)]]$model$tuning_instance$result[[parameter]])
   
   qplot(y = tuning_result, x = 1, geom = "boxplot") +
   ylim(scale) +
   geom_hline(yintercept = scale[1], col = "red", linetype = "dashed") +
   geom_hline(yintercept = scale[2], col = "red", linetype = "dashed") +
-  labs(y = parameter, x = "", subtitle = paste("Learner:", learner_ident, "\nHP:", parameter)) +
+  labs(y = parameter, x = "", subtitle = paste("Learner:", gsub('^.{6}', '', learner_ident), "\nHP:", parameter)) +
   theme_bw() +
   theme(axis.text.x = element_blank())
 }
@@ -272,9 +272,8 @@ list_args = list(
 plot_hyperparam <- lapply(list_args, function(x) mlr3misc::invoke(plot_tuning, .args = x))
 
 png("hyperparam_setting.png")
-grid.arrange(grobs = plot_hyperparam,
-  nrow = 2,
-  top = textGrob("Tuning Results: Hyperparameter Settings", gp = gpar(fontface = 2, fontsize = 14)))
+grid.arrange(grobs = plot_hyperparam, nrow = 2,
+  top = text_grob("Tuning Results: Hyperparameter Settings"))
 dev.off()
 ```
 
@@ -389,13 +388,13 @@ The major difference is that there is no outer loop.
 Based on the tuning results, the model is trained on the whole dataset. 
 
 
-```{r eval=longrun}
+```{r, eval=longrun}
 lgr::get_logger("mlr3")$set_threshold("warn")
 learner = lrn("regr.ranger", importance = "impurity")
 
 # Autotuning to find the optimal hyperparameter configuration
 # based on the complete dataset:
-at_ranger_final = AutoTuner$new(
+at_ranger = AutoTuner$new(
   learner = learner,
   resampling = resampling_inner,
   measure = msr("regr.mse"),
@@ -405,26 +404,27 @@ at_ranger_final = AutoTuner$new(
 )
 
 # Train the model:
-at_ranger_final$store_tuning_instance = TRUE
+at_ranger$instance_args$store_benchmark_result = TRUE
+at_ranger_final = GraphLearner$new(po_scale %>>% at_ranger)
 at_ranger_final$train(ins_task)
 ```
 
 ```{r eval=longrun, echo=FALSE}
-tab_tuning = at_ranger_final$archive$data()[, c("batch_nr", "regr.mse", "min.node.size", "mtry")]
-
-saveRDS(tab_tuning, file = "tab_tuning.rds")
+saveRDS(at_ranger_final, file = "at_ranger.rds")
 ```
 
 ```{r tabtuningrds, echo=FALSE, eval=!longrun}
-tab_tuning = readRDS("tab_tuning.rds")
-learner = lrn("regr.ranger", importance = "impurity")
+at_ranger_final <- readRDS("at_ranger.rds")
 ```
 
-From the tuning process of our final model, we conlude that the optimal hyperparameter setting is achieved through the combination of $min.node.size = 30$ and $mtry = 4$.
+From the tuning process of our final model, we conclude that the optimal hyperparameter setting is achieved through the combination of $min.node.size = 30$ and $mtry = 4$.
 The figure below illustrates the investigated parameter combinations via random search.
 The color intensity matches the value of the respective MSE and the hyperparameter combination with the best performance, which is used to train the model, is highlighted in red.  
 
 ```{r echo=FALSE, eval=TRUE}
+tab_tuning_instance = at_ranger_final$model$regr.ranger.tuned$model$tuning_instance
+tab_tuning = tab_tuning_instance$archive$data()[, c("batch_nr", "regr.mse", "min.node.size", "mtry")]
+
 ggplot() +
   geom_point(aes(x = min.node.size, y = mtry, fill = regr.mse, col = regr.mse), data = tab_tuning, size = 5, shape = 21) +
   geom_point(aes(x = min.node.size, y = mtry, fill = regr.mse), data = tab_tuning[regr.mse == min(tab_tuning$regr.mse), ], col = "red", size = 5, shape = 21, stroke = 2) +
@@ -458,6 +458,7 @@ This can be done with the help of filter methods, which assign an importance val
 For the Ranger learning algorithm, we can make use of the filter methods embedded in the mlr3-package.  
 
 ```{r}
+learner <- lrn("regr.ranger", importance = "impurity")
 filter = flt("importance", learner = learner)
 filter$calculate(ins_task)
 ```
