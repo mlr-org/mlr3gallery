@@ -64,7 +64,7 @@ library("smotefamily") # SMOTE algorithm for imbalance correction
 [OpenML.org](https://www.openml.org) is an open machine learning platform, which allows users to share data, code and machine learning experiments.
 The OpenML R package can query available data sets using a filter-like approach by providing desired dataset characteristics like `number.of.classes` or `number.of.features`.
 
-```{r}
+```{r, eval = FALSE}
 # get list of curated binary classification data sets (see https://arxiv.org/abs/1708.03731v2)
 ds = listOMLDataSets(
   number.of.classes = 2,
@@ -75,9 +75,21 @@ ds = listOMLDataSets(
 ds = subset(ds, minority.class.size / number.of.instances < 0.2 &
   number.of.symbolic.features == 1)
 ds
+```
 
+```{r, echo = FALSE}
+ds = readRDS("ds.RDS")
+ds
+```
+
+```{r, eval = FALSE}
 # pick one data set from list above
 d = getOMLDataSet(980)
+d
+```
+
+```{r, echo = FALSE}
+d = readRDS("d.RDS")
 d
 ```
 
