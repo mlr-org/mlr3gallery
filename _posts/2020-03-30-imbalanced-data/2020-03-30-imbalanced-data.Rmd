@@ -57,6 +57,7 @@ library("mlr3viz") # autoplot for benchmarks
 library("paradox") # hyperparameter space
 library("OpenML") # to obtain data sets
 library("smotefamily") # SMOTE algorithm for imbalance correction
+library("mlr3data") # another way to obtain data sets
 ```
 
 ## Retrieve data sets from OpenML
@@ -64,7 +65,7 @@ library("smotefamily") # SMOTE algorithm for imbalance correction
 [OpenML.org](https://www.openml.org) is an open machine learning platform, which allows users to share data, code and machine learning experiments.
 The OpenML R package can query available data sets using a filter-like approach by providing desired dataset characteristics like `number.of.classes` or `number.of.features`.
 
-```{r}
+```{r, eval = FALSE}
 # get list of curated binary classification data sets (see https://arxiv.org/abs/1708.03731v2)
 ds = listOMLDataSets(
   number.of.classes = 2,
@@ -83,7 +84,7 @@ d
 
 After downloading the chosen data set, we create an `mlr3` classification task:
 
-```{r}
+```{r, eval = FALSE}
 # make sure target is a factor and create mlr3 tasks
 data = as.data.frame(d)
 data[[d$target.features]] = as.factor(data[[d$target.features]])
@@ -93,18 +94,24 @@ task = TaskClassif$new(
 task
 ```
 
+Please note that the `optdigits` dataset is also included in the `mlr3data` package where you can get the preprocessed (integers properly encoded as such, etc.) task via:
+
+```{r}
+task = get_optdigits_task()
+```
+
 Quick overview of the data:
 
 ```{r}
-skimr::skim(data)
+skimr::skim(task$data())
 ```
 
 ## Imbalance correction
 
 In `mlr3pipelines`, there is a [`classbalancing`](https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_classbalancing.html) and a [`smote`](https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_smote.html) pipe operator that can be combined with any learner.
-Below, we define the undersampling, oversampling and SMOTE `PipeOp`s.
+Below, we define the undersampling, oversampling and SMOTE `PipeOp`s/`Graph`.
 All three imbalance correction methods have hyperparameters to control the degree of class imbalance.
-We apply the `PipeOp`s to the current `task` with specific hyperparameter values to see how the class balance changes:
+We apply the `PipeOp`s/`Graph` to the current `task` with specific hyperparameter values to see how the class balance changes:
 
 ```{r}
 # check original class balance
@@ -123,16 +130,26 @@ po_over = po("classbalancing",
   reference = "minor", shuffle = FALSE, ratio = 6)
 # enrich minority class by factor 'ratio'
 table(po_over$train(list(task))$output$truth())
+```
 
+Note that the original SMOTE algorithm only accepts numeric features (see `?smotefamily::SMOTE`).
+To keep it simple, we therefore preprocess the data and coerce integers to numerics prior to running `SMOTE` and reverse this afterwards:
+
+```{r}
 # SMOTE enriches the minority class with synthetic data
-po_smote = po("smote", dup_size = 6)
+gr_smote =
+  po("colapply", id = "int_to_num",
+    applicator = as.numeric, affect_columns = selector_type("integer")) %>>%
+  po("smote", dup_size = 6) %>>%
+  po("colapply", id = "num_to_int",
+    applicator = function(x) as.integer(round(x, 0L)), affect_columns = selector_type("numeric"))
 # enrich minority class by factor (dup_size + 1)
-table(po_smote$train(list(task))$output$truth())
+table(gr_smote$train(task)[[1L]]$truth())
 ```
 
 ## Construct `AutoTuner`
 
-We combine the `PipeOp`s with a learner (here `ranger`) to make each pipeline graph behave like a learner:
+We combine the `PipeOp`s/`Graph` with a learner (here `ranger`) to make each pipeline graph behave like a learner:
 
 ```{r}
 # create random forest learner
@@ -140,8 +157,11 @@ lrn = lrn("classif.ranger", num.trees = 50)
 
 # combine learner with pipeline graph
 lrn_under = GraphLearner$new(po_under %>>% lrn)
+lrn_under$id = "undersample.ranger"
 lrn_over = GraphLearner$new(po_over %>>% lrn)
-lrn_smote = GraphLearner$new(po_smote %>>% lrn)
+lrn_over$id = "oversample.ranger"
+lrn_smote = GraphLearner$new(gr_smote %>>% lrn)
+lrn_smote$id = "smote.ranger"
 ```
 
 We define the search space in order to tune the hyperparameters of the class imbalance methods.
@@ -200,8 +220,6 @@ learns = list(
     tuner = tnr("grid_search", resolution = 6)
   )
 )
-names(learns) = mlr3misc::map(learns, "id")
-names(learns)
 ```
 
 ## Benchmark `AutoTuner`
@@ -239,16 +257,15 @@ Therefore, we can plot the tuning path of the best learner from the subsampling 
 
 ```{r}
 library(ggplot2)
-utune_path = bmr$data$learners()[[2]][[1]]$model$tuning_instance$archive$data()
-
-utune_gg = ggplot(utune_path, aes(x = undersample.ratio, y = classif.fbeta)) +
-  geom_point(size = 3) +
-  geom_line() + ylim(0.9, 1)
-
-stune_path = bmr$data$learners()[[2]][[2]]$model$tuning_instance$archive$data()
+stune_path = bmr$data$learners()[[2]][[1]]$model$tuning_instance$archive$data()
 stune_gg = ggplot(stune_path, aes(
   x = smote.dup_size,
   y = classif.fbeta, col = factor(smote.K))) +
+  geom_point(size = 3) +
+  geom_line() + ylim(0.9, 1)
+
+utune_path = bmr$data$learners()[[2]][[2]]$model$tuning_instance$archive$data()
+utune_gg = ggplot(utune_path, aes(x = undersample.ratio, y = classif.fbeta)) +
   geom_point(size = 3) +
   geom_line() + ylim(0.9, 1)
 
