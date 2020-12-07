@@ -54,35 +54,35 @@ div.sourceCode
 @media screen {
 code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
-code span.al { color: #ff0000; font-weight: bold; } /* Alert */
-code span.an { color: #545454; font-weight: bold; } /* Annotation */
-code span.at { color: #7d9029; } /* Attribute */
-code span.bn { color: #a1024a; } /* BaseN */
+code span.al { color: #ad0000; } /* Alert */
+code span.an { color: #5e5e5e; } /* Annotation */
+code span.at { color: #20794d; } /* Attribute */
+code span.bn { color: #ad0000; } /* BaseN */
 code span.bu { } /* BuiltIn */
-code span.cf { color: #007faa; font-weight: bold; } /* ControlFlow */
-code span.ch { color: #008000; } /* Char */
-code span.cn { color: #d91e18; } /* Constant */
-code span.co { color: #545454; } /* Comment */
-code span.cv { color: #545454; font-weight: bold; font-style: italic; } /* CommentVar */
-code span.do { color: #ba2121; font-style: italic; } /* Documentation */
-code span.dt { color: #aa5d00; } /* DataType */
-code span.dv { color: #a1024a; } /* DecVal */
-code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.cf { color: #007ba5; } /* ControlFlow */
+code span.ch { color: #20794d; } /* Char */
+code span.cn { color: #8f5902; } /* Constant */
+code span.co { color: #5e5e5e; } /* Comment */
+code span.cv { color: #5e5e5e; font-style: italic; } /* CommentVar */
+code span.do { color: #5e5e5e; font-style: italic; } /* Documentation */
+code span.dt { color: #ad0000; } /* DataType */
+code span.dv { color: #ad0000; } /* DecVal */
+code span.er { color: #ad0000; } /* Error */
 code span.ex { } /* Extension */
-code span.fl { color: #a1024a; } /* Float */
-code span.fu { color: #4254a7; } /* Function */
+code span.fl { color: #ad0000; } /* Float */
+code span.fu { color: #4758ab; } /* Function */
 code span.im { } /* Import */
-code span.in { color: #545454; font-weight: bold; } /* Information */
-code span.kw { color: #007faa; font-weight: bold; } /* Keyword */
-code span.op { color: #696969; } /* Operator */
-code span.ot { color: #007faa; } /* Other */
-code span.pp { color: #bc7a00; } /* Preprocessor */
-code span.sc { color: #008000; } /* SpecialChar */
-code span.ss { color: #bb6688; } /* SpecialString */
-code span.st { color: #008000; } /* String */
-code span.va { color: #19177c; } /* Variable */
-code span.vs { color: #008000; } /* VerbatimString */
-code span.wa { color: #545454; font-weight: bold; font-style: italic; } /* Warning */
+code span.in { color: #5e5e5e; } /* Information */
+code span.kw { color: #007ba5; } /* Keyword */
+code span.op { color: #5e5e5e; } /* Operator */
+code span.ot { color: #007ba5; } /* Other */
+code span.pp { color: #ad0000; } /* Preprocessor */
+code span.sc { color: #20794d; } /* SpecialChar */
+code span.ss { color: #20794d; } /* SpecialString */
+code span.st { color: #20794d; } /* String */
+code span.va { color: #111111; } /* Variable */
+code span.vs { color: #20794d; } /* VerbatimString */
+code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 </style>
 
   <!--radix_placeholder_meta_tags-->
@@ -149,6 +149,7 @@ code span.wa { color: #545454; font-weight: bold; font-style: italic; } /* Warni
     var header = $('header').get(0);
     var headerHeight = header.offsetHeight;
     var headroom = new Headroom(header, {
+      tolerance: 5,
       onPin : function() {
         if (window.headroom_prevent_pin) {
           window.headroom_prevent_pin = false;
@@ -496,22 +497,19 @@ function offsetURL(url) {
   return offset ? offset + '/' + url : url;
 }
 
-function createIndex() {
-  var options = {
-    keys: [
-      "title",
-      "categories",
-      "description",
-      "contents"
-    ]
-  };
-  return new window.Fuse([],options);
-}
-
 function createFuseIndex() {
 
   // create fuse index
-  var options = { keys: ["title", "description", "contents"] };
+  var options = {
+    keys: [
+      { name: 'title', weight: 20 },
+      { name: 'categories', weight: 15 },
+      { name: 'description', weight: 10 },
+      { name: 'contents', weight: 5 },
+    ],
+    ignoreLocation: true,
+    threshold: 0
+  };
   var fuse = new window.Fuse([], options);
 
   // fetch the main search.json
@@ -579,12 +577,6 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
             shouldSort: true,
             minMatchCharLength: 2,
             limit: 10,
-            keys: [
-              { name: 'title', weight: 20 },
-              { name: 'categories', weight: 15 },
-              { name: 'description', weight: 10 },
-              { name: 'contents', weight: 5 },
-            ],
           };
           var results = fuse.search(query, searchOptions);
           callback(results
@@ -882,7 +874,7 @@ d-article pre code {
 d-article pre,
 d-article div.sourceCode,
 d-article div.sourceCode pre {
-  overflow: hidden;
+  overflow: auto;
 }
 
 d-article div.sourceCode {
@@ -2258,80 +2250,80 @@ document.addEventListener('DOMContentLoaded', function() {
 </code></pre>
 </div>
 <pre><code>     k distance classif.ce                                uhash  x_domain
- 1:  3        1      0.271 6450ab30-13b4-4aa9-a55e-676b6760f87e &lt;list[2]&gt;
- 2:  3        2      0.273 a61255c5-f81f-4adf-8d02-359b3fe1d03a &lt;list[2]&gt;
- 3:  4        1      0.292 21bc6efb-2aa3-4618-afa4-76f1e124685b &lt;list[2]&gt;
- 4:  4        2      0.279 bd023ffa-9fbb-4aae-b5db-73d5f572717a &lt;list[2]&gt;
- 5:  5        1      0.271 a5699897-4c85-4693-a522-78049ff87a54 &lt;list[2]&gt;
- 6:  5        2      0.274 86d24d1b-fed4-467e-b16b-f1ccfe491160 &lt;list[2]&gt;
- 7:  6        1      0.278 b1f4af4f-b7ff-4861-aa2f-5e94a475d83c &lt;list[2]&gt;
- 8:  6        2      0.273 e5e193cd-f875-41e2-a667-d0453d333305 &lt;list[2]&gt;
- 9:  7        1      0.257 122caa8e-feda-41c7-ae32-c5773eea21f7 &lt;list[2]&gt;
-10:  7        2      0.258 dc0a8f1c-f3be-4269-8db0-f9259055feae &lt;list[2]&gt;
-11:  8        1      0.264 cb501c8c-b21c-4a69-bc1c-0cb4dcade581 &lt;list[2]&gt;
-12:  8        2      0.256 702bef8b-f700-4ead-af12-599e715c3e47 &lt;list[2]&gt;
-13:  9        1      0.251 cd9982ad-b31b-448e-b32d-0e5e57304b49 &lt;list[2]&gt;
-14:  9        2      0.250 8c35989b-0f29-417c-846d-5b661675bdfc &lt;list[2]&gt;
-15: 10        1      0.261 ea80eb13-a723-42e6-9b87-590561b34559 &lt;list[2]&gt;
-16: 10        2      0.250 4fecd8a0-0e67-45d1-bf4e-d442a850a972 &lt;list[2]&gt;
-17: 11        1      0.256 e60775b6-5dc5-4e72-a709-cf8751b37634 &lt;list[2]&gt;
-18: 11        2      0.254 0307ba04-a729-4791-9219-764066fd09af &lt;list[2]&gt;
-19: 12        1      0.260 ef5d090e-949a-48e1-9f63-ae6f66155ec8 &lt;list[2]&gt;
-20: 12        2      0.259 7badc9da-af52-4811-9578-7d5452750e76 &lt;list[2]&gt;
-21: 13        1      0.268 08fececb-4bbb-4609-ad4d-b6cf0ff8b8ba &lt;list[2]&gt;
-22: 13        2      0.258 1812ae00-fa4e-414b-aef1-621ca5c14c5c &lt;list[2]&gt;
-23: 14        1      0.265 92c7e260-6d02-4b1b-bcae-838535a3c666 &lt;list[2]&gt;
-24: 14        2      0.263 dc0eb615-119c-417d-b115-286258477d89 &lt;list[2]&gt;
-25: 15        1      0.268 281d3ad6-e2c3-48cd-9d1f-90c86f1f43f0 &lt;list[2]&gt;
-26: 15        2      0.264 1e668470-ad04-4bc6-93f4-934072b3a9cd &lt;list[2]&gt;
-27: 16        1      0.267 14461fd8-13e5-4249-8e43-845561f6818c &lt;list[2]&gt;
-28: 16        2      0.262 15eab339-08a2-4057-bd50-86ee07c96fd3 &lt;list[2]&gt;
-29: 17        1      0.264 bbd01e1e-b6f1-47c8-ae41-8f50306bc288 &lt;list[2]&gt;
-30: 17        2      0.267 e68c5d69-8d37-418d-a09d-8b4e46d30934 &lt;list[2]&gt;
-31: 18        1      0.273 3db3561d-1fee-47cf-8438-e566c3c2a462 &lt;list[2]&gt;
-32: 18        2      0.271 767c14b6-72f6-4160-8259-eaabde4a2dc9 &lt;list[2]&gt;
-33: 19        1      0.269 450a96d8-1a7e-437e-a599-0c97d087fd07 &lt;list[2]&gt;
-34: 19        2      0.269 ba902e84-77af-4bf4-8127-f5b2a2d66f02 &lt;list[2]&gt;
-35: 20        1      0.268 d557f0bb-b49c-445d-96e5-9e6e17eec880 &lt;list[2]&gt;
-36: 20        2      0.269 72e2cb6d-6221-4c9d-a985-5df247f5ce24 &lt;list[2]&gt;
+ 1:  3        1      0.271 d4258bb4-4c55-40fd-ad5c-caca5fb3a174 &lt;list[2]&gt;
+ 2:  3        2      0.273 07e0553f-8d8d-48ad-90a3-03d7bb72fd52 &lt;list[2]&gt;
+ 3:  4        1      0.292 0e63eb58-6c0c-4ee0-b073-845b6ba333d7 &lt;list[2]&gt;
+ 4:  4        2      0.279 71b29f16-be9e-4a28-8b66-2646989dd182 &lt;list[2]&gt;
+ 5:  5        1      0.271 edfc91bd-8f12-480e-ace5-11cf1116874d &lt;list[2]&gt;
+ 6:  5        2      0.274 dab30215-093e-44d7-ae9d-95ae0bc820ba &lt;list[2]&gt;
+ 7:  6        1      0.278 aee17267-dc12-46a9-ae53-2ec83b8ac4c6 &lt;list[2]&gt;
+ 8:  6        2      0.273 41ca5ff3-735d-42a9-9be0-097ae6977582 &lt;list[2]&gt;
+ 9:  7        1      0.257 282359c1-f18a-48c6-9f18-bec30681421a &lt;list[2]&gt;
+10:  7        2      0.258 4ff86fa6-1892-488b-97d9-1617b7d2d54d &lt;list[2]&gt;
+11:  8        1      0.264 deeaf083-231b-4d87-9b03-a07acda7757b &lt;list[2]&gt;
+12:  8        2      0.256 337045d9-7110-40ed-bcd9-dfebf9a89902 &lt;list[2]&gt;
+13:  9        1      0.251 2bd2263a-11ea-48fe-870d-ca60736e0595 &lt;list[2]&gt;
+14:  9        2      0.250 651c6feb-e261-43ea-a1df-318ac5cedc9a &lt;list[2]&gt;
+15: 10        1      0.261 3b7e593a-b718-405c-b361-4adba44ad2a7 &lt;list[2]&gt;
+16: 10        2      0.250 8ff05939-cd51-4b21-a2a4-c10275f1d83b &lt;list[2]&gt;
+17: 11        1      0.256 d1c7df9e-7d42-4ca5-8d16-977550f61f05 &lt;list[2]&gt;
+18: 11        2      0.254 48489168-fab2-4f6a-a574-bbd2671453c7 &lt;list[2]&gt;
+19: 12        1      0.260 a9d32423-c91e-4109-bebe-8ac0ce998f83 &lt;list[2]&gt;
+20: 12        2      0.259 94fbc658-f51d-481d-9d89-adf5a2ccbcff &lt;list[2]&gt;
+21: 13        1      0.268 7ad1d1c1-23b5-4442-b77c-0fb8043132bb &lt;list[2]&gt;
+22: 13        2      0.258 5903d86e-4651-4d78-b000-488f32fe7b63 &lt;list[2]&gt;
+23: 14        1      0.265 dcd9c2b4-97e7-4584-bfbd-8a9900193760 &lt;list[2]&gt;
+24: 14        2      0.263 b424abd8-f02e-4db1-b9a1-d2d0694e9f54 &lt;list[2]&gt;
+25: 15        1      0.268 9cdcd705-6fda-4531-93de-d5af7422c1d1 &lt;list[2]&gt;
+26: 15        2      0.264 4e555c79-1d8f-4011-b99d-e2595eae0df6 &lt;list[2]&gt;
+27: 16        1      0.267 e1d05fb9-2568-42ef-b120-92c094ef6df5 &lt;list[2]&gt;
+28: 16        2      0.262 86e4e025-c25d-4fd7-ad27-31b4f209d46a &lt;list[2]&gt;
+29: 17        1      0.264 1c560b8f-0033-48bc-bd21-104eff7b721e &lt;list[2]&gt;
+30: 17        2      0.267 6c9868d7-60d4-40ed-8297-fd432c066f13 &lt;list[2]&gt;
+31: 18        1      0.273 13594cf1-6fcf-4cd5-9f60-5b7e8ff992d3 &lt;list[2]&gt;
+32: 18        2      0.271 51ab3680-2462-4df5-8038-0d692ef925a7 &lt;list[2]&gt;
+33: 19        1      0.269 4434641f-ecea-4a26-a262-22da6800ffff &lt;list[2]&gt;
+34: 19        2      0.269 aac38422-8703-4dd8-88bf-8475931fc3c4 &lt;list[2]&gt;
+35: 20        1      0.268 211b2bb6-2213-46f9-8c67-0143a3278f8a &lt;list[2]&gt;
+36: 20        2      0.269 31f57f15-857d-4682-91c4-5ecde78c51d4 &lt;list[2]&gt;
      k distance classif.ce                                uhash  x_domain
               timestamp batch_nr
- 1: 2020-11-29 04:48:32        1
- 2: 2020-11-29 04:48:32        1
- 3: 2020-11-29 04:48:32        1
- 4: 2020-11-29 04:48:32        1
- 5: 2020-11-29 04:48:32        1
- 6: 2020-11-29 04:48:32        1
- 7: 2020-11-29 04:48:32        1
- 8: 2020-11-29 04:48:32        1
- 9: 2020-11-29 04:48:32        1
-10: 2020-11-29 04:48:32        1
-11: 2020-11-29 04:48:32        1
-12: 2020-11-29 04:48:32        1
-13: 2020-11-29 04:48:32        1
-14: 2020-11-29 04:48:32        1
-15: 2020-11-29 04:48:32        1
-16: 2020-11-29 04:48:32        1
-17: 2020-11-29 04:48:32        1
-18: 2020-11-29 04:48:32        1
-19: 2020-11-29 04:48:32        1
-20: 2020-11-29 04:48:32        1
-21: 2020-11-29 04:48:32        1
-22: 2020-11-29 04:48:32        1
-23: 2020-11-29 04:48:32        1
-24: 2020-11-29 04:48:32        1
-25: 2020-11-29 04:48:32        1
-26: 2020-11-29 04:48:32        1
-27: 2020-11-29 04:48:32        1
-28: 2020-11-29 04:48:32        1
-29: 2020-11-29 04:48:32        1
-30: 2020-11-29 04:48:32        1
-31: 2020-11-29 04:48:32        1
-32: 2020-11-29 04:48:32        1
-33: 2020-11-29 04:48:32        1
-34: 2020-11-29 04:48:32        1
-35: 2020-11-29 04:48:32        1
-36: 2020-11-29 04:48:32        1
+ 1: 2020-12-07 04:49:42        1
+ 2: 2020-12-07 04:49:42        1
+ 3: 2020-12-07 04:49:42        1
+ 4: 2020-12-07 04:49:42        1
+ 5: 2020-12-07 04:49:42        1
+ 6: 2020-12-07 04:49:42        1
+ 7: 2020-12-07 04:49:42        1
+ 8: 2020-12-07 04:49:42        1
+ 9: 2020-12-07 04:49:42        1
+10: 2020-12-07 04:49:42        1
+11: 2020-12-07 04:49:42        1
+12: 2020-12-07 04:49:42        1
+13: 2020-12-07 04:49:42        1
+14: 2020-12-07 04:49:42        1
+15: 2020-12-07 04:49:42        1
+16: 2020-12-07 04:49:42        1
+17: 2020-12-07 04:49:42        1
+18: 2020-12-07 04:49:42        1
+19: 2020-12-07 04:49:42        1
+20: 2020-12-07 04:49:42        1
+21: 2020-12-07 04:49:42        1
+22: 2020-12-07 04:49:42        1
+23: 2020-12-07 04:49:42        1
+24: 2020-12-07 04:49:42        1
+25: 2020-12-07 04:49:42        1
+26: 2020-12-07 04:49:42        1
+27: 2020-12-07 04:49:42        1
+28: 2020-12-07 04:49:42        1
+29: 2020-12-07 04:49:42        1
+30: 2020-12-07 04:49:42        1
+31: 2020-12-07 04:49:42        1
+32: 2020-12-07 04:49:42        1
+33: 2020-12-07 04:49:42        1
+34: 2020-12-07 04:49:42        1
+35: 2020-12-07 04:49:42        1
+36: 2020-12-07 04:49:42        1
               timestamp batch_nr</code></pre>
 </div>
 <p>We plot the performances depending on the sampled <code>k</code> and <code>distance</code>:</p>
@@ -2433,42 +2425,42 @@ document.addEventListener('DOMContentLoaded', function() {
 36: 3.285535 1.296423        rank FALSE      0.300
            k distance      kernel scale classif.ce
                                    uhash  x_domain           timestamp batch_nr
- 1: b030a7ff-4474-4a77-8f1d-953ee520a5e7 &lt;list[4]&gt; 2020-11-29 04:49:14        1
- 2: 06e70c8e-6a17-4b58-a9d9-944a0a26a2ba &lt;list[4]&gt; 2020-11-29 04:49:14        1
- 3: 7bcad94a-5d00-467b-b728-7ddecf94702a &lt;list[4]&gt; 2020-11-29 04:49:14        1
- 4: c68009a2-d575-48ff-86a1-956a4edf3c11 &lt;list[4]&gt; 2020-11-29 04:49:14        1
- 5: 7c630a5a-1cec-4899-b9d8-8e12f5f391d7 &lt;list[4]&gt; 2020-11-29 04:49:14        1
- 6: e8ec1888-ed2f-46af-984d-111690f0d9c8 &lt;list[4]&gt; 2020-11-29 04:49:14        1
- 7: b607e48b-f85a-4fff-983a-43716218d91d &lt;list[4]&gt; 2020-11-29 04:49:14        1
- 8: 8e0e57d2-e875-4761-b3b9-f9a65140efc2 &lt;list[4]&gt; 2020-11-29 04:49:14        1
- 9: c19adac3-aed8-4fa0-8e10-d3962c569c4d &lt;list[4]&gt; 2020-11-29 04:49:14        1
-10: 974fdcd6-aad4-4202-964b-fd9a372baed3 &lt;list[4]&gt; 2020-11-29 04:49:14        1
-11: e2e07d62-b4a8-40ca-9c73-0f67715f6f7f &lt;list[4]&gt; 2020-11-29 04:49:14        1
-12: c265c6f4-9ab8-455c-ab41-64fa65a9fff8 &lt;list[4]&gt; 2020-11-29 04:49:14        1
-13: df1b4b4d-bac8-4234-b910-88d70f5d1d88 &lt;list[4]&gt; 2020-11-29 04:49:14        1
-14: 098b9724-2e85-4069-97e3-c24fe6ceec1d &lt;list[4]&gt; 2020-11-29 04:49:14        1
-15: ecc4d1c5-f15f-41e9-9a50-2bd18df87a0f &lt;list[4]&gt; 2020-11-29 04:49:14        1
-16: bd6696e1-1b15-4b5e-9516-cba4adf06c44 &lt;list[4]&gt; 2020-11-29 04:49:14        1
-17: cae427ef-d631-4630-a48b-9ae175ba240c &lt;list[4]&gt; 2020-11-29 04:49:14        1
-18: e47902fe-b708-4a66-acd5-ec2c83753bda &lt;list[4]&gt; 2020-11-29 04:49:14        1
-19: 3135cdfe-74b7-43a4-a06d-7492a24b3257 &lt;list[4]&gt; 2020-11-29 04:49:14        1
-20: 4e68032a-bb5f-4b1a-a02e-97f3edb70dad &lt;list[4]&gt; 2020-11-29 04:49:14        1
-21: 34cc9a8c-8835-4a3e-9c9e-d636525b3749 &lt;list[4]&gt; 2020-11-29 04:49:14        1
-22: f9b96509-b856-47f8-a2dd-e6f0dc11275b &lt;list[4]&gt; 2020-11-29 04:49:14        1
-23: 8dfe2f9a-6676-4d04-a7a9-c17708facd01 &lt;list[4]&gt; 2020-11-29 04:49:14        1
-24: a02afdee-4bff-4c99-9e82-83cb4ba1930d &lt;list[4]&gt; 2020-11-29 04:49:14        1
-25: 7a1f5fa6-11cb-48a4-92a4-c5f27f017b48 &lt;list[4]&gt; 2020-11-29 04:49:14        1
-26: bd37bd27-5796-4674-a096-0a50dc9938ec &lt;list[4]&gt; 2020-11-29 04:49:14        1
-27: 287e25b4-9efd-46d7-b808-2773c4b31414 &lt;list[4]&gt; 2020-11-29 04:49:14        1
-28: 7dd6d665-9839-4515-b03e-879aee4e98ac &lt;list[4]&gt; 2020-11-29 04:49:14        1
-29: 9803af95-5b42-48ea-a2b6-6ebb23507d25 &lt;list[4]&gt; 2020-11-29 04:49:14        1
-30: 7281c327-3451-4f23-9b03-10e2109a1aac &lt;list[4]&gt; 2020-11-29 04:49:14        1
-31: 1ce8a762-d872-4b8f-b988-1f0e31025bb2 &lt;list[4]&gt; 2020-11-29 04:49:14        1
-32: 85eaa335-566e-48be-b9f1-414bd84a70d9 &lt;list[4]&gt; 2020-11-29 04:49:14        1
-33: c244f09a-582c-4a24-828b-8b790c8ce697 &lt;list[4]&gt; 2020-11-29 04:49:14        1
-34: 682f0e64-bbb2-4316-a720-d9d149bffd4b &lt;list[4]&gt; 2020-11-29 04:49:14        1
-35: d9f095bb-4e7b-44c9-a586-290849bfbd68 &lt;list[4]&gt; 2020-11-29 04:49:14        1
-36: df5112b4-75f7-4979-a566-8f367871d9cd &lt;list[4]&gt; 2020-11-29 04:49:14        1
+ 1: 74b85127-28d2-4f44-b1b1-b2fa2d830863 &lt;list[4]&gt; 2020-12-07 04:50:19        1
+ 2: f7af36fa-0f97-4108-ad5e-fc470cca2574 &lt;list[4]&gt; 2020-12-07 04:50:19        1
+ 3: 373bb785-46bf-4442-9752-4717559cd5ba &lt;list[4]&gt; 2020-12-07 04:50:19        1
+ 4: 8c9b49c6-69c1-4ff7-8c61-a35e045e2217 &lt;list[4]&gt; 2020-12-07 04:50:19        1
+ 5: 666e7837-d334-4405-8a29-77c6d5f38691 &lt;list[4]&gt; 2020-12-07 04:50:19        1
+ 6: 1bfcb734-2779-4d39-9a58-774ee3c3d3b8 &lt;list[4]&gt; 2020-12-07 04:50:19        1
+ 7: 67b46d05-2f49-4fcb-b190-2904e6d687b2 &lt;list[4]&gt; 2020-12-07 04:50:19        1
+ 8: 31d2ee2d-d1a0-40c9-92d1-8e09d0404d2c &lt;list[4]&gt; 2020-12-07 04:50:19        1
+ 9: db6a3ef8-a8ac-4f36-a1c7-9ca474f884a5 &lt;list[4]&gt; 2020-12-07 04:50:19        1
+10: eb463fe8-e4a1-4149-bfac-31e72a4ef6aa &lt;list[4]&gt; 2020-12-07 04:50:19        1
+11: 88f57170-8956-4c38-bc4b-ef9825028fed &lt;list[4]&gt; 2020-12-07 04:50:19        1
+12: a049ed15-01b9-4d52-a140-bcb8e9ac2918 &lt;list[4]&gt; 2020-12-07 04:50:19        1
+13: 042e351f-b5ec-44c5-acd9-11fdd8ceaab1 &lt;list[4]&gt; 2020-12-07 04:50:19        1
+14: 2ea5d4b6-1905-431d-9c9a-6580711c6dc0 &lt;list[4]&gt; 2020-12-07 04:50:19        1
+15: 44076e41-5e0e-4ba1-bab5-5007fb739045 &lt;list[4]&gt; 2020-12-07 04:50:19        1
+16: 4aeed9cf-e3c6-40cb-aad4-56bbddcd3ca5 &lt;list[4]&gt; 2020-12-07 04:50:19        1
+17: 97a42091-c0cf-43b4-b81f-0bda8963521b &lt;list[4]&gt; 2020-12-07 04:50:19        1
+18: 12848a04-00fb-470a-92de-ad313fc490ef &lt;list[4]&gt; 2020-12-07 04:50:19        1
+19: b8b407a1-badc-45e5-92d9-fe2b03bbd049 &lt;list[4]&gt; 2020-12-07 04:50:19        1
+20: ebdbba9c-553f-429c-8a34-5ad6bf9b9a75 &lt;list[4]&gt; 2020-12-07 04:50:19        1
+21: 9df5920b-8190-4147-8d33-2472a921ca2d &lt;list[4]&gt; 2020-12-07 04:50:19        1
+22: ee068bfd-a991-4e2e-8339-991849b44410 &lt;list[4]&gt; 2020-12-07 04:50:19        1
+23: 6c193256-8e2a-4aa9-9a8b-b172e221eb97 &lt;list[4]&gt; 2020-12-07 04:50:19        1
+24: e85ee963-2625-456a-946c-d05ed53d71e8 &lt;list[4]&gt; 2020-12-07 04:50:19        1
+25: 81859478-0d84-4dbb-ad4f-2e9e8fc94f23 &lt;list[4]&gt; 2020-12-07 04:50:19        1
+26: 2b4d2f00-d854-4bbd-ab6f-f2976eac1bbf &lt;list[4]&gt; 2020-12-07 04:50:19        1
+27: c2289378-8cbd-412f-a7b3-17bc68ec9366 &lt;list[4]&gt; 2020-12-07 04:50:19        1
+28: d03623c8-6c3d-4b65-a8d8-669002189a63 &lt;list[4]&gt; 2020-12-07 04:50:19        1
+29: 92676949-d8fa-481f-a207-bd67d9cf0352 &lt;list[4]&gt; 2020-12-07 04:50:19        1
+30: 7a89cd81-9b8d-4c1b-bc57-9e554cc90b63 &lt;list[4]&gt; 2020-12-07 04:50:19        1
+31: 94a913b1-201c-4685-bf80-2f5b9ecc5275 &lt;list[4]&gt; 2020-12-07 04:50:19        1
+32: f3ebe1e2-7e67-4fc8-ae5f-d08614d4178c &lt;list[4]&gt; 2020-12-07 04:50:19        1
+33: 54b2cc3d-c868-437c-acd3-4956ca9e9276 &lt;list[4]&gt; 2020-12-07 04:50:19        1
+34: e25c8528-67fc-484c-86c2-849ce028bb46 &lt;list[4]&gt; 2020-12-07 04:50:19        1
+35: 000977ac-ad16-4513-b55a-6c108ddc06a2 &lt;list[4]&gt; 2020-12-07 04:50:19        1
+36: 015eb2dd-898c-4653-85f1-fb9c701e7946 &lt;list[4]&gt; 2020-12-07 04:50:19        1
                                    uhash  x_domain           timestamp batch_nr</code></pre>
 </div>
 <p>The parameters used by the learner (points after the transformation) are stored in in the <code>x_domain</code> column as lists. By using <code>unnest = x_domain</code>, the list elements are expanded to separate columns:</p>
@@ -2516,42 +2508,42 @@ document.addEventListener('DOMContentLoaded', function() {
 36: 3.285535 1.296423        rank FALSE      0.300
            k distance      kernel scale classif.ce
                                    uhash           timestamp batch_nr
- 1: b030a7ff-4474-4a77-8f1d-953ee520a5e7 2020-11-29 04:49:14        1
- 2: 06e70c8e-6a17-4b58-a9d9-944a0a26a2ba 2020-11-29 04:49:14        1
- 3: 7bcad94a-5d00-467b-b728-7ddecf94702a 2020-11-29 04:49:14        1
- 4: c68009a2-d575-48ff-86a1-956a4edf3c11 2020-11-29 04:49:14        1
- 5: 7c630a5a-1cec-4899-b9d8-8e12f5f391d7 2020-11-29 04:49:14        1
- 6: e8ec1888-ed2f-46af-984d-111690f0d9c8 2020-11-29 04:49:14        1
- 7: b607e48b-f85a-4fff-983a-43716218d91d 2020-11-29 04:49:14        1
- 8: 8e0e57d2-e875-4761-b3b9-f9a65140efc2 2020-11-29 04:49:14        1
- 9: c19adac3-aed8-4fa0-8e10-d3962c569c4d 2020-11-29 04:49:14        1
-10: 974fdcd6-aad4-4202-964b-fd9a372baed3 2020-11-29 04:49:14        1
-11: e2e07d62-b4a8-40ca-9c73-0f67715f6f7f 2020-11-29 04:49:14        1
-12: c265c6f4-9ab8-455c-ab41-64fa65a9fff8 2020-11-29 04:49:14        1
-13: df1b4b4d-bac8-4234-b910-88d70f5d1d88 2020-11-29 04:49:14        1
-14: 098b9724-2e85-4069-97e3-c24fe6ceec1d 2020-11-29 04:49:14        1
-15: ecc4d1c5-f15f-41e9-9a50-2bd18df87a0f 2020-11-29 04:49:14        1
-16: bd6696e1-1b15-4b5e-9516-cba4adf06c44 2020-11-29 04:49:14        1
-17: cae427ef-d631-4630-a48b-9ae175ba240c 2020-11-29 04:49:14        1
-18: e47902fe-b708-4a66-acd5-ec2c83753bda 2020-11-29 04:49:14        1
-19: 3135cdfe-74b7-43a4-a06d-7492a24b3257 2020-11-29 04:49:14        1
-20: 4e68032a-bb5f-4b1a-a02e-97f3edb70dad 2020-11-29 04:49:14        1
-21: 34cc9a8c-8835-4a3e-9c9e-d636525b3749 2020-11-29 04:49:14        1
-22: f9b96509-b856-47f8-a2dd-e6f0dc11275b 2020-11-29 04:49:14        1
-23: 8dfe2f9a-6676-4d04-a7a9-c17708facd01 2020-11-29 04:49:14        1
-24: a02afdee-4bff-4c99-9e82-83cb4ba1930d 2020-11-29 04:49:14        1
-25: 7a1f5fa6-11cb-48a4-92a4-c5f27f017b48 2020-11-29 04:49:14        1
-26: bd37bd27-5796-4674-a096-0a50dc9938ec 2020-11-29 04:49:14        1
-27: 287e25b4-9efd-46d7-b808-2773c4b31414 2020-11-29 04:49:14        1
-28: 7dd6d665-9839-4515-b03e-879aee4e98ac 2020-11-29 04:49:14        1
-29: 9803af95-5b42-48ea-a2b6-6ebb23507d25 2020-11-29 04:49:14        1
-30: 7281c327-3451-4f23-9b03-10e2109a1aac 2020-11-29 04:49:14        1
-31: 1ce8a762-d872-4b8f-b988-1f0e31025bb2 2020-11-29 04:49:14        1
-32: 85eaa335-566e-48be-b9f1-414bd84a70d9 2020-11-29 04:49:14        1
-33: c244f09a-582c-4a24-828b-8b790c8ce697 2020-11-29 04:49:14        1
-34: 682f0e64-bbb2-4316-a720-d9d149bffd4b 2020-11-29 04:49:14        1
-35: d9f095bb-4e7b-44c9-a586-290849bfbd68 2020-11-29 04:49:14        1
-36: df5112b4-75f7-4979-a566-8f367871d9cd 2020-11-29 04:49:14        1
+ 1: 74b85127-28d2-4f44-b1b1-b2fa2d830863 2020-12-07 04:50:19        1
+ 2: f7af36fa-0f97-4108-ad5e-fc470cca2574 2020-12-07 04:50:19        1
+ 3: 373bb785-46bf-4442-9752-4717559cd5ba 2020-12-07 04:50:19        1
+ 4: 8c9b49c6-69c1-4ff7-8c61-a35e045e2217 2020-12-07 04:50:19        1
+ 5: 666e7837-d334-4405-8a29-77c6d5f38691 2020-12-07 04:50:19        1
+ 6: 1bfcb734-2779-4d39-9a58-774ee3c3d3b8 2020-12-07 04:50:19        1
+ 7: 67b46d05-2f49-4fcb-b190-2904e6d687b2 2020-12-07 04:50:19        1
+ 8: 31d2ee2d-d1a0-40c9-92d1-8e09d0404d2c 2020-12-07 04:50:19        1
+ 9: db6a3ef8-a8ac-4f36-a1c7-9ca474f884a5 2020-12-07 04:50:19        1
+10: eb463fe8-e4a1-4149-bfac-31e72a4ef6aa 2020-12-07 04:50:19        1
+11: 88f57170-8956-4c38-bc4b-ef9825028fed 2020-12-07 04:50:19        1
+12: a049ed15-01b9-4d52-a140-bcb8e9ac2918 2020-12-07 04:50:19        1
+13: 042e351f-b5ec-44c5-acd9-11fdd8ceaab1 2020-12-07 04:50:19        1
+14: 2ea5d4b6-1905-431d-9c9a-6580711c6dc0 2020-12-07 04:50:19        1
+15: 44076e41-5e0e-4ba1-bab5-5007fb739045 2020-12-07 04:50:19        1
+16: 4aeed9cf-e3c6-40cb-aad4-56bbddcd3ca5 2020-12-07 04:50:19        1
+17: 97a42091-c0cf-43b4-b81f-0bda8963521b 2020-12-07 04:50:19        1
+18: 12848a04-00fb-470a-92de-ad313fc490ef 2020-12-07 04:50:19        1
+19: b8b407a1-badc-45e5-92d9-fe2b03bbd049 2020-12-07 04:50:19        1
+20: ebdbba9c-553f-429c-8a34-5ad6bf9b9a75 2020-12-07 04:50:19        1
+21: 9df5920b-8190-4147-8d33-2472a921ca2d 2020-12-07 04:50:19        1
+22: ee068bfd-a991-4e2e-8339-991849b44410 2020-12-07 04:50:19        1
+23: 6c193256-8e2a-4aa9-9a8b-b172e221eb97 2020-12-07 04:50:19        1
+24: e85ee963-2625-456a-946c-d05ed53d71e8 2020-12-07 04:50:19        1
+25: 81859478-0d84-4dbb-ad4f-2e9e8fc94f23 2020-12-07 04:50:19        1
+26: 2b4d2f00-d854-4bbd-ab6f-f2976eac1bbf 2020-12-07 04:50:19        1
+27: c2289378-8cbd-412f-a7b3-17bc68ec9366 2020-12-07 04:50:19        1
+28: d03623c8-6c3d-4b65-a8d8-669002189a63 2020-12-07 04:50:19        1
+29: 92676949-d8fa-481f-a207-bd67d9cf0352 2020-12-07 04:50:19        1
+30: 7a89cd81-9b8d-4c1b-bc57-9e554cc90b63 2020-12-07 04:50:19        1
+31: 94a913b1-201c-4685-bf80-2f5b9ecc5275 2020-12-07 04:50:19        1
+32: f3ebe1e2-7e67-4fc8-ae5f-d08614d4178c 2020-12-07 04:50:19        1
+33: 54b2cc3d-c868-437c-acd3-4956ca9e9276 2020-12-07 04:50:19        1
+34: e25c8528-67fc-484c-86c2-849ce028bb46 2020-12-07 04:50:19        1
+35: 000977ac-ad16-4513-b55a-6c108ddc06a2 2020-12-07 04:50:19        1
+36: 015eb2dd-898c-4653-85f1-fb9c701e7946 2020-12-07 04:50:19        1
                                    uhash           timestamp batch_nr
     x_domain_k x_domain_distance x_domain_kernel x_domain_scale
  1:         14          2.921236     rectangular          FALSE
