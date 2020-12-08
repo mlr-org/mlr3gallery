@@ -327,8 +327,14 @@ ps = ParamSet$new(
 
 # Define the Terminator
 terminator = trm("evals", n_evals = 10)
-at = AutoTuner$new(lrn_xgb, rsmp("holdout"), msr("regr.rmse"), ps,
-  terminator, tuner = tnr("random_search"))
+at = AutoTuner$new(
+  lrn_xgb,
+  resampling = rsmp("holdout"),
+  measure = msr("regr.rmse"),
+  terminator = terminator,
+  tuner = tnr("random_search"),
+  search_space = ps
+)
 ```
 
 ```{r, echo = FALSE, results = 'hide', eval = eval_tune}
@@ -344,7 +350,7 @@ sprintf("RMSE of the tuned xgboost: %s", round(sqrt(res$aggregate()), 2))
 We can obtain the resulting parameters in the respective splits by accessing the `r ref("ResampleResult")`.
 
 ```{r, eval = eval_tune}
-sapply(res$learners, function(x) x$param_set$values)[-2,]
+sapply(res$learners, function(x) x$learner$param_set$values)[-2,]
 ```
 
 **NOTE:** To keep runtime low, we only tune parts of the hyperparameter space of `r cran_pkg("xgboost")` in this example.
