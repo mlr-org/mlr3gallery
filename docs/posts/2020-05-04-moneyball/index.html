@@ -132,7 +132,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 <!--/radix_placeholder_rmarkdown_metadata-->
   
   <script type="text/json" id="radix-resource-manifest">
-  {"type":"character","attributes":{},"value":["2020-05-04-moneyball_files/figure-html5/unnamed-chunk-15-1.png","2020-05-04-moneyball_files/figure-html5/unnamed-chunk-23-1.png","2020-05-04-moneyball_files/figure-html5/unnamed-chunk-9-1.png"]}
+  {"type":"character","attributes":{},"value":["2020-05-04-moneyball_files/figure-html5/unnamed-chunk-13-1.png","2020-05-04-moneyball_files/figure-html5/unnamed-chunk-21-1.png","2020-05-04-moneyball_files/figure-html5/unnamed-chunk-9-1.png"]}
   </script>
   <!--radix_placeholder_navigation_in_header-->
 <meta name="distill:offset" content="../.."/>
@@ -2092,9 +2092,11 @@ document.addEventListener('DOMContentLoaded', function() {
 <span class='co'># Pipelines</span>
 <span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='st'><a href='https://mlr3pipelines.mlr-org.com'>"mlr3pipelines"</a></span><span class='op'>)</span>
 <span class='co'># lots of measures for evaluation</span>
-<span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='st'><a href='https:///mlr3measures.mlr-org.com'>"mlr3measures"</a></span><span class='op'>)</span>
+<span class='fu'><a href='https://rdrr.io/r/base/ns-load.html'>requireNamespace</a></span><span class='op'>(</span><span class='st'>"mlr3measures"</span><span class='op'>)</span>
 <span class='co'># Retrieving the data</span>
 <span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='st'><a href='https://github.com/openml/openml-r'>"OpenML"</a></span><span class='op'>)</span>
+<span class='co'># Another way to obtain the data</span>
+<span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='st'><a href='https://github.com/mlr-org/mlr3data'>"mlr3data"</a></span><span class='op'>)</span>
 </code></pre>
 </div>
 </div>
@@ -2113,39 +2115,37 @@ document.addEventListener('DOMContentLoaded', function() {
 <pre><code><span class='va'>oml_dat</span>
 </code></pre>
 </div>
-<pre><code>
-Data Set &#39;Moneyball&#39; :: (Version = 2, OpenML ID = 41021)
-  Default Target Attribute: RS</code></pre>
 </div>
 <p>However, the description within the <code>OpenML</code> object is not very detailed. The previously referenced <a href="https://www.openml.org/d/41021">page</a> however states the following:</p>
 <p>In the early 2000s, Billy Beane and Paul DePodesta worked for the Oakland Athletics. During their work there, they disrupted the game of baseball. They didn’t do it using a bat or glove, and they certainly didn’t do it by throwing money at the issue; in fact, money was the issue. They didn’t have enough of it, but they were still expected to keep up with teams that had more substantial endorsements. This is where Statistics came riding down the hillside on a white horse to save the day. This data set contains some of the information that was available to Beane and DePodesta in the early 2000s, and it can be used to better understand their methods.</p>
-<p>This data set contains a set of variables that Beane and DePodesta emphasized in their work. They determined that statistics like on-base percentage (OBP) and slugging percentage (SLG) were very important when it came to scoring runs, however, they were largely undervalued by most scouts at the time. This translated to a gold mine for Beane and DePodesta. Since these players weren’t being looked at by other teams, they could recruit these players on a small budget. The variables are as follows:</p>
+<p>This data set contains a set of variables that Beane and DePodesta emphasized in their work. They determined that statistics like on-base percentage (obp) and slugging percentage (slg) were very important when it came to scoring runs, however, they were largely undervalued by most scouts at the time. This translated to a gold mine for Beane and DePodesta. Since these players weren’t being looked at by other teams, they could recruit these players on a small budget. The variables are as follows:</p>
 <ul>
-<li>Team</li>
-<li>League</li>
-<li>Year</li>
-<li>Runs Scored (RS)</li>
-<li>Runs Allowed (RA)</li>
-<li>Wins (W)</li>
-<li>On-Base Percentage (OBP)</li>
-<li>Slugging Percentage (SLG)</li>
-<li>Batting Average (BA)</li>
-<li>Playoffs (binary)</li>
-<li>RankSeason</li>
-<li>RankPlayoffs</li>
-<li>Games Played (G)</li>
-<li>Opponent On-Base Percentage (OOBP)</li>
-<li>Opponent Slugging Percentage (OSLG)</li>
+<li>team</li>
+<li>league</li>
+<li>year</li>
+<li>runs scored (rs)</li>
+<li>runs allowed (ra)</li>
+<li>wins (w)</li>
+<li>on-base percentage (obp)</li>
+<li>slugging percentage (slg)</li>
+<li>batting average (ba)</li>
+<li>playoffs (binary)</li>
+<li>rankseason</li>
+<li>rankplayoffs</li>
+<li>games played (g)</li>
+<li>opponent on-base percentage (oobp)</li>
+<li>opponent slugging percentage (oslg)</li>
 </ul>
 <p>While Beane and DePodesta defined most of these statistics and measures for individual players, this data set is on the team level.</p>
 <p>These statistics seem very informative if you are into baseball. If baseball of rather obscure to you, simply take these features as given or give this <a href="https://en.wikipedia.org/wiki/Baseball_statistics">article</a> a quick read.</p>
+<p>Finally, note that the <code>moneyball</code> dataset is also included in the <code>mlr3data</code> package where you can get the preprocessed (integers properly encoded as such, etc.) data via:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>data</span> <span class='op'>=</span> <span class='va'>oml_dat</span><span class='op'>$</span><span class='va'>data</span>
-<span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>data</span><span class='op'>)</span>
+<pre><code><span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span><span class='op'>(</span><span class='st'>"moneyball"</span>, package <span class='op'>=</span> <span class='st'>"mlr3data"</span><span class='op'>)</span>
+<span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>moneyball</span><span class='op'>)</span>
 </code></pre>
 </div>
-<pre><code>      Team     League        Year            RS               RA        
+<pre><code>      team     league        year            rs               ra        
  BAL    : 47   AL:616   Min.   :1962   Min.   : 463.0   Min.   : 472.0  
  BOS    : 47   NL:616   1st Qu.:1977   1st Qu.: 652.0   1st Qu.: 649.8  
  CHC    : 47            Median :1989   Median : 711.0   Median : 709.0  
@@ -2153,7 +2153,7 @@ Data Set &#39;Moneyball&#39; :: (Version = 2, OpenML ID = 41021)
  CIN    : 47            3rd Qu.:2002   3rd Qu.: 775.0   3rd Qu.: 774.2  
  CLE    : 47            Max.   :2012   Max.   :1009.0   Max.   :1103.0  
  (Other):950                                                            
-       W              OBP              SLG               BA         Playoffs
+       w              obp              slg               ba         playoffs
  Min.   : 40.0   Min.   :0.2770   Min.   :0.3010   Min.   :0.2140   0:988   
  1st Qu.: 73.0   1st Qu.:0.3170   1st Qu.:0.3750   1st Qu.:0.2510   1:244   
  Median : 81.0   Median :0.3260   Median :0.3960   Median :0.2600           
@@ -2161,7 +2161,7 @@ Data Set &#39;Moneyball&#39; :: (Version = 2, OpenML ID = 41021)
  3rd Qu.: 89.0   3rd Qu.:0.3370   3rd Qu.:0.4210   3rd Qu.:0.2680           
  Max.   :116.0   Max.   :0.3730   Max.   :0.4910   Max.   :0.2940           
                                                                             
-   RankSeason  RankPlayoffs       G            OOBP             OSLG       
+   rankseason  rankplayoffs       g            oobp             oslg       
  2      : 53   1   : 47     162    :954   Min.   :0.2940   Min.   :0.3460  
  1      : 52   2   : 47     161    :139   1st Qu.:0.3210   1st Qu.:0.4010  
  3      : 44   3   : 80     163    : 93   Median :0.3310   Median :0.4190  
@@ -2170,25 +2170,25 @@ Data Set &#39;Moneyball&#39; :: (Version = 2, OpenML ID = 41021)
  (Other): 30   NA&#39;s:988     164    : 10   Max.   :0.3840   Max.   :0.4990  
  NA&#39;s   :988                (Other):  3   NA&#39;s   :812      NA&#39;s   :812     </code></pre>
 </div>
-<p>The summary shows how this data we are dealing with looks like: Some data is missing, however, this has structural reasons. There are <span class="math inline">\(39\)</span> teams with each maximally <span class="math inline">\(47\)</span> years (<span class="math inline">\(1962\)</span> - <span class="math inline">\(2012\)</span>). For <span class="math inline">\(988\)</span> cases the information on <code>RankSeason</code> and <code>RankPlayoffs</code> is missing. This is since these simply did not reach the playoffs and hence have no reported rank.</p>
+<p>The summary shows how this data we are dealing with looks like: Some data is missing, however, this has structural reasons. There are <span class="math inline">\(39\)</span> teams with each maximally <span class="math inline">\(47\)</span> years (<span class="math inline">\(1962\)</span> - <span class="math inline">\(2012\)</span>). For <span class="math inline">\(988\)</span> cases the information on <code>rankseason</code> and <code>rankplayoffs</code> is missing. This is since these simply did not reach the playoffs and hence have no reported rank.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>data</span><span class='op'>[</span><span class='va'>data</span><span class='op'>$</span><span class='va'>Playoffs</span> <span class='op'>==</span> <span class='fl'>0</span>, <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"RankSeason"</span>, <span class='st'>"RankPlayoffs"</span><span class='op'>)</span><span class='op'>]</span><span class='op'>)</span>
+<pre><code><span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>moneyball</span><span class='op'>[</span><span class='va'>moneyball</span><span class='op'>$</span><span class='va'>Playoffs</span> <span class='op'>==</span> <span class='fl'>0</span>, <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"rankseason"</span>, <span class='st'>"rankplayoffs"</span><span class='op'>)</span><span class='op'>]</span><span class='op'>)</span>
 </code></pre>
 </div>
-<pre><code>   RankSeason  RankPlayoffs
- 1      :  0   1   :  0    
- 2      :  0   2   :  0    
- 3      :  0   3   :  0    
- 4      :  0   4   :  0    
- 5      :  0   5   :  0    
- (Other):  0   NA&#39;s:988    
- NA&#39;s   :988               </code></pre>
+<pre><code>   rankseason rankplayoffs
+ 1      :0    1:0         
+ 2      :0    2:0         
+ 3      :0    3:0         
+ 4      :0    4:0         
+ 5      :0    5:0         
+ 6      :0                
+ (Other):0                </code></pre>
 </div>
-<p>On the other hand, <code>OOBP</code> and <code>OSLG</code> have <span class="math inline">\(812\)</span> missing values. It seems as if these measures were not available before <span class="math inline">\(1998\)</span>.</p>
+<p>On the other hand, <code>oobp</code> and <code>oslg</code> have <span class="math inline">\(812\)</span> missing values. It seems as if these measures were not available before <span class="math inline">\(1998\)</span>.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>data</span><span class='op'>[</span><span class='fu'><a href='https://rdrr.io/r/base/NA.html'>is.na</a></span><span class='op'>(</span><span class='va'>data</span><span class='op'>$</span><span class='va'>OOBP</span><span class='op'>)</span>, <span class='st'>"Year"</span><span class='op'>]</span><span class='op'>)</span>
+<pre><code><span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>moneyball</span><span class='op'>[</span><span class='fu'><a href='https://rdrr.io/r/base/NA.html'>is.na</a></span><span class='op'>(</span><span class='va'>moneyball</span><span class='op'>$</span><span class='va'>oobp</span><span class='op'>)</span>, <span class='st'>"year"</span><span class='op'>]</span><span class='op'>)</span>
 </code></pre>
 </div>
 <pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
@@ -2200,12 +2200,12 @@ Data Set &#39;Moneyball&#39; :: (Version = 2, OpenML ID = 41021)
 <li><p>Complete feature analysis: Exclude all features with missing values.</p></li>
 <li><p>Missing value imputation: Use a model to “guess” the missing values (based on the underlying distribution of the data.</p></li>
 </ul>
-<p>Usually, missing value imputation is preferred over the first two. However, in machine learning, one can try out all options and see which performs best for the underlying problem. For now, we limit ourselves to a rather simple imputation technique, imputation by randomly sampling from the univariate distribution. Note that this does not take the multivariate distribution into account properly and that there are more elaborate approaches. We only aim to impute <code>OOBP</code> and <code>OSLG</code>. For the other missing (categorical) features, we simply add a new level which indicates that information is missing (i.e. all missing values belong to.</p>
+<p>Usually, missing value imputation is preferred over the first two. However, in machine learning, one can try out all options and see which performs best for the underlying problem. For now, we limit ourselves to a rather simple imputation technique, imputation by randomly sampling from the univariate distribution. Note that this does not take the multivariate distribution into account properly and that there are more elaborate approaches. We only aim to impute <code>oobp</code> and <code>oslg</code>. For the other missing (categorical) features, we simply add a new level which indicates that information is missing (i.e. all missing values belong to).</p>
 <p>It is important to note that in this case here the vast majority of information on the features is missing. In this case, imputation is performed to not throw away the existing information of the features.</p>
 <p><code>mlr3</code> has some solutions for that within the <code>mlr3pipelines</code> package. We start with an easy <code>PipeOp</code> which only performs numeric imputation.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>imp_num</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"imputehist"</span>, param_vals <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>affect_columns <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/Selector.html'>selector_type</a></span><span class='op'>(</span><span class='st'>"numeric"</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>
+<pre><code><span class='va'>imp_num</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"imputehist"</span>, param_vals <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>affect_columns <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/Selector.html'>selector_type</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"integer"</span>, <span class='st'>"numeric"</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>
 </code></pre>
 </div>
 </div>
@@ -2219,35 +2219,21 @@ Data Set &#39;Moneyball&#39; :: (Version = 2, OpenML ID = 41021)
 </div>
 <p><img src="2020-05-04-moneyball_files/figure-html5/unnamed-chunk-9-1.png" width="624" /></p>
 </div>
-<p>So far we only prepared the pipeline without actually modeling. Before we come to this step, we perform a last preprocessing step manually. Namely, we make <code>G</code> (games played) a numerical feature.</p>
-<div class="layout-chunk" data-layout="l-body">
-<div class="sourceCode">
-<pre><code><span class='va'>data</span><span class='op'>$</span><span class='va'>G</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/numeric.html'>as.numeric</a></span><span class='op'>(</span><span class='va'>data</span><span class='op'>$</span><span class='va'>G</span><span class='op'>)</span>
-</code></pre>
-</div>
-</div>
-<p>Additionally, the row names (starting with <span class="math inline">\(0\)</span>) are changed.</p>
-<div class="layout-chunk" data-layout="l-body">
-<div class="sourceCode">
-<pre><code><span class='fu'><a href='https://rdrr.io/r/base/colnames.html'>rownames</a></span><span class='op'>(</span><span class='va'>data</span><span class='op'>)</span> <span class='op'>&lt;-</span> <span class='fl'>1</span><span class='op'>:</span><span class='fu'><a href='https://rdrr.io/r/base/nrow.html'>nrow</a></span><span class='op'>(</span><span class='va'>data</span><span class='op'>)</span>
-</code></pre>
-</div>
-</div>
 <h2 id="creating-tasks-and-learners">Creating tasks and learners</h2>
-<p>The fact that there is missing data does not affect the <code>task</code> definition. The <code>task</code> determines what is the problem to be solved by machine learning. We want to explain the Runs Scored (RS). RS is an important measure as a run is equivalent to a ‘point’ scored in other sports. Naturally, the aim of a coach should be to maximise runs scored and minimise runs allowed. As runs scored and runs allowed are both legitimate targets we ignore the runs allowed here. The task is defined by:</p>
+<p>The fact that there is missing data does not affect the <code>task</code> definition. The <code>task</code> determines what is the problem to be solved by machine learning. We want to explain the runs scored (<code>rs</code>). <code>rs</code> is an important measure as a run is equivalent to a ‘point’ scored in other sports. Naturally, the aim of a coach should be to maximise runs scored and minimise runs allowed. As runs scored and runs allowed are both legitimate targets we ignore the runs allowed here. The task is defined by:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre><code><span class='co'># creates a `mlr3` task from scratch, from a data.frame</span>
 <span class='co'># 'target' names the column in the dataset we want to learn to predict</span>
-<span class='va'>task</span> <span class='op'>=</span> <span class='va'><a href='https://mlr3.mlr-org.com/reference/TaskRegr.html'>TaskRegr</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span>id <span class='op'>=</span> <span class='st'>"moneyball"</span>, backend <span class='op'>=</span> <span class='va'>data</span>, target <span class='op'>=</span> <span class='st'>"RS"</span><span class='op'>)</span>
+<span class='va'>task</span> <span class='op'>=</span> <span class='va'><a href='https://mlr3.mlr-org.com/reference/TaskRegr.html'>TaskRegr</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span>id <span class='op'>=</span> <span class='st'>"moneyball"</span>, backend <span class='op'>=</span> <span class='va'>moneyball</span>, target <span class='op'>=</span> <span class='st'>"rs"</span><span class='op'>)</span>
 <span class='va'>task</span><span class='op'>$</span><span class='fu'>missings</span><span class='op'>(</span><span class='op'>)</span>
 </code></pre>
 </div>
-<pre><code>          RS           BA            G       League          OBP         OOBP 
+<pre><code>          rs           ba            g       league          obp         oobp 
            0            0            0            0            0          812 
-        OSLG     Playoffs           RA RankPlayoffs   RankSeason          SLG 
+        oslg     playoffs           ra rankplayoffs   rankseason          slg 
          812            0            0          988          988            0 
-        Team            W         Year 
+        team            w         year 
            0            0            0 </code></pre>
 </div>
 <p>The <code>missings</code> method indicates what we already knew: our missing values. Missing values are not always a problem. Some learners can deal with them pretty well. However, we want to use a random forest for our task.</p>
@@ -2280,7 +2266,7 @@ Data Set &#39;Moneyball&#39; :: (Version = 2, OpenML ID = 41021)
 <pre><code><span class='fu'><a href='https://rdrr.io/r/graphics/plot.default.html'>plot</a></span><span class='op'>(</span><span class='va'>graph</span> <span class='op'>%&gt;&gt;%</span> <span class='va'>polrn</span><span class='op'>)</span>
 </code></pre>
 </div>
-<p><img src="2020-05-04-moneyball_files/figure-html5/unnamed-chunk-15-1.png" width="624" /></p>
+<p><img src="2020-05-04-moneyball_files/figure-html5/unnamed-chunk-13-1.png" width="624" /></p>
 </div>
 <h2 id="train-and-predict">Train and predict</h2>
 <p>To get a feeling of how our model performs we simply train the <code>learner</code> on a subset of the data and predict the hold-out data.</p>
@@ -2398,7 +2384,7 @@ Keys: classif.acc, classif.auc, classif.bacc, classif.bbrier,
 <p>That seems not too bad. Considering that on average approximately 715 runs per team per season have been scored.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='fu'><a href='https://rdrr.io/r/base/mean.html'>mean</a></span><span class='op'>(</span><span class='va'>data</span><span class='op'>$</span><span class='va'>RS</span><span class='op'>)</span>
+<pre><code><span class='fu'><a href='https://rdrr.io/r/base/mean.html'>mean</a></span><span class='op'>(</span><span class='va'>moneyball</span><span class='op'>$</span><span class='va'>rs</span><span class='op'>)</span>
 </code></pre>
 </div>
 <pre><code>[1] 715.082</code></pre>
@@ -2416,17 +2402,17 @@ Keys: classif.acc, classif.auc, classif.bacc, classif.bbrier,
 <p>Subsequently, we add the <code>PipeOpSelect</code> <code>PipeOp</code> to the pipeline.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>feature_names</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/colnames.html'>colnames</a></span><span class='op'>(</span><span class='va'>data</span><span class='op'>)</span><span class='op'>[</span><span class='op'>!</span><span class='fu'><a href='https://rdrr.io/r/base/lapply.html'>sapply</a></span><span class='op'>(</span><span class='va'>data</span>, <span class='va'>anyNA</span><span class='op'>)</span><span class='op'>]</span>
+<pre><code><span class='va'>feature_names</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/colnames.html'>colnames</a></span><span class='op'>(</span><span class='va'>moneyball</span><span class='op'>)</span><span class='op'>[</span><span class='op'>!</span><span class='fu'><a href='https://rdrr.io/r/base/lapply.html'>sapply</a></span><span class='op'>(</span><span class='va'>moneyball</span>, <span class='va'>anyNA</span><span class='op'>)</span><span class='op'>]</span>
 <span class='va'>feature_names</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span>
   <span class='va'>feature_names</span><span class='op'>[</span><span class='va'>feature_names</span> <span class='op'>%in%</span> <span class='va'>task</span><span class='op'>$</span><span class='va'>feature_names</span><span class='op'>]</span>,
-  <span class='st'>"RankSeason"</span>, <span class='st'>"RankPlayoffs"</span><span class='op'>)</span>
+  <span class='st'>"rankseason"</span>, <span class='st'>"rankplayoffs"</span><span class='op'>)</span>
 <span class='va'>na_select</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"select"</span><span class='op'>)</span>
 <span class='va'>na_select</span><span class='op'>$</span><span class='va'>param_set</span><span class='op'>$</span><span class='va'>values</span><span class='op'>$</span><span class='va'>selector</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/Selector.html'>selector_name</a></span><span class='op'>(</span><span class='va'>feature_names</span><span class='op'>)</span>
 <span class='va'>graph2</span> <span class='op'>=</span> <span class='va'>graph2</span> <span class='op'>%&gt;&gt;%</span> <span class='va'>na_select</span>
 <span class='va'>graph2</span><span class='op'>$</span><span class='fu'>plot</span><span class='op'>(</span><span class='op'>)</span>
 </code></pre>
 </div>
-<p><img src="2020-05-04-moneyball_files/figure-html5/unnamed-chunk-23-1.png" width="624" /></p>
+<p><img src="2020-05-04-moneyball_files/figure-html5/unnamed-chunk-21-1.png" width="624" /></p>
 </div>
 <p>Now we complete the learner and apply resampling as before.</p>
 <div class="layout-chunk" data-layout="l-body">
@@ -2445,19 +2431,19 @@ Keys: classif.acc, classif.auc, classif.bacc, classif.bbrier,
 <pre><code><span class='fu'><a href='https://rdrr.io/r/base/sort.html'>sort</a></span><span class='op'>(</span><span class='va'>lrn</span><span class='op'>$</span><span class='va'>model</span><span class='op'>$</span><span class='va'>regr.ranger</span><span class='op'>$</span><span class='va'>model</span><span class='op'>$</span><span class='va'>variable.importance</span>, decreasing <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>
 </code></pre>
 </div>
-<pre><code>         SLG          OBP           BA            W           RA         Year 
+<pre><code>         slg          obp           ba            w           ra         year 
  3435.643552  2485.771229   936.206663   715.235512   501.303163   269.429878 
-  RankSeason RankPlayoffs     Playoffs       League         OOBP         OSLG 
+  rankseason rankplayoffs     playoffs       league         oobp         oslg 
   132.335915   106.292475    97.366197    35.753015    25.235380    25.087355 
-        Team            G 
+        team            g 
    16.611604     9.464481 </code></pre>
 </div>
-<p>We see that according to this the left out <code>OOBP</code> and <code>OSLG</code> seem to have solely rudimentary explanatory power. This may be because there were simply too many instances or because the features are themselves not very powerful.</p>
+<p>We see that according to this the left out <code>oobp</code> and <code>oslg</code> seem to have solely rudimentary explanatory power. This may be because there were simply too many instances or because the features are themselves not very powerful.</p>
 <h2 id="conclusion">Conclusion</h2>
-<p>So, to sum up, what we have learned: We can access very cool data straight away with the <code>OpenML</code> package. (We are working on a better direct implementation into <code>mlr3</code> at the moment.) We can even work with missing data very well in <code>mlr3</code>. Nevertheless, we discovered that sometimes imputation does not lead to the intended goals. We also learned how to use some <code>PipeOp</code>s from the <code>mlr3pipelines</code> package.</p>
+<p>So, to sum up, what we have learned: We can access very cool data straight away with the <code>OpenML</code> package. (We are working on a better direct implementation into <code>mlr3</code> at the moment.) We can work with missing data very well in <code>mlr3</code>. Nevertheless, we discovered that sometimes imputation does not lead to the intended goals. We also learned how to use some <code>PipeOp</code>s from the <code>mlr3pipelines</code> package.</p>
 <p>But most importantly, we found a way to predict the runs scored of MLB teams.</p>
 <p>If you want to know more, read the <a href="https://mlr3book.mlr-org.com/">mlr3book</a> and the documentation of the mentioned packages.</p>
-<div class="sourceCode" id="cb14"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
 <!--radix_placeholder_article_footer-->
 <!--/radix_placeholder_article_footer-->
 </div>
