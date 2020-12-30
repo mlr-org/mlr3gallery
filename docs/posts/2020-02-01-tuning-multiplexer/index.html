@@ -2239,11 +2239,11 @@ document.addEventListener('DOMContentLoaded', function() {
 </code></pre>
 </div>
 <pre><code>   branch.selection classif.ce                                uhash
-1:              xgb  0.3413462 8d1f06f2-efad-46cd-9d73-32a306b0c161
-2:               rf  0.2355769 e422ea14-848d-4134-8f88-1265ff29f67a
+1:              xgb  0.3413462 fb04d773-7715-4c1e-8ccd-c1264c1968cf
+2:               rf  0.2355769 59e13aa2-def2-4808-ba87-b7867841ac25
              timestamp batch_nr x_domain_branch.selection
-1: 2020-12-29 04:51:22        1                       xgb
-2: 2020-12-29 04:51:23        2                        rf</code></pre>
+1: 2020-12-30 04:54:42        1                       xgb
+2: 2020-12-30 04:54:43        2                        rf</code></pre>
 </div>
 <p>But: Via this approach we can now get unbiased performance results via nested resampling and using the <a href="https://mlr3tuning.mlr-org.com/reference/AutoTuner.html"><code>AutoTuner</code></a> (which would make much more sense if we would select from 100 models and not 2).</p>
 <div class="layout-chunk" data-layout="l-body">
@@ -2269,11 +2269,11 @@ document.addEventListener('DOMContentLoaded', function() {
 </code></pre>
 </div>
 <pre><code>   branch.selection classif.ce                                uhash  x_domain
-1:              xgb  0.3253012 ce3d06eb-8181-49da-a541-ebcfcaf20075 &lt;list[1]&gt;
-2:               rf  0.2469880 0164544e-00e3-442b-8303-3e3c9c2575d1 &lt;list[1]&gt;
+1:              xgb  0.3253012 04658605-e802-4f01-b1c7-8022cafdcad2 &lt;list[1]&gt;
+2:               rf  0.2469880 51d1cddb-c555-48d6-9f11-1c71217c3fba &lt;list[1]&gt;
              timestamp batch_nr
-1: 2020-12-29 04:51:28        1
-2: 2020-12-29 04:51:29        2</code></pre>
+1: 2020-12-30 04:54:48        1
+2: 2020-12-30 04:54:50        2</code></pre>
 </div>
 <h2 id="model-selection-and-tuning-with-pipelines">Model-Selection and Tuning with Pipelines</h2>
 <p>Now let’s select from our given set of models and tune their hyperparameters. One way to do this is to define a search space for each individual learner, wrap them all with the <code>AutoTuner</code>, then call <a href="https://mlr3.mlr-org.com/reference/benchmark.html"><code>benchmark()</code></a> on them. As this is pretty standard, we will skip this here, and show an even neater option, where you can tune over models and hyperparameters in one go. If you have quite a large space of potential learners and combine this with an efficient tuning algorithm, this can save quite some time in tuning as you can learn during optimization which options work best and focus on them. NB: Many AutoML systems work in a very similar way.</p>
@@ -2426,16 +2426,16 @@ document.addEventListener('DOMContentLoaded', function() {
  9:               rf       1          NA  0.2355769
 10:               rf       9          NA  0.2355769
                                    uhash           timestamp batch_nr
- 1: 620c9457-16ee-46b5-828c-00af2f9616e8 2020-12-29 04:51:41        1
- 2: 1c6e01ce-3c31-4794-b9c3-7a2412e5a798 2020-12-29 04:51:41        2
- 3: ca1835e3-c5ce-42a1-adc9-5f28ebc89f28 2020-12-29 04:51:42        3
- 4: 2127a755-aeba-497c-a0ca-c44edf58544f 2020-12-29 04:51:44        4
- 5: 0084ce1b-b815-44a1-8bdd-0bd1870749d6 2020-12-29 04:51:44        5
- 6: 82329636-aa6d-4020-84b9-4c6c4c4dddb0 2020-12-29 04:51:45        6
- 7: 317a356e-0892-4b1c-98d9-beeb7fe595ed 2020-12-29 04:51:46        7
- 8: 783a23ea-2634-489f-8989-798395ba7eae 2020-12-29 04:51:48        8
- 9: 25a19486-7618-4348-8787-887a8f237955 2020-12-29 04:51:49        9
-10: a2e82e0d-8910-400b-a46a-2274430f163b 2020-12-29 04:51:50       10
+ 1: 6444ff7a-2b5f-4f55-abcc-64d06a8e3c23 2020-12-30 04:55:04        1
+ 2: f4776fd3-87b4-4531-8bf6-58c19a1fe361 2020-12-30 04:55:05        2
+ 3: 2207f906-b136-4284-93c4-421f3edff487 2020-12-30 04:55:06        3
+ 4: f8611702-7029-4837-8f2b-6fccfa90abd0 2020-12-30 04:55:07        4
+ 5: 30302a9f-1fb3-4a74-8bbf-52dc8b0e6e45 2020-12-30 04:55:08        5
+ 6: c52123d9-b012-4f5e-9bdc-27dd97eba532 2020-12-30 04:55:10        6
+ 7: 7557dfdb-3699-4ad6-bce3-02ded58fea61 2020-12-30 04:55:11        7
+ 8: da4d9d37-7f0c-47b8-b97c-21213ac0aa86 2020-12-30 04:55:12        8
+ 9: 1406bde7-8fd5-446a-b2f9-9e0bbeca46a6 2020-12-30 04:55:13        9
+10: 6b6f2c2e-4713-4248-b438-7dae336130a5 2020-12-30 04:55:15       10
     x_domain_branch.selection x_domain_rf.mtry x_domain_xgb.nrounds
  1:                        rf               13                   NA
  2:                       xgb               NA                   23
@@ -2502,16 +2502,16 @@ document.addEventListener('DOMContentLoaded', function() {
  9:               rf      17          NA  0.2168675
 10:              xgb      NA         121  0.2469880
                                    uhash  x_domain           timestamp batch_nr
- 1: 0adb4609-86fd-4ea9-804e-b00e3fedf71f &lt;list[2]&gt; 2020-12-29 04:52:29        1
- 2: 19f94359-c8f3-4849-b039-0720125f3277 &lt;list[2]&gt; 2020-12-29 04:52:30        2
- 3: a3ccd1b0-276d-4779-a5d6-221345df1a1b &lt;list[2]&gt; 2020-12-29 04:52:31        3
- 4: 284c6cda-1d3e-4d5a-8732-d29f8391be71 &lt;list[2]&gt; 2020-12-29 04:52:32        4
- 5: 5b3533dc-8baa-4ca2-9db8-0a5fe65f7204 &lt;list[2]&gt; 2020-12-29 04:52:34        5
- 6: 267a6b07-1770-434b-aa9c-f34263dbafb9 &lt;list[2]&gt; 2020-12-29 04:52:35        6
- 7: 32e7075a-eac8-415b-9e16-6e6f648dbc96 &lt;list[2]&gt; 2020-12-29 04:52:36        7
- 8: 10595e73-3440-402c-b47a-765fbaee6edb &lt;list[2]&gt; 2020-12-29 04:52:37        8
- 9: e016a164-2d4e-43a5-adc3-1275ecc8865a &lt;list[2]&gt; 2020-12-29 04:52:38        9
-10: 00e1ffb2-f32b-4a35-a9a5-3a10e7b34b1c &lt;list[2]&gt; 2020-12-29 04:52:39       10</code></pre>
+ 1: f35b011c-001d-4d2d-9374-fec71ff07828 &lt;list[2]&gt; 2020-12-30 04:56:01        1
+ 2: 78235cd5-3098-49cd-9a90-d2bc330f0edb &lt;list[2]&gt; 2020-12-30 04:56:02        2
+ 3: 24fd9cd3-4202-494d-a2ce-d3dd662979ea &lt;list[2]&gt; 2020-12-30 04:56:04        3
+ 4: 130d7955-e2b7-4a7e-be61-969612350d30 &lt;list[2]&gt; 2020-12-30 04:56:05        4
+ 5: fd2e8926-6303-4fcf-96ed-baccc2cbc354 &lt;list[2]&gt; 2020-12-30 04:56:06        5
+ 6: c1a87f79-5df5-4e22-8155-1be5ad1ebc8d &lt;list[2]&gt; 2020-12-30 04:56:08        6
+ 7: 3349d352-2481-4439-b0d7-6a00bfcb2719 &lt;list[2]&gt; 2020-12-30 04:56:09        7
+ 8: 2e7695db-f0eb-463e-9e57-448b9fa275c5 &lt;list[2]&gt; 2020-12-30 04:56:10        8
+ 9: 25420831-cad4-41dd-b999-969c3b7c4bdc &lt;list[2]&gt; 2020-12-30 04:56:11        9
+10: aff1154c-6a83-45d2-9b3c-1197e8eb59a3 &lt;list[2]&gt; 2020-12-30 04:56:13       10</code></pre>
 </div>
 <div class="sourceCode" id="cb13"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
 <!--radix_placeholder_article_footer-->
