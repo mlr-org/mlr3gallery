@@ -1,6 +1,6 @@
 ---
 title: Bike Sharing Demand - Use Case
-author: 
+author:
   - name: Henri Funk
   - name: Andreas Hofheinz
   - name: Marius Girnat
@@ -30,7 +30,13 @@ library(mlr3book)
 long_run = FALSE
 ```
 
+# Preamble
 
+The following examples were created as part of the Introduction to Machine Learning Lecture at LMU Munich.
+The goal of the project was to create and compare one or several machine learning pipelines for the problem at hand together with exploratory analysis and an exposition of results.
+The posts were contributed to the mlr3gallery by the authors and edited for better legibility by the editor.
+We want to thank the authors for allowing us to publish their results.
+Note, that correctness of the results can not be guaranteed.
 
 # Intro
 
@@ -39,7 +45,7 @@ For the suppliers of those networks, it is important to always have enough bicyc
 Therefore it is essential to have a forecasting system that predicts the demand taking into account several variables.
 In this document, we develop such a system using the `mlr3verse` package.
 For our analysis, we used the [Kaggle Bike Sharing Demand](https://www.kaggle.com/c/bike-sharing-demand/data) data set, which was provided by Hadi Fanaee Tork using data from Capital Bikeshare. [@Fanaee]
-After ingesting the data into R we continue with some descriptive statistics for our training data set. 
+After ingesting the data into R we continue with some descriptive statistics for our training data set.
 We then preprocess the data and carry out feature and target engineering.
 Afterwards we proceed with the modeling process in which we fit, tune and benchmark the *KNN*, *CART* and *RandomForest* learner of the `mlr3verse` package.
 We conclude with our model prediction for the data.
@@ -55,7 +61,6 @@ library(knitr)
 library(kableExtra)
 # descriptive
 library(ggplot2)
-library(DataExplorer)
 library(GGally)
 library(ggrepel)
 # tools
@@ -116,31 +121,31 @@ column_descr = data.frame(
   rbind(
     cbind("datetime", "hourly date"),
     cbind("season", "
-           \\begin{cases} 
-              1, \\ spring \\\\ 
-              2, \\ summer \\\\ 
-              3, \\ fall \\\\ 
-              4, \\ winter \\\\ 
+           \\begin{cases}
+              1, \\ spring \\\\
+              2, \\ summer \\\\
+              3, \\ fall \\\\
+              4, \\ winter \\\\
             \\end{cases}"
     ),
     cbind("holiday", "
-           \\begin{cases} 
-              1, \\ holiday \\\\ 
-              0, \\ else \\\\ 
+           \\begin{cases}
+              1, \\ holiday \\\\
+              0, \\ else \\\\
             \\end{cases}"
     ),
     cbind("workingday", "
-           \\begin{cases} 
-              1, \\ neither \\ weekend \\ nor \\ holiday \\\\ 
-              0, \\ else \\\\ 
+           \\begin{cases}
+              1, \\ neither \\ weekend \\ nor \\ holiday \\\\
+              0, \\ else \\\\
             \\end{cases}"
     ),
     cbind("weather", "
             \\begin{cases}
-              1, \\ Clear, \\ Few \\ clouds\\\\ 
-              2, \\ Mist \\ and \\ Cloudy\\\\ 
-              3, \\ Light \\ Snow, \\ Light \\ Rain, \\ Thunderstorm\\\\ 
-              4, \\ Heavy \\ Rain, \\ Ice \\ Pallets\\\\ 
+              1, \\ Clear, \\ Few \\ clouds\\\\
+              2, \\ Mist \\ and \\ Cloudy\\\\
+              3, \\ Light \\ Snow, \\ Light \\ Rain, \\ Thunderstorm\\\\
+              4, \\ Heavy \\ Rain, \\ Ice \\ Pallets\\\\
           \\end{cases}"
     ),
     cbind("temp", "temperature in Celsius"),
@@ -157,7 +162,7 @@ names(column_descr) = c("Column Name", "Description")
 
 kable(column_descr, escape = FALSE, booktabs = TRUE, longtable = TRUE,
       linesep = "\\addlinespace", caption = "Column description training data",
-      format = "html", table.attr = "") %>% 
+      format = "html", table.attr = "") %>%
   kable_styling(position = "left")
 ```
 
@@ -168,28 +173,31 @@ Since there are no missing values in our data, we do not need to apply any furth
 
 ## Descriptive Statistics
 
+<!--
+# FIXME: reiterate through figure numbers if you uncomment
 In Figure 1 we show the density estimates of the continuous variables in the training data.
-We find that our target variable `count` is highly right-skewed, which we examine further during pre-processing in chapter 2.3. 
+We find that our target variable `count` is highly right-skewed, which we examine further during pre-processing in chapter 2.3.
 
 ```{r dense, echo=FALSE, fig.cap="Density estimates of the continuous variables in training data", fig.height=3.3}
-plot_density(train,
-  ncol = 3L,
-  ggtheme = theme_bw(),
-  theme_config = list(
-    plot.title = element_text(size = 10),
-    axis.title = element_text(size = 9),
-    axis.text = element_text(size = 5)
-  )
-)
+#plot_density(train,
+#  ncol = 3L,
+#  ggtheme = theme_bw(),
+#  theme_config = list(
+#    plot.title = element_text(size = 10),
+#    axis.title = element_text(size = 9),
+#    axis.text = element_text(size = 5)
+#  )
+#)
 ```
+-->
 
-The correlation of the continuous variables of our training data is shown in Figure 2.
+The correlation of the continuous variables of our training data is shown in Figure 1.
 We find that there is an almost perfect positive correlation between `atemp` and `temp` ($r = 0.98$), swhich makes sense, since the 'feels like' temperature is very similar to the real temperature.
 Moreover, there is a positive correlation between `count` and `atemp` as well as `count` and `temp` ($r = 0.39$).
 Additionally, we see that our target variable `count` is negatively correlated with the `humidity` ($r = - 0.32$).
 
 ```{r corr, echo=FALSE, fig.cap="Correlation matrix of continuous variables in training data"}
-ggcorr(train[, c("count", "windspeed", "humidity", "atemp", "temp")], geom = "blank", 
+ggcorr(train[, c("count", "windspeed", "humidity", "atemp", "temp")], geom = "blank",
        label = TRUE, hjust = 0.6, color = "#666366", label_round = 2, label_size = 2.5,
        size = 3) +
   geom_point(size = 10, aes(color = coefficient > 0, alpha = abs(coefficient) > 0.3)) +
@@ -199,11 +207,11 @@ ggcorr(train[, c("count", "windspeed", "humidity", "atemp", "temp")], geom = "bl
   theme(axis.title = element_text(size = 9))
 ```
 
-Figure 3 shows the Bike Sharing demand over the entire time frame of our training data. 
+Figure 2 shows the Bike Sharing demand over the entire time frame of our training data.
 We find an overall positive trend with seasonality, whereby the demand is higher in summer than in winter.
 
 ```{r bbytime, echo=FALSE, message=FALSE, fig.cap="Bike Sharing demand over time"}
-ggplot(train, aes(x = as.POSIXct(datetime), y = count)) + 
+ggplot(train, aes(x = as.POSIXct(datetime), y = count)) +
   geom_point(size = 0.5, color = "darkgrey") +
   geom_smooth(fill = "blue") +
   labs(x = element_blank(), y = "Count") +
@@ -211,11 +219,11 @@ ggplot(train, aes(x = as.POSIXct(datetime), y = count)) +
   theme(axis.title = element_text(size = 9))
 ```
 
-As we can see in Figure 4, the bike sharing demand is fairly evenly distributed over a month.
+As we can see in Figure 3, the bike sharing demand is fairly evenly distributed over a month.
 Note that we have no values for days after the 19th day of each month in our training data since those days are included in our test data.
 
 ```{r grouped, echo=FALSE, warning=FALSE, fig.cap="Distribution of Bike Sharing demand over a month", fig.height=2}
-df_grouped_day = train %>% 
+df_grouped_day = train %>%
     group_by(day = day(datetime)) %>%
     summarize(count = sum(count))
 
@@ -235,7 +243,7 @@ ggplot(df_grouped_day, aes(x = day, y = count)) +
     panel.border = element_blank(),
     axis.ticks.x = element_blank(),
     axis.title = element_text(size = 9)
-  ) 
+  )
 ```
 
 ## Preprocessing
@@ -246,7 +254,7 @@ It applies that `count == casual + registered`.
 all.equal(train$count, train$casual + train$registered)
 ```
 
-So we cannot use `casual` and `registered` as features to predict `count` since 
+So we cannot use `casual` and `registered` as features to predict `count` since
 we only know them once we also know `count`.
 Therefore we can remove them without affecting the prediction quality.
 Furthermore the features `atem` the 'feels like' temperature and `temp` the
@@ -257,9 +265,9 @@ cor(train$atem, train$temp)
 ```
 
 Therefore we omit `temp` feature during the modeling process to
-reduce the number of features and the complexity of our data structure. 
-Additionally, we convert nominal and ordinal features to factors and `datetime` to 
-POSIXct. The structure of our pre-processed data is shown in Table 3.
+reduce the number of features and the complexity of our data structure.
+Additionally, we convert nominal and ordinal features to factors and `datetime` to
+POSIXct. The structure of our pre-processed data is shown in Table 2.
 
 ```{r, echo = FALSE}
 preprocess = function(df, null = c("casual", "registered")){
@@ -277,30 +285,30 @@ train = preprocess(train)
 ```
 
 ```{r, echo=FALSE, warning=FALSE}
-train %>% summary.default %>% as.data.frame %>% 
-  dplyr::group_by(Var1) %>%  
-  tidyr::spread(key = Var2, value = Freq) %>% 
-  ungroup() %>% 
-  select(Variable = Var1, Class, Mode, -Length) %>% 
-  mutate(Variable = as.character(Variable)) %>% 
-  arrange(Variable, Class, Mode) %>% 
-  as.data.frame() %>% 
+train %>% summary.default %>% as.data.frame %>%
+  dplyr::group_by(Var1) %>%
+  tidyr::spread(key = Var2, value = Freq) %>%
+  ungroup() %>%
+  select(Variable = Var1, Class, Mode, -Length) %>%
+  mutate(Variable = as.character(Variable)) %>%
+  arrange(Variable, Class, Mode) %>%
+  as.data.frame() %>%
   kable("html", booktabs = TRUE,  caption = "Processed training data",
-      linesep = "\\addlinespace", longtable = TRUE) %>% 
+      linesep = "\\addlinespace", longtable = TRUE) %>%
   kable_styling(full_width = TRUE, latex_options = c("repeat_header"))
 ```
 
 ## Feature engineering
 
-Since we have one observation at each time, each time stamp (`datetime`) is a unique value 
-and therefore has no predictive quality. However, if we split it into `hour`, `weekday`, `month` 
-and `year` we obtain useful predictors. The structure of our pre-processed training data is visualized 
-in Table 4.
+Since we have one observation at each time, each time stamp (`datetime`) is a unique value
+and therefore has no predictive quality. However, if we split it into `hour`, `weekday`, `month`
+and `year` we obtain useful predictors. The structure of our pre-processed training data is visualized
+in Table 3.
 
 ```{r, echo=FALSE}
 engineer_features = function(df) {
   df$hour = factor(hour(df$datetime))
-  df$weekday = factor(weekdays(as.Date(df$datetime))) 
+  df$weekday = factor(weekdays(as.Date(df$datetime)))
   df$month = factor(month(df$datetime))
   df$year = factor(year(df$datetime))
   df$datetime = NULL
@@ -321,29 +329,29 @@ train = engineer_features(train)
 ```
 
 ```{r, echo=FALSE, out.height='75%'}
-train %>% summary.default %>% as.data.frame %>% 
-  dplyr::group_by(Var1) %>%  
-  tidyr::spread(key = Var2, value = Freq) %>% 
-  ungroup() %>% 
-  select(Variable = Var1, Class, Mode, -Length) %>% 
-  mutate(Variable = as.character(Variable)) %>% 
-  arrange(Variable, Class, Mode) %>% 
-  as.data.frame() %>% 
+train %>% summary.default %>% as.data.frame %>%
+  dplyr::group_by(Var1) %>%
+  tidyr::spread(key = Var2, value = Freq) %>%
+  ungroup() %>%
+  select(Variable = Var1, Class, Mode, -Length) %>%
+  mutate(Variable = as.character(Variable)) %>%
+  arrange(Variable, Class, Mode) %>%
+  as.data.frame() %>%
   kable("html", booktabs = TRUE,  caption = "Feature engineered training data",
-      linesep = "\\addlinespace", longtable = TRUE) %>% 
+      linesep = "\\addlinespace", longtable = TRUE) %>%
   kable_styling(full_width = TRUE)
 ```
 
-In Figure 6 we use our engineered `hour` variable to plot the Bike Sharing demand by hour and temperature.
+In Figure 4 we use our engineered `hour` variable to plot the Bike Sharing demand by hour and temperature.
 Note, that the felt temperature `atemp` is normalized.
 We find that the highest demand occurs between 18h and 20h at higher temperatures.
 
 ```{r,echo=FALSE, warning=FALSE, fig.cap="Bike Sharing demand by hour and temperature", fig.height=3}
-heat = c("#5e4fa2", "#3288bd", "#66c2a5", "#abdda4", "#e6f598", "#fee08b", 
+heat = c("#5e4fa2", "#3288bd", "#66c2a5", "#abdda4", "#e6f598", "#fee08b",
           "#fdae61", "#f46d43", "#d53e4f", "#9e0142")
 ggplot(train) +
   geom_jitter(aes(x = as.numeric(hour), y = count, colour = atemp), alpha = 0.8) +
-  scale_color_gradientn(colours = heat) + 
+  scale_color_gradientn(colours = heat) +
   labs(x = "Hour", y = "Count") +
   scale_x_continuous(breaks = seq(1, 24, by = 4)) +
   theme_bw() +
@@ -355,15 +363,15 @@ ggplot(train) +
 
 ## Target engineering
 
-As mentioned in our descriptive analysis (chapter 2.2), we find that our target variable `count` is 
+As mentioned in our descriptive analysis (chapter 2.2), we find that our target variable `count` is
 highly right-skewed.
 Since this could cause problems during model fitting, we perform a $z = log(x + 1)$ transformation.
-In the right plot in Figure 6, we see that the distribution of our transformed `count` variable is much less
+In the right plot in Figure 5, we see that the distribution of our transformed `count` variable is much less
 skewed than before.
 
 ```{r,echo = FALSE, warning=FALSE, out.width=c('50%', '50%'), fig.show='hold', fig.cap="Density transformation of `count`"}
 ggplot(train, aes(count)) +
-  geom_density() + 
+  geom_density() +
   labs(x = "Count", y = "Density") +
   theme_bw()
 ggplot(train, aes(log1p(count))) +
@@ -394,7 +402,7 @@ log1p_target_trafo = function(learner, graph = TRUE) {
 
 ## Task Initialization
 
-First, we have to initialize our bike task. 
+First, we have to initialize our bike task.
 As back-end, we use our training data and as target variable `count`.
 
 ```{r taskinit}
@@ -405,7 +413,7 @@ bike_task = TaskRegr$new("bike_sharing", backend = train, target = "count")
 
 The `mlr3viz` package enables the user to quickly create insightful descriptive graphics.
 We use this function to compare the values of our target variable `count` over the seasons and between holidays and other days.
-The results are visualized in Figure 7.
+The results are visualized in Figure 6.
 We notice that there is almost no difference between the seasons with the exception of spring when the value of `count` is lower.
 Moreover, there is no real change between holidays and other days.
 
@@ -418,9 +426,9 @@ autoplot(bike_task) +
   theme_bw()
 ```
 
-To examine relationships between variables in train data, we can also use the `autoplot` function and set the `type` argument to "pairs". 
+To examine relationships between variables in train data, we can also use the `autoplot` function and set the `type` argument to "pairs".
 We make use of this option to further investigate the relationship between `atemp`, `windspeed` and `count` and compare it over the two years of our data.
-The result is visualized in Figure 8.
+The result is visualized in Figure 7.
 In the upper left graph, we notice that there the value of `log1p_count` is higher in 2012 than in 2011.
 In contrast, the distribtions of `atemp` and `windspeed`  do not seem to differ between the years.
 Also, the correlations of the variables are fairly similar in both years.
@@ -450,10 +458,10 @@ In our modeling process, we consider three learners: `kknn`, `rpart` and `ranger
 For parameter optimization, we use the so-called `autotuner`.
 An `Autotuner` is a learner, that tunes its hyperparameters during training.
 The technical implementation is provided by `mlr3tuning`.
-For more details see the [mlr3manual](https://mlr3book.mlr-org.com/tuning.html).  
+For more details see the [mlr3manual](https://mlr3book.mlr-org.com/tuning.html).
 
 In order to achieve maximum comparability between the learners the `Resampling` objects and which enable us to measure a learner-configuration's performance as well as the tuning strategy are kept fixed for all compared learners.
-If a learner's settings differ from the general case, the reason is given in the 
+If a learner's settings differ from the general case, the reason is given in the
 section on the `autotuner` concerned.
 
 ```{r configurations}
@@ -468,18 +476,18 @@ term_evals20 = trm("evals", n_evals = 20L)
 For more information see [Nested Resamling](https://mlr3book.mlr-org.com/nested-resampling.html).
 During our modeling process, we use 5-fold CV for `inner resampling` to avoid overfitting when optimizing the model parameters (`resampling_cv_5`).
 In order to avoid overfitting during hyperparameter tuning, we use 3-fold CV as `outer resampling` method (`resampling_outer_cv3`).
-Nested resampling is done in our Chapter 5 "Nested Resampling" where we evaluate and compare the performance of the learners in a single Graph Learner. 
+Nested resampling is done in our Chapter 5 "Nested Resampling" where we evaluate and compare the performance of the learners in a single Graph Learner.
 
 * `measure` defines the loss function that the autotuner evaluates during training.
 As the Kaggle competition requires participants to minimize the `RMSLE` we use the `RMSE measure` since our target variable is already log-transformed.
 
 * `tuning method` will be Grid Search with a grid resolution of 10.
 As we chose two hyperparameters to tune over, the two-dimensional grid consists of $10^{2} = 100$ configurations. The tuner grid is called `tuner_grid_10`.
- 
+
 * `terminator` limits the tuning process to 20 hyperparameter combinations, which will be drawn randomly from the `tuner_grid_10`.
 The terminator is called `term_evals20`.
 
-As the computational time of `nested resampling` is high and tuning over multiple parameters would be very complex, the `autotuners` are be restricted to two hyperparameters, that seem to have a strong influence on the `regr.rmse`. 
+As the computational time of `nested resampling` is high and tuning over multiple parameters would be very complex, the `autotuners` are be restricted to two hyperparameters, that seem to have a strong influence on the `regr.rmse`.
 The hyperparameter space of numeric hyperparameter is set around their default values for tuning.
 
 Resampling and Terminator during auto tuning are set to relatively small iterations to save up computational effort.
@@ -488,7 +496,7 @@ Auto tuning should exploit enough grid points to give the user an impression abo
 
 ### KNN
 
-`kknn` is a k-nearest-neighbor learner whose hyperparameters are shown in Table 5.
+`kknn` is a k-nearest-neighbor learner whose hyperparameters are shown in Table 4.
 
 ```{r, results="hide"}
 kknn_learner = lrn("regr.kknn")
@@ -499,18 +507,18 @@ kknn_learner$param_set
 df_params = as.data.table(kknn_learner$param_set)[,c("id", "lower", "upper", "levels", "default")]
 kable(df_params, "html", booktabs = TRUE,  caption = "Paramters of kknn learner",
       linesep = "\\addlinespace", longtable = TRUE) %>%
-kable_styling(full_width = TRUE) %>% 
-column_spec(4, width = "8cm") %>% 
-column_spec(1, width = "2cm") %>% 
+kable_styling(full_width = TRUE) %>%
+column_spec(4, width = "8cm") %>%
+column_spec(1, width = "2cm") %>%
 column_spec(c(2, 3), width = "1.5cm")
 ```
 
 For simplicity we tune only two of those parameters:
 
-1. `k`  
+1. `k`
 > Number of neighbors considered.
 
-2. `distance`  
+2. `distance`
 > Parameter of Minkowski distance
 
 For more information see the
@@ -555,10 +563,10 @@ saveRDS(archive_kknn, file = "archive_kknn.rds")
 archive_kknn = readRDS("archive_kknn.rds")
 ```
 
-In Figure 9 we see the RMSE for the considered hyperparameter of the `kknn` autotuner.
-It seems that a higher order `p` of the Minkowski distance leads to a lower `RMSE`. 
+In Figure 8 we see the RMSE for the considered hyperparameter of the `kknn` autotuner.
+It seems that a higher order `p` of the Minkowski distance leads to a lower `RMSE`.
 Moreover, we see that the `RMSE` is lowest around `k = 10` neighbors.
-For smaller `k` the estimation might be too wiggly, for higher `k` it might be too global (Bias-Variance trade off). 
+For smaller `k` the estimation might be too wiggly, for higher `k` it might be too global (Bias-Variance trade off).
 The minimal RMSE that the `autotuner` could find is given for `p = 3` and `k = 12`.
 
 ```{r, echo=FALSE, fig.cap="RMSE on tuning grid of kknn autotuner"}
@@ -567,12 +575,12 @@ ggplot(archive_kknn, aes(x = regr.kknn.k, y = regr.kknn.distance, col = regr.rms
   geom_label_repel(
     data = subset(archive_kknn, regr.rmse == min(regr.rmse)),
     aes(label = paste(
-      "Min RMSE:", round(regr.rmse, 2L), 
-      "\ndistance: ",  regr.kknn.distance, 
+      "Min RMSE:", round(regr.rmse, 2L),
+      "\ndistance: ",  regr.kknn.distance,
       "\nk: ", regr.kknn.k)
     ),
     size = 2.5,
-    box.padding   = 0.35, 
+    box.padding   = 0.35,
     point.padding = 0.5,
     segment.color = 'grey50'
   ) +
@@ -588,7 +596,7 @@ ggplot(archive_kknn, aes(x = regr.kknn.k, y = regr.kknn.distance, col = regr.rms
 
 ### CART
 
-`rpart` is CART learner whose hyperparameters are shown in Table 6.
+`rpart` is CART learner whose hyperparameters are shown in Table 5.
 
 ```{r, results="hide"}
 rpart_learner = lrn("regr.rpart")
@@ -604,13 +612,13 @@ kable_styling(full_width = TRUE)
 
 Again, for simplicity, we tune only two of those parameters:
 
-1. `minsplit`  
+1. `minsplit`
 > the minimum number of observations that must exist in a node in order for a
 split to be attempted.
 
-2. `cp`  
-> complexity parameter. 
-Any split that does not decrease the overall lack of fit by a factor of cp is 
+2. `cp`
+> complexity parameter.
+Any split that does not decrease the overall lack of fit by a factor of cp is
 not attempted.
 [...]
 
@@ -652,12 +660,12 @@ saveRDS(archive_rpart, file = "archive_rpart.rds")
 archive_rpart = readRDS("archive_rpart.rds")
 ```
 
-In Figure 10 we see the RMSE for the considered hyperparameter of the `rpart` autotuner.
+In Figure 9 we see the RMSE for the considered hyperparameter of the `rpart` autotuner.
 The learner performs the worst if we set the minimum size of nodes in `minsplit < 3`.
 For splitting criteria `minsplit > 3` seems to have no significant influence on the RMSE in the given hyperparameter space.
 In contrast, we find that for relatively low `cp` the error decreases considerably.
 Lowering `cp` reduces the level of pruning, resulting in larger trees.
-We reach the minimal `regr.rmse` at the lowest considered `cp = 0.001`. 
+We reach the minimal `regr.rmse` at the lowest considered `cp = 0.001`.
 
 ```{r, echo=FALSE, fig.cap="RMSE on tuning grid rpart learner"}
 ggplot(archive_rpart, aes(x = regr.rpart.cp, y = regr.rpart.minsplit, col = regr.rmse)) +
@@ -668,13 +676,13 @@ ggplot(archive_rpart, aes(x = regr.rpart.cp, y = regr.rpart.minsplit, col = regr
   geom_label_repel(
     data = subset(archive_rpart, regr.rmse == min(regr.rmse)),
     aes(label = paste(
-      "Min RMSE:", round(regr.rmse, 2L), 
-      "\nminsplit: ",  regr.rpart.minsplit, 
+      "Min RMSE:", round(regr.rmse, 2L),
+      "\nminsplit: ",  regr.rpart.minsplit,
       "\ncp: ", regr.rpart.cp)
     ),
     size = 2.5,
     nudge_y = -8,
-    box.padding   = 0.35, 
+    box.padding   = 0.35,
     point.padding = 0.5,
     segment.color = 'grey50'
   ) +
@@ -687,7 +695,7 @@ ggplot(archive_rpart, aes(x = regr.rpart.cp, y = regr.rpart.minsplit, col = regr
 
 ### Random Forest
 
-`ranger` is a Random Forest Learner whose hyperparameters are shown in Table 7.
+`ranger` is a Random Forest Learner whose hyperparameters are shown in Table 6.
 
 ```{r, results="hide"}
 ranger_learner = lrn("regr.ranger", importance = "impurity")
@@ -706,7 +714,7 @@ kable(df_params_table, "html", booktabs = TRUE,  caption = "Paramters of ranger 
 kable_styling(full_width = TRUE, latex_options = "repeat_header")
 ```
 
-**Feature Importance**  
+**Feature Importance**
 
 First, we take advantage of the ability of the `ranger_learner` to calculate the importance of its features.
 The `importance filter` implemented in `mlr3filters` provides the possibility to access this calculation via `mlr3` syntax.
@@ -717,7 +725,7 @@ filter_ranger$calculate(bike_task)
 feature_importance = as.data.table(filter_ranger)
 ```
 
-In Figure 11 we see there is a difference in features.
+In Figure 10 we see there is a difference in features.
 Some features don't seem to make a contribution to the model performance that is worthwhile to implement to the learner's architecture.
 To test this hypothesis we are going to set up a learner that can test different feature combinations.
 
@@ -732,9 +740,9 @@ ggplot(feature_importance, aes(reorder(feature, score), y = score)) +
 
 We use the features in decreasing order of feature importance.
 Say, if we use $n$ features to predict the target we use the $n$ most important features according to their `impurity`.
-Therefore, we set up a graph learner in the next step.  
+Therefore, we set up a graph learner in the next step.
 
-**Ranger Pipe** 
+**Ranger Pipe**
 
 Setting up the Ranger Pipe enables us to compare models with different feature combinations.
 Therefore we use the `mlr3` packages `mlr3pipelines` and `mlr3filters` and create a new learner `ranger_feature`.
@@ -751,13 +759,13 @@ In addition to the regular `ranger` features, we are now able to tune on any par
 
 Again, for simplicity, we tune only two of those parameters:
 
-1. `regr.ranger.mtry`  
+1. `regr.ranger.mtry`
 > Number of variables to possibly split at in each node. Default is the (rounded
-down) square root of the number variables. 
+down) square root of the number variables.
 [...]
 
-2. `importance.filter.nfeat`  
-> A param from `importance` that allows to control the size of features computed 
+2. `importance.filter.nfeat`
+> A param from `importance` that allows to control the size of features computed
 in the model.
 
 For more information see the [ranger documentation](https://cran.r-project.org/web/packages/ranger/ranger.pdf) and [mlr3 pipelines](https://mlr3book.mlr-org.com/pipelines.html).
@@ -773,7 +781,7 @@ param_set_ranger = ParamSet$new(
 
 To ensure that `regr.ranger.mtry` never exceeds `importance.filter.nfeat`, we define the search space for the tuner manually.
 We constraint the possible number of features to the 1, 6 , 10 and 11 most important feature(s).
-The resulting grid shown in Figure 12, expands to over 28 combinations to tune our learner on.
+The resulting grid shown in Figure 11, expands to over 28 combinations to tune our learner on.
 
 ```{r}
 grid = generate_design_grid(param_set_ranger, resolution = 11)
@@ -825,7 +833,7 @@ archive_ranger = readRDS("archive_ranger.rds")
 ```
 
 
-In Figure 13 we see the RMSE for the evaluated hyperparameter of the ranger autotuner.
+In Figure 12 we see the RMSE for the evaluated hyperparameter of the ranger autotuner.
 With increasing `mtry` and the number `features` used in the model, the RMSE decreases.
 The best considered combination is achieved with 11 `features` and `mtry = 10`. For higher values of `mtry` and number of features `features` the `RMSE` is slightly higher.
 
@@ -836,12 +844,12 @@ ggplot(archive_ranger, aes(x = importance.filter.nfeat,
   geom_label_repel(
     data = subset(archive_ranger, regr.rmse == min(regr.rmse)),
     aes(label = paste(
-      "Min RMSE:", round(regr.rmse, 2L), 
-      "\nfeatures: ",  importance.filter.nfeat, 
+      "Min RMSE:", round(regr.rmse, 2L),
+      "\nfeatures: ",  importance.filter.nfeat,
       "\nmtry: ", regr.ranger.mtry)
     ),
     size = 2.5,
-    box.padding   = 0.5, 
+    box.padding   = 0.5,
     point.padding = 0.5,
     segment.color = 'grey50',
     nudge_x = -1.5
@@ -895,25 +903,25 @@ bmr_table = readRDS("bmr_table.rds")
 
 ```{r, echo=FALSE}
 agg = bmr_table %>%
-  mutate(regr.rmse = round(regr.rmse, 2)) %>% 
+  mutate(regr.rmse = round(regr.rmse, 2)) %>%
   arrange(regr.rmse)
 
 kable(agg, "html", booktabs = TRUE,  caption = "Benchmarking results",
       linesep = "\\addlinespace") %>%
-kable_styling(full_width = TRUE) %>% 
+kable_styling(full_width = TRUE) %>%
 column_spec(1, width = "8cm")
 ```
 
 Tuning enables us to optimize hyperparameters in our model via trial and error.
-For more details see [mlr3tuning](https://mlr3book.mlr-org.com/optimization.html).  
+For more details see [mlr3tuning](https://mlr3book.mlr-org.com/optimization.html).
 To evaluate each tuned learners' performance and compare it, we set up  benchmarking.
-Results are shown in Table 8 and Figure 14.  
+Results are shown in Table 7 and Figure 13.
 In the boxplot resulting RMSE from the outer resampling are shown for each tuned learner from chapter 3.3 and its non-tuned equivalent.
 The benchmarking resampling validates our results from hyperparameter tuning for each autotuner in a 3-fold-cross-validation.
 We find that with auto tuning each of the learners could increase its performance compared to its' equivalent that is using default hyperparameters.
-However, for `rpart` not only performance is increasing but also variance.  
+However, for `rpart` not only performance is increasing but also variance.
 That does not apply to  the tuned `kknn` and `ranger` learners for which the results seem to be comparatively stable.
-With a RMSE of 0.31 the tuned random forest performs the best among tuned and untuned learners compared in benchmarking.  
+With a RMSE of 0.31 the tuned random forest performs the best among tuned and untuned learners compared in benchmarking.
 Consequently, the tuned `ranger` is our learner of choice for prediction.
 
 ```{r, eval=long_run, warning=FALSE}
@@ -949,7 +957,7 @@ Benchmarking on the other hand, "only" tunes each autotuner once and cross-valid
 We create a simple branched pipe, with our already known learners from the previous chapters.
 Note that we do not implement the autotuners but the actual learners here, since we aim to tune over the whole pipeline as a learner here, rather than over each learner individually.
 Therefore our selected learners `kknn`, `rpart` and `importance.ranger` can be considered as hyperparameters in a more universal graph-learner `glrn`.
-For more information see [mlr3pipelines](https://mlr3book.mlr-org.com/pipelines.html).  
+For more information see [mlr3pipelines](https://mlr3book.mlr-org.com/pipelines.html).
 
 ```{r pipelinie, fig.cap="Pipeline Learner", fig.width = 5, fig.height = 4.3, eval=FALSE}
 list = sapply(list(po(kknn_learner), po(rpart_learner), po(ranger_learner)), log1p_target_trafo)
@@ -967,7 +975,7 @@ A few words should be said about this rather complex parameter set:
 - The only exception is the `importance.ranger`, for which we tune over $\{6, 10, 11\}$ features because the autotuners had the best performance at these values.
 - Logically, `k` or `distance` can only be called if the selected branch is `regr.kknn`. The same applies to the parameters of the other learners.
 For this purpose we add *dependencies* to the parameter.
-- In the `ParameterSet` `nfeat` is set to `levels`. This is used to control the levels, a grid can tune over. 
+- In the `ParameterSet` `nfeat` is set to `levels`. This is used to control the levels, a grid can tune over.
 `mtry` is initialized in the transformation depending on the randomly chosen `nfeat`.
 
 ```{r graphparamset, message=FALSE, results='hide', eval=FALSE}
@@ -1084,7 +1092,7 @@ saveRDS(data_total, "data_total.rds")
 data_total = readRDS("data_total.rds")
 ```
 
-A visual comparison between the predicted demand with the actual demand is shown in Figure 15.
+A visual comparison between the predicted demand with the actual demand is shown in Figure 14.
 The points depict the actual values and the green bars show our predicted values.
 The spaces with no points are the 19th day until the end of each month for which we only have test data.
 We find that overall the model predictions are quite close to the actual values and that the forecast seems reasonable for the test data.
@@ -1095,24 +1103,24 @@ data_temp$year = year(data_temp$datetime)
 year(data_temp$datetime) = 2000
 
 ggplot(data_temp) +
-  geom_bar(aes(x = datetime, y = response), stat = "identity", fill = "green", 
+  geom_bar(aes(x = datetime, y = response), stat = "identity", fill = "green",
            position = "dodge") +
   geom_point(aes(x = datetime, y = truth), size = 0.1, alpha = 0.2) +
   labs(x = element_blank(), y = "Count") +
   scale_x_datetime(labels = scales::date_format("%b"), date_breaks = "2 month") +
   facet_grid(year ~ .) +
-  theme_bw() + 
+  theme_bw() +
   theme(axis.title = element_text(size = 9))
 ```
 
-In Figure 16, we compare the predictions with the actual data grouped by the days of the month.
+In Figure 15, we compare the predictions with the actual data grouped by the days of the month.
 Again, we find that the predictions are very close to the actual values.
 However, the model seems to systematically underestimate the actual values slightly.
 
 ```{r, warning=FALSE, echo=FALSE, fig.cap="Distribution of Bike Sharing demand over a month", fig.height=2}
-data_grouped_day = data_total %>% 
-  select(datetime, Actual = truth, Forecast = response) %>% 
-  pivot_longer(cols = c(Actual, Forecast)) %>% 
+data_grouped_day = data_total %>%
+  select(datetime, Actual = truth, Forecast = response) %>%
+  pivot_longer(cols = c(Actual, Forecast)) %>%
   group_by(day = day(datetime), name) %>%
   summarize(count = sum(value))
 
@@ -1135,7 +1143,7 @@ ggplot(data_grouped_day, aes(x = day, y = count)) +
     legend.title = element_blank(),
     axis.title = element_text(size = 9),
     legend.text = element_text(size = 8)
-  ) 
+  )
 ```
 
 
@@ -1144,7 +1152,7 @@ ggplot(data_grouped_day, aes(x = day, y = count)) +
 The `mlr3verse`  makes the process of model fitting, tuning, benchmarking and nested resampling intuitive and fast.
 The included packages provide access to a set of commonly used learners and their train and predict methods using R6 classes.
 Moreover one can increase the capabilities of learners of the original packages through tuning, benchmarking as well as imputing and even ensembling.
-`mlr3` provides these methods in a simple syntax to create understandable and comparable code architectures.   
+`mlr3` provides these methods in a simple syntax to create understandable and comparable code architectures.
 Using these resources we set up a generalized tuning process for `kknn`, `rpart` and `ranger` learners.
 By tuning two hyperparameters of each learner, we were able to considerably increase performance of each learner.
 Performance comparison through nested resampling provided a solid foundation for choosing the best learner to predict the test set.
