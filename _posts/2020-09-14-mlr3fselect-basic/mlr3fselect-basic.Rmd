@@ -142,7 +142,7 @@ fselector$optimize(instance)
 The `ArchiveFSelect` stores a `data.table` which conists of the evaluated feature sets and the corresponding estimated predictive performances. 
 
 ```{r random search archive}
-instance$archive$data()
+as.data.table(instance$archive)
 ```
 The associated resampling iterations can be accessed in the `BenchmarkResult` by calling
 
@@ -194,19 +194,17 @@ measure = msr("classif.ce")
 terminator = trm("evals", n_evals = 60)
 ```
 
-The `AutoFSelect` class inherits from the `Learner` class and starts an automatic feature selection when a task is passed to the `$train()` method.
+The `AutoFSelector` class inherits from the `Learner` class and starts an automatic feature selection when a task is passed to the `$train()` method.
  
 ```{r AutoFSelect}
 fs_sequential = fs("sequential")
-at_sequential = AutoFSelect$new(learner, resampling_inner, measure = measure, terminator, fselect = fs_sequential)
-at_sequential$store_fselect_instance = TRUE
+at_sequential = AutoFSelector$new(learner, resampling_inner, measure = measure, terminator, fselect = fs_sequential, store_fselect_instance = TRUE)
 
 fs_random = fs("random_search")
-at_random = AutoFSelect$new(learner, resampling_inner, measure = measure, terminator, fselect = fs_random)
-at_random$store_fselect_instance = TRUE
+at_random = AutoFSelector$new(learner, resampling_inner, measure = measure, terminator, fselect = fs_random, , store_fselect_instance = TRUE)
 ```
 
-We combine each `AutoFSelect` learner with the task and resampling to a benchmark grid design.
+We combine each `AutoFSelector` learner with the task and resampling to a benchmark grid design.
 
 ```{r design}
 design = benchmark_grid(task, list(at_sequential, at_random), resampling_outer)
