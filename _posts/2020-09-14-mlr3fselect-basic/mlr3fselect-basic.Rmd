@@ -1,15 +1,15 @@
 ---
-title: "mlr3fselect-basic"
+title: "Feature Selection on the Titanic Data Set"
 categories:
   - mlr3fselect
-  - nested resampling
-  - feature importance
   - optimization
+  - feature selection
+  - nested resampling
 description: |
-  Short introduction to mlr3fselect
+  We give a short introduction to mlr3fselect.
 author:
   - name: Marc Becker
-date: 09-14-2020
+date: 01-08-2021
 output:
   distill::distill_article:
     self_contained: false
@@ -45,7 +45,7 @@ In addition to the `survived` column, the reduced data set contains for each pas
 * `pc_class` Passenger class
 * `embarked` Port of embarkation
 
-```{r data}
+```{r}
 library(mlr3data)
 
 data("titanic", package = "mlr3data")
@@ -59,7 +59,7 @@ titanic = titanic[!is.na(titanic$survived),]
 
 We construct a binary classification task.
 
-```{r task}
+```{r}
 library(mlr3)
 
 task = TaskClassif$new(id = "titanic", backend = titanic, target = "survived", positive = "yes")
@@ -69,7 +69,7 @@ task = TaskClassif$new(id = "titanic", backend = titanic, target = "survived", p
 
 We use the logistic regression learner provided by the `mlr3learners` package.
 
-```{r learner}
+```{r}
 library(mlr3learners)
 
 learner = lrn("classif.log_reg")
@@ -77,7 +77,7 @@ learner = lrn("classif.log_reg")
 
 To evaluate the predictive performance, we choose a `3-fold-cross-validation` and the classification error as the measure.
 
-```{r resample and measure}
+```{r}
 resampling = rsmp("cv", folds = 3)
 measure = msr("classif.ce")
 
@@ -88,13 +88,14 @@ resampling$instantiate(task)
 
 The `FSelectInstanceSingleCrit` class specifies a general feature selection scenario. 
 It includes the  `ObjectiveFSelect` object that encodes the black box objective function which is optimized by a feature selection algorithm. 
-The evaluated feature sets are stored in an `ArchiveFSelect` object which provides a method for  querying the best performing feature set.
+The evaluated feature sets are stored in an `ArchiveFSelect` object. 
+The archive provides a method for querying the best performing feature set.
 
 The `Terminator` subclasses determine when to stop the feature selection. 
 In this example we choose a terminator that stops the feature selection after 10 seconds. 
 The sugar functions `trm()` and `trms()` can be used to retrieve terminators from the `mlr_terminators` dictionary.
 
-```{r terminator and instance}
+```{r}
 library(mlr3fselect)
 
 terminator = trm("run_time", secs = 10)
@@ -108,18 +109,17 @@ FSelectInstanceSingleCrit$new(
 
 The `FSelector` subclasses describe the feature selection strategy. The sugar function `fs()` can be used to retrieve feature selection algorithms from the `mlr_fselectors` dictionary.
 
-```{r dictionary}
+```{r}
 mlr_fselectors
 ```
+
 ## Random search
 
 Random search randomly draws feature sets and evaluates them in batches. 
 We retrieve the `FSelectRandomSearch` class with the `fs()` sugar function and choose the `evals` terminator. 
 We set the `n_evals` parameter to `10` which means that 10 feature sets are evaluated.
 
-```{r random search}
-set.seed(7832)
-
+```{r}
 terminator = trm("evals", n_evals = 10)
 instance = FSelectInstanceSingleCrit$new(
   task = task, 
@@ -135,15 +135,16 @@ These features set are internally passed to the `$eval_batch()` method of `FSele
 This general interaction between the objects of **mlr3fselect** stays the same for the different feature selection methods.
 However, the way how new feature sets are generated differs depending on the chosen `FSelector` subclass.
 
-```{r random search optimize}
+```{r}
 fselector$optimize(instance)
 ```
 
 The `ArchiveFSelect` stores a `data.table` which conists of the evaluated feature sets and the corresponding estimated predictive performances. 
 
-```{r random search archive}
-as.data.table(instance$archive)
+```{r}
+as.data.table(instance$archive)[, 1:8]
 ```
+
 The associated resampling iterations can be accessed in the `BenchmarkResult` by calling
 
 ```{r}
@@ -152,16 +153,15 @@ instance$archive$benchmark_result
 
 We retrieve the best performing feature set with 
 
-```{r random search result}
+```{r}
 instance$result
 ```
+
 ## Sequential forward selection 
 
 We try sequential forward selection. We chose the `stagnation` terminator that stops the feature selection if the predictive performance does not increase anymore.
 
-```{r sfs}
-set.seed(7832)
-
+```{r}
 terminator = trm("stagnation", iters = 5)
 instance = FSelectInstanceSingleCrit$new(
   task = task, 
@@ -174,77 +174,20 @@ fselector = fs("sequential")
 fselector$optimize(instance)
 ```
 
-## Nested resampling
+The `FSelectorSequential` object has a special method for displaying the optimization path of the sequential feature selection. 
 
-The feature selection should not be performed on the same resampling sets which are used for evaluating the model itself since this would result in biased performance estimates.
-Nested resampling uses an outer and inner resampling to separate the feature selection from the performance estimation of the model.
-
-We choose `holdout` validation for the outer resampling loop to get a fixed test set. 
-The outer training set is passed to the `AutoFSelect` objects to execute the feature selection. Then the learner is fitted on the outer training set using the selected feature sets and the performance is evaluated on the outer test set.
-
-```{r outer resampling}
-resampling_outer = rsmp("holdout")
+```{r}
+fselector$optimization_path(instance)
 ```
 
-We use  a `3-fold-cross-validation` to evaluate the predictive performance during the feature selection.
+## Recursive feature elimination
 
-```{r inner resampling}
-resampling_inner = rsmp("cv", folds = 5)
-measure = msr("classif.ce")
-terminator = trm("evals", n_evals = 60)
-```
-
-The `AutoFSelector` class inherits from the `Learner` class and starts an automatic feature selection when a task is passed to the `$train()` method.
- 
-```{r AutoFSelect}
-fs_sequential = fs("sequential")
-at_sequential = AutoFSelector$new(learner, resampling_inner, measure = measure, terminator, fselect = fs_sequential, store_fselect_instance = TRUE)
-
-fs_random = fs("random_search")
-at_random = AutoFSelector$new(learner, resampling_inner, measure = measure, terminator, fselect = fs_random, , store_fselect_instance = TRUE)
-```
-
-We combine each `AutoFSelector` learner with the task and resampling to a benchmark grid design.
-
-```{r design}
-design = benchmark_grid(task, list(at_sequential, at_random), resampling_outer)
-design
-```
-
-Now we construct a benchmark call to execute the feature selection and performance evaluation at once.
-
-```{r benchmark}
-set.seed(7832)
-bmr = benchmark(design, store_models = TRUE)
-```
-
-We access the performance of the models estimated on the outer resampling test set.
-
-```{r score}
-bmr$score()
-```
-
-In order to access the corresponding feature sets, we use the `BenchmarkResult` object.
-
-```{r feature set 1}
-bmr$resample_result(1)$learners[[1]]$fselect_result
-```
-
-```{r feature set 2}
-bmr$resample_result(2)$learners[[1]]$fselect_result
-```
-We may see a different result if we replace the `3-fold-cross-validation` with a cross validation with many repetitions since the used resampling instance introduces much randomness.
-
-# Recursive feature elimination
-
-Recrusive feature elemiation utilizes the `importance()` method of learners.
-In each iteration the feature with the lowest importance score is droped. 
+Recrusive feature elemiation utilizes the `$importance()` method of learners.
+In each iteration the feature(s) with the lowest importance score is droped. 
 We choose the non-recruvie algorithm (`recursive = FALSE`) which calculates the feature importance once on the complete feature set. 
 The recrusive version (`recursive = TRUE`) recomputes the feature importance on the reduced feature set in every iteration. 
 
-```{r rfe}
-set.seed(7832)
-
+```{r}
 learner = lrn("classif.ranger", importance = "impurity")
 terminator = trm("none")
 instance = FSelectInstanceSingleCrit$new(
@@ -261,8 +204,64 @@ fselector$optimize(instance)
 
 We access the results.
 
-```{r rfe archive}
-as.data.table(instance$archive)
+```{r}
+as.data.table(instance$archive)[, 1:8]
 ```
 
+## Nested resampling
 
+It is a common mistake to report the predictive performance estimated on resampling sets during the feature selection as the performance that can be expected from the model.
+The repeated evaluation of the model might leak information about the test sets into the model and thus leads to overfitting and over-optimistic performance results. 
+[Nested resampling](https://mlr3book.mlr-org.com/nested-resampling.html) uses an outer and inner resampling to separate the feature selection from the performance estimation of the model.
+We can use the `AutoFselector` class for running nested resampling.
+The `AutoFselector` wraps a `Learner` and argument it with an automatic feature selection.
+This is our inner resampling loop.
+
+```{r}
+resampling_inner = rsmp("cv", folds = 5)
+measure = msr("classif.ce")
+
+at = AutoFSelector$new(
+  learner = learner, 
+  resampling = resampling_inner, 
+  measure = measure,
+  terminator = terminator,
+  fselect = fs("sequential"),
+  store_models = TRUE)
+```
+
+We put the `AutoFSelector` into a `resample()` call to get the outer resampling loop.
+
+```{r}
+resampling_outer = rsmp("cv", folds = 3)
+
+rr = resample(task, at, resampling_outer, store_models = TRUE)
+```
+
+The aggregated performance of all outer resampling iterations is the unbiased predictive performance we can expected from the logisitic regression model with an optimized feature set found by sequential selection. 
+
+```{r}
+rr$aggregate()
+```
+
+Next, we want to compare the predictive performances estimated on the outer resampling to the inner resampling.
+Significantly lower predictive performances on the outer resampling indicate that the models with the optimized feature sets overfit the data.
+
+```{r}
+rr$score()
+```
+
+We check if the feature sets are stable that were selected in the inner resampling. 
+The selected featute sets should not differ too much.
+We might observe unstable models in this example because the small data set and the low number of resampling iterations might introduces too much randomness. 
+Usually, we aim for the selection of similiar feature sets for all outer training sets.
+
+```{r}
+do.call(rbind, lapply(rr$learners, function(x) x$fselect_result))
+```
+
+The archive of the `AutoFSelector` gives us all evaluated hyperparameter configurations with the associated predictive performances.
+
+```{r}
+rr$learners[[1]]$archive$data[, 1:8]
+```
