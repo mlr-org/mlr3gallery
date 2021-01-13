@@ -54,35 +54,35 @@ div.sourceCode
 @media screen {
 code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
-code span.al { color: #ff0000; font-weight: bold; } /* Alert */
-code span.an { color: #545454; font-weight: bold; } /* Annotation */
-code span.at { color: #7d9029; } /* Attribute */
-code span.bn { color: #a1024a; } /* BaseN */
+code span.al { color: #ad0000; } /* Alert */
+code span.an { color: #5e5e5e; } /* Annotation */
+code span.at { color: #20794d; } /* Attribute */
+code span.bn { color: #ad0000; } /* BaseN */
 code span.bu { } /* BuiltIn */
-code span.cf { color: #007faa; font-weight: bold; } /* ControlFlow */
-code span.ch { color: #008000; } /* Char */
-code span.cn { color: #d91e18; } /* Constant */
-code span.co { color: #545454; } /* Comment */
-code span.cv { color: #545454; font-weight: bold; font-style: italic; } /* CommentVar */
-code span.do { color: #ba2121; font-style: italic; } /* Documentation */
-code span.dt { color: #aa5d00; } /* DataType */
-code span.dv { color: #a1024a; } /* DecVal */
-code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.cf { color: #007ba5; } /* ControlFlow */
+code span.ch { color: #20794d; } /* Char */
+code span.cn { color: #8f5902; } /* Constant */
+code span.co { color: #5e5e5e; } /* Comment */
+code span.cv { color: #5e5e5e; font-style: italic; } /* CommentVar */
+code span.do { color: #5e5e5e; font-style: italic; } /* Documentation */
+code span.dt { color: #ad0000; } /* DataType */
+code span.dv { color: #ad0000; } /* DecVal */
+code span.er { color: #ad0000; } /* Error */
 code span.ex { } /* Extension */
-code span.fl { color: #a1024a; } /* Float */
-code span.fu { color: #4254a7; } /* Function */
+code span.fl { color: #ad0000; } /* Float */
+code span.fu { color: #4758ab; } /* Function */
 code span.im { } /* Import */
-code span.in { color: #545454; font-weight: bold; } /* Information */
-code span.kw { color: #007faa; font-weight: bold; } /* Keyword */
-code span.op { color: #696969; } /* Operator */
-code span.ot { color: #007faa; } /* Other */
-code span.pp { color: #bc7a00; } /* Preprocessor */
-code span.sc { color: #008000; } /* SpecialChar */
-code span.ss { color: #bb6688; } /* SpecialString */
-code span.st { color: #008000; } /* String */
-code span.va { color: #19177c; } /* Variable */
-code span.vs { color: #008000; } /* VerbatimString */
-code span.wa { color: #545454; font-weight: bold; font-style: italic; } /* Warning */
+code span.in { color: #5e5e5e; } /* Information */
+code span.kw { color: #007ba5; } /* Keyword */
+code span.op { color: #5e5e5e; } /* Operator */
+code span.ot { color: #007ba5; } /* Other */
+code span.pp { color: #ad0000; } /* Preprocessor */
+code span.sc { color: #20794d; } /* SpecialChar */
+code span.ss { color: #20794d; } /* SpecialString */
+code span.st { color: #20794d; } /* String */
+code span.va { color: #111111; } /* Variable */
+code span.vs { color: #20794d; } /* VerbatimString */
+code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 </style>
 
   <!--radix_placeholder_meta_tags-->
@@ -151,6 +151,7 @@ code span.wa { color: #545454; font-weight: bold; font-style: italic; } /* Warni
     var header = $('header').get(0);
     var headerHeight = header.offsetHeight;
     var headroom = new Headroom(header, {
+      tolerance: 5,
       onPin : function() {
         if (window.headroom_prevent_pin) {
           window.headroom_prevent_pin = false;
@@ -498,22 +499,19 @@ function offsetURL(url) {
   return offset ? offset + '/' + url : url;
 }
 
-function createIndex() {
-  var options = {
-    keys: [
-      "title",
-      "categories",
-      "description",
-      "contents"
-    ]
-  };
-  return new window.Fuse([],options);
-}
-
 function createFuseIndex() {
 
   // create fuse index
-  var options = { keys: ["title", "description", "contents"] };
+  var options = {
+    keys: [
+      { name: 'title', weight: 20 },
+      { name: 'categories', weight: 15 },
+      { name: 'description', weight: 10 },
+      { name: 'contents', weight: 5 },
+    ],
+    ignoreLocation: true,
+    threshold: 0
+  };
   var fuse = new window.Fuse([], options);
 
   // fetch the main search.json
@@ -581,12 +579,6 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
             shouldSort: true,
             minMatchCharLength: 2,
             limit: 10,
-            keys: [
-              { name: 'title', weight: 20 },
-              { name: 'categories', weight: 15 },
-              { name: 'description', weight: 10 },
-              { name: 'contents', weight: 5 },
-            ],
           };
           var results = fuse.search(query, searchOptions);
           callback(results
@@ -884,7 +876,7 @@ d-article pre code {
 d-article pre,
 d-article div.sourceCode,
 d-article div.sourceCode pre {
-  overflow: hidden;
+  overflow: auto;
 }
 
 d-article div.sourceCode {
@@ -2105,11 +2097,11 @@ This includes packages from the `mlr3` family, as well as other packages for dat
 <p>Then, load the main packages we are going to use:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='st'><a href='http://r-datatable.com'>"data.table"</a></span><span class='op'>)</span>
+<pre><code><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='st'><a href='https://Rdatatable.gitlab.io/data.table'>"data.table"</a></span><span class='op'>)</span>
 <span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='st'><a href='https://mlr3.mlr-org.com'>"mlr3"</a></span><span class='op'>)</span>
 <span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='st'><a href='https://mlr3learners.mlr-org.com'>"mlr3learners"</a></span><span class='op'>)</span>
 <span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='st'><a href='https://mlr3viz.mlr-org.com'>"mlr3viz"</a></span><span class='op'>)</span>
-<span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='st'><a href='http://ggplot2.tidyverse.org'>"ggplot2"</a></span><span class='op'>)</span>
+<span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='st'><a href='https://ggplot2.tidyverse.org'>"ggplot2"</a></span><span class='op'>)</span>
 </code></pre>
 </div>
 </div>
@@ -2605,14 +2597,14 @@ Prior to calling [DataExplorer](https://cran.r-project.org/package=DataExplorer)
 <pre><code><span class='va'>mlr_learners</span>
 </code></pre>
 </div>
-<pre><code>&lt;DictionaryLearner&gt; with 28 stored values
+<pre><code>&lt;DictionaryLearner&gt; with 29 stored values
 Keys: classif.cv_glmnet, classif.debug, classif.featureless,
   classif.glmnet, classif.kknn, classif.lda, classif.log_reg,
-  classif.multinom, classif.naive_bayes, classif.qda, classif.ranger,
-  classif.rpart, classif.svm, classif.xgboost, regr.cv_glmnet,
-  regr.featureless, regr.glmnet, regr.kknn, regr.km, regr.lm,
-  regr.ranger, regr.rpart, regr.svm, regr.xgboost, surv.cv_glmnet,
-  surv.glmnet, surv.ranger, surv.xgboost</code></pre>
+  classif.multinom, classif.naive_bayes, classif.nnet, classif.qda,
+  classif.ranger, classif.rpart, classif.svm, classif.xgboost,
+  regr.cv_glmnet, regr.featureless, regr.glmnet, regr.kknn, regr.km,
+  regr.lm, regr.ranger, regr.rpart, regr.svm, regr.xgboost,
+  surv.cv_glmnet, surv.glmnet, surv.ranger, surv.xgboost</code></pre>
 </div>
 <p>For our problem, a suitable learner could be one of the following: Logistic regression, CART, random forest (or many more).</p>
 <p>A learner can be initialized with the <a href="https://mlr3.mlr-org.com/reference/mlr_sugar.html"><code>lrn()</code></a> function and the name of the learner, e.g., <code>lrn("classif.xxx")</code>. Use <code>?mlr_learners_xxx</code> to open the help page of a learner named <code>xxx</code>.</p>
@@ -3437,14 +3429,14 @@ Keys: boston_housing, breast_cancer, german_credit, iris, mtcars, pima,
 <pre><code><span class='va'>mlr_learners</span>
 </code></pre>
 </div>
-<pre><code>&lt;DictionaryLearner&gt; with 28 stored values
+<pre><code>&lt;DictionaryLearner&gt; with 29 stored values
 Keys: classif.cv_glmnet, classif.debug, classif.featureless,
   classif.glmnet, classif.kknn, classif.lda, classif.log_reg,
-  classif.multinom, classif.naive_bayes, classif.qda, classif.ranger,
-  classif.rpart, classif.svm, classif.xgboost, regr.cv_glmnet,
-  regr.featureless, regr.glmnet, regr.kknn, regr.km, regr.lm,
-  regr.ranger, regr.rpart, regr.svm, regr.xgboost, surv.cv_glmnet,
-  surv.glmnet, surv.ranger, surv.xgboost</code></pre>
+  classif.multinom, classif.naive_bayes, classif.nnet, classif.qda,
+  classif.ranger, classif.rpart, classif.svm, classif.xgboost,
+  regr.cv_glmnet, regr.featureless, regr.glmnet, regr.kknn, regr.km,
+  regr.lm, regr.ranger, regr.rpart, regr.svm, regr.xgboost,
+  surv.cv_glmnet, surv.glmnet, surv.ranger, surv.xgboost</code></pre>
 <div class="sourceCode">
 <pre><code><span class='va'>mlr_resamplings</span>
 </code></pre>

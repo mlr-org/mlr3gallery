@@ -43,8 +43,12 @@ library("mlr3")
 library("mlr3learners")
 # Pipelines
 library("mlr3pipelines")
+# lots of measures for evaluation
+requireNamespace("mlr3measures")
 # Retrieving the data
 library("OpenML")
+# Another way to obtain the data
+library("mlr3data")
 ```
 
 ## Retrieving the data from OpenML
@@ -57,14 +61,14 @@ We choose the `41021`as our `oml_id`.
 The related web page can be accessed [here](https://www.openml.org/d/41021).
 This data set was uploaded by [Joaquin Vanschoren](https://www.openml.org/u/2).
 
-```{r}
+```{r, eval = FALSE}
 oml_id = 41021
 oml_dat = getOMLDataSet(data.id = oml_id)
 ```
 
 The description indicates that the data set is associated with baseball or more precisely the story of [Moneyball](https://www.imdb.com/title/tt1210166/).
 
-```{r}
+```{r, eval = FALSE}
 oml_dat
 ```
 
@@ -79,52 +83,54 @@ This is where Statistics came riding down the hillside on a white horse to save 
 This data set contains some of the information that was available to Beane and DePodesta in the early 2000s, and it can be used to better understand their methods.
 
 This data set contains a set of variables that Beane and DePodesta emphasized in their work.
-They determined that statistics like on-base percentage (OBP) and slugging percentage (SLG) were very important when it came to scoring runs, however, they were largely undervalued by most scouts at the time.
+They determined that statistics like on-base percentage (obp) and slugging percentage (slg) were very important when it came to scoring runs, however, they were largely undervalued by most scouts at the time.
 This translated to a gold mine for Beane and DePodesta.
 Since these players weren't being looked at by other teams, they could recruit these players on a small budget.
 The variables are as follows:
 
-* Team
-* League
-* Year
-* Runs Scored (RS)
-* Runs Allowed (RA)
-* Wins (W)
-* On-Base Percentage (OBP)
-* Slugging Percentage (SLG)
-* Batting Average (BA)
-* Playoffs (binary)
-* RankSeason
-* RankPlayoffs
-* Games Played (G)
-* Opponent On-Base Percentage (OOBP)
-* Opponent Slugging Percentage (OSLG)
+* team
+* league
+* year
+* runs scored (rs)
+* runs allowed (ra)
+* wins (w)
+* on-base percentage (obp)
+* slugging percentage (slg)
+* batting average (ba)
+* playoffs (binary)
+* rankseason
+* rankplayoffs
+* games played (g)
+* opponent on-base percentage (oobp)
+* opponent slugging percentage (oslg)
 
 While Beane and DePodesta defined most of these statistics and measures for individual players, this data set is on the team level.
 
 These statistics seem very informative if you are into baseball.
 If baseball of rather obscure to you, simply take these features as given or give this [article](https://en.wikipedia.org/wiki/Baseball_statistics) a quick read.
 
+Finally, note that the `moneyball` dataset is also included in the `mlr3data` package where you can get the preprocessed (integers properly encoded as such, etc.) data via:
+
 ```{r}
-data = oml_dat$data
-summary(data)
+data("moneyball", package = "mlr3data")
+summary(moneyball)
 ```
 
 The summary shows how this data we are dealing with looks like:
 Some data is missing, however, this has structural reasons.
 There are $39$ teams with each maximally $47$ years ($1962$ - $2012$).
-For $988$ cases the information on `RankSeason` and `RankPlayoffs` is missing.
+For $988$ cases the information on `rankseason` and `rankplayoffs` is missing.
 This is since these simply did not reach the playoffs and hence have no reported rank.
 
 ```{r}
-summary(data[data$Playoffs == 0, c("RankSeason", "RankPlayoffs")])
+summary(moneyball[moneyball$Playoffs == 0, c("rankseason", "rankplayoffs")])
 ```
 
-On the other hand, `OOBP` and `OSLG` have $812$ missing values.
+On the other hand, `oobp` and `oslg` have $812$ missing values.
 It seems as if these measures were not available before $1998$.
 
 ```{r}
-summary(data[is.na(data$OOBP), "Year"])
+summary(moneyball[is.na(moneyball$oobp), "year"])
 ```
 
 We seem to have a missing data problem.
@@ -141,8 +147,8 @@ Usually, missing value imputation is preferred over the first two.
 However, in machine learning, one can try out all options and see which performs best for the underlying problem.
 For now, we limit ourselves to a rather simple imputation technique, imputation by randomly sampling from the univariate distribution.
 Note that this does not take the multivariate distribution into account properly and that there are more elaborate approaches.
-We only aim to impute `OOBP` and `OSLG`.
-For the other missing (categorical) features, we simply add a new level which indicates that information is missing (i.e. all missing values belong to.
+We only aim to impute `oobp` and `oslg`.
+For the other missing (categorical) features, we simply add a new level which indicates that information is missing (i.e. all missing values belong to).
 
 It is important to note that in this case here the vast majority of information on the features is missing.
 In this case, imputation is performed to not throw away the existing information of the features.
@@ -151,7 +157,7 @@ In this case, imputation is performed to not throw away the existing information
 We start with an easy `PipeOp` which only performs numeric imputation.
 
 ```{r}
-imp_num = po("imputehist", param_vals = list(affect_columns = selector_type("numeric")))
+imp_num = po("imputehist", param_vals = list(affect_columns = selector_type(c("integer", "numeric"))))
 ```
 
 Next, we append the second imputation job for factors.
@@ -162,26 +168,12 @@ graph = imp_num %>>% imp_fct
 graph$plot()
 ```
 
-So far we only prepared the pipeline without actually modeling.
-Before we come to this step, we perform a last preprocessing step manually.
-Namely, we make `G` (games played) a numerical feature.
-
-```{r}
-data$G = as.numeric(data$G)
-```
-
-Additionally, the row names (starting with $0$) are changed.
-
-```{r}
-rownames(data) <- 1:nrow(data)
-```
-
 ## Creating tasks and learners
 
 The fact that there is missing data does not affect the `task` definition.
 The `task` determines what is the problem to be solved by machine learning.
-We want to explain the Runs Scored (RS).
-RS is an important measure as a run is equivalent to a 'point' scored in other sports.
+We want to explain the runs scored (`rs`).
+`rs` is an important measure as a run is equivalent to a 'point' scored in other sports.
 Naturally, the aim of a coach should be to maximise runs scored and minimise runs allowed.
 As runs scored and runs allowed are both legitimate targets we ignore the runs allowed here.
 The task is defined by:
@@ -189,7 +181,7 @@ The task is defined by:
 ```{r}
 # creates a `mlr3` task from scratch, from a data.frame
 # 'target' names the column in the dataset we want to learn to predict
-task = TaskRegr$new(id = "moneyball", backend = data, target = "RS")
+task = TaskRegr$new(id = "moneyball", backend = moneyball, target = "rs")
 task$missings()
 ```
 
@@ -280,7 +272,7 @@ That seems not too bad.
 Considering that on average approximately 715 runs per team per season have been scored.
 
 ```{r}
-mean(data$RS)
+mean(moneyball$rs)
 ```
 
 ## Performance boost of imputation
@@ -300,10 +292,10 @@ graph2 = as_graph(imp_fct)
 Subsequently, we add the `PipeOpSelect` `PipeOp` to the pipeline.
 
 ```{r}
-feature_names = colnames(data)[!sapply(data, anyNA)]
+feature_names = colnames(moneyball)[!sapply(moneyball, anyNA)]
 feature_names = c(
   feature_names[feature_names %in% task$feature_names],
-  "RankSeason", "RankPlayoffs")
+  "rankseason", "rankplayoffs")
 na_select = po("select")
 na_select$param_set$values$selector = selector_name(feature_names)
 graph2 = graph2 %>>% na_select
@@ -326,7 +318,7 @@ We can use the `variable.importance` of the random forest.
 sort(lrn$model$regr.ranger$model$variable.importance, decreasing = TRUE)
 ```
 
-We see that according to this the left out `OOBP` and `OSLG` seem to have solely rudimentary explanatory power.
+We see that according to this the left out `oobp` and `oslg` seem to have solely rudimentary explanatory power.
 This may be because there were simply too many instances or because the features are themselves not very powerful.
 
 ## Conclusion
@@ -334,7 +326,7 @@ This may be because there were simply too many instances or because the features
 So, to sum up, what we have learned:
 We can access very cool data straight away with the `OpenML` package.
 (We are working on a better direct implementation into `mlr3` at the moment.)
-We can even work with missing data very well in `mlr3`.
+We can work with missing data very well in `mlr3`.
 Nevertheless, we discovered that sometimes imputation does not lead to the intended goals.
 We also learned how to use some `PipeOp`s from the `mlr3pipelines` package.
 
