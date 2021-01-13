@@ -54,35 +54,35 @@ div.sourceCode
 @media screen {
 code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
-code span.al { color: #ff0000; font-weight: bold; } /* Alert */
-code span.an { color: #545454; font-weight: bold; } /* Annotation */
-code span.at { color: #7d9029; } /* Attribute */
-code span.bn { color: #a1024a; } /* BaseN */
+code span.al { color: #ad0000; } /* Alert */
+code span.an { color: #5e5e5e; } /* Annotation */
+code span.at { color: #20794d; } /* Attribute */
+code span.bn { color: #ad0000; } /* BaseN */
 code span.bu { } /* BuiltIn */
-code span.cf { color: #007faa; font-weight: bold; } /* ControlFlow */
-code span.ch { color: #008000; } /* Char */
-code span.cn { color: #d91e18; } /* Constant */
-code span.co { color: #545454; } /* Comment */
-code span.cv { color: #545454; font-weight: bold; font-style: italic; } /* CommentVar */
-code span.do { color: #ba2121; font-style: italic; } /* Documentation */
-code span.dt { color: #aa5d00; } /* DataType */
-code span.dv { color: #a1024a; } /* DecVal */
-code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.cf { color: #007ba5; } /* ControlFlow */
+code span.ch { color: #20794d; } /* Char */
+code span.cn { color: #8f5902; } /* Constant */
+code span.co { color: #5e5e5e; } /* Comment */
+code span.cv { color: #5e5e5e; font-style: italic; } /* CommentVar */
+code span.do { color: #5e5e5e; font-style: italic; } /* Documentation */
+code span.dt { color: #ad0000; } /* DataType */
+code span.dv { color: #ad0000; } /* DecVal */
+code span.er { color: #ad0000; } /* Error */
 code span.ex { } /* Extension */
-code span.fl { color: #a1024a; } /* Float */
-code span.fu { color: #4254a7; } /* Function */
+code span.fl { color: #ad0000; } /* Float */
+code span.fu { color: #4758ab; } /* Function */
 code span.im { } /* Import */
-code span.in { color: #545454; font-weight: bold; } /* Information */
-code span.kw { color: #007faa; font-weight: bold; } /* Keyword */
-code span.op { color: #696969; } /* Operator */
-code span.ot { color: #007faa; } /* Other */
-code span.pp { color: #bc7a00; } /* Preprocessor */
-code span.sc { color: #008000; } /* SpecialChar */
-code span.ss { color: #bb6688; } /* SpecialString */
-code span.st { color: #008000; } /* String */
-code span.va { color: #19177c; } /* Variable */
-code span.vs { color: #008000; } /* VerbatimString */
-code span.wa { color: #545454; font-weight: bold; font-style: italic; } /* Warning */
+code span.in { color: #5e5e5e; } /* Information */
+code span.kw { color: #007ba5; } /* Keyword */
+code span.op { color: #5e5e5e; } /* Operator */
+code span.ot { color: #007ba5; } /* Other */
+code span.pp { color: #ad0000; } /* Preprocessor */
+code span.sc { color: #20794d; } /* SpecialChar */
+code span.ss { color: #20794d; } /* SpecialString */
+code span.st { color: #20794d; } /* String */
+code span.va { color: #111111; } /* Variable */
+code span.vs { color: #20794d; } /* VerbatimString */
+code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 </style>
 
   <!--radix_placeholder_meta_tags-->
@@ -134,7 +134,7 @@ code span.wa { color: #545454; font-weight: bold; font-style: italic; } /* Warni
 <!--/radix_placeholder_rmarkdown_metadata-->
   
   <script type="text/json" id="radix-resource-manifest">
-  {"type":"character","attributes":{},"value":["2020-03-11-mlr3tuning_tutorial_german_credit_files/figure-html5/unnamed-chunk-16-1.png","2020-03-11-mlr3tuning_tutorial_german_credit_files/figure-html5/unnamed-chunk-22-1.png","2020-03-11-mlr3tuning_tutorial_german_credit_files/figure-html5/unnamed-chunk-23-1.png","2020-03-11-mlr3tuning_tutorial_german_credit_files/figure-html5/unnamed-chunk-33-1.png","2020-03-11-mlr3tuning_tutorial_german_credit_files/figure-html5/unnamed-chunk-34-1.png","2020-03-11-mlr3tuning_tutorial_german_credit_files/figure-html5/unnamed-chunk-35-1.png","2020-03-11-mlr3tuning_tutorial_german_credit_files/figure-html5/unnamed-chunk-36-1.png"]}
+  {"type":"character","attributes":{},"value":["2020-03-11-mlr3tuning_tutorial_german_credit_files/figure-html5/unnamed-chunk-16-1.png","2020-03-11-mlr3tuning_tutorial_german_credit_files/figure-html5/unnamed-chunk-22-1.png","2020-03-11-mlr3tuning_tutorial_german_credit_files/figure-html5/unnamed-chunk-23-1.png","2020-03-11-mlr3tuning_tutorial_german_credit_files/figure-html5/unnamed-chunk-32-1.png","2020-03-11-mlr3tuning_tutorial_german_credit_files/figure-html5/unnamed-chunk-33-1.png","2020-03-11-mlr3tuning_tutorial_german_credit_files/figure-html5/unnamed-chunk-34-1.png","2020-03-11-mlr3tuning_tutorial_german_credit_files/figure-html5/unnamed-chunk-35-1.png"]}
   </script>
   <!--radix_placeholder_navigation_in_header-->
 <meta name="distill:offset" content="../.."/>
@@ -149,6 +149,7 @@ code span.wa { color: #545454; font-weight: bold; font-style: italic; } /* Warni
     var header = $('header').get(0);
     var headerHeight = header.offsetHeight;
     var headroom = new Headroom(header, {
+      tolerance: 5,
       onPin : function() {
         if (window.headroom_prevent_pin) {
           window.headroom_prevent_pin = false;
@@ -496,22 +497,19 @@ function offsetURL(url) {
   return offset ? offset + '/' + url : url;
 }
 
-function createIndex() {
-  var options = {
-    keys: [
-      "title",
-      "categories",
-      "description",
-      "contents"
-    ]
-  };
-  return new window.Fuse([],options);
-}
-
 function createFuseIndex() {
 
   // create fuse index
-  var options = { keys: ["title", "description", "contents"] };
+  var options = {
+    keys: [
+      { name: 'title', weight: 20 },
+      { name: 'categories', weight: 15 },
+      { name: 'description', weight: 10 },
+      { name: 'contents', weight: 5 },
+    ],
+    ignoreLocation: true,
+    threshold: 0
+  };
   var fuse = new window.Fuse([], options);
 
   // fetch the main search.json
@@ -579,12 +577,6 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
             shouldSort: true,
             minMatchCharLength: 2,
             limit: 10,
-            keys: [
-              { name: 'title', weight: 20 },
-              { name: 'categories', weight: 15 },
-              { name: 'description', weight: 10 },
-              { name: 'contents', weight: 5 },
-            ],
           };
           var results = fuse.search(query, searchOptions);
           callback(results
@@ -882,7 +874,7 @@ d-article pre code {
 d-article pre,
 d-article div.sourceCode,
 d-article div.sourceCode pre {
-  overflow: hidden;
+  overflow: auto;
 }
 
 d-article div.sourceCode {
@@ -2101,8 +2093,8 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>First, load the packages we are going to use:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='st'><a href='http://r-datatable.com'>"data.table"</a></span><span class='op'>)</span>
-<span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='st'><a href='http://ggplot2.tidyverse.org'>"ggplot2"</a></span><span class='op'>)</span>
+<pre><code><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='st'><a href='https://Rdatatable.gitlab.io/data.table'>"data.table"</a></span><span class='op'>)</span>
+<span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='st'><a href='https://ggplot2.tidyverse.org'>"ggplot2"</a></span><span class='op'>)</span>
 <span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='st'><a href='https://mlr3.mlr-org.com'>"mlr3"</a></span><span class='op'>)</span>
 <span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='st'><a href='https://mlr3learners.mlr-org.com'>"mlr3learners"</a></span><span class='op'>)</span>
 <span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='st'><a href='https://mlr3tuning.mlr-org.com'>"mlr3tuning"</a></span><span class='op'>)</span>
@@ -2210,8 +2202,8 @@ document.addEventListener('DOMContentLoaded', function() {
   learner <span class='op'>=</span> <span class='va'>knn</span>,
   resampling <span class='op'>=</span> <span class='va'>cv10_instance</span>,
   measure <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>msr</a></span><span class='op'>(</span><span class='st'>"classif.ce"</span><span class='op'>)</span>,
-  search_space <span class='op'>=</span> <span class='va'>search_space</span>,
-  terminator <span class='op'>=</span> <span class='fu'><a href='https://bbotk.mlr-org.com/reference/trm.html'>trm</a></span><span class='op'>(</span><span class='st'>"none"</span><span class='op'>)</span>
+  terminator <span class='op'>=</span> <span class='fu'><a href='https://bbotk.mlr-org.com/reference/trm.html'>trm</a></span><span class='op'>(</span><span class='st'>"none"</span><span class='op'>)</span>,
+  search_space <span class='op'>=</span> <span class='va'>search_space</span>
 <span class='op'>)</span>
 </code></pre>
 </div>
@@ -2258,80 +2250,80 @@ document.addEventListener('DOMContentLoaded', function() {
 </code></pre>
 </div>
 <pre><code>     k distance classif.ce                                uhash  x_domain
- 1:  3        1      0.271 63772726-0002-48e8-bb9b-150bb1470e03 &lt;list[2]&gt;
- 2:  3        2      0.273 ca9d8436-bd81-4d9c-bbc9-75648c7ed7eb &lt;list[2]&gt;
- 3:  4        1      0.292 398f4d38-9da2-443b-b1b7-eeaf8d2e5280 &lt;list[2]&gt;
- 4:  4        2      0.279 cafc4762-14af-427f-973e-efacb80cf9d4 &lt;list[2]&gt;
- 5:  5        1      0.271 9ad7b0f7-2258-4cf8-bf8c-0ff7f0aeb8ae &lt;list[2]&gt;
- 6:  5        2      0.274 6c5509f3-d46b-4cbd-a2c2-a3776bea7e1b &lt;list[2]&gt;
- 7:  6        1      0.278 d83ba848-d448-4a1d-b048-112af8380b5d &lt;list[2]&gt;
- 8:  6        2      0.273 63419116-b6aa-4e32-a96d-45c869133103 &lt;list[2]&gt;
- 9:  7        1      0.257 0afc4834-fe2f-4319-b971-071458294268 &lt;list[2]&gt;
-10:  7        2      0.258 870c699a-cf80-4660-ae99-15a77a6a7e01 &lt;list[2]&gt;
-11:  8        1      0.264 97fa8fcc-ff1a-49bc-9033-4ebb5f22e31a &lt;list[2]&gt;
-12:  8        2      0.256 7d483119-9776-4259-b935-7f11892ee329 &lt;list[2]&gt;
-13:  9        1      0.251 dd199e61-0e29-4731-8c99-3aeef8fa5794 &lt;list[2]&gt;
-14:  9        2      0.250 dbe598a8-8858-405d-834f-e9c2699cc1ef &lt;list[2]&gt;
-15: 10        1      0.261 06447694-86ab-4914-9292-de8b21d99958 &lt;list[2]&gt;
-16: 10        2      0.250 730433e5-79fb-43ae-b1a6-b615ef13294f &lt;list[2]&gt;
-17: 11        1      0.256 51701815-369b-4aa0-9e38-a604e842f60e &lt;list[2]&gt;
-18: 11        2      0.254 92365e7e-5616-4767-a204-a78ede822663 &lt;list[2]&gt;
-19: 12        1      0.260 d789d416-4899-497b-832f-26c678e7e170 &lt;list[2]&gt;
-20: 12        2      0.259 919dede4-a5ea-4931-8435-f927eb8d409b &lt;list[2]&gt;
-21: 13        1      0.268 fd65dde4-81c2-412e-b237-b8742830c3ef &lt;list[2]&gt;
-22: 13        2      0.258 6a1378f0-72c7-4fe9-90e2-48e0c7bdcfd7 &lt;list[2]&gt;
-23: 14        1      0.265 f98740ed-1bfa-40ad-8a89-40879cb5bfaa &lt;list[2]&gt;
-24: 14        2      0.263 39edd888-cb72-4ede-a560-4e6e6a67b89a &lt;list[2]&gt;
-25: 15        1      0.268 6c07d223-1f3b-47ca-917a-7c915ead5d35 &lt;list[2]&gt;
-26: 15        2      0.264 f82d6c16-6d74-4668-af56-614e1102112a &lt;list[2]&gt;
-27: 16        1      0.267 419c78c5-9269-4ec9-a558-1af197cb8708 &lt;list[2]&gt;
-28: 16        2      0.262 3e74accc-a19a-4d1a-9623-08bca2748f47 &lt;list[2]&gt;
-29: 17        1      0.264 767981cf-2499-433b-94b4-976c4342735d &lt;list[2]&gt;
-30: 17        2      0.267 bb0c1b4e-0f51-400d-83f1-8c4f85b53970 &lt;list[2]&gt;
-31: 18        1      0.273 c46d9182-b08c-4db9-9655-4917a4ac1e54 &lt;list[2]&gt;
-32: 18        2      0.271 cb89dbe5-e9ab-45f9-af3b-10464945c431 &lt;list[2]&gt;
-33: 19        1      0.269 b3edec18-7cff-46e0-9a1d-65bb89724ba6 &lt;list[2]&gt;
-34: 19        2      0.269 8cc75407-1ed5-4813-871f-07205de8e5f6 &lt;list[2]&gt;
-35: 20        1      0.268 ec7ee767-1179-451d-b63d-d732412776d5 &lt;list[2]&gt;
-36: 20        2      0.269 6f37912f-a3b8-4c91-8bdc-3e5b6b228a75 &lt;list[2]&gt;
+ 1:  3        1      0.271 92ab244c-ceaa-4b23-8863-a7d6d1da9ce1 &lt;list[2]&gt;
+ 2:  3        2      0.273 ddd010de-6403-4e54-8642-aeb660e299b4 &lt;list[2]&gt;
+ 3:  4        1      0.292 1548d904-133e-4840-ae15-769262a61506 &lt;list[2]&gt;
+ 4:  4        2      0.279 f06f18a0-1424-479e-8f5f-6520cf74d9cb &lt;list[2]&gt;
+ 5:  5        1      0.271 85818197-e552-4094-9f84-17cc5b7fa73f &lt;list[2]&gt;
+ 6:  5        2      0.274 43da0a8a-a5f9-4b52-8768-baefe1a421bb &lt;list[2]&gt;
+ 7:  6        1      0.278 972bfb30-7fd5-402c-a968-929acf946dd6 &lt;list[2]&gt;
+ 8:  6        2      0.273 05c3c326-9c71-4129-859d-7e84a2503984 &lt;list[2]&gt;
+ 9:  7        1      0.257 16bc813d-99d7-4989-8465-600127902d3f &lt;list[2]&gt;
+10:  7        2      0.258 dde19252-2315-45f1-b642-fc06d08c1d25 &lt;list[2]&gt;
+11:  8        1      0.264 b2ecc94c-fa07-4185-94a6-c9c0017dfc78 &lt;list[2]&gt;
+12:  8        2      0.256 97bad0ec-2d0d-4c8c-98ab-9cf2be73a666 &lt;list[2]&gt;
+13:  9        1      0.251 7dfb5c2c-d64c-4017-b8c9-6db4311a3532 &lt;list[2]&gt;
+14:  9        2      0.250 65b4d107-a15e-4033-9a8c-c57cddd23b80 &lt;list[2]&gt;
+15: 10        1      0.261 29cffbdd-6625-448e-a343-e1685b469f65 &lt;list[2]&gt;
+16: 10        2      0.250 c146a992-ea59-4b8a-8566-b194a1c0e9c7 &lt;list[2]&gt;
+17: 11        1      0.256 166b7b05-2e8e-465e-9f69-185f1ce933bd &lt;list[2]&gt;
+18: 11        2      0.254 20ff0b8c-2f9c-4239-b8b4-da3e31489923 &lt;list[2]&gt;
+19: 12        1      0.260 753b5033-0186-4444-88cb-716ac5c8e2d0 &lt;list[2]&gt;
+20: 12        2      0.259 ce72a7ab-7853-4220-9f5b-5faf81d57c78 &lt;list[2]&gt;
+21: 13        1      0.268 3894f05c-e0c8-464e-a5a3-6598355532e9 &lt;list[2]&gt;
+22: 13        2      0.258 4e012025-f58b-4168-9644-d0c8fe3686b4 &lt;list[2]&gt;
+23: 14        1      0.265 0b736043-14d9-4dfb-99ff-d3a79f660132 &lt;list[2]&gt;
+24: 14        2      0.263 b60f951d-58b4-4836-bf56-731754e29f93 &lt;list[2]&gt;
+25: 15        1      0.268 3f98d36d-1102-4587-82af-4a288d63cc9e &lt;list[2]&gt;
+26: 15        2      0.264 65befd51-ab38-40b7-9949-cae430ea1b08 &lt;list[2]&gt;
+27: 16        1      0.267 eaae73f1-bd6e-4b2a-88b7-4748658cc0e5 &lt;list[2]&gt;
+28: 16        2      0.262 643b7f0d-8fbe-485c-a63b-dd0eedfdde09 &lt;list[2]&gt;
+29: 17        1      0.264 c8761d53-d11d-45dd-8802-da878f7da5e1 &lt;list[2]&gt;
+30: 17        2      0.267 4e39ba1f-b97d-4ef7-81a8-b8b8753ddd68 &lt;list[2]&gt;
+31: 18        1      0.273 1fa7191e-85a8-4d3e-b709-10f02906dd2e &lt;list[2]&gt;
+32: 18        2      0.271 b0228933-0e13-4c62-8078-aa6856f3577b &lt;list[2]&gt;
+33: 19        1      0.269 66785259-82e2-401c-b171-c8d0418a2764 &lt;list[2]&gt;
+34: 19        2      0.269 8f83fba3-ff5e-4920-b363-db924bb605b2 &lt;list[2]&gt;
+35: 20        1      0.268 08f4122e-4379-4e34-aa9b-e2eb44499694 &lt;list[2]&gt;
+36: 20        2      0.269 41b37f00-cc4b-4467-ba40-641a324b7d74 &lt;list[2]&gt;
      k distance classif.ce                                uhash  x_domain
               timestamp batch_nr
- 1: 2020-11-24 04:46:04        1
- 2: 2020-11-24 04:46:04        1
- 3: 2020-11-24 04:46:04        1
- 4: 2020-11-24 04:46:04        1
- 5: 2020-11-24 04:46:04        1
- 6: 2020-11-24 04:46:04        1
- 7: 2020-11-24 04:46:04        1
- 8: 2020-11-24 04:46:04        1
- 9: 2020-11-24 04:46:04        1
-10: 2020-11-24 04:46:04        1
-11: 2020-11-24 04:46:04        1
-12: 2020-11-24 04:46:04        1
-13: 2020-11-24 04:46:04        1
-14: 2020-11-24 04:46:04        1
-15: 2020-11-24 04:46:04        1
-16: 2020-11-24 04:46:04        1
-17: 2020-11-24 04:46:04        1
-18: 2020-11-24 04:46:04        1
-19: 2020-11-24 04:46:04        1
-20: 2020-11-24 04:46:04        1
-21: 2020-11-24 04:46:04        1
-22: 2020-11-24 04:46:04        1
-23: 2020-11-24 04:46:04        1
-24: 2020-11-24 04:46:04        1
-25: 2020-11-24 04:46:04        1
-26: 2020-11-24 04:46:04        1
-27: 2020-11-24 04:46:04        1
-28: 2020-11-24 04:46:04        1
-29: 2020-11-24 04:46:04        1
-30: 2020-11-24 04:46:04        1
-31: 2020-11-24 04:46:04        1
-32: 2020-11-24 04:46:04        1
-33: 2020-11-24 04:46:04        1
-34: 2020-11-24 04:46:04        1
-35: 2020-11-24 04:46:04        1
-36: 2020-11-24 04:46:04        1
+ 1: 2021-01-13 05:12:15        1
+ 2: 2021-01-13 05:12:15        1
+ 3: 2021-01-13 05:12:15        1
+ 4: 2021-01-13 05:12:15        1
+ 5: 2021-01-13 05:12:15        1
+ 6: 2021-01-13 05:12:15        1
+ 7: 2021-01-13 05:12:15        1
+ 8: 2021-01-13 05:12:15        1
+ 9: 2021-01-13 05:12:15        1
+10: 2021-01-13 05:12:15        1
+11: 2021-01-13 05:12:15        1
+12: 2021-01-13 05:12:15        1
+13: 2021-01-13 05:12:15        1
+14: 2021-01-13 05:12:15        1
+15: 2021-01-13 05:12:15        1
+16: 2021-01-13 05:12:15        1
+17: 2021-01-13 05:12:15        1
+18: 2021-01-13 05:12:15        1
+19: 2021-01-13 05:12:15        1
+20: 2021-01-13 05:12:15        1
+21: 2021-01-13 05:12:15        1
+22: 2021-01-13 05:12:15        1
+23: 2021-01-13 05:12:15        1
+24: 2021-01-13 05:12:15        1
+25: 2021-01-13 05:12:15        1
+26: 2021-01-13 05:12:15        1
+27: 2021-01-13 05:12:15        1
+28: 2021-01-13 05:12:15        1
+29: 2021-01-13 05:12:15        1
+30: 2021-01-13 05:12:15        1
+31: 2021-01-13 05:12:15        1
+32: 2021-01-13 05:12:15        1
+33: 2021-01-13 05:12:15        1
+34: 2021-01-13 05:12:15        1
+35: 2021-01-13 05:12:15        1
+36: 2021-01-13 05:12:15        1
               timestamp batch_nr</code></pre>
 </div>
 <p>We plot the performances depending on the sampled <code>k</code> and <code>distance</code>:</p>
@@ -2374,8 +2366,8 @@ document.addEventListener('DOMContentLoaded', function() {
   learner <span class='op'>=</span> <span class='va'>knn</span>,
   resampling <span class='op'>=</span> <span class='va'>cv10_instance</span>,
   measure <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>msr</a></span><span class='op'>(</span><span class='st'>"classif.ce"</span><span class='op'>)</span>,
+  terminator <span class='op'>=</span> <span class='fu'><a href='https://bbotk.mlr-org.com/reference/trm.html'>trm</a></span><span class='op'>(</span><span class='st'>"evals"</span>, n_evals <span class='op'>=</span> <span class='fl'>36</span><span class='op'>)</span>,
   search_space <span class='op'>=</span> <span class='va'>large_searchspace</span>,
-  terminator <span class='op'>=</span> <span class='fu'><a href='https://bbotk.mlr-org.com/reference/trm.html'>trm</a></span><span class='op'>(</span><span class='st'>"evals"</span>, n_evals <span class='op'>=</span> <span class='fl'>36</span><span class='op'>)</span>
 <span class='op'>)</span>
 </code></pre>
 </div>
@@ -2433,42 +2425,42 @@ document.addEventListener('DOMContentLoaded', function() {
 36: 3.285535 1.296423        rank FALSE      0.300
            k distance      kernel scale classif.ce
                                    uhash  x_domain           timestamp batch_nr
- 1: 9bc934d1-914f-4169-8333-21807ca1f798 &lt;list[4]&gt; 2020-11-24 04:46:44        1
- 2: 7b153920-c6fc-4199-80a9-728f629fd58b &lt;list[4]&gt; 2020-11-24 04:46:44        1
- 3: 091a0e44-b02c-4233-926c-b9ea1db29e9a &lt;list[4]&gt; 2020-11-24 04:46:44        1
- 4: b91cac66-2d73-4189-a23b-ed235695d728 &lt;list[4]&gt; 2020-11-24 04:46:44        1
- 5: 91e67b21-339c-4f70-93c4-51348965f8cf &lt;list[4]&gt; 2020-11-24 04:46:44        1
- 6: 90bac51a-8732-4eb0-a3e8-4d7b6e692bdb &lt;list[4]&gt; 2020-11-24 04:46:44        1
- 7: cc41f79b-22f5-4c7c-811a-2b5a9cc59b2e &lt;list[4]&gt; 2020-11-24 04:46:44        1
- 8: 7330fa7b-b122-4c11-9c19-d54187475da3 &lt;list[4]&gt; 2020-11-24 04:46:44        1
- 9: c020abe6-dcb5-47b7-a6b4-545d3999343f &lt;list[4]&gt; 2020-11-24 04:46:44        1
-10: f94d017f-b111-444b-ac6b-ac941d4382fa &lt;list[4]&gt; 2020-11-24 04:46:44        1
-11: 919ef478-63b8-4078-84d3-2c49210022d2 &lt;list[4]&gt; 2020-11-24 04:46:44        1
-12: 8b2ecd27-6136-485f-8d8a-99bccec3439f &lt;list[4]&gt; 2020-11-24 04:46:44        1
-13: 8aab30b1-0d44-49a6-bcc0-2810a8d61740 &lt;list[4]&gt; 2020-11-24 04:46:44        1
-14: 90dae62a-1f06-4028-af6f-dfbef022d81d &lt;list[4]&gt; 2020-11-24 04:46:44        1
-15: f62dfc5a-df25-49a3-9e50-cb8573f4f106 &lt;list[4]&gt; 2020-11-24 04:46:44        1
-16: c3bb19be-88e6-4c46-b11c-1287b1cd944a &lt;list[4]&gt; 2020-11-24 04:46:44        1
-17: d0e8c0b8-69ec-433c-ad10-62dd276890e7 &lt;list[4]&gt; 2020-11-24 04:46:44        1
-18: f884e1ab-0fd6-4240-ad84-799d923f67bf &lt;list[4]&gt; 2020-11-24 04:46:44        1
-19: e656f436-4bfb-4952-b810-f1cdb62c273c &lt;list[4]&gt; 2020-11-24 04:46:44        1
-20: 2b5af0f3-20ff-413f-9df2-935acc8696a1 &lt;list[4]&gt; 2020-11-24 04:46:44        1
-21: aa01118e-79cd-4b32-8493-3f9707da935b &lt;list[4]&gt; 2020-11-24 04:46:44        1
-22: 2a2ab370-29f1-4502-9fcb-a13a1ba2d68d &lt;list[4]&gt; 2020-11-24 04:46:44        1
-23: 16f6ed87-b335-4728-96b2-513b6adb37d7 &lt;list[4]&gt; 2020-11-24 04:46:44        1
-24: b392a170-b12c-4cde-830e-c516cb6d4f0d &lt;list[4]&gt; 2020-11-24 04:46:44        1
-25: b01d5be4-1eaa-4964-b181-802828b7ea90 &lt;list[4]&gt; 2020-11-24 04:46:44        1
-26: e7b4aa6a-f7a0-40c9-8b3a-ed08acfec60f &lt;list[4]&gt; 2020-11-24 04:46:44        1
-27: e80cdee7-6fe2-47bb-875d-81482e411a16 &lt;list[4]&gt; 2020-11-24 04:46:44        1
-28: bba8571a-2c44-405a-baf3-f99e9df206be &lt;list[4]&gt; 2020-11-24 04:46:44        1
-29: ff47e65d-d046-4bdb-9cef-41fe6e7c491f &lt;list[4]&gt; 2020-11-24 04:46:44        1
-30: a670f0ac-5037-438a-be70-0c0c14522b98 &lt;list[4]&gt; 2020-11-24 04:46:44        1
-31: 04ecdc39-9047-429b-b6f1-ac4e8bc92e7b &lt;list[4]&gt; 2020-11-24 04:46:44        1
-32: a2a8101c-c6ca-41ea-952a-454b3c551996 &lt;list[4]&gt; 2020-11-24 04:46:44        1
-33: 767ab6d8-cf0f-4466-99c1-d15a90d9eb6f &lt;list[4]&gt; 2020-11-24 04:46:44        1
-34: 3a42dbad-c909-45aa-95ed-6290836d92f5 &lt;list[4]&gt; 2020-11-24 04:46:44        1
-35: 6e557253-eb35-4ed1-a6f9-ffe1d90bed6d &lt;list[4]&gt; 2020-11-24 04:46:44        1
-36: 7dadc269-f67b-4d0a-8d7f-938f9ab13096 &lt;list[4]&gt; 2020-11-24 04:46:44        1
+ 1: a5eca94c-58fb-4849-9ebb-448366cc9d71 &lt;list[4]&gt; 2021-01-13 05:12:50        1
+ 2: 5abfacd5-8306-4911-8a95-27e008ac2da3 &lt;list[4]&gt; 2021-01-13 05:12:50        1
+ 3: 59b907ef-7545-47bf-8284-95a899e30cd9 &lt;list[4]&gt; 2021-01-13 05:12:50        1
+ 4: 6b96ee19-0f44-431e-867d-5eb39ace8d85 &lt;list[4]&gt; 2021-01-13 05:12:50        1
+ 5: fdb40355-a451-443b-a541-4717bed2f602 &lt;list[4]&gt; 2021-01-13 05:12:50        1
+ 6: 71878420-4da6-4827-8909-ed700658f73f &lt;list[4]&gt; 2021-01-13 05:12:50        1
+ 7: cbea70d4-eb71-4056-a8c9-dafedecaba47 &lt;list[4]&gt; 2021-01-13 05:12:50        1
+ 8: eba3c34a-de0f-4bf0-b276-156c87f39904 &lt;list[4]&gt; 2021-01-13 05:12:50        1
+ 9: b900750e-258c-4c58-9375-5ac01b52383e &lt;list[4]&gt; 2021-01-13 05:12:50        1
+10: 50e3c08f-3c9f-4194-8528-8ffc9145cbb6 &lt;list[4]&gt; 2021-01-13 05:12:50        1
+11: 3859dfa9-1049-4000-8f03-2ffc47e5319e &lt;list[4]&gt; 2021-01-13 05:12:50        1
+12: 59bf5373-64a0-41ab-a2b4-9bb0cfd86db5 &lt;list[4]&gt; 2021-01-13 05:12:50        1
+13: 1131614b-e115-44ea-a73f-80de00e8666c &lt;list[4]&gt; 2021-01-13 05:12:50        1
+14: 1e91b286-feb5-47e6-aa0b-b76732ab6053 &lt;list[4]&gt; 2021-01-13 05:12:50        1
+15: c8eb94bc-b68e-4cd5-901a-1f614c8376ac &lt;list[4]&gt; 2021-01-13 05:12:50        1
+16: babec870-4dbb-4a7a-b58c-baf3cab7bfee &lt;list[4]&gt; 2021-01-13 05:12:50        1
+17: c39f495c-323a-4f22-bc79-f5686b3162a2 &lt;list[4]&gt; 2021-01-13 05:12:50        1
+18: d6f24d55-4d56-4c0d-860e-f9e38fca5caf &lt;list[4]&gt; 2021-01-13 05:12:50        1
+19: e522f53c-840b-429e-874a-549e997e9b5e &lt;list[4]&gt; 2021-01-13 05:12:50        1
+20: 1cf7608e-cb10-45c1-b7c7-6bfd877fea14 &lt;list[4]&gt; 2021-01-13 05:12:50        1
+21: 7d93a216-92ad-41b7-b14a-9ddd7fd64e1f &lt;list[4]&gt; 2021-01-13 05:12:50        1
+22: f50fce7f-4862-45ad-9e04-f4cfb8cc1da7 &lt;list[4]&gt; 2021-01-13 05:12:50        1
+23: faf0d78c-4d61-4df3-b65a-587f0fef84a8 &lt;list[4]&gt; 2021-01-13 05:12:50        1
+24: 9ca2f9d1-9818-4b46-9862-af4f44e088d9 &lt;list[4]&gt; 2021-01-13 05:12:50        1
+25: 6e495758-df35-4df3-8cf7-615e4e163b76 &lt;list[4]&gt; 2021-01-13 05:12:50        1
+26: 6fed5b26-1333-4c14-b9e3-d97cfc288cd6 &lt;list[4]&gt; 2021-01-13 05:12:50        1
+27: 3eabcfb9-bffb-4b7e-b3af-8e123bd6448c &lt;list[4]&gt; 2021-01-13 05:12:50        1
+28: 4dff31a7-7700-4ae1-aadb-f6bf19db7e99 &lt;list[4]&gt; 2021-01-13 05:12:50        1
+29: 4da8b9e9-f6b6-49bc-a639-e9fd4f931e83 &lt;list[4]&gt; 2021-01-13 05:12:50        1
+30: bea40e4d-ac0f-4c25-9b69-23d2a919df25 &lt;list[4]&gt; 2021-01-13 05:12:50        1
+31: e12e36aa-9dc0-4bc4-bd6f-473961a11bc7 &lt;list[4]&gt; 2021-01-13 05:12:50        1
+32: 2d16d895-b294-4387-8d6b-1d177f11d8e3 &lt;list[4]&gt; 2021-01-13 05:12:50        1
+33: 27f20f0b-8631-4088-b071-e20060767830 &lt;list[4]&gt; 2021-01-13 05:12:50        1
+34: c0ab8e46-93c1-4e52-b9c9-0a13616a84e6 &lt;list[4]&gt; 2021-01-13 05:12:50        1
+35: 9386072b-f50c-41e9-801d-3ea56b2e6360 &lt;list[4]&gt; 2021-01-13 05:12:50        1
+36: b7462cc4-9b17-46d7-b666-18645d5252e8 &lt;list[4]&gt; 2021-01-13 05:12:50        1
                                    uhash  x_domain           timestamp batch_nr</code></pre>
 </div>
 <p>The parameters used by the learner (points after the transformation) are stored in in the <code>x_domain</code> column as lists. By using <code>unnest = x_domain</code>, the list elements are expanded to separate columns:</p>
@@ -2516,42 +2508,42 @@ document.addEventListener('DOMContentLoaded', function() {
 36: 3.285535 1.296423        rank FALSE      0.300
            k distance      kernel scale classif.ce
                                    uhash           timestamp batch_nr
- 1: 9bc934d1-914f-4169-8333-21807ca1f798 2020-11-24 04:46:44        1
- 2: 7b153920-c6fc-4199-80a9-728f629fd58b 2020-11-24 04:46:44        1
- 3: 091a0e44-b02c-4233-926c-b9ea1db29e9a 2020-11-24 04:46:44        1
- 4: b91cac66-2d73-4189-a23b-ed235695d728 2020-11-24 04:46:44        1
- 5: 91e67b21-339c-4f70-93c4-51348965f8cf 2020-11-24 04:46:44        1
- 6: 90bac51a-8732-4eb0-a3e8-4d7b6e692bdb 2020-11-24 04:46:44        1
- 7: cc41f79b-22f5-4c7c-811a-2b5a9cc59b2e 2020-11-24 04:46:44        1
- 8: 7330fa7b-b122-4c11-9c19-d54187475da3 2020-11-24 04:46:44        1
- 9: c020abe6-dcb5-47b7-a6b4-545d3999343f 2020-11-24 04:46:44        1
-10: f94d017f-b111-444b-ac6b-ac941d4382fa 2020-11-24 04:46:44        1
-11: 919ef478-63b8-4078-84d3-2c49210022d2 2020-11-24 04:46:44        1
-12: 8b2ecd27-6136-485f-8d8a-99bccec3439f 2020-11-24 04:46:44        1
-13: 8aab30b1-0d44-49a6-bcc0-2810a8d61740 2020-11-24 04:46:44        1
-14: 90dae62a-1f06-4028-af6f-dfbef022d81d 2020-11-24 04:46:44        1
-15: f62dfc5a-df25-49a3-9e50-cb8573f4f106 2020-11-24 04:46:44        1
-16: c3bb19be-88e6-4c46-b11c-1287b1cd944a 2020-11-24 04:46:44        1
-17: d0e8c0b8-69ec-433c-ad10-62dd276890e7 2020-11-24 04:46:44        1
-18: f884e1ab-0fd6-4240-ad84-799d923f67bf 2020-11-24 04:46:44        1
-19: e656f436-4bfb-4952-b810-f1cdb62c273c 2020-11-24 04:46:44        1
-20: 2b5af0f3-20ff-413f-9df2-935acc8696a1 2020-11-24 04:46:44        1
-21: aa01118e-79cd-4b32-8493-3f9707da935b 2020-11-24 04:46:44        1
-22: 2a2ab370-29f1-4502-9fcb-a13a1ba2d68d 2020-11-24 04:46:44        1
-23: 16f6ed87-b335-4728-96b2-513b6adb37d7 2020-11-24 04:46:44        1
-24: b392a170-b12c-4cde-830e-c516cb6d4f0d 2020-11-24 04:46:44        1
-25: b01d5be4-1eaa-4964-b181-802828b7ea90 2020-11-24 04:46:44        1
-26: e7b4aa6a-f7a0-40c9-8b3a-ed08acfec60f 2020-11-24 04:46:44        1
-27: e80cdee7-6fe2-47bb-875d-81482e411a16 2020-11-24 04:46:44        1
-28: bba8571a-2c44-405a-baf3-f99e9df206be 2020-11-24 04:46:44        1
-29: ff47e65d-d046-4bdb-9cef-41fe6e7c491f 2020-11-24 04:46:44        1
-30: a670f0ac-5037-438a-be70-0c0c14522b98 2020-11-24 04:46:44        1
-31: 04ecdc39-9047-429b-b6f1-ac4e8bc92e7b 2020-11-24 04:46:44        1
-32: a2a8101c-c6ca-41ea-952a-454b3c551996 2020-11-24 04:46:44        1
-33: 767ab6d8-cf0f-4466-99c1-d15a90d9eb6f 2020-11-24 04:46:44        1
-34: 3a42dbad-c909-45aa-95ed-6290836d92f5 2020-11-24 04:46:44        1
-35: 6e557253-eb35-4ed1-a6f9-ffe1d90bed6d 2020-11-24 04:46:44        1
-36: 7dadc269-f67b-4d0a-8d7f-938f9ab13096 2020-11-24 04:46:44        1
+ 1: a5eca94c-58fb-4849-9ebb-448366cc9d71 2021-01-13 05:12:50        1
+ 2: 5abfacd5-8306-4911-8a95-27e008ac2da3 2021-01-13 05:12:50        1
+ 3: 59b907ef-7545-47bf-8284-95a899e30cd9 2021-01-13 05:12:50        1
+ 4: 6b96ee19-0f44-431e-867d-5eb39ace8d85 2021-01-13 05:12:50        1
+ 5: fdb40355-a451-443b-a541-4717bed2f602 2021-01-13 05:12:50        1
+ 6: 71878420-4da6-4827-8909-ed700658f73f 2021-01-13 05:12:50        1
+ 7: cbea70d4-eb71-4056-a8c9-dafedecaba47 2021-01-13 05:12:50        1
+ 8: eba3c34a-de0f-4bf0-b276-156c87f39904 2021-01-13 05:12:50        1
+ 9: b900750e-258c-4c58-9375-5ac01b52383e 2021-01-13 05:12:50        1
+10: 50e3c08f-3c9f-4194-8528-8ffc9145cbb6 2021-01-13 05:12:50        1
+11: 3859dfa9-1049-4000-8f03-2ffc47e5319e 2021-01-13 05:12:50        1
+12: 59bf5373-64a0-41ab-a2b4-9bb0cfd86db5 2021-01-13 05:12:50        1
+13: 1131614b-e115-44ea-a73f-80de00e8666c 2021-01-13 05:12:50        1
+14: 1e91b286-feb5-47e6-aa0b-b76732ab6053 2021-01-13 05:12:50        1
+15: c8eb94bc-b68e-4cd5-901a-1f614c8376ac 2021-01-13 05:12:50        1
+16: babec870-4dbb-4a7a-b58c-baf3cab7bfee 2021-01-13 05:12:50        1
+17: c39f495c-323a-4f22-bc79-f5686b3162a2 2021-01-13 05:12:50        1
+18: d6f24d55-4d56-4c0d-860e-f9e38fca5caf 2021-01-13 05:12:50        1
+19: e522f53c-840b-429e-874a-549e997e9b5e 2021-01-13 05:12:50        1
+20: 1cf7608e-cb10-45c1-b7c7-6bfd877fea14 2021-01-13 05:12:50        1
+21: 7d93a216-92ad-41b7-b14a-9ddd7fd64e1f 2021-01-13 05:12:50        1
+22: f50fce7f-4862-45ad-9e04-f4cfb8cc1da7 2021-01-13 05:12:50        1
+23: faf0d78c-4d61-4df3-b65a-587f0fef84a8 2021-01-13 05:12:50        1
+24: 9ca2f9d1-9818-4b46-9862-af4f44e088d9 2021-01-13 05:12:50        1
+25: 6e495758-df35-4df3-8cf7-615e4e163b76 2021-01-13 05:12:50        1
+26: 6fed5b26-1333-4c14-b9e3-d97cfc288cd6 2021-01-13 05:12:50        1
+27: 3eabcfb9-bffb-4b7e-b3af-8e123bd6448c 2021-01-13 05:12:50        1
+28: 4dff31a7-7700-4ae1-aadb-f6bf19db7e99 2021-01-13 05:12:50        1
+29: 4da8b9e9-f6b6-49bc-a639-e9fd4f931e83 2021-01-13 05:12:50        1
+30: bea40e4d-ac0f-4c25-9b69-23d2a919df25 2021-01-13 05:12:50        1
+31: e12e36aa-9dc0-4bc4-bd6f-473961a11bc7 2021-01-13 05:12:50        1
+32: 2d16d895-b294-4387-8d6b-1d177f11d8e3 2021-01-13 05:12:50        1
+33: 27f20f0b-8631-4088-b071-e20060767830 2021-01-13 05:12:50        1
+34: c0ab8e46-93c1-4e52-b9c9-0a13616a84e6 2021-01-13 05:12:50        1
+35: 9386072b-f50c-41e9-801d-3ea56b2e6360 2021-01-13 05:12:50        1
+36: b7462cc4-9b17-46d7-b666-18645d5252e8 2021-01-13 05:12:50        1
                                    uhash           timestamp batch_nr
     x_domain_k x_domain_distance x_domain_kernel x_domain_scale
  1:         14          2.921236     rectangular          FALSE
@@ -2638,9 +2630,9 @@ document.addEventListener('DOMContentLoaded', function() {
   learner <span class='op'>=</span> <span class='va'>knn</span>,
   resampling <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>rsmp</a></span><span class='op'>(</span><span class='st'>"cv"</span>, folds <span class='op'>=</span> <span class='fl'>5</span><span class='op'>)</span>, <span class='co'># we can NOT use fixed resampling here</span>
   measure <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>msr</a></span><span class='op'>(</span><span class='st'>"classif.ce"</span><span class='op'>)</span>,
-  search_space <span class='op'>=</span> <span class='va'>search_space</span>,
   terminator <span class='op'>=</span> <span class='fu'><a href='https://bbotk.mlr-org.com/reference/trm.html'>trm</a></span><span class='op'>(</span><span class='st'>"none"</span><span class='op'>)</span>,
   tuner <span class='op'>=</span> <span class='fu'><a href='https://mlr3tuning.mlr-org.com/reference/tnr.html'>tnr</a></span><span class='op'>(</span><span class='st'>"grid_search"</span>, resolution <span class='op'>=</span> <span class='fl'>18</span><span class='op'>)</span>,
+  search_space <span class='op'>=</span> <span class='va'>search_space</span>
 <span class='op'>)</span>
 </code></pre>
 </div>
@@ -2662,7 +2654,7 @@ document.addEventListener('DOMContentLoaded', function() {
 </code></pre>
 </div>
 <pre><code>classif.ce 
-     0.256 </code></pre>
+     0.261 </code></pre>
 </div>
 <p>Essentially, this is the performance of a “knn with optimal hyperparameters found by grid search”. Note that <code>grid_auto</code> is not changed since <code>resample()</code> creates a clone for each resampling iteration. The trained <code>AutoTuner</code> objects can be accessed by using</p>
 <div class="layout-chunk" data-layout="l-body">
@@ -2672,7 +2664,7 @@ document.addEventListener('DOMContentLoaded', function() {
 </div>
 <pre><code>&lt;AutoTuner:classif.kknn.tuned&gt;
 * Model: list
-* Parameters: kernel=rectangular, k=9, distance=2
+* Parameters: list()
 * Packages: kknn
 * Predict Type: prob
 * Feature types: logical, integer, numeric, factor, ordered
@@ -2682,7 +2674,7 @@ document.addEventListener('DOMContentLoaded', function() {
 </code></pre>
 </div>
 <pre><code>   k distance learner_param_vals  x_domain classif.ce
-1: 9        2          &lt;list[3]&gt; &lt;list[2]&gt;       0.26</code></pre>
+1: 9        2          &lt;list[3]&gt; &lt;list[2]&gt;  0.2522222</code></pre>
 </div>
 <h2 id="appendix">Appendix</h2>
 <h3 id="example-tuning-with-a-larger-budget">Example: Tuning With A Larger Budget</h3>
@@ -2691,13 +2683,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
 </div>
 <div class="layout-chunk" data-layout="l-body">
-
-</div>
-<div class="layout-chunk" data-layout="l-body">
-<div class="sourceCode">
-<pre><code><span class='va'>perfdata</span>
-</code></pre>
-</div>
 <pre><code>             k distance   kernel scale classif.ce
    1: 2.191216 2.232217 gaussian FALSE      0.312
    2: 3.549142 1.058476     rank FALSE      0.296
@@ -2711,17 +2696,17 @@ document.addEventListener('DOMContentLoaded', function() {
 3599: 3.298112 2.984946  optimal FALSE      0.301
 3600: 3.855455 2.613641 gaussian FALSE      0.294
                                      uhash           timestamp batch_nr
-   1: ca82829b-8915-4b0c-831b-15208edad9ae 2020-10-08 10:52:41        1
-   2: e075729f-bef1-4f06-88c7-8d4e379866be 2020-10-08 10:52:41        1
-   3: 215b080b-9e0a-40f5-8305-e4c4c85fb99c 2020-10-08 10:52:41        1
-   4: 1e640077-c625-49fd-b0dc-58ebcb49d1d9 2020-10-08 10:52:41        1
-   5: 495af8d5-474c-4451-9f02-06d1d26f4ebd 2020-10-08 10:52:41        1
+   1: 0bac4d72-2dad-4d0f-8502-22cc27284bb2 2020-12-09 15:08:29        1
+   2: fe8de768-e91a-4a89-9fe2-521083a24466 2020-12-09 15:08:29        1
+   3: bbeab2d5-19aa-4382-a351-d5ece72a58a2 2020-12-09 15:08:29        1
+   4: 93b5f285-66b9-4ea6-a8fc-700a11ed08a2 2020-12-09 15:08:29        1
+   5: 1ab6ca63-96db-414e-9932-67f23592aab9 2020-12-09 15:08:29        1
   ---                                                                  
-3596: e9d1d423-80b2-4955-96fd-5b27dae39617 2020-10-08 11:43:55      100
-3597: 66f68400-4622-4ba0-a2f3-facaf141d97c 2020-10-08 11:43:55      100
-3598: 61d53a77-507d-4449-8e99-ce1273ab2c73 2020-10-08 11:43:55      100
-3599: ba0392f8-719b-438d-bbd3-a982e736c2c4 2020-10-08 11:43:55      100
-3600: b14811dc-5519-45ca-ac75-3ebe9e81f9a0 2020-10-08 11:43:55      100
+3596: ae870063-e324-4f69-bfea-7c973ccabb02 2020-12-09 16:05:45      100
+3597: 8f2d97f6-9ead-482d-96df-dade4277054c 2020-12-09 16:05:45      100
+3598: 5b1d82a7-d330-48a6-b4be-af06d6a73a4c 2020-12-09 16:05:45      100
+3599: 9e77de4a-f3ab-43fc-a89b-987e53be04a4 2020-12-09 16:05:45      100
+3600: 1ce1c23f-a756-482a-8b46-65abb1270fd2 2020-12-09 16:05:45      100
       x_domain_k x_domain_distance x_domain_kernel x_domain_scale
    1:          9          2.232217        gaussian          FALSE
    2:         35          1.058476            rank          FALSE
@@ -2742,7 +2727,7 @@ document.addEventListener('DOMContentLoaded', function() {
   <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/geom_point.html'>geom_point</a></span><span class='op'>(</span>size <span class='op'>=</span> <span class='fl'>2</span>, alpha <span class='op'>=</span> <span class='fl'>0.3</span><span class='op'>)</span>
 </code></pre>
 </div>
-<p><img src="2020-03-11-mlr3tuning_tutorial_german_credit_files/figure-html5/unnamed-chunk-33-1.png" width="624" /></p>
+<p><img src="2020-03-11-mlr3tuning_tutorial_german_credit_files/figure-html5/unnamed-chunk-32-1.png" width="624" /></p>
 </div>
 <p>Now, there seems to be a visible pattern by kernel as well:</p>
 <div class="layout-chunk" data-layout="l-body">
@@ -2751,18 +2736,18 @@ document.addEventListener('DOMContentLoaded', function() {
   <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/geom_point.html'>geom_point</a></span><span class='op'>(</span>size <span class='op'>=</span> <span class='fl'>2</span>, alpha <span class='op'>=</span> <span class='fl'>0.3</span><span class='op'>)</span>
 </code></pre>
 </div>
-<p><img src="2020-03-11-mlr3tuning_tutorial_german_credit_files/figure-html5/unnamed-chunk-34-1.png" width="624" /></p>
+<p><img src="2020-03-11-mlr3tuning_tutorial_german_credit_files/figure-html5/unnamed-chunk-33-1.png" width="624" /></p>
 </div>
-<p>In fact, if we zoom in to <code>(5, 35)</code> <span class="math inline">\(\times\)</span> <code>(0.23, 0.28)</code> and do decrease smoothing we see that different kernels have their optimum at different values of <code>k</code>:</p>
+<p>In fact, if we zoom in to <code>(5, 40)</code> <span class="math inline">\(\times\)</span> <code>(0.23, 0.28)</code> and do decrease smoothing we see that different kernels have their optimum at different values of <code>k</code>:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre><code><span class='fu'><a href='https://ggplot2.tidyverse.org/reference/ggplot.html'>ggplot</a></span><span class='op'>(</span><span class='va'>perfdata</span>, <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/aes.html'>aes</a></span><span class='op'>(</span>x <span class='op'>=</span> <span class='va'>x_domain_k</span>, y <span class='op'>=</span> <span class='va'>classif.ce</span>, color <span class='op'>=</span> <span class='va'>kernel</span>,
   group <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/interaction.html'>interaction</a></span><span class='op'>(</span><span class='va'>kernel</span>, <span class='va'>scale</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span>
   <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/geom_point.html'>geom_point</a></span><span class='op'>(</span>size <span class='op'>=</span> <span class='fl'>2</span>, alpha <span class='op'>=</span> <span class='fl'>0.3</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/geom_smooth.html'>geom_smooth</a></span><span class='op'>(</span><span class='op'>)</span> <span class='op'>+</span>
-  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/lims.html'>xlim</a></span><span class='op'>(</span><span class='fl'>5</span>, <span class='fl'>35</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/lims.html'>ylim</a></span><span class='op'>(</span><span class='fl'>0.23</span>, <span class='fl'>0.28</span><span class='op'>)</span>
+  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/lims.html'>xlim</a></span><span class='op'>(</span><span class='fl'>5</span>, <span class='fl'>40</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/lims.html'>ylim</a></span><span class='op'>(</span><span class='fl'>0.23</span>, <span class='fl'>0.28</span><span class='op'>)</span>
 </code></pre>
 </div>
-<p><img src="2020-03-11-mlr3tuning_tutorial_german_credit_files/figure-html5/unnamed-chunk-35-1.png" width="624" /></p>
+<p><img src="2020-03-11-mlr3tuning_tutorial_german_credit_files/figure-html5/unnamed-chunk-34-1.png" width="624" /></p>
 </div>
 <p>What about the <code>distance</code> parameter? If we select all results with <code>k</code> between 10 and 20 and plot distance and kernel we see an approximate relationship:</p>
 <div class="layout-chunk" data-layout="l-body">
@@ -2772,7 +2757,7 @@ document.addEventListener('DOMContentLoaded', function() {
   <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/geom_point.html'>geom_point</a></span><span class='op'>(</span>size <span class='op'>=</span> <span class='fl'>2</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/geom_smooth.html'>geom_smooth</a></span><span class='op'>(</span><span class='op'>)</span>
 </code></pre>
 </div>
-<p><img src="2020-03-11-mlr3tuning_tutorial_german_credit_files/figure-html5/unnamed-chunk-36-1.png" width="624" /></p>
+<p><img src="2020-03-11-mlr3tuning_tutorial_german_credit_files/figure-html5/unnamed-chunk-35-1.png" width="624" /></p>
 </div>
 <p>In sum our observations are: The <code>scale</code> parameter is very influential, and scaling is beneficial. The <code>distance</code> type seems to be the least influential. Their seems to be an interaction between ‘k’ and ‘kernel’.</p>
 <div class="sourceCode" id="cb16"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
