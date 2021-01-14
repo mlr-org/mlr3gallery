@@ -472,8 +472,15 @@ d-title {
   top: 0;
 }
 
+/* adjust viewport for navbar height */
+/* helps vertically center bootstrap (non-distill) content */
+.min-vh-100 {
+  min-height: calc(100vh - 100px) !important;
+}
+
 </style>
 
+<script src="../../site_libs/jquery-1.11.3/jquery.min.js"></script>
 <link href="../../site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet"/>
 <link href="../../site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet"/>
 <script src="../../site_libs/headroom-0.9.4/headroom.min.js"></script>
@@ -581,19 +588,21 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
           var results = fuse.search(query, searchOptions);
           callback(results
             .map(function(result) { return result.item; })
-            .filter(function(item) { return !!item.description; })
           );
         },
         templates: {
           suggestion: function(suggestion) {
+            var img = suggestion.preview && Object.keys(suggestion.preview).length > 0
+              ? `<img src="${offsetURL(suggestion.preview)}"</img>`
+              : '';
             var html = `
               <div class="search-item">
                 <h3>${suggestion.title}</h3>
                 <div class="search-item-description">
-                  ${suggestion.description}
+                  ${suggestion.description || ''}
                 </div>
                 <div class="search-item-preview">
-                  <img src="${suggestion.preview ? offsetURL(suggestion.preview) : ''}"</img>
+                  ${img}
                 </div>
               </div>
             `;
@@ -616,6 +625,10 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 </script>
 
 <style type="text/css">
+
+.nav-search {
+  font-size: x-small;
+}
 
 /* Algolioa Autocomplete */
 
@@ -691,6 +704,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 }
 
 .algolia-autocomplete .aa-dropdown-menu .aa-suggestion .search-item h3 {
+  font-size: 1rem;
   margin-block-start: 0;
   margin-block-end: 5px;
 }
@@ -918,6 +932,11 @@ d-article pre a:hover {
   text-decoration: underline;
 }
 
+d-article details {
+  grid-column: text;
+  margin-bottom: 0.8em;
+}
+
 @media(min-width: 768px) {
 
 d-article pre,
@@ -1072,6 +1091,17 @@ d-article .citation {
 
 div.hanging-indent{
   margin-left: 1em; text-indent: -1em;
+}
+
+/* Citation hover box */
+
+.tippy-box[data-theme~=light-border] {
+  background-color: rgba(250, 250, 250, 0.95);
+}
+
+.tippy-content > p {
+  margin-bottom: 0;
+  padding: 2px;
 }
 
 
@@ -1739,7 +1769,7 @@ function init_distill() {
     var layout = $(this).attr('data-layout');
 
     // apply layout to markdown level block elements
-    var elements = $(this).children().not('div.sourceCode, pre, script');
+    var elements = $(this).children().not('details, div.sourceCode, pre, script');
     elements.each(function(i, el) {
       var layout_div = $('<div class="' + layout + '"></div>');
       if (layout_div.hasClass('shaded')) {
@@ -1854,6 +1884,20 @@ function init_distill() {
     // move appendix-bottom entries to the bottom
     $('.appendix-bottom').appendTo('d-appendix').children().unwrap();
     $('.appendix-bottom').remove();
+
+    // hoverable references
+    $('span.citation[data-cites]').each(function() {
+      var refHtml = $('#ref-' + $(this).attr('data-cites')).html();
+      window.tippy(this, {
+        allowHTML: true,
+        content: refHtml,
+        maxWidth: 500,
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'light-border',
+        placement: 'bottom-start'
+      });
+    });
 
     // clear polling timer
     clearInterval(tid);
@@ -2015,6 +2059,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
 <!--/radix_placeholder_distill-->
   <script src="../../site_libs/jquery-1.11.3/jquery.min.js"></script>
+  <script src="../../site_libs/popper-2.6.0/popper.min.js"></script>
+  <link href="../../site_libs/tippy-6.2.7/tippy.css" rel="stylesheet" />
+  <link href="../../site_libs/tippy-6.2.7/tippy-light-border.css" rel="stylesheet" />
+  <script src="../../site_libs/tippy-6.2.7/tippy.umd.min.js"></script>
   <script src="../../site_libs/anchor-4.2.2/anchor.min.js"></script>
   <script src="../../site_libs/bowser-1.9.3/bowser.min.js"></script>
   <script src="../../site_libs/webcomponents-2.0.0/webcomponents.js"></script>
@@ -2093,7 +2141,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>First, load the packages we are going to use:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='st'><a href='https://Rdatatable.gitlab.io/data.table'>"data.table"</a></span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='st'><a href='https://Rdatatable.gitlab.io/data.table'>"data.table"</a></span><span class='op'>)</span>
 <span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='st'><a href='https://ggplot2.tidyverse.org'>"ggplot2"</a></span><span class='op'>)</span>
 <span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='st'><a href='https://mlr3.mlr-org.com'>"mlr3"</a></span><span class='op'>)</span>
 <span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='st'><a href='https://mlr3learners.mlr-org.com'>"mlr3learners"</a></span><span class='op'>)</span>
@@ -2105,14 +2153,14 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>We use the same <code>Task</code> as in Part I:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>task</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>tsk</a></span><span class='op'>(</span><span class='st'>"german_credit"</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>task</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>tsk</a></span><span class='op'>(</span><span class='st'>"german_credit"</span><span class='op'>)</span>
 </code></pre>
 </div>
 </div>
 <p>We also might want to use multiple cores to reduce long run times of tuning runs.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='co'># future::plan("multiprocess") # uncomment for parallelization</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='co'># future::plan("multiprocess") # uncomment for parallelization</span>
 </code></pre>
 </div>
 </div>
@@ -2120,7 +2168,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>We will evaluate all hyperparameter configurations using 10-fold CV. We use a <em>fixed</em> train-test split, i.e. the same splits for each evaluation. Otherwise, some evaluation could get unusually “hard” splits, which would make comparisons unfair.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='fu'><a href='https://rdrr.io/r/base/Random.html'>set.seed</a></span><span class='op'>(</span><span class='fl'>8008135</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/Random.html'>set.seed</a></span><span class='op'>(</span><span class='fl'>8008135</span><span class='op'>)</span>
 <span class='va'>cv10_instance</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>rsmp</a></span><span class='op'>(</span><span class='st'>"cv"</span>, folds <span class='op'>=</span> <span class='fl'>10</span><span class='op'>)</span>
 
 <span class='co'># fix the train-test splits using the $instantiate() method</span>
@@ -2153,7 +2201,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>First, we need to decide what <a href="https://mlr3.mlr-org.com/reference/Learner.html"><code>Learner</code></a> we want to optimize. We will use <a href="https://mlr3learners.mlr-org.com/reference/mlr_learners_classif.kknn.html"><code>LearnerClassifKKNN</code></a>, the “kernelized” k-nearest neighbor classifier. We will use <code>kknn</code> as a normal kNN without weighting first (i.e., using the rectangular kernel):</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>knn</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>lrn</a></span><span class='op'>(</span><span class='st'>"classif.kknn"</span>, predict_type <span class='op'>=</span> <span class='st'>"prob"</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>knn</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>lrn</a></span><span class='op'>(</span><span class='st'>"classif.kknn"</span>, predict_type <span class='op'>=</span> <span class='st'>"prob"</span><span class='op'>)</span>
 <span class='va'>knn</span><span class='op'>$</span><span class='va'>param_set</span><span class='op'>$</span><span class='va'>values</span><span class='op'>$</span><span class='va'>kernel</span> <span class='op'>=</span> <span class='st'>"rectangular"</span>
 </code></pre>
 </div>
@@ -2161,7 +2209,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>As a next step, we decide what parameters we optimize over. Before that, though, we are interested in the parameter set on which we could tune:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>knn</span><span class='op'>$</span><span class='va'>param_set</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>knn</span><span class='op'>$</span><span class='va'>param_set</span>
 </code></pre>
 </div>
 <pre><code>&lt;ParamSet&gt;
@@ -2187,7 +2235,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>We first tune the <code>k</code> parameter (i.e. the number of nearest neighbors), between 3 to 20. Second, we tune the <code>distance</code> function, allowing L1 and L2 distances. To do so, we use the <code>paradox</code> package to define a search space (see the <a href="https://mlr3book.mlr-org.com/paradox.html">online vignette</a> for a more complete introduction.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>search_space</span> <span class='op'>=</span> <span class='va'><a href='https://paradox.mlr-org.com/reference/ParamSet.html'>ParamSet</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>search_space</span> <span class='op'>=</span> <span class='va'><a href='https://paradox.mlr-org.com/reference/ParamSet.html'>ParamSet</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>
   <span class='va'><a href='https://paradox.mlr-org.com/reference/ParamInt.html'>ParamInt</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='st'>"k"</span>, lower <span class='op'>=</span> <span class='fl'>3</span>, upper <span class='op'>=</span> <span class='fl'>20</span><span class='op'>)</span>,
   <span class='va'><a href='https://paradox.mlr-org.com/reference/ParamInt.html'>ParamInt</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='st'>"distance"</span>, lower <span class='op'>=</span> <span class='fl'>1</span>, upper <span class='op'>=</span> <span class='fl'>2</span><span class='op'>)</span>
 <span class='op'>)</span><span class='op'>)</span>
@@ -2197,7 +2245,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>As a next step, we define a <a href="https://mlr3tuning.mlr-org.com/reference/TuningInstanceSingleCrit.html"><code>TuningInstanceSingleCrit</code></a> that represents the problem we are trying to optimize.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>instance_grid</span> <span class='op'>=</span> <span class='va'><a href='https://mlr3tuning.mlr-org.com/reference/TuningInstanceSingleCrit.html'>TuningInstanceSingleCrit</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>instance_grid</span> <span class='op'>=</span> <span class='va'><a href='https://mlr3tuning.mlr-org.com/reference/TuningInstanceSingleCrit.html'>TuningInstanceSingleCrit</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span>
   task <span class='op'>=</span> <span class='va'>task</span>,
   learner <span class='op'>=</span> <span class='va'>knn</span>,
   resampling <span class='op'>=</span> <span class='va'>cv10_instance</span>,
@@ -2212,7 +2260,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>After having set up a tuning instance, we can start tuning. Before that, we need a tuning strategy, though. A simple tuning method is to try all possible combinations of parameters: <strong>Grid Search</strong>. While it is very intuitive and simple, it is inefficient if the search space is large. For this simple use case, it suffices, though. We get the <a href="https://mlr3tuning.mlr-org.com/reference/mlr_tuners_grid_search.html"><code>grid_search tuner</code></a> via:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='fu'><a href='https://rdrr.io/r/base/Random.html'>set.seed</a></span><span class='op'>(</span><span class='fl'>1</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/Random.html'>set.seed</a></span><span class='op'>(</span><span class='fl'>1</span><span class='op'>)</span>
 <span class='va'>tuner_grid</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3tuning.mlr-org.com/reference/tnr.html'>tnr</a></span><span class='op'>(</span><span class='st'>"grid_search"</span>, resolution <span class='op'>=</span> <span class='fl'>18</span>, batch_size <span class='op'>=</span> <span class='fl'>36</span><span class='op'>)</span>
 </code></pre>
 </div>
@@ -2220,7 +2268,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>Tuning works by calling <code>$optimize()</code>. Note that the tuning procedure <em>modifies</em> our tuning instance (as usual for <code>R6</code> class objects). The result can be found in the <code>instance</code> object. Before tuning it is empty:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>instance_grid</span><span class='op'>$</span><span class='va'>result</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>instance_grid</span><span class='op'>$</span><span class='va'>result</span>
 </code></pre>
 </div>
 <pre><code>NULL</code></pre>
@@ -2228,7 +2276,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>Now, we tune:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>tuner_grid</span><span class='op'>$</span><span class='fu'>optimize</span><span class='op'>(</span><span class='va'>instance_grid</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>tuner_grid</span><span class='op'>$</span><span class='fu'>optimize</span><span class='op'>(</span><span class='va'>instance_grid</span><span class='op'>)</span>
 </code></pre>
 </div>
 <pre><code>   k distance learner_param_vals  x_domain classif.ce
@@ -2237,7 +2285,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>The result is returned by <code>$optimize()</code> together with its performance. It can be also accessed with the <code>$result</code> slot:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>instance_grid</span><span class='op'>$</span><span class='va'>result</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>instance_grid</span><span class='op'>$</span><span class='va'>result</span>
 </code></pre>
 </div>
 <pre><code>   k distance learner_param_vals  x_domain classif.ce
@@ -2246,90 +2294,90 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>We can also look at the <code>Archive</code> of evaluated configurations:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>instance_grid</span><span class='op'>$</span><span class='va'>archive</span><span class='op'>$</span><span class='fu'>data</span><span class='op'>(</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>instance_grid</span><span class='op'>$</span><span class='va'>archive</span><span class='op'>$</span><span class='fu'>data</span><span class='op'>(</span><span class='op'>)</span>
 </code></pre>
 </div>
 <pre><code>     k distance classif.ce                                uhash  x_domain
- 1:  3        1      0.271 92ab244c-ceaa-4b23-8863-a7d6d1da9ce1 &lt;list[2]&gt;
- 2:  3        2      0.273 ddd010de-6403-4e54-8642-aeb660e299b4 &lt;list[2]&gt;
- 3:  4        1      0.292 1548d904-133e-4840-ae15-769262a61506 &lt;list[2]&gt;
- 4:  4        2      0.279 f06f18a0-1424-479e-8f5f-6520cf74d9cb &lt;list[2]&gt;
- 5:  5        1      0.271 85818197-e552-4094-9f84-17cc5b7fa73f &lt;list[2]&gt;
- 6:  5        2      0.274 43da0a8a-a5f9-4b52-8768-baefe1a421bb &lt;list[2]&gt;
- 7:  6        1      0.278 972bfb30-7fd5-402c-a968-929acf946dd6 &lt;list[2]&gt;
- 8:  6        2      0.273 05c3c326-9c71-4129-859d-7e84a2503984 &lt;list[2]&gt;
- 9:  7        1      0.257 16bc813d-99d7-4989-8465-600127902d3f &lt;list[2]&gt;
-10:  7        2      0.258 dde19252-2315-45f1-b642-fc06d08c1d25 &lt;list[2]&gt;
-11:  8        1      0.264 b2ecc94c-fa07-4185-94a6-c9c0017dfc78 &lt;list[2]&gt;
-12:  8        2      0.256 97bad0ec-2d0d-4c8c-98ab-9cf2be73a666 &lt;list[2]&gt;
-13:  9        1      0.251 7dfb5c2c-d64c-4017-b8c9-6db4311a3532 &lt;list[2]&gt;
-14:  9        2      0.250 65b4d107-a15e-4033-9a8c-c57cddd23b80 &lt;list[2]&gt;
-15: 10        1      0.261 29cffbdd-6625-448e-a343-e1685b469f65 &lt;list[2]&gt;
-16: 10        2      0.250 c146a992-ea59-4b8a-8566-b194a1c0e9c7 &lt;list[2]&gt;
-17: 11        1      0.256 166b7b05-2e8e-465e-9f69-185f1ce933bd &lt;list[2]&gt;
-18: 11        2      0.254 20ff0b8c-2f9c-4239-b8b4-da3e31489923 &lt;list[2]&gt;
-19: 12        1      0.260 753b5033-0186-4444-88cb-716ac5c8e2d0 &lt;list[2]&gt;
-20: 12        2      0.259 ce72a7ab-7853-4220-9f5b-5faf81d57c78 &lt;list[2]&gt;
-21: 13        1      0.268 3894f05c-e0c8-464e-a5a3-6598355532e9 &lt;list[2]&gt;
-22: 13        2      0.258 4e012025-f58b-4168-9644-d0c8fe3686b4 &lt;list[2]&gt;
-23: 14        1      0.265 0b736043-14d9-4dfb-99ff-d3a79f660132 &lt;list[2]&gt;
-24: 14        2      0.263 b60f951d-58b4-4836-bf56-731754e29f93 &lt;list[2]&gt;
-25: 15        1      0.268 3f98d36d-1102-4587-82af-4a288d63cc9e &lt;list[2]&gt;
-26: 15        2      0.264 65befd51-ab38-40b7-9949-cae430ea1b08 &lt;list[2]&gt;
-27: 16        1      0.267 eaae73f1-bd6e-4b2a-88b7-4748658cc0e5 &lt;list[2]&gt;
-28: 16        2      0.262 643b7f0d-8fbe-485c-a63b-dd0eedfdde09 &lt;list[2]&gt;
-29: 17        1      0.264 c8761d53-d11d-45dd-8802-da878f7da5e1 &lt;list[2]&gt;
-30: 17        2      0.267 4e39ba1f-b97d-4ef7-81a8-b8b8753ddd68 &lt;list[2]&gt;
-31: 18        1      0.273 1fa7191e-85a8-4d3e-b709-10f02906dd2e &lt;list[2]&gt;
-32: 18        2      0.271 b0228933-0e13-4c62-8078-aa6856f3577b &lt;list[2]&gt;
-33: 19        1      0.269 66785259-82e2-401c-b171-c8d0418a2764 &lt;list[2]&gt;
-34: 19        2      0.269 8f83fba3-ff5e-4920-b363-db924bb605b2 &lt;list[2]&gt;
-35: 20        1      0.268 08f4122e-4379-4e34-aa9b-e2eb44499694 &lt;list[2]&gt;
-36: 20        2      0.269 41b37f00-cc4b-4467-ba40-641a324b7d74 &lt;list[2]&gt;
+ 1:  3        1      0.271 b45f5a8e-ee37-4949-b218-20d021dbb853 &lt;list[2]&gt;
+ 2:  3        2      0.273 369de0ee-b6f3-41a3-b678-a6d166795464 &lt;list[2]&gt;
+ 3:  4        1      0.292 fa354212-d020-4fb7-93a4-0e3f18605d39 &lt;list[2]&gt;
+ 4:  4        2      0.279 29625068-6311-44b1-889c-68f16fb717d7 &lt;list[2]&gt;
+ 5:  5        1      0.271 c3d33db6-1cd2-4dc4-ad61-e705436d168b &lt;list[2]&gt;
+ 6:  5        2      0.274 ba5790cd-9067-434c-afe3-688d4f14fdff &lt;list[2]&gt;
+ 7:  6        1      0.278 9dbf7e5e-e531-431e-a6ca-5e751bcce1dd &lt;list[2]&gt;
+ 8:  6        2      0.273 a9370116-4e9a-4511-b1d8-5f945e789112 &lt;list[2]&gt;
+ 9:  7        1      0.257 2c716485-1a8a-46b2-b4a8-1639ad6bacec &lt;list[2]&gt;
+10:  7        2      0.258 85c58b42-3f46-41d6-a019-69dbade72f91 &lt;list[2]&gt;
+11:  8        1      0.264 76b61a9d-b530-4fe9-8578-0f6cd09f3081 &lt;list[2]&gt;
+12:  8        2      0.256 c133ea2f-3581-441e-8b88-cc0f2770a6b0 &lt;list[2]&gt;
+13:  9        1      0.251 d33017b1-9385-45eb-addc-82a001244141 &lt;list[2]&gt;
+14:  9        2      0.250 bed2af1f-67e4-465a-962c-a248e8e30b1c &lt;list[2]&gt;
+15: 10        1      0.261 5d0b22cc-9d9e-417a-83a3-08078c43e788 &lt;list[2]&gt;
+16: 10        2      0.250 60468896-0385-494a-9da5-79fa8fc91dde &lt;list[2]&gt;
+17: 11        1      0.256 e463b5af-c310-40e1-b69c-2ac0645a8c71 &lt;list[2]&gt;
+18: 11        2      0.254 14fee858-3066-4a85-8104-c5f3cf00afd8 &lt;list[2]&gt;
+19: 12        1      0.260 9a1b33cc-be15-4cda-8ace-8ecf44859d43 &lt;list[2]&gt;
+20: 12        2      0.259 b6502fb1-528f-4330-a630-b657e49a90a4 &lt;list[2]&gt;
+21: 13        1      0.268 a7cf3da4-ce1a-4324-a21d-cfd40816b5b1 &lt;list[2]&gt;
+22: 13        2      0.258 0701e44d-0ab8-4f68-b896-8b3ee14f400e &lt;list[2]&gt;
+23: 14        1      0.265 23fa672e-151d-4e79-b2f0-8fa903c066cb &lt;list[2]&gt;
+24: 14        2      0.263 5f27aa37-269e-4e58-9903-d7745b9c9d95 &lt;list[2]&gt;
+25: 15        1      0.268 a708aa9d-8b78-45e8-8f34-ba9d22f82b43 &lt;list[2]&gt;
+26: 15        2      0.264 446d0c9d-0950-4c0d-b4a6-c1ba43f2039d &lt;list[2]&gt;
+27: 16        1      0.267 3efa7987-aba7-45f7-988d-7aa67f56beb9 &lt;list[2]&gt;
+28: 16        2      0.262 877fa08f-df76-48a3-bd3d-e7d5534071ad &lt;list[2]&gt;
+29: 17        1      0.264 a8349605-e149-4287-8983-08b5a832a91b &lt;list[2]&gt;
+30: 17        2      0.267 e5cf1398-b067-4baf-8b9e-6246df53efd9 &lt;list[2]&gt;
+31: 18        1      0.273 5da7f9f6-a4c6-465f-954a-ea40bfe777d1 &lt;list[2]&gt;
+32: 18        2      0.271 8e85a972-4a5e-4571-a55c-cf7fcc61932e &lt;list[2]&gt;
+33: 19        1      0.269 3c311cc1-f7a7-41ae-9c2c-25833403e2cf &lt;list[2]&gt;
+34: 19        2      0.269 ddd66d44-b9b0-482a-a7b2-408a51c82440 &lt;list[2]&gt;
+35: 20        1      0.268 48a322ff-e955-4419-a656-dff020e0c8c3 &lt;list[2]&gt;
+36: 20        2      0.269 0ccbf049-927b-4407-a5b9-bd332592a994 &lt;list[2]&gt;
      k distance classif.ce                                uhash  x_domain
               timestamp batch_nr
- 1: 2021-01-13 05:12:15        1
- 2: 2021-01-13 05:12:15        1
- 3: 2021-01-13 05:12:15        1
- 4: 2021-01-13 05:12:15        1
- 5: 2021-01-13 05:12:15        1
- 6: 2021-01-13 05:12:15        1
- 7: 2021-01-13 05:12:15        1
- 8: 2021-01-13 05:12:15        1
- 9: 2021-01-13 05:12:15        1
-10: 2021-01-13 05:12:15        1
-11: 2021-01-13 05:12:15        1
-12: 2021-01-13 05:12:15        1
-13: 2021-01-13 05:12:15        1
-14: 2021-01-13 05:12:15        1
-15: 2021-01-13 05:12:15        1
-16: 2021-01-13 05:12:15        1
-17: 2021-01-13 05:12:15        1
-18: 2021-01-13 05:12:15        1
-19: 2021-01-13 05:12:15        1
-20: 2021-01-13 05:12:15        1
-21: 2021-01-13 05:12:15        1
-22: 2021-01-13 05:12:15        1
-23: 2021-01-13 05:12:15        1
-24: 2021-01-13 05:12:15        1
-25: 2021-01-13 05:12:15        1
-26: 2021-01-13 05:12:15        1
-27: 2021-01-13 05:12:15        1
-28: 2021-01-13 05:12:15        1
-29: 2021-01-13 05:12:15        1
-30: 2021-01-13 05:12:15        1
-31: 2021-01-13 05:12:15        1
-32: 2021-01-13 05:12:15        1
-33: 2021-01-13 05:12:15        1
-34: 2021-01-13 05:12:15        1
-35: 2021-01-13 05:12:15        1
-36: 2021-01-13 05:12:15        1
+ 1: 2021-01-14 05:20:29        1
+ 2: 2021-01-14 05:20:29        1
+ 3: 2021-01-14 05:20:29        1
+ 4: 2021-01-14 05:20:29        1
+ 5: 2021-01-14 05:20:29        1
+ 6: 2021-01-14 05:20:29        1
+ 7: 2021-01-14 05:20:29        1
+ 8: 2021-01-14 05:20:29        1
+ 9: 2021-01-14 05:20:29        1
+10: 2021-01-14 05:20:29        1
+11: 2021-01-14 05:20:29        1
+12: 2021-01-14 05:20:29        1
+13: 2021-01-14 05:20:29        1
+14: 2021-01-14 05:20:29        1
+15: 2021-01-14 05:20:29        1
+16: 2021-01-14 05:20:29        1
+17: 2021-01-14 05:20:29        1
+18: 2021-01-14 05:20:29        1
+19: 2021-01-14 05:20:29        1
+20: 2021-01-14 05:20:29        1
+21: 2021-01-14 05:20:29        1
+22: 2021-01-14 05:20:29        1
+23: 2021-01-14 05:20:29        1
+24: 2021-01-14 05:20:29        1
+25: 2021-01-14 05:20:29        1
+26: 2021-01-14 05:20:29        1
+27: 2021-01-14 05:20:29        1
+28: 2021-01-14 05:20:29        1
+29: 2021-01-14 05:20:29        1
+30: 2021-01-14 05:20:29        1
+31: 2021-01-14 05:20:29        1
+32: 2021-01-14 05:20:29        1
+33: 2021-01-14 05:20:29        1
+34: 2021-01-14 05:20:29        1
+35: 2021-01-14 05:20:29        1
+36: 2021-01-14 05:20:29        1
               timestamp batch_nr</code></pre>
 </div>
 <p>We plot the performances depending on the sampled <code>k</code> and <code>distance</code>:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='fu'><a href='https://ggplot2.tidyverse.org/reference/ggplot.html'>ggplot</a></span><span class='op'>(</span><span class='va'>instance_grid</span><span class='op'>$</span><span class='va'>archive</span><span class='op'>$</span><span class='fu'>data</span><span class='op'>(</span><span class='op'>)</span>, <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/aes.html'>aes</a></span><span class='op'>(</span>x <span class='op'>=</span> <span class='va'>k</span>, y <span class='op'>=</span> <span class='va'>classif.ce</span>, color <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/factor.html'>as.factor</a></span><span class='op'>(</span><span class='va'>distance</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://ggplot2.tidyverse.org/reference/ggplot.html'>ggplot</a></span><span class='op'>(</span><span class='va'>instance_grid</span><span class='op'>$</span><span class='va'>archive</span><span class='op'>$</span><span class='fu'>data</span><span class='op'>(</span><span class='op'>)</span>, <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/aes.html'>aes</a></span><span class='op'>(</span>x <span class='op'>=</span> <span class='va'>k</span>, y <span class='op'>=</span> <span class='va'>classif.ce</span>, color <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/factor.html'>as.factor</a></span><span class='op'>(</span><span class='va'>distance</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span>
   <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/geom_path.html'>geom_line</a></span><span class='op'>(</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/geom_point.html'>geom_point</a></span><span class='op'>(</span>size <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span>
 </code></pre>
 </div>
@@ -2342,7 +2390,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>First, the resulting difference in performance between <code>k</code> = 3 and <code>k</code> = 4 is probably larger than the difference between <code>k</code> = 49 and <code>k</code> = 50. While 4 is 33% larger than 3, 50 is only 2 percent larger than 49. To account for this we will use a <strong>transformation function</strong> for <code>k</code> and optimize in log-space. We define the range for <code>k</code> from <code>log(3)</code> to <code>log(50)</code> and exponentiate in the transformation. Now, as <code>k</code> has become a double instead of an int (in the search space, before transformation), we round it in the <code>trafo</code>.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>large_searchspace</span> <span class='op'>=</span> <span class='va'><a href='https://paradox.mlr-org.com/reference/ParamSet.html'>ParamSet</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>large_searchspace</span> <span class='op'>=</span> <span class='va'><a href='https://paradox.mlr-org.com/reference/ParamSet.html'>ParamSet</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>
   <span class='va'><a href='https://paradox.mlr-org.com/reference/ParamDbl.html'>ParamDbl</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='st'>"k"</span>, lower <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='fl'>3</span><span class='op'>)</span>, upper <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='fl'>50</span><span class='op'>)</span><span class='op'>)</span>,
   <span class='va'><a href='https://paradox.mlr-org.com/reference/ParamDbl.html'>ParamDbl</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='st'>"distance"</span>, lower <span class='op'>=</span> <span class='fl'>1</span>, upper <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span>,
   <span class='va'><a href='https://paradox.mlr-org.com/reference/ParamFct.html'>ParamFct</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='st'>"kernel"</span>, <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"rectangular"</span>, <span class='st'>"gaussian"</span>, <span class='st'>"rank"</span>, <span class='st'>"optimal"</span><span class='op'>)</span><span class='op'>)</span>,
@@ -2359,7 +2407,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>The second problem is that grid search may (and often will) take a long time. For instance, trying out three different values for <code>k</code>, <code>distance</code>, <code>kernel</code>, and the two values for <code>scale</code> will take 54 evaluations. Because of this, we use a different search algorithm, namely the <strong>Random Search</strong>. We need to specify in the <em>tuning instance</em> a <em>termination criterion</em>. The criterion tells the search algorithm when to stop. Here, we will terminate after 36 evaluations:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>tuner_random</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3tuning.mlr-org.com/reference/tnr.html'>tnr</a></span><span class='op'>(</span><span class='st'>"random_search"</span>, batch_size <span class='op'>=</span> <span class='fl'>36</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>tuner_random</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3tuning.mlr-org.com/reference/tnr.html'>tnr</a></span><span class='op'>(</span><span class='st'>"random_search"</span>, batch_size <span class='op'>=</span> <span class='fl'>36</span><span class='op'>)</span>
 
 <span class='va'>instance_random</span> <span class='op'>=</span> <span class='va'><a href='https://mlr3tuning.mlr-org.com/reference/TuningInstanceSingleCrit.html'>TuningInstanceSingleCrit</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span>
   task <span class='op'>=</span> <span class='va'>task</span>,
@@ -2374,7 +2422,7 @@ document.addEventListener('DOMContentLoaded', function() {
 </div>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>tuner_random</span><span class='op'>$</span><span class='fu'>optimize</span><span class='op'>(</span><span class='va'>instance_random</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>tuner_random</span><span class='op'>$</span><span class='fu'>optimize</span><span class='op'>(</span><span class='va'>instance_random</span><span class='op'>)</span>
 </code></pre>
 </div>
 <pre><code>          k distance  kernel scale learner_param_vals  x_domain classif.ce
@@ -2383,7 +2431,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>Like before, we can review the <code>Archive</code>. It includes the points before and after the transformation. The archive includes a column for each parameter the <code>Tuner</code> sampled on the search space (points before the transformation):</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>instance_random</span><span class='op'>$</span><span class='va'>archive</span><span class='op'>$</span><span class='fu'>data</span><span class='op'>(</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>instance_random</span><span class='op'>$</span><span class='va'>archive</span><span class='op'>$</span><span class='fu'>data</span><span class='op'>(</span><span class='op'>)</span>
 </code></pre>
 </div>
 <pre><code>           k distance      kernel scale classif.ce
@@ -2425,48 +2473,48 @@ document.addEventListener('DOMContentLoaded', function() {
 36: 3.285535 1.296423        rank FALSE      0.300
            k distance      kernel scale classif.ce
                                    uhash  x_domain           timestamp batch_nr
- 1: a5eca94c-58fb-4849-9ebb-448366cc9d71 &lt;list[4]&gt; 2021-01-13 05:12:50        1
- 2: 5abfacd5-8306-4911-8a95-27e008ac2da3 &lt;list[4]&gt; 2021-01-13 05:12:50        1
- 3: 59b907ef-7545-47bf-8284-95a899e30cd9 &lt;list[4]&gt; 2021-01-13 05:12:50        1
- 4: 6b96ee19-0f44-431e-867d-5eb39ace8d85 &lt;list[4]&gt; 2021-01-13 05:12:50        1
- 5: fdb40355-a451-443b-a541-4717bed2f602 &lt;list[4]&gt; 2021-01-13 05:12:50        1
- 6: 71878420-4da6-4827-8909-ed700658f73f &lt;list[4]&gt; 2021-01-13 05:12:50        1
- 7: cbea70d4-eb71-4056-a8c9-dafedecaba47 &lt;list[4]&gt; 2021-01-13 05:12:50        1
- 8: eba3c34a-de0f-4bf0-b276-156c87f39904 &lt;list[4]&gt; 2021-01-13 05:12:50        1
- 9: b900750e-258c-4c58-9375-5ac01b52383e &lt;list[4]&gt; 2021-01-13 05:12:50        1
-10: 50e3c08f-3c9f-4194-8528-8ffc9145cbb6 &lt;list[4]&gt; 2021-01-13 05:12:50        1
-11: 3859dfa9-1049-4000-8f03-2ffc47e5319e &lt;list[4]&gt; 2021-01-13 05:12:50        1
-12: 59bf5373-64a0-41ab-a2b4-9bb0cfd86db5 &lt;list[4]&gt; 2021-01-13 05:12:50        1
-13: 1131614b-e115-44ea-a73f-80de00e8666c &lt;list[4]&gt; 2021-01-13 05:12:50        1
-14: 1e91b286-feb5-47e6-aa0b-b76732ab6053 &lt;list[4]&gt; 2021-01-13 05:12:50        1
-15: c8eb94bc-b68e-4cd5-901a-1f614c8376ac &lt;list[4]&gt; 2021-01-13 05:12:50        1
-16: babec870-4dbb-4a7a-b58c-baf3cab7bfee &lt;list[4]&gt; 2021-01-13 05:12:50        1
-17: c39f495c-323a-4f22-bc79-f5686b3162a2 &lt;list[4]&gt; 2021-01-13 05:12:50        1
-18: d6f24d55-4d56-4c0d-860e-f9e38fca5caf &lt;list[4]&gt; 2021-01-13 05:12:50        1
-19: e522f53c-840b-429e-874a-549e997e9b5e &lt;list[4]&gt; 2021-01-13 05:12:50        1
-20: 1cf7608e-cb10-45c1-b7c7-6bfd877fea14 &lt;list[4]&gt; 2021-01-13 05:12:50        1
-21: 7d93a216-92ad-41b7-b14a-9ddd7fd64e1f &lt;list[4]&gt; 2021-01-13 05:12:50        1
-22: f50fce7f-4862-45ad-9e04-f4cfb8cc1da7 &lt;list[4]&gt; 2021-01-13 05:12:50        1
-23: faf0d78c-4d61-4df3-b65a-587f0fef84a8 &lt;list[4]&gt; 2021-01-13 05:12:50        1
-24: 9ca2f9d1-9818-4b46-9862-af4f44e088d9 &lt;list[4]&gt; 2021-01-13 05:12:50        1
-25: 6e495758-df35-4df3-8cf7-615e4e163b76 &lt;list[4]&gt; 2021-01-13 05:12:50        1
-26: 6fed5b26-1333-4c14-b9e3-d97cfc288cd6 &lt;list[4]&gt; 2021-01-13 05:12:50        1
-27: 3eabcfb9-bffb-4b7e-b3af-8e123bd6448c &lt;list[4]&gt; 2021-01-13 05:12:50        1
-28: 4dff31a7-7700-4ae1-aadb-f6bf19db7e99 &lt;list[4]&gt; 2021-01-13 05:12:50        1
-29: 4da8b9e9-f6b6-49bc-a639-e9fd4f931e83 &lt;list[4]&gt; 2021-01-13 05:12:50        1
-30: bea40e4d-ac0f-4c25-9b69-23d2a919df25 &lt;list[4]&gt; 2021-01-13 05:12:50        1
-31: e12e36aa-9dc0-4bc4-bd6f-473961a11bc7 &lt;list[4]&gt; 2021-01-13 05:12:50        1
-32: 2d16d895-b294-4387-8d6b-1d177f11d8e3 &lt;list[4]&gt; 2021-01-13 05:12:50        1
-33: 27f20f0b-8631-4088-b071-e20060767830 &lt;list[4]&gt; 2021-01-13 05:12:50        1
-34: c0ab8e46-93c1-4e52-b9c9-0a13616a84e6 &lt;list[4]&gt; 2021-01-13 05:12:50        1
-35: 9386072b-f50c-41e9-801d-3ea56b2e6360 &lt;list[4]&gt; 2021-01-13 05:12:50        1
-36: b7462cc4-9b17-46d7-b666-18645d5252e8 &lt;list[4]&gt; 2021-01-13 05:12:50        1
+ 1: 6d5d0299-4738-421f-81c8-5fb062aa9e01 &lt;list[4]&gt; 2021-01-14 05:21:11        1
+ 2: 9a5fc396-53c4-42d2-8646-15aeda21b186 &lt;list[4]&gt; 2021-01-14 05:21:11        1
+ 3: 62251c8c-2d68-4258-8fcc-50fe1736b537 &lt;list[4]&gt; 2021-01-14 05:21:11        1
+ 4: 782741bc-49ce-4515-a209-0450ec789658 &lt;list[4]&gt; 2021-01-14 05:21:11        1
+ 5: bae2220c-572f-4432-a682-0fed37dd148b &lt;list[4]&gt; 2021-01-14 05:21:11        1
+ 6: 28a6013a-75bc-4bcb-be68-696086a283a8 &lt;list[4]&gt; 2021-01-14 05:21:11        1
+ 7: 9db8fd7e-5ebe-4cf9-b521-59279e381ae7 &lt;list[4]&gt; 2021-01-14 05:21:11        1
+ 8: d5a36a60-565e-4e9b-a7c0-220cf4dcbab9 &lt;list[4]&gt; 2021-01-14 05:21:11        1
+ 9: 94890169-90cb-42db-a003-724250fc5d78 &lt;list[4]&gt; 2021-01-14 05:21:11        1
+10: 5636dfb6-e9e4-4721-96cc-b388704a8c97 &lt;list[4]&gt; 2021-01-14 05:21:11        1
+11: d5733a2b-ddac-4b22-9097-18e1c76de018 &lt;list[4]&gt; 2021-01-14 05:21:11        1
+12: 2ac67782-ff86-49ff-8813-8b7cc4b185d0 &lt;list[4]&gt; 2021-01-14 05:21:11        1
+13: f1ba14a9-4b57-464d-bb7f-67748f9a2ee6 &lt;list[4]&gt; 2021-01-14 05:21:11        1
+14: a4911c7d-e83c-4c35-a4cd-cc246a974e54 &lt;list[4]&gt; 2021-01-14 05:21:11        1
+15: b896d5bb-6e2b-4423-b34e-72286138a753 &lt;list[4]&gt; 2021-01-14 05:21:11        1
+16: dbb82e9f-ea73-4435-ba28-e5f6f0f7f39e &lt;list[4]&gt; 2021-01-14 05:21:11        1
+17: 3ab2cd60-163e-4176-aa9c-496a3c814ea1 &lt;list[4]&gt; 2021-01-14 05:21:11        1
+18: 8c1c227c-0583-4232-9b98-846dd3bdff9f &lt;list[4]&gt; 2021-01-14 05:21:11        1
+19: 2b916ef7-b75c-4b38-80c1-b9739d393e0d &lt;list[4]&gt; 2021-01-14 05:21:11        1
+20: 5fe8379d-3d84-4243-9ced-788d3b7afce3 &lt;list[4]&gt; 2021-01-14 05:21:11        1
+21: 542aa47d-65af-405b-82af-979027c425c5 &lt;list[4]&gt; 2021-01-14 05:21:11        1
+22: cfcd25a1-ad21-4a64-b940-e270e8af1da7 &lt;list[4]&gt; 2021-01-14 05:21:11        1
+23: b9d02ef9-4391-422f-93fc-26af74a71351 &lt;list[4]&gt; 2021-01-14 05:21:11        1
+24: 9ae06b1b-d0e8-4bc3-93d1-dbcc3fd43402 &lt;list[4]&gt; 2021-01-14 05:21:11        1
+25: aa29deb7-8477-4216-a37d-d4770dcbf228 &lt;list[4]&gt; 2021-01-14 05:21:11        1
+26: d78c8b91-21b7-486e-b6aa-83cd7a472eb9 &lt;list[4]&gt; 2021-01-14 05:21:11        1
+27: 23ee57ce-1856-4882-a6be-384cf1e8edb7 &lt;list[4]&gt; 2021-01-14 05:21:11        1
+28: e403b358-d08d-45e6-821a-35cb250b5393 &lt;list[4]&gt; 2021-01-14 05:21:11        1
+29: d49916e1-7fc9-4973-86ff-4cf39ab46ac2 &lt;list[4]&gt; 2021-01-14 05:21:11        1
+30: b9b80d8f-36b5-4374-9107-8399656d0e58 &lt;list[4]&gt; 2021-01-14 05:21:11        1
+31: 4d008f13-8fd3-42b5-96e7-302ff9343fa7 &lt;list[4]&gt; 2021-01-14 05:21:11        1
+32: 59f27ec3-80cd-46ff-8fe5-f9f8a072ccd4 &lt;list[4]&gt; 2021-01-14 05:21:11        1
+33: 906824f8-14ec-408a-bc5c-40382a52ca31 &lt;list[4]&gt; 2021-01-14 05:21:11        1
+34: b47f62fb-a12c-457f-b9e5-96ce39c43a9c &lt;list[4]&gt; 2021-01-14 05:21:11        1
+35: eba2695d-a4e6-4274-af36-0b811b6f896b &lt;list[4]&gt; 2021-01-14 05:21:11        1
+36: 3565181e-ac42-40f7-b4f9-bb802a22a6bb &lt;list[4]&gt; 2021-01-14 05:21:11        1
                                    uhash  x_domain           timestamp batch_nr</code></pre>
 </div>
 <p>The parameters used by the learner (points after the transformation) are stored in in the <code>x_domain</code> column as lists. By using <code>unnest = x_domain</code>, the list elements are expanded to separate columns:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>instance_random</span><span class='op'>$</span><span class='va'>archive</span><span class='op'>$</span><span class='fu'>data</span><span class='op'>(</span>unnest <span class='op'>=</span> <span class='st'>"x_domain"</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>instance_random</span><span class='op'>$</span><span class='va'>archive</span><span class='op'>$</span><span class='fu'>data</span><span class='op'>(</span>unnest <span class='op'>=</span> <span class='st'>"x_domain"</span><span class='op'>)</span>
 </code></pre>
 </div>
 <pre><code>           k distance      kernel scale classif.ce
@@ -2508,42 +2556,42 @@ document.addEventListener('DOMContentLoaded', function() {
 36: 3.285535 1.296423        rank FALSE      0.300
            k distance      kernel scale classif.ce
                                    uhash           timestamp batch_nr
- 1: a5eca94c-58fb-4849-9ebb-448366cc9d71 2021-01-13 05:12:50        1
- 2: 5abfacd5-8306-4911-8a95-27e008ac2da3 2021-01-13 05:12:50        1
- 3: 59b907ef-7545-47bf-8284-95a899e30cd9 2021-01-13 05:12:50        1
- 4: 6b96ee19-0f44-431e-867d-5eb39ace8d85 2021-01-13 05:12:50        1
- 5: fdb40355-a451-443b-a541-4717bed2f602 2021-01-13 05:12:50        1
- 6: 71878420-4da6-4827-8909-ed700658f73f 2021-01-13 05:12:50        1
- 7: cbea70d4-eb71-4056-a8c9-dafedecaba47 2021-01-13 05:12:50        1
- 8: eba3c34a-de0f-4bf0-b276-156c87f39904 2021-01-13 05:12:50        1
- 9: b900750e-258c-4c58-9375-5ac01b52383e 2021-01-13 05:12:50        1
-10: 50e3c08f-3c9f-4194-8528-8ffc9145cbb6 2021-01-13 05:12:50        1
-11: 3859dfa9-1049-4000-8f03-2ffc47e5319e 2021-01-13 05:12:50        1
-12: 59bf5373-64a0-41ab-a2b4-9bb0cfd86db5 2021-01-13 05:12:50        1
-13: 1131614b-e115-44ea-a73f-80de00e8666c 2021-01-13 05:12:50        1
-14: 1e91b286-feb5-47e6-aa0b-b76732ab6053 2021-01-13 05:12:50        1
-15: c8eb94bc-b68e-4cd5-901a-1f614c8376ac 2021-01-13 05:12:50        1
-16: babec870-4dbb-4a7a-b58c-baf3cab7bfee 2021-01-13 05:12:50        1
-17: c39f495c-323a-4f22-bc79-f5686b3162a2 2021-01-13 05:12:50        1
-18: d6f24d55-4d56-4c0d-860e-f9e38fca5caf 2021-01-13 05:12:50        1
-19: e522f53c-840b-429e-874a-549e997e9b5e 2021-01-13 05:12:50        1
-20: 1cf7608e-cb10-45c1-b7c7-6bfd877fea14 2021-01-13 05:12:50        1
-21: 7d93a216-92ad-41b7-b14a-9ddd7fd64e1f 2021-01-13 05:12:50        1
-22: f50fce7f-4862-45ad-9e04-f4cfb8cc1da7 2021-01-13 05:12:50        1
-23: faf0d78c-4d61-4df3-b65a-587f0fef84a8 2021-01-13 05:12:50        1
-24: 9ca2f9d1-9818-4b46-9862-af4f44e088d9 2021-01-13 05:12:50        1
-25: 6e495758-df35-4df3-8cf7-615e4e163b76 2021-01-13 05:12:50        1
-26: 6fed5b26-1333-4c14-b9e3-d97cfc288cd6 2021-01-13 05:12:50        1
-27: 3eabcfb9-bffb-4b7e-b3af-8e123bd6448c 2021-01-13 05:12:50        1
-28: 4dff31a7-7700-4ae1-aadb-f6bf19db7e99 2021-01-13 05:12:50        1
-29: 4da8b9e9-f6b6-49bc-a639-e9fd4f931e83 2021-01-13 05:12:50        1
-30: bea40e4d-ac0f-4c25-9b69-23d2a919df25 2021-01-13 05:12:50        1
-31: e12e36aa-9dc0-4bc4-bd6f-473961a11bc7 2021-01-13 05:12:50        1
-32: 2d16d895-b294-4387-8d6b-1d177f11d8e3 2021-01-13 05:12:50        1
-33: 27f20f0b-8631-4088-b071-e20060767830 2021-01-13 05:12:50        1
-34: c0ab8e46-93c1-4e52-b9c9-0a13616a84e6 2021-01-13 05:12:50        1
-35: 9386072b-f50c-41e9-801d-3ea56b2e6360 2021-01-13 05:12:50        1
-36: b7462cc4-9b17-46d7-b666-18645d5252e8 2021-01-13 05:12:50        1
+ 1: 6d5d0299-4738-421f-81c8-5fb062aa9e01 2021-01-14 05:21:11        1
+ 2: 9a5fc396-53c4-42d2-8646-15aeda21b186 2021-01-14 05:21:11        1
+ 3: 62251c8c-2d68-4258-8fcc-50fe1736b537 2021-01-14 05:21:11        1
+ 4: 782741bc-49ce-4515-a209-0450ec789658 2021-01-14 05:21:11        1
+ 5: bae2220c-572f-4432-a682-0fed37dd148b 2021-01-14 05:21:11        1
+ 6: 28a6013a-75bc-4bcb-be68-696086a283a8 2021-01-14 05:21:11        1
+ 7: 9db8fd7e-5ebe-4cf9-b521-59279e381ae7 2021-01-14 05:21:11        1
+ 8: d5a36a60-565e-4e9b-a7c0-220cf4dcbab9 2021-01-14 05:21:11        1
+ 9: 94890169-90cb-42db-a003-724250fc5d78 2021-01-14 05:21:11        1
+10: 5636dfb6-e9e4-4721-96cc-b388704a8c97 2021-01-14 05:21:11        1
+11: d5733a2b-ddac-4b22-9097-18e1c76de018 2021-01-14 05:21:11        1
+12: 2ac67782-ff86-49ff-8813-8b7cc4b185d0 2021-01-14 05:21:11        1
+13: f1ba14a9-4b57-464d-bb7f-67748f9a2ee6 2021-01-14 05:21:11        1
+14: a4911c7d-e83c-4c35-a4cd-cc246a974e54 2021-01-14 05:21:11        1
+15: b896d5bb-6e2b-4423-b34e-72286138a753 2021-01-14 05:21:11        1
+16: dbb82e9f-ea73-4435-ba28-e5f6f0f7f39e 2021-01-14 05:21:11        1
+17: 3ab2cd60-163e-4176-aa9c-496a3c814ea1 2021-01-14 05:21:11        1
+18: 8c1c227c-0583-4232-9b98-846dd3bdff9f 2021-01-14 05:21:11        1
+19: 2b916ef7-b75c-4b38-80c1-b9739d393e0d 2021-01-14 05:21:11        1
+20: 5fe8379d-3d84-4243-9ced-788d3b7afce3 2021-01-14 05:21:11        1
+21: 542aa47d-65af-405b-82af-979027c425c5 2021-01-14 05:21:11        1
+22: cfcd25a1-ad21-4a64-b940-e270e8af1da7 2021-01-14 05:21:11        1
+23: b9d02ef9-4391-422f-93fc-26af74a71351 2021-01-14 05:21:11        1
+24: 9ae06b1b-d0e8-4bc3-93d1-dbcc3fd43402 2021-01-14 05:21:11        1
+25: aa29deb7-8477-4216-a37d-d4770dcbf228 2021-01-14 05:21:11        1
+26: d78c8b91-21b7-486e-b6aa-83cd7a472eb9 2021-01-14 05:21:11        1
+27: 23ee57ce-1856-4882-a6be-384cf1e8edb7 2021-01-14 05:21:11        1
+28: e403b358-d08d-45e6-821a-35cb250b5393 2021-01-14 05:21:11        1
+29: d49916e1-7fc9-4973-86ff-4cf39ab46ac2 2021-01-14 05:21:11        1
+30: b9b80d8f-36b5-4374-9107-8399656d0e58 2021-01-14 05:21:11        1
+31: 4d008f13-8fd3-42b5-96e7-302ff9343fa7 2021-01-14 05:21:11        1
+32: 59f27ec3-80cd-46ff-8fe5-f9f8a072ccd4 2021-01-14 05:21:11        1
+33: 906824f8-14ec-408a-bc5c-40382a52ca31 2021-01-14 05:21:11        1
+34: b47f62fb-a12c-457f-b9e5-96ce39c43a9c 2021-01-14 05:21:11        1
+35: eba2695d-a4e6-4274-af36-0b811b6f896b 2021-01-14 05:21:11        1
+36: 3565181e-ac42-40f7-b4f9-bb802a22a6bb 2021-01-14 05:21:11        1
                                    uhash           timestamp batch_nr
     x_domain_k x_domain_distance x_domain_kernel x_domain_scale
  1:         14          2.921236     rectangular          FALSE
@@ -2587,7 +2635,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>Let’s now investigate the performance by parameters. This is especially easy using visualization:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='fu'><a href='https://ggplot2.tidyverse.org/reference/ggplot.html'>ggplot</a></span><span class='op'>(</span><span class='va'>instance_random</span><span class='op'>$</span><span class='va'>archive</span><span class='op'>$</span><span class='fu'>data</span><span class='op'>(</span>unnest <span class='op'>=</span> <span class='st'>"x_domain"</span><span class='op'>)</span>,
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://ggplot2.tidyverse.org/reference/ggplot.html'>ggplot</a></span><span class='op'>(</span><span class='va'>instance_random</span><span class='op'>$</span><span class='va'>archive</span><span class='op'>$</span><span class='fu'>data</span><span class='op'>(</span>unnest <span class='op'>=</span> <span class='st'>"x_domain"</span><span class='op'>)</span>,
   <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/aes.html'>aes</a></span><span class='op'>(</span>x <span class='op'>=</span> <span class='va'>x_domain_k</span>, y <span class='op'>=</span> <span class='va'>classif.ce</span>, color <span class='op'>=</span> <span class='va'>x_domain_scale</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span>
   <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/geom_point.html'>geom_point</a></span><span class='op'>(</span>size <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/geom_path.html'>geom_line</a></span><span class='op'>(</span><span class='op'>)</span>
 </code></pre>
@@ -2597,7 +2645,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>The previous plot suggests that <code>scale</code> has a strong influence on performance. For the kernel, there does not seem to be a strong influence:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='fu'><a href='https://ggplot2.tidyverse.org/reference/ggplot.html'>ggplot</a></span><span class='op'>(</span><span class='va'>instance_random</span><span class='op'>$</span><span class='va'>archive</span><span class='op'>$</span><span class='fu'>data</span><span class='op'>(</span>unnest <span class='op'>=</span> <span class='st'>"x_domain"</span><span class='op'>)</span>,
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://ggplot2.tidyverse.org/reference/ggplot.html'>ggplot</a></span><span class='op'>(</span><span class='va'>instance_random</span><span class='op'>$</span><span class='va'>archive</span><span class='op'>$</span><span class='fu'>data</span><span class='op'>(</span>unnest <span class='op'>=</span> <span class='st'>"x_domain"</span><span class='op'>)</span>,
   <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/aes.html'>aes</a></span><span class='op'>(</span>x <span class='op'>=</span> <span class='va'>x_domain_k</span>, y <span class='op'>=</span> <span class='va'>classif.ce</span>, color <span class='op'>=</span> <span class='va'>x_domain_kernel</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span>
   <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/geom_point.html'>geom_point</a></span><span class='op'>(</span>size <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/geom_path.html'>geom_line</a></span><span class='op'>(</span><span class='op'>)</span>
 </code></pre>
@@ -2608,13 +2656,13 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>Having determined tuned configurations that seem to work well, we want to find out which performance we can expect from them. However, this may require more than this naive approach:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>instance_random</span><span class='op'>$</span><span class='va'>result_y</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>instance_random</span><span class='op'>$</span><span class='va'>result_y</span>
 </code></pre>
 </div>
 <pre><code>classif.ce 
      0.249 </code></pre>
 <div class="sourceCode">
-<pre><code><span class='va'>instance_grid</span><span class='op'>$</span><span class='va'>result_y</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>instance_grid</span><span class='op'>$</span><span class='va'>result_y</span>
 </code></pre>
 </div>
 <pre><code>classif.ce 
@@ -2626,7 +2674,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>The <code>AutoTuner</code> finds the best parameters and uses them for training:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>grid_auto</span> <span class='op'>=</span> <span class='va'><a href='https://mlr3tuning.mlr-org.com/reference/AutoTuner.html'>AutoTuner</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>grid_auto</span> <span class='op'>=</span> <span class='va'><a href='https://mlr3tuning.mlr-org.com/reference/AutoTuner.html'>AutoTuner</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span>
   learner <span class='op'>=</span> <span class='va'>knn</span>,
   resampling <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>rsmp</a></span><span class='op'>(</span><span class='st'>"cv"</span>, folds <span class='op'>=</span> <span class='fl'>5</span><span class='op'>)</span>, <span class='co'># we can NOT use fixed resampling here</span>
   measure <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>msr</a></span><span class='op'>(</span><span class='st'>"classif.ce"</span><span class='op'>)</span>,
@@ -2640,7 +2688,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>The <code>AutoTuner</code> behaves just like a regular <code>Learner</code>. It can be used to combine the steps of hyperparameter tuning and model fitting but is especially useful for resampling and <em>fair</em> comparison of performance through benchmarking:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>rr</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/resample.html'>resample</a></span><span class='op'>(</span><span class='va'>task</span>, <span class='va'>grid_auto</span>, <span class='va'>cv10_instance</span>, store_models <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>rr</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/resample.html'>resample</a></span><span class='op'>(</span><span class='va'>task</span>, <span class='va'>grid_auto</span>, <span class='va'>cv10_instance</span>, store_models <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>
 </code></pre>
 </div>
 </div>
@@ -2650,7 +2698,7 @@ document.addEventListener('DOMContentLoaded', function() {
 </div>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>rr</span><span class='op'>$</span><span class='fu'>aggregate</span><span class='op'>(</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>rr</span><span class='op'>$</span><span class='fu'>aggregate</span><span class='op'>(</span><span class='op'>)</span>
 </code></pre>
 </div>
 <pre><code>classif.ce 
@@ -2659,7 +2707,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>Essentially, this is the performance of a “knn with optimal hyperparameters found by grid search”. Note that <code>grid_auto</code> is not changed since <code>resample()</code> creates a clone for each resampling iteration. The trained <code>AutoTuner</code> objects can be accessed by using</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>rr</span><span class='op'>$</span><span class='va'>learners</span><span class='op'>[[</span><span class='fl'>1</span><span class='op'>]</span><span class='op'>]</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>rr</span><span class='op'>$</span><span class='va'>learners</span><span class='op'>[[</span><span class='fl'>1</span><span class='op'>]</span><span class='op'>]</span>
 </code></pre>
 </div>
 <pre><code>&lt;AutoTuner:classif.kknn.tuned&gt;
@@ -2670,7 +2718,7 @@ document.addEventListener('DOMContentLoaded', function() {
 * Feature types: logical, integer, numeric, factor, ordered
 * Properties: multiclass, twoclass</code></pre>
 <div class="sourceCode">
-<pre><code><span class='va'>rr</span><span class='op'>$</span><span class='va'>learners</span><span class='op'>[[</span><span class='fl'>1</span><span class='op'>]</span><span class='op'>]</span><span class='op'>$</span><span class='va'>tuning_result</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>rr</span><span class='op'>$</span><span class='va'>learners</span><span class='op'>[[</span><span class='fl'>1</span><span class='op'>]</span><span class='op'>]</span><span class='op'>$</span><span class='va'>tuning_result</span>
 </code></pre>
 </div>
 <pre><code>   k distance learner_param_vals  x_domain classif.ce
@@ -2723,7 +2771,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>The scale effect is just as visible as before with fewer data:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='fu'><a href='https://ggplot2.tidyverse.org/reference/ggplot.html'>ggplot</a></span><span class='op'>(</span><span class='va'>perfdata</span>, <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/aes.html'>aes</a></span><span class='op'>(</span>x <span class='op'>=</span> <span class='va'>x_domain_k</span>, y <span class='op'>=</span> <span class='va'>classif.ce</span>, color <span class='op'>=</span> <span class='va'>scale</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://ggplot2.tidyverse.org/reference/ggplot.html'>ggplot</a></span><span class='op'>(</span><span class='va'>perfdata</span>, <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/aes.html'>aes</a></span><span class='op'>(</span>x <span class='op'>=</span> <span class='va'>x_domain_k</span>, y <span class='op'>=</span> <span class='va'>classif.ce</span>, color <span class='op'>=</span> <span class='va'>scale</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span>
   <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/geom_point.html'>geom_point</a></span><span class='op'>(</span>size <span class='op'>=</span> <span class='fl'>2</span>, alpha <span class='op'>=</span> <span class='fl'>0.3</span><span class='op'>)</span>
 </code></pre>
 </div>
@@ -2732,7 +2780,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>Now, there seems to be a visible pattern by kernel as well:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='fu'><a href='https://ggplot2.tidyverse.org/reference/ggplot.html'>ggplot</a></span><span class='op'>(</span><span class='va'>perfdata</span>, <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/aes.html'>aes</a></span><span class='op'>(</span>x <span class='op'>=</span> <span class='va'>x_domain_k</span>, y <span class='op'>=</span> <span class='va'>classif.ce</span>, color <span class='op'>=</span> <span class='va'>kernel</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://ggplot2.tidyverse.org/reference/ggplot.html'>ggplot</a></span><span class='op'>(</span><span class='va'>perfdata</span>, <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/aes.html'>aes</a></span><span class='op'>(</span>x <span class='op'>=</span> <span class='va'>x_domain_k</span>, y <span class='op'>=</span> <span class='va'>classif.ce</span>, color <span class='op'>=</span> <span class='va'>kernel</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span>
   <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/geom_point.html'>geom_point</a></span><span class='op'>(</span>size <span class='op'>=</span> <span class='fl'>2</span>, alpha <span class='op'>=</span> <span class='fl'>0.3</span><span class='op'>)</span>
 </code></pre>
 </div>
@@ -2741,7 +2789,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>In fact, if we zoom in to <code>(5, 40)</code> <span class="math inline">\(\times\)</span> <code>(0.23, 0.28)</code> and do decrease smoothing we see that different kernels have their optimum at different values of <code>k</code>:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='fu'><a href='https://ggplot2.tidyverse.org/reference/ggplot.html'>ggplot</a></span><span class='op'>(</span><span class='va'>perfdata</span>, <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/aes.html'>aes</a></span><span class='op'>(</span>x <span class='op'>=</span> <span class='va'>x_domain_k</span>, y <span class='op'>=</span> <span class='va'>classif.ce</span>, color <span class='op'>=</span> <span class='va'>kernel</span>,
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://ggplot2.tidyverse.org/reference/ggplot.html'>ggplot</a></span><span class='op'>(</span><span class='va'>perfdata</span>, <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/aes.html'>aes</a></span><span class='op'>(</span>x <span class='op'>=</span> <span class='va'>x_domain_k</span>, y <span class='op'>=</span> <span class='va'>classif.ce</span>, color <span class='op'>=</span> <span class='va'>kernel</span>,
   group <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/interaction.html'>interaction</a></span><span class='op'>(</span><span class='va'>kernel</span>, <span class='va'>scale</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span>
   <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/geom_point.html'>geom_point</a></span><span class='op'>(</span>size <span class='op'>=</span> <span class='fl'>2</span>, alpha <span class='op'>=</span> <span class='fl'>0.3</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/geom_smooth.html'>geom_smooth</a></span><span class='op'>(</span><span class='op'>)</span> <span class='op'>+</span>
   <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/lims.html'>xlim</a></span><span class='op'>(</span><span class='fl'>5</span>, <span class='fl'>40</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/lims.html'>ylim</a></span><span class='op'>(</span><span class='fl'>0.23</span>, <span class='fl'>0.28</span><span class='op'>)</span>
@@ -2752,7 +2800,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>What about the <code>distance</code> parameter? If we select all results with <code>k</code> between 10 and 20 and plot distance and kernel we see an approximate relationship:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='fu'><a href='https://ggplot2.tidyverse.org/reference/ggplot.html'>ggplot</a></span><span class='op'>(</span><span class='va'>perfdata</span><span class='op'>[</span><span class='va'>x_domain_k</span> <span class='op'>&gt;</span> <span class='fl'>10</span> <span class='op'>&amp;</span> <span class='va'>x_domain_k</span> <span class='op'>&lt;</span> <span class='fl'>20</span> <span class='op'>&amp;</span> <span class='va'>scale</span> <span class='op'>==</span> <span class='cn'>TRUE</span><span class='op'>]</span>,
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://ggplot2.tidyverse.org/reference/ggplot.html'>ggplot</a></span><span class='op'>(</span><span class='va'>perfdata</span><span class='op'>[</span><span class='va'>x_domain_k</span> <span class='op'>&gt;</span> <span class='fl'>10</span> <span class='op'>&amp;</span> <span class='va'>x_domain_k</span> <span class='op'>&lt;</span> <span class='fl'>20</span> <span class='op'>&amp;</span> <span class='va'>scale</span> <span class='op'>==</span> <span class='cn'>TRUE</span><span class='op'>]</span>,
   <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/aes.html'>aes</a></span><span class='op'>(</span>x <span class='op'>=</span> <span class='va'>distance</span>, y <span class='op'>=</span> <span class='va'>classif.ce</span>, color <span class='op'>=</span> <span class='va'>kernel</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span>
   <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/geom_point.html'>geom_point</a></span><span class='op'>(</span>size <span class='op'>=</span> <span class='fl'>2</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/geom_smooth.html'>geom_smooth</a></span><span class='op'>(</span><span class='op'>)</span>
 </code></pre>

@@ -472,8 +472,15 @@ d-title {
   top: 0;
 }
 
+/* adjust viewport for navbar height */
+/* helps vertically center bootstrap (non-distill) content */
+.min-vh-100 {
+  min-height: calc(100vh - 100px) !important;
+}
+
 </style>
 
+<script src="../../site_libs/jquery-1.11.3/jquery.min.js"></script>
 <link href="../../site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet"/>
 <link href="../../site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet"/>
 <script src="../../site_libs/headroom-0.9.4/headroom.min.js"></script>
@@ -581,19 +588,21 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
           var results = fuse.search(query, searchOptions);
           callback(results
             .map(function(result) { return result.item; })
-            .filter(function(item) { return !!item.description; })
           );
         },
         templates: {
           suggestion: function(suggestion) {
+            var img = suggestion.preview && Object.keys(suggestion.preview).length > 0
+              ? `<img src="${offsetURL(suggestion.preview)}"</img>`
+              : '';
             var html = `
               <div class="search-item">
                 <h3>${suggestion.title}</h3>
                 <div class="search-item-description">
-                  ${suggestion.description}
+                  ${suggestion.description || ''}
                 </div>
                 <div class="search-item-preview">
-                  <img src="${suggestion.preview ? offsetURL(suggestion.preview) : ''}"</img>
+                  ${img}
                 </div>
               </div>
             `;
@@ -616,6 +625,10 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 </script>
 
 <style type="text/css">
+
+.nav-search {
+  font-size: x-small;
+}
 
 /* Algolioa Autocomplete */
 
@@ -691,6 +704,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 }
 
 .algolia-autocomplete .aa-dropdown-menu .aa-suggestion .search-item h3 {
+  font-size: 1rem;
   margin-block-start: 0;
   margin-block-end: 5px;
 }
@@ -918,6 +932,11 @@ d-article pre a:hover {
   text-decoration: underline;
 }
 
+d-article details {
+  grid-column: text;
+  margin-bottom: 0.8em;
+}
+
 @media(min-width: 768px) {
 
 d-article pre,
@@ -1072,6 +1091,17 @@ d-article .citation {
 
 div.hanging-indent{
   margin-left: 1em; text-indent: -1em;
+}
+
+/* Citation hover box */
+
+.tippy-box[data-theme~=light-border] {
+  background-color: rgba(250, 250, 250, 0.95);
+}
+
+.tippy-content > p {
+  margin-bottom: 0;
+  padding: 2px;
 }
 
 
@@ -1739,7 +1769,7 @@ function init_distill() {
     var layout = $(this).attr('data-layout');
 
     // apply layout to markdown level block elements
-    var elements = $(this).children().not('div.sourceCode, pre, script');
+    var elements = $(this).children().not('details, div.sourceCode, pre, script');
     elements.each(function(i, el) {
       var layout_div = $('<div class="' + layout + '"></div>');
       if (layout_div.hasClass('shaded')) {
@@ -1854,6 +1884,20 @@ function init_distill() {
     // move appendix-bottom entries to the bottom
     $('.appendix-bottom').appendTo('d-appendix').children().unwrap();
     $('.appendix-bottom').remove();
+
+    // hoverable references
+    $('span.citation[data-cites]').each(function() {
+      var refHtml = $('#ref-' + $(this).attr('data-cites')).html();
+      window.tippy(this, {
+        allowHTML: true,
+        content: refHtml,
+        maxWidth: 500,
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'light-border',
+        placement: 'bottom-start'
+      });
+    });
 
     // clear polling timer
     clearInterval(tid);
@@ -2015,6 +2059,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
 <!--/radix_placeholder_distill-->
   <script src="../../site_libs/jquery-1.11.3/jquery.min.js"></script>
+  <script src="../../site_libs/popper-2.6.0/popper.min.js"></script>
+  <link href="../../site_libs/tippy-6.2.7/tippy.css" rel="stylesheet" />
+  <link href="../../site_libs/tippy-6.2.7/tippy-light-border.css" rel="stylesheet" />
+  <script src="../../site_libs/tippy-6.2.7/tippy.umd.min.js"></script>
   <script src="../../site_libs/anchor-4.2.2/anchor.min.js"></script>
   <script src="../../site_libs/bowser-1.9.3/bowser.min.js"></script>
   <script src="../../site_libs/webcomponents-2.0.0/webcomponents.js"></script>
@@ -2084,7 +2132,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>In the following, we rely on some toy data. We simulate 100 responses to three target variables, <span class="math inline">\(y_{1}\)</span>, <span class="math inline">\(y_{2}\)</span>, and <span class="math inline">\(y_{3}\)</span> following a multivariate normal distribution with a mean and covariance matrix of:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://Rdatatable.gitlab.io/data.table'>data.table</a></span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://Rdatatable.gitlab.io/data.table'>data.table</a></span><span class='op'>)</span>
 <span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='http://mvtnorm.R-forge.R-project.org'>mvtnorm</a></span><span class='op'>)</span>
 <span class='fu'><a href='https://rdrr.io/r/base/Random.html'>set.seed</a></span><span class='op'>(</span><span class='fl'>2409</span><span class='op'>)</span>
 <span class='va'>n</span> <span class='op'>=</span> <span class='fl'>100</span>
@@ -2094,7 +2142,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <pre><code>y1 y2 y3 
  1  2  3 </code></pre>
 <div class="sourceCode">
-<pre><code><span class='op'>(</span><span class='va'>sigma</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/matrix.html'>matrix</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>1</span>, <span class='op'>-</span><span class='fl'>0.5</span>, <span class='fl'>0.25</span>, <span class='op'>-</span><span class='fl'>0.5</span>, <span class='fl'>1</span>, <span class='op'>-</span><span class='fl'>0.25</span>, <span class='fl'>0.25</span>, <span class='op'>-</span><span class='fl'>0.25</span>, <span class='fl'>1</span><span class='op'>)</span>,
+<pre class="sourceCode r"><code class="sourceCode r"><span class='op'>(</span><span class='va'>sigma</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/matrix.html'>matrix</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>1</span>, <span class='op'>-</span><span class='fl'>0.5</span>, <span class='fl'>0.25</span>, <span class='op'>-</span><span class='fl'>0.5</span>, <span class='fl'>1</span>, <span class='op'>-</span><span class='fl'>0.25</span>, <span class='fl'>0.25</span>, <span class='op'>-</span><span class='fl'>0.25</span>, <span class='fl'>1</span><span class='op'>)</span>,
   nrow <span class='op'>=</span> <span class='fl'>3</span>, ncol <span class='op'>=</span> <span class='fl'>3</span>, byrow <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span><span class='op'>)</span>
 </code></pre>
 </div>
@@ -2103,14 +2151,14 @@ document.addEventListener('DOMContentLoaded', function() {
 [2,] -0.50  1.00 -0.25
 [3,]  0.25 -0.25  1.00</code></pre>
 <div class="sourceCode">
-<pre><code><span class='va'>Y</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/pkg/mvtnorm/man/Mvnorm.html'>rmvnorm</a></span><span class='op'>(</span><span class='va'>n</span>, mean <span class='op'>=</span> <span class='va'>mean</span>, sigma <span class='op'>=</span> <span class='va'>sigma</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>Y</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/pkg/mvtnorm/man/Mvnorm.html'>rmvnorm</a></span><span class='op'>(</span><span class='va'>n</span>, mean <span class='op'>=</span> <span class='va'>mean</span>, sigma <span class='op'>=</span> <span class='va'>sigma</span><span class='op'>)</span>
 </code></pre>
 </div>
 </div>
 <p>The feature variables <span class="math inline">\(x_{1}\)</span>, and <span class="math inline">\(x_{2}\)</span> are simulated as follows: <span class="math inline">\(x_{1}\)</span> is simply given by <span class="math inline">\(y_{1}\)</span> and an independent normally distributed error term and <span class="math inline">\(x_{2}\)</span> is given by <span class="math inline">\(y_{2}\)</span> and an independent normally distributed error term.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>x1</span> <span class='op'>=</span> <span class='va'>Y</span><span class='op'>[</span>, <span class='fl'>1</span><span class='op'>]</span> <span class='op'>+</span> <span class='fu'><a href='https://rdrr.io/r/stats/Normal.html'>rnorm</a></span><span class='op'>(</span><span class='va'>n</span>, sd <span class='op'>=</span> <span class='fl'>0.1</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>x1</span> <span class='op'>=</span> <span class='va'>Y</span><span class='op'>[</span>, <span class='fl'>1</span><span class='op'>]</span> <span class='op'>+</span> <span class='fu'><a href='https://rdrr.io/r/stats/Normal.html'>rnorm</a></span><span class='op'>(</span><span class='va'>n</span>, sd <span class='op'>=</span> <span class='fl'>0.1</span><span class='op'>)</span>
 <span class='va'>x2</span> <span class='op'>=</span> <span class='va'>Y</span><span class='op'>[</span>, <span class='fl'>2</span><span class='op'>]</span> <span class='op'>+</span> <span class='fu'><a href='https://rdrr.io/r/stats/Normal.html'>rnorm</a></span><span class='op'>(</span><span class='va'>n</span>, sd <span class='op'>=</span> <span class='fl'>0.1</span><span class='op'>)</span>
 </code></pre>
 </div>
@@ -2118,7 +2166,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>The final data is given as:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>dat</span> <span class='op'>=</span> <span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/as.data.table.html'>as.data.table</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/cbind.html'>cbind</a></span><span class='op'>(</span><span class='va'>Y</span>, <span class='va'>x1</span>, <span class='va'>x2</span><span class='op'>)</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>dat</span> <span class='op'>=</span> <span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/as.data.table.html'>as.data.table</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/cbind.html'>cbind</a></span><span class='op'>(</span><span class='va'>Y</span>, <span class='va'>x1</span>, <span class='va'>x2</span><span class='op'>)</span><span class='op'>)</span>
 <span class='fu'><a href='https://rdrr.io/r/utils/str.html'>str</a></span><span class='op'>(</span><span class='va'>dat</span><span class='op'>)</span>
 </code></pre>
 </div>
@@ -2135,14 +2183,14 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>If you feel confident to already have a good feeling of the data, feel free to skip this section. If not, you can use the <a href="https://cran.r-project.org/package=rgl">rgl</a> package to play around with the following four 3D plots with either the feature variables or <span class="math inline">\(y_{1}\)</span> and <span class="math inline">\(y_{2}\)</span> on the x- and y-axis and the target variables on the respective z-axes:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'>rgl</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'>rgl</span><span class='op'>)</span>
 <span class='va'>colfun</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/grDevices/colorRamp.html'>colorRampPalette</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"#161B1D"</span>, <span class='st'>"#ADD8E6"</span><span class='op'>)</span><span class='op'>)</span>
 </code></pre>
 </div>
 </div>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/setorder.html'>setorder</a></span><span class='op'>(</span><span class='va'>dat</span>, <span class='va'>y1</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/setorder.html'>setorder</a></span><span class='op'>(</span><span class='va'>dat</span>, <span class='va'>y1</span><span class='op'>)</span>
 <span class='fu'>plot3d</span><span class='op'>(</span><span class='va'>dat</span><span class='op'>$</span><span class='va'>x1</span>, <span class='va'>dat</span><span class='op'>$</span><span class='va'>x2</span>, <span class='va'>dat</span><span class='op'>$</span><span class='va'>y1</span>,
   xlab <span class='op'>=</span> <span class='st'>"x1"</span>, ylab <span class='op'>=</span> <span class='st'>"x2"</span>, zlab <span class='op'>=</span> <span class='st'>"y1"</span>,
   type <span class='op'>=</span> <span class='st'>"s"</span>, radius <span class='op'>=</span> <span class='fl'>0.1</span>, col <span class='op'>=</span> <span class='fu'>colfun</span><span class='op'>(</span><span class='va'>n</span><span class='op'>)</span><span class='op'>)</span>
@@ -2151,7 +2199,7 @@ document.addEventListener('DOMContentLoaded', function() {
 </div>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/setorder.html'>setorder</a></span><span class='op'>(</span><span class='va'>dat</span>, <span class='va'>y2</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/setorder.html'>setorder</a></span><span class='op'>(</span><span class='va'>dat</span>, <span class='va'>y2</span><span class='op'>)</span>
 <span class='fu'>plot3d</span><span class='op'>(</span><span class='va'>dat</span><span class='op'>$</span><span class='va'>x1</span>, <span class='va'>dat</span><span class='op'>$</span><span class='va'>x2</span>, <span class='va'>dat</span><span class='op'>$</span><span class='va'>y2</span>,
   xlab <span class='op'>=</span> <span class='st'>"x1"</span>, ylab <span class='op'>=</span> <span class='st'>"x2"</span>, zlab <span class='op'>=</span> <span class='st'>"y2"</span>,
   type <span class='op'>=</span> <span class='st'>"s"</span>, radius <span class='op'>=</span> <span class='fl'>0.1</span>, col <span class='op'>=</span> <span class='fu'>colfun</span><span class='op'>(</span><span class='va'>n</span><span class='op'>)</span><span class='op'>)</span>
@@ -2160,7 +2208,7 @@ document.addEventListener('DOMContentLoaded', function() {
 </div>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/setorder.html'>setorder</a></span><span class='op'>(</span><span class='va'>dat</span>, <span class='va'>y3</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/setorder.html'>setorder</a></span><span class='op'>(</span><span class='va'>dat</span>, <span class='va'>y3</span><span class='op'>)</span>
 <span class='fu'>plot3d</span><span class='op'>(</span><span class='va'>dat</span><span class='op'>$</span><span class='va'>x1</span>, <span class='va'>dat</span><span class='op'>$</span><span class='va'>x2</span>, <span class='va'>dat</span><span class='op'>$</span><span class='va'>y3</span>,
   xlab <span class='op'>=</span> <span class='st'>"x1"</span>, ylab <span class='op'>=</span> <span class='st'>"x2"</span>, zlab <span class='op'>=</span> <span class='st'>"y3"</span>,
   type <span class='op'>=</span> <span class='st'>"s"</span>, radius <span class='op'>=</span> <span class='fl'>0.1</span>, col <span class='op'>=</span> <span class='fu'>colfun</span><span class='op'>(</span><span class='va'>n</span><span class='op'>)</span><span class='op'>)</span>
@@ -2169,7 +2217,7 @@ document.addEventListener('DOMContentLoaded', function() {
 </div>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/setorder.html'>setorder</a></span><span class='op'>(</span><span class='va'>dat</span>, <span class='va'>y3</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/setorder.html'>setorder</a></span><span class='op'>(</span><span class='va'>dat</span>, <span class='va'>y3</span><span class='op'>)</span>
 <span class='fu'>plot3d</span><span class='op'>(</span><span class='va'>dat</span><span class='op'>$</span><span class='va'>y1</span>, <span class='va'>dat</span><span class='op'>$</span><span class='va'>y2</span>, <span class='va'>dat</span><span class='op'>$</span><span class='va'>y3</span>,
   xlab <span class='op'>=</span> <span class='st'>"y1"</span>, ylab <span class='op'>=</span> <span class='st'>"y2"</span>, zlab <span class='op'>=</span> <span class='st'>"y3"</span>,
   type <span class='op'>=</span> <span class='st'>"s"</span>, radius <span class='op'>=</span> <span class='fl'>0.1</span>, col <span class='op'>=</span> <span class='fu'>colfun</span><span class='op'>(</span><span class='va'>n</span><span class='op'>)</span><span class='op'>)</span>
@@ -2180,7 +2228,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>In our regression chain, the first model will predict <span class="math inline">\(y_{1}\)</span>. Therefore, we initialize our <code>Task</code> with respect to this target:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://mlr3.mlr-org.com'>mlr3</a></span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://mlr3.mlr-org.com'>mlr3</a></span><span class='op'>)</span>
 <span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://mlr3learners.mlr-org.com'>mlr3learners</a></span><span class='op'>)</span>
 <span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://mlr3pipelines.mlr-org.com'>mlr3pipelines</a></span><span class='op'>)</span>
 <span class='va'>task</span> <span class='op'>=</span> <span class='va'><a href='https://mlr3.mlr-org.com/reference/TaskRegr.html'>TaskRegr</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='st'>"multiregression"</span>, backend <span class='op'>=</span> <span class='va'>dat</span>, target <span class='op'>=</span> <span class='st'>"y1"</span><span class='op'>)</span>
@@ -2196,7 +2244,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>To combine predictions of a <code>Learner</code> with the previous input, we rely on <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_learner_cv.html"><code>PipeOpLearnerCV</code></a> and <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_nop.html"><code>PipeOpNOP</code></a> arranged in parallel via <a href="https://mlr3pipelines.mlr-org.com/reference/gunion.html"><code>gunion</code></a> combined via <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_featureunion.html"><code>PipeOpFeatureUnion</code></a>. To drop the respective remaining target variables as features, we rely on <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_colroles.html"><code>PipeOpColRoles</code></a>. The first step of predicting <span class="math inline">\(y_{1}\)</span> looks like the following:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>step1</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"copy"</span>, outnum <span class='op'>=</span> <span class='fl'>2</span>, id <span class='op'>=</span> <span class='st'>"copy1"</span><span class='op'>)</span> <span class='op'>%&gt;&gt;%</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>step1</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"copy"</span>, outnum <span class='op'>=</span> <span class='fl'>2</span>, id <span class='op'>=</span> <span class='st'>"copy1"</span><span class='op'>)</span> <span class='op'>%&gt;&gt;%</span>
   <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/gunion.html'>gunion</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>
     <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"colroles"</span>, id <span class='op'>=</span> <span class='st'>"drop_y2_y3"</span>,
       param_vals <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>new_role <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>y2 <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/character.html'>character</a></span><span class='op'>(</span><span class='op'>)</span>, y3 <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/character.html'>character</a></span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>%&gt;&gt;%</span>
@@ -2212,7 +2260,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>Training using the input <code>Task</code>, shows us how the output and the <code>$state</code> look like:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>step1_out</span> <span class='op'>=</span> <span class='va'>step1</span><span class='op'>$</span><span class='fu'>train</span><span class='op'>(</span><span class='va'>task</span><span class='op'>)</span><span class='op'>[[</span><span class='fl'>1</span><span class='op'>]</span><span class='op'>]</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>step1_out</span> <span class='op'>=</span> <span class='va'>step1</span><span class='op'>$</span><span class='fu'>train</span><span class='op'>(</span><span class='va'>task</span><span class='op'>)</span><span class='op'>[[</span><span class='fl'>1</span><span class='op'>]</span><span class='op'>]</span>
 <span class='va'>step1_out</span>
 </code></pre>
 </div>
@@ -2222,7 +2270,7 @@ document.addEventListener('DOMContentLoaded', function() {
 * Features (5):
   - dbl (5): x1, x2, y1_learner.response, y2, y3</code></pre>
 <div class="sourceCode">
-<pre><code><span class='va'>step1</span><span class='op'>$</span><span class='va'>state</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>step1</span><span class='op'>$</span><span class='va'>state</span>
 </code></pre>
 </div>
 <pre><code>$copy1
@@ -2300,13 +2348,13 @@ list()</code></pre>
 <p>Within the second step we then have to define <span class="math inline">\(y_{2}\)</span> as the new target. This can be done using <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_updatetarget.html"><code>PipeOpUpdateTarget</code></a> (note that <code>PipeOpUpdateTarget</code> currently is not exported but will be in a future version). By default, <code>PipeOpUpdateTarget</code> drops the original target from the feature set, here <span class="math inline">\(y_{1}\)</span>.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>mlr_pipeops</span><span class='op'>$</span><span class='fu'>add</span><span class='op'>(</span><span class='st'>"update_target"</span>, <span class='fu'>mlr3pipelines</span><span class='fu'>:::</span><span class='va'><a href='https://mlr3pipelines.mlr-org.com//reference/mlr_pipeops_updatetarget.html'>PipeOpUpdateTarget</a></span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>mlr_pipeops</span><span class='op'>$</span><span class='fu'>add</span><span class='op'>(</span><span class='st'>"update_target"</span>, <span class='fu'>mlr3pipelines</span><span class='fu'>:::</span><span class='va'><a href='https://mlr3pipelines.mlr-org.com//reference/mlr_pipeops_updatetarget.html'>PipeOpUpdateTarget</a></span><span class='op'>)</span>
 </code></pre>
 </div>
 </div>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>step2</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"update_target"</span>, id <span class='op'>=</span> <span class='st'>"y2_target"</span>,
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>step2</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"update_target"</span>, id <span class='op'>=</span> <span class='st'>"y2_target"</span>,
     param_vals <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>new_target_name <span class='op'>=</span> <span class='st'>"y2"</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>%&gt;&gt;%</span>
   <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"copy"</span>, outnum <span class='op'>=</span> <span class='fl'>2</span>, id <span class='op'>=</span> <span class='st'>"copy2"</span><span class='op'>)</span> <span class='op'>%&gt;&gt;%</span>
   <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/gunion.html'>gunion</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>
@@ -2322,7 +2370,7 @@ list()</code></pre>
 <p>Again, we can train to see how the output and <code>$state</code> look like, but now using the output of <code>step1</code> as the input:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>step2_out</span> <span class='op'>=</span> <span class='va'>step2</span><span class='op'>$</span><span class='fu'>train</span><span class='op'>(</span><span class='va'>step1_out</span><span class='op'>)</span><span class='op'>[[</span><span class='fl'>1</span><span class='op'>]</span><span class='op'>]</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>step2_out</span> <span class='op'>=</span> <span class='va'>step2</span><span class='op'>$</span><span class='fu'>train</span><span class='op'>(</span><span class='va'>step1_out</span><span class='op'>)</span><span class='op'>[[</span><span class='fl'>1</span><span class='op'>]</span><span class='op'>]</span>
 <span class='va'>step2_out</span>
 </code></pre>
 </div>
@@ -2332,7 +2380,7 @@ list()</code></pre>
 * Features (5):
   - dbl (5): x1, x2, y1_learner.response, y2_learner.response, y3</code></pre>
 <div class="sourceCode">
-<pre><code><span class='va'>step2</span><span class='op'>$</span><span class='va'>state</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>step2</span><span class='op'>$</span><span class='va'>state</span>
 </code></pre>
 </div>
 <pre><code>$y2_target
@@ -2384,7 +2432,7 @@ $y2_learner$log
 Empty data.table (0 rows and 3 cols): stage,class,msg
 
 $y2_learner$train_time
-[1] 0.006
+[1] 0.011
 
 $y2_learner$train_task
 &lt;TaskRegr:multiregression&gt; (0 x 4)
@@ -2419,7 +2467,7 @@ list()</code></pre>
 <p>In the final third step we define <span class="math inline">\(y_{3}\)</span> as the new target (again, <code>PipeOpUpdateTarget</code> drops the previous original target from the feature set, here <span class="math inline">\(y_{2}\)</span>):</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>step3</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"update_target"</span>, id <span class='op'>=</span> <span class='st'>"y3_target"</span>,
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>step3</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"update_target"</span>, id <span class='op'>=</span> <span class='st'>"y3_target"</span>,
     param_vals <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>new_target_name <span class='op'>=</span> <span class='st'>"y3"</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>%&gt;&gt;%</span>
   <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"learner"</span>, learner <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>lrn</a></span><span class='op'>(</span><span class='st'>"regr.lm"</span><span class='op'>)</span>, id <span class='op'>=</span> <span class='st'>"y3_learner"</span><span class='op'>)</span>
 </code></pre>
@@ -2428,13 +2476,13 @@ list()</code></pre>
 <p>Using the output of <code>step2</code> as input:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>step3_out</span> <span class='op'>=</span> <span class='va'>step3</span><span class='op'>$</span><span class='fu'>train</span><span class='op'>(</span><span class='va'>step2_out</span><span class='op'>)</span><span class='op'>[[</span><span class='fl'>1</span><span class='op'>]</span><span class='op'>]</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>step3_out</span> <span class='op'>=</span> <span class='va'>step3</span><span class='op'>$</span><span class='fu'>train</span><span class='op'>(</span><span class='va'>step2_out</span><span class='op'>)</span><span class='op'>[[</span><span class='fl'>1</span><span class='op'>]</span><span class='op'>]</span>
 <span class='va'>step3_out</span>
 </code></pre>
 </div>
 <pre><code>NULL</code></pre>
 <div class="sourceCode">
-<pre><code><span class='va'>step3</span><span class='op'>$</span><span class='va'>state</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>step3</span><span class='op'>$</span><span class='va'>state</span>
 </code></pre>
 </div>
 <pre><code>$y3_target
@@ -2457,7 +2505,7 @@ $y3_learner$log
 Empty data.table (0 rows and 3 cols): stage,class,msg
 
 $y3_learner$train_time
-[1] 0.007
+[1] 0.01
 
 $y3_learner$train_task
 &lt;TaskRegr:multiregression&gt; (0 x 5)
@@ -2469,7 +2517,7 @@ $y3_learner$train_task
 <p>The complete pipeline, more precisely <a href="https://mlr3pipelines.mlr-org.com/reference/Graph.html"><code>Graph</code></a>, looks like the following:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>graph</span> <span class='op'>=</span> <span class='va'>step1</span> <span class='op'>%&gt;&gt;%</span> <span class='va'>step2</span> <span class='op'>%&gt;&gt;%</span> <span class='va'>step3</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>graph</span> <span class='op'>=</span> <span class='va'>step1</span> <span class='op'>%&gt;&gt;%</span> <span class='va'>step2</span> <span class='op'>%&gt;&gt;%</span> <span class='va'>step3</span>
 <span class='va'>graph</span><span class='op'>$</span><span class='fu'>plot</span><span class='op'>(</span><span class='op'>)</span>
 </code></pre>
 </div>
@@ -2479,7 +2527,7 @@ $y3_learner$train_task
 <p>By wrapping our <code>Graph</code> in a <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_learners_graph.html"><code>GraphLearner</code></a>, we can perform <a href="https://mlr3.mlr-org.com/reference/mlr_resamplings_cv.html"><code>3-fold cross-validation</code></a> and get an estimated average of the root-mean-square error (of course, in a real world setting splitting the data in a training and test set should have been done):</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>learner</span> <span class='op'>=</span> <span class='va'><a href='https://mlr3pipelines.mlr-org.com//reference/mlr_learners_graph.html'>GraphLearner</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='va'>graph</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>learner</span> <span class='op'>=</span> <span class='va'><a href='https://mlr3pipelines.mlr-org.com//reference/mlr_learners_graph.html'>GraphLearner</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='va'>graph</span><span class='op'>)</span>
 <span class='va'>rr</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/resample.html'>resample</a></span><span class='op'>(</span><span class='va'>task</span>, learner <span class='op'>=</span> <span class='va'>learner</span>, resampling <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>rsmp</a></span><span class='op'>(</span><span class='st'>"cv"</span>, folds <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span><span class='op'>)</span>
 <span class='va'>rr</span><span class='op'>$</span><span class='fu'>aggregate</span><span class='op'>(</span><span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>msr</a></span><span class='op'>(</span><span class='st'>"regr.mse"</span><span class='op'>)</span><span class='op'>)</span>
 </code></pre>
@@ -2491,7 +2539,7 @@ $y3_learner$train_task
 <p>For completeness, we also show how a prediction step without having any target variable data available would look like:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>dat_predict</span> <span class='op'>=</span> <span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/as.data.table.html'>as.data.table</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/cbind.html'>cbind</a></span><span class='op'>(</span><span class='va'>x1</span>, <span class='va'>x2</span>, y1 <span class='op'>=</span> <span class='cn'>NA</span>, y2 <span class='op'>=</span> <span class='cn'>NA</span>, y3 <span class='op'>=</span> <span class='cn'>NA</span><span class='op'>)</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>dat_predict</span> <span class='op'>=</span> <span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/as.data.table.html'>as.data.table</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/cbind.html'>cbind</a></span><span class='op'>(</span><span class='va'>x1</span>, <span class='va'>x2</span>, y1 <span class='op'>=</span> <span class='cn'>NA</span>, y2 <span class='op'>=</span> <span class='cn'>NA</span>, y3 <span class='op'>=</span> <span class='cn'>NA</span><span class='op'>)</span><span class='op'>)</span>
 <span class='va'>learner</span><span class='op'>$</span><span class='fu'>train</span><span class='op'>(</span><span class='va'>task</span><span class='op'>)</span>
 <span class='va'>learner</span><span class='op'>$</span><span class='fu'>predict_newdata</span><span class='op'>(</span><span class='va'>dat_predict</span><span class='op'>)</span>
 </code></pre>

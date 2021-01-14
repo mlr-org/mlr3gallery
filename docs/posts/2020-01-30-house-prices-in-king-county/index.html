@@ -470,8 +470,15 @@ d-title {
   top: 0;
 }
 
+/* adjust viewport for navbar height */
+/* helps vertically center bootstrap (non-distill) content */
+.min-vh-100 {
+  min-height: calc(100vh - 100px) !important;
+}
+
 </style>
 
+<script src="../../site_libs/jquery-1.11.3/jquery.min.js"></script>
 <link href="../../site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet"/>
 <link href="../../site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet"/>
 <script src="../../site_libs/headroom-0.9.4/headroom.min.js"></script>
@@ -579,19 +586,21 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
           var results = fuse.search(query, searchOptions);
           callback(results
             .map(function(result) { return result.item; })
-            .filter(function(item) { return !!item.description; })
           );
         },
         templates: {
           suggestion: function(suggestion) {
+            var img = suggestion.preview && Object.keys(suggestion.preview).length > 0
+              ? `<img src="${offsetURL(suggestion.preview)}"</img>`
+              : '';
             var html = `
               <div class="search-item">
                 <h3>${suggestion.title}</h3>
                 <div class="search-item-description">
-                  ${suggestion.description}
+                  ${suggestion.description || ''}
                 </div>
                 <div class="search-item-preview">
-                  <img src="${suggestion.preview ? offsetURL(suggestion.preview) : ''}"</img>
+                  ${img}
                 </div>
               </div>
             `;
@@ -614,6 +623,10 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 </script>
 
 <style type="text/css">
+
+.nav-search {
+  font-size: x-small;
+}
 
 /* Algolioa Autocomplete */
 
@@ -689,6 +702,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 }
 
 .algolia-autocomplete .aa-dropdown-menu .aa-suggestion .search-item h3 {
+  font-size: 1rem;
   margin-block-start: 0;
   margin-block-end: 5px;
 }
@@ -916,6 +930,11 @@ d-article pre a:hover {
   text-decoration: underline;
 }
 
+d-article details {
+  grid-column: text;
+  margin-bottom: 0.8em;
+}
+
 @media(min-width: 768px) {
 
 d-article pre,
@@ -1070,6 +1089,17 @@ d-article .citation {
 
 div.hanging-indent{
   margin-left: 1em; text-indent: -1em;
+}
+
+/* Citation hover box */
+
+.tippy-box[data-theme~=light-border] {
+  background-color: rgba(250, 250, 250, 0.95);
+}
+
+.tippy-content > p {
+  margin-bottom: 0;
+  padding: 2px;
 }
 
 
@@ -1737,7 +1767,7 @@ function init_distill() {
     var layout = $(this).attr('data-layout');
 
     // apply layout to markdown level block elements
-    var elements = $(this).children().not('div.sourceCode, pre, script');
+    var elements = $(this).children().not('details, div.sourceCode, pre, script');
     elements.each(function(i, el) {
       var layout_div = $('<div class="' + layout + '"></div>');
       if (layout_div.hasClass('shaded')) {
@@ -1852,6 +1882,20 @@ function init_distill() {
     // move appendix-bottom entries to the bottom
     $('.appendix-bottom').appendTo('d-appendix').children().unwrap();
     $('.appendix-bottom').remove();
+
+    // hoverable references
+    $('span.citation[data-cites]').each(function() {
+      var refHtml = $('#ref-' + $(this).attr('data-cites')).html();
+      window.tippy(this, {
+        allowHTML: true,
+        content: refHtml,
+        maxWidth: 500,
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'light-border',
+        placement: 'bottom-start'
+      });
+    });
 
     // clear polling timer
     clearInterval(tid);
@@ -2013,6 +2057,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
 <!--/radix_placeholder_distill-->
   <script src="../../site_libs/jquery-1.11.3/jquery.min.js"></script>
+  <script src="../../site_libs/popper-2.6.0/popper.min.js"></script>
+  <link href="../../site_libs/tippy-6.2.7/tippy.css" rel="stylesheet" />
+  <link href="../../site_libs/tippy-6.2.7/tippy-light-border.css" rel="stylesheet" />
+  <script src="../../site_libs/tippy-6.2.7/tippy.umd.min.js"></script>
   <script src="../../site_libs/anchor-4.2.2/anchor.min.js"></script>
   <script src="../../site_libs/bowser-1.9.3/bowser.min.js"></script>
   <script src="../../site_libs/webcomponents-2.0.0/webcomponents.js"></script>
@@ -2101,7 +2149,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>We use the <code>kc_housing</code> dataset contained in the package <a href="https://mlr3book.mlr-org.com">mlr3book</a> in order to provide a use-case for the application of <a href="https://mlr3.mlr-org.com">mlr3</a> on real-world data.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://mlr3.mlr-org.com'>mlr3</a></span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://mlr3.mlr-org.com'>mlr3</a></span><span class='op'>)</span>
 <span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span><span class='op'>(</span><span class='st'>"kc_housing"</span>, package <span class='op'>=</span> <span class='st'>"mlr3data"</span><span class='op'>)</span>
 </code></pre>
 </div>
@@ -2111,7 +2159,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>We can get a quick overview using R’s summary function:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>kc_housing</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>kc_housing</span><span class='op'>)</span>
 </code></pre>
 </div>
 <pre><code>      date                         price            bedrooms     
@@ -2155,7 +2203,7 @@ document.addEventListener('DOMContentLoaded', function() {
  Max.   :47.78   Max.   :-121.3   Max.   :6210   Max.   :871200  
                                                                  </code></pre>
 <div class="sourceCode">
-<pre><code><span class='fu'><a href='https://rdrr.io/r/base/dim.html'>dim</a></span><span class='op'>(</span><span class='va'>kc_housing</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/dim.html'>dim</a></span><span class='op'>(</span><span class='va'>kc_housing</span><span class='op'>)</span>
 </code></pre>
 </div>
 <pre><code>[1] 21613    20</code></pre>
@@ -2172,7 +2220,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>First we convert the <code>date</code> column to <code>numeric</code>. To do so, we convert the date to the POSIXct date/time class with the <a href="https://cran.r-project.org/package=anytime">anytime</a> package. Next, use <code>difftime()</code> to convert to days since the first day recorded in the data set:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='http://dirk.eddelbuettel.com/code/anytime.html'>anytime</a></span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='http://dirk.eddelbuettel.com/code/anytime.html'>anytime</a></span><span class='op'>)</span>
 <span class='va'>dates</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/pkg/anytime/man/anytime.html'>anytime</a></span><span class='op'>(</span><span class='va'>kc_housing</span><span class='op'>$</span><span class='va'>date</span><span class='op'>)</span>
 <span class='va'>kc_housing</span><span class='op'>$</span><span class='va'>date</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/numeric.html'>as.numeric</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/difftime.html'>difftime</a></span><span class='op'>(</span><span class='va'>dates</span>, <span class='fu'><a href='https://rdrr.io/r/base/Extremes.html'>min</a></span><span class='op'>(</span><span class='va'>dates</span><span class='op'>)</span>, units <span class='op'>=</span> <span class='st'>"days"</span><span class='op'>)</span><span class='op'>)</span>
 </code></pre>
@@ -2181,14 +2229,14 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>Afterwards, we convert the zip code to a factor:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>kc_housing</span><span class='op'>$</span><span class='va'>zipcode</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/factor.html'>as.factor</a></span><span class='op'>(</span><span class='va'>kc_housing</span><span class='op'>$</span><span class='va'>zipcode</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>kc_housing</span><span class='op'>$</span><span class='va'>zipcode</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/factor.html'>as.factor</a></span><span class='op'>(</span><span class='va'>kc_housing</span><span class='op'>$</span><span class='va'>zipcode</span><span class='op'>)</span>
 </code></pre>
 </div>
 </div>
 <p>And add a new column <strong>renovated</strong> indicating whether a house was renovated at some point.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>kc_housing</span><span class='op'>$</span><span class='va'>renovated</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/numeric.html'>as.numeric</a></span><span class='op'>(</span><span class='op'>!</span><span class='fu'><a href='https://rdrr.io/r/base/NA.html'>is.na</a></span><span class='op'>(</span><span class='va'>kc_housing</span><span class='op'>$</span><span class='va'>yr_renovated</span><span class='op'>)</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>kc_housing</span><span class='op'>$</span><span class='va'>renovated</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/numeric.html'>as.numeric</a></span><span class='op'>(</span><span class='op'>!</span><span class='fu'><a href='https://rdrr.io/r/base/NA.html'>is.na</a></span><span class='op'>(</span><span class='va'>kc_housing</span><span class='op'>$</span><span class='va'>yr_renovated</span><span class='op'>)</span><span class='op'>)</span>
 <span class='va'>kc_housing</span><span class='op'>$</span><span class='va'>has_basement</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/numeric.html'>as.numeric</a></span><span class='op'>(</span><span class='op'>!</span><span class='fu'><a href='https://rdrr.io/r/base/NA.html'>is.na</a></span><span class='op'>(</span><span class='va'>kc_housing</span><span class='op'>$</span><span class='va'>sqft_basement</span><span class='op'>)</span><span class='op'>)</span>
 </code></pre>
 </div>
@@ -2196,21 +2244,21 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>We drop the id column which provides no information about the house prices:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>kc_housing</span><span class='op'>$</span><span class='va'>id</span> <span class='op'>=</span> <span class='cn'>NULL</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>kc_housing</span><span class='op'>$</span><span class='va'>id</span> <span class='op'>=</span> <span class='cn'>NULL</span>
 </code></pre>
 </div>
 </div>
 <p>Additionally, we convert the price from Dollar to units of 1000 Dollar to improve readability.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>kc_housing</span><span class='op'>$</span><span class='va'>price</span> <span class='op'>=</span> <span class='va'>kc_housing</span><span class='op'>$</span><span class='va'>price</span> <span class='op'>/</span> <span class='fl'>1000</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>kc_housing</span><span class='op'>$</span><span class='va'>price</span> <span class='op'>=</span> <span class='va'>kc_housing</span><span class='op'>$</span><span class='va'>price</span> <span class='op'>/</span> <span class='fl'>1000</span>
 </code></pre>
 </div>
 </div>
 <p>Additionally, for now we simply drop the columns that have missing values, as some of our learners can not deal with them. A better option to deal with missing values would be imputation, i.e. replacing missing values with valid ones. We will deal with this in a separate article.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>kc_housing</span><span class='op'>$</span><span class='va'>yr_renovated</span> <span class='op'>=</span> <span class='cn'>NULL</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>kc_housing</span><span class='op'>$</span><span class='va'>yr_renovated</span> <span class='op'>=</span> <span class='cn'>NULL</span>
 <span class='va'>kc_housing</span><span class='op'>$</span><span class='va'>sqft_basement</span> <span class='op'>=</span> <span class='cn'>NULL</span>
 </code></pre>
 </div>
@@ -2218,7 +2266,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>We can now plot the density of the <strong>price</strong> to get a first impression on its distribution.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://ggplot2.tidyverse.org'>ggplot2</a></span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://ggplot2.tidyverse.org'>ggplot2</a></span><span class='op'>)</span>
 <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/ggplot.html'>ggplot</a></span><span class='op'>(</span><span class='va'>kc_housing</span>, <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/aes.html'>aes</a></span><span class='op'>(</span>x <span class='op'>=</span> <span class='va'>price</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/geom_density.html'>geom_density</a></span><span class='op'>(</span><span class='op'>)</span>
 </code></pre>
 </div>
@@ -2229,7 +2277,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>After those initial manipulations, we load all required packages and create a Task containing our data.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://mlr3.mlr-org.com'>mlr3</a></span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://mlr3.mlr-org.com'>mlr3</a></span><span class='op'>)</span>
 <span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://mlr3viz.mlr-org.com'>mlr3viz</a></span><span class='op'>)</span>
 <span class='va'>tsk</span> <span class='op'>=</span> <span class='va'><a href='https://mlr3.mlr-org.com/reference/TaskRegr.html'>TaskRegr</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='st'>"sales"</span>, <span class='va'>kc_housing</span>, target <span class='op'>=</span> <span class='st'>"price"</span><span class='op'>)</span>
 </code></pre>
@@ -2240,7 +2288,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>The outcome we want to predict is the <strong>price</strong> variable. The <code>autoplot</code> function provides a good first glimpse on our data. As the resulting object is a <code>ggplot2</code> object, we can use <code>faceting</code> and other functions from <strong>ggplot2</strong> in order to enhance plots.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://ggplot2.tidyverse.org'>ggplot2</a></span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://ggplot2.tidyverse.org'>ggplot2</a></span><span class='op'>)</span>
 <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/autoplot.html'>autoplot</a></span><span class='op'>(</span><span class='va'>tsk</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/facet_wrap.html'>facet_wrap</a></span><span class='op'>(</span><span class='op'>~</span><span class='va'>renovated</span><span class='op'>)</span>
 </code></pre>
 </div>
@@ -2250,7 +2298,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>Additionally, we can for example look at the condition of the house. Again, we clearly can see that the price rises with increasing condition.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='fu'><a href='https://ggplot2.tidyverse.org/reference/autoplot.html'>autoplot</a></span><span class='op'>(</span><span class='va'>tsk</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/facet_wrap.html'>facet_wrap</a></span><span class='op'>(</span><span class='op'>~</span><span class='va'>condition</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://ggplot2.tidyverse.org/reference/autoplot.html'>autoplot</a></span><span class='op'>(</span><span class='va'>tsk</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/facet_wrap.html'>facet_wrap</a></span><span class='op'>(</span><span class='op'>~</span><span class='va'>condition</span><span class='op'>)</span>
 </code></pre>
 </div>
 <p><img src="2020-01-30-house-prices-in-king-county_files/figure-html5/unnamed-chunk-13-1.png" width="624" /></p>
@@ -2259,7 +2307,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>In addition to the association with the target variable, the association between the features can also lead to interesting insights. We investigate using variables associated with the quality and size of the house. Note that we use <code>$clone()</code> and <code>$select()</code> to clone the task and select only a subset of the features for the <code>autoplot</code> function, as <code>autoplot</code> per default uses all features. The task is cloned before we select features in order to keep the original task intact.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='co'># Variables associated with quality</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='co'># Variables associated with quality</span>
 <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/autoplot.html'>autoplot</a></span><span class='op'>(</span><span class='va'>tsk</span><span class='op'>$</span><span class='fu'>clone</span><span class='op'>(</span><span class='op'>)</span><span class='op'>$</span><span class='fu'>select</span><span class='op'>(</span><span class='va'>tsk</span><span class='op'>$</span><span class='va'>feature_names</span><span class='op'>[</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>3</span>, <span class='fl'>17</span><span class='op'>)</span><span class='op'>]</span><span class='op'>)</span>,
   type <span class='op'>=</span> <span class='st'>"pairs"</span><span class='op'>)</span>
 </code></pre>
@@ -2268,7 +2316,7 @@ document.addEventListener('DOMContentLoaded', function() {
 </div>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='fu'><a href='https://ggplot2.tidyverse.org/reference/autoplot.html'>autoplot</a></span><span class='op'>(</span><span class='va'>tsk</span><span class='op'>$</span><span class='fu'>clone</span><span class='op'>(</span><span class='op'>)</span><span class='op'>$</span><span class='fu'>select</span><span class='op'>(</span><span class='va'>tsk</span><span class='op'>$</span><span class='va'>feature_names</span><span class='op'>[</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>9</span><span class='op'>:</span><span class='fl'>12</span><span class='op'>)</span><span class='op'>]</span><span class='op'>)</span>,
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://ggplot2.tidyverse.org/reference/autoplot.html'>autoplot</a></span><span class='op'>(</span><span class='va'>tsk</span><span class='op'>$</span><span class='fu'>clone</span><span class='op'>(</span><span class='op'>)</span><span class='op'>$</span><span class='fu'>select</span><span class='op'>(</span><span class='va'>tsk</span><span class='op'>$</span><span class='va'>feature_names</span><span class='op'>[</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>9</span><span class='op'>:</span><span class='fl'>12</span><span class='op'>)</span><span class='op'>]</span><span class='op'>)</span>,
   type <span class='op'>=</span> <span class='st'>"pairs"</span><span class='op'>)</span>
 </code></pre>
 </div>
@@ -2278,7 +2326,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>In <code>mlr3</code>, we do not create <code>train</code> and <code>test</code> data sets, but instead keep only a vector of train and test indices.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='fu'><a href='https://rdrr.io/r/base/Random.html'>set.seed</a></span><span class='op'>(</span><span class='fl'>4411</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/Random.html'>set.seed</a></span><span class='op'>(</span><span class='fl'>4411</span><span class='op'>)</span>
 <span class='va'>train.idx</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/sample.html'>sample</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/seq.html'>seq_len</a></span><span class='op'>(</span><span class='va'>tsk</span><span class='op'>$</span><span class='va'>nrow</span><span class='op'>)</span>, <span class='fl'>0.7</span> <span class='op'>*</span> <span class='va'>tsk</span><span class='op'>$</span><span class='va'>nrow</span><span class='op'>)</span>
 <span class='va'>test.idx</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/sets.html'>setdiff</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/seq.html'>seq_len</a></span><span class='op'>(</span><span class='va'>tsk</span><span class='op'>$</span><span class='va'>nrow</span><span class='op'>)</span>, <span class='va'>train.idx</span><span class='op'>)</span>
 </code></pre>
@@ -2287,7 +2335,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>We can do the same for our task:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>task_train</span> <span class='op'>=</span> <span class='va'>tsk</span><span class='op'>$</span><span class='fu'>clone</span><span class='op'>(</span><span class='op'>)</span><span class='op'>$</span><span class='fu'>filter</span><span class='op'>(</span><span class='va'>train.idx</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>task_train</span> <span class='op'>=</span> <span class='va'>tsk</span><span class='op'>$</span><span class='fu'>clone</span><span class='op'>(</span><span class='op'>)</span><span class='op'>$</span><span class='fu'>filter</span><span class='op'>(</span><span class='va'>train.idx</span><span class='op'>)</span>
 <span class='va'>task_test</span>  <span class='op'>=</span> <span class='va'>tsk</span><span class='op'>$</span><span class='fu'>clone</span><span class='op'>(</span><span class='op'>)</span><span class='op'>$</span><span class='fu'>filter</span><span class='op'>(</span><span class='va'>test.idx</span><span class='op'>)</span>
 </code></pre>
 </div>
@@ -2297,7 +2345,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>For now, we leave out the <code>zipcode</code> variable, as we also have the <code>latitude</code> and <code>longitude</code> of each house. Again, we use <code>$clone()</code>, so we do not change the original task.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>tsk_nozip</span> <span class='op'>=</span> <span class='va'>task_train</span><span class='op'>$</span><span class='fu'>clone</span><span class='op'>(</span><span class='op'>)</span><span class='op'>$</span><span class='fu'>select</span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/sets.html'>setdiff</a></span><span class='op'>(</span><span class='va'>tsk</span><span class='op'>$</span><span class='va'>feature_names</span>, <span class='st'>"zipcode"</span><span class='op'>)</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>tsk_nozip</span> <span class='op'>=</span> <span class='va'>task_train</span><span class='op'>$</span><span class='fu'>clone</span><span class='op'>(</span><span class='op'>)</span><span class='op'>$</span><span class='fu'>select</span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/sets.html'>setdiff</a></span><span class='op'>(</span><span class='va'>tsk</span><span class='op'>$</span><span class='va'>feature_names</span>, <span class='st'>"zipcode"</span><span class='op'>)</span><span class='op'>)</span>
 <span class='co'># Get the learner</span>
 <span class='va'>lrn</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>lrn</a></span><span class='op'>(</span><span class='st'>"regr.rpart"</span><span class='op'>)</span>
 <span class='co'># And train on the task</span>
@@ -2307,7 +2355,7 @@ document.addEventListener('DOMContentLoaded', function() {
 </div>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='fu'><a href='https://rdrr.io/r/graphics/plot.default.html'>plot</a></span><span class='op'>(</span><span class='va'>lrn</span><span class='op'>$</span><span class='va'>model</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/graphics/plot.default.html'>plot</a></span><span class='op'>(</span><span class='va'>lrn</span><span class='op'>$</span><span class='va'>model</span><span class='op'>)</span>
 <span class='fu'><a href='https://rdrr.io/r/graphics/text.html'>text</a></span><span class='op'>(</span><span class='va'>lrn</span><span class='op'>$</span><span class='va'>model</span><span class='op'>)</span>
 </code></pre>
 </div>
@@ -2316,7 +2364,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>The learned tree relies on several variables in order to distinguish between cheaper and pricier houses. The features we split along are <strong>grade</strong>, <strong>sqft_living</strong>, but also some features related to the area (longitude and latitude). We can visualize the price across different regions in order to get more info:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='co'># Load the ggmap package in order to visualize on a map</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='co'># Load the ggmap package in order to visualize on a map</span>
 <span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://github.com/dkahle/ggmap'>ggmap</a></span><span class='op'>)</span>
 
 <span class='co'># And create a quick plot for the price</span>
@@ -2327,7 +2375,7 @@ document.addEventListener('DOMContentLoaded', function() {
 </div>
 <img src="2020-01-30-house-prices-in-king-county_files/figure-html5/unnamed-chunk-20-1.png" width="624" />
 <div class="sourceCode">
-<pre><code><span class='co'># And the zipcode</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='co'># And the zipcode</span>
 <span class='fu'><a href='https://rdrr.io/pkg/ggmap/man/qmplot.html'>qmplot</a></span><span class='op'>(</span><span class='va'>long</span>, <span class='va'>lat</span>, maptype <span class='op'>=</span> <span class='st'>"watercolor"</span>, color <span class='op'>=</span> <span class='va'>zipcode</span>,
   data <span class='op'>=</span> <span class='va'>kc_housing</span><span class='op'>[</span><span class='va'>train.idx</span><span class='op'>[</span><span class='fl'>1</span><span class='op'>:</span><span class='fl'>3000</span><span class='op'>]</span>,<span class='op'>]</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/guides.html'>guides</a></span><span class='op'>(</span>color <span class='op'>=</span> <span class='cn'>FALSE</span><span class='op'>)</span>
 </code></pre>
@@ -2340,14 +2388,14 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>We use <code>resample</code> with <code>3-fold cross-validation</code> on our training data in order to get a reliable estimate of the algorithm’s performance on future data. Before we start with defining and training learners, we create a <a href="https://mlr3.mlr-org.com/reference/Resampling.html"><code>Resampling</code></a> in order to make sure that we always compare on exactly the same data.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>cv3</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>rsmp</a></span><span class='op'>(</span><span class='st'>"cv"</span>, folds <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>cv3</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>rsmp</a></span><span class='op'>(</span><span class='st'>"cv"</span>, folds <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span>
 </code></pre>
 </div>
 </div>
 <p>For the cross-validation we only use the <strong>training data</strong> by cloning the task and selecting only observations from the training set.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>lrn_rpart</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>lrn</a></span><span class='op'>(</span><span class='st'>"regr.rpart"</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>lrn_rpart</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>lrn</a></span><span class='op'>(</span><span class='st'>"regr.rpart"</span><span class='op'>)</span>
 <span class='va'>res</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/resample.html'>resample</a></span><span class='op'>(</span>task <span class='op'>=</span> <span class='va'>task_train</span>, <span class='va'>lrn_rpart</span>, <span class='va'>cv3</span><span class='op'>)</span>
 <span class='va'>res</span><span class='op'>$</span><span class='fu'>score</span><span class='op'>(</span><span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>msr</a></span><span class='op'>(</span><span class='st'>"regr.rmse"</span><span class='op'>)</span><span class='op'>)</span>
 </code></pre>
@@ -2361,7 +2409,7 @@ document.addEventListener('DOMContentLoaded', function() {
 2:            cv         2 &lt;PredictionRegr[18]&gt;  222.7076
 3:            cv         3 &lt;PredictionRegr[18]&gt;  206.1984</code></pre>
 <div class="sourceCode">
-<pre><code><span class='fu'><a href='https://rdrr.io/r/base/sprintf.html'>sprintf</a></span><span class='op'>(</span><span class='st'>"RMSE of the simple rpart: %s"</span>, <span class='fu'><a href='https://rdrr.io/r/base/Round.html'>round</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/MathFun.html'>sqrt</a></span><span class='op'>(</span><span class='va'>res</span><span class='op'>$</span><span class='fu'>aggregate</span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span>, <span class='fl'>2</span><span class='op'>)</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/sprintf.html'>sprintf</a></span><span class='op'>(</span><span class='st'>"RMSE of the simple rpart: %s"</span>, <span class='fu'><a href='https://rdrr.io/r/base/Round.html'>round</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/MathFun.html'>sqrt</a></span><span class='op'>(</span><span class='va'>res</span><span class='op'>$</span><span class='fu'>aggregate</span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span>, <span class='fl'>2</span><span class='op'>)</span><span class='op'>)</span>
 </code></pre>
 </div>
 <pre><code>[1] &quot;RMSE of the simple rpart: 214.11&quot;</code></pre>
@@ -2370,7 +2418,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>We might be able to improve upon the <strong>RMSE</strong> using more powerful learners. We first load the <a href="https://mlr3learners.mlr-org.com">mlr3learners</a> package, which contains the <a href="https://cran.r-project.org/package=ranger">ranger</a> learner (a package which implements the “Random Forest” algorithm).</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://mlr3learners.mlr-org.com'>mlr3learners</a></span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://mlr3learners.mlr-org.com'>mlr3learners</a></span><span class='op'>)</span>
 <span class='va'>lrn_ranger</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>lrn</a></span><span class='op'>(</span><span class='st'>"regr.ranger"</span>, num.trees <span class='op'>=</span> <span class='fl'>15L</span><span class='op'>)</span>
 <span class='va'>res</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/resample.html'>resample</a></span><span class='op'>(</span>task <span class='op'>=</span> <span class='va'>task_train</span>, <span class='va'>lrn_ranger</span>, <span class='va'>cv3</span><span class='op'>)</span>
 <span class='va'>res</span><span class='op'>$</span><span class='fu'>score</span><span class='op'>(</span><span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>msr</a></span><span class='op'>(</span><span class='st'>"regr.rmse"</span><span class='op'>)</span><span class='op'>)</span>
@@ -2385,7 +2433,7 @@ document.addEventListener('DOMContentLoaded', function() {
 2: &lt;ResamplingCV[19]&gt;            cv         2 &lt;PredictionRegr[18]&gt;  133.0924
 3: &lt;ResamplingCV[19]&gt;            cv         3 &lt;PredictionRegr[18]&gt;  169.7755</code></pre>
 <div class="sourceCode">
-<pre><code><span class='fu'><a href='https://rdrr.io/r/base/sprintf.html'>sprintf</a></span><span class='op'>(</span><span class='st'>"RMSE of the simple ranger: %s"</span>, <span class='fu'><a href='https://rdrr.io/r/base/Round.html'>round</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/MathFun.html'>sqrt</a></span><span class='op'>(</span><span class='va'>res</span><span class='op'>$</span><span class='fu'>aggregate</span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span>, <span class='fl'>2</span><span class='op'>)</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/sprintf.html'>sprintf</a></span><span class='op'>(</span><span class='st'>"RMSE of the simple ranger: %s"</span>, <span class='fu'><a href='https://rdrr.io/r/base/Round.html'>round</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/MathFun.html'>sqrt</a></span><span class='op'>(</span><span class='va'>res</span><span class='op'>$</span><span class='fu'>aggregate</span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span>, <span class='fl'>2</span><span class='op'>)</span><span class='op'>)</span>
 </code></pre>
 </div>
 <pre><code>[1] &quot;RMSE of the simple ranger: 153.02&quot;</code></pre>
@@ -2399,7 +2447,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>Tuning can often further improve the performance. In this case, we <em>tune</em> the xgboost learner in order to see whether this can improve performance. For the <code>AutoTuner</code> we have to specify a <strong>Termination Criterion</strong> (how long the tuning should run) a <strong>Tuner</strong> (which tuning method to use) and a <strong>ParamSet</strong> (which space we might want to search through). For now, we do not use the <strong>zipcode</strong> column, as <a href="https://cran.r-project.org/package=xgboost">xgboost</a> cannot naturally deal with categorical features. The <strong>AutoTuner</strong> automatically performs nested cross-validation.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='fu'><a href='https://rdrr.io/r/base/Random.html'>set.seed</a></span><span class='op'>(</span><span class='fl'>444L</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/Random.html'>set.seed</a></span><span class='op'>(</span><span class='fl'>444L</span><span class='op'>)</span>
 <span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://mlr3tuning.mlr-org.com'>mlr3tuning</a></span><span class='op'>)</span>
 <span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://paradox.mlr-org.com'>paradox</a></span><span class='op'>)</span>
 <span class='va'>lrn_xgb</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>lrn</a></span><span class='op'>(</span><span class='st'>"regr.xgboost"</span><span class='op'>)</span>
@@ -2433,7 +2481,7 @@ document.addEventListener('DOMContentLoaded', function() {
 </div>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>res</span><span class='op'>$</span><span class='fu'>score</span><span class='op'>(</span><span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>msr</a></span><span class='op'>(</span><span class='st'>"regr.rmse"</span><span class='op'>)</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>res</span><span class='op'>$</span><span class='fu'>score</span><span class='op'>(</span><span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>msr</a></span><span class='op'>(</span><span class='st'>"regr.rmse"</span><span class='op'>)</span><span class='op'>)</span>
 </code></pre>
 </div>
 <pre><code>             task task_id         learner         learner_id         resampling
@@ -2445,7 +2493,7 @@ document.addEventListener('DOMContentLoaded', function() {
 2:            cv         2 &lt;PredictionRegr[18]&gt;  151.6051
 3:            cv         3 &lt;PredictionRegr[18]&gt;  137.3358</code></pre>
 <div class="sourceCode">
-<pre><code><span class='fu'><a href='https://rdrr.io/r/base/sprintf.html'>sprintf</a></span><span class='op'>(</span><span class='st'>"RMSE of the tuned xgboost: %s"</span>, <span class='fu'><a href='https://rdrr.io/r/base/Round.html'>round</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/MathFun.html'>sqrt</a></span><span class='op'>(</span><span class='va'>res</span><span class='op'>$</span><span class='fu'>aggregate</span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span>, <span class='fl'>2</span><span class='op'>)</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/sprintf.html'>sprintf</a></span><span class='op'>(</span><span class='st'>"RMSE of the tuned xgboost: %s"</span>, <span class='fu'><a href='https://rdrr.io/r/base/Round.html'>round</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/MathFun.html'>sqrt</a></span><span class='op'>(</span><span class='va'>res</span><span class='op'>$</span><span class='fu'>aggregate</span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span>, <span class='fl'>2</span><span class='op'>)</span><span class='op'>)</span>
 </code></pre>
 </div>
 <pre><code>[1] &quot;RMSE of the tuned xgboost: 142.62&quot;</code></pre>
@@ -2453,7 +2501,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>We can obtain the resulting parameters in the respective splits by accessing the <a href="https://mlr3.mlr-org.com/reference/ResampleResult.html"><code>ResampleResult</code></a>.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='fu'><a href='https://rdrr.io/r/base/lapply.html'>sapply</a></span><span class='op'>(</span><span class='va'>res</span><span class='op'>$</span><span class='va'>learners</span>, <span class='kw'>function</span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span> <span class='va'>x</span><span class='op'>$</span><span class='va'>learner</span><span class='op'>$</span><span class='va'>param_set</span><span class='op'>$</span><span class='va'>values</span><span class='op'>)</span><span class='op'>[</span><span class='op'>-</span><span class='fl'>2</span>,<span class='op'>]</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/lapply.html'>sapply</a></span><span class='op'>(</span><span class='va'>res</span><span class='op'>$</span><span class='va'>learners</span>, <span class='kw'>function</span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span> <span class='va'>x</span><span class='op'>$</span><span class='va'>learner</span><span class='op'>$</span><span class='va'>param_set</span><span class='op'>$</span><span class='va'>values</span><span class='op'>)</span><span class='op'>[</span><span class='op'>-</span><span class='fl'>2</span>,<span class='op'>]</span>
 </code></pre>
 </div>
 <pre><code>                  [,1]      [,2]      [,3]     
@@ -2485,7 +2533,7 @@ colsample_bylevel 0.6843433 0.5786264 0.5484728</code></pre>
 <p>We can equip a learner with impact encoding using <strong>mlr3pipelines</strong>. More information on <strong>mlr3pipelines</strong> can be obtained from other posts.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://mlr3pipelines.mlr-org.com'>mlr3pipelines</a></span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://mlr3pipelines.mlr-org.com'>mlr3pipelines</a></span><span class='op'>)</span>
 <span class='va'>lrn_impact</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"encodeimpact"</span>, affect_columns <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/Selector.html'>selector_name</a></span><span class='op'>(</span><span class='st'>"zipcode"</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>%&gt;&gt;%</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>lrn</a></span><span class='op'>(</span><span class='st'>"regr.ranger"</span><span class='op'>)</span>
 </code></pre>
 </div>
@@ -2493,7 +2541,7 @@ colsample_bylevel 0.6843433 0.5786264 0.5484728</code></pre>
 <p>Again, we run <a href="https://mlr3.mlr-org.com/reference/resample.html"><code>resample()</code></a> and compute the <strong>RMSE</strong>.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>res</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/resample.html'>resample</a></span><span class='op'>(</span>task <span class='op'>=</span> <span class='va'>task_train</span>, <span class='va'>lrn_impact</span>, <span class='va'>cv3</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>res</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/resample.html'>resample</a></span><span class='op'>(</span>task <span class='op'>=</span> <span class='va'>task_train</span>, <span class='va'>lrn_impact</span>, <span class='va'>cv3</span><span class='op'>)</span>
 <span class='va'>res</span><span class='op'>$</span><span class='fu'>score</span><span class='op'>(</span><span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>msr</a></span><span class='op'>(</span><span class='st'>"regr.rmse"</span><span class='op'>)</span><span class='op'>)</span>
 </code></pre>
 </div>
@@ -2506,7 +2554,7 @@ colsample_bylevel 0.6843433 0.5786264 0.5484728</code></pre>
 2: &lt;ResamplingCV[19]&gt;            cv         2 &lt;PredictionRegr[18]&gt;  122.4995
 3: &lt;ResamplingCV[19]&gt;            cv         3 &lt;PredictionRegr[18]&gt;  152.0627</code></pre>
 <div class="sourceCode">
-<pre><code><span class='fu'><a href='https://rdrr.io/r/base/sprintf.html'>sprintf</a></span><span class='op'>(</span><span class='st'>"RMSE of ranger with med_price: %s"</span>, <span class='fu'><a href='https://rdrr.io/r/base/Round.html'>round</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/MathFun.html'>sqrt</a></span><span class='op'>(</span><span class='va'>res</span><span class='op'>$</span><span class='fu'>aggregate</span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span>, <span class='fl'>2</span><span class='op'>)</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/sprintf.html'>sprintf</a></span><span class='op'>(</span><span class='st'>"RMSE of ranger with med_price: %s"</span>, <span class='fu'><a href='https://rdrr.io/r/base/Round.html'>round</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/MathFun.html'>sqrt</a></span><span class='op'>(</span><span class='va'>res</span><span class='op'>$</span><span class='fu'>aggregate</span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span>, <span class='fl'>2</span><span class='op'>)</span><span class='op'>)</span>
 </code></pre>
 </div>
 <pre><code>[1] &quot;RMSE of ranger with med_price: 134&quot;</code></pre>
@@ -2516,7 +2564,7 @@ colsample_bylevel 0.6843433 0.5786264 0.5484728</code></pre>
 <p>In this example, we use <code>PipeOpFilter</code> (via <code>po("filter", ...)</code>) to add a feature-filter before training the model. For a more in-depth insight, refer to the sections on <code>mlr3pipelines</code> and <code>mlr3filters</code> in the <strong>mlr3 book</strong>: <a href="https://mlr3book.mlr-org.com/fs.html">Feature Selection</a> and <a href="https://mlr3book.mlr-org.com/pipelines.html">Pipelines</a>.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://mlr3pipelines.mlr-org.com'>mlr3pipelines</a></span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://mlr3pipelines.mlr-org.com'>mlr3pipelines</a></span><span class='op'>)</span>
 <span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://mlr3filters.mlr-org.com'>mlr3filters</a></span><span class='op'>)</span>
 <span class='va'>filter</span> <span class='op'>=</span> <span class='va'><a href='https://mlr3filters.mlr-org.com/reference/mlr_filters_mrmr.html'>FilterMRMR</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='op'>)</span>
 </code></pre>
@@ -2525,7 +2573,7 @@ colsample_bylevel 0.6843433 0.5786264 0.5484728</code></pre>
 <p>The resulting <strong>RMSE</strong> is slightly higher, and at the same time we only use <span class="math inline">\(12\)</span> features.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>lrn_filter</span> <span class='op'>=</span> <span class='va'><a href='https://mlr3pipelines.mlr-org.com//reference/mlr_learners_graph.html'>GraphLearner</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>lrn_filter</span> <span class='op'>=</span> <span class='va'><a href='https://mlr3pipelines.mlr-org.com//reference/mlr_learners_graph.html'>GraphLearner</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span>
   <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"filter"</span>, <span class='va'>filter</span>, param_vals <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>filter.nfeat <span class='op'>=</span> <span class='fl'>12</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>%&gt;&gt;%</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"learner"</span>, <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>lrn</a></span><span class='op'>(</span><span class='st'>"regr.ranger"</span><span class='op'>)</span><span class='op'>)</span>
   <span class='op'>)</span>
 <span class='va'>res</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/resample.html'>resample</a></span><span class='op'>(</span>task <span class='op'>=</span> <span class='va'>task_train</span>, <span class='va'>lrn_filter</span>, <span class='va'>cv3</span><span class='op'>)</span>
@@ -2541,7 +2589,7 @@ colsample_bylevel 0.6843433 0.5786264 0.5484728</code></pre>
 2: &lt;ResamplingCV[19]&gt;            cv         2 &lt;PredictionRegr[18]&gt;  163.2111
 3: &lt;ResamplingCV[19]&gt;            cv         3 &lt;PredictionRegr[18]&gt;  152.5527</code></pre>
 <div class="sourceCode">
-<pre><code><span class='fu'><a href='https://rdrr.io/r/base/sprintf.html'>sprintf</a></span><span class='op'>(</span><span class='st'>"RMSE of ranger with filtering: %s"</span>, <span class='fu'><a href='https://rdrr.io/r/base/Round.html'>round</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/MathFun.html'>sqrt</a></span><span class='op'>(</span><span class='va'>res</span><span class='op'>$</span><span class='fu'>aggregate</span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span>, <span class='fl'>2</span><span class='op'>)</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/sprintf.html'>sprintf</a></span><span class='op'>(</span><span class='st'>"RMSE of ranger with filtering: %s"</span>, <span class='fu'><a href='https://rdrr.io/r/base/Round.html'>round</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/MathFun.html'>sqrt</a></span><span class='op'>(</span><span class='va'>res</span><span class='op'>$</span><span class='fu'>aggregate</span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span>, <span class='fl'>2</span><span class='op'>)</span><span class='op'>)</span>
 </code></pre>
 </div>
 <pre><code>[1] &quot;RMSE of ranger with filtering: 156.66&quot;</code></pre>
@@ -2558,7 +2606,7 @@ colsample_bylevel 0.6843433 0.5786264 0.5484728</code></pre>
 <p>The best model we found in this example is the <code>ranger</code> model with the added <code>med_price</code> feature. In a final step, we now want to assess the model’s quality on the held-out data we stored in our <code>task_test</code>. In order to do so, and to prevent data leakage, we can only add the median price from the training data.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>data</span> <span class='op'>=</span> <span class='va'>task_train</span><span class='op'>$</span><span class='fu'>data</span><span class='op'>(</span>cols <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"price"</span>, <span class='st'>"zipcode"</span><span class='op'>)</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>data</span> <span class='op'>=</span> <span class='va'>task_train</span><span class='op'>$</span><span class='fu'>data</span><span class='op'>(</span>cols <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"price"</span>, <span class='st'>"zipcode"</span><span class='op'>)</span><span class='op'>)</span>
 <span class='va'>data</span><span class='op'>[</span>, <span class='va'>med_price</span> <span class='op'>:=</span> <span class='fu'><a href='https://rdrr.io/r/stats/median.html'>median</a></span><span class='op'>(</span><span class='va'>price</span><span class='op'>)</span>, by <span class='op'>=</span> <span class='st'>"zipcode"</span><span class='op'>]</span>
 <span class='va'>test_data</span> <span class='op'>=</span> <span class='va'>task_test</span><span class='op'>$</span><span class='fu'>data</span><span class='op'>(</span>cols <span class='op'>=</span> <span class='st'>"zipcode"</span><span class='op'>)</span>
 <span class='va'>test</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/merge.html'>merge</a></span><span class='op'>(</span><span class='va'>test_data</span>, <span class='fu'><a href='https://rdrr.io/r/base/unique.html'>unique</a></span><span class='op'>(</span><span class='va'>data</span><span class='op'>[</span>, <span class='fu'>.</span><span class='op'>(</span><span class='va'>zipcode</span>, <span class='va'>med_price</span><span class='op'>)</span><span class='op'>]</span><span class='op'>)</span>, all.x <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>
@@ -2569,7 +2617,7 @@ colsample_bylevel 0.6843433 0.5786264 0.5484728</code></pre>
 <p>Now we can use the augmented <code>task_test</code> to predict on new data.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>lrn_ranger</span><span class='op'>$</span><span class='fu'>train</span><span class='op'>(</span><span class='va'>task_train</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>lrn_ranger</span><span class='op'>$</span><span class='fu'>train</span><span class='op'>(</span><span class='va'>task_train</span><span class='op'>)</span>
 <span class='va'>pred</span> <span class='op'>=</span> <span class='va'>lrn_ranger</span><span class='op'>$</span><span class='fu'>predict</span><span class='op'>(</span><span class='va'>task_test</span><span class='op'>)</span>
 <span class='va'>pred</span><span class='op'>$</span><span class='fu'>score</span><span class='op'>(</span><span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>msr</a></span><span class='op'>(</span><span class='st'>"regr.rmse"</span><span class='op'>)</span><span class='op'>)</span>
 </code></pre>

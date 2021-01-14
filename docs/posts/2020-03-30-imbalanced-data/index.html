@@ -472,8 +472,15 @@ d-title {
   top: 0;
 }
 
+/* adjust viewport for navbar height */
+/* helps vertically center bootstrap (non-distill) content */
+.min-vh-100 {
+  min-height: calc(100vh - 100px) !important;
+}
+
 </style>
 
+<script src="../../site_libs/jquery-1.11.3/jquery.min.js"></script>
 <link href="../../site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet"/>
 <link href="../../site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet"/>
 <script src="../../site_libs/headroom-0.9.4/headroom.min.js"></script>
@@ -581,19 +588,21 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
           var results = fuse.search(query, searchOptions);
           callback(results
             .map(function(result) { return result.item; })
-            .filter(function(item) { return !!item.description; })
           );
         },
         templates: {
           suggestion: function(suggestion) {
+            var img = suggestion.preview && Object.keys(suggestion.preview).length > 0
+              ? `<img src="${offsetURL(suggestion.preview)}"</img>`
+              : '';
             var html = `
               <div class="search-item">
                 <h3>${suggestion.title}</h3>
                 <div class="search-item-description">
-                  ${suggestion.description}
+                  ${suggestion.description || ''}
                 </div>
                 <div class="search-item-preview">
-                  <img src="${suggestion.preview ? offsetURL(suggestion.preview) : ''}"</img>
+                  ${img}
                 </div>
               </div>
             `;
@@ -616,6 +625,10 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 </script>
 
 <style type="text/css">
+
+.nav-search {
+  font-size: x-small;
+}
 
 /* Algolioa Autocomplete */
 
@@ -691,6 +704,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 }
 
 .algolia-autocomplete .aa-dropdown-menu .aa-suggestion .search-item h3 {
+  font-size: 1rem;
   margin-block-start: 0;
   margin-block-end: 5px;
 }
@@ -918,6 +932,11 @@ d-article pre a:hover {
   text-decoration: underline;
 }
 
+d-article details {
+  grid-column: text;
+  margin-bottom: 0.8em;
+}
+
 @media(min-width: 768px) {
 
 d-article pre,
@@ -1072,6 +1091,17 @@ d-article .citation {
 
 div.hanging-indent{
   margin-left: 1em; text-indent: -1em;
+}
+
+/* Citation hover box */
+
+.tippy-box[data-theme~=light-border] {
+  background-color: rgba(250, 250, 250, 0.95);
+}
+
+.tippy-content > p {
+  margin-bottom: 0;
+  padding: 2px;
 }
 
 
@@ -1739,7 +1769,7 @@ function init_distill() {
     var layout = $(this).attr('data-layout');
 
     // apply layout to markdown level block elements
-    var elements = $(this).children().not('div.sourceCode, pre, script');
+    var elements = $(this).children().not('details, div.sourceCode, pre, script');
     elements.each(function(i, el) {
       var layout_div = $('<div class="' + layout + '"></div>');
       if (layout_div.hasClass('shaded')) {
@@ -1854,6 +1884,20 @@ function init_distill() {
     // move appendix-bottom entries to the bottom
     $('.appendix-bottom').appendTo('d-appendix').children().unwrap();
     $('.appendix-bottom').remove();
+
+    // hoverable references
+    $('span.citation[data-cites]').each(function() {
+      var refHtml = $('#ref-' + $(this).attr('data-cites')).html();
+      window.tippy(this, {
+        allowHTML: true,
+        content: refHtml,
+        maxWidth: 500,
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'light-border',
+        placement: 'bottom-start'
+      });
+    });
 
     // clear polling timer
     clearInterval(tid);
@@ -2015,6 +2059,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
 <!--/radix_placeholder_distill-->
   <script src="../../site_libs/jquery-1.11.3/jquery.min.js"></script>
+  <script src="../../site_libs/popper-2.6.0/popper.min.js"></script>
+  <link href="../../site_libs/tippy-6.2.7/tippy.css" rel="stylesheet" />
+  <link href="../../site_libs/tippy-6.2.7/tippy-light-border.css" rel="stylesheet" />
+  <script src="../../site_libs/tippy-6.2.7/tippy.umd.min.js"></script>
   <script src="../../site_libs/anchor-4.2.2/anchor.min.js"></script>
   <script src="../../site_libs/bowser-1.9.3/bowser.min.js"></script>
   <script src="../../site_libs/webcomponents-2.0.0/webcomponents.js"></script>
@@ -2089,7 +2137,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <h2 id="loading-required-packages">Loading required packages</h2>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='st'><a href='https://mlr3.mlr-org.com'>"mlr3"</a></span><span class='op'>)</span> <span class='co'># mlr3 base package</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='st'><a href='https://mlr3.mlr-org.com'>"mlr3"</a></span><span class='op'>)</span> <span class='co'># mlr3 base package</span>
 <span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='st'><a href='https://mlr3misc.mlr-org.com'>"mlr3misc"</a></span><span class='op'>)</span> <span class='co'># contains some helper functions</span>
 <span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='st'><a href='https://mlr3pipelines.mlr-org.com'>"mlr3pipelines"</a></span><span class='op'>)</span> <span class='co'># create ML pipelines</span>
 <span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='st'><a href='https://mlr3tuning.mlr-org.com'>"mlr3tuning"</a></span><span class='op'>)</span> <span class='co'># tuning ML algorithms</span>
@@ -2106,7 +2154,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p><a href="https://www.openml.org">OpenML.org</a> is an open machine learning platform, which allows users to share data, code and machine learning experiments. The OpenML R package can query available data sets using a filter-like approach by providing desired dataset characteristics like <code>number.of.classes</code> or <code>number.of.features</code>.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='co'># get list of curated binary classification data sets (see https://arxiv.org/abs/1708.03731v2)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='co'># get list of curated binary classification data sets (see https://arxiv.org/abs/1708.03731v2)</span>
 <span class='va'>ds</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/pkg/OpenML/man/listOMLDataSets.html'>listOMLDataSets</a></span><span class='op'>(</span>
   number.of.classes <span class='op'>=</span> <span class='fl'>2</span>,
   number.of.features <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>1</span>, <span class='fl'>100</span><span class='op'>)</span>,
@@ -2126,7 +2174,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>After downloading the chosen data set, we create an <code>mlr3</code> classification task:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='co'># make sure target is a factor and create mlr3 tasks</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='co'># make sure target is a factor and create mlr3 tasks</span>
 <span class='va'>data</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/as.data.frame.html'>as.data.frame</a></span><span class='op'>(</span><span class='va'>d</span><span class='op'>)</span>
 <span class='va'>data</span><span class='op'>[[</span><span class='va'>d</span><span class='op'>$</span><span class='va'>target.features</span><span class='op'>]</span><span class='op'>]</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/factor.html'>as.factor</a></span><span class='op'>(</span><span class='va'>data</span><span class='op'>[[</span><span class='va'>d</span><span class='op'>$</span><span class='va'>target.features</span><span class='op'>]</span><span class='op'>]</span><span class='op'>)</span>
 <span class='va'>task</span> <span class='op'>=</span> <span class='va'><a href='https://mlr3.mlr-org.com/reference/TaskClassif.html'>TaskClassif</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span>
@@ -2139,7 +2187,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>Please note that the <code>optdigits</code> dataset is also included in the <code>mlr3data</code> package where you can get the preprocessed (integers properly encoded as such, etc.) data via:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span><span class='op'>(</span><span class='st'>"optdigits"</span>, package <span class='op'>=</span> <span class='st'>"mlr3data"</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span><span class='op'>(</span><span class='st'>"optdigits"</span>, package <span class='op'>=</span> <span class='st'>"mlr3data"</span><span class='op'>)</span>
 <span class='va'>task</span> <span class='op'>=</span> <span class='va'><a href='https://mlr3.mlr-org.com/reference/TaskClassif.html'>TaskClassif</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='st'>"optdigits"</span>, backend <span class='op'>=</span> <span class='va'>optdigits</span>, target <span class='op'>=</span> <span class='st'>"binaryclass"</span>, positive <span class='op'>=</span> <span class='st'>"P"</span><span class='op'>)</span>
 </code></pre>
 </div>
@@ -2147,7 +2195,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>Quick overview of the data:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='fu'>skimr</span><span class='fu'>::</span><span class='fu'><a href='https://docs.ropensci.org/skimr/reference/skim.html'>skim</a></span><span class='op'>(</span><span class='va'>task</span><span class='op'>$</span><span class='fu'>data</span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'>skimr</span><span class='fu'>::</span><span class='fu'><a href='https://docs.ropensci.org/skimr/reference/skim.html'>skim</a></span><span class='op'>(</span><span class='va'>task</span><span class='op'>$</span><span class='fu'>data</span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span>
 </code></pre>
 </div>
 <table>
@@ -3071,7 +3119,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>In <code>mlr3pipelines</code>, there is a <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_classbalancing.html"><code>classbalancing</code></a> and a <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_smote.html"><code>smote</code></a> pipe operator that can be combined with any learner. Below, we define the undersampling, oversampling and SMOTE <code>PipeOp</code>s/<code>Graph</code>. All three imbalance correction methods have hyperparameters to control the degree of class imbalance. We apply the <code>PipeOp</code>s/<code>Graph</code> to the current <code>task</code> with specific hyperparameter values to see how the class balance changes:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='co'># check original class balance</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='co'># check original class balance</span>
 <span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='va'>task</span><span class='op'>$</span><span class='fu'>truth</span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span>
 </code></pre>
 </div>
@@ -3079,7 +3127,7 @@ document.addEventListener('DOMContentLoaded', function() {
    P    N 
  572 5048 </code></pre>
 <div class="sourceCode">
-<pre><code><span class='co'># undersample majority class (relative to majority class)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='co'># undersample majority class (relative to majority class)</span>
 <span class='va'>po_under</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"classbalancing"</span>,
   id <span class='op'>=</span> <span class='st'>"undersample"</span>, adjust <span class='op'>=</span> <span class='st'>"major"</span>,
   reference <span class='op'>=</span> <span class='st'>"major"</span>, shuffle <span class='op'>=</span> <span class='cn'>FALSE</span>, ratio <span class='op'>=</span> <span class='fl'>1</span> <span class='op'>/</span> <span class='fl'>6</span><span class='op'>)</span>
@@ -3091,7 +3139,7 @@ document.addEventListener('DOMContentLoaded', function() {
   P   N 
 572 841 </code></pre>
 <div class="sourceCode">
-<pre><code><span class='co'># oversample majority class (relative to majority class)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='co'># oversample majority class (relative to majority class)</span>
 <span class='va'>po_over</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"classbalancing"</span>,
   id <span class='op'>=</span> <span class='st'>"oversample"</span>, adjust <span class='op'>=</span> <span class='st'>"minor"</span>,
   reference <span class='op'>=</span> <span class='st'>"minor"</span>, shuffle <span class='op'>=</span> <span class='cn'>FALSE</span>, ratio <span class='op'>=</span> <span class='fl'>6</span><span class='op'>)</span>
@@ -3106,7 +3154,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>Note that the original SMOTE algorithm only accepts numeric features (see <code>?smotefamily::SMOTE</code>). To keep it simple, we therefore preprocess the data and coerce integers to numerics prior to running <code>SMOTE</code> and reverse this afterwards:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='co'># SMOTE enriches the minority class with synthetic data</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='co'># SMOTE enriches the minority class with synthetic data</span>
 <span class='va'>gr_smote</span> <span class='op'>=</span>
   <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"colapply"</span>, id <span class='op'>=</span> <span class='st'>"int_to_num"</span>,
     applicator <span class='op'>=</span> <span class='va'>as.numeric</span>, affect_columns <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/Selector.html'>selector_type</a></span><span class='op'>(</span><span class='st'>"integer"</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>%&gt;&gt;%</span>
@@ -3125,7 +3173,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>We combine the <code>PipeOp</code>s/<code>Graph</code> with a learner (here <code>ranger</code>) to make each pipeline graph behave like a learner:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='co'># create random forest learner</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='co'># create random forest learner</span>
 <span class='va'>lrn</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>lrn</a></span><span class='op'>(</span><span class='st'>"classif.ranger"</span>, num.trees <span class='op'>=</span> <span class='fl'>50</span><span class='op'>)</span>
 
 <span class='co'># combine learner with pipeline graph</span>
@@ -3141,7 +3189,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>We define the search space in order to tune the hyperparameters of the class imbalance methods.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='co'># define parameter search space for each method</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='co'># define parameter search space for each method</span>
 <span class='va'>ps_under</span> <span class='op'>=</span> <span class='va'><a href='https://paradox.mlr-org.com/reference/ParamSet.html'>ParamSet</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='va'><a href='https://paradox.mlr-org.com/reference/ParamDbl.html'>ParamDbl</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='st'>"undersample.ratio"</span>, lower <span class='op'>=</span> <span class='fl'>1</span> <span class='op'>/</span> <span class='fl'>6</span>, upper <span class='op'>=</span> <span class='fl'>1</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>
 <span class='va'>ps_over</span> <span class='op'>=</span> <span class='va'><a href='https://paradox.mlr-org.com/reference/ParamSet.html'>ParamSet</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='va'><a href='https://paradox.mlr-org.com/reference/ParamDbl.html'>ParamDbl</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='st'>"oversample.ratio"</span>, lower <span class='op'>=</span> <span class='fl'>1</span>, upper <span class='op'>=</span> <span class='fl'>6</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>
 <span class='va'>ps_smote</span> <span class='op'>=</span> <span class='va'><a href='https://paradox.mlr-org.com/reference/ParamSet.html'>ParamSet</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>
@@ -3160,7 +3208,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>We create an <code>AutoTuner</code> class from the learner to tune the graph (random forest learner + imbalance correction method) based on a 3-fold CV using the <code>classif.fbeta</code> as performance measure. To keep runtime low, we define the search space only for the imbalance correction method. However, one can also jointly tune the hyperparameter of the learner along with the imbalance correction method by extending the search space with the learner’s hyperparameters. Note that SMOTE has two hyperparameters <code>K</code> and <code>dup_size</code>. While <code>K</code> changes the behavior of the SMOTE algorithm, <code>dup_size</code> will affect oversampling rate. To focus on the effect of the oversampling rate on the performance, we will consider SMOTE with K = 2 as a different imbalance correction method as SMOTE with K = 4 (and so on). Hence, we use grid search with 5 different hyperparameter configurations for the undersampling method, the oversampling method and each SMOTE variant for tuning:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>inner_cv3</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>rsmp</a></span><span class='op'>(</span><span class='st'>"cv"</span>, folds <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>inner_cv3</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>rsmp</a></span><span class='op'>(</span><span class='st'>"cv"</span>, folds <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span>
 <span class='va'>measure</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>msr</a></span><span class='op'>(</span><span class='st'>"classif.fbeta"</span><span class='op'>)</span>
 
 <span class='va'>learns</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>
@@ -3196,14 +3244,14 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>The <code>AutoTuner</code> is a fully tuned graph that behaves like a usual learner. For the tuning a 3-fold CV is used. Now, we use the <code>benchmark</code> function to compare the tuned class imbalance pipeline graphs based on a holdout for the outer evaluation:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='co'># NOTE: This code runs about 5 minutes</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='co'># NOTE: This code runs about 5 minutes</span>
 <span class='va'>outer_resampling</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>rsmp</a></span><span class='op'>(</span><span class='st'>"holdout"</span><span class='op'>)</span>
 <span class='va'>design</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/benchmark_grid.html'>benchmark_grid</a></span><span class='op'>(</span>
   tasks <span class='op'>=</span> <span class='va'>task</span>,
   learners <span class='op'>=</span> <span class='va'>learns</span>,
   resamplings <span class='op'>=</span> <span class='va'>outer_resampling</span>
 <span class='op'>)</span>
-<span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span><span class='op'>(</span><span class='va'>design</span><span class='op'>)</span>
+<span class='fu'><a href='https://docs.ropensci.org/skimr/reference/print.html'>print</a></span><span class='op'>(</span><span class='va'>design</span><span class='op'>)</span>
 </code></pre>
 </div>
 <pre><code>                task         learner              resampling
@@ -3211,7 +3259,7 @@ document.addEventListener('DOMContentLoaded', function() {
 2: &lt;TaskClassif[45]&gt; &lt;AutoTuner[38]&gt; &lt;ResamplingHoldout[19]&gt;
 3: &lt;TaskClassif[45]&gt; &lt;AutoTuner[38]&gt; &lt;ResamplingHoldout[19]&gt;</code></pre>
 <div class="sourceCode">
-<pre><code><span class='fu'><a href='https://rdrr.io/r/base/Random.html'>set.seed</a></span><span class='op'>(</span><span class='fl'>1</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/Random.html'>set.seed</a></span><span class='op'>(</span><span class='fl'>1</span><span class='op'>)</span>
 <span class='va'>bmr</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/benchmark.html'>benchmark</a></span><span class='op'>(</span><span class='va'>design</span>, store_models <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>
 </code></pre>
 </div>
@@ -3219,7 +3267,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <h3 id="visualize-benchmark-results">Visualize benchmark results</h3>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>bmr</span><span class='op'>$</span><span class='fu'>aggregate</span><span class='op'>(</span><span class='va'>measure</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>bmr</span><span class='op'>$</span><span class='fu'>aggregate</span><span class='op'>(</span><span class='va'>measure</span><span class='op'>)</span>
 </code></pre>
 </div>
 <pre><code>   nr      resample_result   task_id               learner_id resampling_id
@@ -3231,7 +3279,7 @@ document.addEventListener('DOMContentLoaded', function() {
 2:     1     0.9571788
 3:     1     0.9675810</code></pre>
 <div class="sourceCode">
-<pre><code><span class='co'># one value per boxplot since we used holdout as outer resampling</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='co'># one value per boxplot since we used holdout as outer resampling</span>
 <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/autoplot.html'>autoplot</a></span><span class='op'>(</span><span class='va'>bmr</span>, measure <span class='op'>=</span> <span class='va'>measure</span><span class='op'>)</span>
 </code></pre>
 </div>
@@ -3241,7 +3289,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>With <code>store_models = TRUE</code> we allow the <code>benchmark</code> function to store each single model that was computed during tuning. Therefore, we can plot the tuning path of the best learner from the subsampling iterations:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://ggplot2.tidyverse.org'>ggplot2</a></span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://ggplot2.tidyverse.org'>ggplot2</a></span><span class='op'>)</span>
 <span class='va'>bmr_data_learners</span> <span class='op'>=</span> <span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/as.data.table.html'>as.data.table</a></span><span class='op'>(</span><span class='va'>bmr</span><span class='op'>)</span><span class='op'>$</span><span class='va'>learner</span>
 <span class='va'>utune_path</span> <span class='op'>=</span> <span class='va'>bmr_data_learners</span><span class='op'>[[</span><span class='fl'>1</span><span class='op'>]</span><span class='op'>]</span><span class='op'>$</span><span class='va'>model</span><span class='op'>$</span><span class='va'>tuning_instance</span><span class='op'>$</span><span class='va'>archive</span><span class='op'>$</span><span class='fu'>data</span><span class='op'>(</span><span class='op'>)</span>
 <span class='va'>utune_gg</span> <span class='op'>=</span> <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/ggplot.html'>ggplot</a></span><span class='op'>(</span><span class='va'>utune_path</span>, <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/aes.html'>aes</a></span><span class='op'>(</span>x <span class='op'>=</span> <span class='va'>undersample.ratio</span>, y <span class='op'>=</span> <span class='va'>classif.fbeta</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span>
