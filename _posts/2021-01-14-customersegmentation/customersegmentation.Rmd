@@ -1,0 +1,423 @@
+---
+title: "customer_segmentation"
+description: |
+  Customer Segmentation based on RFM scores
+author:
+  - name: Giuseppe Casalicchio
+  - name: Henri Funk
+date: 01-14-2021
+output:
+  distill::distill_article:
+    self_contained: false
+    css: ../../custom.css
+    toc: yes
+    toc_depth: 4
+---
+
+
+```{r setup, include = FALSE}
+library("mlr3book")
+```
+
+
+```{r, echo=FALSE, cache=FALSE, message=FALSE, warning=FALSE}
+set.seed(1)
+library(knitr)
+library(ggplot2)
+library(mlr3book)
+theme_set(theme_bw() + theme(legend.position = "bottom"))
+knitr::opts_chunk$set(warning = FALSE, message = FALSE, fig.align = "center", dev = "png", fig.retina = 1, R.options = list(width = 100))
+gg_color_hue = function(n) {
+  hues = seq(15, 375, length = n + 1)
+  grDevices::hcl(h = hues, l = 65, c = 100)[1:n]
+}
+# load packages
+library(ggplot2)
+library(gridExtra)
+library(factoextra)
+library(DataExplorer)
+library(cluster)
+library(dplyr)
+library(scales)
+
+library(mlr3)
+library(mlr3pipelines)
+library(mlr3cluster)
+library(mlr3measures)
+library(mlr3misc)
+library(mlr3viz)
+library(paradox)
+library(checkmate)
+```
+
+# Steel Wheels Data
+
+### Data Description
+
+The provided data contains purchase information of a fictional store named Steel Wheels (available at https://www.kaggle.com/kyanyoga/sample-sales-data). 
+Each line refers to a specific product that was sold to a customer in a specific order.
+In our analysis, we will focus on the following columns:
+
+- `ORDERNUMBER`: Unique ID for each order made by a customer
+- `ORDERDATE`: Date of the order
+- `PRODUCTLINE`: Type of product
+- `QUANTITYORDERED`: Quantity of the product item included in the considered order specified by `ORDERNUMBER`
+- `SALES`: Total price of the product item included in the considered order
+- `CUSTOMERNAME`: Name of the customer of the considered order
+
+```{r}
+
+# import data
+df = read.csv("archive/sales_data_sample.csv")
+
+# select required columns
+feats = c("ORDERNUMBER", "ORDERDATE", "PRODUCTLINE", "QUANTITYORDERED", "SALES", "CUSTOMERNAME")
+df = df[, feats]
+
+# encode date and category columns properly
+df$ORDERDATE = as.Date(df$ORDERDATE, '%m/%d/%Y %H:%M')
+df$ORDERNUMBER = as.factor(df$ORDERNUMBER)
+df$PRODUCTLINE = as.factor(df$PRODUCTLINE)
+df$CUSTOMERNAME = as.factor(df$CUSTOMERNAME)
+
+# look at the data
+head(df)
+summary(df)
+```
+
+### Motivation: Customer Segmentation
+
+Almost every company that sells products or services stores data of this form.
+This type of data can be used to perform customer segmentation to plan efficient client-targeted marketing strategies.
+To do so, the data is often aggregated on customer level to analyze the value of a customer.
+The so-called RFM (Recency, Frequency, Monetary Value) approach offers a nice way to analyze the customer value on three dimensions:
+
+- **R**ecency: How recently did the customer made an order?
+- **F**requency: How often did the customer made an order (this value is often capped to avoid outliers)?
+- **M**onetary Value: How much did the customer spend per order?
+
+![](https://images.squarespace-cdn.com/content/v1/5ae8cb742714e518400c587e/1603372536920-HBSB3IU477Z38AUCPJBY/ke17ZwdGBToddI8pDm48kFWJ8WX-fAYJkDfe91aE9sV7gQa3H78H3Y0txjaiv_0fDoOvxcdMmMKkDsyUqMSsMWxHk725yiiHCCLfrh8O1z5QPOohDIaIeljMHgDF5CVlOqpeNLcJ80NK65_fV7S1UVn9BDQI9BwT6RRRBkYuN-2TC5gedsUldwTK65d0sDSVZDqXZYzu2fuaodM4POSZ4w/rfm_segments.png)
+
+### Aggregate Data at Customer Level
+
+To perform customer segmentation, we need to aggregate the purchase data on customer level and calculate the aforementioned RFM scores for each customer:
+
+```{r}
+df_RFM = df %>% 
+  group_by(CUSTOMERNAME) %>% 
+  summarise(
+    recency = as.numeric(as.Date("2005-06-01") - max(ORDERDATE)),
+    frequency = min(c(n_distinct(ORDERNUMBER), 6)),
+    monetary = sum(SALES)/n_distinct(ORDERNUMBER)
+  )
+
+# look at the aggregated data
+head(df_RFM)
+summary(df_RFM)
+
+# visualize aggregated data
+DataExplorer::plot_histogram(df_RFM, geom_histogram_args = list(bins = 10))
+DataExplorer::plot_correlation(df_RFM)
+```
+
+### mlr3 Task
+
+With the resulting dataframe we create a `Clustering Task`. 
+This is an mlr3 object that can be used to fit unsupervised learners on.
+
+```{r}
+task_RFM <- TaskClust$new(id = "customer_segment", df_RFM)
+task_RFM$select(cols = c("frequency", "monetary", "recency"))
+```
+
+
+# Clustering with $k$-means
+
+### The Elbow Method
+
+- The idea behind the elbow method is to determine the value of $k$ where the within cluster variance begins to decrease most quickly.
+- If $k$ increases, the within cluster variance will always decrease, as the points are getting closer to the centroids they are assigned to.
+- However, at some point, the decrease in variability will usually slow down, which can be visualized by an elbow (a smaller angle). 
+- The optimal number of clusters is chosen at exactly this point. Note, however, that the "elbow" is not always clearly identifiable.
+
+We use the normalized data to perform $k$-means with different number of clusters $k$ and select the optimal number for $k$ according to the Elbow method:
+
+*Note:* We normalize the RFM data so that each dimension lies on a comparable scale with mean 0 and standard deviation 1.
+For smooth implementation we use `r ref("PipeOpScale")`.
+
+```{r}
+km_wss  <- sapply(1:10, function(x) {
+  k_center <- po("scale") %>>% lrn("clust.kmeans", centers = x, nstart = 100L)
+  k_center$train(task_RFM)
+  k_center$pipeops$clust.kmeans$learner_model$model$tot.withinss
+})
+
+plot(x = 1:10, y = km_wss, type = "b", main = "Elbow Plot")
+```
+
+The code above requires a loop (we did this with `sapply`).
+The `fviz_nbclust` function from the `factoextra` package offers a convenient automated alternative.
+Additionally, it allows to produce elbow plots for **other clustering algorithms**, e.g., by specifying them in `FUNcluster` argument (see [Hierarchical Clustering]):
+
+*Note:* Be careful with training and predicting new data, as they have to be scaled with the information of training data input.
+This Does not have to be considered, using the pipeline used above.
+
+```{r}
+rfm_cols = c("recency", "frequency", "monetary")
+df_scaled = as.data.frame(scale(df_RFM[, rfm_cols]))
+summary(df_scaled)
+
+plot_km = factoextra::fviz_nbclust(df_scaled, FUNcluster = kmeans, method = "wss", nstart = 100) +
+  geom_vline(xintercept = 4, lty = 2)
+plot_km
+```
+
+### Cluster Insights
+
+From the elbow method, we might chose $k=4$ as optimal number of clusters.
+Hence, we perform $k$-means with $k=4$ and augment the original RFM data with a new column called `km_clusters` containing the cluster assignments:
+
+```{r, message=FALSE}
+km_best = po("scale") %>>% lrn("clust.kmeans", nstart = 100L,  centers = 4L)
+km_best$train(task_RFM)
+prediction = km_best$predict(task_RFM)$clust.kmeans.output
+partition = as.factor(prediction$data$partition)
+df_RFM$km_clusters = partition
+```
+
+We can now use exploratory data analysis (EDA) to gain insights from the cluster assignment.
+
+#### Conditional Plots
+
+We start with looking at **conditional (or stratified) density plots** for the columns recency, frequency and monetary.
+They illustrate how the **frequency distribution** of the clusters change with increasing values for the considered RFM scores.
+As in this use case, the **frequency score** consists of only few distinct values, we will use a **stratified bar chart** to show the frequency distribution stratified by each cluster.
+
+```{r, fig.height=4, fig.width=10, echo=FALSE}
+# conditional density (and frequency) plots
+p_rec = ggplot(df_RFM, aes(x = recency, fill = km_clusters)) + 
+  geom_density(position = "fill") + 
+  ggtitle("Recency")
+p_fre = ggplot(df_RFM, aes(x = as.factor(frequency), fill = km_clusters)) + 
+  geom_bar(position = "fill") +
+  ggtitle("Frequency")
+p_mon = ggplot(df_RFM, aes(x = monetary, fill = km_clusters)) + 
+  geom_density(position = "fill") + 
+  ggtitle("Monetary Value")
+gridExtra::grid.arrange(p_rec, p_fre, p_mon, ncol = 3)
+```
+
+From this, we can observe that clusters of customers refer to specific ranges of the scores, e.g., high recency scores belong to customers from **cluster 2**.
+
+#### Scatter Plots
+
+We can visualize the clusters in an interactive 3D scatter plot using different colors for the clusters:
+
+
+
+```{r}
+plotly::plot_ly(df_RFM, x = ~recency, y = ~monetary, z = ~frequency, color =  ~km_clusters)
+```
+
+
+We can use the `autoplot` function from the `mlr3viz` package, as it offers a unified interface also for other clustering algorithms.
+By default, the function visualizes a scatter plot on the first two **principal components**:
+
+```{r, fig.height=5, fig.width=5}
+# scatterplot using fviz_cluster on principal components
+autoplot(prediction, task = task_RFM, type = "pca", frame = TRUE, lable = TRUE)
+```
+
+This PCA seems to squash most of the information in the first component.
+If you want to implement your own plotting method in the style of `mlr3viz` you can simply embed it in via `autoplot` method.
+
+```{r}
+autoplot.LearnerClustKMeans = function(object, task = NULL, ...) {
+  if (is.null(object$model)) {
+    stopf("Learner '%s' must be trained first", object$id)
+  }
+  data = if(is.null(task)) NULL else task$data()
+  require_namespaces("factoextra")
+  factoextra::fviz_cluster(object = object$model, data, ...)
+}
+```
+
+To acces the trained learner in our pipeline use the following syntax.
+
+```{r, fig.height=4, fig.width=8}
+km_best_model = km_best$pipeops$clust.kmeans$learner_model
+scatter_km1 = autoplot(km_best_model, task = task_RFM)
+scatter_km2 = autoplot(km_best_model, task = task_RFM, choose.vars = c("recency", "monetary"), stand = FALSE)
+gridExtra::grid.arrange(scatter_km1, scatter_km2, nrow = 1)
+```
+
+
+#### Pairs Plot
+
+A pairs plot gives even more insights at one glance if we use the cluster belongings as color aesthetics. 
+It shows
+
+- size of clusters in bar charts (first row, first column)
+- box plots of the RFM scores, stratified by each cluster (first row, after first column)
+- densities of the RFM scores, stratified by each cluster (diagonal)
+- histograms of the RFM scores, stratified by each cluster (first column, after first row)
+- pairwise scatter plots of the RFM scores with different colors for their cluster belongings (lower diagonal)
+- pairwise correlations of the RFM scores, stratified by each cluster (upper diagonal)
+
+```{r,fig.height=7, fig.width=7}
+autoplot(prediction, task_RFM)
+```
+
+#### Summarize Cluster Centers
+
+Now, we look at the cluster centers of the original data to derive a description for the customer segments
+
+```{r}
+df_RFM %>% 
+  group_by(km_clusters) %>% # define column used for grouping
+  summarize_if(is.numeric, mean) # aggregate all numeric columns by the mean
+```
+
+### Conclusion
+
+After this analysis, we might be able to describe the clusters (e.g., customer segments) as follows:
+
+- **Cluster 1**: Customers with highest recency score (last purchase long time ago), lowest frequency, and medium monetary value.\
+$\Rightarrow$ Customers **at risk** or **lost** due to inactivity but maybe salvageable by offering big discounts or sending reminders to receive again their attention.
+
+- **Cluster 2**: Customers with moderate recency and frequency and lowest monetary value.\
+$\Rightarrow$ Customers show medium activity but do not spend much, e.g., marketing strategy should motivate these customers to spend more money, e.g., offer quantity discounts or time limited discounts.
+
+- **Cluster 3**: Customers with moderate recency and frequency but highest monetary value.\
+$\Rightarrow$ These are **champions** or **promising** customers that we must keep, e.g., we could directly contact these customers to ask if they are happy with our service.
+
+- **Cluster 4**: Customers with lowest recency, highest frequency and medium monetary value.\
+$\Rightarrow$ These are rather **new** customers that are pretty active. Let us keep an eye on these customers and make sure that they remain active.
+
+# Hierarchical Clustering
+
+```{r, echo = FALSE}
+theme_set(theme_bw())
+```
+
+Another type of exploration is to try out different clustering algorithms (e.g., hierarchical clustering with different linkage methods) for customer segmentation.
+A good customer segmentation process usually includes exploring different clustering strategies to arrive at optimal customer segments that provide valuable insights.
+
+### Hierarchical Clustering with `agnes`
+
+To compute a dendogram and visualize the cluster assingments, we need to do the following steps:
+
+```{r mlr3implementation}
+aclust <- po("scale") %>>% lrn("clust.agnes", method = "complete", k = 4L)
+aclust$train(task_RFM)
+aclust_trained = aclust$pipeops$clust.agnes
+
+autoplot(aclust_trained$learner_model,
+  k = aclust_trained$param_set$values$k, rect_fill = TRUE,
+  rect = TRUE, rect_border = c("red", "cyan"))
+```
+
+### Implement a Cluster Method
+
+If the preferred clustering method is not available in `mlr3` yet you can add the desired learner on your own.
+For more information read here: https://mlr3book.mlr-org.com/extending-learners.html.
+
+
+```{r}
+library(R6)
+source("LearnerClustHClust.R")
+```
+
+For plotting we need to relate this learner to our desired `autoplot method`
+
+```{r}
+autoplot.LearnerClustHclust = mlr3viz:::autoplot.LearnerClustHierarchical
+```
+
+
+### Hierarchical Clustering with `hclust`
+
+To compute a dendogram and visualize the cluster assignments, we need to do the following steps:
+
+```{r mlr3implementationII}
+hclust <- po("scale") %>>% lrn("clust.hclust", method = "complete", distmethod = "euclidean", k = 4L)
+hclust$train(task_RFM)
+aclust_trained = hclust$pipeops$clust.hclust
+
+autoplot(aclust_trained$learner_model,
+  k = aclust_trained$param_set$values$k, rect_fill = TRUE,
+  rect = TRUE, rect_border = c("red", "cyan"))
+```
+
+### Hierarchical Clustering with `hcut`
+
+The `factoextra` package offers convenient functions to perform the same steps also using a few lines of code:
+
+```{r}
+# perform hierarchical clustering by directly specifying k, the distance metric, and the linkage method
+hc2 = factoextra::hcut(df_scaled, k = 4, hc_func = "hclust", hc_method = "complete", hc_metric = "euclidean")
+# cluster assignments are automatically computed and stored in `hc2$cluster`
+head(hc2$cluster)
+# plot dendogram and visualize clusters
+factoextra::fviz_dend(hc2, k = 4)
+```
+
+It allows to use the same functions we used for the k-means object to visualize scatter plots, e.g.,
+
+```{r, fig.height=4, fig.width=10}
+scatter_hc1 = factoextra::fviz_cluster(hc2)
+scatter_hc2 = factoextra::fviz_cluster(hc2, k = 4, choose.vars = c("recency", "monetary"), stand = FALSE)
+gridExtra::grid.arrange(scatter_hc1, scatter_hc2, nrow = 1)
+```
+
+Also the `fviz_nbclust` function can be used with `hcut` to find the optimal number of clusters by the elbow method:
+
+```{r}
+plot_com = factoextra::fviz_nbclust(df_scaled, FUNcluster = hcut, method = "wss",
+  hc_func = "hclust", hc_method = "complete", hc_metric = "euclidean")
+plot_com
+# Note: All information required for the elbow plot are stored in
+plot_com$data
+```
+
+### Compare Hierarchical Clustering and $k$-means
+
+If we want to compare the performance of different cluster algorithms, we can look at the **total within sum of square** measure for a specific value of $k$.
+To do so, we store all information from the elbow plot for optimal number of clusters of different linkage methods:
+
+```{r}
+plot_avg = factoextra::fviz_nbclust(df_scaled, FUNcluster = hcut, method = "wss",
+  hc_func = "hclust", hc_method = "average", hc_metric = "euclidean")
+plot_cen = factoextra::fviz_nbclust(df_scaled, FUNcluster = hcut, method = "wss",
+  hc_func = "hclust", hc_method = "centroid", hc_metric = "euclidean")
+plot_sin = factoextra::fviz_nbclust(df_scaled, FUNcluster = hcut, method = "wss",
+  hc_func = "hclust", hc_method = "single", hc_metric = "euclidean")
+```
+
+To compare $k$-means and different hierarchical clustering algorithms, we combine all relevant elbow plot information in one `data.frame` and visualize the results:
+
+```{r}
+compare = rbind(
+  cbind(plot_km$data, method = "kmeans"),
+  cbind(plot_avg$data, method = "hclust_average"),
+  cbind(plot_cen$data, method = "hclust_centroid"),
+  cbind(plot_com$data, method = "hclust_complete"),
+  cbind(plot_sin$data, method = "hclust_single")
+)
+str(compare)
+
+ggplot(compare, aes(x = clusters, y = y, col = method)) + 
+  geom_point() +
+  geom_line(aes(group = method)) + 
+  ylab("Total Within Sum of Square")
+```
+
+Obviously, $k$-means outperforms all other hierarchical clustering algorithms as it directly aims at minimizing the within sum of square measure `wss`.
+Many other metrics and indices to evaluate the clusters exist.
+
+# Next Steps
+
+For an improved discovery and insights, we can further improve the cluster analysis by adding other customer-related features or other relevant order details, e.g.:
+
+- Generate other features from the original data like the duration of the **customer relationship**, which can be obtained from the date of the first order of the customer.
+- Aggregate the monetary value for specific type of products separately (information available in `PRODUCTLINE`) to target customers according to product interests and develop a product-specific marketing strategy.
