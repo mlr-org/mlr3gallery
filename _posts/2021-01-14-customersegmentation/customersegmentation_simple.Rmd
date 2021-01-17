@@ -162,23 +162,6 @@ km_wss <- sapply(1:10, function(x) {
 plot(x = 1:10, y = km_wss, type = "b", main = "Elbow Plot")
 ```
 
-The code above requires a loop (we did this with `sapply`).
-The `fviz_nbclust` function from the `factoextra` package offers a convenient automated alternative.
-Additionally, it allows to produce elbow plots for **other clustering algorithms**, e.g., by specifying them in `FUNcluster` argument (see [Hierarchical Clustering]):
-
-*Note:* Be careful with training and predicting new data, as they have to be scaled with the information of training data input.
-This Does not have to be considered, using the pipeline used above.
-
-```{r}
-rfm_cols = c("recency", "frequency", "monetary")
-df_scaled = as.data.frame(scale(df_RFM[, rfm_cols]))
-summary(df_scaled)
-
-plot_km = factoextra::fviz_nbclust(df_scaled, FUNcluster = kmeans, method = "wss", nstart = 100) +
-  geom_vline(xintercept = 4, lty = 2)
-plot_km
-```
-
 ### Cluster Insights
 
 From the elbow method, we might chose $k=4$ as optimal number of clusters.
@@ -328,27 +311,6 @@ hclust_trained = hclust$pipeops$clust.hclust
 autoplot(hclust_trained$learner_model,
   k = hclust_trained$param_set$values$k, rect_fill = TRUE,
   rect = TRUE, rect_border = c("red", "cyan"))
-```
-
-### Hierarchical Clustering with `hcut`
-
-The `factoextra` package offers convenient functions to perform the same steps also using a few lines of code:
-
-```{r}
-# perform hierarchical clustering by directly specifying k, the distance metric, and the linkage method
-hc2 = factoextra::hcut(df_scaled, k = 4, hc_func = "hclust", hc_method = "complete", hc_metric = "euclidean")
-# cluster assignments are automatically computed and stored in `hc2$cluster`
-head(hc2$cluster)
-# plot dendogram and visualize clusters
-factoextra::fviz_dend(hc2, k = 4)
-```
-
-It allows to use the same functions we used for the k-means object to visualize scatter plots, e.g.,
-
-```{r, fig.height=4, fig.width=10}
-scatter_hc1 = factoextra::fviz_cluster(hc2)
-scatter_hc2 = factoextra::fviz_cluster(hc2, k = 4, choose.vars = c("recency", "monetary"), stand = FALSE)
-gridExtra::grid.arrange(scatter_hc1, scatter_hc2, nrow = 1)
 ```
 
 ### Compare Hierarchical Clustering and $k$-means
