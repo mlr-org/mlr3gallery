@@ -25,7 +25,7 @@ library(mlr3book)
 ```
 
 The following example describes a situation where we aim to remove **correlated features**.
-This in essence means, that we drop features until no features have a correlation higher then a given `cutoff`.
+This in essence means, that we drop features until no features have a correlation higher than a given `cutoff`.
 This is often useful when we for example want to use **linear models**.
 
 ## Prerequisites
@@ -48,7 +48,7 @@ library("mlr3tuning")
 
 ```{r, include = FALSE}
 lgr::get_logger("mlr3")$set_threshold("warn")
-lgr::get_logger("mlr3tuning")$set_threshold("warn")
+lgr::get_logger("bbotk")$set_threshold("warn")
 ```
 
 The basic pipeline looks as follows:
@@ -60,7 +60,7 @@ pipeline = po("select") %>>% lrn("classif.rpart")
 
 Now we get to the magic:
 
-We want to use the function `r ref("caret::findCorrelation")` from the `r cran_pkg("caret")` package in order to select uncorrelated variables.
+We want to use the function `r ref("caret::findCorrelation()")` from the `r cran_pkg("caret")` package in order to select uncorrelated variables.
 This function has a `cutoff` parameter, that specifies the maximum correlation allowed between variables.
 In order to expose this variable as a `numeric` parameter we can tune over we specify the following `r ref("ParamSet")`:
 
@@ -90,34 +90,38 @@ ps$trafo = function(x, param_set) {
 If you are not sure, you understand the `trafo` concept, consult the [mlr3book](https://mlr3book.mlr-org.com/paradox.html).
 It has a section on the `trafo` concept.
 
-To now tune over different values for `cutoff`, we first create a `r ref("TuningInstance")`.
+To now tune over different values for `cutoff`, we first create a `r ref("TuningInstanceSingleCrit")`.
 
 ```{r}
-inst = TuningInstance$new(
+inst = TuningInstanceSingleCrit$new(
   task = tsk("iris"),
   learner = pipeline,
   resampling = rsmp("cv", folds = 3L),
-  measures = msr("classif.ce"),
-  param_set = ps,
-  terminator = term("none"),
+  measure = msr("classif.ce"),
+  search_space = ps,
+  terminator = trm("none"),
   # don't need the following line for optimization, this is for
   # demonstration that different features were selected
-  bm_args = list(store_models = TRUE)
+  store_models = TRUE
 )
 ```
 
-and run the tuning:
+Then we run the tuning:
 
 ```{r}
-tnr("grid_search")$tune(inst)
+tnr("grid_search")$optimize(inst)
 ```
 
 In order to demonstrate that different cutoff values result in different features being selected, we can run the following to inspect the trained models.
 Note this inspects only the trained models of the first CV fold of each evaluated model.
-The features being excluded depends on the training data seen by the pipeline and may be different in different folds, even at the same cutoff value
+The features being excluded depends on the training data seen by the pipeline and may be different in different folds, even at the same cutoff value.
+
+```{r, echo=FALSE}
+resample_result = inst$archive$data("x_domain")$resample_result
+```
 
 ```{r}
-inst$archive(unnest = "tune_x")[
+inst$archive$data("x_domain")[
   order(cutoff),
   list(cutoff, classif.ce,
     featurenames = lapply(resample_result, function(x) {

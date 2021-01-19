@@ -32,9 +32,9 @@ Consult the [mlr3book](https://mlr3book.mlr-org.com/pipelines.html) if some aspe
 It deals with the problem of missing data.
 
 The random forest implementation in the package `r cran_pkg("ranger")` unfortunately does not support missing values.
-Therefore it is required to impute missing features before passing the data to the learner.
+Therefore, it is required to impute missing features before passing the data to the learner.
 
-We show how to use `r mlr_pkg("mlr3pipelines")` to augment the `r ref("mlr_learners_classif.ranger", "ranger learner")` with automatic imputation.
+We show how to use `r mlr_pkg("mlr3pipelines")` to augment the `r ref("mlr_learners_classif.ranger", "ranger random forest learner")` with automatic imputation.
 
 ## Construct the Base Objects
 
@@ -98,13 +98,13 @@ Since our task only has numeric features, we do not need to deal with imputing f
 and can instead concentrate on imputing numeric values:
 
 We do this in a two-step process:
-* For every column we create a new indicator column, that tells us whether the value is "missing" or "present".
+* We create new indicator columns, that tells us whether the value of a feature is "missing" or "present".
   We achieve this using the  `r ref("mlr_pipeops_missind", "missind")` `r ref("PipeOp")`.
 
 * Afterwards, we impute every missing value by sampling from the histogram of the respective column.
   We achieve this using the  `r ref("mlr_pipeops_imputehist", "imputehist")` `r ref("PipeOp")`.
 
-We also have to make sure to apply the pipeops in the correct order!
+We also have to make sure to apply the pipe operators in the correct order!
 
 ```{r}
 imp_missind = po("missind")
@@ -195,23 +195,27 @@ glearner$predict(task2)
 ## Missing factor features
 
 For `factor` features, the process works analogously.
-Instead of using `r ref("mlr_pipeops_imputehist", "imputehist")`, we can for example use `r ref("mlr_pipeops_imputenewlvl", "imputenewlvl")`.
+Instead of using `r ref("mlr_pipeops_imputehist", "imputehist")`, we can for example use `r ref("mlr_pipeops_imputeoor", "imputeoor")`.
 This will simply replace every `NA` in each factor variable with a new value `missing`.
 
 A full graph might the look like this:
 
 ```{r}
-imp_fct = po("imputenewlvl",
+imp_missind = po("missind", param_vals = list(affect_columns = NULL, which = "all"))
+imp_fct = po("imputeoor",
   param_vals = list(affect_columns = selector_type("factor")))
 graph = po("copy", 2) %>>%
   gunion(list(imp_missind, imp_num %>>% imp_fct)) %>>%
   po("featureunion")
 ```
 
+Note that we specify the parameter `affect_columns = NULL` when initializing `r ref("mlr_pipeops_missind", "missind")`, because we also want indicator columns for our `factor` features.
+By default, `affect_columns` would be set to `selector_invert(selector_type(c("factor", "ordered", "character")))`.
+We also set the parameter `which` to `"all"` to add indicator columns for all features, regardless whether values were missing during training or not.
+
 In order to test out our new graph, we again create a situation where our task has missing factor levels.
 As the (`r ref("mlr_tasks_pima", "pima")`) task does not have any factor levels, we use the
 famous (`r ref("mlr_tasks_boston_housing", "boston_housing")`) task.
-
 
 ```{r}
 # t1 is the training data without missings
@@ -231,4 +235,4 @@ gl$train(t1)
 gl$predict(t2)
 ```
 
-Success! We learned how to deal with missing values in less then 10 minutes.
+Success! We learned how to deal with missing values in less than 10 minutes.

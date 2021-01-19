@@ -18,6 +18,73 @@
  <!--radix_placeholder_import_source-->
  <!--/radix_placeholder_import_source-->
 
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css" data-origin="pandoc">
+code.sourceCode > span { display: inline-block; line-height: 1.25; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ad0000; } /* Alert */
+code span.an { color: #5e5e5e; } /* Annotation */
+code span.at { color: #20794d; } /* Attribute */
+code span.bn { color: #ad0000; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007ba5; } /* ControlFlow */
+code span.ch { color: #20794d; } /* Char */
+code span.cn { color: #8f5902; } /* Constant */
+code span.co { color: #5e5e5e; } /* Comment */
+code span.cv { color: #5e5e5e; font-style: italic; } /* CommentVar */
+code span.do { color: #5e5e5e; font-style: italic; } /* Documentation */
+code span.dt { color: #ad0000; } /* DataType */
+code span.dv { color: #ad0000; } /* DecVal */
+code span.er { color: #ad0000; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #ad0000; } /* Float */
+code span.fu { color: #4758ab; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #5e5e5e; } /* Information */
+code span.kw { color: #007ba5; } /* Keyword */
+code span.op { color: #5e5e5e; } /* Operator */
+code span.ot { color: #007ba5; } /* Other */
+code span.pp { color: #ad0000; } /* Preprocessor */
+code span.sc { color: #20794d; } /* SpecialChar */
+code span.ss { color: #20794d; } /* SpecialString */
+code span.st { color: #20794d; } /* String */
+code span.va { color: #111111; } /* Variable */
+code span.vs { color: #20794d; } /* VerbatimString */
+code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
+</style>
+
   <!--radix_placeholder_meta_tags-->
 <title>mlr3gallery: mlr3 and OpenML - Moneyball use case</title>
 
@@ -35,14 +102,20 @@
 <meta property="og:type" content="article"/>
 <meta property="og:description" content="This use case shows how to make use of OpenML data and how to impute missing values in a ML problem."/>
 <meta property="og:url" content="https://mlr3gallery.mlr-org.com/posts/2020-05-04-moneyball/"/>
+<meta property="og:image" content="https://mlr3gallery.mlr-org.com/posts/2020-05-04-moneyball/2020-05-04-moneyball_files/figure-html5/unnamed-chunk-9-1.png"/>
+<meta property="og:image:width" content="1248"/>
+<meta property="og:image:height" content="768"/>
 <meta property="og:locale" content="en_US"/>
 <meta property="og:site_name" content="mlr3gallery"/>
 
 <!--  https://dev.twitter.com/cards/types/summary -->
-<meta property="twitter:card" content="summary"/>
+<meta property="twitter:card" content="summary_large_image"/>
 <meta property="twitter:title" content="mlr3gallery: mlr3 and OpenML - Moneyball use case"/>
 <meta property="twitter:description" content="This use case shows how to make use of OpenML data and how to impute missing values in a ML problem."/>
 <meta property="twitter:url" content="https://mlr3gallery.mlr-org.com/posts/2020-05-04-moneyball/"/>
+<meta property="twitter:image" content="https://mlr3gallery.mlr-org.com/posts/2020-05-04-moneyball/2020-05-04-moneyball_files/figure-html5/unnamed-chunk-9-1.png"/>
+<meta property="twitter:image:width" content="1248"/>
+<meta property="twitter:image:height" content="768"/>
 
 <!--  https://scholar.google.com/intl/en/scholar/inclusion.html#indexing -->
 <meta name="citation_title" content="mlr3gallery: mlr3 and OpenML - Moneyball use case"/>
@@ -59,9 +132,10 @@
 <!--/radix_placeholder_rmarkdown_metadata-->
   
   <script type="text/json" id="radix-resource-manifest">
-  {"type":"NULL"}
+  {"type":"character","attributes":{},"value":["2020-05-04-moneyball_files/figure-html5/unnamed-chunk-13-1.png","2020-05-04-moneyball_files/figure-html5/unnamed-chunk-21-1.png","2020-05-04-moneyball_files/figure-html5/unnamed-chunk-9-1.png"]}
   </script>
   <!--radix_placeholder_navigation_in_header-->
+<meta name="distill:offset" content="../.."/>
 
 <script type="application/javascript">
 
@@ -73,6 +147,7 @@
     var header = $('header').get(0);
     var headerHeight = header.offsetHeight;
     var headroom = new Headroom(header, {
+      tolerance: 5,
       onPin : function() {
         if (window.headroom_prevent_pin) {
           window.headroom_prevent_pin = false;
@@ -121,7 +196,7 @@
 
 .distill-site-nav {
   color: rgba(255, 255, 255, 0.8);
-  background-color: #455a64;
+  background-color: #0F2E3D;
   font-size: 15px;
   font-weight: 300;
 }
@@ -184,6 +259,7 @@
 
 .distill-site-header .title {
   font-size: 18px;
+  min-width: 150px;
 }
 
 .distill-site-header .logo {
@@ -325,7 +401,7 @@
 
 
 @media screen and (max-width: 768px) {
-  .distill-site-header.responsive {position: relative;}
+  .distill-site-header.responsive {position: relative; min-height: 500px; }
   .distill-site-header.responsive a.nav-toggle {
     position: absolute;
     right: 0;
@@ -394,11 +470,277 @@ d-title {
   top: 0;
 }
 
+/* adjust viewport for navbar height */
+/* helps vertically center bootstrap (non-distill) content */
+.min-vh-100 {
+  min-height: calc(100vh - 100px) !important;
+}
+
 </style>
 
+<script src="../../site_libs/jquery-1.11.3/jquery.min.js"></script>
 <link href="../../site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet"/>
 <link href="../../site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet"/>
 <script src="../../site_libs/headroom-0.9.4/headroom.min.js"></script>
+<script src="../../site_libs/autocomplete-0.37.1/autocomplete.min.js"></script>
+<script src="../../site_libs/fuse-6.4.1/fuse.min.js"></script>
+
+<script type="application/javascript">
+
+function getMeta(metaName) {
+  var metas = document.getElementsByTagName('meta');
+  for (let i = 0; i < metas.length; i++) {
+    if (metas[i].getAttribute('name') === metaName) {
+      return metas[i].getAttribute('content');
+    }
+  }
+  return '';
+}
+
+function offsetURL(url) {
+  var offset = getMeta('distill:offset');
+  return offset ? offset + '/' + url : url;
+}
+
+function createFuseIndex() {
+
+  // create fuse index
+  var options = {
+    keys: [
+      { name: 'title', weight: 20 },
+      { name: 'categories', weight: 15 },
+      { name: 'description', weight: 10 },
+      { name: 'contents', weight: 5 },
+    ],
+    ignoreLocation: true,
+    threshold: 0
+  };
+  var fuse = new window.Fuse([], options);
+
+  // fetch the main search.json
+  return fetch(offsetURL('search.json'))
+    .then(function(response) {
+      if (response.status == 200) {
+        return response.json().then(function(json) {
+          // index main articles
+          json.articles.forEach(function(article) {
+            fuse.add(article);
+          });
+          // download collections and index their articles
+          return Promise.all(json.collections.map(function(collection) {
+            return fetch(offsetURL(collection)).then(function(response) {
+              if (response.status === 200) {
+                return response.json().then(function(articles) {
+                  articles.forEach(function(article) {
+                    fuse.add(article);
+                  });
+                })
+              } else {
+                return Promise.reject(
+                  new Error('Unexpected status from search index request: ' +
+                            response.status)
+                );
+              }
+            });
+          })).then(function() {
+            return fuse;
+          });
+        });
+
+      } else {
+        return Promise.reject(
+          new Error('Unexpected status from search index request: ' +
+                      response.status)
+        );
+      }
+    });
+}
+
+window.document.addEventListener("DOMContentLoaded", function (event) {
+
+  // get search element (bail if we don't have one)
+  var searchEl = window.document.getElementById('distill-search');
+  if (!searchEl)
+    return;
+
+  createFuseIndex()
+    .then(function(fuse) {
+
+      // make search box visible
+      searchEl.classList.remove('hidden');
+
+      // initialize autocomplete
+      var options = {
+        autoselect: true,
+        hint: false,
+        minLength: 2,
+      };
+      window.autocomplete(searchEl, options, [{
+        source: function(query, callback) {
+          const searchOptions = {
+            isCaseSensitive: false,
+            shouldSort: true,
+            minMatchCharLength: 2,
+            limit: 10,
+          };
+          var results = fuse.search(query, searchOptions);
+          callback(results
+            .map(function(result) { return result.item; })
+          );
+        },
+        templates: {
+          suggestion: function(suggestion) {
+            var img = suggestion.preview && Object.keys(suggestion.preview).length > 0
+              ? `<img src="${offsetURL(suggestion.preview)}"</img>`
+              : '';
+            var html = `
+              <div class="search-item">
+                <h3>${suggestion.title}</h3>
+                <div class="search-item-description">
+                  ${suggestion.description || ''}
+                </div>
+                <div class="search-item-preview">
+                  ${img}
+                </div>
+              </div>
+            `;
+            return html;
+          }
+        }
+      }]).on('autocomplete:selected', function(event, suggestion) {
+        window.location.href = offsetURL(suggestion.path);
+      });
+      // remove inline display style on autocompleter (we want to
+      // manage responsive display via css)
+      $('.algolia-autocomplete').css("display", "");
+    })
+    .catch(function(error) {
+      console.log(error);
+    });
+
+});
+
+</script>
+
+<style type="text/css">
+
+.nav-search {
+  font-size: x-small;
+}
+
+/* Algolioa Autocomplete */
+
+.algolia-autocomplete {
+  display: inline-block;
+  margin-left: 10px;
+  vertical-align: sub;
+  background-color: white;
+  color: black;
+  padding: 6px;
+  padding-top: 8px;
+  padding-bottom: 0;
+  border-radius: 6px;
+  border: 1px #0F2E3D solid;
+  width: 180px;
+}
+
+
+@media screen and (max-width: 768px) {
+  .distill-site-nav .algolia-autocomplete {
+    display: none;
+    visibility: hidden;
+  }
+  .distill-site-nav.responsive .algolia-autocomplete {
+    display: inline-block;
+    visibility: visible;
+  }
+  .distill-site-nav.responsive .algolia-autocomplete .aa-dropdown-menu {
+    margin-left: 0;
+    width: 400px;
+    max-height: 400px;
+  }
+}
+
+.algolia-autocomplete .aa-input, .algolia-autocomplete .aa-hint {
+  width: 90%;
+  outline: none;
+  border: none;
+}
+
+.algolia-autocomplete .aa-hint {
+  color: #999;
+}
+.algolia-autocomplete .aa-dropdown-menu {
+  width: 550px;
+  max-height: 70vh;
+  overflow-x: visible;
+  overflow-y: scroll;
+  padding: 5px;
+  margin-top: 3px;
+  margin-left: -150px;
+  background-color: #fff;
+  border-radius: 5px;
+  border: 1px solid #999;
+  border-top: none;
+}
+
+.algolia-autocomplete .aa-dropdown-menu .aa-suggestion {
+  cursor: pointer;
+  padding: 5px 4px;
+  border-bottom: 1px solid #eee;
+}
+
+.algolia-autocomplete .aa-dropdown-menu .aa-suggestion:last-of-type {
+  border-bottom: none;
+  margin-bottom: 2px;
+}
+
+.algolia-autocomplete .aa-dropdown-menu .aa-suggestion .search-item {
+  overflow: hidden;
+  font-size: 0.8em;
+  line-height: 1.4em;
+}
+
+.algolia-autocomplete .aa-dropdown-menu .aa-suggestion .search-item h3 {
+  font-size: 1rem;
+  margin-block-start: 0;
+  margin-block-end: 5px;
+}
+
+.algolia-autocomplete .aa-dropdown-menu .aa-suggestion .search-item-description {
+  display: inline-block;
+  overflow: hidden;
+  height: 2.8em;
+  width: 80%;
+  margin-right: 4%;
+}
+
+.algolia-autocomplete .aa-dropdown-menu .aa-suggestion .search-item-preview {
+  display: inline-block;
+  width: 15%;
+}
+
+.algolia-autocomplete .aa-dropdown-menu .aa-suggestion .search-item-preview img {
+  height: 3em;
+  width: auto;
+  display: none;
+}
+
+.algolia-autocomplete .aa-dropdown-menu .aa-suggestion .search-item-preview img[src] {
+  display: initial;
+}
+
+.algolia-autocomplete .aa-dropdown-menu .aa-suggestion.aa-cursor {
+  background-color: #eee;
+}
+.algolia-autocomplete .aa-dropdown-menu .aa-suggestion em {
+  font-weight: bold;
+  font-style: normal;
+}
+
+</style>
+
+
 <!--/radix_placeholder_navigation_in_header-->
   <!--radix_placeholder_distill-->
 
@@ -422,6 +764,51 @@ body {
 
 .pagedtable-footer {
   font-size: 15px;
+}
+
+d-byline .byline {
+  grid-template-columns: 2fr 2fr;
+}
+
+d-byline .byline h3 {
+  margin-block-start: 1.5em;
+}
+
+d-byline .byline .authors-affiliations h3 {
+  margin-block-start: 0.5em;
+}
+
+.authors-affiliations .orcid-id {
+  width: 16px;
+  height:16px;
+  margin-left: 4px;
+  margin-right: 4px;
+  vertical-align: middle;
+  padding-bottom: 2px;
+}
+
+d-title .dt-tags {
+  margin-top: 1em;
+  grid-column: text;
+}
+
+.dt-tags .dt-tag {
+  text-decoration: none;
+  display: inline-block;
+  color: rgba(0,0,0,0.6);
+  padding: 0em 0.4em;
+  margin-right: 0.5em;
+  margin-bottom: 0.4em;
+  font-size: 70%;
+  border: 1px solid rgba(0,0,0,0.2);
+  border-radius: 3px;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+d-article table.gt_table td,
+d-article table.gt_table th {
+  border-bottom: none;
 }
 
 .html-widget {
@@ -463,6 +850,7 @@ body {
 }
 
 d-article {
+  padding-top: 2.5rem;
   padding-bottom: 30px;
 }
 
@@ -474,91 +862,48 @@ d-article>p>img {
   width: 100%;
 }
 
+d-article h2 {
+  margin: 1rem 0 1.5rem 0;
+}
+
+d-article h3 {
+  margin-top: 1.5rem;
+}
+
 d-article iframe {
   border: 1px solid rgba(0, 0, 0, 0.1);
   margin-bottom: 2.0em;
   width: 100%;
 }
 
-figure img.external {
-  background: white;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.1);
-  padding: 18px;
-  box-sizing: border-box;
+/* Tweak code blocks */
+
+d-article div.sourceCode code,
+d-article pre code {
+  font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
 }
 
-/* CSS for table of contents */
-
-.d-toc {
-  color: rgba(0,0,0,0.8);
-  font-size: 0.8em;
-  line-height: 1em;
+d-article pre,
+d-article div.sourceCode,
+d-article div.sourceCode pre {
+  overflow: auto;
 }
 
-.d-toc-header {
-  font-size: 0.6rem;
-  font-weight: 400;
-  color: rgba(0, 0, 0, 0.5);
-  text-transform: uppercase;
-  margin-top: 0;
-  margin-bottom: 1.3em;
+d-article div.sourceCode {
+  background-color: white;
 }
 
-.d-toc a {
-  border-bottom: none;
-}
-
-.d-toc ul {
-  padding-left: 0;
-}
-
-.d-toc li>ul {
-  padding-top: 0.8em;
-  padding-left: 16px;
-  margin-bottom: 0.6em;
-}
-
-.d-toc ul,
-.d-toc li {
-  list-style-type: none;
-}
-
-.d-toc li {
-  margin-bottom: 0.9em;
-}
-
-.d-toc-separator {
-  margin-top: 20px;
-  margin-bottom: 2em;
-}
-
-.d-article-with-toc {
-  border-top: none;
-  padding-top: 0;
-}
-
-
-
-/* Tweak code blocks (note that this CSS is repeated above in an injection
-   into the d-code shadow dom) */
-
-d-code {
-  overflow-x: auto !important;
-}
-
-pre.d-code code.d-code {
+d-article div.sourceCode pre {
   padding-left: 10px;
   font-size: 12px;
   border-left: 2px solid rgba(0,0,0,0.1);
 }
 
-pre.text-output {
-
+d-article pre {
   font-size: 12px;
   color: black;
   background: none;
-  font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+  margin-top: 0;
   text-align: left;
   white-space: pre;
   word-spacing: normal;
@@ -576,20 +921,128 @@ pre.text-output {
   hyphens: none;
 }
 
+d-article pre a {
+  border-bottom: none;
+}
+
+d-article pre a:hover {
+  border-bottom: none;
+  text-decoration: underline;
+}
+
+d-article details {
+  grid-column: text;
+  margin-bottom: 0.8em;
+}
+
 @media(min-width: 768px) {
 
-d-code {
-  overflow-x: visible !important;
+d-article pre,
+d-article div.sourceCode,
+d-article div.sourceCode pre {
+  overflow: visible !important;
 }
 
-pre.d-code code.d-code  {
-    padding-left: 18px;
-    font-size: 14px;
-}
-pre.text-output {
+d-article div.sourceCode pre {
+  padding-left: 18px;
   font-size: 14px;
 }
+
+d-article pre {
+  font-size: 14px;
 }
+
+}
+
+figure img.external {
+  background: white;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.1);
+  padding: 18px;
+  box-sizing: border-box;
+}
+
+/* CSS for d-contents */
+
+.d-contents {
+  grid-column: text;
+  color: rgba(0,0,0,0.8);
+  font-size: 0.9em;
+  padding-bottom: 1em;
+  margin-bottom: 1em;
+  padding-bottom: 0.5em;
+  margin-bottom: 1em;
+  padding-left: 0.25em;
+  justify-self: start;
+}
+
+@media(min-width: 1000px) {
+  .d-contents.d-contents-float {
+    height: 0;
+    grid-column-start: 1;
+    grid-column-end: 4;
+    justify-self: center;
+    padding-right: 3em;
+    padding-left: 2em;
+  }
+}
+
+.d-contents nav h3 {
+  font-size: 18px;
+  margin-top: 0;
+  margin-bottom: 1em;
+}
+
+.d-contents li {
+  list-style-type: none
+}
+
+.d-contents nav > ul {
+  padding-left: 0;
+}
+
+.d-contents ul {
+  padding-left: 1em
+}
+
+.d-contents nav ul li {
+  margin-top: 0.6em;
+  margin-bottom: 0.2em;
+}
+
+.d-contents nav a {
+  font-size: 13px;
+  border-bottom: none;
+  text-decoration: none
+  color: rgba(0, 0, 0, 0.8);
+}
+
+.d-contents nav a:hover {
+  text-decoration: underline solid rgba(0, 0, 0, 0.6)
+}
+
+.d-contents nav > ul > li > a {
+  font-weight: 600;
+}
+
+.d-contents nav > ul > li > ul {
+  font-weight: inherit;
+}
+
+.d-contents nav > ul > li > ul > li {
+  margin-top: 0.2em;
+}
+
+
+.d-contents nav ul {
+  margin-top: 0;
+  margin-bottom: 0.25em;
+}
+
+.d-article-with-toc h2:nth-child(2) {
+  margin-top: 0;
+}
+
 
 /* Figure */
 
@@ -627,6 +1080,27 @@ pre.text-output {
   color: rgba(0, 0, 0, 1.0);
 }
 
+/* Citations */
+
+d-article .citation {
+  color: inherit;
+  cursor: inherit;
+}
+
+div.hanging-indent{
+  margin-left: 1em; text-indent: -1em;
+}
+
+/* Citation hover box */
+
+.tippy-box[data-theme~=light-border] {
+  background-color: rgba(250, 250, 250, 0.95);
+}
+
+.tippy-content > p {
+  margin-bottom: 0;
+  padding: 2px;
+}
 
 
 /* Tweak 1000px media break to show more text */
@@ -702,6 +1176,91 @@ d-appendix .citation-appendix,
   word-wrap: break-word;
 }
 
+/* Include appendix styles here so they can be overridden */
+
+d-appendix {
+  contain: layout style;
+  font-size: 0.8em;
+  line-height: 1.7em;
+  margin-top: 60px;
+  margin-bottom: 0;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  color: rgba(0,0,0,0.5);
+  padding-top: 60px;
+  padding-bottom: 48px;
+}
+
+d-appendix h3 {
+  grid-column: page-start / text-start;
+  font-size: 15px;
+  font-weight: 500;
+  margin-top: 1em;
+  margin-bottom: 0;
+  color: rgba(0,0,0,0.65);
+}
+
+d-appendix h3 + * {
+  margin-top: 1em;
+}
+
+d-appendix ol {
+  padding: 0 0 0 15px;
+}
+
+@media (min-width: 768px) {
+  d-appendix ol {
+    padding: 0 0 0 30px;
+    margin-left: -30px;
+  }
+}
+
+d-appendix li {
+  margin-bottom: 1em;
+}
+
+d-appendix a {
+  color: rgba(0, 0, 0, 0.6);
+}
+
+d-appendix > * {
+  grid-column: text;
+}
+
+d-appendix > d-footnote-list,
+d-appendix > d-citation-list,
+d-appendix > distill-appendix {
+  grid-column: screen;
+}
+
+/* Include footnote styles here so they can be overridden */
+
+d-footnote-list {
+  contain: layout style;
+}
+
+d-footnote-list > * {
+  grid-column: text;
+}
+
+d-footnote-list a.footnote-backlink {
+  color: rgba(0,0,0,0.3);
+  padding-left: 0.5em;
+}
+
+
+
+/* Anchor.js */
+
+.anchorjs-link {
+  /*transition: all .25s linear; */
+  text-decoration: none;
+  border-bottom: none;
+}
+*:hover > .anchorjs-link {
+  margin-left: -1.125em !important;
+  text-decoration: none;
+  border-bottom: none;
+}
 
 /* Social footer */
 
@@ -756,6 +1315,211 @@ d-appendix .citation-appendix,
 
 .custom p {
   margin-bottom: 0.5em;
+}
+
+/* Styles for listing layout (hide title) */
+.layout-listing d-title, .layout-listing .d-title {
+  display: none;
+}
+
+/* Styles for posts lists (not auto-injected) */
+
+
+.posts-with-sidebar {
+  padding-left: 45px;
+  padding-right: 45px;
+}
+
+.posts-list .description h2,
+.posts-list .description p {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", Arial, sans-serif;
+}
+
+.posts-list .description h2 {
+  font-weight: 700;
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.posts-list h2.post-tag {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+  padding-bottom: 12px;
+}
+.posts-list {
+  margin-top: 60px;
+  margin-bottom: 24px;
+}
+
+.posts-list .post-preview {
+  text-decoration: none;
+  overflow: hidden;
+  display: block;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  padding: 24px 0;
+}
+
+.post-preview-last {
+  border-bottom: none !important;
+}
+
+.posts-list .posts-list-caption {
+  grid-column: screen;
+  font-weight: 400;
+}
+
+.posts-list .post-preview h2 {
+  margin: 0 0 6px 0;
+  line-height: 1.2em;
+  font-style: normal;
+  font-size: 24px;
+}
+
+.posts-list .post-preview p {
+  margin: 0 0 12px 0;
+  line-height: 1.4em;
+  font-size: 16px;
+}
+
+.posts-list .post-preview .thumbnail {
+  box-sizing: border-box;
+  margin-bottom: 24px;
+  position: relative;
+  max-width: 500px;
+}
+.posts-list .post-preview img {
+  width: 100%;
+  display: block;
+}
+
+.posts-list .metadata {
+  font-size: 12px;
+  line-height: 1.4em;
+  margin-bottom: 18px;
+}
+
+.posts-list .metadata > * {
+  display: inline-block;
+}
+
+.posts-list .metadata .publishedDate {
+  margin-right: 2em;
+}
+
+.posts-list .metadata .dt-authors {
+  display: block;
+  margin-top: 0.3em;
+  margin-right: 2em;
+}
+
+.posts-list .dt-tags {
+  display: block;
+  line-height: 1em;
+}
+
+.posts-list .dt-tags .dt-tag {
+  display: inline-block;
+  color: rgba(0,0,0,0.6);
+  padding: 0.3em 0.4em;
+  margin-right: 0.2em;
+  margin-bottom: 0.4em;
+  font-size: 60%;
+  border: 1px solid rgba(0,0,0,0.2);
+  border-radius: 3px;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+.posts-list img {
+  opacity: 1;
+}
+
+.posts-list img[data-src] {
+  opacity: 0;
+}
+
+.posts-more {
+  clear: both;
+}
+
+
+.posts-sidebar {
+  font-size: 16px;
+}
+
+.posts-sidebar h3 {
+  font-size: 16px;
+  margin-top: 0;
+  margin-bottom: 0.5em;
+  font-weight: 400;
+  text-transform: uppercase;
+}
+
+.sidebar-section {
+  margin-bottom: 30px;
+}
+
+.categories ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+.categories li {
+  color: rgba(0, 0, 0, 0.8);
+  margin-bottom: 0;
+}
+
+.categories li>a {
+  border-bottom: none;
+}
+
+.categories li>a:hover {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.4);
+}
+
+.categories .active {
+  font-weight: 600;
+}
+
+.categories .category-count {
+  color: rgba(0, 0, 0, 0.4);
+}
+
+
+@media(min-width: 768px) {
+  .posts-list .post-preview h2 {
+    font-size: 26px;
+  }
+  .posts-list .post-preview .thumbnail {
+    float: right;
+    width: 30%;
+    margin-bottom: 0;
+  }
+  .posts-list .post-preview .description {
+    float: left;
+    width: 45%;
+  }
+  .posts-list .post-preview .metadata {
+    float: left;
+    width: 20%;
+    margin-top: 8px;
+  }
+  .posts-list .post-preview p {
+    margin: 0 0 12px 0;
+    line-height: 1.5em;
+    font-size: 16px;
+  }
+  .posts-with-sidebar .posts-list {
+    float: left;
+    width: 75%;
+  }
+  .posts-with-sidebar .posts-sidebar {
+    float: right;
+    width: 20%;
+    margin-top: 60px;
+    padding-top: 24px;
+    padding-bottom: 24px;
+  }
 }
 
 
@@ -887,6 +1651,12 @@ d-appendix .citation-appendix,
   hyphens: none;
 }
 
+.downlevel .posts-list .post-preview {
+  color: inherit;
+}
+
+
+
 </style>
 
 <script type="application/javascript">
@@ -902,6 +1672,13 @@ function is_downlevel_browser() {
 
 // show body when load is complete
 function on_load_complete() {
+
+  // add anchors
+  if (window.anchors) {
+    window.anchors.options.placement = 'left';
+    window.anchors.add('d-article > h2, d-article > h3, d-article > h4, d-article > h5');
+  }
+
 
   // set body to visible
   document.body.style.visibility = 'visible';
@@ -948,23 +1725,8 @@ function init_distill() {
   // create d-appendix
   $('.d-appendix').changeElementType('d-appendix');
 
-  // create d-bibliography
-  var bibliography = $('<d-bibliography></d-bibliography>');
-  $('#distill-bibliography').wrap(bibliography);
-
   // flag indicating that we have appendix items
   var appendix = $('.appendix-bottom').children('h3').length > 0;
-
-  // replace citations with <d-cite>
-  $('.citation').each(function(i, val) {
-    appendix = true;
-    var cites = $(this).attr('data-cites').split(" ");
-    var dt_cite = $('<d-cite></d-cite>');
-    dt_cite.attr('key', cites.join());
-    $(this).replaceWith(dt_cite);
-  });
-  // remove refs
-  $('#refs').remove();
 
   // replace footnotes with <d-footnote>
   $('.footnote-ref').each(function(i, val) {
@@ -982,39 +1744,21 @@ function init_distill() {
   // remove footnotes
   $('.footnotes').remove();
 
+  // move refs into #references-listing
+  $('#references-listing').replaceWith($('#refs'));
+
   $('h1.appendix, h2.appendix').each(function(i, val) {
     $(this).changeElementType('h3');
   });
   $('h3.appendix').each(function(i, val) {
     var id = $(this).attr('id');
-    $('.d-toc a[href="#' + id + '"]').parent().remove();
+    $('.d-contents a[href="#' + id + '"]').parent().remove();
     appendix = true;
     $(this).nextUntil($('h1, h2, h3')).addBack().appendTo($('d-appendix'));
   });
 
   // show d-appendix if we have appendix content
   $("d-appendix").css('display', appendix ? 'grid' : 'none');
-
-  // replace code blocks with d-code
-  $('pre>code').each(function(i, val) {
-    var code = $(this);
-    var pre = code.parent();
-    var clz = "";
-    var language = pre.attr('class');
-    if (language) {
-      // map unknown languages to "clike" (without this they just dissapear)
-      if ($.inArray(language, ["bash", "clike", "css", "go", "html",
-                               "javascript", "js", "julia", "lua", "markdown",
-                               "markup", "mathml", "python", "svg", "xml"]) == -1)
-        language = "clike";
-      language = ' language="' + language + '"';
-      var dt_code = $('<d-code block' + language + clz + '></d-code>');
-      dt_code.text(code.text());
-      pre.replaceWith(dt_code);
-    } else {
-      code.addClass('text-output').unwrap().changeElementType('pre');
-    }
-  });
 
   // localize layout chunks to just output
   $('.layout-chunk').each(function(i, val) {
@@ -1023,7 +1767,7 @@ function init_distill() {
     var layout = $(this).attr('data-layout');
 
     // apply layout to markdown level block elements
-    var elements = $(this).children().not('d-code, pre.text-output, script');
+    var elements = $(this).children().not('details, div.sourceCode, pre, script');
     elements.each(function(i, el) {
       var layout_div = $('<div class="' + layout + '"></div>');
       if (layout_div.hasClass('shaded')) {
@@ -1040,6 +1784,13 @@ function init_distill() {
     $(this).children().unwrap();
   });
 
+  // remove code block used to force  highlighting css
+  $('.distill-force-highlighting-css').parent().remove();
+
+  // remove empty line numbers inserted by pandoc when using a
+  // custom syntax highlighting theme
+  $('code.sourceCode a:empty').remove();
+
   // load distill framework
   load_distill_framework();
 
@@ -1055,12 +1806,26 @@ function init_distill() {
     if (!have_authors)
       $('d-byline').addClass('hidden');
 
-    // table of contents
-    if (have_authors) // adjust border if we are in authors
-      $('.d-toc').parent().addClass('d-article-with-toc');
+    // article with toc class
+    $('.d-contents').parent().addClass('d-article-with-toc');
 
     // strip links that point to #
     $('.authors-affiliations').find('a[href="#"]').removeAttr('href');
+
+    // add orcid ids
+    $('.authors-affiliations').find('.author').each(function(i, el) {
+      var orcid_id = front_matter.authors[i].orcidID;
+      if (orcid_id) {
+        var a = $('<a></a>');
+        a.attr('href', 'https://orcid.org/' + orcid_id);
+        var img = $('<img></img>');
+        img.addClass('orcid-id');
+        img.attr('alt', 'ORCID ID');
+        img.attr('src','data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA2ZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo1N0NEMjA4MDI1MjA2ODExOTk0QzkzNTEzRjZEQTg1NyIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDozM0NDOEJGNEZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDozM0NDOEJGM0ZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M1IE1hY2ludG9zaCI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOkZDN0YxMTc0MDcyMDY4MTE5NUZFRDc5MUM2MUUwNEREIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjU3Q0QyMDgwMjUyMDY4MTE5OTRDOTM1MTNGNkRBODU3Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+84NovQAAAR1JREFUeNpiZEADy85ZJgCpeCB2QJM6AMQLo4yOL0AWZETSqACk1gOxAQN+cAGIA4EGPQBxmJA0nwdpjjQ8xqArmczw5tMHXAaALDgP1QMxAGqzAAPxQACqh4ER6uf5MBlkm0X4EGayMfMw/Pr7Bd2gRBZogMFBrv01hisv5jLsv9nLAPIOMnjy8RDDyYctyAbFM2EJbRQw+aAWw/LzVgx7b+cwCHKqMhjJFCBLOzAR6+lXX84xnHjYyqAo5IUizkRCwIENQQckGSDGY4TVgAPEaraQr2a4/24bSuoExcJCfAEJihXkWDj3ZAKy9EJGaEo8T0QSxkjSwORsCAuDQCD+QILmD1A9kECEZgxDaEZhICIzGcIyEyOl2RkgwAAhkmC+eAm0TAAAAABJRU5ErkJggg==');
+        a.append(img);
+        $(this).append(a);
+      }
+    });
 
     // hide elements of author/affiliations grid that have no value
     function hide_byline_column(caption) {
@@ -1110,18 +1875,27 @@ function init_distill() {
       grid.children('h3:contains("Affiliations")').text('Affiliation');
     }
 
-    // inject pre code styles (can't do this with a global stylesheet b/c a shadow root is used)
-    $('d-code').each(function(i, val) {
-      var style = document.createElement('style');
-      style.innerHTML = 'pre code { padding-left: 10px; font-size: 12px; border-left: 2px solid rgba(0,0,0,0.1); } ' +
-                        '@media(min-width: 768px) { pre code { padding-left: 18px; font-size: 14px; } }';
-      if (this.shadowRoot)
-        this.shadowRoot.appendChild(style);
-    });
+    // remove d-appendix and d-footnote-list local styles
+    $('d-appendix > style:first-child').remove();
+    $('d-footnote-list > style:first-child').remove();
 
     // move appendix-bottom entries to the bottom
     $('.appendix-bottom').appendTo('d-appendix').children().unwrap();
     $('.appendix-bottom').remove();
+
+    // hoverable references
+    $('span.citation[data-cites]').each(function() {
+      var refHtml = $('#ref-' + $(this).attr('data-cites')).html();
+      window.tippy(this, {
+        allowHTML: true,
+        content: refHtml,
+        maxWidth: 500,
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'light-border',
+        placement: 'bottom-start'
+      });
+    });
 
     // clear polling timer
     clearInterval(tid);
@@ -1153,9 +1927,7 @@ function init_downlevel() {
   $('.d-byline a').remove();
 
   // remove toc
-  $('.d-toc-header').remove();
-  $('.d-toc').remove();
-  $('.d-toc-separator').remove();
+  $('.d-contents').remove();
 
   // move appendix elements
   $('h1.appendix, h2.appendix').each(function(i, val) {
@@ -1284,11 +2056,12 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 <!--/radix_placeholder_distill-->
-  <script src="../../site_libs/htmlwidgets-1.5.1/htmlwidgets.js"></script>
-  <link href="../../site_libs/vis-4.20.1/vis.css" rel="stylesheet" />
-  <script src="../../site_libs/vis-4.20.1/vis.min.js"></script>
-  <script src="../../site_libs/visNetwork-binding-2.0.9/visNetwork.js"></script>
   <script src="../../site_libs/jquery-1.11.3/jquery.min.js"></script>
+  <script src="../../site_libs/popper-2.6.0/popper.min.js"></script>
+  <link href="../../site_libs/tippy-6.2.7/tippy.css" rel="stylesheet" />
+  <link href="../../site_libs/tippy-6.2.7/tippy-light-border.css" rel="stylesheet" />
+  <script src="../../site_libs/tippy-6.2.7/tippy.umd.min.js"></script>
+  <script src="../../site_libs/anchor-4.2.2/anchor.min.js"></script>
   <script src="../../site_libs/bowser-1.9.3/bowser.min.js"></script>
   <script src="../../site_libs/webcomponents-2.0.0/webcomponents.js"></script>
   <script src="../../site_libs/distill-2.2.21/template.v2.js"></script>
@@ -1304,7 +2077,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <!--radix_placeholder_front_matter-->
 
 <script id="distill-front-matter" type="text/json">
-{"title":"mlr3 and OpenML - Moneyball use case","description":"This use case shows how to make use of OpenML data and how to impute missing values in a ML problem.","authors":[{"author":"Philipp Kopper","authorURL":"#","affiliation":"&nbsp;","affiliationURL":"#"}],"publishedDate":"2020-05-04T00:00:00.000+00:00","citationText":"Kopper, 2020"}
+{"title":"mlr3 and OpenML - Moneyball use case","description":"This use case shows how to make use of OpenML data and how to impute missing values in a ML problem.","authors":[{"author":"Philipp Kopper","authorURL":"#","affiliation":"&nbsp;","affiliationURL":"#","orcidID":""}],"publishedDate":"2020-05-04T00:00:00.000+00:00","citationText":"Kopper, 2020"}
 </script>
 
 <!--/radix_placeholder_front_matter-->
@@ -1316,6 +2089,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <img src="../../images/logo.png" alt="Logo"/>
 </a>
 <a href="../../index.html" class="title">mlr3gallery</a>
+<input id="distill-search" class="nav-search hidden" type="text" placeholder="Search..."/>
 </div>
 <div class="nav-right">
 <a href="https://github.com/mlr-org/mlr3gallery">
@@ -1331,6 +2105,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
 <div class="d-title">
 <h1>mlr3 and OpenML - Moneyball use case</h1>
+<!--radix_placeholder_categories-->
+<div class="dt-tags">
+  <a href="../../index.html#category:imputation" class="dt-tag">imputation</a>
+  <a href="../../index.html#category:regression" class="dt-tag">regression</a>
+  <a href="../../index.html#category:feature_importance" class="dt-tag">feature importance</a>
+</div>
+<!--/radix_placeholder_categories-->
 <p><p>This use case shows how to make use of OpenML data and how to impute missing values in a ML problem.</p></p>
 </div>
 
@@ -1351,61 +2132,68 @@ document.addEventListener('DOMContentLoaded', function() {
 </ul>
 <h2 id="loading-basic-packages">Loading basic packages</h2>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-# tasks, train, predict, resample, benchmark
-library(&quot;mlr3&quot;)
-# about a dozen reasonable learners
-library(&quot;mlr3learners&quot;)
-# Pipelines
-library(&quot;mlr3pipelines&quot;)
-# lots of measures for evaluation
-library(&quot;mlr3measures&quot;)
-# Retreiving the data
-library(&quot;OpenML&quot;)</code></pre>
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='co'># tasks, train, predict, resample, benchmark</span>
+<span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='st'><a href='https://mlr3.mlr-org.com'>"mlr3"</a></span><span class='op'>)</span>
+<span class='co'># about a dozen reasonable learners</span>
+<span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='st'><a href='https://mlr3learners.mlr-org.com'>"mlr3learners"</a></span><span class='op'>)</span>
+<span class='co'># Pipelines</span>
+<span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='st'><a href='https://mlr3pipelines.mlr-org.com'>"mlr3pipelines"</a></span><span class='op'>)</span>
+<span class='co'># lots of measures for evaluation</span>
+<span class='fu'><a href='https://rdrr.io/r/base/ns-load.html'>requireNamespace</a></span><span class='op'>(</span><span class='st'>"mlr3measures"</span><span class='op'>)</span>
+<span class='co'># Retrieving the data</span>
+<span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='st'><a href='https://github.com/openml/openml-r'>"OpenML"</a></span><span class='op'>)</span>
+<span class='co'># Another way to obtain the data</span>
+<span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='st'><a href='https://github.com/mlr-org/mlr3data'>"mlr3data"</a></span><span class='op'>)</span>
+</code></pre>
+</div>
 </div>
 <h2 id="retrieving-the-data-from-openml">Retrieving the data from OpenML</h2>
-<p>We can use the <code>OpenML</code> package to retrieve data (and more) straight away. <code>OpenML</code> is is an inclusive movement to build an open, organized, online ecosystem for machine learning. Typically, you can retrieve the data with an <code>id</code>. The <code>id</code> can be found on <a href="https://www.openml.org/">OpenML</a>. We choose the <code>41021</code>as our <code>oml_id</code>. The related web page can be accessed <a href="https://www.openml.org/d/41021">here</a>. This data set was uploaded by <a href="https://www.openml.org/u/2">Joaquin Vanschoren</a>.</p>
+<p>We can use the <a href="https://cran.r-project.org/package=OpenML">OpenML</a> package to retrieve data (and more) straight away. <code>OpenML</code> is is an inclusive movement to build an open, organized, online ecosystem for machine learning. Typically, you can retrieve the data with an <code>id</code>. The <code>id</code> can be found on <a href="https://www.openml.org/">OpenML</a>. We choose the <code>41021</code>as our <code>oml_id</code>. The related web page can be accessed <a href="https://www.openml.org/d/41021">here</a>. This data set was uploaded by <a href="https://www.openml.org/u/2">Joaquin Vanschoren</a>.</p>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-oml_id = 41021
-oml_dat = getOMLDataSet(data.id = oml_id)</code></pre>
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>oml_id</span> <span class='op'>=</span> <span class='fl'>41021</span>
+<span class='va'>oml_dat</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/pkg/OpenML/man/getOMLDataSet.html'>getOMLDataSet</a></span><span class='op'>(</span>data.id <span class='op'>=</span> <span class='va'>oml_id</span><span class='op'>)</span>
+</code></pre>
+</div>
 </div>
 <p>The description indicates that the data set is associated with baseball or more precisely the story of <a href="https://www.imdb.com/title/tt1210166/">Moneyball</a>.</p>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-oml_dat</code></pre>
-<pre><code>
-Data Set &#39;Moneyball&#39; :: (Version = 2, OpenML ID = 41021)
-  Default Target Attribute: RS</code></pre>
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>oml_dat</span>
+</code></pre>
+</div>
 </div>
 <p>However, the description within the <code>OpenML</code> object is not very detailed. The previously referenced <a href="https://www.openml.org/d/41021">page</a> however states the following:</p>
 <p>In the early 2000s, Billy Beane and Paul DePodesta worked for the Oakland Athletics. During their work there, they disrupted the game of baseball. They didn’t do it using a bat or glove, and they certainly didn’t do it by throwing money at the issue; in fact, money was the issue. They didn’t have enough of it, but they were still expected to keep up with teams that had more substantial endorsements. This is where Statistics came riding down the hillside on a white horse to save the day. This data set contains some of the information that was available to Beane and DePodesta in the early 2000s, and it can be used to better understand their methods.</p>
-<p>This data set contains a set of variables that Beane and DePodesta emphasized in their work. They determined that statistics like on-base percentage (OBP) and slugging percentage (SLG) were very important when it came to scoring runs, however, they were largely undervalued by most scouts at the time. This translated to a gold mine for Beane and DePodesta. Since these players weren’t being looked at by other teams, they could recruit these players on a small budget. The variables are as follows:</p>
+<p>This data set contains a set of variables that Beane and DePodesta emphasized in their work. They determined that statistics like on-base percentage (obp) and slugging percentage (slg) were very important when it came to scoring runs, however, they were largely undervalued by most scouts at the time. This translated to a gold mine for Beane and DePodesta. Since these players weren’t being looked at by other teams, they could recruit these players on a small budget. The variables are as follows:</p>
 <ul>
-<li>Team</li>
-<li>League</li>
-<li>Year</li>
-<li>Runs Scored (RS)</li>
-<li>Runs Allowed (RA)</li>
-<li>Wins (W)</li>
-<li>On-Base Percentage (OBP)</li>
-<li>Slugging Percentage (SLG)</li>
-<li>Batting Average (BA)</li>
-<li>Playoffs (binary)</li>
-<li>RankSeason</li>
-<li>RankPlayoffs</li>
-<li>Games Played (G)</li>
-<li>Opponent On-Base Percentage (OOBP)</li>
-<li>Opponent Slugging Percentage (OSLG)</li>
+<li>team</li>
+<li>league</li>
+<li>year</li>
+<li>runs scored (rs)</li>
+<li>runs allowed (ra)</li>
+<li>wins (w)</li>
+<li>on-base percentage (obp)</li>
+<li>slugging percentage (slg)</li>
+<li>batting average (ba)</li>
+<li>playoffs (binary)</li>
+<li>rankseason</li>
+<li>rankplayoffs</li>
+<li>games played (g)</li>
+<li>opponent on-base percentage (oobp)</li>
+<li>opponent slugging percentage (oslg)</li>
 </ul>
 <p>While Beane and DePodesta defined most of these statistics and measures for individual players, this data set is on the team level.</p>
 <p>These statistics seem very informative if you are into baseball. If baseball of rather obscure to you, simply take these features as given or give this <a href="https://en.wikipedia.org/wiki/Baseball_statistics">article</a> a quick read.</p>
+<p>Finally, note that the <code>moneyball</code> dataset is also included in the <code>mlr3data</code> package where you can get the preprocessed (integers properly encoded as such, etc.) data via:</p>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-data = oml_dat$data
-summary(data)</code></pre>
-<pre><code>
-      Team     League        Year            RS               RA        
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span><span class='op'>(</span><span class='st'>"moneyball"</span>, package <span class='op'>=</span> <span class='st'>"mlr3data"</span><span class='op'>)</span>
+<span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>moneyball</span><span class='op'>)</span>
+</code></pre>
+</div>
+<pre><code>      team     league        year            rs               ra        
  BAL    : 47   AL:616   Min.   :1962   Min.   : 463.0   Min.   : 472.0  
  BOS    : 47   NL:616   1st Qu.:1977   1st Qu.: 652.0   1st Qu.: 649.8  
  CHC    : 47            Median :1989   Median : 711.0   Median : 709.0  
@@ -1413,7 +2201,7 @@ summary(data)</code></pre>
  CIN    : 47            3rd Qu.:2002   3rd Qu.: 775.0   3rd Qu.: 774.2  
  CLE    : 47            Max.   :2012   Max.   :1009.0   Max.   :1103.0  
  (Other):950                                                            
-       W              OBP              SLG               BA         Playoffs
+       w              obp              slg               ba         playoffs
  Min.   : 40.0   Min.   :0.2770   Min.   :0.3010   Min.   :0.2140   0:988   
  1st Qu.: 73.0   1st Qu.:0.3170   1st Qu.:0.3750   1st Qu.:0.2510   1:244   
  Median : 81.0   Median :0.3260   Median :0.3960   Median :0.2600           
@@ -1421,7 +2209,7 @@ summary(data)</code></pre>
  3rd Qu.: 89.0   3rd Qu.:0.3370   3rd Qu.:0.4210   3rd Qu.:0.2680           
  Max.   :116.0   Max.   :0.3730   Max.   :0.4910   Max.   :0.2940           
                                                                             
-   RankSeason  RankPlayoffs       G            OOBP             OSLG       
+   rankseason  rankplayoffs       g            oobp             oslg       
  2      : 53   1   : 47     162    :954   Min.   :0.2940   Min.   :0.3460  
  1      : 52   2   : 47     161    :139   1st Qu.:0.3210   1st Qu.:0.4010  
  3      : 44   3   : 80     163    : 93   Median :0.3310   Median :0.4190  
@@ -1430,26 +2218,28 @@ summary(data)</code></pre>
  (Other): 30   NA&#39;s:988     164    : 10   Max.   :0.3840   Max.   :0.4990  
  NA&#39;s   :988                (Other):  3   NA&#39;s   :812      NA&#39;s   :812     </code></pre>
 </div>
-<p>The summary shows how this data we are dealing with looks like: Some data is missing, however, this has structural reasons. There are <span class="math inline">\(39\)</span> teams with each maximally <span class="math inline">\(47\)</span> years (<span class="math inline">\(1962\)</span> - <span class="math inline">\(2012\)</span>). For <span class="math inline">\(988\)</span> cases the information on <code>RankSeason</code> and <code>RankPlayoffs</code> is missing. This is since these simply did not reach the playoffs and hence have no reported rank.</p>
+<p>The summary shows how this data we are dealing with looks like: Some data is missing, however, this has structural reasons. There are <span class="math inline">\(39\)</span> teams with each maximally <span class="math inline">\(47\)</span> years (<span class="math inline">\(1962\)</span> - <span class="math inline">\(2012\)</span>). For <span class="math inline">\(988\)</span> cases the information on <code>rankseason</code> and <code>rankplayoffs</code> is missing. This is since these simply did not reach the playoffs and hence have no reported rank.</p>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-summary(data[data$Playoffs == 0, c(&quot;RankSeason&quot;, &quot;RankPlayoffs&quot;)])</code></pre>
-<pre><code>
-   RankSeason  RankPlayoffs
- 1      :  0   1   :  0    
- 2      :  0   2   :  0    
- 3      :  0   3   :  0    
- 4      :  0   4   :  0    
- 5      :  0   5   :  0    
- (Other):  0   NA&#39;s:988    
- NA&#39;s   :988               </code></pre>
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>moneyball</span><span class='op'>[</span><span class='va'>moneyball</span><span class='op'>$</span><span class='va'>Playoffs</span> <span class='op'>==</span> <span class='fl'>0</span>, <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"rankseason"</span>, <span class='st'>"rankplayoffs"</span><span class='op'>)</span><span class='op'>]</span><span class='op'>)</span>
+</code></pre>
 </div>
-<p>On the other hand, <code>OOBP</code> and <code>OSLG</code> have <span class="math inline">\(812\)</span> missing values. It seems as if these measures were not available before <span class="math inline">\(1998\)</span>.</p>
+<pre><code>   rankseason rankplayoffs
+ 1      :0    1:0         
+ 2      :0    2:0         
+ 3      :0    3:0         
+ 4      :0    4:0         
+ 5      :0    5:0         
+ 6      :0                
+ (Other):0                </code></pre>
+</div>
+<p>On the other hand, <code>oobp</code> and <code>oslg</code> have <span class="math inline">\(812\)</span> missing values. It seems as if these measures were not available before <span class="math inline">\(1998\)</span>.</p>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-summary(data[is.na(data$OOBP), &quot;Year&quot;])</code></pre>
-<pre><code>
-   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>moneyball</span><span class='op'>[</span><span class='fu'><a href='https://rdrr.io/r/base/NA.html'>is.na</a></span><span class='op'>(</span><span class='va'>moneyball</span><span class='op'>$</span><span class='va'>oobp</span><span class='op'>)</span>, <span class='st'>"year"</span><span class='op'>]</span><span class='op'>)</span>
+</code></pre>
+</div>
+<pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
    1962    1971    1980    1980    1989    1998 </code></pre>
 </div>
 <p>We seem to have a missing data problem. Typically, in this case, we have three options: They are:</p>
@@ -1458,240 +2248,250 @@ summary(data[is.na(data$OOBP), &quot;Year&quot;])</code></pre>
 <li><p>Complete feature analysis: Exclude all features with missing values.</p></li>
 <li><p>Missing value imputation: Use a model to “guess” the missing values (based on the underlying distribution of the data.</p></li>
 </ul>
-<p>Usually, missing value imputation is preferred over the first two. However, in machine learning, one can try out all options and see which performs best for the underlying problem. For now, we limit ourselves to a rather simple imputation technique, imputation by randomly sampling from the univariate distribution. Note that this does not take the multivariate distribution into account properly and that there are more elaborate approaches. We only aim to impute <code>OOBP</code> and <code>OSLG</code>. For the other missing (categorical) features, we simply add a new level which indicates that information is missing (i.e. all missing values belong to.</p>
+<p>Usually, missing value imputation is preferred over the first two. However, in machine learning, one can try out all options and see which performs best for the underlying problem. For now, we limit ourselves to a rather simple imputation technique, imputation by randomly sampling from the univariate distribution. Note that this does not take the multivariate distribution into account properly and that there are more elaborate approaches. We only aim to impute <code>oobp</code> and <code>oslg</code>. For the other missing (categorical) features, we simply add a new level which indicates that information is missing (i.e. all missing values belong to).</p>
 <p>It is important to note that in this case here the vast majority of information on the features is missing. In this case, imputation is performed to not throw away the existing information of the features.</p>
-<p><code>mlr3</code> has some solutions for that within the <code>mlr3pipelines</code> package. We start with an easy graph which only performs numeric imputation. We create a graph that copies the data. After this gateway, the data is simply passed through for the first node. On the other one numeric imputation is performed. The results are combined via the <code>featureunion</code> <code>PipeOp</code>. We end up with a data set where all numeric features are imputed.</p>
+<p><code>mlr3</code> has some solutions for that within the <code>mlr3pipelines</code> package. We start with an easy <code>PipeOp</code> which only performs numeric imputation.</p>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-nop = po(&quot;nop&quot;)
-imp_num = po(&quot;imputehist&quot;, param_vals = list(affect_columns = selector_type(&quot;numeric&quot;)))
-graph = po(&quot;copy&quot;, 2) %&gt;&gt;% gunion(list(nop, imp_num)) %&gt;&gt;% po(&quot;featureunion&quot;)</code></pre>
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>imp_num</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"imputehist"</span>, param_vals <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>affect_columns <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/Selector.html'>selector_type</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"integer"</span>, <span class='st'>"numeric"</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>
+</code></pre>
 </div>
-<p>We can visualise the preprocessing graph by its own <code>plot</code> method:</p>
-<div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-graph$plot(html = TRUE)</code></pre>
-<div id="htmlwidget-d4fac0b2c897be5bc8ab" style="width:50%;height:400px;" class="visNetwork html-widget"></div>
-<script type="application/json" data-for="htmlwidget-d4fac0b2c897be5bc8ab">{"x":{"nodes":{"id":["copy","nop","imputehist","<INPUT>","featureunion","<OUTPUT>"],"label":["copy","nop","imputehist","<INPUT>","featureunion","<OUTPUT>"],"shape":["box","box","box","database","box","ellipse"],"color":["lightblue","lightblue","lightblue","rgba(0,204,102,0.2)","lightblue","rgba(255,51,51,0.2)"],"value":[1,1,1,0.8,1,0.8],"title":["<p>PipeOp: <b>copy<\/b> (not trained)<br>values: <b>list()<\/b><br>Input channels <b>name [train type, predict type]<\/b>:<br>  input [*,*]<br>Output channels <b>name [train type, predict type]<\/b>:<br>  output1 [*,*], output2 [*,*]<\/p>","<p>PipeOp: <b>nop<\/b> (not trained)<br>values: <b>list()<\/b><br>Input channels <b>name [train type, predict type]<\/b>:<br>  input [*,*]<br>Output channels <b>name [train type, predict type]<\/b>:<br>  output [*,*]<\/p>","<p>PipeOp: <b>imputehist<\/b> (not trained)<br>values: <b>affect_columns=<Selector><\/b><br>Input channels <b>name [train type, predict type]<\/b>:<br>  input [Task,Task]<br>Output channels <b>name [train type, predict type]<\/b>:<br>  output [Task,Task]<\/p>","<p>Input:<br>Name: copy.input<br>Train: *<br>Predict: *<\/p>","<p>PipeOp: <b>featureunion<\/b> (not trained)<br>values: <b>list()<\/b><br>Input channels <b>name [train type, predict type]<\/b>:<br>  ... [Task,Task]<br>Output channels <b>name [train type, predict type]<\/b>:<br>  output [Task,Task]<\/p>","<p>Output:<br>Name: featureunion.output<br>Train: Task<br>Predict: Task<\/p>"],"x":[0,-1,1,0,0,0],"y":[-0.5,0,0,-1,0.5,1]},"edges":{"from":["copy","copy","nop","imputehist","<INPUT>","featureunion"],"to":["nop","imputehist","featureunion","featureunion","copy","<OUTPUT>"],"color":["lightblue","lightblue","lightblue","lightblue","lightblue","lightblue"]},"nodesToDataframe":true,"edgesToDataframe":true,"options":{"width":"100%","height":"100%","nodes":{"shape":"dot","physics":false},"manipulation":{"enabled":false},"edges":{"arrows":"to","smooth":{"enabled":false,"forceDirection":"vertical"}},"physics":{"stabilization":false}},"groups":null,"width":"50%","height":"400px","idselection":{"enabled":false},"byselection":{"enabled":false},"main":null,"submain":null,"footer":null,"background":"rgba(0, 0, 0, 0)","igraphlayout":{"type":"full"}},"evals":[],"jsHooks":[]}</script>
 </div>
-<p>We still have to append the second imputation job for factors. We pretty much construct the same pipeline again only for factors. However, we have to make sure that the operator <code>id</code>s are unique.</p>
+<p>Next, we append the second imputation job for factors.</p>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-nop2 = po(&quot;nop&quot;, id = &quot;nop2&quot;)
-imp_fct = po(&quot;imputenewlvl&quot;, param_vals = list(affect_columns = selector_type(&quot;factor&quot;)))
-graph = graph %&gt;&gt;% po(&quot;copy&quot;, 2, id = &quot;copy2&quot;) %&gt;&gt;% gunion(list(nop2, imp_fct)) %&gt;&gt;%
-  po(&quot;featureunion&quot;, id = &quot;featureunion2&quot;)
-graph$plot(html = TRUE)</code></pre>
-<div id="htmlwidget-261702c78b38f51a7f49" style="width:50%;height:400px;" class="visNetwork html-widget"></div>
-<script type="application/json" data-for="htmlwidget-261702c78b38f51a7f49">{"x":{"nodes":{"id":["copy","nop","imputehist","featureunion","copy2","nop2","imputenewlvl","<INPUT>","featureunion2","<OUTPUT>"],"label":["copy","nop","imputehist","featureunion","copy2","nop2","imputenewlvl","<INPUT>","featureunion2","<OUTPUT>"],"shape":["box","box","box","box","box","box","box","database","box","ellipse"],"color":["lightblue","lightblue","lightblue","lightblue","lightblue","lightblue","lightblue","rgba(0,204,102,0.2)","lightblue","rgba(255,51,51,0.2)"],"value":[1,1,1,1,1,1,1,0.8,1,0.8],"title":["<p>PipeOp: <b>copy<\/b> (not trained)<br>values: <b>list()<\/b><br>Input channels <b>name [train type, predict type]<\/b>:<br>  input [*,*]<br>Output channels <b>name [train type, predict type]<\/b>:<br>  output1 [*,*], output2 [*,*]<\/p>","<p>PipeOp: <b>nop<\/b> (not trained)<br>values: <b>list()<\/b><br>Input channels <b>name [train type, predict type]<\/b>:<br>  input [*,*]<br>Output channels <b>name [train type, predict type]<\/b>:<br>  output [*,*]<\/p>","<p>PipeOp: <b>imputehist<\/b> (not trained)<br>values: <b>affect_columns=<Selector><\/b><br>Input channels <b>name [train type, predict type]<\/b>:<br>  input [Task,Task]<br>Output channels <b>name [train type, predict type]<\/b>:<br>  output [Task,Task]<\/p>","<p>PipeOp: <b>featureunion<\/b> (not trained)<br>values: <b>list()<\/b><br>Input channels <b>name [train type, predict type]<\/b>:<br>  ... [Task,Task]<br>Output channels <b>name [train type, predict type]<\/b>:<br>  output [Task,Task]<\/p>","<p>PipeOp: <b>copy2<\/b> (not trained)<br>values: <b>list()<\/b><br>Input channels <b>name [train type, predict type]<\/b>:<br>  input [*,*]<br>Output channels <b>name [train type, predict type]<\/b>:<br>  output1 [*,*], output2 [*,*]<\/p>","<p>PipeOp: <b>nop2<\/b> (not trained)<br>values: <b>list()<\/b><br>Input channels <b>name [train type, predict type]<\/b>:<br>  input [*,*]<br>Output channels <b>name [train type, predict type]<\/b>:<br>  output [*,*]<\/p>","<p>PipeOp: <b>imputenewlvl<\/b> (not trained)<br>values: <b>affect_columns=<Selector><\/b><br>Input channels <b>name [train type, predict type]<\/b>:<br>  input [Task,Task]<br>Output channels <b>name [train type, predict type]<\/b>:<br>  output [Task,Task]<\/p>","<p>Input:<br>Name: copy.input<br>Train: *<br>Predict: *<\/p>","<p>PipeOp: <b>featureunion2<\/b> (not trained)<br>values: <b>list()<\/b><br>Input channels <b>name [train type, predict type]<\/b>:<br>  ... [Task,Task]<br>Output channels <b>name [train type, predict type]<\/b>:<br>  output [Task,Task]<\/p>","<p>Output:<br>Name: featureunion2.output<br>Train: Task<br>Predict: Task<\/p>"],"x":[0,-1,1,0,0,-1,1,0,0,0],"y":[-0.714285714285714,-0.428571428571429,-0.428571428571429,-0.142857142857143,0.142857142857143,0.428571428571429,0.428571428571429,-1,0.714285714285714,1]},"edges":{"from":["copy","copy","nop","imputehist","featureunion","copy2","copy2","nop2","imputenewlvl","<INPUT>","featureunion2"],"to":["nop","imputehist","featureunion","featureunion","copy2","nop2","imputenewlvl","featureunion2","featureunion2","copy","<OUTPUT>"],"color":["lightblue","lightblue","lightblue","lightblue","lightblue","lightblue","lightblue","lightblue","lightblue","lightblue","lightblue"]},"nodesToDataframe":true,"edgesToDataframe":true,"options":{"width":"100%","height":"100%","nodes":{"shape":"dot","physics":false},"manipulation":{"enabled":false},"edges":{"arrows":"to","smooth":{"enabled":false,"forceDirection":"vertical"}},"physics":{"stabilization":false}},"groups":null,"width":"50%","height":"400px","idselection":{"enabled":false},"byselection":{"enabled":false},"main":null,"submain":null,"footer":null,"background":"rgba(0, 0, 0, 0)","igraphlayout":{"type":"full"}},"evals":[],"jsHooks":[]}</script>
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>imp_fct</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"imputeoor"</span>, param_vals <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>affect_columns <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/Selector.html'>selector_type</a></span><span class='op'>(</span><span class='st'>"factor"</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>
+<span class='va'>graph</span> <span class='op'>=</span> <span class='va'>imp_num</span> <span class='op'>%&gt;&gt;%</span> <span class='va'>imp_fct</span>
+<span class='va'>graph</span><span class='op'>$</span><span class='fu'>plot</span><span class='op'>(</span><span class='op'>)</span>
+</code></pre>
 </div>
-<p>So far we only prepared the pipeline without actually modeling. Before we come to this step, we perform a last preprocessing step manually. Namely, we make <code>G</code> (games played) a numerical feature.</p>
-<div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-data$G = as.numeric(data$G)</code></pre>
-</div>
-<p>Additionally, the row names (starting with <span class="math inline">\(0\)</span>) are changed.</p>
-<div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-rownames(data) &lt;- 1:nrow(data)</code></pre>
+<p><img src="2020-05-04-moneyball_files/figure-html5/unnamed-chunk-9-1.png" width="624" /></p>
 </div>
 <h2 id="creating-tasks-and-learners">Creating tasks and learners</h2>
-<p>The fact that there is missing data does not affect the <code>task</code> definition. The <code>task</code> determines what is the problem to be solved by machine learning. We want to explain the Runs Scored (RS). RS is an important measure as a run is equivalent to a ‘point’ scored in other sports. Naturally, the aim of a coach should be to maximise runs scored and minimise runs allowed. As runs scored and runs allowed are both legitimate targets we ignore the runs allowed here. The task is defined by:</p>
+<p>The fact that there is missing data does not affect the <code>task</code> definition. The <code>task</code> determines what is the problem to be solved by machine learning. We want to explain the runs scored (<code>rs</code>). <code>rs</code> is an important measure as a run is equivalent to a ‘point’ scored in other sports. Naturally, the aim of a coach should be to maximise runs scored and minimise runs allowed. As runs scored and runs allowed are both legitimate targets we ignore the runs allowed here. The task is defined by:</p>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-# creates a `mlr3` task from scratch, from a data.frame
-# &#39;target&#39; names the column in the dataset we want to learn to predict
-task = TaskRegr$new(id = &quot;moneyball&quot;, backend = data, target = &quot;RS&quot;)
-task$missings()</code></pre>
-<pre><code>
-          RS           BA            G       League          OBP         OOBP 
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='co'># creates a `mlr3` task from scratch, from a data.frame</span>
+<span class='co'># 'target' names the column in the dataset we want to learn to predict</span>
+<span class='va'>task</span> <span class='op'>=</span> <span class='va'><a href='https://mlr3.mlr-org.com/reference/TaskRegr.html'>TaskRegr</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span>id <span class='op'>=</span> <span class='st'>"moneyball"</span>, backend <span class='op'>=</span> <span class='va'>moneyball</span>, target <span class='op'>=</span> <span class='st'>"rs"</span><span class='op'>)</span>
+<span class='va'>task</span><span class='op'>$</span><span class='fu'>missings</span><span class='op'>(</span><span class='op'>)</span>
+</code></pre>
+</div>
+<pre><code>          rs           ba            g       league          obp         oobp 
            0            0            0            0            0          812 
-        OSLG     Playoffs           RA RankPlayoffs   RankSeason          SLG 
+        oslg     playoffs           ra rankplayoffs   rankseason          slg 
          812            0            0          988          988            0 
-        Team            W         Year 
+        team            w         year 
            0            0            0 </code></pre>
 </div>
 <p>The <code>missings</code> method indicates what we already knew: our missing values. Missing values are not always a problem. Some learners can deal with them pretty well. However, we want to use a random forest for our task.</p>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-# creates a learner
-test_lrn = LearnerRegrRanger$new()
-# displays the properties
-test_lrn$properties</code></pre>
-<pre><code>
-[1] &quot;importance&quot; &quot;oob_error&quot;  &quot;weights&quot;   </code></pre>
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='co'># creates a learner</span>
+<span class='va'>test_lrn</span> <span class='op'>=</span> <span class='va'><a href='https://mlr3learners.mlr-org.com/reference/mlr_learners_regr.ranger.html'>LearnerRegrRanger</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='op'>)</span>
+<span class='co'># displays the properties</span>
+<span class='va'>test_lrn</span><span class='op'>$</span><span class='va'>properties</span>
+</code></pre>
+</div>
+<pre><code>[1] &quot;importance&quot; &quot;oob_error&quot;  &quot;weights&quot;   </code></pre>
 </div>
 <p>Typically, in <code>mlr3</code> the <code>properties</code> method would tell us whether missing values are a problem to this learner or not. As it is not listed here, the random forest cannot deal with missing values.</p>
 <p>As we aim to use imputation beforehand, we incorporate it into the learner. Our selected learner is going to be a random forest from the <code>ranger</code> package. One can allow the embedding of the preprocessing (imputation) into a learner by creating <code>new</code> (method) <code>PipeOpLearner</code> (R6 class). This special <code>learner</code> can be put into a graph together with the <code>imputer</code> via the <code>new</code> method of the <code>GraphLearner</code> class.</p>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-# creates a normal learner however allows further embedding of PipeOp&#39;s.
-polrn = PipeOpLearner$new(mlr_learners$get(&quot;regr.ranger&quot;))
-# sets number of trees to 1000, importance is for later
-polrn$param_set$values = list(num.trees = 1000, importance = &quot;permutation&quot;)
-# the final learner is a graph consisting of the imputer and the normal learner.
-lrn = GraphLearner$new(graph = graph %&gt;&gt;% polrn)</code></pre>
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='co'># creates a normal learner however allows further embedding of PipeOp's.</span>
+<span class='va'>polrn</span> <span class='op'>=</span> <span class='va'><a href='https://mlr3pipelines.mlr-org.com//reference/mlr_pipeops_learner.html'>PipeOpLearner</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='va'>mlr_learners</span><span class='op'>$</span><span class='fu'>get</span><span class='op'>(</span><span class='st'>"regr.ranger"</span><span class='op'>)</span><span class='op'>)</span>
+<span class='co'># sets number of trees to 1000, importance is for later</span>
+<span class='va'>polrn</span><span class='op'>$</span><span class='va'>param_set</span><span class='op'>$</span><span class='va'>values</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>num.trees <span class='op'>=</span> <span class='fl'>1000</span>, importance <span class='op'>=</span> <span class='st'>"permutation"</span><span class='op'>)</span>
+<span class='co'># the final learner is a graph consisting of the imputer and the normal learner.</span>
+<span class='va'>lrn</span> <span class='op'>=</span> <span class='va'><a href='https://mlr3pipelines.mlr-org.com//reference/mlr_learners_graph.html'>GraphLearner</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span>graph <span class='op'>=</span> <span class='va'>graph</span> <span class='op'>%&gt;&gt;%</span> <span class='va'>polrn</span><span class='op'>)</span>
+</code></pre>
+</div>
 </div>
 <p>The final graph looks like the following:</p>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-plot(graph %&gt;&gt;% polrn, html = TRUE)</code></pre>
-<div id="htmlwidget-edd4d90203ecc5735dba" style="width:50%;height:400px;" class="visNetwork html-widget"></div>
-<script type="application/json" data-for="htmlwidget-edd4d90203ecc5735dba">{"x":{"nodes":{"id":["copy","nop","imputehist","featureunion","copy2","nop2","imputenewlvl","featureunion2","<INPUT>","regr.ranger","<OUTPUT>"],"label":["copy","nop","imputehist","featureunion","copy2","nop2","imputenewlvl","featureunion2","<INPUT>","regr.ranger","<OUTPUT>"],"shape":["box","box","box","box","box","box","box","box","database","box","ellipse"],"color":["lightblue","lightblue","lightblue","lightblue","lightblue","lightblue","lightblue","lightblue","rgba(0,204,102,0.2)","lightblue","rgba(255,51,51,0.2)"],"value":[1,1,1,1,1,1,1,1,0.8,1,0.8],"title":["<p>PipeOp: <b>copy<\/b> (not trained)<br>values: <b>list()<\/b><br>Input channels <b>name [train type, predict type]<\/b>:<br>  input [*,*]<br>Output channels <b>name [train type, predict type]<\/b>:<br>  output1 [*,*], output2 [*,*]<\/p>","<p>PipeOp: <b>nop<\/b> (not trained)<br>values: <b>list()<\/b><br>Input channels <b>name [train type, predict type]<\/b>:<br>  input [*,*]<br>Output channels <b>name [train type, predict type]<\/b>:<br>  output [*,*]<\/p>","<p>PipeOp: <b>imputehist<\/b> (not trained)<br>values: <b>affect_columns=<Selector><\/b><br>Input channels <b>name [train type, predict type]<\/b>:<br>  input [Task,Task]<br>Output channels <b>name [train type, predict type]<\/b>:<br>  output [Task,Task]<\/p>","<p>PipeOp: <b>featureunion<\/b> (not trained)<br>values: <b>list()<\/b><br>Input channels <b>name [train type, predict type]<\/b>:<br>  ... [Task,Task]<br>Output channels <b>name [train type, predict type]<\/b>:<br>  output [Task,Task]<\/p>","<p>PipeOp: <b>copy2<\/b> (not trained)<br>values: <b>list()<\/b><br>Input channels <b>name [train type, predict type]<\/b>:<br>  input [*,*]<br>Output channels <b>name [train type, predict type]<\/b>:<br>  output1 [*,*], output2 [*,*]<\/p>","<p>PipeOp: <b>nop2<\/b> (not trained)<br>values: <b>list()<\/b><br>Input channels <b>name [train type, predict type]<\/b>:<br>  input [*,*]<br>Output channels <b>name [train type, predict type]<\/b>:<br>  output [*,*]<\/p>","<p>PipeOp: <b>imputenewlvl<\/b> (not trained)<br>values: <b>affect_columns=<Selector><\/b><br>Input channels <b>name [train type, predict type]<\/b>:<br>  input [Task,Task]<br>Output channels <b>name [train type, predict type]<\/b>:<br>  output [Task,Task]<\/p>","<p>PipeOp: <b>featureunion2<\/b> (not trained)<br>values: <b>list()<\/b><br>Input channels <b>name [train type, predict type]<\/b>:<br>  ... [Task,Task]<br>Output channels <b>name [train type, predict type]<\/b>:<br>  output [Task,Task]<\/p>","<p>Input:<br>Name: copy.input<br>Train: *<br>Predict: *<\/p>","<p>PipeOp: <b>regr.ranger<\/b> (not trained)<br>values: <b>num.trees=1000, importance=permutation<\/b><br>Input channels <b>name [train type, predict type]<\/b>:<br>  input [TaskRegr,TaskRegr]<br>Output channels <b>name [train type, predict type]<\/b>:<br>  output [NULL,PredictionRegr]<\/p>","<p>Output:<br>Name: regr.ranger.output<br>Train: NULL<br>Predict: PredictionRegr<\/p>"],"x":[0,-1,1,0,0,-1,1,0,0,0,0],"y":[-0.75,-0.5,-0.5,-0.25,0,0.25,0.25,0.5,-1,0.75,1]},"edges":{"from":["copy","copy","nop","imputehist","featureunion","copy2","copy2","nop2","imputenewlvl","featureunion2","<INPUT>","regr.ranger"],"to":["nop","imputehist","featureunion","featureunion","copy2","nop2","imputenewlvl","featureunion2","featureunion2","regr.ranger","copy","<OUTPUT>"],"color":["lightblue","lightblue","lightblue","lightblue","lightblue","lightblue","lightblue","lightblue","lightblue","lightblue","lightblue","lightblue"]},"nodesToDataframe":true,"edgesToDataframe":true,"options":{"width":"100%","height":"100%","nodes":{"shape":"dot","physics":false},"manipulation":{"enabled":false},"edges":{"arrows":"to","smooth":{"enabled":false,"forceDirection":"vertical"}},"physics":{"stabilization":false}},"groups":null,"width":"50%","height":"400px","idselection":{"enabled":false},"byselection":{"enabled":false},"main":null,"submain":null,"footer":null,"background":"rgba(0, 0, 0, 0)","igraphlayout":{"type":"full"}},"evals":[],"jsHooks":[]}</script>
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/graphics/plot.default.html'>plot</a></span><span class='op'>(</span><span class='va'>graph</span> <span class='op'>%&gt;&gt;%</span> <span class='va'>polrn</span><span class='op'>)</span>
+</code></pre>
+</div>
+<p><img src="2020-05-04-moneyball_files/figure-html5/unnamed-chunk-13-1.png" width="624" /></p>
 </div>
 <h2 id="train-and-predict">Train and predict</h2>
 <p>To get a feeling of how our model performs we simply train the <code>learner</code> on a subset of the data and predict the hold-out data.</p>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-# defines the training and testing data; 95% is used for training
-train_set = sample(task$nrow, 0.95 * task$nrow)
-test_set = setdiff(seq_len(task$nrow), train_set)
-# train learner on subset of task
-lrn$train(task, row_ids = train_set)
-# predict using held out observations
-preds = lrn$predict(task, row_ids = test_set)
-print(preds)</code></pre>
-<pre><code>
-&lt;PredictionRegr&gt; for 62 observations:
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='co'># defines the training and testing data; 95% is used for training</span>
+<span class='va'>train_set</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/sample.html'>sample</a></span><span class='op'>(</span><span class='va'>task</span><span class='op'>$</span><span class='va'>nrow</span>, <span class='fl'>0.95</span> <span class='op'>*</span> <span class='va'>task</span><span class='op'>$</span><span class='va'>nrow</span><span class='op'>)</span>
+<span class='va'>test_set</span> <span class='op'>=</span> <span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/setops.html'>setdiff</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/seq.html'>seq_len</a></span><span class='op'>(</span><span class='va'>task</span><span class='op'>$</span><span class='va'>nrow</span><span class='op'>)</span>, <span class='va'>train_set</span><span class='op'>)</span>
+<span class='co'># train learner on subset of task</span>
+<span class='va'>lrn</span><span class='op'>$</span><span class='fu'>train</span><span class='op'>(</span><span class='va'>task</span>, row_ids <span class='op'>=</span> <span class='va'>train_set</span><span class='op'>)</span>
+<span class='co'># predict using held out observations</span>
+<span class='va'>preds</span> <span class='op'>=</span> <span class='va'>lrn</span><span class='op'>$</span><span class='fu'>predict</span><span class='op'>(</span><span class='va'>task</span>, row_ids <span class='op'>=</span> <span class='va'>test_set</span><span class='op'>)</span>
+<span class='fu'><a href='https://docs.ropensci.org/skimr/reference/print.html'>print</a></span><span class='op'>(</span><span class='va'>preds</span><span class='op'>)</span>
+</code></pre>
+</div>
+<pre><code>&lt;PredictionRegr&gt; for 62 observations:
     row_id truth response
-         3   712 720.4585
-        17   701 684.5254
-        21   684 684.8685
+        24   619 598.1560
+        63   613 675.8026
+        90   655 655.8345
 ---                      
-      1216   707 701.7326
-      1218   682 668.9311
-      1221   745 710.7331</code></pre>
+      1183   614 580.0988
+      1188   693 686.3181
+      1191   715 729.2207</code></pre>
 </div>
 <p>Viewing the predicted values it seems like the model predicts reasonable values that are fairly close to the truth.</p>
 <h2 id="evaluation-resampling">Evaluation &amp; Resampling</h2>
 <p>While the prediction indicated that the model is doing what it is supposed to, we want to have a more systematic understanding of the model performance. That means we want to know by how much our model is away from the truth on average. Cross-validation investigates this question. In <code>mlr3</code> ten-fold cross-validation is constructed as follows:</p>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-cv10 = rsmp(&quot;cv&quot;, folds = 10)
-r = resample(task, lrn, cv10)</code></pre>
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>cv10</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>rsmp</a></span><span class='op'>(</span><span class='st'>"cv"</span>, folds <span class='op'>=</span> <span class='fl'>10</span><span class='op'>)</span>
+<span class='va'>r</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/resample.html'>resample</a></span><span class='op'>(</span><span class='va'>task</span>, <span class='va'>lrn</span>, <span class='va'>cv10</span><span class='op'>)</span>
+</code></pre>
+</div>
 </div>
 <p>We choose some of the performance measures provided by:</p>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-mlr_measures</code></pre>
-<pre><code>
-&lt;DictionaryMeasure&gt; with 53 stored values
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>mlr_measures</span>
+</code></pre>
+</div>
+<pre><code>&lt;DictionaryMeasure&gt; with 98 stored values
 Keys: classif.acc, classif.auc, classif.bacc, classif.bbrier,
   classif.ce, classif.costs, classif.dor, classif.fbeta, classif.fdr,
   classif.fn, classif.fnr, classif.fomr, classif.fp, classif.fpr,
   classif.logloss, classif.mbrier, classif.mcc, classif.npv,
-  classif.ppv, classif.precision, classif.recall, classif.sensitivity,
-  classif.specificity, classif.tn, classif.tnr, classif.tp,
-  classif.tpr, debug, oob_error, regr.bias, regr.ktau, regr.mae,
-  regr.mape, regr.maxae, regr.medae, regr.medse, regr.mse, regr.msle,
-  regr.pbias, regr.rae, regr.rmse, regr.rmsle, regr.rrse, regr.rse,
-  regr.rsq, regr.sae, regr.smape, regr.srho, regr.sse,
-  selected_features, time_both, time_predict, time_train</code></pre>
+  classif.ppv, classif.prauc, classif.precision, classif.recall,
+  classif.sensitivity, classif.specificity, classif.tn, classif.tnr,
+  classif.tp, classif.tpr, debug, dens.logloss, oob_error, regr.bias,
+  regr.ktau, regr.mae, regr.mape, regr.maxae, regr.medae, regr.medse,
+  regr.mse, regr.msle, regr.pbias, regr.rae, regr.rmse, regr.rmsle,
+  regr.rrse, regr.rse, regr.rsq, regr.sae, regr.smape, regr.srho,
+  regr.sse, selected_features, surv.beggC, surv.brier,
+  surv.calib_alpha, surv.calib_beta, surv.chambless_auc,
+  surv.chamblessAUC, surv.cindex, surv.gonenC, surv.graf, surv.grafSE,
+  surv.harrellC, surv.hung_auc, surv.hungAUC, surv.intlogloss,
+  surv.intloglossSE, surv.logloss, surv.loglossSE, surv.mae,
+  surv.maeSE, surv.mse, surv.mseSE, surv.nagelk_r2, surv.nagelkR2,
+  surv.oquigley_r2, surv.oquigleyR2, surv.rmse, surv.rmseSE,
+  surv.schmid, surv.song_auc, surv.song_tnr, surv.song_tpr,
+  surv.songAUC, surv.songTNR, surv.songTPR, surv.uno_auc, surv.uno_tnr,
+  surv.uno_tpr, surv.unoAUC, surv.unoC, surv.unoTNR, surv.unoTPR,
+  surv.xu_r2, surv.xuR2, time_both, time_predict, time_train</code></pre>
 </div>
 <p>We choose the mean absolute error (<code>regr.mae</code>) and the mean squared error (<code>regr.mse</code>).</p>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-scores = r$score(msrs(c(&quot;regr.mae&quot;, &quot;regr.mse&quot;)))
-scores</code></pre>
-<pre><code>
-              task   task_id            learner
- 1: &lt;TaskRegr[41]&gt; moneyball &lt;GraphLearner[33]&gt;
- 2: &lt;TaskRegr[41]&gt; moneyball &lt;GraphLearner[33]&gt;
- 3: &lt;TaskRegr[41]&gt; moneyball &lt;GraphLearner[33]&gt;
- 4: &lt;TaskRegr[41]&gt; moneyball &lt;GraphLearner[33]&gt;
- 5: &lt;TaskRegr[41]&gt; moneyball &lt;GraphLearner[33]&gt;
- 6: &lt;TaskRegr[41]&gt; moneyball &lt;GraphLearner[33]&gt;
- 7: &lt;TaskRegr[41]&gt; moneyball &lt;GraphLearner[33]&gt;
- 8: &lt;TaskRegr[41]&gt; moneyball &lt;GraphLearner[33]&gt;
- 9: &lt;TaskRegr[41]&gt; moneyball &lt;GraphLearner[33]&gt;
-10: &lt;TaskRegr[41]&gt; moneyball &lt;GraphLearner[33]&gt;
-                                                                            learner_id
- 1: copy.nop.imputehist.featureunion.copy2.nop2.imputenewlvl.featureunion2.regr.ranger
- 2: copy.nop.imputehist.featureunion.copy2.nop2.imputenewlvl.featureunion2.regr.ranger
- 3: copy.nop.imputehist.featureunion.copy2.nop2.imputenewlvl.featureunion2.regr.ranger
- 4: copy.nop.imputehist.featureunion.copy2.nop2.imputenewlvl.featureunion2.regr.ranger
- 5: copy.nop.imputehist.featureunion.copy2.nop2.imputenewlvl.featureunion2.regr.ranger
- 6: copy.nop.imputehist.featureunion.copy2.nop2.imputenewlvl.featureunion2.regr.ranger
- 7: copy.nop.imputehist.featureunion.copy2.nop2.imputenewlvl.featureunion2.regr.ranger
- 8: copy.nop.imputehist.featureunion.copy2.nop2.imputenewlvl.featureunion2.regr.ranger
- 9: copy.nop.imputehist.featureunion.copy2.nop2.imputenewlvl.featureunion2.regr.ranger
-10: copy.nop.imputehist.featureunion.copy2.nop2.imputenewlvl.featureunion2.regr.ranger
-            resampling resampling_id iteration prediction regr.mae regr.mse
- 1: &lt;ResamplingCV[19]&gt;            cv         1  &lt;list[1]&gt; 20.43917 648.3324
- 2: &lt;ResamplingCV[19]&gt;            cv         2  &lt;list[1]&gt; 18.20349 485.0693
- 3: &lt;ResamplingCV[19]&gt;            cv         3  &lt;list[1]&gt; 19.09615 622.9985
- 4: &lt;ResamplingCV[19]&gt;            cv         4  &lt;list[1]&gt; 18.20625 552.0036
- 5: &lt;ResamplingCV[19]&gt;            cv         5  &lt;list[1]&gt; 15.95627 412.5762
- 6: &lt;ResamplingCV[19]&gt;            cv         6  &lt;list[1]&gt; 20.34762 653.1284
- 7: &lt;ResamplingCV[19]&gt;            cv         7  &lt;list[1]&gt; 20.10235 678.3616
- 8: &lt;ResamplingCV[19]&gt;            cv         8  &lt;list[1]&gt; 21.58926 688.2150
- 9: &lt;ResamplingCV[19]&gt;            cv         9  &lt;list[1]&gt; 19.99936 595.1096
-10: &lt;ResamplingCV[19]&gt;            cv        10  &lt;list[1]&gt; 19.68491 685.9597</code></pre>
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>scores</span> <span class='op'>=</span> <span class='va'>r</span><span class='op'>$</span><span class='fu'>score</span><span class='op'>(</span><span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>msrs</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"regr.mae"</span>, <span class='st'>"regr.mse"</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>
+<span class='va'>scores</span>
+</code></pre>
+</div>
+<pre><code>              task   task_id            learner
+ 1: &lt;TaskRegr[42]&gt; moneyball &lt;GraphLearner[33]&gt;
+ 2: &lt;TaskRegr[42]&gt; moneyball &lt;GraphLearner[33]&gt;
+ 3: &lt;TaskRegr[42]&gt; moneyball &lt;GraphLearner[33]&gt;
+ 4: &lt;TaskRegr[42]&gt; moneyball &lt;GraphLearner[33]&gt;
+ 5: &lt;TaskRegr[42]&gt; moneyball &lt;GraphLearner[33]&gt;
+ 6: &lt;TaskRegr[42]&gt; moneyball &lt;GraphLearner[33]&gt;
+ 7: &lt;TaskRegr[42]&gt; moneyball &lt;GraphLearner[33]&gt;
+ 8: &lt;TaskRegr[42]&gt; moneyball &lt;GraphLearner[33]&gt;
+ 9: &lt;TaskRegr[42]&gt; moneyball &lt;GraphLearner[33]&gt;
+10: &lt;TaskRegr[42]&gt; moneyball &lt;GraphLearner[33]&gt;
+                          learner_id         resampling resampling_id iteration
+ 1: imputehist.imputeoor.regr.ranger &lt;ResamplingCV[19]&gt;            cv         1
+ 2: imputehist.imputeoor.regr.ranger &lt;ResamplingCV[19]&gt;            cv         2
+ 3: imputehist.imputeoor.regr.ranger &lt;ResamplingCV[19]&gt;            cv         3
+ 4: imputehist.imputeoor.regr.ranger &lt;ResamplingCV[19]&gt;            cv         4
+ 5: imputehist.imputeoor.regr.ranger &lt;ResamplingCV[19]&gt;            cv         5
+ 6: imputehist.imputeoor.regr.ranger &lt;ResamplingCV[19]&gt;            cv         6
+ 7: imputehist.imputeoor.regr.ranger &lt;ResamplingCV[19]&gt;            cv         7
+ 8: imputehist.imputeoor.regr.ranger &lt;ResamplingCV[19]&gt;            cv         8
+ 9: imputehist.imputeoor.regr.ranger &lt;ResamplingCV[19]&gt;            cv         9
+10: imputehist.imputeoor.regr.ranger &lt;ResamplingCV[19]&gt;            cv        10
+              prediction regr.mae regr.mse
+ 1: &lt;PredictionRegr[18]&gt; 19.59415 619.0158
+ 2: &lt;PredictionRegr[18]&gt; 18.26726 533.1473
+ 3: &lt;PredictionRegr[18]&gt; 22.51755 792.7933
+ 4: &lt;PredictionRegr[18]&gt; 19.83573 608.2372
+ 5: &lt;PredictionRegr[18]&gt; 21.85814 785.5617
+ 6: &lt;PredictionRegr[18]&gt; 18.59886 531.2656
+ 7: &lt;PredictionRegr[18]&gt; 17.50763 495.5710
+ 8: &lt;PredictionRegr[18]&gt; 18.05779 511.2827
+ 9: &lt;PredictionRegr[18]&gt; 19.83747 725.6058
+10: &lt;PredictionRegr[18]&gt; 18.28481 494.6057</code></pre>
 </div>
 <p>We can also compute now by how much our model was on average wrong when predicting the runs scored.</p>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-mean(scores$regr.mae)</code></pre>
-<pre><code>
-[1] 19.36248</code></pre>
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>r</span><span class='op'>$</span><span class='fu'>aggregate</span><span class='op'>(</span><span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>msr</a></span><span class='op'>(</span><span class='st'>"regr.mae"</span><span class='op'>)</span><span class='op'>)</span>
+</code></pre>
+</div>
+<pre><code>regr.mae 
+19.43594 </code></pre>
 </div>
 <p>That seems not too bad. Considering that on average approximately 715 runs per team per season have been scored.</p>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-mean(data$RS)</code></pre>
-<pre><code>
-[1] 715.082</code></pre>
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/mean.html'>mean</a></span><span class='op'>(</span><span class='va'>moneyball</span><span class='op'>$</span><span class='va'>rs</span><span class='op'>)</span>
+</code></pre>
+</div>
+<pre><code>[1] 715.082</code></pre>
 </div>
 <h2 id="performance-boost-of-imputation">Performance boost of imputation</h2>
 <p>To assess if imputation was beneficial, we can compare our current learner with a learner which ignores the missing features. Normally, one would set up a benchmark for this. However, we want to keep things short in this use case. Thus, we only set up the alternative learner (with identical hyperparameters) and compare the 10-fold-cross-validated mean absolute error.</p>
-<p>We can easily ignore features by a specific <code>PipeOp</code> As we are mostly interested in the numeric imputation we leave the remaining graph as it is.</p>
+<p>As we are mostly interested in the numeric imputation we leave the remaining graph as it is.</p>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-nop = po(&quot;nop&quot;)
-imp_fct = po(&quot;imputenewlvl&quot;, param_vals = list(affect_columns = selector_type(&quot;factor&quot;)))
-graph2 = po(&quot;copy&quot;, 2) %&gt;&gt;% gunion(list(nop, imp_fct)) %&gt;&gt;% po(&quot;featureunion&quot;)</code></pre>
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>imp_fct</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"imputeoor"</span>, param_vals <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>affect_columns <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/Selector.html'>selector_type</a></span><span class='op'>(</span><span class='st'>"factor"</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>
+<span class='va'>graph2</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/as_graph.html'>as_graph</a></span><span class='op'>(</span><span class='va'>imp_fct</span><span class='op'>)</span>
+</code></pre>
+</div>
 </div>
 <p>Subsequently, we add the <code>PipeOpSelect</code> <code>PipeOp</code> to the pipeline.</p>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-feature_names = colnames(data)[apply(!is.na(data), 2, all)]
-feature_names = c(
-  feature_names[feature_names %in% task$feature_names],
-  &quot;RankSeason&quot;, &quot;RankPlayoffs&quot;)
-na_select = po(&quot;select&quot;)
-na_select$param_set$values$selector = selector_name(feature_names)
-graph2 = graph2 %&gt;&gt;% na_select
-graph2$plot(html = TRUE)</code></pre>
-<div id="htmlwidget-2d146bf99409cc939dfa" style="width:50%;height:400px;" class="visNetwork html-widget"></div>
-<script type="application/json" data-for="htmlwidget-2d146bf99409cc939dfa">{"x":{"nodes":{"id":["copy","nop","imputenewlvl","featureunion","<INPUT>","select","<OUTPUT>"],"label":["copy","nop","imputenewlvl","featureunion","<INPUT>","select","<OUTPUT>"],"shape":["box","box","box","box","database","box","ellipse"],"color":["lightblue","lightblue","lightblue","lightblue","rgba(0,204,102,0.2)","lightblue","rgba(255,51,51,0.2)"],"value":[1,1,1,1,0.8,1,0.8],"title":["<p>PipeOp: <b>copy<\/b> (not trained)<br>values: <b>list()<\/b><br>Input channels <b>name [train type, predict type]<\/b>:<br>  input [*,*]<br>Output channels <b>name [train type, predict type]<\/b>:<br>  output1 [*,*], output2 [*,*]<\/p>","<p>PipeOp: <b>nop<\/b> (not trained)<br>values: <b>list()<\/b><br>Input channels <b>name [train type, predict type]<\/b>:<br>  input [*,*]<br>Output channels <b>name [train type, predict type]<\/b>:<br>  output [*,*]<\/p>","<p>PipeOp: <b>imputenewlvl<\/b> (not trained)<br>values: <b>affect_columns=<Selector><\/b><br>Input channels <b>name [train type, predict type]<\/b>:<br>  input [Task,Task]<br>Output channels <b>name [train type, predict type]<\/b>:<br>  output [Task,Task]<\/p>","<p>PipeOp: <b>featureunion<\/b> (not trained)<br>values: <b>list()<\/b><br>Input channels <b>name [train type, predict type]<\/b>:<br>  ... [Task,Task]<br>Output channels <b>name [train type, predict type]<\/b>:<br>  output [Task,Task]<\/p>","<p>Input:<br>Name: copy.input<br>Train: *<br>Predict: *<\/p>","<p>PipeOp: <b>select<\/b> (not trained)<br>values: <b>selector=<Selector><\/b><br>Input channels <b>name [train type, predict type]<\/b>:<br>  input [Task,Task]<br>Output channels <b>name [train type, predict type]<\/b>:<br>  output [Task,Task]<\/p>","<p>Output:<br>Name: select.output<br>Train: Task<br>Predict: Task<\/p>"],"x":[0,-1,1,0,0,0,0],"y":[-0.6,-0.2,-0.2,0.2,-1,0.6,1]},"edges":{"from":["copy","copy","nop","imputenewlvl","featureunion","<INPUT>","select"],"to":["nop","imputenewlvl","featureunion","featureunion","select","copy","<OUTPUT>"],"color":["lightblue","lightblue","lightblue","lightblue","lightblue","lightblue","lightblue"]},"nodesToDataframe":true,"edgesToDataframe":true,"options":{"width":"100%","height":"100%","nodes":{"shape":"dot","physics":false},"manipulation":{"enabled":false},"edges":{"arrows":"to","smooth":{"enabled":false,"forceDirection":"vertical"}},"physics":{"stabilization":false}},"groups":null,"width":"50%","height":"400px","idselection":{"enabled":false},"byselection":{"enabled":false},"main":null,"submain":null,"footer":null,"background":"rgba(0, 0, 0, 0)","igraphlayout":{"type":"full"}},"evals":[],"jsHooks":[]}</script>
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>feature_names</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/colnames.html'>colnames</a></span><span class='op'>(</span><span class='va'>moneyball</span><span class='op'>)</span><span class='op'>[</span><span class='op'>!</span><span class='fu'><a href='https://rdrr.io/r/base/lapply.html'>sapply</a></span><span class='op'>(</span><span class='va'>moneyball</span>, <span class='va'>anyNA</span><span class='op'>)</span><span class='op'>]</span>
+<span class='va'>feature_names</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span>
+  <span class='va'>feature_names</span><span class='op'>[</span><span class='va'>feature_names</span> <span class='op'>%in%</span> <span class='va'>task</span><span class='op'>$</span><span class='va'>feature_names</span><span class='op'>]</span>,
+  <span class='st'>"rankseason"</span>, <span class='st'>"rankplayoffs"</span><span class='op'>)</span>
+<span class='va'>na_select</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"select"</span><span class='op'>)</span>
+<span class='va'>na_select</span><span class='op'>$</span><span class='va'>param_set</span><span class='op'>$</span><span class='va'>values</span><span class='op'>$</span><span class='va'>selector</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/Selector.html'>selector_name</a></span><span class='op'>(</span><span class='va'>feature_names</span><span class='op'>)</span>
+<span class='va'>graph2</span> <span class='op'>=</span> <span class='va'>graph2</span> <span class='op'>%&gt;&gt;%</span> <span class='va'>na_select</span>
+<span class='va'>graph2</span><span class='op'>$</span><span class='fu'>plot</span><span class='op'>(</span><span class='op'>)</span>
+</code></pre>
+</div>
+<p><img src="2020-05-04-moneyball_files/figure-html5/unnamed-chunk-21-1.png" width="624" /></p>
 </div>
 <p>Now we complete the learner and apply resampling as before.</p>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-lrn2 = GraphLearner$new(graph = graph2 %&gt;&gt;% polrn)
-r2 = resample(task, lrn2, cv10)
-scores2 = r2$score(msrs(c(&quot;regr.mae&quot;, &quot;regr.mse&quot;)))
-mean(scores2$regr.mae)</code></pre>
-<pre><code>
-[1] 19.03274</code></pre>
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>lrn2</span> <span class='op'>=</span> <span class='va'><a href='https://mlr3pipelines.mlr-org.com//reference/mlr_learners_graph.html'>GraphLearner</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span>graph <span class='op'>=</span> <span class='va'>graph2</span> <span class='op'>%&gt;&gt;%</span> <span class='va'>polrn</span><span class='op'>)</span>
+<span class='va'>r2</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/resample.html'>resample</a></span><span class='op'>(</span><span class='va'>task</span>, <span class='va'>lrn2</span>, <span class='va'>cv10</span><span class='op'>)</span>
+<span class='va'>r2</span><span class='op'>$</span><span class='fu'>aggregate</span><span class='op'>(</span><span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>msr</a></span><span class='op'>(</span><span class='st'>"regr.mae"</span><span class='op'>)</span><span class='op'>)</span>
+</code></pre>
+</div>
+<pre><code>regr.mae 
+18.92482 </code></pre>
 </div>
 <p>Surprisingly, the performance seems to be approximately the same. That means that the imputed features seem not very helpful. We can use the <code>variable.importance</code> of the random forest.</p>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-sort(lrn$model$regr.ranger$model$variable.importance)</code></pre>
-<pre><code>
-           G         Team       League         OSLG         OOBP     Playoffs 
-    6.095786    23.248151    24.921970    26.782873    33.415285    91.312521 
-RankPlayoffs   RankSeason         Year           RA            W           BA 
-  106.866448   136.198270   230.972774   465.215959   657.985552   891.685433 
-         OBP          SLG 
- 2586.924210  3484.937837 </code></pre>
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/sort.html'>sort</a></span><span class='op'>(</span><span class='va'>lrn</span><span class='op'>$</span><span class='va'>model</span><span class='op'>$</span><span class='va'>regr.ranger</span><span class='op'>$</span><span class='va'>model</span><span class='op'>$</span><span class='va'>variable.importance</span>, decreasing <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>
+</code></pre>
 </div>
-<p>We see that according to this the left out <code>OOBP</code> and <code>OSLG</code> seem to have solely rudimentary explanatory power. This may be because there were simply too many instances or because the features are themselves not very powerful.</p>
+<pre><code>         slg          obp           ba            w           ra         year 
+ 3435.643552  2485.771229   936.206663   715.235512   501.303163   269.429878 
+  rankseason rankplayoffs     playoffs       league         oobp         oslg 
+  132.335915   106.292475    97.366197    35.753015    25.235380    25.087355 
+        team            g 
+   16.611604     9.464481 </code></pre>
+</div>
+<p>We see that according to this the left out <code>oobp</code> and <code>oslg</code> seem to have solely rudimentary explanatory power. This may be because there were simply too many instances or because the features are themselves not very powerful.</p>
 <h2 id="conclusion">Conclusion</h2>
-<p>So, to sum up, what we have learned: We can access very cool data straight away with the <code>OpenML</code> package. (We are working on a better direct implementation into <code>mlr3</code> at the moment.) We can even work with missing data very well in <code>mlr3</code>. Nevertheless, we discovered that sometimes imputation does not lead to the intended goals. We also learned how to use some <code>PipeOp</code>s from the <code>mlr3pipelines</code> package.</p>
+<p>So, to sum up, what we have learned: We can access very cool data straight away with the <code>OpenML</code> package. (We are working on a better direct implementation into <code>mlr3</code> at the moment.) We can work with missing data very well in <code>mlr3</code>. Nevertheless, we discovered that sometimes imputation does not lead to the intended goals. We also learned how to use some <code>PipeOp</code>s from the <code>mlr3pipelines</code> package.</p>
 <p>But most importantly, we found a way to predict the runs scored of MLB teams.</p>
 <p>If you want to know more, read the <a href="https://mlr3book.mlr-org.com/">mlr3book</a> and the documentation of the mentioned packages.</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
 <!--radix_placeholder_article_footer-->
 <!--/radix_placeholder_article_footer-->
 </div>
