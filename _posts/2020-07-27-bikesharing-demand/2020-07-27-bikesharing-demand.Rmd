@@ -549,7 +549,7 @@ at_kknn = AutoTuner$new(ppl_kknn,
 at_kknn$train(bike_task)
 
 
-archive_kknn = at_kknn$archive$data()[, c("regr.rmse",
+archive_kknn = at_kknn$archive$data[, c("regr.rmse",
                                           "regr.kknn.k",
                                           "regr.kknn.distance")]
 ```
@@ -646,7 +646,7 @@ at_rpart = AutoTuner$new(ppl_rpart,
   tuner = tuner_grid_10
 )
 at_rpart$train(bike_task)
-archive_rpart = at_rpart$archive$data()[, c("regr.rmse",
+archive_rpart = at_rpart$archive$data[, c("regr.rmse",
                                             "regr.rpart.minsplit",
                                             "regr.rpart.cp")]
 ```
@@ -818,7 +818,7 @@ at_ranger = AutoTuner$new(ranger_feature,
 # at_ranger$store_tuning_instance = FALSE
 at_ranger$train(bike_task)
 
-archive_ranger = at_ranger$archive$data()[, c("regr.rmse",
+archive_ranger = at_ranger$archive$data[, c("regr.rmse",
                                               "importance.filter.nfeat",
                                               "regr.ranger.mtry")]
 ```
@@ -1030,7 +1030,7 @@ cols = c("regr.rmse", "branch.selection",
           "importance.filter.nfeat", "importance.mtry")
 multi_at_archiv = lapply(
  1:3,
- function(x) multi_at_rr$data$learner[[x]]$archive$data()[, ..cols]
+ function(x) multi_at_rr$data$learner[[x]]$archive$data[, ..cols]
 )
 ```
 
