@@ -16,15 +16,22 @@ knitr::opts_chunk$set(
   echo = TRUE,
   R.options = list(width = 80)
 )
-lgr::get_logger("mlr3")$set_threshold("warn")
-lgr::get_logger("bbotk")$set_threshold("warn")
+
+library("mlr3book")
 ```
 
 ## Intro
 
-`Tuner` for real-valued search spaces are not able to tune on integer hyperparameters. 
-However, it is possible to round the real values proposed by a `Tuner` to integers before passing them to the learner in the evaluation. 
-We show how to apply a parameter transformation to a `paradox::ParamSet` and use this set in the tuning process.
+`r ref("Tuner")` for real-valued search spaces are not able to tune on integer hyperparameters. 
+However, it is possible to round the real values proposed by a `r ref("Tuner")` to integers before passing them to the learner in the evaluation. 
+We show how to apply a parameter transformation to a `r ref("ParamSet")` and use this set in the tuning process.
+
+```{r}
+library(mlr3verse)
+
+lgr::get_logger("mlr3")$set_threshold("warn")
+lgr::get_logger("bbotk")$set_threshold("warn")
+```
 
 ## Task and Learner
 
@@ -32,11 +39,8 @@ In this example, we use the k-Nearest-Neighbor classification learner.
 We want to tune the integer-valued hyperparameter `k` which defines the numbers of neighbors.
 
 ```{r}
-library(mlr3verse)
-
-learner = lrn("classif.kknn", predict_type = "prob")
-learner$param_set$values$kernel = "triangular"
-print(learner$param_set)
+learner = lrn("classif.kknn")
+print(learner$param_set$params$k)
 ```
 
 We choose the `iris` dataset to demonstrate the tuning.
@@ -49,15 +53,14 @@ print(task)
 # Tuning
 
 We choose generalized simulated annealing as tuning strategy.
-The `param_classes` field of `TunerGenSA` states that the tuner only supports real-valued (`ParamDbl`) hyperparameter tuning.
+The `param_classes` field of `r ref("TunerGenSA")` states that the tuner only supports real-valued (`ParamDbl`) hyperparameter tuning.
 
 ```{r}
 tuner = tnr("gensa")
 print(tuner)
 ```
 
-To get integer-valued hyperparameter values for `k`, we construct a search space
-with a transformation function.
+To get integer-valued hyperparameter values for `k`, we construct a search space with a transformation function.
 
 ```{r}
 search_space = ps(
@@ -95,18 +98,18 @@ However, in the learners hyperparameters space, `k` is an integer value.
 instance$result_x_domain
 ```
 
-The archive shows us that for all real-valued `k` proposed by `GenSA`, an integer-valued `k` in the learner hyperparameter space (`x_domain_k`) was created.
+The archive shows us that for all real-valued `k` proposed by `r cran_pkg("GenSA")`, an integer-valued `k` in the learner hyperparameter space (`x_domain_k`) was created.
 
 ```{r}
-as.data.table(instance$archive)
+as.data.table(instance$archive)[, c("k", "classif.ce", "x_domain_k")]
 ```
 
-Internally, `TunerGenSA` was given the parameter types of the search space and therefore suggested real numbers for `k`.
+Internally, `r ref("TunerGenSA")` was given the parameter types of the search space and therefore suggested real numbers for `k`.
 Before the performance of the different `k` values was evaluated, the transformation function of the `search_space` parameter set was called and `k` was transformed to an integer value.
 
 Note that the tuner is not aware of the transformation.
 This could lead to problems since the tuner proposes different real values but they might be all rounded to the same integer value.
 
-We successfully tuned a integer-valued hyperparameter with `TunerGenSA` which is only suitable for an real-valued search space.
+We successfully tuned a integer-valued hyperparameter with `r ref("TunerGenSA")` which is only suitable for an real-valued search space.
 This technique is not limited to tuning problems.
-`Optimizer` in [`bbotk`](https://bbotk.mlr-org.com) can be also used in the same way to produce points with integer parameters.
+`r ref("Optimizer")` in `r mlr_pkg("bbotk")` can be also used in the same way to produce points with integer parameters.
