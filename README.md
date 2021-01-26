@@ -1,7 +1,7 @@
 # mlr3gallery
 
 <!-- badges: start -->
-[![R CMD Check via {tic}](https://github.com/mlr-org/mlr3gallery/workflows/tic/badge.svg?branch=master)](https://github.com/mlr-org/mlr3gallery/actions)
+[![R CMD Check via {tic}](https://github.com/mlr-org/mlr3gallery/workflows/tic/badge.svg?branch=main)](https://github.com/mlr-org/mlr3gallery/actions)
 <!-- badges: end -->
 
 ## Add a new post
