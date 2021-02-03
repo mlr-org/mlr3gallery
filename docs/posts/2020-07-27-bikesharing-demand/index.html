@@ -2906,7 +2906,7 @@ NULL
 <span class='va'>at_kknn</span><span class='op'>$</span><span class='fu'>train</span><span class='op'>(</span><span class='va'>bike_task</span><span class='op'>)</span>
 
 
-<span class='va'>archive_kknn</span> <span class='op'>=</span> <span class='va'>at_kknn</span><span class='op'>$</span><span class='va'>archive</span><span class='op'>$</span><span class='fu'>data</span><span class='op'>(</span><span class='op'>)</span><span class='op'>[</span>, <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"regr.rmse"</span>,
+<span class='va'>archive_kknn</span> <span class='op'>=</span> <span class='va'>at_kknn</span><span class='op'>$</span><span class='va'>archive</span><span class='op'>$</span><span class='va'>data</span><span class='op'>[</span>, <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"regr.rmse"</span>,
                                           <span class='st'>"regr.kknn.k"</span>,
                                           <span class='st'>"regr.kknn.distance"</span><span class='op'>)</span><span class='op'>]</span>
 </code></pre>
@@ -2992,7 +2992,7 @@ Inf
 NULL
 </td>
 <td style="text-align:left;">
-&lt;environment: 0x563f6a056820&gt;
+&lt;environment: 0x556aa3bcdd18&gt;
 </td>
 </tr>
 <tr>
@@ -3164,7 +3164,7 @@ FALSE
   tuner <span class='op'>=</span> <span class='va'>tuner_grid_10</span>
 <span class='op'>)</span>
 <span class='va'>at_rpart</span><span class='op'>$</span><span class='fu'>train</span><span class='op'>(</span><span class='va'>bike_task</span><span class='op'>)</span>
-<span class='va'>archive_rpart</span> <span class='op'>=</span> <span class='va'>at_rpart</span><span class='op'>$</span><span class='va'>archive</span><span class='op'>$</span><span class='fu'>data</span><span class='op'>(</span><span class='op'>)</span><span class='op'>[</span>, <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"regr.rmse"</span>,
+<span class='va'>archive_rpart</span> <span class='op'>=</span> <span class='va'>at_rpart</span><span class='op'>$</span><span class='va'>archive</span><span class='op'>$</span><span class='va'>data</span><span class='op'>[</span>, <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"regr.rmse"</span>,
                                             <span class='st'>"regr.rpart.minsplit"</span>,
                                             <span class='st'>"regr.rpart.cp"</span><span class='op'>)</span><span class='op'>]</span>
 </code></pre>
@@ -3275,7 +3275,7 @@ jack , infjack
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='va'>filter_ranger</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3filters.mlr-org.com/reference/flt.html'>flt</a></span><span class='op'>(</span><span class='st'>"importance"</span>, learner <span class='op'>=</span> <span class='va'>ranger_learner</span><span class='op'>)</span>
 <span class='va'>filter_ranger</span><span class='op'>$</span><span class='fu'>calculate</span><span class='op'>(</span><span class='va'>bike_task</span><span class='op'>)</span>
-<span class='va'>feature_importance</span> <span class='op'>=</span> <span class='fu'><a href='https://paradox.mlr-org.com/reference/as.data.table.html'>as.data.table</a></span><span class='op'>(</span><span class='va'>filter_ranger</span><span class='op'>)</span>
+<span class='va'>feature_importance</span> <span class='op'>=</span> <span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/as.data.table.html'>as.data.table</a></span><span class='op'>(</span><span class='va'>filter_ranger</span><span class='op'>)</span>
 </code></pre>
 </div>
 </div>
@@ -3349,7 +3349,7 @@ Figure 11: Search space for ranger autotuner
 <span class='co'># at_ranger$store_tuning_instance = FALSE</span>
 <span class='va'>at_ranger</span><span class='op'>$</span><span class='fu'>train</span><span class='op'>(</span><span class='va'>bike_task</span><span class='op'>)</span>
 
-<span class='va'>archive_ranger</span> <span class='op'>=</span> <span class='va'>at_ranger</span><span class='op'>$</span><span class='va'>archive</span><span class='op'>$</span><span class='fu'>data</span><span class='op'>(</span><span class='op'>)</span><span class='op'>[</span>, <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"regr.rmse"</span>,
+<span class='va'>archive_ranger</span> <span class='op'>=</span> <span class='va'>at_ranger</span><span class='op'>$</span><span class='va'>archive</span><span class='op'>$</span><span class='va'>data</span><span class='op'>[</span>, <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"regr.rmse"</span>,
                                               <span class='st'>"importance.filter.nfeat"</span>,
                                               <span class='st'>"regr.ranger.mtry"</span><span class='op'>)</span><span class='op'>]</span>
 </code></pre>
@@ -3598,7 +3598,7 @@ cv
           <span class='st'>"importance.filter.nfeat"</span>, <span class='st'>"importance.mtry"</span><span class='op'>)</span>
 <span class='va'>multi_at_archiv</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/lapply.html'>lapply</a></span><span class='op'>(</span>
  <span class='fl'>1</span><span class='op'>:</span><span class='fl'>3</span>,
- <span class='kw'>function</span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span> <span class='va'>multi_at_rr</span><span class='op'>$</span><span class='va'>data</span><span class='op'>$</span><span class='va'>learner</span><span class='op'>[[</span><span class='va'>x</span><span class='op'>]</span><span class='op'>]</span><span class='op'>$</span><span class='va'>archive</span><span class='op'>$</span><span class='fu'>data</span><span class='op'>(</span><span class='op'>)</span><span class='op'>[</span>, <span class='va'>..cols</span><span class='op'>]</span>
+ <span class='kw'>function</span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span> <span class='va'>multi_at_rr</span><span class='op'>$</span><span class='va'>data</span><span class='op'>$</span><span class='va'>learner</span><span class='op'>[[</span><span class='va'>x</span><span class='op'>]</span><span class='op'>]</span><span class='op'>$</span><span class='va'>archive</span><span class='op'>$</span><span class='va'>data</span><span class='op'>[</span>, <span class='va'>..cols</span><span class='op'>]</span>
 <span class='op'>)</span>
 </code></pre>
 </div>

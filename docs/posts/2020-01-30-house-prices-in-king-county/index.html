@@ -2489,14 +2489,14 @@ document.addEventListener('DOMContentLoaded', function() {
 2: &lt;TaskRegr[42]&gt;   sales &lt;AutoTuner[38]&gt; regr.xgboost.tuned &lt;ResamplingCV[19]&gt;
 3: &lt;TaskRegr[42]&gt;   sales &lt;AutoTuner[38]&gt; regr.xgboost.tuned &lt;ResamplingCV[19]&gt;
    resampling_id iteration           prediction regr.rmse
-1:            cv         1 &lt;PredictionRegr[18]&gt;  138.4914
-2:            cv         2 &lt;PredictionRegr[18]&gt;  151.6051
-3:            cv         3 &lt;PredictionRegr[18]&gt;  137.3358</code></pre>
+1:            cv         1 &lt;PredictionRegr[18]&gt;  136.7962
+2:            cv         2 &lt;PredictionRegr[18]&gt;  144.2232
+3:            cv         3 &lt;PredictionRegr[18]&gt;  136.6028</code></pre>
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/sprintf.html'>sprintf</a></span><span class='op'>(</span><span class='st'>"RMSE of the tuned xgboost: %s"</span>, <span class='fu'><a href='https://rdrr.io/r/base/Round.html'>round</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/MathFun.html'>sqrt</a></span><span class='op'>(</span><span class='va'>res</span><span class='op'>$</span><span class='fu'>aggregate</span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span>, <span class='fl'>2</span><span class='op'>)</span><span class='op'>)</span>
 </code></pre>
 </div>
-<pre><code>[1] &quot;RMSE of the tuned xgboost: 142.62&quot;</code></pre>
+<pre><code>[1] &quot;RMSE of the tuned xgboost: 139.25&quot;</code></pre>
 </div>
 <p>We can obtain the resulting parameters in the respective splits by accessing the <a href="https://mlr3.mlr-org.com/reference/ResampleResult.html"><code>ResampleResult</code></a>.</p>
 <div class="layout-chunk" data-layout="l-body">
@@ -2505,12 +2505,12 @@ document.addEventListener('DOMContentLoaded', function() {
 </code></pre>
 </div>
 <pre><code>                  [,1]      [,2]      [,3]     
-nrounds           25        24        19       
-eta               0.2749585 0.3882467 0.2563837
-min_child_weight  7.235687  4.567695  8.498792 
-subsample         0.7426973 0.7240773 0.7184338
-colsample_bytree  0.9131039 0.9467479 0.9204235
-colsample_bylevel 0.6843433 0.5786264 0.5484728</code></pre>
+nrounds           25        16        21       
+eta               0.3003876 0.2446317 0.2610744
+min_child_weight  7.46339   7.735657  11.65568 
+subsample         0.75327   0.731867  0.7063289
+colsample_bytree  0.9407204 0.9626068 0.9164513
+colsample_bylevel 0.6655282 0.5588478 0.6550101</code></pre>
 </div>
 <p><strong>NOTE:</strong> To keep runtime low, we only tune parts of the hyperparameter space of <a href="https://cran.r-project.org/package=xgboost">xgboost</a> in this example. Additionally, we only allow for <span class="math inline">\(10\)</span> random search iterations, which is usually too little for real-world applications. Nonetheless, we are able to obtain an improved performance when comparing to the <a href="https://cran.r-project.org/package=ranger">ranger</a> model.</p>
 <p>In order to further improve our results we have several options:</p>
