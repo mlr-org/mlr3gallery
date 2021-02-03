@@ -6,7 +6,7 @@ categories:
   - classification
 author:
   - name: Lennart Schneider
-date: 05-07-2020
+date: 02-03-2021
 description: |
   We show how to tune a complex graph for a single task.
 output:
@@ -55,10 +55,12 @@ dat0 = read.delim(datafile, header = TRUE, skip = 1)[, -(1:2)]
 dat0 = t(dat0)
 dat = data.frame(dat0[!(rownames(dat0) %in%
   c("TEST.9", "TEST.13", "TEST.5", "TEST.3", "TEST.11")), ])
-dat$class = as.factor(c(
-  substr(rownames(dat)[1:63], start = 1, stop = 2),
-  c("NB", "RM", "NB", "EW", "RM", "BL", "EW", "RM", "EW", "EW", "EW", "RM",
-    "BL", "RM", "NB", "NB", "NB", "NB", "BL", "EW")))
+dat$class = as.factor(
+  c(substr(rownames(dat)[1:63], start = 1, stop = 2),
+    c("NB", "RM", "NB", "EW", "RM", "BL", "EW", "RM", "EW", "EW", "EW", "RM",
+      "BL", "RM", "NB", "NB", "NB", "NB", "BL", "EW")
+  )
+)
 ```
 
 We then construct our training and test `r ref("Task", "Task")` :
@@ -74,12 +76,12 @@ task_test$filter(64:83)
 ## Workflow
 
 Our graph will start with log transforming the features, followed by scaling them.
-Then, either a `r ref("PipeOpPCA", "PCA")` or `r ref("PipeOpICA", "ICA")` is applied to extract principal/independent components followed by fitting a `r ref("mlr_learners_classif.lda", "LDA")` or a `r ref("mlr_learners_classif.ranger", "ranger random forest")` is fitted without any preprocessing (the log transformation and scaling should most likely affect the `LDA` more than the `ranger random forest`).
-Regarding the `PCA` and `ICA`, both the number of principal/independent components are tuning parameters.
+Then, either a `r ref("PipeOpPCA", "PCA")` or `r ref("PipeOpICA", "ICA")` is applied to extract principal / independent components followed by fitting a `r ref("mlr_learners_classif.lda", "LDA")` or a `r ref("mlr_learners_classif.ranger", "ranger random forest")` is fitted without any preprocessing (the log transformation and scaling should most likely affect the `LDA` more than the `ranger random forest`).
+Regarding the `PCA` and `ICA`, both the number of principal / independent components are tuning parameters.
 Regarding the `LDA`, we can further choose different methods for estimating the mean and variance and regarding the `ranger`, we want to tune the `mtry` and `num.tree` parameters.
 Note that the `PCA-LDA` combination has already been successfully applied in different cancer diagnostic contexts when the feature space is of high dimensionality [@morais2018].
 
-To allow for switching between the `PCA`/`ICA`-`LDA` and `ranger` we can either use branching or proxy pipelines, i.e., `r ref("PipeOpBranch", "PipeOpBranch")` and `r ref("PipeOpUnbranch", "PipeOpUnbranch")` or `r ref("PipeOpProxy", "PipeOpProxy")`.
+To allow for switching between the `PCA` / `ICA`-`LDA` and `ranger` we can either use branching or proxy pipelines, i.e., `r ref("PipeOpBranch", "PipeOpBranch")` and `r ref("PipeOpUnbranch", "PipeOpUnbranch")` or `r ref("PipeOpProxy", "PipeOpProxy")`.
 We will first cover branching in detail and later show how the same can be done using `PipeOpProxy`.
 
 ## Baseline
@@ -102,28 +104,28 @@ Let's see if we can get some better performance, at least for the `LDA`.
 ## Branching
 
 Our graph starts with log transforming the features (we explicitly use base 10 only for better interpretability when inspecting the model later), using `r ref("PipeOpColApply", "PipeOpColApply")`, followed by scaling the features using `r ref("PipeOpScale", "PipeOpScale")`.
-Then, the first branch allows for switching between the `PCA`/`ICA`-`LDA` and `ranger`, and within `PCA`/`ICA`-`LDA`, the second branch allows for switching between `PCA` and `ICA`:
+Then, the first branch allows for switching between the `PCA` / `ICA`-`LDA` and `ranger`, and within `PCA` / `ICA`-`LDA`, the second branch allows for switching between `PCA` and `ICA`:
 
 ```{r}
 graph1 =
   po("colapply", applicator = function(x) log(x, base = 10)) %>>%
   po("scale") %>>%
-  # pca/ica followed by lda vs. ranger
+  # pca / ica followed by lda vs. ranger
   po("branch", id = "branch_learner", options = c("pca_ica_lda", "ranger")) %>>%
-    gunion(list(
-      po("branch", id = "branch_preproc_lda", options = c("pca", "ica")) %>>%
-        gunion(list(
-          po("pca"), po("ica")
-        )) %>>%
+  gunion(list(
+    po("branch", id = "branch_preproc_lda", options = c("pca", "ica")) %>>%
+      gunion(list(
+        po("pca"), po("ica")
+      )) %>>%
       po("unbranch", id = "unbranch_preproc_lda") %>>%
       lrn("classif.lda"),
-      lrn("classif.ranger")
-    )) %>>%
+    lrn("classif.ranger")
+  )) %>>%
   po("unbranch", id = "unbranch_learner")
 ```
 
 Note that the names of the options within each branch are arbitrary, but ideally they describe what is happening.
-Therefore we go with `"pca_ica_lda"`/`"ranger`" and `"pca"`/`"ica"`.
+Therefore we go with `"pca_ica_lda"` / `"ranger`" and `"pca"` / `"ica"`.
 Finally, we also could have used the `branch` `r ref("ppl", "ppl")` to make branching easier (we will come back to this in the [Proxy](#Proxy) section).
 The graph looks like the following:
 
@@ -161,10 +163,10 @@ tune_ps1 = ParamSet$new(list(
 )
 ```
 
-The parameter `branch_learner.selection` defines whether we go down the left (`PCA`/`ICA` followed by `LDA`) or the right branch (`ranger`).
+The parameter `branch_learner.selection` defines whether we go down the left (`PCA` / `ICA` followed by `LDA`) or the right branch (`ranger`).
 The parameter `branch_preproc_lda.selection` defines whether a `PCA` or `ICA` will be applied prior to the `LDA`.
-The other parameters directly belong to the `ParamSet` of the `PCA`/`ICA`/`LDA`/`ranger`.
-Note that it only makes sense to switch between `PCA`/`ICA` if the `"pca_ica_lda"` branch was selected beforehand.
+The other parameters directly belong to the `ParamSet` of the `PCA` / `ICA` / `LDA` / `ranger`.
+Note that it only makes sense to switch between `PCA` / `ICA` if the `"pca_ica_lda"` branch was selected beforehand.
 We have to specify this via:
 
 ```{r}
@@ -250,7 +252,7 @@ tuner_gs$optimize(tune1)
 Now, we can inspect the results ordered by the `classification accuracy`:
 
 ```{r}
-tune1_results = tune1$archive$data()
+tune1_results = tune1$archive$data
 tune1_results[order(classif.acc), ]
 ```
 
@@ -303,13 +305,13 @@ We can tune the graph by using the same search space as before. However, here th
 tune_ps2 = tune_ps1$clone(deep = TRUE)
 ```
 
-The `trafo` function does all the work, i.e., selecting either the `PCA`/`ICA`-`LDA` or `ranger` as the `proxy.content` as well as setting the parameters of the respective preprocessing `PipeOp`s and `Learner`s.
+The `trafo` function does all the work, i.e., selecting either the `PCA` / `ICA`-`LDA` or `ranger` as the `proxy.content` as well as setting the parameters of the respective preprocessing `PipeOp`s and `Learner`s.
 
 ```{r}
 proxy_options = list(
   pca_ica_lda =
     ppl("branch", graphs = list(pca = po("pca"), ica = po("ica"))) %>>%
-    lrn("classif.lda"),
+      lrn("classif.lda"),
   ranger = lrn("classif.ranger")
 )
 ```
@@ -317,7 +319,7 @@ proxy_options = list(
 Above, we made use of the `branch` `r ref("ppl", "ppl")` allowing us to easily construct a branching graph.
 Of course we also could have use another nested `PipeOpProxy` to specify the preprocessing options (`"pca"` vs. `"ica"`) within `proxy_options` if for some reason we do not want to do branching at all.
 The `trafo` function below selects one of the `proxy_options` from above and sets the respective parameters for the `PCA`, `ICA`, `LDA` and `ranger`.
-Here, the argument `x` is a list which will contain sampled/selected parameters from our `ParamSet` (in our case, `tune_ps2`).
+Here, the argument `x` is a list which will contain sampled / selected parameters from our `ParamSet` (in our case, `tune_ps2`).
 The return value is a list only including the appropriate `proxy.content` parameter.
 In each tuning iteration, the `proxy.content` parameter of our graph will be set to this value.
 
@@ -345,7 +347,8 @@ tune_ps2$trafo = function(x, param_set) {
 I.e., suppose that the following parameters will be selected from our `ParamSet`:
 
 ```{r}
-x = list(branch_learner.selection = "ranger",
+x = list(
+  branch_learner.selection = "ranger",
   classif.ranger.mtry = 200,
   classif.ranger.num.trees = 500)
 ```
@@ -372,6 +375,6 @@ tuner_gs$optimize(tune2)
 ```
 
 ```{r, eval = FALSE}
-tune2_results = tune2$archive$data()
+tune2_results = tune2$archive$data
 tune2_results[order(classif.acc), ]
 ```
