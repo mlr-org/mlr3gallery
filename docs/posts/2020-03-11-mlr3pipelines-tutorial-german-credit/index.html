@@ -472,8 +472,15 @@ d-title {
   top: 0;
 }
 
+/* adjust viewport for navbar height */
+/* helps vertically center bootstrap (non-distill) content */
+.min-vh-100 {
+  min-height: calc(100vh - 100px) !important;
+}
+
 </style>
 
+<script src="../../site_libs/jquery-1.11.3/jquery.min.js"></script>
 <link href="../../site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet"/>
 <link href="../../site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet"/>
 <script src="../../site_libs/headroom-0.9.4/headroom.min.js"></script>
@@ -581,19 +588,21 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
           var results = fuse.search(query, searchOptions);
           callback(results
             .map(function(result) { return result.item; })
-            .filter(function(item) { return !!item.description; })
           );
         },
         templates: {
           suggestion: function(suggestion) {
+            var img = suggestion.preview && Object.keys(suggestion.preview).length > 0
+              ? `<img src="${offsetURL(suggestion.preview)}"</img>`
+              : '';
             var html = `
               <div class="search-item">
                 <h3>${suggestion.title}</h3>
                 <div class="search-item-description">
-                  ${suggestion.description}
+                  ${suggestion.description || ''}
                 </div>
                 <div class="search-item-preview">
-                  <img src="${suggestion.preview ? offsetURL(suggestion.preview) : ''}"</img>
+                  ${img}
                 </div>
               </div>
             `;
@@ -616,6 +625,10 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 </script>
 
 <style type="text/css">
+
+.nav-search {
+  font-size: x-small;
+}
 
 /* Algolioa Autocomplete */
 
@@ -691,6 +704,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 }
 
 .algolia-autocomplete .aa-dropdown-menu .aa-suggestion .search-item h3 {
+  font-size: 1rem;
   margin-block-start: 0;
   margin-block-end: 5px;
 }
@@ -918,6 +932,11 @@ d-article pre a:hover {
   text-decoration: underline;
 }
 
+d-article details {
+  grid-column: text;
+  margin-bottom: 0.8em;
+}
+
 @media(min-width: 768px) {
 
 d-article pre,
@@ -1072,6 +1091,17 @@ d-article .citation {
 
 div.hanging-indent{
   margin-left: 1em; text-indent: -1em;
+}
+
+/* Citation hover box */
+
+.tippy-box[data-theme~=light-border] {
+  background-color: rgba(250, 250, 250, 0.95);
+}
+
+.tippy-content > p {
+  margin-bottom: 0;
+  padding: 2px;
 }
 
 
@@ -1739,7 +1769,7 @@ function init_distill() {
     var layout = $(this).attr('data-layout');
 
     // apply layout to markdown level block elements
-    var elements = $(this).children().not('div.sourceCode, pre, script');
+    var elements = $(this).children().not('details, div.sourceCode, pre, script');
     elements.each(function(i, el) {
       var layout_div = $('<div class="' + layout + '"></div>');
       if (layout_div.hasClass('shaded')) {
@@ -1854,6 +1884,20 @@ function init_distill() {
     // move appendix-bottom entries to the bottom
     $('.appendix-bottom').appendTo('d-appendix').children().unwrap();
     $('.appendix-bottom').remove();
+
+    // hoverable references
+    $('span.citation[data-cites]').each(function() {
+      var refHtml = $('#ref-' + $(this).attr('data-cites')).html();
+      window.tippy(this, {
+        allowHTML: true,
+        content: refHtml,
+        maxWidth: 500,
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'light-border',
+        placement: 'bottom-start'
+      });
+    });
 
     // clear polling timer
     clearInterval(tid);
@@ -2015,6 +2059,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
 <!--/radix_placeholder_distill-->
   <script src="../../site_libs/jquery-1.11.3/jquery.min.js"></script>
+  <script src="../../site_libs/popper-2.6.0/popper.min.js"></script>
+  <link href="../../site_libs/tippy-6.2.7/tippy.css" rel="stylesheet" />
+  <link href="../../site_libs/tippy-6.2.7/tippy-light-border.css" rel="stylesheet" />
+  <script src="../../site_libs/tippy-6.2.7/tippy.umd.min.js"></script>
   <script src="../../site_libs/anchor-4.2.2/anchor.min.js"></script>
   <script src="../../site_libs/bowser-1.9.3/bowser.min.js"></script>
   <script src="../../site_libs/webcomponents-2.0.0/webcomponents.js"></script>
@@ -2096,7 +2144,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <h2 id="prerequisites">Prerequisites</h2>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='st'><a href='https://Rdatatable.gitlab.io/data.table'>"data.table"</a></span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='st'><a href='https://Rdatatable.gitlab.io/data.table'>"data.table"</a></span><span class='op'>)</span>
 <span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='st'><a href='https://ggplot2.tidyverse.org'>"ggplot2"</a></span><span class='op'>)</span>
 <span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='st'><a href='https://mlr3.mlr-org.com'>"mlr3"</a></span><span class='op'>)</span>
 <span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='st'><a href='https://mlr3learners.mlr-org.com'>"mlr3learners"</a></span><span class='op'>)</span>
@@ -2110,7 +2158,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>We again use the German credit dataset, but will restrict ourselves to the <em>factorial features</em>. To make things interesting or to make it a bit harder for our <a href="https://mlr3.mlr-org.com/reference/Learner.html"><code>Learners</code></a>, we introduce <em>missing values</em> in the dataset:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>task</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>tsk</a></span><span class='op'>(</span><span class='st'>"german_credit"</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>task</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>tsk</a></span><span class='op'>(</span><span class='st'>"german_credit"</span><span class='op'>)</span>
 <span class='va'>credit_full</span> <span class='op'>=</span> <span class='va'>task</span><span class='op'>$</span><span class='fu'>data</span><span class='op'>(</span><span class='op'>)</span>
 <span class='va'>credit</span> <span class='op'>=</span> <span class='va'>credit_full</span><span class='op'>[</span>, <span class='fu'><a href='https://rdrr.io/r/base/lapply.html'>sapply</a></span><span class='op'>(</span><span class='va'>credit_full</span>, FUN <span class='op'>=</span> <span class='va'>is.factor</span><span class='op'>)</span>, with <span class='op'>=</span> <span class='cn'>FALSE</span><span class='op'>]</span>
 
@@ -2127,7 +2175,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>We instantiate a <code>Resampling</code> instance for this <code>Task</code> to be able to compare resampling performance:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='fu'><a href='https://rdrr.io/r/base/Random.html'>set.seed</a></span><span class='op'>(</span><span class='fl'>20191101</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/Random.html'>set.seed</a></span><span class='op'>(</span><span class='fl'>20191101</span><span class='op'>)</span>
 <span class='va'>cv10_instance</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>rsmp</a></span><span class='op'>(</span><span class='st'>"cv"</span><span class='op'>)</span><span class='op'>$</span><span class='fu'>instantiate</span><span class='op'>(</span><span class='va'>task</span><span class='op'>)</span>
 </code></pre>
 </div>
@@ -2135,7 +2183,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>You can uncomment the following line if you are running this locally:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='co'># future::plan("multiprocess") # uncomment for parallelization</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='co'># future::plan("multiprocess") # uncomment for parallelization</span>
 </code></pre>
 </div>
 </div>
@@ -2145,7 +2193,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>Available <code>PipeOp</code>s are listed in the <code>mlr_pipeops</code> dictionary:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>mlr_pipeops</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>mlr_pipeops</span>
 </code></pre>
 </div>
 <pre><code>&lt;DictionaryPipeOp&gt; with 64 stored values
@@ -2166,7 +2214,7 @@ Keys: boxcox, branch, chunk, classbalancing, classifavg, classweights,
 <p>We have just introduced missing values into our data. While some <code>Learner</code>s can deal with missing value, many cannot. Trying to train a random forest fails because of this:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>ranger</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>lrn</a></span><span class='op'>(</span><span class='st'>"classif.ranger"</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>ranger</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>lrn</a></span><span class='op'>(</span><span class='st'>"classif.ranger"</span><span class='op'>)</span>
 <span class='va'>ranger</span><span class='op'>$</span><span class='fu'>train</span><span class='op'>(</span><span class='va'>task</span><span class='op'>)</span>
 </code></pre>
 </div>
@@ -2175,7 +2223,7 @@ Keys: boxcox, branch, chunk, classbalancing, classifavg, classweights,
 <p>We can perform imputation of missing values using a <code>PipeOp</code>. To find out which imputation <code>PipeOp</code>s are available, we do the following:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>mlr_pipeops</span><span class='op'>$</span><span class='fu'>keys</span><span class='op'>(</span><span class='st'>"^impute"</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>mlr_pipeops</span><span class='op'>$</span><span class='fu'>keys</span><span class='op'>(</span><span class='st'>"^impute"</span><span class='op'>)</span>
 </code></pre>
 </div>
 <pre><code>[1] &quot;imputeconstant&quot; &quot;imputehist&quot;     &quot;imputelearner&quot;  &quot;imputemean&quot;    
@@ -2184,7 +2232,7 @@ Keys: boxcox, branch, chunk, classbalancing, classifavg, classweights,
 <p>We choose to impute factorial features using a new level (via <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_imputeoor.html"><code>PipeOpImputeOOR</code></a>). Let’s use the <code>PipeOp</code> itself to create an imputed <code>Task</code>. This shows us how the <code>PipeOp</code> actually works:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>imputer</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"imputeoor"</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>imputer</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"imputeoor"</span><span class='op'>)</span>
 <span class='va'>task_imputed</span> <span class='op'>=</span> <span class='va'>imputer</span><span class='op'>$</span><span class='fu'>train</span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='va'>task</span><span class='op'>)</span><span class='op'>)</span><span class='op'>[[</span><span class='fl'>1</span><span class='op'>]</span><span class='op'>]</span>
 <span class='va'>task_imputed</span><span class='op'>$</span><span class='fu'>missings</span><span class='op'>(</span><span class='op'>)</span>
 </code></pre>
@@ -2202,7 +2250,7 @@ other_installment_plans           people_liable     personal_status_sex
                 savings                  status               telephone 
                       0                       0                       0 </code></pre>
 <div class="sourceCode">
-<pre><code><span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span><span class='op'>(</span><span class='va'>task_imputed</span><span class='op'>$</span><span class='fu'>data</span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span><span class='op'>(</span><span class='va'>task_imputed</span><span class='op'>$</span><span class='fu'>data</span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span>
 </code></pre>
 </div>
 <pre><code>   credit_risk                              credit_history employment_duration
@@ -2252,7 +2300,7 @@ other_installment_plans           people_liable     personal_status_sex
 <p>If we used the imputed <code>Task</code> for Resampling, we would <em>leak</em> information from the test set into the training set. Therefore, it is mandatory to attach the imputation operator to the <code>Learner</code> itself, creating a <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_learners_graph.html"><code>GraphLearner</code></a>:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>imp_ranger</span> <span class='op'>=</span> <span class='va'><a href='https://mlr3pipelines.mlr-org.com//reference/mlr_learners_graph.html'>GraphLearner</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"imputeoor"</span><span class='op'>)</span> <span class='op'>%&gt;&gt;%</span> <span class='va'>ranger</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>imp_ranger</span> <span class='op'>=</span> <span class='va'><a href='https://mlr3pipelines.mlr-org.com//reference/mlr_learners_graph.html'>GraphLearner</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"imputeoor"</span><span class='op'>)</span> <span class='op'>%&gt;&gt;%</span> <span class='va'>ranger</span><span class='op'>)</span>
 
 <span class='va'>imp_ranger</span><span class='op'>$</span><span class='fu'>train</span><span class='op'>(</span><span class='va'>task</span><span class='op'>)</span>
 </code></pre>
@@ -2261,7 +2309,7 @@ other_installment_plans           people_liable     personal_status_sex
 <p>This <code>GraphLearner</code> can be used for resampling – like an ordinary <code>Learner</code>:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>rr</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/resample.html'>resample</a></span><span class='op'>(</span><span class='va'>task</span>, learner <span class='op'>=</span> <span class='va'>imp_ranger</span>, resampling <span class='op'>=</span> <span class='va'>cv10_instance</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>rr</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/resample.html'>resample</a></span><span class='op'>(</span><span class='va'>task</span>, learner <span class='op'>=</span> <span class='va'>imp_ranger</span>, resampling <span class='op'>=</span> <span class='va'>cv10_instance</span><span class='op'>)</span>
 <span class='va'>rr</span><span class='op'>$</span><span class='fu'>aggregate</span><span class='op'>(</span><span class='op'>)</span>
 </code></pre>
 </div>
@@ -2272,7 +2320,7 @@ other_installment_plans           people_liable     personal_status_sex
 <p>Typically, sparse models, i.e. having models with few(er) features, are desirable. This is due to a variety of reasons, e.g., enhanced interpretability or decreased costs of acquiring data. Furthermore, sparse models may actually be associated with increased performance (especially if overfitting is anticipated). We can use <em>feature filter</em> to only keep features with the highest <em>information</em>. Filters are implemented in the <a href="https://mlr3filters.mlr-org.com">mlr3filters</a> package and listed in the following dictionary:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>mlr_filters</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>mlr_filters</span>
 </code></pre>
 </div>
 <pre><code>&lt;DictionaryFilter&gt; with 19 stored values
@@ -2283,7 +2331,7 @@ Keys: anova, auc, carscore, cmim, correlation, disr, find_correlation,
 <p>We apply the <a href="https://mlr3filters.mlr-org.com/reference/mlr_filters_mim.html"><code>FilterMIM</code></a> (mutual information maximization) <code>Filter</code> as implemented in the <a href="https://cran.r-project.org/package=praznik">praznik</a> package. This <code>Filter</code> allows for the selection of the top-<code>k</code> features of best mutual information.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>filter</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3filters.mlr-org.com/reference/flt.html'>flt</a></span><span class='op'>(</span><span class='st'>"mim"</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>filter</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3filters.mlr-org.com/reference/flt.html'>flt</a></span><span class='op'>(</span><span class='st'>"mim"</span><span class='op'>)</span>
 <span class='va'>filter</span><span class='op'>$</span><span class='fu'>calculate</span><span class='op'>(</span><span class='va'>task_imputed</span><span class='op'>)</span><span class='op'>$</span><span class='va'>scores</span>
 </code></pre>
 </div>
@@ -2303,7 +2351,7 @@ Keys: anova, auc, carscore, cmim, correlation, disr, find_correlation,
 <p>Making use of this <code>Filter</code>, you may wonder at which costs the reduction of the feature space comes. We can investigate the trade-off between features and performance by tuning. We incorporate our filtering strategy into the pipeline using <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_filter.html"><code>PipeOpFilter</code></a>. Like before, we need to perform imputation as the <code>Filter</code> also relies on complete data:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>fpipe</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"imputeoor"</span><span class='op'>)</span> <span class='op'>%&gt;&gt;%</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"filter"</span>, <span class='fu'><a href='https://mlr3filters.mlr-org.com/reference/flt.html'>flt</a></span><span class='op'>(</span><span class='st'>"mim"</span><span class='op'>)</span>, filter.nfeat <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>fpipe</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"imputeoor"</span><span class='op'>)</span> <span class='op'>%&gt;&gt;%</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"filter"</span>, <span class='fu'><a href='https://mlr3filters.mlr-org.com/reference/flt.html'>flt</a></span><span class='op'>(</span><span class='st'>"mim"</span><span class='op'>)</span>, filter.nfeat <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span>
 <span class='va'>fpipe</span><span class='op'>$</span><span class='fu'>train</span><span class='op'>(</span><span class='va'>task</span><span class='op'>)</span><span class='op'>[[</span><span class='fl'>1</span><span class='op'>]</span><span class='op'>]</span><span class='op'>$</span><span class='fu'>head</span><span class='op'>(</span><span class='op'>)</span>
 </code></pre>
 </div>
@@ -2325,7 +2373,7 @@ Keys: anova, auc, carscore, cmim, correlation, disr, find_correlation,
 <p>We can now tune over the <code>mim.filter.nfeat</code> parameter. It steers how many features are kept by the <code>Filter</code> and eventually used by the learner:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>searchspace</span> <span class='op'>=</span> <span class='va'><a href='https://paradox.mlr-org.com/reference/ParamSet.html'>ParamSet</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>searchspace</span> <span class='op'>=</span> <span class='va'><a href='https://paradox.mlr-org.com/reference/ParamSet.html'>ParamSet</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>
   <span class='va'><a href='https://paradox.mlr-org.com/reference/ParamInt.html'>ParamInt</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='st'>"mim.filter.nfeat"</span>, lower <span class='op'>=</span> <span class='fl'>1</span>, upper <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/length.html'>length</a></span><span class='op'>(</span><span class='va'>task</span><span class='op'>$</span><span class='va'>feature_names</span><span class='op'>)</span><span class='op'>)</span>
 <span class='op'>)</span><span class='op'>)</span>
 </code></pre>
@@ -2334,7 +2382,7 @@ Keys: anova, auc, carscore, cmim, correlation, disr, find_correlation,
 <p>The problem is one-dimensional (i.e. only one parameter is tuned). Thus, we make use of a grid search. For higher dimensions, strategies like random search are more appropriate:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>inst</span> <span class='op'>=</span> <span class='va'><a href='https://mlr3tuning.mlr-org.com/reference/TuningInstanceSingleCrit.html'>TuningInstanceSingleCrit</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>inst</span> <span class='op'>=</span> <span class='va'><a href='https://mlr3tuning.mlr-org.com/reference/TuningInstanceSingleCrit.html'>TuningInstanceSingleCrit</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span>
   <span class='va'>task</span>,
   learner <span class='op'>=</span> <span class='va'>fpipe</span> <span class='op'>%&gt;&gt;%</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>lrn</a></span><span class='op'>(</span><span class='st'>"classif.ranger"</span><span class='op'>)</span>,
   resampling <span class='op'>=</span> <span class='va'>cv10_instance</span>,
@@ -2349,7 +2397,7 @@ Keys: anova, auc, carscore, cmim, correlation, disr, find_correlation,
 <p>The tuning procedure may take some time:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>tuner</span><span class='op'>$</span><span class='fu'>optimize</span><span class='op'>(</span><span class='va'>inst</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>tuner</span><span class='op'>$</span><span class='fu'>optimize</span><span class='op'>(</span><span class='va'>inst</span><span class='op'>)</span>
 </code></pre>
 </div>
 <pre><code>   mim.filter.nfeat learner_param_vals  x_domain classif.ce
@@ -2358,7 +2406,7 @@ Keys: anova, auc, carscore, cmim, correlation, disr, find_correlation,
 <p>We can plot the performance against the number of features. If we do so, we see the possible trade-off between sparsity and predictive performance:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>arx</span> <span class='op'>=</span> <span class='va'>inst</span><span class='op'>$</span><span class='va'>archive</span><span class='op'>$</span><span class='fu'>data</span><span class='op'>(</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>arx</span> <span class='op'>=</span> <span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/as.data.table.html'>as.data.table</a></span><span class='op'>(</span><span class='va'>inst</span><span class='op'>$</span><span class='va'>archive</span><span class='op'>)</span>
 <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/ggplot.html'>ggplot</a></span><span class='op'>(</span><span class='va'>arx</span>, <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/aes.html'>aes</a></span><span class='op'>(</span>x <span class='op'>=</span> <span class='va'>mim.filter.nfeat</span>, y <span class='op'>=</span> <span class='va'>classif.ce</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/geom_path.html'>geom_line</a></span><span class='op'>(</span><span class='op'>)</span>
 </code></pre>
 </div>
@@ -2368,7 +2416,7 @@ Keys: anova, auc, carscore, cmim, correlation, disr, find_correlation,
 <p>We want to build a model that is based on the predictions of other <code>Learner</code>s. This means that we are in the state that we need predictions already during training. This is a very specific case that is luckily handled by <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_learner_cv.html"><code>PipeOpLearnerCV</code></a>. <code>PipeOpLearnerCV</code> performs cross-validation during the training phase and returns the cross-validated predictions. We use <code>"prob"</code> predictions because they carry more information than response prediction:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>stackgraph</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"imputeoor"</span><span class='op'>)</span> <span class='op'>%&gt;&gt;%</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>stackgraph</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"imputeoor"</span><span class='op'>)</span> <span class='op'>%&gt;&gt;%</span>
   <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/gunion.html'>gunion</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>
     <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"learner_cv"</span>, <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>lrn</a></span><span class='op'>(</span><span class='st'>"classif.ranger"</span>, predict_type <span class='op'>=</span> <span class='st'>"prob"</span><span class='op'>)</span><span class='op'>)</span>,
     <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"learner_cv"</span>, <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>lrn</a></span><span class='op'>(</span><span class='st'>"classif.kknn"</span>, predict_type <span class='op'>=</span> <span class='st'>"prob"</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>%&gt;&gt;%</span>
@@ -2379,7 +2427,7 @@ Keys: anova, auc, carscore, cmim, correlation, disr, find_correlation,
 <p>We built a pretty complex <a href="https://mlr3pipelines.mlr-org.com/reference/Graph.html"><code>Graph</code></a> already. Therefore, we plot it:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>stackgraph</span><span class='op'>$</span><span class='fu'>plot</span><span class='op'>(</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>stackgraph</span><span class='op'>$</span><span class='fu'>plot</span><span class='op'>(</span><span class='op'>)</span>
 </code></pre>
 </div>
 <p><img src="2020-03-11-mlr3pipelines-tutorial-german-credit_files/figure-html5/unnamed-chunk-21-1.png" width="624" /></p>
@@ -2387,7 +2435,7 @@ Keys: anova, auc, carscore, cmim, correlation, disr, find_correlation,
 <p>We now compare the performance of the stacked learner to the performance of the individual <code>Learner</code>s:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>bmr</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/benchmark.html'>benchmark</a></span><span class='op'>(</span><span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/data.table.html'>data.table</a></span><span class='op'>(</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>bmr</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/benchmark.html'>benchmark</a></span><span class='op'>(</span><span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/data.table.html'>data.table</a></span><span class='op'>(</span>
   task <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='va'>task</span><span class='op'>)</span>,
   learner <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>
     <span class='va'>stackgraph</span>,
@@ -2412,13 +2460,13 @@ Keys: anova, auc, carscore, cmim, correlation, disr, find_correlation,
 <p>If we train the stacked learner and look into the final <code>Learner</code> (the logistic regression), we can see how “important” each <code>Learner</code> of the stacked learner is:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>stackgraph</span><span class='op'>$</span><span class='fu'>train</span><span class='op'>(</span><span class='va'>task</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>stackgraph</span><span class='op'>$</span><span class='fu'>train</span><span class='op'>(</span><span class='va'>task</span><span class='op'>)</span>
 </code></pre>
 </div>
 <pre><code>$classif.log_reg.output
 NULL</code></pre>
 <div class="sourceCode">
-<pre><code><span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>stackgraph</span><span class='op'>$</span><span class='va'>pipeops</span><span class='op'>$</span><span class='va'>classif.log_reg</span><span class='op'>$</span><span class='va'>state</span><span class='op'>$</span><span class='va'>model</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>stackgraph</span><span class='op'>$</span><span class='va'>pipeops</span><span class='op'>$</span><span class='va'>classif.log_reg</span><span class='op'>$</span><span class='va'>state</span><span class='op'>$</span><span class='va'>model</span><span class='op'>)</span>
 </code></pre>
 </div>
 <pre><code>
@@ -2453,14 +2501,14 @@ Number of Fisher Scoring iterations: 4</code></pre>
 <p>We now shift the context, using the complete German credit dataset:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>task</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>tsk</a></span><span class='op'>(</span><span class='st'>"german_credit"</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>task</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>tsk</a></span><span class='op'>(</span><span class='st'>"german_credit"</span><span class='op'>)</span>
 </code></pre>
 </div>
 </div>
 <p>There is a potential practical problem for both, small data sets and data sets with covariates having many factor levels: It may occur that not all possible factor levels have been used by the <code>Learner</code> during training. This happens because these rare instances are simply not sampled. The prediction then may fail because the <code>Learner</code> does not know how to handle unseen factor levels:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>task_unseen</span> <span class='op'>=</span> <span class='va'>task</span><span class='op'>$</span><span class='fu'>clone</span><span class='op'>(</span><span class='op'>)</span><span class='op'>$</span><span class='fu'>filter</span><span class='op'>(</span><span class='fl'>1</span><span class='op'>:</span><span class='fl'>30</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>task_unseen</span> <span class='op'>=</span> <span class='va'>task</span><span class='op'>$</span><span class='fu'>clone</span><span class='op'>(</span><span class='op'>)</span><span class='op'>$</span><span class='fu'>filter</span><span class='op'>(</span><span class='fl'>1</span><span class='op'>:</span><span class='fl'>30</span><span class='op'>)</span>
 <span class='va'>logreg</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>lrn</a></span><span class='op'>(</span><span class='st'>"classif.log_reg"</span><span class='op'>)</span>
 <span class='va'>logreg</span><span class='op'>$</span><span class='fu'>train</span><span class='op'>(</span><span class='va'>task_unseen</span><span class='op'>)</span>
 <span class='va'>logreg</span><span class='op'>$</span><span class='fu'>predict</span><span class='op'>(</span><span class='va'>task</span><span class='op'>)</span>
@@ -2472,7 +2520,7 @@ Number of Fisher Scoring iterations: 4</code></pre>
 <p>Another observation is that all-constant features may also be a problem:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>task_constant</span> <span class='op'>=</span> <span class='va'>task</span><span class='op'>$</span><span class='fu'>clone</span><span class='op'>(</span><span class='op'>)</span><span class='op'>$</span><span class='fu'>filter</span><span class='op'>(</span><span class='fl'>1</span><span class='op'>:</span><span class='fl'>2</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>task_constant</span> <span class='op'>=</span> <span class='va'>task</span><span class='op'>$</span><span class='fu'>clone</span><span class='op'>(</span><span class='op'>)</span><span class='op'>$</span><span class='fu'>filter</span><span class='op'>(</span><span class='fl'>1</span><span class='op'>:</span><span class='fl'>2</span><span class='op'>)</span>
 <span class='va'>logreg</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>lrn</a></span><span class='op'>(</span><span class='st'>"classif.log_reg"</span><span class='op'>)</span>
 <span class='va'>logreg</span><span class='op'>$</span><span class='fu'>train</span><span class='op'>(</span><span class='va'>task_constant</span><span class='op'>)</span>
 </code></pre>
@@ -2483,7 +2531,7 @@ Number of Fisher Scoring iterations: 4</code></pre>
 <p>Both, handling unseen levels and all-constant features can be handled simultaneously using the following <code>Graph</code>:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>robustify</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"fixfactors"</span><span class='op'>)</span> <span class='op'>%&gt;&gt;%</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>robustify</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"fixfactors"</span><span class='op'>)</span> <span class='op'>%&gt;&gt;%</span>
   <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"removeconstants"</span><span class='op'>)</span> <span class='op'>%&gt;&gt;%</span>
   <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"imputesample"</span>, affect_columns <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/Selector.html'>selector_type</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"ordered"</span>, <span class='st'>"factor"</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>
 
@@ -2495,7 +2543,7 @@ Number of Fisher Scoring iterations: 4</code></pre>
 <p>This robust learner works even in very pathological conditions:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>roblogreg</span> <span class='op'>=</span> <span class='va'><a href='https://mlr3pipelines.mlr-org.com//reference/mlr_learners_graph.html'>GraphLearner</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='va'>robustify</span> <span class='op'>%&gt;&gt;%</span> <span class='va'>logreg</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>roblogreg</span> <span class='op'>=</span> <span class='va'><a href='https://mlr3pipelines.mlr-org.com//reference/mlr_learners_graph.html'>GraphLearner</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='va'>robustify</span> <span class='op'>%&gt;&gt;%</span> <span class='va'>logreg</span><span class='op'>)</span>
 
 <span class='va'>roblogreg</span><span class='op'>$</span><span class='fu'>train</span><span class='op'>(</span><span class='va'>task_constant</span><span class='op'>)</span>
 <span class='va'>roblogreg</span><span class='op'>$</span><span class='fu'>predict</span><span class='op'>(</span><span class='va'>task</span><span class='op'>)</span>

@@ -472,8 +472,15 @@ d-title {
   top: 0;
 }
 
+/* adjust viewport for navbar height */
+/* helps vertically center bootstrap (non-distill) content */
+.min-vh-100 {
+  min-height: calc(100vh - 100px) !important;
+}
+
 </style>
 
+<script src="../../site_libs/jquery-1.11.3/jquery.min.js"></script>
 <link href="../../site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet"/>
 <link href="../../site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet"/>
 <script src="../../site_libs/headroom-0.9.4/headroom.min.js"></script>
@@ -581,19 +588,21 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
           var results = fuse.search(query, searchOptions);
           callback(results
             .map(function(result) { return result.item; })
-            .filter(function(item) { return !!item.description; })
           );
         },
         templates: {
           suggestion: function(suggestion) {
+            var img = suggestion.preview && Object.keys(suggestion.preview).length > 0
+              ? `<img src="${offsetURL(suggestion.preview)}"</img>`
+              : '';
             var html = `
               <div class="search-item">
                 <h3>${suggestion.title}</h3>
                 <div class="search-item-description">
-                  ${suggestion.description}
+                  ${suggestion.description || ''}
                 </div>
                 <div class="search-item-preview">
-                  <img src="${suggestion.preview ? offsetURL(suggestion.preview) : ''}"</img>
+                  ${img}
                 </div>
               </div>
             `;
@@ -616,6 +625,10 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 </script>
 
 <style type="text/css">
+
+.nav-search {
+  font-size: x-small;
+}
 
 /* Algolioa Autocomplete */
 
@@ -691,6 +704,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 }
 
 .algolia-autocomplete .aa-dropdown-menu .aa-suggestion .search-item h3 {
+  font-size: 1rem;
   margin-block-start: 0;
   margin-block-end: 5px;
 }
@@ -918,6 +932,11 @@ d-article pre a:hover {
   text-decoration: underline;
 }
 
+d-article details {
+  grid-column: text;
+  margin-bottom: 0.8em;
+}
+
 @media(min-width: 768px) {
 
 d-article pre,
@@ -1072,6 +1091,17 @@ d-article .citation {
 
 div.hanging-indent{
   margin-left: 1em; text-indent: -1em;
+}
+
+/* Citation hover box */
+
+.tippy-box[data-theme~=light-border] {
+  background-color: rgba(250, 250, 250, 0.95);
+}
+
+.tippy-content > p {
+  margin-bottom: 0;
+  padding: 2px;
 }
 
 
@@ -1739,7 +1769,7 @@ function init_distill() {
     var layout = $(this).attr('data-layout');
 
     // apply layout to markdown level block elements
-    var elements = $(this).children().not('div.sourceCode, pre, script');
+    var elements = $(this).children().not('details, div.sourceCode, pre, script');
     elements.each(function(i, el) {
       var layout_div = $('<div class="' + layout + '"></div>');
       if (layout_div.hasClass('shaded')) {
@@ -1854,6 +1884,20 @@ function init_distill() {
     // move appendix-bottom entries to the bottom
     $('.appendix-bottom').appendTo('d-appendix').children().unwrap();
     $('.appendix-bottom').remove();
+
+    // hoverable references
+    $('span.citation[data-cites]').each(function() {
+      var refHtml = $('#ref-' + $(this).attr('data-cites')).html();
+      window.tippy(this, {
+        allowHTML: true,
+        content: refHtml,
+        maxWidth: 500,
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'light-border',
+        placement: 'bottom-start'
+      });
+    });
 
     // clear polling timer
     clearInterval(tid);
@@ -2015,6 +2059,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
 <!--/radix_placeholder_distill-->
   <script src="../../site_libs/jquery-1.11.3/jquery.min.js"></script>
+  <script src="../../site_libs/popper-2.6.0/popper.min.js"></script>
+  <link href="../../site_libs/tippy-6.2.7/tippy.css" rel="stylesheet" />
+  <link href="../../site_libs/tippy-6.2.7/tippy-light-border.css" rel="stylesheet" />
+  <script src="../../site_libs/tippy-6.2.7/tippy.umd.min.js"></script>
   <script src="../../site_libs/anchor-4.2.2/anchor.min.js"></script>
   <script src="../../site_libs/bowser-1.9.3/bowser.min.js"></script>
   <script src="../../site_libs/webcomponents-2.0.0/webcomponents.js"></script>
@@ -2095,7 +2143,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <h2 id="prerequisites">Prerequisites</h2>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://mlr3.mlr-org.com'>mlr3</a></span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://mlr3.mlr-org.com'>mlr3</a></span><span class='op'>)</span>
 <span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://mlr3pipelines.mlr-org.com'>mlr3pipelines</a></span><span class='op'>)</span>
 <span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://mlr3tuning.mlr-org.com'>mlr3tuning</a></span><span class='op'>)</span>
 <span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://paradox.mlr-org.com'>paradox</a></span><span class='op'>)</span>
@@ -2105,7 +2153,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>The <a href="https://mlr3.mlr-org.com/reference/mlr_tasks_pima.html">Pima Indian Diabetes classification task</a> will be used.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>pima_tsk</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>tsk</a></span><span class='op'>(</span><span class='st'>"pima"</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>pima_tsk</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>tsk</a></span><span class='op'>(</span><span class='st'>"pima"</span><span class='op'>)</span>
 <span class='va'>pima_tsk</span><span class='op'>$</span><span class='fu'>data</span><span class='op'>(</span><span class='op'>)</span>
 </code></pre>
 </div>
@@ -2122,7 +2170,7 @@ document.addEventListener('DOMContentLoaded', function() {
 767:      pos  47     126      NA 30.1    0.349        1       60      NA
 768:      neg  23      93      NA 30.4    0.315        1       70      31</code></pre>
 <div class="sourceCode">
-<pre><code><span class='fu'>skimr</span><span class='fu'>::</span><span class='fu'><a href='https://docs.ropensci.org/skimr/reference/skim.html'>skim</a></span><span class='op'>(</span><span class='va'>pima_tsk</span><span class='op'>$</span><span class='fu'>data</span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'>skimr</span><span class='fu'>::</span><span class='fu'><a href='https://docs.ropensci.org/skimr/reference/skim.html'>skim</a></span><span class='op'>(</span><span class='va'>pima_tsk</span><span class='op'>$</span><span class='fu'>data</span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span>
 </code></pre>
 </div>
 <table>
@@ -2318,7 +2366,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>Several features of the <code>pima</code> task have missing values:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>pima_tsk</span><span class='op'>$</span><span class='fu'>missings</span><span class='op'>(</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>pima_tsk</span><span class='op'>$</span><span class='fu'>missings</span><span class='op'>(</span><span class='op'>)</span>
 </code></pre>
 </div>
 <pre><code>diabetes      age  glucose  insulin     mass pedigree pregnant pressure  triceps 
@@ -2334,7 +2382,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>Using the <code>affect_columns</code> argument of a <code>PipeOp</code> to define the variables on which a <code>PipeOp</code> will operate with an appropriate <a href="https://mlr3pipelines.mlr-org.com/reference/Selector.html"><code>selector</code></a> function:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='co'># imputes values based on histogram</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='co'># imputes values based on histogram</span>
 <span class='va'>hist_imp</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"imputehist"</span>,
               param_vals <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>affect_columns <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/Selector.html'>selector_name</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"glucose"</span>, <span class='st'>"mass"</span>, <span class='st'>"pressure"</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>
 <span class='co'># imputes values using the median</span>
@@ -2348,14 +2396,14 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>When <code>PipeOp</code>s are constructed this way, they will perform the specified preprocessing step on the appropriate features and pass all the input features to the subsequent steps:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='co'># no missings in "glucose", "mass" and "pressure"</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='co'># no missings in "glucose", "mass" and "pressure"</span>
 <span class='va'>hist_imp</span><span class='op'>$</span><span class='fu'>train</span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='va'>pima_tsk</span><span class='op'>)</span><span class='op'>)</span><span class='op'>[[</span><span class='fl'>1</span><span class='op'>]</span><span class='op'>]</span><span class='op'>$</span><span class='fu'>missings</span><span class='op'>(</span><span class='op'>)</span>
 </code></pre>
 </div>
 <pre><code>diabetes      age  insulin pedigree pregnant  triceps  glucose     mass pressure 
        0        0      374        0        0      227        0        0        0 </code></pre>
 <div class="sourceCode">
-<pre><code><span class='co'># no missings in "insulin" and "triceps"</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='co'># no missings in "insulin" and "triceps"</span>
 <span class='va'>median_imp</span><span class='op'>$</span><span class='fu'>train</span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='va'>pima_tsk</span><span class='op'>)</span><span class='op'>)</span><span class='op'>[[</span><span class='fl'>1</span><span class='op'>]</span><span class='op'>]</span><span class='op'>$</span><span class='fu'>missings</span><span class='op'>(</span><span class='op'>)</span>
 </code></pre>
 </div>
@@ -2365,14 +2413,14 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>We construct a pipeline that combines <code>hist_imp</code> and <code>median_imp</code>. Here, <code>hist_imp</code> will impute the features “glucose”, “mass” and “pressure”, and <code>median_imp</code> will impute “insulin” and “triceps”. In each preprocessing step, all the input features are passed to the next step. In the end, we obtain a data set without missing values:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='co'># combine the two impuation methods</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='co'># combine the two impuation methods</span>
 <span class='va'>impute_graph</span> <span class='op'>=</span> <span class='va'>hist_imp</span> <span class='op'>%&gt;&gt;%</span> <span class='va'>median_imp</span>
 <span class='va'>impute_graph</span><span class='op'>$</span><span class='fu'>plot</span><span class='op'>(</span>html <span class='op'>=</span> <span class='cn'>FALSE</span><span class='op'>)</span>
 </code></pre>
 </div>
 <img src="2020-04-23-pipelines-selectors-branches_files/figure-html5/unnamed-chunk-7-1.png" width="576" />
 <div class="sourceCode">
-<pre><code><span class='va'>impute_graph</span><span class='op'>$</span><span class='fu'>train</span><span class='op'>(</span><span class='va'>pima_tsk</span><span class='op'>)</span><span class='op'>[[</span><span class='fl'>1</span><span class='op'>]</span><span class='op'>]</span><span class='op'>$</span><span class='fu'>missings</span><span class='op'>(</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>impute_graph</span><span class='op'>$</span><span class='fu'>train</span><span class='op'>(</span><span class='va'>pima_tsk</span><span class='op'>)</span><span class='op'>[[</span><span class='fl'>1</span><span class='op'>]</span><span class='op'>]</span><span class='op'>$</span><span class='fu'>missings</span><span class='op'>(</span><span class='op'>)</span>
 </code></pre>
 </div>
 <pre><code>diabetes      age pedigree pregnant  glucose     mass pressure  insulin  triceps 
@@ -2381,7 +2429,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>The <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_missind.html"><code>missind</code></a> operator replaces features with missing values with a missing value indicator:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>miss_ind</span><span class='op'>$</span><span class='fu'>train</span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='va'>pima_tsk</span><span class='op'>)</span><span class='op'>)</span><span class='op'>[[</span><span class='fl'>1</span><span class='op'>]</span><span class='op'>]</span><span class='op'>$</span><span class='fu'>data</span><span class='op'>(</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>miss_ind</span><span class='op'>$</span><span class='fu'>train</span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='va'>pima_tsk</span><span class='op'>)</span><span class='op'>)</span><span class='op'>[[</span><span class='fl'>1</span><span class='op'>]</span><span class='op'>]</span><span class='op'>$</span><span class='fu'>data</span><span class='op'>(</span><span class='op'>)</span>
 </code></pre>
 </div>
 <pre><code>     diabetes missing_glucose missing_insulin missing_mass missing_pressure missing_triceps
@@ -2400,7 +2448,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>Obviously, this step can not be applied to the already imputed data as there are no missing values. If we want to combine the previous two imputation steps with a third step that adds missing value indicators, we would need to <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_copy.html"><code>copy</code></a> the data two times and supply the first copy to <code>impute_graph</code> and the second copy to <code>miss_ind</code> using <a href="https://mlr3pipelines.mlr-org.com/reference/gunion.html"><code>gunion</code></a>. Finally, the two outputs can be combined with <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_featureunion.html"><code>featureunion</code></a>:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>impute_missind</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"copy"</span>, <span class='fl'>2</span><span class='op'>)</span> <span class='op'>%&gt;&gt;%</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>impute_missind</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"copy"</span>, <span class='fl'>2</span><span class='op'>)</span> <span class='op'>%&gt;&gt;%</span>
   <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/gunion.html'>gunion</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='va'>impute_graph</span>, <span class='va'>miss_ind</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>%&gt;&gt;%</span>
   <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"featureunion"</span><span class='op'>)</span>
 <span class='va'>impute_missind</span><span class='op'>$</span><span class='fu'>plot</span><span class='op'>(</span>html <span class='op'>=</span> <span class='cn'>FALSE</span><span class='op'>)</span>
@@ -2408,7 +2456,7 @@ document.addEventListener('DOMContentLoaded', function() {
 </div>
 <img src="2020-04-23-pipelines-selectors-branches_files/figure-html5/unnamed-chunk-9-1.png" width="576" />
 <div class="sourceCode">
-<pre><code><span class='va'>impute_missind</span><span class='op'>$</span><span class='fu'>train</span><span class='op'>(</span><span class='va'>pima_tsk</span><span class='op'>)</span><span class='op'>[[</span><span class='fl'>1</span><span class='op'>]</span><span class='op'>]</span><span class='op'>$</span><span class='fu'>data</span><span class='op'>(</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>impute_missind</span><span class='op'>$</span><span class='fu'>train</span><span class='op'>(</span><span class='va'>pima_tsk</span><span class='op'>)</span><span class='op'>[[</span><span class='fl'>1</span><span class='op'>]</span><span class='op'>]</span><span class='op'>$</span><span class='fu'>data</span><span class='op'>(</span><span class='op'>)</span>
 </code></pre>
 </div>
 <pre><code>     diabetes age pedigree pregnant glucose mass pressure insulin triceps missing_glucose
@@ -2440,7 +2488,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>We can use the <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_select.html"><code>select</code></a> <code>PipeOp</code> to select the appropriate features and then apply the desired impute <code>PipeOp</code> on them:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>hist_imp2</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"select"</span>,
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>hist_imp2</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"select"</span>,
   selector <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/Selector.html'>selector_name</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"glucose"</span>, <span class='st'>"mass"</span>, <span class='st'>"pressure"</span><span class='op'>)</span><span class='op'>)</span>,
   id <span class='op'>=</span> <span class='st'>"slct1"</span><span class='op'>)</span> <span class='op'>%&gt;&gt;%</span> <span class='co'># unique id so we can combine it in a pipeline with other select PipeOps</span>
   <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"imputehist"</span><span class='op'>)</span>
@@ -2450,7 +2498,7 @@ document.addEventListener('DOMContentLoaded', function() {
 </div>
 <img src="2020-04-23-pipelines-selectors-branches_files/figure-html5/unnamed-chunk-10-1.png" width="576" />
 <div class="sourceCode">
-<pre><code><span class='va'>hist_imp2</span><span class='op'>$</span><span class='fu'>train</span><span class='op'>(</span><span class='va'>pima_tsk</span><span class='op'>)</span><span class='op'>[[</span><span class='fl'>1</span><span class='op'>]</span><span class='op'>]</span><span class='op'>$</span><span class='fu'>data</span><span class='op'>(</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>hist_imp2</span><span class='op'>$</span><span class='fu'>train</span><span class='op'>(</span><span class='va'>pima_tsk</span><span class='op'>)</span><span class='op'>[[</span><span class='fl'>1</span><span class='op'>]</span><span class='op'>]</span><span class='op'>$</span><span class='fu'>data</span><span class='op'>(</span><span class='op'>)</span>
 </code></pre>
 </div>
 <pre><code>     diabetes glucose mass pressure
@@ -2466,7 +2514,7 @@ document.addEventListener('DOMContentLoaded', function() {
 767:      pos     126 30.1       60
 768:      neg      93 30.4       70</code></pre>
 <div class="sourceCode">
-<pre><code><span class='va'>median_imp2</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"select"</span>, selector <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/Selector.html'>selector_name</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"insulin"</span>, <span class='st'>"triceps"</span><span class='op'>)</span><span class='op'>)</span>, id <span class='op'>=</span> <span class='st'>"slct2"</span><span class='op'>)</span> <span class='op'>%&gt;&gt;%</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>median_imp2</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"select"</span>, selector <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/Selector.html'>selector_name</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"insulin"</span>, <span class='st'>"triceps"</span><span class='op'>)</span><span class='op'>)</span>, id <span class='op'>=</span> <span class='st'>"slct2"</span><span class='op'>)</span> <span class='op'>%&gt;&gt;%</span>
   <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"imputemedian"</span><span class='op'>)</span>
 
 <span class='va'>median_imp2</span><span class='op'>$</span><span class='fu'>train</span><span class='op'>(</span><span class='va'>pima_tsk</span><span class='op'>)</span><span class='op'>[[</span><span class='fl'>1</span><span class='op'>]</span><span class='op'>]</span><span class='op'>$</span><span class='fu'>data</span><span class='op'>(</span><span class='op'>)</span>
@@ -2488,7 +2536,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>To reproduce the result of the fist example (1.), we need to copy the data four times and apply <code>hist_imp2</code>, <code>median_imp2</code> and <code>miss_ind</code> on each of the three copies. The fourth copy is required to select the features without missing values and to append it to the final result. We can do this as follows:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>other_features</span> <span class='op'>=</span> <span class='va'>pima_tsk</span><span class='op'>$</span><span class='va'>feature_names</span><span class='op'>[</span><span class='va'>pima_tsk</span><span class='op'>$</span><span class='fu'>missings</span><span class='op'>(</span><span class='op'>)</span><span class='op'>[</span><span class='op'>-</span><span class='fl'>1</span><span class='op'>]</span> <span class='op'>==</span> <span class='fl'>0</span><span class='op'>]</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>other_features</span> <span class='op'>=</span> <span class='va'>pima_tsk</span><span class='op'>$</span><span class='va'>feature_names</span><span class='op'>[</span><span class='va'>pima_tsk</span><span class='op'>$</span><span class='fu'>missings</span><span class='op'>(</span><span class='op'>)</span><span class='op'>[</span><span class='op'>-</span><span class='fl'>1</span><span class='op'>]</span> <span class='op'>==</span> <span class='fl'>0</span><span class='op'>]</span>
 
 <span class='va'>impute_missind2</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"copy"</span>, <span class='fl'>4</span><span class='op'>)</span> <span class='op'>%&gt;&gt;%</span>
   <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/gunion.html'>gunion</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='va'>hist_imp2</span>,
@@ -2502,7 +2550,7 @@ document.addEventListener('DOMContentLoaded', function() {
 </div>
 <img src="2020-04-23-pipelines-selectors-branches_files/figure-html5/unnamed-chunk-11-1.png" width="576" />
 <div class="sourceCode">
-<pre><code><span class='va'>impute_missind2</span><span class='op'>$</span><span class='fu'>train</span><span class='op'>(</span><span class='va'>pima_tsk</span><span class='op'>)</span><span class='op'>[[</span><span class='fl'>1</span><span class='op'>]</span><span class='op'>]</span><span class='op'>$</span><span class='fu'>data</span><span class='op'>(</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>impute_missind2</span><span class='op'>$</span><span class='fu'>train</span><span class='op'>(</span><span class='va'>pima_tsk</span><span class='op'>)</span><span class='op'>[[</span><span class='fl'>1</span><span class='op'>]</span><span class='op'>]</span><span class='op'>$</span><span class='fu'>data</span><span class='op'>(</span><span class='op'>)</span>
 </code></pre>
 </div>
 <pre><code>     diabetes glucose mass pressure insulin triceps missing_glucose missing_insulin missing_mass
@@ -2533,7 +2581,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>Note that when there is one input channel, it is automatically copied as many times as needed for the downstream <code>PipeOp</code>s. In other words, the code above works also without <code>po("copy", 4)</code>:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>impute_missind3</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/gunion.html'>gunion</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='va'>hist_imp2</span>,
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>impute_missind3</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/gunion.html'>gunion</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='va'>hist_imp2</span>,
   <span class='va'>median_imp2</span>,
   <span class='va'>miss_ind</span>,
   <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"select"</span>, selector <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/Selector.html'>selector_name</a></span><span class='op'>(</span><span class='va'>other_features</span><span class='op'>)</span>, id <span class='op'>=</span> <span class='st'>"slct3"</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>%&gt;&gt;%</span>
@@ -2572,7 +2620,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>We can not know if the combination of a learner with this preprocessing graph will benefit from the imputation steps and the added missing value indicators. Maybe it would have been better to just use <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_imputemedian.html"><code>imputemedian</code></a> on all the variables. We could investigate this assumption by adding an alternative path to the graph with the mentioned <code>imputemedian</code>. This is possible using the <a href="https://mlr3pipelines.mlr-org.com/reference/branch.html">“branch”</a> <code>PipeOp</code>:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>median_imp3</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"imputemedian"</span>, id <span class='op'>=</span> <span class='st'>"simple_median"</span><span class='op'>)</span> <span class='co'># add the id so it does not clash with `median_imp`</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>median_imp3</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"imputemedian"</span>, id <span class='op'>=</span> <span class='st'>"simple_median"</span><span class='op'>)</span> <span class='co'># add the id so it does not clash with `median_imp`</span>
 
 <span class='va'>branches</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"impute_missind"</span>, <span class='st'>"simple_median"</span><span class='op'>)</span> <span class='co'># names of the branches</span>
 
@@ -2589,7 +2637,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>To finalize the graph, we combine it with a rpart learner:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>rpart_lrn</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>lrn</a></span><span class='op'>(</span><span class='st'>"classif.rpart"</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>rpart_lrn</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>lrn</a></span><span class='op'>(</span><span class='st'>"classif.rpart"</span><span class='op'>)</span>
 
 <span class='va'>grph</span> <span class='op'>=</span> <span class='va'>graph_branch</span> <span class='op'>%&gt;&gt;%</span>
   <span class='va'>rpart_lrn</span>
@@ -2602,7 +2650,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>To define the parameters to be tuned, we first check the available ones in the graph:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>grph</span><span class='op'>$</span><span class='va'>param_set</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>grph</span><span class='op'>$</span><span class='va'>param_set</span>
 </code></pre>
 </div>
 <pre><code>&lt;ParamSetCollection&gt;
@@ -2646,7 +2694,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>We decide to jointly tune the “branch.selection”, “classif.rpart.cp” and “classif.rpart.minbucket” hyperparameters:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>ps</span> <span class='op'>=</span> <span class='va'><a href='https://paradox.mlr-org.com/reference/ParamSet.html'>ParamSet</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>ps</span> <span class='op'>=</span> <span class='va'><a href='https://paradox.mlr-org.com/reference/ParamSet.html'>ParamSet</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span>
   <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>
     <span class='va'><a href='https://paradox.mlr-org.com/reference/ParamFct.html'>ParamFct</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='st'>"branch.selection"</span>, levels <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"impute_missind"</span>, <span class='st'>"simple_median"</span><span class='op'>)</span><span class='op'>)</span>,
     <span class='va'><a href='https://paradox.mlr-org.com/reference/ParamDbl.html'>ParamDbl</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='st'>"classif.rpart.cp"</span>, <span class='fl'>0.001</span>, <span class='fl'>0.1</span><span class='op'>)</span>,
@@ -2658,7 +2706,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>In order to tune the graph, it needs to be converted to a learner:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>grph_lrn</span> <span class='op'>=</span>  <span class='va'><a href='https://mlr3pipelines.mlr-org.com//reference/mlr_learners_graph.html'>GraphLearner</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='va'>grph</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>grph_lrn</span> <span class='op'>=</span>  <span class='va'><a href='https://mlr3pipelines.mlr-org.com//reference/mlr_learners_graph.html'>GraphLearner</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='va'>grph</span><span class='op'>)</span>
 
 <span class='va'>cv3</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>rsmp</a></span><span class='op'>(</span><span class='st'>"cv"</span>, folds <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span>
 
@@ -2684,7 +2732,7 @@ document.addEventListener('DOMContentLoaded', function() {
    classif.ce
 1:  0.2513021</code></pre>
 <div class="sourceCode">
-<pre><code><span class='va'>instance</span><span class='op'>$</span><span class='va'>archive</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>instance</span><span class='op'>$</span><span class='va'>archive</span>
 </code></pre>
 </div>
 <pre><code>&lt;ArchiveTuning&gt;
@@ -2695,16 +2743,16 @@ document.addEventListener('DOMContentLoaded', function() {
 4:   impute_missind       0.06364106                       5  0.2656250
 5:    simple_median       0.09899797                      10  0.2617188
                                   uhash  x_domain           timestamp batch_nr
-1: 1e1e6786-260c-4a8c-9f11-d2d2de349146 &lt;list[3]&gt; 2021-01-13 05:17:46        1
-2: 2ec50dd3-3b7e-4928-b7c9-d78c9d448fc0 &lt;list[3]&gt; 2021-01-13 05:17:47        2
-3: 3101e63b-f9c8-4c6b-a4e3-8373fa250fff &lt;list[3]&gt; 2021-01-13 05:17:48        3
-4: cb68aa90-668a-454a-9ba5-c275cae5650b &lt;list[3]&gt; 2021-01-13 05:17:50        4
-5: 2e1fc1ee-afab-40b6-a103-27aa8f9944ca &lt;list[3]&gt; 2021-01-13 05:17:51        5</code></pre>
+1: f171d508-506d-4851-a4bf-c09600acec72 &lt;list[3]&gt; 2021-01-26 04:57:08        1
+2: 17a9fd0f-ce9d-41c1-b76b-4b1afce62f7c &lt;list[3]&gt; 2021-01-26 04:57:10        2
+3: 27d5fbd8-4dff-43bd-95e7-34e7ba7d6944 &lt;list[3]&gt; 2021-01-26 04:57:11        3
+4: fc1babe3-130d-4d76-bb26-cac77dfd29f2 &lt;list[3]&gt; 2021-01-26 04:57:12        4
+5: 1e0853bc-3fe3-4af4-a526-f8c33e1693f7 &lt;list[3]&gt; 2021-01-26 04:57:13        5</code></pre>
 </div>
 <p>The best performance in this short tuned experiment was achieved with .</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>instance</span><span class='op'>$</span><span class='va'>result</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>instance</span><span class='op'>$</span><span class='va'>result</span>
 </code></pre>
 </div>
 <pre><code>   branch.selection classif.rpart.cp classif.rpart.minbucket learner_param_vals  x_domain

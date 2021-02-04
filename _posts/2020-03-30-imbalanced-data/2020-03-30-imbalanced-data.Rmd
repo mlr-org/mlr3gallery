@@ -259,17 +259,17 @@ Therefore, we can plot the tuning path of the best learner from the subsampling 
 ```{r}
 library(ggplot2)
 bmr_data_learners = as.data.table(bmr)$learner
-utune_path = bmr_data_learners[[1]]$model$tuning_instance$archive$data()
+utune_path = bmr_data_learners[[1]]$model$tuning_instance$archive$data
 utune_gg = ggplot(utune_path, aes(x = undersample.ratio, y = classif.fbeta)) +
   geom_point(size = 3) +
   geom_line() + ylim(0.9, 1)
 
-otune_path = bmr_data_learners[[2]]$model$tuning_instance$archive$data()
+otune_path = bmr_data_learners[[2]]$model$tuning_instance$archive$data
 otune_gg = ggplot(otune_path, aes(x = oversample.ratio, y = classif.fbeta)) +
   geom_point(size = 3) +
   geom_line() + ylim(0.9, 1)
 
-stune_path = bmr_data_learners[[3]]$model$tuning_instance$archive$data()
+stune_path = bmr_data_learners[[3]]$model$tuning_instance$archive$data
 stune_gg = ggplot(stune_path, aes(
   x = smote.dup_size,
   y = classif.fbeta, col = factor(smote.K))) +

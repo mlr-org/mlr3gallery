@@ -177,13 +177,13 @@ instance_grid$result
 We can also look at the `Archive` of evaluated configurations:
 
 ```{r}
-instance_grid$archive$data()
+as.data.table(instance_grid$archive)
 ```
 
 We plot the performances depending on the sampled `k` and `distance`:
 
 ```{r}
-ggplot(instance_grid$archive$data(), aes(x = k, y = classif.ce, color = as.factor(distance))) +
+ggplot(as.data.table(instance_grid$archive), aes(x = k, y = classif.ce, color = as.factor(distance))) +
   geom_line() + geom_point(size = 3)
 ```
 
@@ -250,21 +250,21 @@ It includes the points before and after the transformation.
 The archive includes a column for each parameter the `Tuner` sampled on the search space (points before the transformation):
 
 ```{r}
-instance_random$archive$data()
+as.data.table(instance_random$archive)
 ```
 
 The parameters used by the learner (points after the transformation) are stored in in the `x_domain` column as lists.
 By using `unnest = x_domain`, the list elements are expanded to separate columns:
 
 ```{r}
-instance_random$archive$data(unnest = "x_domain")
+as.data.table(instance_random$archive)
 ```
 
 Let's now investigate the performance by parameters.
 This is especially easy using visualization:
 
 ```{r}
-ggplot(instance_random$archive$data(unnest = "x_domain"),
+ggplot(as.data.table(instance_random$archive),
   aes(x = x_domain_k, y = classif.ce, color = x_domain_scale)) +
   geom_point(size = 3) + geom_line()
 ```
@@ -273,7 +273,7 @@ The previous plot suggests that `scale` has a strong influence on performance.
 For the kernel, there does not seem to be a strong influence:
 
 ```{r}
-ggplot(instance_random$archive$data(unnest = "x_domain"),
+ggplot(as.data.table(instance_random$archive),
   aes(x = x_domain_k, y = classif.ce, color = x_domain_kernel)) +
   geom_point(size = 3) + geom_line()
 ```
@@ -354,7 +354,7 @@ instance_random = TuningInstanceSingleCrit$new(
 )
 tuner_random$optimize(instance_random)
 instance_random$result
-perfdata = instance_random$archive$data(unnest = "x_domain")
+perfdata = as.data.table(instance_random$archive)
 perfdata
 ```
 

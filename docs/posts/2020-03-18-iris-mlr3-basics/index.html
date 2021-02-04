@@ -464,8 +464,15 @@ d-title {
   top: 0;
 }
 
+/* adjust viewport for navbar height */
+/* helps vertically center bootstrap (non-distill) content */
+.min-vh-100 {
+  min-height: calc(100vh - 100px) !important;
+}
+
 </style>
 
+<script src="../../site_libs/jquery-1.11.3/jquery.min.js"></script>
 <link href="../../site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet"/>
 <link href="../../site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet"/>
 <script src="../../site_libs/headroom-0.9.4/headroom.min.js"></script>
@@ -573,19 +580,21 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
           var results = fuse.search(query, searchOptions);
           callback(results
             .map(function(result) { return result.item; })
-            .filter(function(item) { return !!item.description; })
           );
         },
         templates: {
           suggestion: function(suggestion) {
+            var img = suggestion.preview && Object.keys(suggestion.preview).length > 0
+              ? `<img src="${offsetURL(suggestion.preview)}"</img>`
+              : '';
             var html = `
               <div class="search-item">
                 <h3>${suggestion.title}</h3>
                 <div class="search-item-description">
-                  ${suggestion.description}
+                  ${suggestion.description || ''}
                 </div>
                 <div class="search-item-preview">
-                  <img src="${suggestion.preview ? offsetURL(suggestion.preview) : ''}"</img>
+                  ${img}
                 </div>
               </div>
             `;
@@ -608,6 +617,10 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 </script>
 
 <style type="text/css">
+
+.nav-search {
+  font-size: x-small;
+}
 
 /* Algolioa Autocomplete */
 
@@ -683,6 +696,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 }
 
 .algolia-autocomplete .aa-dropdown-menu .aa-suggestion .search-item h3 {
+  font-size: 1rem;
   margin-block-start: 0;
   margin-block-end: 5px;
 }
@@ -910,6 +924,11 @@ d-article pre a:hover {
   text-decoration: underline;
 }
 
+d-article details {
+  grid-column: text;
+  margin-bottom: 0.8em;
+}
+
 @media(min-width: 768px) {
 
 d-article pre,
@@ -1064,6 +1083,17 @@ d-article .citation {
 
 div.hanging-indent{
   margin-left: 1em; text-indent: -1em;
+}
+
+/* Citation hover box */
+
+.tippy-box[data-theme~=light-border] {
+  background-color: rgba(250, 250, 250, 0.95);
+}
+
+.tippy-content > p {
+  margin-bottom: 0;
+  padding: 2px;
 }
 
 
@@ -1731,7 +1761,7 @@ function init_distill() {
     var layout = $(this).attr('data-layout');
 
     // apply layout to markdown level block elements
-    var elements = $(this).children().not('div.sourceCode, pre, script');
+    var elements = $(this).children().not('details, div.sourceCode, pre, script');
     elements.each(function(i, el) {
       var layout_div = $('<div class="' + layout + '"></div>');
       if (layout_div.hasClass('shaded')) {
@@ -1846,6 +1876,20 @@ function init_distill() {
     // move appendix-bottom entries to the bottom
     $('.appendix-bottom').appendTo('d-appendix').children().unwrap();
     $('.appendix-bottom').remove();
+
+    // hoverable references
+    $('span.citation[data-cites]').each(function() {
+      var refHtml = $('#ref-' + $(this).attr('data-cites')).html();
+      window.tippy(this, {
+        allowHTML: true,
+        content: refHtml,
+        maxWidth: 500,
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'light-border',
+        placement: 'bottom-start'
+      });
+    });
 
     // clear polling timer
     clearInterval(tid);
@@ -2007,6 +2051,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
 <!--/radix_placeholder_distill-->
   <script src="../../site_libs/jquery-1.11.3/jquery.min.js"></script>
+  <script src="../../site_libs/popper-2.6.0/popper.min.js"></script>
+  <link href="../../site_libs/tippy-6.2.7/tippy.css" rel="stylesheet" />
+  <link href="../../site_libs/tippy-6.2.7/tippy-light-border.css" rel="stylesheet" />
+  <script src="../../site_libs/tippy-6.2.7/tippy.umd.min.js"></script>
   <script src="../../site_libs/anchor-4.2.2/anchor.min.js"></script>
   <script src="../../site_libs/bowser-1.9.3/bowser.min.js"></script>
   <script src="../../site_libs/webcomponents-2.0.0/webcomponents.js"></script>
@@ -2080,7 +2128,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <h2 id="loading-basic-packages">Loading basic packages</h2>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='co'># tasks, train, predict, resample, benchmark</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='co'># tasks, train, predict, resample, benchmark</span>
 <span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='st'><a href='https://mlr3.mlr-org.com'>"mlr3"</a></span><span class='op'>)</span>
 <span class='co'># about a dozen reasonable learners</span>
 <span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='st'><a href='https://mlr3learners.mlr-org.com'>"mlr3learners"</a></span><span class='op'>)</span>
@@ -2091,14 +2139,14 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>Let’s work on the canonical, simple iris data set, and try out some ML algorithms. We will start by using a decision tree with default settings.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='co'># creates mlr3 task from scratch, from a data.frame</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='co'># creates mlr3 task from scratch, from a data.frame</span>
 <span class='co'># 'target' names the column in the dataset we want to learn to predict</span>
 <span class='va'>task</span> <span class='op'>=</span> <span class='va'><a href='https://mlr3.mlr-org.com/reference/TaskClassif.html'>TaskClassif</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span>id <span class='op'>=</span> <span class='st'>"iris"</span>, backend <span class='op'>=</span> <span class='va'>iris</span>, target <span class='op'>=</span> <span class='st'>"Species"</span><span class='op'>)</span>
 <span class='co'># in this case we could also take the iris example from mlr3's dictionary of shipped example tasks</span>
 <span class='co'># 2 equivalent calls to create a task. The second is just sugar for the user.</span>
 <span class='va'>task</span> <span class='op'>=</span> <span class='va'>mlr_tasks</span><span class='op'>$</span><span class='fu'>get</span><span class='op'>(</span><span class='st'>"iris"</span><span class='op'>)</span>
 <span class='va'>task</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>tsk</a></span><span class='op'>(</span><span class='st'>"iris"</span><span class='op'>)</span>
-<span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span><span class='op'>(</span><span class='va'>task</span><span class='op'>)</span>
+<span class='fu'><a href='https://docs.ropensci.org/skimr/reference/print.html'>print</a></span><span class='op'>(</span><span class='va'>task</span><span class='op'>)</span>
 </code></pre>
 </div>
 <pre><code>&lt;TaskClassif:iris&gt; (150 x 5)
@@ -2107,11 +2155,11 @@ document.addEventListener('DOMContentLoaded', function() {
 * Features (4):
   - dbl (4): Petal.Length, Petal.Width, Sepal.Length, Sepal.Width</code></pre>
 <div class="sourceCode">
-<pre><code><span class='co'># create learner from dictionary of mlr3learners</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='co'># create learner from dictionary of mlr3learners</span>
 <span class='co'># 2 equivalent calls:</span>
 <span class='va'>learner1</span> <span class='op'>=</span> <span class='va'>mlr_learners</span><span class='op'>$</span><span class='fu'>get</span><span class='op'>(</span><span class='st'>"classif.rpart"</span><span class='op'>)</span>
 <span class='va'>learner1</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>lrn</a></span><span class='op'>(</span><span class='st'>"classif.rpart"</span><span class='op'>)</span>
-<span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span><span class='op'>(</span><span class='va'>learner1</span><span class='op'>)</span>
+<span class='fu'><a href='https://docs.ropensci.org/skimr/reference/print.html'>print</a></span><span class='op'>(</span><span class='va'>learner1</span><span class='op'>)</span>
 </code></pre>
 </div>
 <pre><code>&lt;LearnerClassifRpart:classif.rpart&gt;
@@ -2127,10 +2175,10 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>Now the usual ML operations: Train on some observations, predict on others.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='co'># train learner on subset of task</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='co'># train learner on subset of task</span>
 <span class='va'>learner1</span><span class='op'>$</span><span class='fu'>train</span><span class='op'>(</span><span class='va'>task</span>, row_ids <span class='op'>=</span> <span class='fl'>1</span><span class='op'>:</span><span class='fl'>120</span><span class='op'>)</span>
 <span class='co'># this is what the decision tree looks like</span>
-<span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span><span class='op'>(</span><span class='va'>learner1</span><span class='op'>$</span><span class='va'>model</span><span class='op'>)</span>
+<span class='fu'><a href='https://docs.ropensci.org/skimr/reference/print.html'>print</a></span><span class='op'>(</span><span class='va'>learner1</span><span class='op'>$</span><span class='va'>model</span><span class='op'>)</span>
 </code></pre>
 </div>
 <pre><code>n= 120 
@@ -2144,11 +2192,11 @@ node), split, n, loss, yval, (yprob)
     6) Petal.Length&lt; 4.95 49  1 versicolor (0.00000000 0.97959184 0.02040816) *
     7) Petal.Length&gt;=4.95 21  2 virginica (0.00000000 0.09523810 0.90476190) *</code></pre>
 <div class="sourceCode">
-<pre><code><span class='co'># predict using observations from task</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='co'># predict using observations from task</span>
 <span class='va'>preds</span> <span class='op'>=</span> <span class='va'>learner1</span><span class='op'>$</span><span class='fu'>predict</span><span class='op'>(</span><span class='va'>task</span>, row_ids <span class='op'>=</span> <span class='fl'>121</span><span class='op'>:</span><span class='fl'>150</span><span class='op'>)</span>
 <span class='co'># predict using "new" observations from an external data.frame</span>
 <span class='va'>preds</span> <span class='op'>=</span> <span class='va'>learner1</span><span class='op'>$</span><span class='fu'>predict_newdata</span><span class='op'>(</span>newdata <span class='op'>=</span> <span class='va'>iris</span><span class='op'>[</span><span class='fl'>121</span><span class='op'>:</span><span class='fl'>150</span>, <span class='op'>]</span><span class='op'>)</span>
-<span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span><span class='op'>(</span><span class='va'>preds</span><span class='op'>)</span>
+<span class='fu'><a href='https://docs.ropensci.org/skimr/reference/print.html'>print</a></span><span class='op'>(</span><span class='va'>preds</span><span class='op'>)</span>
 </code></pre>
 </div>
 <pre><code>&lt;PredictionClassif&gt; for 30 observations:
@@ -2165,7 +2213,7 @@ node), split, n, loss, yval, (yprob)
 <p>Let’s score our <a href="https://mlr3.mlr-org.com/reference/Prediction.html"><code>Prediction</code></a> object with some metrics. And take a deeper look by inspecting the <code>confusion matrix</code>.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span><span class='op'>(</span><span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/as.data.table.html'>as.data.table</a></span><span class='op'>(</span><span class='va'>mlr_measures</span><span class='op'>)</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span><span class='op'>(</span><span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/as.data.table.html'>as.data.table</a></span><span class='op'>(</span><span class='va'>mlr_measures</span><span class='op'>)</span><span class='op'>)</span>
 </code></pre>
 </div>
 <pre><code>              key task_type     packages predict_type task_properties
@@ -2176,22 +2224,22 @@ node), split, n, loss, yval, (yprob)
 5:     classif.ce   classif mlr3measures     response                
 6:  classif.costs   classif                  response                </code></pre>
 <div class="sourceCode">
-<pre><code><span class='va'>s</span> <span class='op'>=</span> <span class='va'>preds</span><span class='op'>$</span><span class='fu'>score</span><span class='op'>(</span><span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>msr</a></span><span class='op'>(</span><span class='st'>"classif.acc"</span><span class='op'>)</span><span class='op'>)</span>
-<span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span><span class='op'>(</span><span class='va'>s</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>s</span> <span class='op'>=</span> <span class='va'>preds</span><span class='op'>$</span><span class='fu'>score</span><span class='op'>(</span><span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>msr</a></span><span class='op'>(</span><span class='st'>"classif.acc"</span><span class='op'>)</span><span class='op'>)</span>
+<span class='fu'><a href='https://docs.ropensci.org/skimr/reference/print.html'>print</a></span><span class='op'>(</span><span class='va'>s</span><span class='op'>)</span>
 </code></pre>
 </div>
 <pre><code>classif.acc 
   0.8333333 </code></pre>
 <div class="sourceCode">
-<pre><code><span class='va'>s</span> <span class='op'>=</span> <span class='va'>preds</span><span class='op'>$</span><span class='fu'>score</span><span class='op'>(</span><span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>msrs</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"classif.acc"</span>, <span class='st'>"classif.ce"</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>
-<span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span><span class='op'>(</span><span class='va'>s</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>s</span> <span class='op'>=</span> <span class='va'>preds</span><span class='op'>$</span><span class='fu'>score</span><span class='op'>(</span><span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>msrs</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"classif.acc"</span>, <span class='st'>"classif.ce"</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>
+<span class='fu'><a href='https://docs.ropensci.org/skimr/reference/print.html'>print</a></span><span class='op'>(</span><span class='va'>s</span><span class='op'>)</span>
 </code></pre>
 </div>
 <pre><code>classif.acc  classif.ce 
   0.8333333   0.1666667 </code></pre>
 <div class="sourceCode">
-<pre><code><span class='va'>cm</span> <span class='op'>=</span> <span class='va'>preds</span><span class='op'>$</span><span class='va'>confusion</span>
-<span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span><span class='op'>(</span><span class='va'>cm</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>cm</span> <span class='op'>=</span> <span class='va'>preds</span><span class='op'>$</span><span class='va'>confusion</span>
+<span class='fu'><a href='https://docs.ropensci.org/skimr/reference/print.html'>print</a></span><span class='op'>(</span><span class='va'>cm</span><span class='op'>)</span>
 </code></pre>
 </div>
 <pre><code>            truth
@@ -2204,7 +2252,7 @@ response     setosa versicolor virginica
 <p>The <a href="https://mlr3.mlr-org.com/reference/Learner.html"><code>Learner</code></a> contains information about all parameters that can be configured, including data type, constraints, defaults, etc. We can change the hyperparameters either during construction of later through an active binding.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span><span class='op'>(</span><span class='va'>learner1</span><span class='op'>$</span><span class='va'>param_set</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://docs.ropensci.org/skimr/reference/print.html'>print</a></span><span class='op'>(</span><span class='va'>learner1</span><span class='op'>$</span><span class='va'>param_set</span><span class='op'>)</span>
 </code></pre>
 </div>
 <pre><code>&lt;ParamSet&gt;
@@ -2220,7 +2268,7 @@ response     setosa versicolor virginica
  9:           xval ParamInt     0   Inf                         10     0
 10:     keep_model ParamLgl    NA    NA  TRUE,FALSE          FALSE      </code></pre>
 <div class="sourceCode">
-<pre><code><span class='va'>learner2</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>lrn</a></span><span class='op'>(</span><span class='st'>"classif.rpart"</span>, predict_type <span class='op'>=</span> <span class='st'>"prob"</span>, minsplit <span class='op'>=</span> <span class='fl'>50</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>learner2</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>lrn</a></span><span class='op'>(</span><span class='st'>"classif.rpart"</span>, predict_type <span class='op'>=</span> <span class='st'>"prob"</span>, minsplit <span class='op'>=</span> <span class='fl'>50</span><span class='op'>)</span>
 <span class='va'>learner2</span><span class='op'>$</span><span class='va'>param_set</span><span class='op'>$</span><span class='va'>values</span><span class='op'>$</span><span class='va'>minsplit</span> <span class='op'>=</span> <span class='fl'>50</span>
 </code></pre>
 </div>
@@ -2229,9 +2277,9 @@ response     setosa versicolor virginica
 <p><a href="https://mlr3.mlr-org.com/reference/Resampling.html"><code>Resampling</code></a> simply repeats the train-predict-score loop and collects all results in a nice <code>data.table</code>.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>cv10</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>rsmp</a></span><span class='op'>(</span><span class='st'>"cv"</span>, folds <span class='op'>=</span> <span class='fl'>10</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>cv10</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>rsmp</a></span><span class='op'>(</span><span class='st'>"cv"</span>, folds <span class='op'>=</span> <span class='fl'>10</span><span class='op'>)</span>
 <span class='va'>r</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/resample.html'>resample</a></span><span class='op'>(</span><span class='va'>task</span>, <span class='va'>learner1</span>, <span class='va'>cv10</span><span class='op'>)</span>
-<span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span><span class='op'>(</span><span class='va'>r</span><span class='op'>)</span>
+<span class='fu'><a href='https://docs.ropensci.org/skimr/reference/print.html'>print</a></span><span class='op'>(</span><span class='va'>r</span><span class='op'>)</span>
 </code></pre>
 </div>
 <pre><code>&lt;ResampleResult&gt; of 10 iterations
@@ -2240,7 +2288,7 @@ response     setosa versicolor virginica
 * Warnings: 0 in 0 iterations
 * Errors: 0 in 0 iterations</code></pre>
 <div class="sourceCode">
-<pre><code><span class='va'>r</span><span class='op'>$</span><span class='fu'>score</span><span class='op'>(</span><span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>msrs</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"classif.acc"</span>, <span class='st'>"classif.ce"</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>r</span><span class='op'>$</span><span class='fu'>score</span><span class='op'>(</span><span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>msrs</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"classif.acc"</span>, <span class='st'>"classif.ce"</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>
 </code></pre>
 </div>
 <pre><code>                 task task_id                   learner    learner_id
@@ -2277,7 +2325,7 @@ response     setosa versicolor virginica
  9:   0.9333333 0.06666667
 10:   0.8666667 0.13333333</code></pre>
 <div class="sourceCode">
-<pre><code><span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span><span class='op'>(</span><span class='va'>r</span><span class='op'>$</span><span class='va'>data</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://docs.ropensci.org/skimr/reference/print.html'>print</a></span><span class='op'>(</span><span class='va'>r</span><span class='op'>$</span><span class='va'>data</span><span class='op'>)</span>
 </code></pre>
 </div>
 <pre><code>&lt;ResultData&gt;
@@ -2286,7 +2334,7 @@ response     setosa versicolor virginica
     clone: function (deep = FALSE) 
     combine: function (rdata) 
     data: list
-    initialize: function (data = NULL) 
+    initialize: function (data = NULL, store_backends = TRUE) 
     iterations: function (view = NULL) 
     learners: function (view = NULL, states = TRUE, reassemble = TRUE) 
     logs: function (view = NULL, condition) 
@@ -2295,15 +2343,15 @@ response     setosa versicolor virginica
     resamplings: function (view = NULL) 
     sweep: function () 
     task_type: active binding
-    tasks: function (view = NULL, reassemble = TRUE) 
+    tasks: function (view = NULL) 
     uhashes: function (view = NULL) 
   Private:
     deep_clone: function (name, value) 
     get_view_index: function (view) </code></pre>
 <div class="sourceCode">
-<pre><code><span class='co'># get all predictions nicely concatenated in a table</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='co'># get all predictions nicely concatenated in a table</span>
 <span class='va'>preds</span> <span class='op'>=</span> <span class='va'>r</span><span class='op'>$</span><span class='fu'>prediction</span><span class='op'>(</span><span class='op'>)</span>
-<span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span><span class='op'>(</span><span class='va'>preds</span><span class='op'>)</span>
+<span class='fu'><a href='https://docs.ropensci.org/skimr/reference/print.html'>print</a></span><span class='op'>(</span><span class='va'>preds</span><span class='op'>)</span>
 </code></pre>
 </div>
 <pre><code>&lt;PredictionClassif&gt; for 150 observations:
@@ -2316,8 +2364,8 @@ response     setosa versicolor virginica
        138  virginica  virginica
        145  virginica  virginica</code></pre>
 <div class="sourceCode">
-<pre><code><span class='va'>cm</span> <span class='op'>=</span> <span class='va'>preds</span><span class='op'>$</span><span class='va'>confusion</span>
-<span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span><span class='op'>(</span><span class='va'>cm</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>cm</span> <span class='op'>=</span> <span class='va'>preds</span><span class='op'>$</span><span class='va'>confusion</span>
+<span class='fu'><a href='https://docs.ropensci.org/skimr/reference/print.html'>print</a></span><span class='op'>(</span><span class='va'>cm</span><span class='op'>)</span>
 </code></pre>
 </div>
 <pre><code>            truth
@@ -2330,7 +2378,7 @@ response     setosa versicolor virginica
 <p><a href="https://mlr3learners.mlr-org.com">mlr3learners</a> ships out with a dozen different popular <a href="https://mlr3.mlr-org.com/reference/Learner.html"><code>Learners</code></a>. We can list them from the dictionary. If we want more, we can install an extension package, <a href="https://mlr3extralearners.mlr-org.com">mlr3extralearners</a>, from GitHub. Note how after the installation the dictionary increases in size.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span><span class='op'>(</span><span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/as.data.table.html'>as.data.table</a></span><span class='op'>(</span><span class='va'>mlr_learners</span><span class='op'>)</span><span class='op'>[</span>, <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"key"</span>, <span class='st'>"packages"</span><span class='op'>)</span><span class='op'>]</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span><span class='op'>(</span><span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/as.data.table.html'>as.data.table</a></span><span class='op'>(</span><span class='va'>mlr_learners</span><span class='op'>)</span><span class='op'>[</span>, <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"key"</span>, <span class='st'>"packages"</span><span class='op'>)</span><span class='op'>]</span><span class='op'>)</span>
 </code></pre>
 </div>
 <pre><code>                   key packages
@@ -2341,9 +2389,9 @@ response     setosa versicolor virginica
 5:        classif.kknn     kknn
 6:         classif.lda     MASS</code></pre>
 <div class="sourceCode">
-<pre><code><span class='co'># remotes::install_github("mlr-org/mlr3extralearners")</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='co'># remotes::install_github("mlr-org/mlr3extralearners")</span>
 <span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'>mlr3extralearners</span><span class='op'>)</span>
-<span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span><span class='op'>(</span><span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/as.data.table.html'>as.data.table</a></span><span class='op'>(</span><span class='va'>mlr_learners</span><span class='op'>)</span><span class='op'>[</span>, <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"key"</span>, <span class='st'>"packages"</span><span class='op'>)</span><span class='op'>]</span><span class='op'>)</span>
+<span class='fu'><a href='https://docs.ropensci.org/skimr/reference/print.html'>print</a></span><span class='op'>(</span><span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/as.data.table.html'>as.data.table</a></span><span class='op'>(</span><span class='va'>mlr_learners</span><span class='op'>)</span><span class='op'>[</span>, <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"key"</span>, <span class='st'>"packages"</span><span class='op'>)</span><span class='op'>]</span><span class='op'>)</span>
 </code></pre>
 </div>
 <pre><code>                    key               packages
@@ -2353,20 +2401,20 @@ response     setosa versicolor virginica
   4:        classif.J48                  RWeka
   5:       classif.JRip                  RWeka
  ---                                          
-105:        surv.ranger                 ranger
-106:         surv.rfsrc randomForestSRC,pracma
-107:         surv.rpart  rpart,distr6,survival
-108:           surv.svm            survivalsvm
-109:       surv.xgboost                xgboost</code></pre>
+109:        surv.ranger                 ranger
+110:         surv.rfsrc randomForestSRC,pracma
+111:         surv.rpart  rpart,distr6,survival
+112:           surv.svm            survivalsvm
+113:       surv.xgboost                xgboost</code></pre>
 </div>
 <h2 id="benchmarking-multiple-learners">Benchmarking multiple learners</h2>
 <p>The <a href="https://mlr3.mlr-org.com/reference/benchmark.html"><code>benchmark</code></a> function can conveniently compare `r ref(“Learner”, “Learners”) on the same dataset(s).</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>learners</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='va'>learner1</span>, <span class='va'>learner2</span>, <span class='fu'><a href='https://rdrr.io/pkg/mlr3extralearners/man/lrn.html'>lrn</a></span><span class='op'>(</span><span class='st'>"classif.randomForest"</span><span class='op'>)</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>learners</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='va'>learner1</span>, <span class='va'>learner2</span>, <span class='fu'><a href='https://rdrr.io/pkg/mlr3extralearners/man/lrn.html'>lrn</a></span><span class='op'>(</span><span class='st'>"classif.randomForest"</span><span class='op'>)</span><span class='op'>)</span>
 <span class='va'>bm_grid</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/benchmark_grid.html'>benchmark_grid</a></span><span class='op'>(</span><span class='va'>task</span>, <span class='va'>learners</span>, <span class='va'>cv10</span><span class='op'>)</span>
 <span class='va'>bm</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/benchmark.html'>benchmark</a></span><span class='op'>(</span><span class='va'>bm_grid</span><span class='op'>)</span>
-<span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span><span class='op'>(</span><span class='va'>bm</span><span class='op'>)</span>
+<span class='fu'><a href='https://docs.ropensci.org/skimr/reference/print.html'>print</a></span><span class='op'>(</span><span class='va'>bm</span><span class='op'>)</span>
 </code></pre>
 </div>
 <pre><code>&lt;BenchmarkResult&gt; of 30 rows with 3 resampling runs
@@ -2375,7 +2423,7 @@ response     setosa versicolor virginica
   2    iris        classif.rpart            cv    10        0      0
   3    iris classif.randomForest            cv    10        0      0</code></pre>
 <div class="sourceCode">
-<pre><code><span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span><span class='op'>(</span><span class='va'>bm</span><span class='op'>$</span><span class='fu'>aggregate</span><span class='op'>(</span>measures <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>msrs</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"classif.acc"</span>, <span class='st'>"classif.ce"</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://docs.ropensci.org/skimr/reference/print.html'>print</a></span><span class='op'>(</span><span class='va'>bm</span><span class='op'>$</span><span class='fu'>aggregate</span><span class='op'>(</span>measures <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>msrs</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"classif.acc"</span>, <span class='st'>"classif.ce"</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>
 </code></pre>
 </div>
 <pre><code>   nr      resample_result task_id           learner_id resampling_id iters
