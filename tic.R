@@ -6,7 +6,7 @@ get_stage("script") %>%
     pattern = ".Rmd",
     full.names = TRUE, recursive = TRUE), rmarkdown::render))
 
-if (ci_get_branch() == "master") {
+if (ci_get_branch() == "main") {
   get_stage("before_deploy") %>%
     add_step(step_setup_ssh()) %>%
     add_step(step_setup_push_deploy())
