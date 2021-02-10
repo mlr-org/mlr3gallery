@@ -101,7 +101,10 @@ Internally, `r ref("TunerGenSA")` was given the parameter types of the search sp
 Before the performance of the different `k` values was evaluated, the transformation function of the `search_space` parameter set was called and `k` was transformed to an integer value.
 
 Note that the tuner is not aware of the transformation.
-This could lead to problems since the tuner proposes different real values but they might be all rounded to the same integer value.
+This has two problematic consequences:
+First, the tuner might propose different real valued configurations that after rounding end up to be already evaluated configurations and we end up with re-evaluating the same hyperparameter configuration.
+This is only problematic, if we only optimze integer parameters.
+Second, the rounding introduces discontinuities which can be problematic for some tuners. 
 
 We successfully tuned a integer-valued hyperparameter with `r ref("TunerGenSA")` which is only suitable for an real-valued search space.
 This technique is not limited to tuning problems.
