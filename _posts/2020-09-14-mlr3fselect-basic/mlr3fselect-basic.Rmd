@@ -215,7 +215,7 @@ The repeated evaluation of the model might leak information about the test sets 
 [Nested resampling](https://mlr3book.mlr-org.com/nested-resampling.html) uses an outer and inner resampling to separate the feature selection from the performance estimation of the model.
 We can use the `AutoFselector` class for running nested resampling.
 The `AutoFselector` essantially combines a given `Learner` and feature selection method into a `Learner` with internal automatic feature selection.
-This is our inner resampling loop.
+The inner resampling loop that is used to determine the best feature set is conducted internally each time the `AutoFSelector` `Learner` object is trained.
 
 ```{r}
 resampling_inner = rsmp("cv", folds = 5)
