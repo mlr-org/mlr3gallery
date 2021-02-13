@@ -247,14 +247,7 @@ tuner_random$optimize(instance_random)
 
 Like before, we can review the `Archive`.
 It includes the points before and after the transformation.
-The archive includes a column for each parameter the `Tuner` sampled on the search space (points before the transformation):
-
-```{r}
-as.data.table(instance_random$archive)
-```
-
-The parameters used by the learner (points after the transformation) are stored in in the `x_domain` column as lists.
-By using `unnest = x_domain`, the list elements are expanded to separate columns:
+The archive includes a column for each parameter the `Tuner` sampled on the search space (values before the transformation) and additional columns with prefix `x_domain_*` that refer to the parameters used by the learner (values after the transformation):
 
 ```{r}
 as.data.table(instance_random$archive)
