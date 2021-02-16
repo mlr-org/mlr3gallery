@@ -1,24 +1,23 @@
 ---
-title: Liver Patient Classification Based on Diagnostic Measures
-author: 
+title: "Liver Patient Classification Based on Diagnostic Measures"
+categories:
+  - tuning
+  - oversampling
+  - binary calissification
+author:
   - name: Julian Lange
   - name: Jae-Eun Nam
   - name: Viet Tran
   - name: Simon Wiegrebe
   - name: Henri Funk (editor)
-date: 09-11-2020
 description: |
   This use case provides an example on tuning and benchmarking in mlr3verse using data from Liver Patient DataSet.
-categories:
-  - 'tuning'
-  - 'i2ml'
-  - 'oversampling'
-  - 'binary calissification'
-bibliography: bs.bib
+date: 09-11-2020
 output:
   distill::distill_article:
     self_contained: false
     css: ../../custom.css
+bibliography: bs.bib
 ---
 
 ```{r setup, include=FALSE}
@@ -37,7 +36,7 @@ The following examples were created as part of the Introduction to Machine Learn
 The goal of the project was to create and compare one or several machine learning pipelines for the problem at hand together with exploratory analysis and an exposition of results.
 The posts were contributed to the mlr3gallery by the authors and edited for better legibility by the editor.
 We want to thank the authors for allowing us to publish their results.
-Note, that correctness of the results can not be guaranteed. 
+Note, that correctness of the results can not be guaranteed.
 
 ## Prerequisites
 
@@ -73,10 +72,10 @@ colnames(liver) = c(
 
 # Recode class and gender
 liver_df = liver %>%
-  mutate( 
+  mutate(
     class = factor(ifelse(class == 2, 0, 1),
       levels = c(0, 1),
-      labels = c("no disease", "disease")), 
+      labels = c("no disease", "disease")),
     gender = factor(ifelse(gender == "Female", 1, 0),
       levels = c(0, 1),
       labels = c("male", "female"))
@@ -87,9 +86,9 @@ Machine learning (ML), a branch of both computer science and statistics, in conj
 A prime example for this is the healthcare industry, where applications of ML, as well as artificial intelligence in general, have become more and more popular in recent years.
 One very frequently researched and applied use of ML in the medical field is the area of disease identification and diagnosis.
 ML technologies have shown potential in detecting anomalies and diseases through pattern recognition, even though an entirely digital diagnosis by a computer is probably still something for the far future.
-However, suitable and reliable models estimating the risk of diseases could help real doctors make quicker and better decisions today already.  
+However, suitable and reliable models estimating the risk of diseases could help real doctors make quicker and better decisions today already.
 In this use case we examined machine learning algorithms and learners for the specific application of liver disease detection.
-The task is therefore a binary classification task to predict whether a patient has liver disease or not based on some common diagnostic measurements.  
+The task is therefore a binary classification task to predict whether a patient has liver disease or not based on some common diagnostic measurements.
 This report is organized as follows.
 Section 1 introduces the data and section 2 provides more in-depth data exploration.
 Section 3 presents learners and their hyperparameter tuning while section 4, dealing with model fitting and benchmarking, presents results and conclusions.
@@ -126,11 +125,11 @@ While the names and corresponding measurements look rather cryptic to the uninfo
 All of these measurements are frequently used markers for liver disease.
 For the first five, measuring the chemical compound bilirubin and the three enzymes alkaline phosphatase, alanine transaminase and aspartate transaminase, elevated levels indicate liver disease @Gowda2009 @Oh2011.
 For the remaining three, which concern protein levels, lower-than-normal values suggest a liver problem @Carvalho2018 @LabTests2019.
-Lastly, one should note that some of the measurements are part of more than one variable. For example, the total serum bilirubin is simply the sum of both the direct and indirect bilirubin levels and the amount of albumin is used to calculate the values of the total serum protein as well as the albumin-to-globulin ratio. So, one might already suspect that some of the features are highly correlated to one another, but more on that kind of analysis in the following section. 
+Lastly, one should note that some of the measurements are part of more than one variable. For example, the total serum bilirubin is simply the sum of both the direct and indirect bilirubin levels and the amount of albumin is used to calculate the values of the total serum protein as well as the albumin-to-globulin ratio. So, one might already suspect that some of the features are highly correlated to one another, but more on that kind of analysis in the following section.
 
 # Data exporation
 
-## Missing values  
+## Missing values
 
 After we got an overview of the task and dataset, we analyzed the variables from an exploratory perspective and first checked for missing values.
 
@@ -145,7 +144,7 @@ liver_df[rowSums(is.na(liver_df)) > 0, ]
 ```
 
 The only missing values, totalling four, are albumin-to-globulin ratios.
-As it turned out omitting or imputation techniques were not necessary, because we ended up not using the ratio due to high correlations with other features. 
+As it turned out omitting or imputation techniques were not necessary, because we ended up not using the ratio due to high correlations with other features.
 Thus, we were left with no missing value problems to deal with.
 
 ## Univariate distribution
@@ -156,14 +155,14 @@ Next, we looked into the univariate distribution of each of the variables. We be
 # Barplots for discrete variables (target, gender)
 bar_target = ggplot(liver_df, aes(x = class)) +
   geom_bar() +
-  ylab("Frequency") + 
-  theme_minimal() + 
+  ylab("Frequency") +
+  theme_minimal() +
   theme(plot.margin = unit(c(5.5, 30, 5.5, 5.5), units = "points"))
 
 bar_gender = ggplot(liver_df, aes(x = gender)) +
-  geom_bar() + 
-  ylab("Frequency") + 
-  theme_minimal() + 
+  geom_bar() +
+  ylab("Frequency") +
+  theme_minimal() +
   theme(plot.margin = unit(c(5.5, 5.5, 5.5, 30), units = "points"))
 
 gridExtra::grid.arrange(bar_target, bar_gender, ncol = 2)
@@ -171,7 +170,7 @@ gridExtra::grid.arrange(bar_target, bar_gender, ncol = 2)
 
 The distribution of the target variable is quite imbalanced, as the barplot shows: the number of patients with and without liver disease equals `r length(which(liver_df$class == "disease"))` and `r length(which(liver_df$class == "no disease"))`, respectively.
 The underrepresentation of a class, in our case those without liver disease, might worsen the performance of ML models.
-In order to examine this, we additionally fitted the models on a dataset where we randomly over-sampled the minority class, resulting in a perfectly balanced dataset.  
+In order to examine this, we additionally fitted the models on a dataset where we randomly over-sampled the minority class, resulting in a perfectly balanced dataset.
 Furthermore, we applied stratified sampling to ensure the proportion of the classes is maintained during cross-validation.
 
 The only discrete feature gender is quite imbalanced, too.
@@ -182,8 +181,8 @@ As one can see in the next section, this proportion is also observed within each
 plot_histogram(liver_df, nrow = 3, ncol = 3, ggtheme = theme_minimal())
 ```
 
-Strikingly, some of the metric features are extremely right-skewed and contain several extreme values. 
-To reduce the impact of outliers and since some models assume normality of features, we log-transformed these variables. 
+Strikingly, some of the metric features are extremely right-skewed and contain several extreme values.
+To reduce the impact of outliers and since some models assume normality of features, we log-transformed these variables.
 
 ## Features by class
 
@@ -198,9 +197,9 @@ count_class_gender = liver_df %>%
 
 ggplot(count_class_gender, aes(x = class, y = n, fill = gender)) +
   geom_bar(position = "fill", stat = "identity") +
-  ylab("Percentage") + 
-  scale_fill_grey(start = 0.8, end = 0.2) + 
-  theme_minimal() + 
+  ylab("Percentage") +
+  scale_fill_grey(start = 0.8, end = 0.2) +
+  theme_minimal() +
   theme(text = element_text(size = 15))
 ```
 
@@ -210,28 +209,28 @@ To see the differences in metric features, we compare the following boxplots, wh
 
 ```{r metricFeaturesByClass, echo=FALSE, warning=FALSE, fig.width=10, fig.asp=.6, fig.align='center', out.width='82%'}
 # Class by metric features before log-transforming right-skewed features
-plot_boxplot(liver_df, by = "class", nrow = 3, ncol = 3, 
+plot_boxplot(liver_df, by = "class", nrow = 3, ncol = 3,
              ggtheme = theme_minimal(base_size = 14))
 ```
- 
-Except for the total amount of protein, for each feature we obtain differences between the median values of the two classes. 
-Notably, in the case of strongly right-skewed features the "disease" class contains far more extreme values than the "no disease" class, which is probably because of its larger size. 
-This effect is weakened by log-transforming such features, as can be seen in the boxplots below. 
-Moreover, the dispersion in the class "disease" is greater for these features, as the length of the boxes indicates. 
+
+Except for the total amount of protein, for each feature we obtain differences between the median values of the two classes.
+Notably, in the case of strongly right-skewed features the "disease" class contains far more extreme values than the "no disease" class, which is probably because of its larger size.
+This effect is weakened by log-transforming such features, as can be seen in the boxplots below.
+Moreover, the dispersion in the class "disease" is greater for these features, as the length of the boxes indicates.
 Overall, the features seem to be correlated to the target, so it makes sense to use them for this task and model their relationship with the target.
 
 ```{r TransformedFeaturesByClass, echo=FALSE, warning=FALSE, fig.width=10, fig.asp=.6, fig.align='center', out.width='82%'}
 # Metric features by class after log-transforming right-skewed features
 liver_df_log = liver_df %>%
   mutate( # Log for features with skewed distributions
-    alkaline_phosphatase = log(alkaline_phosphatase), 
+    alkaline_phosphatase = log(alkaline_phosphatase),
     aspartate_transaminase = log(aspartate_transaminase),
     direct_bilirubin = log(direct_bilirubin),
     total_bilirubin = log(total_bilirubin),
     alanine_transaminase = log(alanine_transaminase)
   )
-  
-plot_boxplot(liver_df_log, by = "class", nrow = 3, ncol = 3, 
+
+plot_boxplot(liver_df_log, by = "class", nrow = 3, ncol = 3,
              ggtheme = theme_minimal(base_size = 14))
 ```
 
@@ -258,7 +257,7 @@ liver_df_numeric = liver_df %>%
 GGally::ggcorr(liver_df_numeric, label = TRUE, label_color='white', hjust = .9)
 ```
 
-For four of the pairs we obtained a very high correlation coefficient. 
+For four of the pairs we obtained a very high correlation coefficient.
 Looking at these features, it is clear they affect each other.
 As the complexity of the model should be minimized and due to multicollinearity concerns, we decided to take only one of each pair.
 When deciding on which features to keep, we chose those that are more specific and relevant regarding liver disease.
@@ -272,7 +271,7 @@ Since we did not notice any fundamental differences in the data for these two fe
 ```{r reduceAndScale, include=FALSE}
 ## Reducing, transforming and scaling dataset
 liver_df_log = liver_df %>%
-  select(-total_bilirubin, -alanine_transaminase, -total_protein, 
+  select(-total_bilirubin, -alanine_transaminase, -total_protein,
          -albumin_globulin_ratio) %>%
   mutate(
     gender = as.numeric(ifelse(gender == "female", 1, 0)), # Recode gender
@@ -288,8 +287,8 @@ po_scale$param_set$values$affect_columns = selector_name(c("age", "direct_biliru
 ```
 
 Lastly, we standardized all metric features, as different ranges and units might weigh features. This is especially important for the k-NN model.
-The following table shows the final dataset and the transformations we applied.  
-**Note**: 
+The following table shows the final dataset and the transformations we applied.
+**Note**:
 Different from `log` or other transformation, `scaling` depends on the data themselves.
 Scaling data before data are split leads to data leakage, were information of train and test set are shared.
 As Data Leakage causes higher performance, scaling should always be applied in each data split induced by the ML workflow separately.
@@ -312,11 +311,11 @@ The specification of the positive class has an impact on the evaluation later on
 
 ```{r task definition}
 ## Task definition
-task_liver = TaskClassif$new(id = "task_liver", backend = liver_df_log, 
+task_liver = TaskClassif$new(id = "task_liver", backend = liver_df_log,
                               target = "class", positive = "1")
 ```
 
-In the following we are going to evaluate logistic regression, linear discriminant analysis (LDA), quadratic discriminant analysis (QDA), naive Bayes, k-nearest neighbour (k-NN), classification trees (CART) and random forest on the binary target. 
+In the following we are going to evaluate logistic regression, linear discriminant analysis (LDA), quadratic discriminant analysis (QDA), naive Bayes, k-nearest neighbour (k-NN), classification trees (CART) and random forest on the binary target.
 
 ```{r learner definition}
 ## Learner definition
@@ -369,7 +368,7 @@ The following table shows the hyperparameters we tuned.
 
 For k-NN we chose 3 as the lower limit and 50 as the upper limit for k (number of neighbors).
 A too small k can lead to overfitting.
-We also tried different distance measures (e.g. 1 for Manhattan distance, 2 for Euclidean distance) and kernels. 
+We also tried different distance measures (e.g. 1 for Manhattan distance, 2 for Euclidean distance) and kernels.
 For CART we tuned the hyperparameters cp (complexity parameter) and minsplit (minimum number of observations in a node in order to attempt a split).
 cp controls the size of the tree: small values can result in overfitting while large values can cause underfitting. We also tuned parameters for the minimum size of terminal nodes and the number of variables randomly sampled as candidates at each split (from 1 to number of features) for random forest.
 
@@ -380,16 +379,16 @@ tune_ps_knn = ParamSet$new(list(
   ParamFct$new("kernel", c("rectangular", "gaussian", "rank", "optimal"))
 ))
 tune_ps_rpart = ParamSet$new(list(
-  # Minimum number of observations that must exist in a node in order for a 
+  # Minimum number of observations that must exist in a node in order for a
   # split to be attempted
-  ParamInt$new("minsplit", lower = 10, upper = 40), 
+  ParamInt$new("minsplit", lower = 10, upper = 40),
   ParamDbl$new("cp", lower = 0.001, upper = 0.1) # Complexity parameter
 ))
 tune_ps_rf = ParamSet$new(list(
   # Minimum size of terminal nodes
-  ParamInt$new("min.node.size", lower = 10, upper = 50), 
+  ParamInt$new("min.node.size", lower = 10, upper = 50),
   # Number of variables randomly sampled as candidates at each split
-  ParamInt$new("mtry", lower = 1, upper = 6) 
+  ParamInt$new("mtry", lower = 1, upper = 6)
 ))
 ```
 
@@ -429,7 +428,7 @@ learners$learner_rf$predict_sets = c("train", "test")
 ```
 
 During our research we found that oversampling can potentially increase the performance of the learners.
-As mentioned in section 2.2, we opted for perfectly balancing the classes. By using `mlr3pipelines` we can apply the benchmark function later on. 
+As mentioned in section 2.2, we opted for perfectly balancing the classes. By using `mlr3pipelines` we can apply the benchmark function later on.
 
 ```{r oversampling and corresponding learners, results="hide"}
 # Oversampling minority class to get perfectly balanced classes
@@ -454,7 +453,7 @@ resampling_outer = rsmp(id = "cv", .key = "cv", folds = 5L) # 5-fold cross-valid
 task_liver$col_roles$stratum = task_liver$target_names # Stratification
 ```
 
-To rank the different learners and finally decide which one fits best for the task at hand, we used benchmarking. 
+To rank the different learners and finally decide which one fits best for the task at hand, we used benchmarking.
 The following code chunk executes our benchmarking with all learners.
 
 ```{r benchmarking, echo = TRUE, results = 'hide', warning = FALSE, eval=long_run}
@@ -474,7 +473,7 @@ bmr = readRDS("bmr.RDS")
 
 As mentioned above, stratified 5-fold cross-validation was chosen.
 This means that performance is determined as the average across five model evaluations with a train-test-split of 80% to 20%.
-Furthermore, the choice of performance metrics is crucial in ranking different learners. 
+Furthermore, the choice of performance metrics is crucial in ranking different learners.
 While each one of them has its specific use case, we opted for AUC, a performance metric taking into account both sensitivity and specificity, which we also used for hyperparameter tuning.
 
 We first present a comparison of all learners by AUC, with and without oversampling, and for both training and test data.
@@ -486,16 +485,16 @@ measures = list(
   msr("classif.auc", id = "auc_test")
 )
 
-bmr$aggregate(measures)[, c("learner_id", "auc_train", "auc_test")] %>% 
+bmr$aggregate(measures)[, c("learner_id", "auc_train", "auc_test")] %>%
   kable(digits = 4)
 ```
 
 As can be seen in the results above, regardless of whether oversampling was applied or not, logistic regression, LDA, QDA, and naive Bayes have very similar performance on training and test data.
 On the other hand, k-NN, CART and random forest predict much better on the training data, indicating overfitting.
 
-Furthermore, oversampling leaves AUC performance almost untouched for all learners. 
+Furthermore, oversampling leaves AUC performance almost untouched for all learners.
 
-The boxplots below graphically summarize AUC performance of all learners, with the blue dots indicating mean AUC performance. 
+The boxplots below graphically summarize AUC performance of all learners, with the blue dots indicating mean AUC performance.
 
 ```{r AUC boxplots, echo=FALSE, fig.height = 6, fig.width = 12, out.width='95%', fig.align="center"}
 # Boxplots to compare learners by AUC
@@ -516,22 +515,22 @@ compare_df = as.data.frame(bmr$score(list(
 
 ggplot(compare_df, aes(x = learner_id, y = classif.auc)) +
   geom_boxplot() +
-  stat_summary(fun.y = mean, geom = "point", shape = 20, size = 3, color = "blue") + 
+  stat_summary(fun.y = mean, geom = "point", shape = 20, size = 3, color = "blue") +
   labs(x = "Learner", y = "AUC") +
-  theme_minimal() + 
+  theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, vjust = 1, size = 12, hjust = 1),
         axis.title.x = element_text(size = 12, face = "bold"),
         axis.title.y = element_text(size = 12, face = "bold"))
 ```
 
 Random forest is the learner with the best AUC performance, both with and without oversampling.
-Whereas mean AUC is roughly between 0.65 and 0.75 for all learners, the individual components of AUC might differ substantially. 
+Whereas mean AUC is roughly between 0.65 and 0.75 for all learners, the individual components of AUC might differ substantially.
 
 As a first step towards "AUC decomposition", we consider the ROC curve, which provides valuable graphical insights into performance - even more so since AUC is directly derived from it.
 
 ```{r, echo=FALSE, out.width='85%', fig.align="center"}
 # Plotting ROC curves
-autoplot(bmr, type = "roc", show_cb = FALSE) + 
+autoplot(bmr, type = "roc", show_cb = FALSE) +
   theme_minimal()
 ```
 
@@ -559,7 +558,7 @@ bmr$aggregate(list(
 As it turned out, without oversampling logistic regression, LDA, k-NN, CART, and random forest score very high on sensitivity and rather low on specificity; QDA and naive Bayes, on the other hand, score relatively high on specificity, but not as high on sensitivity.
 By definition, high sensitivity (specificity) results from a low false negative (positive) rate, which is also represented in the data.
 
-With oversampling, specificity increases at the cost of sensitivity for all learners (even for those which already had high specificity), as can be seen in the two graphs below. 
+With oversampling, specificity increases at the cost of sensitivity for all learners (even for those which already had high specificity), as can be seen in the two graphs below.
 
 ```{r sensitivity and specificity barplots, echo=FALSE, out.width='90%', fig.align="center"}
 # Creating dataframe with the performance measures for the barplots
@@ -576,7 +575,7 @@ compare_df2 = as.data.frame(bmr$aggregate(list(
   )
 
 # Plotting sensitivity and specificity, comparing original and oversampled dataset
-plot1 = ggplot(compare_df2, aes(fill = data_balanced, y = classif.sensitivity, 
+plot1 = ggplot(compare_df2, aes(fill = data_balanced, y = classif.sensitivity,
                                  x = learner_id_wo)) +
   geom_bar(position = "dodge", stat = "identity") +
   labs(x = "Learner", y = "Sensitivity", fill = "Data") +
@@ -585,15 +584,15 @@ plot1 = ggplot(compare_df2, aes(fill = data_balanced, y = classif.sensitivity,
         axis.title.x = element_text(size = 10, face = "bold"),
         axis.title.y = element_text(size = 10, face = "bold"),
         legend.title = element_text(size = 10),
-        legend.text = element_text(size = 10), 
+        legend.text = element_text(size = 10),
         legend.position = "bottom") +
   ylim(0, 1)
 
-plot2 = ggplot(compare_df2, aes(fill = data_balanced, y = classif.specificity, 
+plot2 = ggplot(compare_df2, aes(fill = data_balanced, y = classif.specificity,
                                  x = learner_id_wo)) +
   geom_bar(position = "dodge", stat = "identity") +
   labs(x = "Learner", y = "Specificity", fill = "Data") +
-  theme_minimal() + 
+  theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, vjust = 1, size = 10, hjust = 1),
         axis.title.x = element_text(size = 10, face = "bold"),
         axis.title.y = element_text(size = 10, face = "bold"),
@@ -625,8 +624,8 @@ compare_df3 = gather(compare_df2, "measure", "value", 2:6)
 ggplot(compare_df3[which(compare_df3$learner_id_wo == "classif.ranger.tuned"), ],
        aes(fill = data_balanced, y = value, x = measure)) +
   geom_bar(position = "dodge", stat = "identity") +
-  labs(title = "Random forest", x = "Measure", y = "Value", fill = "Data") + 
-  theme_minimal() + 
+  labs(title = "Random forest", x = "Measure", y = "Value", fill = "Data") +
+  theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, vjust = 1, size = 10, hjust = 1),
       axis.title.x = element_text(size = 10, face = "bold"),
       axis.title.y = element_text(size = 10, face = "bold"),
@@ -645,15 +644,15 @@ confusion <- lapply(setNames(1:14, names), function(x) ftable(bmr$resample_resul
 
 
 The confusion matrices confirm the above conclusions: without oversampling, all learners (except QDA and naive Bayes) display very high numbers of true positives, but also of false positives, implying high sensitivity and low specificity.
-Also note that a trivial model classifying all individuals as "1" would cause fewer misclassifications than all of our models except random forest, casting doubt on the predictive power of the features in our dataset.  
-Regarding learner performance with oversampling, the confusion matrices add another valuable insight:  
+Also note that a trivial model classifying all individuals as "1" would cause fewer misclassifications than all of our models except random forest, casting doubt on the predictive power of the features in our dataset.
+Regarding learner performance with oversampling, the confusion matrices add another valuable insight:
 
 * the total number of misclassifications increases for all learners
-* the correct predictions become more balanced (by partly shifting from true positives to true negatives) 
+* the correct predictions become more balanced (by partly shifting from true positives to true negatives)
 * the misclassifications partly shift from false positives to false negatives
 
 The final decision regarding which learner works best - and also whether oversampling should be used or not - strongly depends on the real world implications of sensitivity and specificity. One of the two might outweigh the other many times over in terms of practical importance.
-Think of the typical HIV rapid diagnostic test example, where high sensitivity at the cost of low specificity might cause an (unwarranted) shock but is otherwise not dangerous, whereas low sensitivity would be highly perilous.  
+Think of the typical HIV rapid diagnostic test example, where high sensitivity at the cost of low specificity might cause an (unwarranted) shock but is otherwise not dangerous, whereas low sensitivity would be highly perilous.
 As is usually the case, no black and white "best model" exists here - recall that, even with oversampling, none of our models perform well on both sensitivity and specificity.
 In our case, we would need to ask ourselves: what would be the consequences of high specificity at the cost of low sensitivity, which implies telling many patients with a liver disease that they are healthy; versus what would be the consequences of high sensitivity at the cost of low specificity, which would mean telling many healthy patients they have a liver disease.
 In absence of further topic-specific information, we can only state the best-performing learners for the particular performance metric chosen.
@@ -666,6 +665,6 @@ On the feature level, while we focused almost exclusively on the machine learnin
 This might also mean to consider already thrown out variables again.
 Furthermore, feature engineering as well as data preprocessing, for instance  using principal component analysis, could be applied to the dataset.
 Regarding hyperparameter tuning, different hyperparameters with larger hyperparameter spaces and numbers of evaluations could be considered.
-Furthermore, tuning could also be applied to some of those learners that we labeled as baseline learners, though to a lesser extent.  
+Furthermore, tuning could also be applied to some of those learners that we labeled as baseline learners, though to a lesser extent.
 Finally, we limited ourselves to those classifiers discussed in detail in the course.
 More classifiers exist, however; in particular, gradient boosting and support vector machines could additionally be applied to this task and potentially yield better results.
