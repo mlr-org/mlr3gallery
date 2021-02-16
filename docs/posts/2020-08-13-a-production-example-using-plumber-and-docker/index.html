@@ -464,8 +464,15 @@ d-title {
   top: 0;
 }
 
+/* adjust viewport for navbar height */
+/* helps vertically center bootstrap (non-distill) content */
+.min-vh-100 {
+  min-height: calc(100vh - 100px) !important;
+}
+
 </style>
 
+<script src="../../site_libs/jquery-1.11.3/jquery.min.js"></script>
 <link href="../../site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet"/>
 <link href="../../site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet"/>
 <script src="../../site_libs/headroom-0.9.4/headroom.min.js"></script>
@@ -573,19 +580,21 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
           var results = fuse.search(query, searchOptions);
           callback(results
             .map(function(result) { return result.item; })
-            .filter(function(item) { return !!item.description; })
           );
         },
         templates: {
           suggestion: function(suggestion) {
+            var img = suggestion.preview && Object.keys(suggestion.preview).length > 0
+              ? `<img src="${offsetURL(suggestion.preview)}"</img>`
+              : '';
             var html = `
               <div class="search-item">
                 <h3>${suggestion.title}</h3>
                 <div class="search-item-description">
-                  ${suggestion.description}
+                  ${suggestion.description || ''}
                 </div>
                 <div class="search-item-preview">
-                  <img src="${suggestion.preview ? offsetURL(suggestion.preview) : ''}"</img>
+                  ${img}
                 </div>
               </div>
             `;
@@ -608,6 +617,10 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 </script>
 
 <style type="text/css">
+
+.nav-search {
+  font-size: x-small;
+}
 
 /* Algolioa Autocomplete */
 
@@ -683,6 +696,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 }
 
 .algolia-autocomplete .aa-dropdown-menu .aa-suggestion .search-item h3 {
+  font-size: 1rem;
   margin-block-start: 0;
   margin-block-end: 5px;
 }
@@ -910,6 +924,11 @@ d-article pre a:hover {
   text-decoration: underline;
 }
 
+d-article details {
+  grid-column: text;
+  margin-bottom: 0.8em;
+}
+
 @media(min-width: 768px) {
 
 d-article pre,
@@ -1064,6 +1083,17 @@ d-article .citation {
 
 div.hanging-indent{
   margin-left: 1em; text-indent: -1em;
+}
+
+/* Citation hover box */
+
+.tippy-box[data-theme~=light-border] {
+  background-color: rgba(250, 250, 250, 0.95);
+}
+
+.tippy-content > p {
+  margin-bottom: 0;
+  padding: 2px;
 }
 
 
@@ -1731,7 +1761,7 @@ function init_distill() {
     var layout = $(this).attr('data-layout');
 
     // apply layout to markdown level block elements
-    var elements = $(this).children().not('div.sourceCode, pre, script');
+    var elements = $(this).children().not('details, div.sourceCode, pre, script');
     elements.each(function(i, el) {
       var layout_div = $('<div class="' + layout + '"></div>');
       if (layout_div.hasClass('shaded')) {
@@ -1846,6 +1876,20 @@ function init_distill() {
     // move appendix-bottom entries to the bottom
     $('.appendix-bottom').appendTo('d-appendix').children().unwrap();
     $('.appendix-bottom').remove();
+
+    // hoverable references
+    $('span.citation[data-cites]').each(function() {
+      var refHtml = $('#ref-' + $(this).attr('data-cites')).html();
+      window.tippy(this, {
+        allowHTML: true,
+        content: refHtml,
+        maxWidth: 500,
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'light-border',
+        placement: 'bottom-start'
+      });
+    });
 
     // clear polling timer
     clearInterval(tid);
@@ -2007,6 +2051,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
 <!--/radix_placeholder_distill-->
   <script src="../../site_libs/jquery-1.11.3/jquery.min.js"></script>
+  <script src="../../site_libs/popper-2.6.0/popper.min.js"></script>
+  <link href="../../site_libs/tippy-6.2.7/tippy.css" rel="stylesheet" />
+  <link href="../../site_libs/tippy-6.2.7/tippy-light-border.css" rel="stylesheet" />
+  <script src="../../site_libs/tippy-6.2.7/tippy.umd.min.js"></script>
   <script src="../../site_libs/anchor-4.2.2/anchor.min.js"></script>
   <script src="../../site_libs/bowser-1.9.3/bowser.min.js"></script>
   <script src="../../site_libs/webcomponents-2.0.0/webcomponents.js"></script>
@@ -2077,7 +2125,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <h3 id="modeling-background">Modeling Background</h3>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://Rdatatable.gitlab.io/data.table'>data.table</a></span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://Rdatatable.gitlab.io/data.table'>data.table</a></span><span class='op'>)</span>
 <span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://mlr3.mlr-org.com'>mlr3</a></span><span class='op'>)</span>
 <span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://mlr3pipelines.mlr-org.com'>mlr3pipelines</a></span><span class='op'>)</span>
 </code></pre>
@@ -2086,14 +2134,14 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>We will use a subset of the <a href="https://mlr3.mlr-org.com/reference/mlr_tasks_boston_housing.html"><code>boston_housing</code></a> <a href="https://mlr3.mlr-org.com/reference/Task.html"><code>Task</code></a>. Our goal is to predict the median value of owner-occupied homes in USD 1000’s (target <code>medv</code>), using the features <code>crim</code>, <code>tax</code> and <code>town</code> (just to have <code>factor</code>, <code>integer</code>, and <code>numeric</code> feature types):</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>data</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>tsk</a></span><span class='op'>(</span><span class='st'>"boston_housing"</span><span class='op'>)</span><span class='op'>$</span><span class='fu'>data</span><span class='op'>(</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>data</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>tsk</a></span><span class='op'>(</span><span class='st'>"boston_housing"</span><span class='op'>)</span><span class='op'>$</span><span class='fu'>data</span><span class='op'>(</span><span class='op'>)</span>
 <span class='va'>data</span> <span class='op'>=</span> <span class='va'>data</span><span class='op'>[</span>, <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"medv"</span>, <span class='st'>"crim"</span>, <span class='st'>"tax"</span>, <span class='st'>"town"</span><span class='op'>)</span><span class='op'>]</span>
 </code></pre>
 </div>
 </div>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>task</span> <span class='op'>=</span> <span class='va'><a href='https://mlr3.mlr-org.com/reference/TaskRegr.html'>TaskRegr</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='st'>"boston"</span>, backend <span class='op'>=</span> <span class='va'>data</span>, target <span class='op'>=</span> <span class='st'>"medv"</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>task</span> <span class='op'>=</span> <span class='va'><a href='https://mlr3.mlr-org.com/reference/TaskRegr.html'>TaskRegr</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='st'>"boston"</span>, backend <span class='op'>=</span> <span class='va'>data</span>, target <span class='op'>=</span> <span class='st'>"medv"</span><span class='op'>)</span>
 </code></pre>
 </div>
 </div>
@@ -2101,7 +2149,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>Regarding modeling, we will keep it very simple and use the <a href="https://mlr3.mlr-org.com/reference/mlr_learners_regr.rpart.html"><code>rpart learner</code></a>. Missing numerical features (which could happen during prediction) will be imputed by their median via <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_imputemedian.html"><code>PipeOpImputeMedian</code></a>, while missing factorial features will be imputed using a new level via <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_imputeoor.html"><code>PipeOpImputeOOR</code></a>. As <code>PipeOpImputeOOR</code> will introduce a new <code>level</code>, <code>".MISSING"</code> to impute missing values, we also use <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_fixfactors.html"><code>PipeOpFixFactors</code></a>:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>g</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"imputemedian"</span><span class='op'>)</span> <span class='op'>%&gt;&gt;%</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>g</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"imputemedian"</span><span class='op'>)</span> <span class='op'>%&gt;&gt;%</span>
   <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"imputeoor"</span><span class='op'>)</span> <span class='op'>%&gt;&gt;%</span>
   <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"fixfactors"</span><span class='op'>)</span> <span class='op'>%&gt;&gt;%</span>
   <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>lrn</a></span><span class='op'>(</span><span class='st'>"regr.rpart"</span><span class='op'>)</span>
@@ -2111,7 +2159,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>We wrap this <a href="https://mlr3pipelines.mlr-org.com/reference/Graph.html"><code>Graph</code></a> in a <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_learners_graph.html"><code>GraphLearner</code></a> and can train on the <code>Task</code>:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>gl</span> <span class='op'>=</span> <span class='va'><a href='https://mlr3pipelines.mlr-org.com//reference/mlr_learners_graph.html'>GraphLearner</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='va'>g</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>gl</span> <span class='op'>=</span> <span class='va'><a href='https://mlr3pipelines.mlr-org.com//reference/mlr_learners_graph.html'>GraphLearner</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='va'>g</span><span class='op'>)</span>
 <span class='va'>gl</span><span class='op'>$</span><span class='fu'>train</span><span class='op'>(</span><span class='va'>task</span><span class='op'>)</span>
 </code></pre>
 </div>
@@ -2119,21 +2167,21 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>We can inspect the trained pipeline looking at:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>gl</span><span class='op'>$</span><span class='va'>model</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>gl</span><span class='op'>$</span><span class='va'>model</span>
 </code></pre>
 </div>
 </div>
 <p>Furthermore, we can save the trained pipeline, i.e., as <code>"gl.rds"</code>:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='fu'><a href='https://rdrr.io/r/base/readRDS.html'>saveRDS</a></span><span class='op'>(</span><span class='va'>gl</span>, <span class='st'>"gl.rds"</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/readRDS.html'>saveRDS</a></span><span class='op'>(</span><span class='va'>gl</span>, <span class='st'>"gl.rds"</span><span class='op'>)</span>
 </code></pre>
 </div>
 </div>
 <p>We will also store some information regarding the features, i.e., the feature names, types and levels (you will later see, why we need to do this):</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>feature_info</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>feature_info</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>
   feature_names <span class='op'>=</span> <span class='va'>task</span><span class='op'>$</span><span class='va'>feature_names</span>,
   feature_types <span class='op'>=</span> <span class='va'>task</span><span class='op'>$</span><span class='va'>feature_types</span>,
   levels <span class='op'>=</span> <span class='va'>task</span><span class='op'>$</span><span class='fu'>levels</span><span class='op'>(</span><span class='op'>)</span>
@@ -2145,7 +2193,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>Putting everything in a file, <code>train_gl.R</code> looks like the following, which we can then source before moving on:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='co'># train_gl.R</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='co'># train_gl.R</span>
 
 <span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://mlr3.mlr-org.com'>mlr3</a></span><span class='op'>)</span>
 <span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://mlr3pipelines.mlr-org.com'>mlr3pipelines</a></span><span class='op'>)</span>
@@ -2178,7 +2226,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>Our goal of our REST (representational state transfer) API (application programming interface) will be to predict the <code>medv</code> of a new observation, i.e., it should do something like the following:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>newdata</span> <span class='op'>=</span> <span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/data.table.html'>data.table</a></span><span class='op'>(</span>crim <span class='op'>=</span> <span class='fl'>3.14</span>, tax <span class='op'>=</span> <span class='fl'>691</span>, town <span class='op'>=</span> <span class='st'>"Newton"</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>newdata</span> <span class='op'>=</span> <span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/data.table.html'>data.table</a></span><span class='op'>(</span>crim <span class='op'>=</span> <span class='fl'>3.14</span>, tax <span class='op'>=</span> <span class='fl'>691</span>, town <span class='op'>=</span> <span class='st'>"Newton"</span><span class='op'>)</span>
 <span class='va'>gl</span><span class='op'>$</span><span class='fu'>predict_newdata</span><span class='op'>(</span><span class='va'>newdata</span><span class='op'>)</span>
 </code></pre>
 </div>
@@ -2198,7 +2246,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>To make sure that all features match their feature type, we will later use the following function stored in the R file <code>fix_feature_types.R</code>:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='co'># fix_feature_types.R</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='co'># fix_feature_types.R</span>
 
 <span class='va'>fix_feature_types</span> <span class='op'>=</span> <span class='kw'>function</span><span class='op'>(</span><span class='va'>feature</span>, <span class='va'>feature_name</span>, <span class='va'>feature_info</span><span class='op'>)</span> <span class='op'>{</span>
   <span class='va'>id</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/match.html'>match</a></span><span class='op'>(</span><span class='va'>feature_name</span>, <span class='va'>feature_info</span><span class='op'>$</span><span class='va'>feature_names</span><span class='op'>)</span>
@@ -2222,7 +2270,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>The following R file, <code>predict_gl.R</code> loads our trained pipepline and feature information and provides an endpoint for a <code>POST</code> request, <code>"/predict_medv"</code>. The incoming data then is converted using <code>jsonlite::fromJSON</code>. We expect the incoming data to either be JSON objects in an array or nested JSON objects and therefore we bind the converted vectors row-wise to a <code>data.table</code> using <code>data.table::rbindlist</code>. We then convert all features to their expected <code>feature_types</code> (using the <code>fix_feature_types()</code> function as defined above) and can finally predict the <code>medv</code> using our trained pipeline. As no default serialization from <code>R6</code> objects to JSON objects exists (yet), we wrap the <a href="https://mlr3.mlr-org.com/reference/Prediction.html"><code>Prediction</code></a> in a <code>data.table</code> (of course we could also only return the numeric prediction values):</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='co'># predict_gl.R</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='co'># predict_gl.R</span>
 
 <span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://Rdatatable.gitlab.io/data.table'>data.table</a></span><span class='op'>)</span>
 <span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://arxiv.org/abs/1403.2805'>jsonlite</a></span><span class='op'>)</span>
@@ -2257,7 +2305,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>Note that the only difference to a regular R file is the comment</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='co'>#* @post /predict_medv`</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='co'>#* @post /predict_medv`</span>
 </code></pre>
 </div>
 </div>
@@ -2265,7 +2313,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>We can then run <code>plumber::plumb</code>. The following code sets up the web service locally on your personal machine at port 1030 (we use such a high number because some systems require administrator rights to allow processes to listen to lower ports):</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'>plumber</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'>plumber</span><span class='op'>)</span>
 <span class='va'>r</span> <span class='op'>=</span> <span class='fu'>plumb</span><span class='op'>(</span><span class='st'>"predict_gl.R"</span><span class='op'>)</span>
 <span class='va'>r</span><span class='op'>$</span><span class='fu'>run</span><span class='op'>(</span>port <span class='op'>=</span> <span class='fl'>1030</span>, host <span class='op'>=</span> <span class='st'>"0.0.0.0"</span><span class='op'>)</span>
 </code></pre>
@@ -2282,7 +2330,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>Alternatively, we can also use the <code>httr::POST</code> function within R:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>newdata</span> <span class='op'>=</span> <span class='st'>'[{"crim":3.14, "tax":691, "town":"Newton"}]'</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>newdata</span> <span class='op'>=</span> <span class='st'>'[{"crim":3.14, "tax":691, "town":"Newton"}]'</span>
 <span class='va'>resp</span> <span class='op'>=</span> <span class='fu'>httr</span><span class='fu'>::</span><span class='fu'><a href='https://httr.r-lib.org/reference/POST.html'>POST</a></span><span class='op'>(</span>url <span class='op'>=</span> <span class='st'>"http://127.0.0.1:1030/predict_medv"</span>,
   body <span class='op'>=</span> <span class='va'>newdata</span>, encode <span class='op'>=</span> <span class='st'>"json"</span><span class='op'>)</span>
 <span class='fu'>httr</span><span class='fu'>::</span><span class='fu'><a href='https://httr.r-lib.org/reference/content.html'>content</a></span><span class='op'>(</span><span class='va'>resp</span><span class='op'>)</span>
@@ -2292,7 +2340,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>We can further play around a bit more and provide more than a single new observation and also check whether our feature type conversion and missing value imputation works:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>newdata</span> <span class='op'>=</span> <span class='st'>'[
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>newdata</span> <span class='op'>=</span> <span class='st'>'[
   {"crim":3.14, "tax":691, "town":"Newton"},
   {"crim":"not_a_number", "tax":3.14, "town":"Munich"},
   {"tax":"not_a_number", "town":31, "crim":99}

@@ -472,8 +472,15 @@ d-title {
   top: 0;
 }
 
+/* adjust viewport for navbar height */
+/* helps vertically center bootstrap (non-distill) content */
+.min-vh-100 {
+  min-height: calc(100vh - 100px) !important;
+}
+
 </style>
 
+<script src="../../site_libs/jquery-1.11.3/jquery.min.js"></script>
 <link href="../../site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet"/>
 <link href="../../site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet"/>
 <script src="../../site_libs/headroom-0.9.4/headroom.min.js"></script>
@@ -581,19 +588,21 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
           var results = fuse.search(query, searchOptions);
           callback(results
             .map(function(result) { return result.item; })
-            .filter(function(item) { return !!item.description; })
           );
         },
         templates: {
           suggestion: function(suggestion) {
+            var img = suggestion.preview && Object.keys(suggestion.preview).length > 0
+              ? `<img src="${offsetURL(suggestion.preview)}"</img>`
+              : '';
             var html = `
               <div class="search-item">
                 <h3>${suggestion.title}</h3>
                 <div class="search-item-description">
-                  ${suggestion.description}
+                  ${suggestion.description || ''}
                 </div>
                 <div class="search-item-preview">
-                  <img src="${suggestion.preview ? offsetURL(suggestion.preview) : ''}"</img>
+                  ${img}
                 </div>
               </div>
             `;
@@ -616,6 +625,10 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 </script>
 
 <style type="text/css">
+
+.nav-search {
+  font-size: x-small;
+}
 
 /* Algolioa Autocomplete */
 
@@ -691,6 +704,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 }
 
 .algolia-autocomplete .aa-dropdown-menu .aa-suggestion .search-item h3 {
+  font-size: 1rem;
   margin-block-start: 0;
   margin-block-end: 5px;
 }
@@ -918,6 +932,11 @@ d-article pre a:hover {
   text-decoration: underline;
 }
 
+d-article details {
+  grid-column: text;
+  margin-bottom: 0.8em;
+}
+
 @media(min-width: 768px) {
 
 d-article pre,
@@ -1072,6 +1091,17 @@ d-article .citation {
 
 div.hanging-indent{
   margin-left: 1em; text-indent: -1em;
+}
+
+/* Citation hover box */
+
+.tippy-box[data-theme~=light-border] {
+  background-color: rgba(250, 250, 250, 0.95);
+}
+
+.tippy-content > p {
+  margin-bottom: 0;
+  padding: 2px;
 }
 
 
@@ -1739,7 +1769,7 @@ function init_distill() {
     var layout = $(this).attr('data-layout');
 
     // apply layout to markdown level block elements
-    var elements = $(this).children().not('div.sourceCode, pre, script');
+    var elements = $(this).children().not('details, div.sourceCode, pre, script');
     elements.each(function(i, el) {
       var layout_div = $('<div class="' + layout + '"></div>');
       if (layout_div.hasClass('shaded')) {
@@ -1854,6 +1884,20 @@ function init_distill() {
     // move appendix-bottom entries to the bottom
     $('.appendix-bottom').appendTo('d-appendix').children().unwrap();
     $('.appendix-bottom').remove();
+
+    // hoverable references
+    $('span.citation[data-cites]').each(function() {
+      var refHtml = $('#ref-' + $(this).attr('data-cites')).html();
+      window.tippy(this, {
+        allowHTML: true,
+        content: refHtml,
+        maxWidth: 500,
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'light-border',
+        placement: 'bottom-start'
+      });
+    });
 
     // clear polling timer
     clearInterval(tid);
@@ -2015,6 +2059,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
 <!--/radix_placeholder_distill-->
   <script src="../../site_libs/jquery-1.11.3/jquery.min.js"></script>
+  <script src="../../site_libs/popper-2.6.0/popper.min.js"></script>
+  <link href="../../site_libs/tippy-6.2.7/tippy.css" rel="stylesheet" />
+  <link href="../../site_libs/tippy-6.2.7/tippy-light-border.css" rel="stylesheet" />
+  <script src="../../site_libs/tippy-6.2.7/tippy.umd.min.js"></script>
   <script src="../../site_libs/anchor-4.2.2/anchor.min.js"></script>
   <script src="../../site_libs/bowser-1.9.3/bowser.min.js"></script>
   <script src="../../site_libs/webcomponents-2.0.0/webcomponents.js"></script>
@@ -2093,7 +2141,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <h2 id="prerequisites">Prerequisites</h2>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://mlr3.mlr-org.com'>mlr3</a></span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://mlr3.mlr-org.com'>mlr3</a></span><span class='op'>)</span>
 <span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://mlr3learners.mlr-org.com'>mlr3learners</a></span><span class='op'>)</span>
 <span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://mlr3pipelines.mlr-org.com'>mlr3pipelines</a></span><span class='op'>)</span>
 <span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://mlr3filters.mlr-org.com'>mlr3filters</a></span><span class='op'>)</span>
@@ -2106,7 +2154,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>For the stacking example, we use the <a href="https://mlr3.mlr-org.com/reference/mlr_tasks_sonar.html">sonar classification task</a>:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>sonar_task</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>tsk</a></span><span class='op'>(</span><span class='st'>"sonar"</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>sonar_task</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>tsk</a></span><span class='op'>(</span><span class='st'>"sonar"</span><span class='op'>)</span>
 <span class='va'>sonar_task</span><span class='op'>$</span><span class='va'>col_roles</span><span class='op'>$</span><span class='va'>stratum</span> <span class='op'>=</span> <span class='va'>sonar_task</span><span class='op'>$</span><span class='va'>target_names</span> <span class='co'>#stratification</span>
 </code></pre>
 </div>
@@ -2116,7 +2164,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>As mentioned, the level 0 learners are <code>rpart</code>, <code>glmnet</code> and <code>lda</code>:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>rprt_lrn</span>  <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>lrn</a></span><span class='op'>(</span><span class='st'>"classif.rpart"</span>, predict_type <span class='op'>=</span> <span class='st'>"prob"</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>rprt_lrn</span>  <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>lrn</a></span><span class='op'>(</span><span class='st'>"classif.rpart"</span>, predict_type <span class='op'>=</span> <span class='st'>"prob"</span><span class='op'>)</span>
 <span class='va'>glmnet_lrn</span> <span class='op'>=</span>  <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>lrn</a></span><span class='op'>(</span><span class='st'>"classif.glmnet"</span>, predict_type <span class='op'>=</span> <span class='st'>"prob"</span><span class='op'>)</span>
 <span class='va'>lda_lrn</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>lrn</a></span><span class='op'>(</span><span class='st'>"classif.lda"</span>, predict_type <span class='op'>=</span> <span class='st'>"prob"</span><span class='op'>)</span>
 </code></pre>
@@ -2125,7 +2173,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>To create the learner out-of-bag predictions, we use <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_learner_cv.html">PipeOpLearnerCV()</a>:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>rprt_cv1</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"learner_cv"</span>, <span class='va'>rprt_lrn</span>, id <span class='op'>=</span> <span class='st'>"rprt_1"</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>rprt_cv1</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"learner_cv"</span>, <span class='va'>rprt_lrn</span>, id <span class='op'>=</span> <span class='st'>"rprt_1"</span><span class='op'>)</span>
 <span class='va'>glmnet_cv1</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"learner_cv"</span>, <span class='va'>glmnet_lrn</span>, id <span class='op'>=</span> <span class='st'>"glmnet_1"</span><span class='op'>)</span>
 <span class='va'>lda_cv1</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"learner_cv"</span>, <span class='va'>lda_lrn</span>, id <span class='op'>=</span> <span class='st'>"lda_1"</span><span class='op'>)</span>
 </code></pre>
@@ -2134,7 +2182,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>A sparser representation of the input data in level 0 is obtained using the following filters:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>anova</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"filter"</span>, <span class='fu'><a href='https://mlr3filters.mlr-org.com/reference/flt.html'>flt</a></span><span class='op'>(</span><span class='st'>"anova"</span><span class='op'>)</span>, id <span class='op'>=</span> <span class='st'>"filt1"</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>anova</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"filter"</span>, <span class='fu'><a href='https://mlr3filters.mlr-org.com/reference/flt.html'>flt</a></span><span class='op'>(</span><span class='st'>"anova"</span><span class='op'>)</span>, id <span class='op'>=</span> <span class='st'>"filt1"</span><span class='op'>)</span>
 <span class='va'>mrmr</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"filter"</span>, <span class='fu'><a href='https://mlr3filters.mlr-org.com/reference/flt.html'>flt</a></span><span class='op'>(</span><span class='st'>"mrmr"</span><span class='op'>)</span>, id <span class='op'>=</span> <span class='st'>"filt2"</span><span class='op'>)</span>
 <span class='va'>find_cor</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"filter"</span>, <span class='fu'><a href='https://mlr3filters.mlr-org.com/reference/flt.html'>flt</a></span><span class='op'>(</span><span class='st'>"find_correlation"</span><span class='op'>)</span>, id <span class='op'>=</span> <span class='st'>"filt3"</span><span class='op'>)</span>
 </code></pre>
@@ -2143,7 +2191,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>To summarize these steps into level 0, we use the <a href="https://mlr3pipelines.mlr-org.com/reference/gunion.html">gunion</a> function. The out-of-bag predictions of all level 0 learners is attached using <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_featureunion.html">PipeOpFeatureUnion</a> along with the original data passed via <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_nop.html">PipeOpNOP()</a>:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>level0</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/gunion.html'>gunion</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>level0</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/gunion.html'>gunion</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>
   <span class='va'>anova</span> <span class='op'>%&gt;&gt;%</span> <span class='va'>rprt_cv1</span>,
   <span class='va'>mrmr</span> <span class='op'>%&gt;&gt;%</span> <span class='va'>glmnet_cv1</span>,
   <span class='va'>find_cor</span> <span class='op'>%&gt;&gt;%</span> <span class='va'>lda_cv1</span>,
@@ -2155,7 +2203,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>We can have a look at the graph from level 0:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>level0</span><span class='op'>$</span><span class='fu'>plot</span><span class='op'>(</span>html <span class='op'>=</span> <span class='cn'>FALSE</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>level0</span><span class='op'>$</span><span class='fu'>plot</span><span class='op'>(</span>html <span class='op'>=</span> <span class='cn'>FALSE</span><span class='op'>)</span>
 </code></pre>
 </div>
 <p><img src="2020-04-27-tuning-stacking_files/figure-html5/lrn4-1.png" width="576" /></p>
@@ -2164,7 +2212,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>Now, we create the level 1 learners:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>rprt_cv2</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"learner_cv"</span>, <span class='va'>rprt_lrn</span> , id <span class='op'>=</span> <span class='st'>"rprt_2"</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>rprt_cv2</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"learner_cv"</span>, <span class='va'>rprt_lrn</span> , id <span class='op'>=</span> <span class='st'>"rprt_2"</span><span class='op'>)</span>
 <span class='va'>glmnet_cv2</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"learner_cv"</span>, <span class='va'>glmnet_lrn</span>, id <span class='op'>=</span> <span class='st'>"glmnet_2"</span><span class='op'>)</span>
 <span class='va'>lda_cv2</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"learner_cv"</span>, <span class='va'>lda_lrn</span>, id <span class='op'>=</span> <span class='st'>"lda_2"</span><span class='op'>)</span>
 </code></pre>
@@ -2173,7 +2221,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>All level 1 learners will use <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_pca.html">PCA</a> transformed data as input:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>level1</span> <span class='op'>=</span> <span class='va'>level0</span> <span class='op'>%&gt;&gt;%</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>level1</span> <span class='op'>=</span> <span class='va'>level0</span> <span class='op'>%&gt;&gt;%</span>
   <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"copy"</span>, <span class='fl'>4</span><span class='op'>)</span> <span class='op'>%&gt;&gt;%</span>
   <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/gunion.html'>gunion</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>
     <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"pca"</span>, id <span class='op'>=</span> <span class='st'>"pca2_1"</span>, param_vals <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>scale. <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>%&gt;&gt;%</span> <span class='va'>rprt_cv2</span>,
@@ -2188,7 +2236,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>We can have a look at the graph from level 1:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>level1</span><span class='op'>$</span><span class='fu'>plot</span><span class='op'>(</span>html <span class='op'>=</span> <span class='cn'>FALSE</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>level1</span><span class='op'>$</span><span class='fu'>plot</span><span class='op'>(</span>html <span class='op'>=</span> <span class='cn'>FALSE</span><span class='op'>)</span>
 </code></pre>
 </div>
 <p><img src="2020-04-27-tuning-stacking_files/figure-html5/lrn7-1.png" width="576" /></p>
@@ -2196,7 +2244,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>The out-of-bag predictions of the level 1 learners are attached to the input data from level 1 and a final ranger learner will be trained:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>ranger_lrn</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>lrn</a></span><span class='op'>(</span><span class='st'>"classif.ranger"</span>, predict_type <span class='op'>=</span> <span class='st'>"prob"</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>ranger_lrn</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>lrn</a></span><span class='op'>(</span><span class='st'>"classif.ranger"</span>, predict_type <span class='op'>=</span> <span class='st'>"prob"</span><span class='op'>)</span>
 
 <span class='va'>ensemble</span> <span class='op'>=</span> <span class='va'>level1</span> <span class='op'>%&gt;&gt;%</span> <span class='va'>ranger_lrn</span>
 <span class='va'>ensemble</span><span class='op'>$</span><span class='fu'>plot</span><span class='op'>(</span>html <span class='op'>=</span> <span class='cn'>FALSE</span><span class='op'>)</span>
@@ -2208,7 +2256,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>In order to tune the ensemble’s hyperparameter jointly, we define the search space using <a href="https://paradox.mlr-org.com/reference/ParamSet.html"><code>ParamSet</code></a> from the <a href="https://paradox.mlr-org.com/">paradox</a> package:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>ps_ens</span> <span class='op'>=</span> <span class='va'><a href='https://paradox.mlr-org.com/reference/ParamSet.html'>ParamSet</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>ps_ens</span> <span class='op'>=</span> <span class='va'><a href='https://paradox.mlr-org.com/reference/ParamSet.html'>ParamSet</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span>
   <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>
     <span class='va'><a href='https://paradox.mlr-org.com/reference/ParamInt.html'>ParamInt</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='st'>"filt1.filter.nfeat"</span>, <span class='fl'>5</span>, <span class='fl'>50</span><span class='op'>)</span>,
     <span class='va'><a href='https://paradox.mlr-org.com/reference/ParamInt.html'>ParamInt</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='st'>"filt2.filter.nfeat"</span>, <span class='fl'>5</span>, <span class='fl'>50</span><span class='op'>)</span>,
@@ -2234,7 +2282,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>To proceed, we convert the <code>ensemble</code> pipeline as a <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_learners_graph.html">GraphLearner</a>:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>ens_lrn</span> <span class='op'>=</span> <span class='va'><a href='https://mlr3pipelines.mlr-org.com//reference/mlr_learners_graph.html'>GraphLearner</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='va'>ensemble</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>ens_lrn</span> <span class='op'>=</span> <span class='va'><a href='https://mlr3pipelines.mlr-org.com//reference/mlr_learners_graph.html'>GraphLearner</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='va'>ensemble</span><span class='op'>)</span>
 <span class='va'>ens_lrn</span><span class='op'>$</span><span class='va'>predict_type</span> <span class='op'>=</span> <span class='st'>"prob"</span>
 </code></pre>
 </div>
@@ -2242,7 +2290,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>We define the search space for the simple ranger learner:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>ps_ranger</span> <span class='op'>=</span> <span class='va'><a href='https://paradox.mlr-org.com/reference/ParamSet.html'>ParamSet</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>ps_ranger</span> <span class='op'>=</span> <span class='va'><a href='https://paradox.mlr-org.com/reference/ParamSet.html'>ParamSet</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span>
   <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>
     <span class='va'><a href='https://paradox.mlr-org.com/reference/ParamInt.html'>ParamInt</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='st'>"mtry"</span>, lower <span class='op'>=</span> <span class='fl'>1L</span>, upper <span class='op'>=</span> <span class='fl'>10L</span><span class='op'>)</span>,
     <span class='va'><a href='https://paradox.mlr-org.com/reference/ParamDbl.html'>ParamDbl</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='st'>"sample.fraction"</span>, lower <span class='op'>=</span> <span class='fl'>0.5</span>, upper <span class='op'>=</span> <span class='fl'>1</span><span class='op'>)</span>,
@@ -2254,7 +2302,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>For performance comparison, we use the <a href="https://mlr3.mlr-org.com/reference/benchmark.html">benchmark</a> function that requires a design incorporating a list of learners and a list of tasks. Here, we have two learners (the simple ranger learner and the ensemble) and one task. Since we want to tune the simple ranger learner as well as the whole ensemble learner, we need to create an <a href="https://mlr3tuning.mlr-org.com/reference/AutoTuner.html">AutoTuner</a> for each learner to be compared. To do so, we need to define a resampling strategy for the tuning in the inner loop (we use <code>cv3</code>) and for the final evaluation use use <code>outer_hold</code>:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>cv3</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>rsmp</a></span><span class='op'>(</span><span class='st'>"cv"</span>, folds <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>cv3</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>rsmp</a></span><span class='op'>(</span><span class='st'>"cv"</span>, folds <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span>
 
 <span class='co'># AutoTuner for the ensemble learner</span>
 <span class='va'>auto1</span> <span class='op'>=</span> <span class='va'><a href='https://mlr3tuning.mlr-org.com/reference/AutoTuner.html'>AutoTuner</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span>
@@ -2301,8 +2349,8 @@ document.addEventListener('DOMContentLoaded', function() {
 1: filt1.filt2.filt3.nop1.rprt_1.glmnet_1.lda_1.union1.copy.pca2_1.pca2_2.pca2_3.nop2.rprt_2.glmnet_2.lda_2.union2.classif.ranger.tuned
 2:                                                                                                                 classif.ranger.tuned
    resampling_id iters classif.auc
-1:       holdout     1   0.9011824
-2:       holdout     1   0.8986486</code></pre>
+1:       holdout     1   0.9222973
+2:       holdout     1   0.9045608</code></pre>
 </div>
 <p>For a more reliable comparison, the number of evaluation of the random search should be increased.</p>
 <h2 id="conclusion">Conclusion</h2>

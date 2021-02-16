@@ -476,8 +476,15 @@ d-title {
   top: 0;
 }
 
+/* adjust viewport for navbar height */
+/* helps vertically center bootstrap (non-distill) content */
+.min-vh-100 {
+  min-height: calc(100vh - 100px) !important;
+}
+
 </style>
 
+<script src="../../site_libs/jquery-1.11.3/jquery.min.js"></script>
 <link href="../../site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet"/>
 <link href="../../site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet"/>
 <script src="../../site_libs/headroom-0.9.4/headroom.min.js"></script>
@@ -585,19 +592,21 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
           var results = fuse.search(query, searchOptions);
           callback(results
             .map(function(result) { return result.item; })
-            .filter(function(item) { return !!item.description; })
           );
         },
         templates: {
           suggestion: function(suggestion) {
+            var img = suggestion.preview && Object.keys(suggestion.preview).length > 0
+              ? `<img src="${offsetURL(suggestion.preview)}"</img>`
+              : '';
             var html = `
               <div class="search-item">
                 <h3>${suggestion.title}</h3>
                 <div class="search-item-description">
-                  ${suggestion.description}
+                  ${suggestion.description || ''}
                 </div>
                 <div class="search-item-preview">
-                  <img src="${suggestion.preview ? offsetURL(suggestion.preview) : ''}"</img>
+                  ${img}
                 </div>
               </div>
             `;
@@ -620,6 +629,10 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 </script>
 
 <style type="text/css">
+
+.nav-search {
+  font-size: x-small;
+}
 
 /* Algolioa Autocomplete */
 
@@ -695,6 +708,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 }
 
 .algolia-autocomplete .aa-dropdown-menu .aa-suggestion .search-item h3 {
+  font-size: 1rem;
   margin-block-start: 0;
   margin-block-end: 5px;
 }
@@ -922,6 +936,11 @@ d-article pre a:hover {
   text-decoration: underline;
 }
 
+d-article details {
+  grid-column: text;
+  margin-bottom: 0.8em;
+}
+
 @media(min-width: 768px) {
 
 d-article pre,
@@ -1076,6 +1095,17 @@ d-article .citation {
 
 div.hanging-indent{
   margin-left: 1em; text-indent: -1em;
+}
+
+/* Citation hover box */
+
+.tippy-box[data-theme~=light-border] {
+  background-color: rgba(250, 250, 250, 0.95);
+}
+
+.tippy-content > p {
+  margin-bottom: 0;
+  padding: 2px;
 }
 
 
@@ -1743,7 +1773,7 @@ function init_distill() {
     var layout = $(this).attr('data-layout');
 
     // apply layout to markdown level block elements
-    var elements = $(this).children().not('div.sourceCode, pre, script');
+    var elements = $(this).children().not('details, div.sourceCode, pre, script');
     elements.each(function(i, el) {
       var layout_div = $('<div class="' + layout + '"></div>');
       if (layout_div.hasClass('shaded')) {
@@ -1858,6 +1888,20 @@ function init_distill() {
     // move appendix-bottom entries to the bottom
     $('.appendix-bottom').appendTo('d-appendix').children().unwrap();
     $('.appendix-bottom').remove();
+
+    // hoverable references
+    $('span.citation[data-cites]').each(function() {
+      var refHtml = $('#ref-' + $(this).attr('data-cites')).html();
+      window.tippy(this, {
+        allowHTML: true,
+        content: refHtml,
+        maxWidth: 500,
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'light-border',
+        placement: 'bottom-start'
+      });
+    });
 
     // clear polling timer
     clearInterval(tid);
@@ -2021,6 +2065,10 @@ document.addEventListener('DOMContentLoaded', function() {
   <script src="../../site_libs/kePrint-0.0.1/kePrint.js"></script>
   <link href="../../site_libs/lightable-0.0.1/lightable.css" rel="stylesheet" />
   <script src="../../site_libs/jquery-1.11.3/jquery.min.js"></script>
+  <script src="../../site_libs/popper-2.6.0/popper.min.js"></script>
+  <link href="../../site_libs/tippy-6.2.7/tippy.css" rel="stylesheet" />
+  <link href="../../site_libs/tippy-6.2.7/tippy-light-border.css" rel="stylesheet" />
+  <script src="../../site_libs/tippy-6.2.7/tippy.umd.min.js"></script>
   <script src="../../site_libs/anchor-4.2.2/anchor.min.js"></script>
   <script src="../../site_libs/bowser-1.9.3/bowser.min.js"></script>
   <script src="../../site_libs/webcomponents-2.0.0/webcomponents.js"></script>
@@ -2096,7 +2144,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>This tutorial assumes familiarity with the basics of <a href="https://mlr3tuning.mlr-org.com">mlr3tuning</a> and <a href="https://mlr3pipelines.mlr-org.com">mlr3pipelines</a>. Consult the <a href="https://mlr3book.mlr-org.com/pipelines.html">mlr3book</a> if some aspects are not fully understandable.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='co'># rmd</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='co'># rmd</span>
 <span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://yihui.org/knitr/'>knitr</a></span><span class='op'>)</span>
 <span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='http://haozhu233.github.io/kableExtra/'>kableExtra</a></span><span class='op'>)</span>
 <span class='co'># descriptive</span>
@@ -2124,7 +2172,7 @@ This will run *all* code chunks no matter the computational effort.
 <h2 id="ingestion">Ingestion</h2>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>train_datetime</span> <span class='op'>=</span> <span class='va'>train</span><span class='op'>$</span><span class='va'>datetime</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>train_datetime</span> <span class='op'>=</span> <span class='va'>train</span><span class='op'>$</span><span class='va'>datetime</span>
 </code></pre>
 </div>
 </div>
@@ -2307,7 +2355,7 @@ Figure 3: Distribution of Bike Sharing demand over a month
 <p>It applies that <code>count == casual + registered</code>.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/all.equal.data.table.html'>all.equal</a></span><span class='op'>(</span><span class='va'>train</span><span class='op'>$</span><span class='va'>count</span>, <span class='va'>train</span><span class='op'>$</span><span class='va'>casual</span> <span class='op'>+</span> <span class='va'>train</span><span class='op'>$</span><span class='va'>registered</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/all.equal.data.table.html'>all.equal</a></span><span class='op'>(</span><span class='va'>train</span><span class='op'>$</span><span class='va'>count</span>, <span class='va'>train</span><span class='op'>$</span><span class='va'>casual</span> <span class='op'>+</span> <span class='va'>train</span><span class='op'>$</span><span class='va'>registered</span><span class='op'>)</span>
 </code></pre>
 </div>
 <pre><code>[1] TRUE</code></pre>
@@ -2315,7 +2363,7 @@ Figure 3: Distribution of Bike Sharing demand over a month
 <p>So we cannot use <code>casual</code> and <code>registered</code> as features to predict <code>count</code> since we only know them once we also know <code>count</code>. Therefore we can remove them without affecting the prediction quality. Furthermore the features <code>atem</code> the ‘feels like’ temperature and <code>temp</code> the real temperature have a nearly perfect correlation.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='fu'><a href='https://rdrr.io/r/stats/cor.html'>cor</a></span><span class='op'>(</span><span class='va'>train</span><span class='op'>$</span><span class='va'>atem</span>, <span class='va'>train</span><span class='op'>$</span><span class='va'>temp</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/stats/cor.html'>cor</a></span><span class='op'>(</span><span class='va'>train</span><span class='op'>$</span><span class='va'>atem</span>, <span class='va'>train</span><span class='op'>$</span><span class='va'>temp</span><span class='op'>)</span>
 </code></pre>
 </div>
 <pre><code>[1] 0.9849481</code></pre>
@@ -2326,7 +2374,7 @@ Figure 3: Distribution of Bike Sharing demand over a month
 </div>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>train</span> <span class='op'>=</span> <span class='fu'>preprocess</span><span class='op'>(</span><span class='va'>train</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>train</span> <span class='op'>=</span> <span class='fu'>preprocess</span><span class='op'>(</span><span class='va'>train</span><span class='op'>)</span>
 </code></pre>
 </div>
 </div>
@@ -2459,7 +2507,7 @@ numeric
 <p>Note, that <a href="https://github.com/mlr-org/mlr3pipelines/blob/master/R/PipeOpDateFeatures.R">PipeOpDateFeatures</a> provides an alternative to engineering such features by automatically extracting a set of date-related features from a <code>POSIXct</code> date variable. <strong>Note</strong>: In this scenario, we assume that we are not interested in forecasting the demand for the following years (provided the other information), but we instead try to obtain a model that describes the existing data as well as possible. In a forecasting scenario, we would need to use a different time-sensitvie resampling strategy in order to assure that our model generalizes to the data we are interested in predicting (the future).</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>train</span> <span class='op'>=</span> <span class='fu'>engineer_features</span><span class='op'>(</span><span class='va'>train</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>train</span> <span class='op'>=</span> <span class='fu'>engineer_features</span><span class='op'>(</span><span class='va'>train</span><span class='op'>)</span>
 </code></pre>
 </div>
 </div>
@@ -2641,7 +2689,7 @@ Figure 5: Density transformation of <code>count</code>
 <p>Using <code>PipeOpTargetTrafo</code> we can dynamically transform our target before the prediction and transform it back into our original scale afterwards.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>log1p_target_trafo</span> <span class='op'>=</span> <span class='kw'>function</span><span class='op'>(</span><span class='va'>learner</span>, <span class='va'>graph</span> <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span> <span class='op'>{</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>log1p_target_trafo</span> <span class='op'>=</span> <span class='kw'>function</span><span class='op'>(</span><span class='va'>learner</span>, <span class='va'>graph</span> <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span> <span class='op'>{</span>
   <span class='va'>ppl</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/ppl.html'>ppl</a></span><span class='op'>(</span><span class='st'>"targettrafo"</span>, graph <span class='op'>=</span> <span class='va'>learner</span><span class='op'>)</span>
   <span class='va'>ppl</span><span class='op'>$</span><span class='va'>param_set</span><span class='op'>$</span><span class='va'>values</span><span class='op'>$</span><span class='va'>targettrafosimple.trafo</span> <span class='op'>=</span> <span class='kw'>function</span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span> <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log1p</a></span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span>
   <span class='va'>ppl</span><span class='op'>$</span><span class='va'>param_set</span><span class='op'>$</span><span class='va'>values</span><span class='op'>$</span><span class='va'>targettrafosimple.inverter</span> <span class='op'>=</span> <span class='kw'>function</span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span> <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>expm1</a></span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span>
@@ -2656,7 +2704,7 @@ Figure 5: Density transformation of <code>count</code>
 <p>First, we have to initialize our bike task. As back-end, we use our training data and as target variable <code>count</code>.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>bike_task</span> <span class='op'>=</span> <span class='va'><a href='https://mlr3.mlr-org.com/reference/TaskRegr.html'>TaskRegr</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='st'>"bike_sharing"</span>, backend <span class='op'>=</span> <span class='va'>train</span>, target <span class='op'>=</span> <span class='st'>"count"</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>bike_task</span> <span class='op'>=</span> <span class='va'><a href='https://mlr3.mlr-org.com/reference/TaskRegr.html'>TaskRegr</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='st'>"bike_sharing"</span>, backend <span class='op'>=</span> <span class='va'>train</span>, target <span class='op'>=</span> <span class='st'>"count"</span><span class='op'>)</span>
 </code></pre>
 </div>
 </div>
@@ -2687,7 +2735,7 @@ Figure 7: Relationship between atemp, windspeed and count by year
 <p>In order to achieve maximum comparability between the learners the <code>Resampling</code> objects and which enable us to measure a learner-configuration’s performance as well as the tuning strategy are kept fixed for all compared learners. If a learner’s settings differ from the general case, the reason is given in the section on the <code>autotuner</code> concerned.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>resampling_cv_5</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>rsmp</a></span><span class='op'>(</span><span class='st'>"cv"</span>, folds <span class='op'>=</span> <span class='fl'>5L</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>resampling_cv_5</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>rsmp</a></span><span class='op'>(</span><span class='st'>"cv"</span>, folds <span class='op'>=</span> <span class='fl'>5L</span><span class='op'>)</span>
 <span class='va'>resampling_outer_cv3</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>rsmp</a></span><span class='op'>(</span><span class='st'>"cv"</span>, folds <span class='op'>=</span> <span class='fl'>3L</span><span class='op'>)</span>
 <span class='va'>measures</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>msr</a></span><span class='op'>(</span><span class='st'>"regr.rmse"</span><span class='op'>)</span>
 <span class='va'>tuner_grid_10</span> <span class='op'>=</span> <span class='fu'>mlr3tuning</span><span class='fu'>::</span><span class='fu'><a href='https://mlr3tuning.mlr-org.com/reference/tnr.html'>tnr</a></span><span class='op'>(</span><span class='st'>"grid_search"</span>, resolution <span class='op'>=</span> <span class='fl'>10L</span><span class='op'>)</span>
@@ -2707,7 +2755,7 @@ Figure 7: Relationship between atemp, windspeed and count by year
 <p><code>kknn</code> is a k-nearest-neighbor learner whose hyperparameters are shown in Table 4.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>kknn_learner</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>lrn</a></span><span class='op'>(</span><span class='st'>"regr.kknn"</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>kknn_learner</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>lrn</a></span><span class='op'>(</span><span class='st'>"regr.kknn"</span><span class='op'>)</span>
 <span class='va'>kknn_learner</span><span class='op'>$</span><span class='va'>param_set</span>
 </code></pre>
 </div>
@@ -2833,7 +2881,7 @@ NULL
 <p>For more information see the <a href="https://cran.r-project.org/web/packages/kknn/kknn.pdf">kknn documentation</a>.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>param_set_kknn</span> <span class='op'>=</span> <span class='va'><a href='https://paradox.mlr-org.com/reference/ParamSet.html'>ParamSet</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>param_set_kknn</span> <span class='op'>=</span> <span class='va'><a href='https://paradox.mlr-org.com/reference/ParamSet.html'>ParamSet</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span>
   params <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>
     <span class='va'><a href='https://paradox.mlr-org.com/reference/ParamInt.html'>ParamInt</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='st'>"regr.kknn.k"</span>, lower <span class='op'>=</span> <span class='fl'>1L</span>, upper <span class='op'>=</span> <span class='fl'>50L</span><span class='op'>)</span>, <span class='co'># k</span>
     <span class='va'><a href='https://paradox.mlr-org.com/reference/ParamInt.html'>ParamInt</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='st'>"regr.kknn.distance"</span>, lower <span class='op'>=</span> <span class='fl'>1L</span>, upper <span class='op'>=</span> <span class='fl'>3L</span><span class='op'>)</span> <span class='co'># distance</span>
@@ -2845,7 +2893,7 @@ NULL
 <p>Now we set up the autotuner for the <code>kknn</code> learner and train it.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='fu'><a href='https://rdrr.io/r/base/Random.html'>set.seed</a></span><span class='op'>(</span><span class='fl'>123456</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/Random.html'>set.seed</a></span><span class='op'>(</span><span class='fl'>123456</span><span class='op'>)</span>
 <span class='va'>ppl_kknn</span> <span class='op'>=</span> <span class='fu'>log1p_target_trafo</span><span class='op'>(</span><span class='va'>kknn_learner</span><span class='op'>)</span>
 <span class='va'>at_kknn</span> <span class='op'>=</span> <span class='va'><a href='https://mlr3tuning.mlr-org.com/reference/AutoTuner.html'>AutoTuner</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='va'>ppl_kknn</span>,
   resampling <span class='op'>=</span> <span class='va'>resampling_cv_5</span>,
@@ -2858,7 +2906,7 @@ NULL
 <span class='va'>at_kknn</span><span class='op'>$</span><span class='fu'>train</span><span class='op'>(</span><span class='va'>bike_task</span><span class='op'>)</span>
 
 
-<span class='va'>archive_kknn</span> <span class='op'>=</span> <span class='va'>at_kknn</span><span class='op'>$</span><span class='va'>archive</span><span class='op'>$</span><span class='fu'>data</span><span class='op'>(</span><span class='op'>)</span><span class='op'>[</span>, <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"regr.rmse"</span>,
+<span class='va'>archive_kknn</span> <span class='op'>=</span> <span class='va'>at_kknn</span><span class='op'>$</span><span class='va'>archive</span><span class='op'>$</span><span class='va'>data</span><span class='op'>[</span>, <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"regr.rmse"</span>,
                                           <span class='st'>"regr.kknn.k"</span>,
                                           <span class='st'>"regr.kknn.distance"</span><span class='op'>)</span><span class='op'>]</span>
 </code></pre>
@@ -2883,7 +2931,7 @@ Figure 8: RMSE on tuning grid of kknn autotuner
 <p><code>rpart</code> is CART learner whose hyperparameters are shown in Table 5.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>rpart_learner</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>lrn</a></span><span class='op'>(</span><span class='st'>"regr.rpart"</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>rpart_learner</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>lrn</a></span><span class='op'>(</span><span class='st'>"regr.rpart"</span><span class='op'>)</span>
 <span class='va'>rpart_learner</span><span class='op'>$</span><span class='va'>param_set</span>
 </code></pre>
 </div>
@@ -2944,7 +2992,7 @@ Inf
 NULL
 </td>
 <td style="text-align:left;">
-&lt;environment: 0x55eb8f64fcf8&gt;
+&lt;environment: 0x55d7a44882f0&gt;
 </td>
 </tr>
 <tr>
@@ -3094,7 +3142,7 @@ FALSE
 <p>For more information browse the <a href="https://cran.r-project.org/web/packages/rpart/rpart.pdf">rpart Documentation</a>.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>param_set_cart</span> <span class='op'>=</span> <span class='va'><a href='https://paradox.mlr-org.com/reference/ParamSet.html'>ParamSet</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>param_set_cart</span> <span class='op'>=</span> <span class='va'><a href='https://paradox.mlr-org.com/reference/ParamSet.html'>ParamSet</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span>
   params <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>
     <span class='va'><a href='https://paradox.mlr-org.com/reference/ParamInt.html'>ParamInt</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='st'>"regr.rpart.minsplit"</span>, lower <span class='op'>=</span> <span class='fl'>1L</span>, upper <span class='op'>=</span> <span class='fl'>30L</span><span class='op'>)</span>,
     <span class='va'><a href='https://paradox.mlr-org.com/reference/ParamDbl.html'>ParamDbl</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='st'>"regr.rpart.cp"</span>, lower <span class='op'>=</span> <span class='fl'>0.001</span>, upper <span class='op'>=</span> <span class='fl'>0.1</span><span class='op'>)</span>
@@ -3106,7 +3154,7 @@ FALSE
 <p>Now we set up the autotuner for the <code>rpart</code> learner and train it.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='fu'><a href='https://rdrr.io/r/base/Random.html'>set.seed</a></span><span class='op'>(</span><span class='fl'>123456</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/Random.html'>set.seed</a></span><span class='op'>(</span><span class='fl'>123456</span><span class='op'>)</span>
 <span class='va'>ppl_rpart</span> <span class='op'>=</span> <span class='fu'>log1p_target_trafo</span><span class='op'>(</span><span class='va'>rpart_learner</span><span class='op'>)</span>
 <span class='va'>at_rpart</span> <span class='op'>=</span> <span class='va'><a href='https://mlr3tuning.mlr-org.com/reference/AutoTuner.html'>AutoTuner</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='va'>ppl_rpart</span>,
   resampling <span class='op'>=</span> <span class='va'>resampling_cv_5</span>,
@@ -3116,7 +3164,7 @@ FALSE
   tuner <span class='op'>=</span> <span class='va'>tuner_grid_10</span>
 <span class='op'>)</span>
 <span class='va'>at_rpart</span><span class='op'>$</span><span class='fu'>train</span><span class='op'>(</span><span class='va'>bike_task</span><span class='op'>)</span>
-<span class='va'>archive_rpart</span> <span class='op'>=</span> <span class='va'>at_rpart</span><span class='op'>$</span><span class='va'>archive</span><span class='op'>$</span><span class='fu'>data</span><span class='op'>(</span><span class='op'>)</span><span class='op'>[</span>, <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"regr.rmse"</span>,
+<span class='va'>archive_rpart</span> <span class='op'>=</span> <span class='va'>at_rpart</span><span class='op'>$</span><span class='va'>archive</span><span class='op'>$</span><span class='va'>data</span><span class='op'>[</span>, <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"regr.rmse"</span>,
                                             <span class='st'>"regr.rpart.minsplit"</span>,
                                             <span class='st'>"regr.rpart.cp"</span><span class='op'>)</span><span class='op'>]</span>
 </code></pre>
@@ -3141,7 +3189,7 @@ Figure 9: RMSE on tuning grid rpart learner
 <p><code>ranger</code> is a Random Forest Learner whose hyperparameters are shown in Table 6.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>ranger_learner</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>lrn</a></span><span class='op'>(</span><span class='st'>"regr.ranger"</span>, importance <span class='op'>=</span> <span class='st'>"impurity"</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>ranger_learner</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>lrn</a></span><span class='op'>(</span><span class='st'>"regr.ranger"</span>, importance <span class='op'>=</span> <span class='st'>"impurity"</span><span class='op'>)</span>
 <span class='va'>ranger_learner</span><span class='op'>$</span><span class='va'>param_set</span>
 </code></pre>
 </div>
@@ -3225,9 +3273,9 @@ jack , infjack
 <p>First, we take advantage of the ability of the <code>ranger_learner</code> to calculate the importance of its features. The <code>importance filter</code> implemented in <code>mlr3filters</code> provides the possibility to access this calculation via <code>mlr3</code> syntax.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>filter_ranger</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3filters.mlr-org.com/reference/flt.html'>flt</a></span><span class='op'>(</span><span class='st'>"importance"</span>, learner <span class='op'>=</span> <span class='va'>ranger_learner</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>filter_ranger</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3filters.mlr-org.com/reference/flt.html'>flt</a></span><span class='op'>(</span><span class='st'>"importance"</span>, learner <span class='op'>=</span> <span class='va'>ranger_learner</span><span class='op'>)</span>
 <span class='va'>filter_ranger</span><span class='op'>$</span><span class='fu'>calculate</span><span class='op'>(</span><span class='va'>bike_task</span><span class='op'>)</span>
-<span class='va'>feature_importance</span> <span class='op'>=</span> <span class='fu'><a href='https://paradox.mlr-org.com/reference/as.data.table.html'>as.data.table</a></span><span class='op'>(</span><span class='va'>filter_ranger</span><span class='op'>)</span>
+<span class='va'>feature_importance</span> <span class='op'>=</span> <span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/as.data.table.html'>as.data.table</a></span><span class='op'>(</span><span class='va'>filter_ranger</span><span class='op'>)</span>
 </code></pre>
 </div>
 </div>
@@ -3245,7 +3293,7 @@ Figure 10: Feature importance in ranger learner
 <p>Setting up the Ranger Pipe enables us to compare models with different feature combinations. Therefore we use the <code>mlr3</code> packages <code>mlr3pipelines</code> and <code>mlr3filters</code> and create a new learner <code>ranger_feature</code>. This learner is now able to select the most important features from the impurity filtering.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>po_flt</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"filter"</span>, <span class='va'>filter_ranger</span>, param_vals <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>filter.nfeat <span class='op'>=</span> <span class='fl'>11L</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>%&gt;&gt;%</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>po_flt</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"filter"</span>, <span class='va'>filter_ranger</span>, param_vals <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>filter.nfeat <span class='op'>=</span> <span class='fl'>11L</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>%&gt;&gt;%</span>
   <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"learner"</span>, <span class='va'>ranger_learner</span><span class='op'>$</span><span class='fu'>clone</span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span>
 </code></pre>
 </div>
@@ -3260,7 +3308,7 @@ Figure 10: Feature importance in ranger learner
 <p>For more information see the <a href="https://cran.r-project.org/web/packages/ranger/ranger.pdf">ranger documentation</a> and <a href="https://mlr3book.mlr-org.com/pipelines.html">mlr3 pipelines</a>.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>param_set_ranger</span> <span class='op'>=</span> <span class='va'><a href='https://paradox.mlr-org.com/reference/ParamSet.html'>ParamSet</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>param_set_ranger</span> <span class='op'>=</span> <span class='va'><a href='https://paradox.mlr-org.com/reference/ParamSet.html'>ParamSet</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span>
   params <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>
     <span class='va'><a href='https://paradox.mlr-org.com/reference/ParamInt.html'>ParamInt</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='st'>"regr.ranger.mtry"</span>, lower <span class='op'>=</span> <span class='fl'>1L</span>, upper <span class='op'>=</span> <span class='fl'>11L</span><span class='op'>)</span>,
     <span class='va'><a href='https://paradox.mlr-org.com/reference/ParamInt.html'>ParamInt</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='st'>"importance.filter.nfeat"</span>, lower <span class='op'>=</span> <span class='fl'>1L</span>, upper <span class='op'>=</span> <span class='fl'>11L</span><span class='op'>)</span>
@@ -3272,7 +3320,7 @@ Figure 10: Feature importance in ranger learner
 <p>To ensure that <code>regr.ranger.mtry</code> never exceeds <code>importance.filter.nfeat</code>, we define the search space for the tuner manually. We constraint the possible number of features to the 1, 6 , 10 and 11 most important feature(s). The resulting grid shown in Figure 11, expands to over 28 combinations to tune our learner on.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>grid</span> <span class='op'>=</span> <span class='fu'><a href='https://paradox.mlr-org.com/reference/generate_design_grid.html'>generate_design_grid</a></span><span class='op'>(</span><span class='va'>param_set_ranger</span>, resolution <span class='op'>=</span> <span class='fl'>11</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>grid</span> <span class='op'>=</span> <span class='fu'><a href='https://paradox.mlr-org.com/reference/generate_design_grid.html'>generate_design_grid</a></span><span class='op'>(</span><span class='va'>param_set_ranger</span>, resolution <span class='op'>=</span> <span class='fl'>11</span><span class='op'>)</span>
 <span class='va'>grid</span><span class='op'>$</span><span class='va'>data</span> <span class='op'>=</span> <span class='va'>grid</span><span class='op'>$</span><span class='va'>data</span><span class='op'>[</span><span class='va'>regr.ranger.mtry</span> <span class='op'>&lt;=</span> <span class='va'>importance.filter.nfeat</span><span class='op'>]</span>
 <span class='va'>grid</span><span class='op'>$</span><span class='va'>data</span> <span class='op'>=</span> <span class='va'>grid</span><span class='op'>$</span><span class='va'>data</span><span class='op'>[</span><span class='va'>importance.filter.nfeat</span> <span class='op'>%in%</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>1</span>, <span class='fl'>6</span>, <span class='fl'>10</span>, <span class='fl'>11</span><span class='op'>)</span><span class='op'>]</span>
 </code></pre>
@@ -3289,7 +3337,7 @@ Figure 11: Search space for ranger autotuner
 <p>To ensure that <code>regr.ranger.mtry</code> never exceeds, <code>importance.filter.nfeat</code> we define a search space. Since the space for hyperparameters is limited, one could consider here to exploit the whole parameter space for <code>nfeat</code> and <code>mtry</code>. To save up time we will stick to 28 combinations here, including all possible combinations at 1, 6, 10 and 11 levels.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='fu'><a href='https://rdrr.io/r/base/Random.html'>set.seed</a></span><span class='op'>(</span><span class='fl'>123456</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/Random.html'>set.seed</a></span><span class='op'>(</span><span class='fl'>123456</span><span class='op'>)</span>
 <span class='va'>ranger_feature</span> <span class='op'>=</span> <span class='fu'>log1p_target_trafo</span><span class='op'>(</span><span class='va'>po_flt</span><span class='op'>)</span>
 <span class='va'>at_ranger</span> <span class='op'>=</span> <span class='va'><a href='https://mlr3tuning.mlr-org.com/reference/AutoTuner.html'>AutoTuner</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='va'>ranger_feature</span>,
   resampling <span class='op'>=</span> <span class='va'>resampling_cv_5</span>,
@@ -3301,7 +3349,7 @@ Figure 11: Search space for ranger autotuner
 <span class='co'># at_ranger$store_tuning_instance = FALSE</span>
 <span class='va'>at_ranger</span><span class='op'>$</span><span class='fu'>train</span><span class='op'>(</span><span class='va'>bike_task</span><span class='op'>)</span>
 
-<span class='va'>archive_ranger</span> <span class='op'>=</span> <span class='va'>at_ranger</span><span class='op'>$</span><span class='va'>archive</span><span class='op'>$</span><span class='fu'>data</span><span class='op'>(</span><span class='op'>)</span><span class='op'>[</span>, <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"regr.rmse"</span>,
+<span class='va'>archive_ranger</span> <span class='op'>=</span> <span class='va'>at_ranger</span><span class='op'>$</span><span class='va'>archive</span><span class='op'>$</span><span class='va'>data</span><span class='op'>[</span>, <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"regr.rmse"</span>,
                                               <span class='st'>"importance.filter.nfeat"</span>,
                                               <span class='st'>"regr.ranger.mtry"</span><span class='op'>)</span><span class='op'>]</span>
 </code></pre>
@@ -3327,7 +3375,7 @@ Figure 12: RMSE on tuning grid ranger learner
 <p>Second, we want to compare the models with each other and examine how tuning improved each of them. As stated in Chapter 3.3 we use a 3-fold CV as our benchmarking resampling method, a 5-fold CV is evaluated inside each auto tuned object to obtain the best hyperparameter combination. Note, that this method does not lead to an unbiased GE, but rather is a step to compare the learners to each other.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>lrns</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>lrns</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>
   <span class='va'>rpart_learner</span>, <span class='va'>at_rpart</span>,
   <span class='va'>ranger_learner</span>, <span class='va'>at_ranger</span>,
   <span class='va'>kknn_learner</span>, <span class='va'>at_kknn</span>
@@ -3462,7 +3510,7 @@ cv
 <p>Tuning enables us to optimize hyperparameters in our model via trial and error. For more details see <a href="https://mlr3book.mlr-org.com/optimization.html">mlr3tuning</a>. To evaluate each tuned learners’ performance and compare it, we set up benchmarking. Results are shown in Table 7 and Figure 13. In the boxplot resulting RMSE from the outer resampling are shown for each tuned learner from chapter 3.3 and its non-tuned equivalent. The benchmarking resampling validates our results from hyperparameter tuning for each autotuner in a 3-fold-cross-validation. We find that with auto tuning each of the learners could increase its performance compared to its’ equivalent that is using default hyperparameters. However, for <code>rpart</code> not only performance is increasing but also variance. That does not apply to the tuned <code>kknn</code> and <code>ranger</code> learners for which the results seem to be comparatively stable. With a RMSE of 0.31 the tuned random forest performs the best among tuned and untuned learners compared in benchmarking. Consequently, the tuned <code>ranger</code> is our learner of choice for prediction.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='fu'><a href='https://rdrr.io/r/grDevices/png.html'>png</a></span><span class='op'>(</span><span class='st'>"bmr.png"</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/grDevices/png.html'>png</a></span><span class='op'>(</span><span class='st'>"bmr.png"</span><span class='op'>)</span>
 <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/autoplot.html'>autoplot</a></span><span class='op'>(</span><span class='va'>bmr</span>, measure <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>msr</a></span><span class='op'>(</span><span class='st'>"regr.rmse"</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span>
   <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/ggtheme.html'>theme_bw</a></span><span class='op'>(</span><span class='op'>)</span> <span class='op'>+</span>
   <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/scale_discrete.html'>scale_x_discrete</a></span><span class='op'>(</span>labels <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"KNN"</span>, <span class='st'>"Random Forest"</span>, <span class='st'>"CART"</span>,
@@ -3483,7 +3531,7 @@ cv
 <p>We create a simple branched pipe, with our already known learners from the previous chapters. Note that we do not implement the autotuners but the actual learners here, since we aim to tune over the whole pipeline as a learner here, rather than over each learner individually. Therefore our selected learners <code>kknn</code>, <code>rpart</code> and <code>importance.ranger</code> can be considered as hyperparameters in a more universal graph-learner <code>glrn</code>. For more information see <a href="https://mlr3book.mlr-org.com/pipelines.html">mlr3pipelines</a>.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>list</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/lapply.html'>sapply</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='va'>kknn_learner</span><span class='op'>)</span>, <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='va'>rpart_learner</span><span class='op'>)</span>, <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='va'>ranger_learner</span><span class='op'>)</span><span class='op'>)</span>, <span class='va'>log1p_target_trafo</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>list</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/lapply.html'>sapply</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='va'>kknn_learner</span><span class='op'>)</span>, <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='va'>rpart_learner</span><span class='op'>)</span>, <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='va'>ranger_learner</span><span class='op'>)</span><span class='op'>)</span>, <span class='va'>log1p_target_trafo</span><span class='op'>)</span>
 <span class='va'>list</span><span class='op'>[[</span><span class='fl'>3</span><span class='op'>]</span><span class='op'>]</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"filter"</span>, <span class='va'>filter_ranger</span>, param_vals <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>filter.nfeat <span class='op'>=</span> <span class='fl'>11L</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>%&gt;&gt;%</span>
   <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"learner"</span>, <span class='va'>list</span><span class='op'>[[</span><span class='fl'>3</span><span class='op'>]</span><span class='op'>]</span><span class='op'>$</span><span class='fu'>clone</span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span>
 <span class='va'>pipe</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/ppl.html'>ppl</a></span><span class='op'>(</span><span class='st'>"branch"</span>, <span class='va'>list</span><span class='op'>)</span>
@@ -3501,7 +3549,7 @@ cv
 </ul>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>ps</span> <span class='op'>=</span> <span class='va'><a href='https://paradox.mlr-org.com/reference/ParamSet.html'>ParamSet</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>ps</span> <span class='op'>=</span> <span class='va'><a href='https://paradox.mlr-org.com/reference/ParamSet.html'>ParamSet</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>
   <span class='va'><a href='https://paradox.mlr-org.com/reference/ParamInt.html'>ParamInt</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='st'>"branch.selection"</span>, lower <span class='op'>=</span> <span class='fl'>1L</span>, upper <span class='op'>=</span> <span class='fl'>3L</span><span class='op'>)</span>,
   <span class='va'><a href='https://paradox.mlr-org.com/reference/ParamInt.html'>ParamInt</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='st'>"targettrafosimple.regr.kknn.targetinverter.regr.kknn.k"</span>, lower <span class='op'>=</span> <span class='fl'>1L</span>, upper <span class='op'>=</span> <span class='fl'>50L</span><span class='op'>)</span>,
   <span class='va'><a href='https://paradox.mlr-org.com/reference/ParamInt.html'>ParamInt</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='st'>"targettrafosimple.regr.kknn.targetinverter.regr.kknn.distance"</span>, lower <span class='op'>=</span> <span class='fl'>1L</span>, upper <span class='op'>=</span> <span class='fl'>3L</span><span class='op'>)</span>,
@@ -3530,7 +3578,7 @@ cv
 <p>Now we can perform nested resampling using our previously created pipe. We directly resample this autotuner to reduce computing time. We can save the tuned learners in our resampling result by setting <code>store_model = TRUE</code>.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>multi_at</span> <span class='op'>=</span> <span class='va'><a href='https://mlr3tuning.mlr-org.com/reference/AutoTuner.html'>AutoTuner</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>multi_at</span> <span class='op'>=</span> <span class='va'><a href='https://mlr3tuning.mlr-org.com/reference/AutoTuner.html'>AutoTuner</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span>
     learner <span class='op'>=</span> <span class='va'><a href='https://mlr3pipelines.mlr-org.com//reference/mlr_learners_graph.html'>GraphLearner</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='va'>pipe</span>, task_type <span class='op'>=</span> <span class='st'>"regr"</span><span class='op'>)</span>,
     resampling <span class='op'>=</span>  <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>rsmp</a></span><span class='op'>(</span><span class='st'>"cv"</span>, folds <span class='op'>=</span> <span class='fl'>5</span><span class='op'>)</span>,
     measure <span class='op'>=</span> <span class='va'>measures</span>,
@@ -3550,7 +3598,7 @@ cv
           <span class='st'>"importance.filter.nfeat"</span>, <span class='st'>"importance.mtry"</span><span class='op'>)</span>
 <span class='va'>multi_at_archiv</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/lapply.html'>lapply</a></span><span class='op'>(</span>
  <span class='fl'>1</span><span class='op'>:</span><span class='fl'>3</span>,
- <span class='kw'>function</span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span> <span class='va'>multi_at_rr</span><span class='op'>$</span><span class='va'>data</span><span class='op'>$</span><span class='va'>learner</span><span class='op'>[[</span><span class='va'>x</span><span class='op'>]</span><span class='op'>]</span><span class='op'>$</span><span class='va'>archive</span><span class='op'>$</span><span class='fu'>data</span><span class='op'>(</span><span class='op'>)</span><span class='op'>[</span>, <span class='va'>..cols</span><span class='op'>]</span>
+ <span class='kw'>function</span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span> <span class='va'>multi_at_rr</span><span class='op'>$</span><span class='va'>data</span><span class='op'>$</span><span class='va'>learner</span><span class='op'>[[</span><span class='va'>x</span><span class='op'>]</span><span class='op'>]</span><span class='op'>$</span><span class='va'>archive</span><span class='op'>$</span><span class='va'>data</span><span class='op'>[</span>, <span class='va'>..cols</span><span class='op'>]</span>
 <span class='op'>)</span>
 </code></pre>
 </div>
@@ -3602,7 +3650,7 @@ mtry
 </td>
 </tr>
 <tr>
-<td style="text-align:right; padding-left:  2em;" indentlevel="1">
+<td style="text-align:right;padding-left: 2em;" indentlevel="1">
 148.46285
 </td>
 <td style="text-align:right;">
@@ -3628,7 +3676,7 @@ NA
 </td>
 </tr>
 <tr>
-<td style="text-align:right; padding-left:  2em;" indentlevel="1">
+<td style="text-align:right;padding-left: 2em;" indentlevel="1">
 78.19935
 </td>
 <td style="text-align:right;">
@@ -3654,7 +3702,7 @@ NA
 </td>
 </tr>
 <tr>
-<td style="text-align:right; padding-left:  2em;" indentlevel="1">
+<td style="text-align:right;padding-left: 2em;" indentlevel="1">
 156.95734
 </td>
 <td style="text-align:right;">
@@ -3680,7 +3728,7 @@ NA
 </td>
 </tr>
 <tr>
-<td style="text-align:right; padding-left:  2em;" indentlevel="1">
+<td style="text-align:right;padding-left: 2em;" indentlevel="1">
 148.46285
 </td>
 <td style="text-align:right;">
@@ -3706,7 +3754,7 @@ NA
 </td>
 </tr>
 <tr>
-<td style="text-align:right; padding-left:  2em;" indentlevel="1">
+<td style="text-align:right;padding-left: 2em;" indentlevel="1">
 131.29139
 </td>
 <td style="text-align:right;">
@@ -3732,7 +3780,7 @@ NA
 </td>
 </tr>
 <tr>
-<td style="text-align:right; padding-left:  2em;" indentlevel="1">
+<td style="text-align:right;padding-left: 2em;" indentlevel="1">
 77.70967
 </td>
 <td style="text-align:right;">
@@ -3758,7 +3806,7 @@ NA
 </td>
 </tr>
 <tr>
-<td style="text-align:right; padding-left:  2em;" indentlevel="1">
+<td style="text-align:right;padding-left: 2em;" indentlevel="1">
 70.69794
 </td>
 <td style="text-align:right;">
@@ -3784,7 +3832,7 @@ NA
 </td>
 </tr>
 <tr>
-<td style="text-align:right; padding-left:  2em;" indentlevel="1">
+<td style="text-align:right;padding-left: 2em;" indentlevel="1">
 124.32739
 </td>
 <td style="text-align:right;">
@@ -3810,7 +3858,7 @@ NA
 </td>
 </tr>
 <tr>
-<td style="text-align:right; padding-left:  2em;" indentlevel="1">
+<td style="text-align:right;padding-left: 2em;" indentlevel="1">
 204.37702
 </td>
 <td style="text-align:right;">
@@ -3836,7 +3884,7 @@ NA
 </td>
 </tr>
 <tr>
-<td style="text-align:right; padding-left:  2em;" indentlevel="1">
+<td style="text-align:right;padding-left: 2em;" indentlevel="1">
 72.40151
 </td>
 <td style="text-align:right;">
@@ -3862,7 +3910,7 @@ NA
 </td>
 </tr>
 <tr>
-<td style="text-align:right; padding-left:  2em;" indentlevel="1">
+<td style="text-align:right;padding-left: 2em;" indentlevel="1">
 159.44030
 </td>
 <td style="text-align:right;">
@@ -3888,7 +3936,7 @@ NA
 </td>
 </tr>
 <tr>
-<td style="text-align:right; padding-left:  2em;" indentlevel="1">
+<td style="text-align:right;padding-left: 2em;" indentlevel="1">
 128.91845
 </td>
 <td style="text-align:right;">
@@ -3914,7 +3962,7 @@ NA
 </td>
 </tr>
 <tr>
-<td style="text-align:right; padding-left:  2em;" indentlevel="1">
+<td style="text-align:right;padding-left: 2em;" indentlevel="1">
 159.44030
 </td>
 <td style="text-align:right;">
@@ -3940,7 +3988,7 @@ NA
 </td>
 </tr>
 <tr>
-<td style="text-align:right; padding-left:  2em;" indentlevel="1">
+<td style="text-align:right;padding-left: 2em;" indentlevel="1">
 148.37438
 </td>
 <td style="text-align:right;">
@@ -3966,7 +4014,7 @@ NA
 </td>
 </tr>
 <tr>
-<td style="text-align:right; padding-left:  2em;" indentlevel="1">
+<td style="text-align:right;padding-left: 2em;" indentlevel="1">
 159.44030
 </td>
 <td style="text-align:right;">
@@ -3992,7 +4040,7 @@ NA
 </td>
 </tr>
 <tr>
-<td style="text-align:right; padding-left:  2em;" indentlevel="1">
+<td style="text-align:right;padding-left: 2em;" indentlevel="1">
 70.86133
 </td>
 <td style="text-align:right;">
@@ -4018,7 +4066,7 @@ NA
 </td>
 </tr>
 <tr>
-<td style="text-align:right; padding-left:  2em;" indentlevel="1">
+<td style="text-align:right;padding-left: 2em;" indentlevel="1">
 72.21180
 </td>
 <td style="text-align:right;">
@@ -4044,7 +4092,7 @@ NA
 </td>
 </tr>
 <tr>
-<td style="text-align:right; padding-left:  2em;" indentlevel="1">
+<td style="text-align:right;padding-left: 2em;" indentlevel="1">
 144.47091
 </td>
 <td style="text-align:right;">
@@ -4070,7 +4118,7 @@ NA
 </td>
 </tr>
 <tr>
-<td style="text-align:right; padding-left:  2em;" indentlevel="1">
+<td style="text-align:right;padding-left: 2em;" indentlevel="1">
 159.44030
 </td>
 <td style="text-align:right;">
@@ -4096,7 +4144,7 @@ NA
 </td>
 </tr>
 <tr>
-<td style="text-align:right; padding-left:  2em;" indentlevel="1">
+<td style="text-align:right;padding-left: 2em;" indentlevel="1">
 77.22525
 </td>
 <td style="text-align:right;">
@@ -4122,7 +4170,7 @@ NA
 </td>
 </tr>
 <tr>
-<td style="text-align:right; padding-left:  2em;" indentlevel="1">
+<td style="text-align:right;padding-left: 2em;" indentlevel="1">
 72.41628
 </td>
 <td style="text-align:right;">
@@ -4153,7 +4201,7 @@ NA
 </td>
 </tr>
 <tr>
-<td style="text-align:right; padding-left:  2em;" indentlevel="1">
+<td style="text-align:right;padding-left: 2em;" indentlevel="1">
 70.90703
 </td>
 <td style="text-align:right;">
@@ -4179,7 +4227,7 @@ NA
 </td>
 </tr>
 <tr>
-<td style="text-align:right; padding-left:  2em;" indentlevel="1">
+<td style="text-align:right;padding-left: 2em;" indentlevel="1">
 128.60097
 </td>
 <td style="text-align:right;">
@@ -4205,7 +4253,7 @@ NA
 </td>
 </tr>
 <tr>
-<td style="text-align:right; padding-left:  2em;" indentlevel="1">
+<td style="text-align:right;padding-left: 2em;" indentlevel="1">
 73.32828
 </td>
 <td style="text-align:right;">
@@ -4231,7 +4279,7 @@ NA
 </td>
 </tr>
 <tr>
-<td style="text-align:right; padding-left:  2em;" indentlevel="1">
+<td style="text-align:right;padding-left: 2em;" indentlevel="1">
 155.05227
 </td>
 <td style="text-align:right;">
@@ -4257,7 +4305,7 @@ NA
 </td>
 </tr>
 <tr>
-<td style="text-align:right; padding-left:  2em;" indentlevel="1">
+<td style="text-align:right;padding-left: 2em;" indentlevel="1">
 145.04972
 </td>
 <td style="text-align:right;">
@@ -4283,7 +4331,7 @@ NA
 </td>
 </tr>
 <tr>
-<td style="text-align:right; padding-left:  2em;" indentlevel="1">
+<td style="text-align:right;padding-left: 2em;" indentlevel="1">
 133.32470
 </td>
 <td style="text-align:right;">
@@ -4309,7 +4357,7 @@ NA
 </td>
 </tr>
 <tr>
-<td style="text-align:right; padding-left:  2em;" indentlevel="1">
+<td style="text-align:right;padding-left: 2em;" indentlevel="1">
 78.19142
 </td>
 <td style="text-align:right;">
@@ -4335,7 +4383,7 @@ NA
 </td>
 </tr>
 <tr>
-<td style="text-align:right; padding-left:  2em;" indentlevel="1">
+<td style="text-align:right;padding-left: 2em;" indentlevel="1">
 126.72121
 </td>
 <td style="text-align:right;">
@@ -4361,7 +4409,7 @@ NA
 </td>
 </tr>
 <tr>
-<td style="text-align:right; padding-left:  2em;" indentlevel="1">
+<td style="text-align:right;padding-left: 2em;" indentlevel="1">
 144.14502
 </td>
 <td style="text-align:right;">
@@ -4387,7 +4435,7 @@ NA
 </td>
 </tr>
 <tr>
-<td style="text-align:right; padding-left:  2em;" indentlevel="1">
+<td style="text-align:right;padding-left: 2em;" indentlevel="1">
 174.11230
 </td>
 <td style="text-align:right;">
@@ -4413,7 +4461,7 @@ NA
 </td>
 </tr>
 <tr>
-<td style="text-align:right; padding-left:  2em;" indentlevel="1">
+<td style="text-align:right;padding-left: 2em;" indentlevel="1">
 73.28386
 </td>
 <td style="text-align:right;">
@@ -4439,7 +4487,7 @@ NA
 </td>
 </tr>
 <tr>
-<td style="text-align:right; padding-left:  2em;" indentlevel="1">
+<td style="text-align:right;padding-left: 2em;" indentlevel="1">
 144.89675
 </td>
 <td style="text-align:right;">
@@ -4465,7 +4513,7 @@ NA
 </td>
 </tr>
 <tr>
-<td style="text-align:right; padding-left:  2em;" indentlevel="1">
+<td style="text-align:right;padding-left: 2em;" indentlevel="1">
 78.08017
 </td>
 <td style="text-align:right;">
@@ -4491,7 +4539,7 @@ NA
 </td>
 </tr>
 <tr>
-<td style="text-align:right; padding-left:  2em;" indentlevel="1">
+<td style="text-align:right;padding-left: 2em;" indentlevel="1">
 73.09981
 </td>
 <td style="text-align:right;">
@@ -4517,7 +4565,7 @@ NA
 </td>
 </tr>
 <tr>
-<td style="text-align:right; padding-left:  2em;" indentlevel="1">
+<td style="text-align:right;padding-left: 2em;" indentlevel="1">
 159.00586
 </td>
 <td style="text-align:right;">
@@ -4543,7 +4591,7 @@ NA
 </td>
 </tr>
 <tr>
-<td style="text-align:right; padding-left:  2em;" indentlevel="1">
+<td style="text-align:right;padding-left: 2em;" indentlevel="1">
 78.12298
 </td>
 <td style="text-align:right;">
@@ -4569,7 +4617,7 @@ NA
 </td>
 </tr>
 <tr>
-<td style="text-align:right; padding-left:  2em;" indentlevel="1">
+<td style="text-align:right;padding-left: 2em;" indentlevel="1">
 147.90780
 </td>
 <td style="text-align:right;">
@@ -4595,7 +4643,7 @@ NA
 </td>
 </tr>
 <tr>
-<td style="text-align:right; padding-left:  2em;" indentlevel="1">
+<td style="text-align:right;padding-left: 2em;" indentlevel="1">
 155.53159
 </td>
 <td style="text-align:right;">
@@ -4621,7 +4669,7 @@ NA
 </td>
 </tr>
 <tr>
-<td style="text-align:right; padding-left:  2em;" indentlevel="1">
+<td style="text-align:right;padding-left: 2em;" indentlevel="1">
 159.33757
 </td>
 <td style="text-align:right;">
@@ -4647,7 +4695,7 @@ NA
 </td>
 </tr>
 <tr>
-<td style="text-align:right; padding-left:  2em;" indentlevel="1">
+<td style="text-align:right;padding-left: 2em;" indentlevel="1">
 127.10846
 </td>
 <td style="text-align:right;">
@@ -4673,7 +4721,7 @@ NA
 </td>
 </tr>
 <tr>
-<td style="text-align:right; padding-left:  2em;" indentlevel="1">
+<td style="text-align:right;padding-left: 2em;" indentlevel="1">
 159.33757
 </td>
 <td style="text-align:right;">
@@ -4704,7 +4752,7 @@ NA
 </td>
 </tr>
 <tr>
-<td style="text-align:right; padding-left:  2em;" indentlevel="1">
+<td style="text-align:right;padding-left: 2em;" indentlevel="1">
 148.38511
 </td>
 <td style="text-align:right;">
@@ -4730,7 +4778,7 @@ NA
 </td>
 </tr>
 <tr>
-<td style="text-align:right; padding-left:  2em;" indentlevel="1">
+<td style="text-align:right;padding-left: 2em;" indentlevel="1">
 157.53131
 </td>
 <td style="text-align:right;">
@@ -4756,7 +4804,7 @@ NA
 </td>
 </tr>
 <tr>
-<td style="text-align:right; padding-left:  2em;" indentlevel="1">
+<td style="text-align:right;padding-left: 2em;" indentlevel="1">
 76.41411
 </td>
 <td style="text-align:right;">
@@ -4782,7 +4830,7 @@ NA
 </td>
 </tr>
 <tr>
-<td style="text-align:right; padding-left:  2em;" indentlevel="1">
+<td style="text-align:right;padding-left: 2em;" indentlevel="1">
 130.27486
 </td>
 <td style="text-align:right;">
@@ -4808,7 +4856,7 @@ NA
 </td>
 </tr>
 <tr>
-<td style="text-align:right; padding-left:  2em;" indentlevel="1">
+<td style="text-align:right;padding-left: 2em;" indentlevel="1">
 69.57183
 </td>
 <td style="text-align:right;">
@@ -4834,7 +4882,7 @@ NA
 </td>
 </tr>
 <tr>
-<td style="text-align:right; padding-left:  2em;" indentlevel="1">
+<td style="text-align:right;padding-left: 2em;" indentlevel="1">
 130.47776
 </td>
 <td style="text-align:right;">
@@ -4860,7 +4908,7 @@ NA
 </td>
 </tr>
 <tr>
-<td style="text-align:right; padding-left:  2em;" indentlevel="1">
+<td style="text-align:right;padding-left: 2em;" indentlevel="1">
 157.53131
 </td>
 <td style="text-align:right;">
@@ -4886,7 +4934,7 @@ NA
 </td>
 </tr>
 <tr>
-<td style="text-align:right; padding-left:  2em;" indentlevel="1">
+<td style="text-align:right;padding-left: 2em;" indentlevel="1">
 157.53131
 </td>
 <td style="text-align:right;">
@@ -4912,7 +4960,7 @@ NA
 </td>
 </tr>
 <tr>
-<td style="text-align:right; padding-left:  2em;" indentlevel="1">
+<td style="text-align:right;padding-left: 2em;" indentlevel="1">
 146.32105
 </td>
 <td style="text-align:right;">
@@ -4938,7 +4986,7 @@ NA
 </td>
 </tr>
 <tr>
-<td style="text-align:right; padding-left:  2em;" indentlevel="1">
+<td style="text-align:right;padding-left: 2em;" indentlevel="1">
 157.53131
 </td>
 <td style="text-align:right;">
@@ -4964,7 +5012,7 @@ NA
 </td>
 </tr>
 <tr>
-<td style="text-align:right; padding-left:  2em;" indentlevel="1">
+<td style="text-align:right;padding-left: 2em;" indentlevel="1">
 141.57592
 </td>
 <td style="text-align:right;">
@@ -4990,7 +5038,7 @@ NA
 </td>
 </tr>
 <tr>
-<td style="text-align:right; padding-left:  2em;" indentlevel="1">
+<td style="text-align:right;padding-left: 2em;" indentlevel="1">
 120.43218
 </td>
 <td style="text-align:right;">
@@ -5016,7 +5064,7 @@ NA
 </td>
 </tr>
 <tr>
-<td style="text-align:right; padding-left:  2em;" indentlevel="1">
+<td style="text-align:right;padding-left: 2em;" indentlevel="1">
 135.86966
 </td>
 <td style="text-align:right;">
@@ -5042,7 +5090,7 @@ NA
 </td>
 </tr>
 <tr>
-<td style="text-align:right; padding-left:  2em;" indentlevel="1">
+<td style="text-align:right;padding-left: 2em;" indentlevel="1">
 157.53131
 </td>
 <td style="text-align:right;">
@@ -5068,7 +5116,7 @@ NA
 </td>
 </tr>
 <tr>
-<td style="text-align:right; padding-left:  2em;" indentlevel="1">
+<td style="text-align:right;padding-left: 2em;" indentlevel="1">
 147.61153
 </td>
 <td style="text-align:right;">
@@ -5094,7 +5142,7 @@ NA
 </td>
 </tr>
 <tr>
-<td style="text-align:right; padding-left:  2em;" indentlevel="1">
+<td style="text-align:right;padding-left: 2em;" indentlevel="1">
 157.53131
 </td>
 <td style="text-align:right;">
@@ -5120,7 +5168,7 @@ NA
 </td>
 </tr>
 <tr>
-<td style="text-align:right; padding-left:  2em;" indentlevel="1">
+<td style="text-align:right;padding-left: 2em;" indentlevel="1">
 202.20482
 </td>
 <td style="text-align:right;">
@@ -5146,7 +5194,7 @@ NA
 </td>
 </tr>
 <tr>
-<td style="text-align:right; padding-left:  2em;" indentlevel="1">
+<td style="text-align:right;padding-left: 2em;" indentlevel="1">
 157.53131
 </td>
 <td style="text-align:right;">
@@ -5172,7 +5220,7 @@ NA
 </td>
 </tr>
 <tr>
-<td style="text-align:right; padding-left:  2em;" indentlevel="1">
+<td style="text-align:right;padding-left: 2em;" indentlevel="1">
 76.33956
 </td>
 <td style="text-align:right;">
@@ -5198,7 +5246,7 @@ NA
 </td>
 </tr>
 <tr>
-<td style="text-align:right; padding-left:  2em;" indentlevel="1">
+<td style="text-align:right;padding-left: 2em;" indentlevel="1">
 157.11866
 </td>
 <td style="text-align:right;">
@@ -5224,7 +5272,7 @@ NA
 </td>
 </tr>
 <tr>
-<td style="text-align:right; padding-left:  2em;" indentlevel="1">
+<td style="text-align:right;padding-left: 2em;" indentlevel="1">
 157.53131
 </td>
 <td style="text-align:right;">
@@ -5259,7 +5307,7 @@ NA
 <p>Before we can make the predictions, we have to preprocess the test data and engineer features in the same way we did for our training data.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>test_datetime</span> <span class='op'>=</span> <span class='va'>test</span><span class='op'>$</span><span class='va'>datetime</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>test_datetime</span> <span class='op'>=</span> <span class='va'>test</span><span class='op'>$</span><span class='va'>datetime</span>
 <span class='va'>test</span> <span class='op'>=</span> <span class='fu'>preprocess</span><span class='op'>(</span><span class='va'>test</span><span class='op'>)</span>
 <span class='va'>test</span> <span class='op'>=</span> <span class='fu'>engineer_features</span><span class='op'>(</span><span class='va'>test</span><span class='op'>)</span>
 </code></pre>
@@ -5268,7 +5316,7 @@ NA
 <p>Now we can use our random forest <code>autotuner</code> to predict the <code>log1p_count</code> variable.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class='va'>pred_train</span> <span class='op'>=</span> <span class='va'>at_ranger</span><span class='op'>$</span><span class='fu'>predict</span><span class='op'>(</span><span class='va'>bike_task</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>pred_train</span> <span class='op'>=</span> <span class='va'>at_ranger</span><span class='op'>$</span><span class='fu'>predict</span><span class='op'>(</span><span class='va'>bike_task</span><span class='op'>)</span>
 <span class='va'>pred_test</span> <span class='op'>=</span> <span class='va'>at_ranger</span><span class='op'>$</span><span class='fu'>predict_newdata</span><span class='op'>(</span><span class='va'>test</span><span class='op'>)</span>
 </code></pre>
 </div>
