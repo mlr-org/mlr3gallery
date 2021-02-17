@@ -1,9 +1,13 @@
 ---
 title: "Integer Hyperparameters in Tuners for Real-valued Search Spaces"
-description: |
-  How to tune integer hyperparameters with tuners that can only propose real numbers.
+categories:
+  - tuning
+  - bbotk
+  - mlr3tuning
 author:
   - name: Marc Becker
+description: |
+  How to tune integer hyperparameters with tuners that can only propose real numbers.
 date: 01-19-2021
 output:
   distill::distill_article:
@@ -22,8 +26,8 @@ library("mlr3book")
 
 ## Intro
 
-`r ref("Tuner")` for real-valued search spaces are not able to tune on integer hyperparameters. 
-However, it is possible to round the real values proposed by a `r ref("Tuner")` to integers before passing them to the learner in the evaluation. 
+`r ref("Tuner")` for real-valued search spaces are not able to tune on integer hyperparameters.
+However, it is possible to round the real values proposed by a `r ref("Tuner")` to integers before passing them to the learner in the evaluation.
 We show how to apply a parameter transformation to a `r ref("ParamSet")` and use this set in the tuning process.
 
 We load the `r mlr_pkg("mlr3verse")` package which pulls in the most important packages for this example and we decrease the verbosity of the logger to keep the output clearly represented.
@@ -87,7 +91,7 @@ The optimal `k` is still a real number in the search space.
 instance$result_x_search_space
 ```
 
-However, in the learners hyperparameters space, `k` is an integer value. 
+However, in the learners hyperparameters space, `k` is an integer value.
 ```{r}
 instance$result_x_domain
 ```
@@ -104,7 +108,7 @@ Note that the tuner is not aware of the transformation.
 This has two problematic consequences:
 First, the tuner might propose different real valued configurations that after rounding end up to be already evaluated configurations and we end up with re-evaluating the same hyperparameter configuration.
 This is only problematic, if we only optimze integer parameters.
-Second, the rounding introduces discontinuities which can be problematic for some tuners. 
+Second, the rounding introduces discontinuities which can be problematic for some tuners.
 
 We successfully tuned a integer-valued hyperparameter with `r ref("TunerGenSA")` which is only suitable for an real-valued search space.
 This technique is not limited to tuning problems.
