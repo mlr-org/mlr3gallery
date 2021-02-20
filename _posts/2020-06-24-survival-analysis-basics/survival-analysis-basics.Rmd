@@ -1,0 +1,142 @@
+---
+title: "telco-customer-churn"
+description: |
+  Introduction to Machine Learning based Survival Analysis using customer churn data.
+author:
+  - name: Andreas Bender
+date: 06-24-2020
+output:
+  distill::distill_article:
+    self_contained: false
+    css: ../../custom.css
+---
+
+```{r, include = FALSE, warning = FALSE, message = FALSE}
+# Just some preparation
+knitr::opts_chunk$set(
+  echo = TRUE,
+  R.options = list(width = 80)
+)
+if (require("data.table")) data.table::setDTthreads(1)
+set.seed(241030)
+lgr::get_logger("mlr3")$set_threshold("warn")
+library(mlr3book)
+```
+
+```{r}
+library(mlr3)
+library(mlr3proba)
+library(paradox)
+library(ggplot2)
+theme_set(theme_bw())
+library(mlr3viz)
+library(skimr)
+```
+
+This post illustrates the Survival Analyiss capabilities of `r mlr_pkg("mlr3")` and `r mlr_pkg("mlr3proba")`. As an example, we use telco customer churn data, that was previously part of a [Kaggle challenge](https://www.kaggle.com/blastchar/telco-customer-churn).
+For a more technical introduction to survival analysis related capabilities of the `r mlr_pkg("mlr3")` eccosystem we refer to the respecitve chapter in the `r mlr_pkg("mlr3book")`, [Chapter 7.1](https://mlr3book.mlr-org.com/survival.html#survival).
+
+
+Customer churn is a term that describes a change in the customers status with a company, e.g., when customers decide to cancel their subscription or contract. Churn data is often analysed as a binary outcome, i.e., did the customer churn, yes or no, using classification techniques. However, the data could also be viewed as a time-to-event outcome, i.e., how long does it take for a customer to churn. This provides a more detailed analysis, as, for example, we can calculate the probability to churn at different time points. However, since time until churn is the outcome of interest, some of the observations are *censored* (no churn *yet*). Methods for survival analysis therefore require specialised techniques capable of incorporating censoring into the definition of the task, the learner, the prediction and evaluation. Within the `r mlr_pkg("mlr3")` eccosystem, `r mlr_pkg("mlr3proba")`
+
+This post
+
+1. [gives an overview of the customer churn data set](#telco-customer-churn-data)
+2. introduces the `TaskSurv` and `LearnerSurv*` objects, on which survival analysis in `mlr3` is based on
+3. illustrates, how different Survival Learners can be tuned and benchmarked using performance measures appropriate for time-to-event data
+4. shows how predictions and model comparisons can be visualized
+
+
+
+On the other hand, as we will see, once we develop tools for handling survival tasks, standard machine learning pipelines can be directly applied in the context of survival analysis.
+
+
+
+## 1. Telco Customer Churn data
+Below the raw data is imported from a github repository and descriptive statistics are provided using the `skimr` package.
+
+The variables of interest that define the time-to-event outcome (time until the customer churned) are provided in the tuple `(tenure, Churn)`, where
+
+  - `tenure` is a continuous variable that specifies the time that has elapsed since the customer signed the contract
+  - `Churn` is a binary variable that indicates whether the customer churned (0 = no, 1 = yes)
+
+In the vocabulary of survival analyis `tenure` indicates the duration time and `Churn` is the status indicator. Customers with `Churn = 0` can be considered censored, as the event of interest (churn) was not observed at the end of the observation period for that customer (`tenure`). However, when estimatig the probablity of remaining a customer at different time points (survival probability $S(t)$), the information that the customer didn't churn up until that point can (and must be) used to obtain unbiased estimates.
+
+
+The features that might affect the survival probability (i.e., the probability that a customer hasn't churned yet) are listed in the Table of factor variables and include customer, contract and service related features. Numeric features include `MonthlyCharges` and `TotalCharges`. Especially the later should not be inlcuded as a feature when training the models, as the total charges depend on the time under contract (`tenure`), thus we know that someone with high amount of total charges could not have churned before a certain time-point. Thus we could often make perfect predictions without learning anything about the actual relationship between features and tenure.
+
+```{r}
+churn <- read.csv("https://raw.githubusercontent.com/treselle-systems/customer_churn_analysis/master/WA_Fn-UseC_-Telco-Customer-Churn.csv")
+churn$SeniorCitizen <- factor(churn$SeniorCitizen, levels = 0:1, labels = c("No", "Yes"))
+skimr::skim(churn)
+```
+
+
+## 2. Survival Tasks and Learners
+
+### 2.1 Survival Tasks
+
+Intiliazing a Survival Task is similar to standard [Regression or Classification tasks](https://mlr3book.mlr-org.com/tasks.html). The only exception is the specification of the target, which depends on the specific survival task at hand, and follows the nomenclature of the `survival::Surv` object. Thus the specification of the survival target requires at least two arguments: `time` and `event`.
+
+In the standard setting these varibables would indicate the (randomly) right-censored survival times (`time`) and status indicator (`event`: alive/censored = 0, dead = 1).
+
+For more complex settings, e.g., for left- or interval-censored data, additional arguments `time2` and `type` can be specified. For example, left-cesored observations would be specified using
+
+- `time`: the left-censoring time
+- `time2`: the right-censored survival time
+- `event`: status indicator
+- `type = "left"`: indicates left-censoring as the specification of interval-censored data would be specified equivalently.
+
+
+Below we create a `TaskSurv` object for the `churn` data using the `TaskSurv$new()` function. The figure generated by `autoplot` provides a first overview of the data. At the end of the follow-up (72 months), about 35% of the customers churned, the other are still subscribed.
+
+```{r}
+churn$Churn <- 1L * (churn$Churn == "Yes")
+churn$TotalCharges <- NULL
+churn_tsk <- TaskSurv$new("churn", backend = churn, time = "tenure", event="Churn" )
+autoplot(churn_tsk) + scale_y_continuous(limits=c(0,1))
+```
+
+### 2.2 Survival Learners
+
+Initializing learners for survival analysis also works similar to standard [regression and classification learners](https://mlr3book.mlr-org.com/learners.html). An overview of the different survival learners available is given [here](https://mlr3proba.mlr-org.com/#survival-learners). Below we initialize three differnt learners:
+
+
+```{r}
+library(mlr3learners) # contains surv.xgboost
+# uncomment below to install the random survival forest extension
+# remotes::install_github("mlr3learners/mlr3learners.randomforestsrc")
+library(mlr3learners.randomforestsrc)
+
+learners <- lapply(c("surv.coxph", "surv.xgboost", "surv.ranger"), lrn)
+print(learners)
+```
+
+## 3.
+
+
+```{r, eval = FALSE}
+params_xgboost = ParamSet$new(
+  list(
+    ParamInt$new("nrounds", 1000),
+    ParamDbl$new("eta", lower = 0.1, upper = 0.3),
+    ParamDbl$new("min_split_loss", lower = 0, upper = 1)
+  )
+)
+params_rfsrc = ParamSet$new(list(
+  ParamInt$new("mtry", lower = 1, upper = 5))
+)
+
+design <- benchmark_grid(
+  tasks = rt,
+  learners = learners,
+  resamplings = rsmp("cv")
+)
+print(design)
+bmr <- benchmark(design)
+
+bmr$aggregate(list(msr("surv.cindex", weight_meth="I"), msr("surv.graf")))
+
+library(mlr3viz)
+autoplot(bmr)
+```
