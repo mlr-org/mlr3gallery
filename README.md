@@ -1,7 +1,7 @@
 # mlr3gallery
 
 <!-- badges: start -->
-[![R CMD Check via {tic}](https://github.com/mlr-org/mlr3gallery/workflows/tic/badge.svg?branch=master)](https://github.com/mlr-org/mlr3gallery/actions)
+[![R CMD Check via {tic}](https://github.com/mlr-org/mlr3gallery/workflows/tic/badge.svg?branch=main)](https://github.com/mlr-org/mlr3gallery/actions)
 <!-- badges: end -->
 
 ## Add a new post
@@ -11,12 +11,10 @@
 1. Add a setup chunk to your post
 
    ````r
-   ```{r setup, include=FALSE}
-   knitr::opts_chunk$set(
+    knitr::opts_chunk$set(
      echo = TRUE,
      R.options = list(width = 80)
    )
-   ```
    ````
 1. Write the post and select appropriate categories. Tags are not available.
 1. Add required packages to the DESCRIPTION file via `usethis::use_package(<package>)`.

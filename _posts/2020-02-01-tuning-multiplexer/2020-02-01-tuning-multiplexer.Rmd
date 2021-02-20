@@ -142,13 +142,12 @@ instance = TuningInstanceSingleCrit$new(
   learner = glrn,
   resampling = cv1,
   measure = msr("classif.ce"),
-  search_space = ps,
-  terminator = trm("none")
+  terminator = trm("none"),
+  search_space = ps
 )
 tuner = tnr("grid_search")
 tuner$optimize(instance)
-instance$archive$data("x_domain")
-instance$result
+as.data.table(instance$archive)
 ```
 
 But: Via this approach we can now get unbiased performance results via nested resampling and using the `r ref("AutoTuner")` (which would make much more sense if we would select from 100 models and not 2).
@@ -164,9 +163,9 @@ at = AutoTuner$new(
 )
 rr = resample(task, at, cv2, store_models = TRUE)
 # access 1st inner tuning result
-ll = rr$data$learner[[1]]
-ll$tuning_result
-ll$archive$data("x_domain")
+ll = rr$learners[[1]]$model$tuning_instance
+ll$result
+ll$archive$data
 ```
 
 ## Model-Selection and Tuning with Pipelines
@@ -223,14 +222,13 @@ instance = TuningInstanceSingleCrit$new(
 )
 tuner = tnr("random_search")
 tuner$optimize(instance)
-instance$archive$data(unnest = "x_domain")
-instance$result
+as.data.table(instance$archive)
 ```
 
 The following shows a quick way to visualize the tuning results.
 
 ```{r}
-resdf = instance$archive$data(unnest = "x_domain")
+resdf = as.data.table(instance$archive)
 resdf = reshape(resdf,
   varying = c("xgb.nrounds","rf.mtry"),
   v.name = "param_value",
@@ -257,7 +255,7 @@ at = AutoTuner$new(
 )
 rr = resample(task, at, cv2, store_models = TRUE)
 # access 1st inner tuning result
-ll = rr$data$learner[[1]]
-ll$tuning_result
-ll$archive$data(unnest = "x_domain")
+ll = rr$learners[[1]]$model$tuning_instance
+ll$result
+as.data.table(instance$archive)
 ```

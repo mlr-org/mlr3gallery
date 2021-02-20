@@ -200,8 +200,12 @@ For higher dimensions, strategies like random search are more appropriate:
 
 ```{r}
 inst = TuningInstanceSingleCrit$new(
-  task, fpipe %>>% lrn("classif.ranger"), cv10_instance, msr("classif.ce"),
-  searchspace, trm("none")
+  task,
+  learner = fpipe %>>% lrn("classif.ranger"),
+  resampling = cv10_instance,
+  measure = msr("classif.ce"),
+  terminator = trm("none"),
+  search_space = searchspace
 )
 tuner = tnr("grid_search")
 ```
@@ -216,7 +220,7 @@ We can plot the performance against the number of features.
 If we do so, we see the possible trade-off between sparsity and predictive performance:
 
 ```{r}
-arx = inst$archive$data()
+arx = as.data.table(inst$archive)
 ggplot(arx, aes(x = mim.filter.nfeat, y = classif.ce)) + geom_line()
 ```
 
