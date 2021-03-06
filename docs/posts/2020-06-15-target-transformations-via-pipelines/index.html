@@ -2247,8 +2247,8 @@ function (inputs)
     assert_list(inputs, len = 1L, types = &quot;Prediction&quot;)
     list(private$.invert(inputs[[1L]], predict_phase_state))
 }
-&lt;bytecode: 0x5643c6d71c70&gt;
-&lt;environment: 0x5643c6d726f0&gt;
+&lt;bytecode: 0x56497a8da8f0&gt;
+&lt;environment: 0x564980a0df48&gt;
 
 $output
 &lt;TaskRegr:mtcars&gt; (32 x 11)
@@ -2346,7 +2346,7 @@ $log
 Empty data.table (0 rows and 3 cols): stage,class,msg
 
 $train_time
-[1] 0.049
+[1] 0.055
 
 $train_task
 &lt;TaskRegr:mtcars&gt; (32 x 11)
@@ -2359,14 +2359,14 @@ $train_task
 </code></pre>
 </div>
 <pre><code>&lt;PredictionRegr&gt; for 32 observations:
-    row_id truth response
-         1  21.0 21.67976
-         2  21.0 21.10831
-         3  22.8 25.73690
----                      
-        30  19.7 19.58533
-        31  15.0 14.11015
-        32  21.4 23.11105</code></pre>
+    row_ids truth response
+          1  21.0 21.67976
+          2  21.0 21.10831
+          3  22.8 25.73690
+---                       
+         30  19.7 19.58533
+         31  15.0 14.11015
+         32  21.4 23.11105</code></pre>
 </div>
 <p>and contrast this with <code>$train()</code> and <code>$predict()</code> of the naive linear regression learner (also look at the estimated coefficients of the linear regression contained in <code>$state$model</code>):</p>
 <div class="layout-chunk" data-layout="l-body">
@@ -2404,14 +2404,14 @@ $train_task
 </code></pre>
 </div>
 <pre><code>&lt;PredictionRegr&gt; for 32 observations:
-    row_id truth response
-         1  21.0 22.59951
-         2  21.0 22.11189
-         3  22.8 26.25064
----                      
-        30  19.7 19.69383
-        31  15.0 13.94112
-        32  21.4 24.36827</code></pre>
+    row_ids truth response
+          1  21.0 22.59951
+          2  21.0 22.11189
+          3  22.8 26.25064
+---                       
+         30  19.7 19.69383
+         31  15.0 13.94112
+         32  21.4 24.36827</code></pre>
 </div>
 <p>You should continue reading, if you are interested in more advanced target transformations, i.e., where the transformation and inverse transformation require information about both the training and prediction data.</p>
 <p>First we will introduce the abstract base class for doing target transformations, <a href="https://mlr3pipelines.mlr-org.com/reference/PipeOpTargetTrafo.html"><code>PipeOpTargetTrafo</code></a>, from which <code>PipeOpTargetMutate</code> inherits.</p>
@@ -2579,7 +2579,7 @@ $model$regr.lm$log
 Empty data.table (0 rows and 3 cols): stage,class,msg
 
 $model$regr.lm$train_time
-[1] 0.006
+[1] 0.007
 
 $model$regr.lm$train_task
 &lt;TaskRegr:mtcars&gt; (32 x 11)
@@ -2606,7 +2606,7 @@ $log
 Empty data.table (0 rows and 3 cols): stage,class,msg
 
 $train_time
-[1] 0.057
+[1] 0.061
 
 $train_task
 &lt;TaskRegr:mtcars&gt; (32 x 11)
@@ -2619,14 +2619,14 @@ $train_task
 </code></pre>
 </div>
 <pre><code>&lt;PredictionRegr&gt; for 32 observations:
-    row_id truth response
-         1  21.0 21.70854
-         2  21.0 21.13946
-         3  22.8 25.75242
----                      
-        30  19.7 19.58934
-        31  15.0 14.10658
-        32  21.4 23.15263</code></pre>
+    row_ids truth response
+          1  21.0 21.70854
+          2  21.0 21.13946
+          3  22.8 25.75242
+---                       
+         30  19.7 19.58934
+         31  15.0 14.10658
+         32  21.4 23.15263</code></pre>
 </div>
 <p>We could now proceed to benchmark our different target transformations:</p>
 <div class="layout-chunk" data-layout="l-body">
