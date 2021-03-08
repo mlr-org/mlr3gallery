@@ -4,10 +4,7 @@ get_stage("install") %>%
 get_stage("script") %>%
   add_code_step(print(list.files("_posts/",
     pattern = ".Rmd",
-    full.names = TRUE, recursive = TRUE))) %>%
-  add_code_step(lapply(list.files("_posts/",
-    pattern = ".Rmd",
-    full.names = TRUE, recursive = TRUE), rmarkdown::render))
+    full.names = TRUE, recursive = TRUE)))
 
 
 if (ci_get_branch() == "main") {
