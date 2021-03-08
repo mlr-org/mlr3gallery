@@ -2189,26 +2189,30 @@ document.addEventListener('DOMContentLoaded', function() {
 <td style="text-align: left;">9</td>
 </tr>
 <tr class="even">
+<td style="text-align: left;">Key</td>
+<td style="text-align: left;">NULL</td>
+</tr>
+<tr class="odd">
 <td style="text-align: left;">_______________________</td>
 <td style="text-align: left;"></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td style="text-align: left;">Column type frequency:</td>
 <td style="text-align: left;"></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td style="text-align: left;">factor</td>
 <td style="text-align: left;">1</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td style="text-align: left;">numeric</td>
 <td style="text-align: left;">8</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td style="text-align: left;">________________________</td>
 <td style="text-align: left;"></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td style="text-align: left;">Group variables</td>
 <td style="text-align: left;">None</td>
 </tr>
@@ -2654,42 +2658,24 @@ document.addEventListener('DOMContentLoaded', function() {
 </code></pre>
 </div>
 <pre><code>&lt;ParamSetCollection&gt;
-                              id    class lower upper                         levels        default
- 1:             branch.selection ParamFct    NA    NA   impute_missind,simple_median &lt;NoDefault[3]&gt;
- 2:    imputehist.affect_columns ParamUty    NA    NA                                &lt;NoDefault[3]&gt;
- 3:  imputemedian.affect_columns ParamUty    NA    NA                                &lt;NoDefault[3]&gt;
- 4:                missind.which ParamFct    NA    NA              missing_train,all &lt;NoDefault[3]&gt;
- 5:                 missind.type ParamFct    NA    NA factor,integer,logical,numeric &lt;NoDefault[3]&gt;
- 6:       missind.affect_columns ParamUty    NA    NA                                 &lt;Selector[1]&gt;
- 7: simple_median.affect_columns ParamUty    NA    NA                                &lt;NoDefault[3]&gt;
- 8:       classif.rpart.minsplit ParamInt     1   Inf                                            20
- 9:      classif.rpart.minbucket ParamInt     1   Inf                                &lt;NoDefault[3]&gt;
-10:             classif.rpart.cp ParamDbl     0     1                                          0.01
-11:     classif.rpart.maxcompete ParamInt     0   Inf                                             4
-12:   classif.rpart.maxsurrogate ParamInt     0   Inf                                             5
-13:       classif.rpart.maxdepth ParamInt     1    30                                            30
-14:   classif.rpart.usesurrogate ParamInt     0     2                                             2
-15: classif.rpart.surrogatestyle ParamInt     0     1                                             0
-16:           classif.rpart.xval ParamInt     0   Inf                                            10
-17:     classif.rpart.keep_model ParamLgl    NA    NA                     TRUE,FALSE          FALSE
-             value
- 1: impute_missind
- 2:  &lt;Selector[1]&gt;
- 3:  &lt;Selector[1]&gt;
- 4:  missing_train
- 5:         factor
- 6:  &lt;Selector[1]&gt;
- 7:               
- 8:               
- 9:               
-10:               
-11:               
-12:               
-13:               
-14:               
-15:               
-16:              0
-17:               </code></pre>
+                              id    class lower upper nlevels        default          value
+ 1:             branch.selection ParamFct    NA    NA       2 &lt;NoDefault[3]&gt; impute_missind
+ 2:    imputehist.affect_columns ParamUty    NA    NA     Inf &lt;NoDefault[3]&gt;  &lt;Selector[1]&gt;
+ 3:  imputemedian.affect_columns ParamUty    NA    NA     Inf &lt;NoDefault[3]&gt;  &lt;Selector[1]&gt;
+ 4:                missind.which ParamFct    NA    NA       2 &lt;NoDefault[3]&gt;  missing_train
+ 5:                 missind.type ParamFct    NA    NA       4 &lt;NoDefault[3]&gt;         factor
+ 6:       missind.affect_columns ParamUty    NA    NA     Inf  &lt;Selector[1]&gt;  &lt;Selector[1]&gt;
+ 7: simple_median.affect_columns ParamUty    NA    NA     Inf &lt;NoDefault[3]&gt;               
+ 8:       classif.rpart.minsplit ParamInt     1   Inf     Inf             20               
+ 9:      classif.rpart.minbucket ParamInt     1   Inf     Inf &lt;NoDefault[3]&gt;               
+10:             classif.rpart.cp ParamDbl     0     1     Inf           0.01               
+11:     classif.rpart.maxcompete ParamInt     0   Inf     Inf              4               
+12:   classif.rpart.maxsurrogate ParamInt     0   Inf     Inf              5               
+13:       classif.rpart.maxdepth ParamInt     1    30      30             30               
+14:   classif.rpart.usesurrogate ParamInt     0     2       3              2               
+15: classif.rpart.surrogatestyle ParamInt     0     1       2              0               
+16:           classif.rpart.xval ParamInt     0   Inf     Inf             10              0
+17:     classif.rpart.keep_model ParamLgl    NA    NA       2          FALSE               </code></pre>
 </div>
 <p>We decide to jointly tune the “branch.selection”, “classif.rpart.cp” and “classif.rpart.minbucket” hyperparameters:</p>
 <div class="layout-chunk" data-layout="l-body">
@@ -2743,11 +2729,11 @@ document.addEventListener('DOMContentLoaded', function() {
 4:   impute_missind       0.06364106                       5  0.2656250
 5:    simple_median       0.09899797                      10  0.2617188
                                   uhash  x_domain           timestamp batch_nr
-1: 99684417-c328-485e-94a1-49d95cb4c4ad &lt;list[3]&gt; 2021-03-07 04:59:09        1
-2: 7bd2878a-83d4-4e20-ae79-949203512eee &lt;list[3]&gt; 2021-03-07 04:59:10        2
-3: 0ea99b83-06d1-4f8d-b4b4-ca616e426bb2 &lt;list[3]&gt; 2021-03-07 04:59:11        3
-4: 8b990a45-dce8-4b0f-b8fe-efe2167848ba &lt;list[3]&gt; 2021-03-07 04:59:13        4
-5: e5973ea8-9215-479d-9396-5a1fdd160ca3 &lt;list[3]&gt; 2021-03-07 04:59:14        5</code></pre>
+1: 3e602031-663b-4071-abd8-ef1713fb3c66 &lt;list[3]&gt; 2021-03-08 04:50:05        1
+2: c5d48a75-3122-40d8-90e5-3e20a4d1f3b0 &lt;list[3]&gt; 2021-03-08 04:50:06        2
+3: 63e488b2-4b7c-4686-84cf-80159c728a65 &lt;list[3]&gt; 2021-03-08 04:50:07        3
+4: f7191731-905d-4c7e-88d6-393ac7f23eb0 &lt;list[3]&gt; 2021-03-08 04:50:08        4
+5: 63610e01-b700-4de8-ae50-b324af886d06 &lt;list[3]&gt; 2021-03-08 04:50:08        5</code></pre>
 </div>
 <p>The best performance in this short tuned experiment was achieved with .</p>
 <div class="layout-chunk" data-layout="l-body">
