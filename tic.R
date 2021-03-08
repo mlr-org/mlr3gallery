@@ -4,7 +4,7 @@ get_stage("install") %>%
 get_stage("script") %>%
   add_code_step(lapply(list.files("_posts/",
     pattern = ".Rmd",
-    full.names = TRUE, recursive = TRUE)[27], rmarkdown::render))
+    full.names = TRUE, recursive = TRUE)[1:31], rmarkdown::render))
 
 if (ci_get_branch() == "main") {
   get_stage("before_deploy") %>%
