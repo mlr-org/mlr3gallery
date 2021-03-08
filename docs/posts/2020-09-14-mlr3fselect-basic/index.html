@@ -1,0 +1,2942 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1"/>
+  <meta name="generator" content="distill" />
+
+  <style type="text/css">
+  /* Hide doc at startup (prevent jankiness while JS renders/transforms) */
+  body {
+    visibility: hidden;
+  }
+  </style>
+
+ <!--radix_placeholder_import_source-->
+ <!--/radix_placeholder_import_source-->
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css" data-origin="pandoc">
+a.sourceLine { display: inline-block; line-height: 1.25; }
+a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
+a.sourceLine:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+a.sourceLine { text-indent: -1em; padding-left: 1em; }
+}
+pre.numberSource a.sourceLine
+  { position: relative; left: -4em; }
+pre.numberSource a.sourceLine::before
+  { content: attr(title);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; pointer-events: all; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {  }
+@media screen {
+a.sourceLine::before { text-decoration: underline; }
+}
+code span.al { color: #ad0000; } /* Alert */
+code span.an { color: #5e5e5e; } /* Annotation */
+code span.at { color: #20794d; } /* Attribute */
+code span.bn { color: #ad0000; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007ba5; } /* ControlFlow */
+code span.ch { color: #20794d; } /* Char */
+code span.cn { color: #8f5902; } /* Constant */
+code span.co { color: #5e5e5e; } /* Comment */
+code span.cv { color: #5e5e5e; font-style: italic; } /* CommentVar */
+code span.do { color: #5e5e5e; font-style: italic; } /* Documentation */
+code span.dt { color: #ad0000; } /* DataType */
+code span.dv { color: #ad0000; } /* DecVal */
+code span.er { color: #ad0000; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #ad0000; } /* Float */
+code span.fu { color: #4758ab; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #5e5e5e; } /* Information */
+code span.kw { color: #007ba5; } /* Keyword */
+code span.op { color: #5e5e5e; } /* Operator */
+code span.ot { color: #007ba5; } /* Other */
+code span.pp { color: #ad0000; } /* Preprocessor */
+code span.sc { color: #20794d; } /* SpecialChar */
+code span.ss { color: #20794d; } /* SpecialString */
+code span.st { color: #20794d; } /* String */
+code span.va { color: #111111; } /* Variable */
+code span.vs { color: #20794d; } /* VerbatimString */
+code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
+</style>
+
+  <!--radix_placeholder_meta_tags-->
+<title>mlr3gallery: Feature Selection on the Titanic Data Set</title>
+
+<meta property="description" itemprop="description" content="We give a short introduction to mlr3fselect."/>
+
+<link rel="canonical" href="https://mlr3gallery.mlr-org.com/posts/2020-09-14-mlr3fselect-basic/"/>
+
+<!--  https://schema.org/Article -->
+<meta property="article:published" itemprop="datePublished" content="2021-01-08"/>
+<meta property="article:created" itemprop="dateCreated" content="2021-01-08"/>
+<meta name="article:author" content="Marc Becker"/>
+
+<!--  https://developers.facebook.com/docs/sharing/webmasters#markup -->
+<meta property="og:title" content="mlr3gallery: Feature Selection on the Titanic Data Set"/>
+<meta property="og:type" content="article"/>
+<meta property="og:description" content="We give a short introduction to mlr3fselect."/>
+<meta property="og:url" content="https://mlr3gallery.mlr-org.com/posts/2020-09-14-mlr3fselect-basic/"/>
+<meta property="og:locale" content="en_US"/>
+<meta property="og:site_name" content="mlr3gallery"/>
+
+<!--  https://dev.twitter.com/cards/types/summary -->
+<meta property="twitter:card" content="summary"/>
+<meta property="twitter:title" content="mlr3gallery: Feature Selection on the Titanic Data Set"/>
+<meta property="twitter:description" content="We give a short introduction to mlr3fselect."/>
+<meta property="twitter:url" content="https://mlr3gallery.mlr-org.com/posts/2020-09-14-mlr3fselect-basic/"/>
+
+<!--  https://scholar.google.com/intl/en/scholar/inclusion.html#indexing -->
+<meta name="citation_title" content="mlr3gallery: Feature Selection on the Titanic Data Set"/>
+<meta name="citation_fulltext_html_url" content="https://mlr3gallery.mlr-org.com/posts/2020-09-14-mlr3fselect-basic/"/>
+<meta name="citation_online_date" content="2021/01/08"/>
+<meta name="citation_publication_date" content="2021/01/08"/>
+<meta name="citation_author" content="Marc Becker"/>
+<!--/radix_placeholder_meta_tags-->
+  <!--radix_placeholder_rmarkdown_metadata-->
+
+<script type="text/json" id="radix-rmarkdown-metadata">
+{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["title","categories","description","author","date","output","citation_url","canonical_url"]}},"value":[{"type":"character","attributes":{},"value":["Feature Selection on the Titanic Data Set"]},{"type":"character","attributes":{},"value":["mlr3fselect","optimization","feature selection","nested resampling"]},{"type":"character","attributes":{},"value":["We give a short introduction to mlr3fselect."]},{"type":"list","attributes":{},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name"]}},"value":[{"type":"character","attributes":{},"value":["Marc Becker"]}]}]},{"type":"character","attributes":{},"value":["01-08-2021"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["distill::distill_article"]}},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["self_contained"]}},"value":[{"type":"logical","attributes":{},"value":[false]}]}]},{"type":"character","attributes":{},"value":["https://mlr3gallery.mlr-org.com/posts/2020-09-14-mlr3fselect-basic/"]},{"type":"character","attributes":{},"value":["https://mlr3gallery.mlr-org.com/posts/2020-09-14-mlr3fselect-basic/"]}]}
+</script>
+<!--/radix_placeholder_rmarkdown_metadata-->
+  
+  <script type="text/json" id="radix-resource-manifest">
+  {"type":"NULL"}
+  </script>
+  <!--radix_placeholder_navigation_in_header-->
+<meta name="distill:offset" content="../.."/>
+
+<script type="application/javascript">
+
+  window.headroom_prevent_pin = false;
+
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+
+    // initialize headroom for banner
+    var header = $('header').get(0);
+    var headerHeight = header.offsetHeight;
+    var headroom = new Headroom(header, {
+      tolerance: 5,
+      onPin : function() {
+        if (window.headroom_prevent_pin) {
+          window.headroom_prevent_pin = false;
+          headroom.unpin();
+        }
+      }
+    });
+    headroom.init();
+    if(window.location.hash)
+      headroom.unpin();
+    $(header).addClass('headroom--transition');
+
+    // offset scroll location for banner on hash change
+    // (see: https://github.com/WickyNilliams/headroom.js/issues/38)
+    window.addEventListener("hashchange", function(event) {
+      window.scrollTo(0, window.pageYOffset - (headerHeight + 25));
+    });
+
+    // responsive menu
+    $('.distill-site-header').each(function(i, val) {
+      var topnav = $(this);
+      var toggle = topnav.find('.nav-toggle');
+      toggle.on('click', function() {
+        topnav.toggleClass('responsive');
+      });
+    });
+
+    // nav dropdowns
+    $('.nav-dropbtn').click(function(e) {
+      $(this).next('.nav-dropdown-content').toggleClass('nav-dropdown-active');
+      $(this).parent().siblings('.nav-dropdown')
+         .children('.nav-dropdown-content').removeClass('nav-dropdown-active');
+    });
+    $("body").click(function(e){
+      $('.nav-dropdown-content').removeClass('nav-dropdown-active');
+    });
+    $(".nav-dropdown").click(function(e){
+      e.stopPropagation();
+    });
+  });
+</script>
+
+<style type="text/css">
+
+/* Theme (user-documented overrideables for nav appearance) */
+
+.distill-site-nav {
+  color: rgba(255, 255, 255, 0.8);
+  background-color: #0F2E3D;
+  font-size: 15px;
+  font-weight: 300;
+}
+
+.distill-site-nav a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.distill-site-nav a:hover {
+  color: white;
+}
+
+@media print {
+  .distill-site-nav {
+    display: none;
+  }
+}
+
+.distill-site-header {
+
+}
+
+.distill-site-footer {
+
+}
+
+
+/* Site Header */
+
+.distill-site-header {
+  width: 100%;
+  box-sizing: border-box;
+  z-index: 3;
+}
+
+.distill-site-header .nav-left {
+  display: inline-block;
+  margin-left: 8px;
+}
+
+@media screen and (max-width: 768px) {
+  .distill-site-header .nav-left {
+    margin-left: 0;
+  }
+}
+
+
+.distill-site-header .nav-right {
+  float: right;
+  margin-right: 8px;
+}
+
+.distill-site-header a,
+.distill-site-header .title {
+  display: inline-block;
+  text-align: center;
+  padding: 14px 10px 14px 10px;
+}
+
+.distill-site-header .title {
+  font-size: 18px;
+  min-width: 150px;
+}
+
+.distill-site-header .logo {
+  padding: 0;
+}
+
+.distill-site-header .logo img {
+  display: none;
+  max-height: 20px;
+  width: auto;
+  margin-bottom: -4px;
+}
+
+.distill-site-header .nav-image img {
+  max-height: 18px;
+  width: auto;
+  display: inline-block;
+  margin-bottom: -3px;
+}
+
+
+
+@media screen and (min-width: 1000px) {
+  .distill-site-header .logo img {
+    display: inline-block;
+  }
+  .distill-site-header .nav-left {
+    margin-left: 20px;
+  }
+  .distill-site-header .nav-right {
+    margin-right: 20px;
+  }
+  .distill-site-header .title {
+    padding-left: 12px;
+  }
+}
+
+
+.distill-site-header .nav-toggle {
+  display: none;
+}
+
+.nav-dropdown {
+  display: inline-block;
+  position: relative;
+}
+
+.nav-dropdown .nav-dropbtn {
+  border: none;
+  outline: none;
+  color: rgba(255, 255, 255, 0.8);
+  padding: 16px 10px;
+  background-color: transparent;
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  margin: 0;
+  margin-top: 1px;
+  z-index: 2;
+}
+
+.nav-dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: white;
+  min-width: 200px;
+  border: 1px solid rgba(0,0,0,0.15);
+  border-radius: 4px;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.1);
+  z-index: 1;
+  margin-top: 2px;
+  white-space: nowrap;
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+.nav-dropdown-content hr {
+  margin-top: 4px;
+  margin-bottom: 4px;
+  border: none;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.nav-dropdown-active {
+  display: block;
+}
+
+.nav-dropdown-content a, .nav-dropdown-content .nav-dropdown-header {
+  color: black;
+  padding: 6px 24px;
+  text-decoration: none;
+  display: block;
+  text-align: left;
+}
+
+.nav-dropdown-content .nav-dropdown-header {
+  display: block;
+  padding: 5px 24px;
+  padding-bottom: 0;
+  text-transform: uppercase;
+  font-size: 14px;
+  color: #999999;
+  white-space: nowrap;
+}
+
+.nav-dropdown:hover .nav-dropbtn {
+  color: white;
+}
+
+.nav-dropdown-content a:hover {
+  background-color: #ddd;
+  color: black;
+}
+
+.nav-right .nav-dropdown-content {
+  margin-left: -45%;
+  right: 0;
+}
+
+@media screen and (max-width: 768px) {
+  .distill-site-header a, .distill-site-header .nav-dropdown  {display: none;}
+  .distill-site-header a.nav-toggle {
+    float: right;
+    display: block;
+  }
+  .distill-site-header .title {
+    margin-left: 0;
+  }
+  .distill-site-header .nav-right {
+    margin-right: 0;
+  }
+  .distill-site-header {
+    overflow: hidden;
+  }
+  .nav-right .nav-dropdown-content {
+    margin-left: 0;
+  }
+}
+
+
+@media screen and (max-width: 768px) {
+  .distill-site-header.responsive {position: relative; min-height: 500px; }
+  .distill-site-header.responsive a.nav-toggle {
+    position: absolute;
+    right: 0;
+    top: 0;
+  }
+  .distill-site-header.responsive a,
+  .distill-site-header.responsive .nav-dropdown {
+    display: block;
+    text-align: left;
+  }
+  .distill-site-header.responsive .nav-left,
+  .distill-site-header.responsive .nav-right {
+    width: 100%;
+  }
+  .distill-site-header.responsive .nav-dropdown {float: none;}
+  .distill-site-header.responsive .nav-dropdown-content {position: relative;}
+  .distill-site-header.responsive .nav-dropdown .nav-dropbtn {
+    display: block;
+    width: 100%;
+    text-align: left;
+  }
+}
+
+/* Site Footer */
+
+.distill-site-footer {
+  width: 100%;
+  overflow: hidden;
+  box-sizing: border-box;
+  z-index: 3;
+  margin-top: 30px;
+  padding-top: 30px;
+  padding-bottom: 30px;
+  text-align: center;
+}
+
+/* Headroom */
+
+d-title {
+  padding-top: 6rem;
+}
+
+@media print {
+  d-title {
+    padding-top: 4rem;
+  }
+}
+
+.headroom {
+  z-index: 1000;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+}
+
+.headroom--transition {
+  transition: all .4s ease-in-out;
+}
+
+.headroom--unpinned {
+  top: -100px;
+}
+
+.headroom--pinned {
+  top: 0;
+}
+
+/* adjust viewport for navbar height */
+/* helps vertically center bootstrap (non-distill) content */
+.min-vh-100 {
+  min-height: calc(100vh - 100px) !important;
+}
+
+</style>
+
+<script src="../../site_libs/jquery-1.11.3/jquery.min.js"></script>
+<link href="../../site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet"/>
+<link href="../../site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet"/>
+<script src="../../site_libs/headroom-0.9.4/headroom.min.js"></script>
+<script src="../../site_libs/autocomplete-0.37.1/autocomplete.min.js"></script>
+<script src="../../site_libs/fuse-6.4.1/fuse.min.js"></script>
+
+<script type="application/javascript">
+
+function getMeta(metaName) {
+  var metas = document.getElementsByTagName('meta');
+  for (let i = 0; i < metas.length; i++) {
+    if (metas[i].getAttribute('name') === metaName) {
+      return metas[i].getAttribute('content');
+    }
+  }
+  return '';
+}
+
+function offsetURL(url) {
+  var offset = getMeta('distill:offset');
+  return offset ? offset + '/' + url : url;
+}
+
+function createFuseIndex() {
+
+  // create fuse index
+  var options = {
+    keys: [
+      { name: 'title', weight: 20 },
+      { name: 'categories', weight: 15 },
+      { name: 'description', weight: 10 },
+      { name: 'contents', weight: 5 },
+    ],
+    ignoreLocation: true,
+    threshold: 0
+  };
+  var fuse = new window.Fuse([], options);
+
+  // fetch the main search.json
+  return fetch(offsetURL('search.json'))
+    .then(function(response) {
+      if (response.status == 200) {
+        return response.json().then(function(json) {
+          // index main articles
+          json.articles.forEach(function(article) {
+            fuse.add(article);
+          });
+          // download collections and index their articles
+          return Promise.all(json.collections.map(function(collection) {
+            return fetch(offsetURL(collection)).then(function(response) {
+              if (response.status === 200) {
+                return response.json().then(function(articles) {
+                  articles.forEach(function(article) {
+                    fuse.add(article);
+                  });
+                })
+              } else {
+                return Promise.reject(
+                  new Error('Unexpected status from search index request: ' +
+                            response.status)
+                );
+              }
+            });
+          })).then(function() {
+            return fuse;
+          });
+        });
+
+      } else {
+        return Promise.reject(
+          new Error('Unexpected status from search index request: ' +
+                      response.status)
+        );
+      }
+    });
+}
+
+window.document.addEventListener("DOMContentLoaded", function (event) {
+
+  // get search element (bail if we don't have one)
+  var searchEl = window.document.getElementById('distill-search');
+  if (!searchEl)
+    return;
+
+  createFuseIndex()
+    .then(function(fuse) {
+
+      // make search box visible
+      searchEl.classList.remove('hidden');
+
+      // initialize autocomplete
+      var options = {
+        autoselect: true,
+        hint: false,
+        minLength: 2,
+      };
+      window.autocomplete(searchEl, options, [{
+        source: function(query, callback) {
+          const searchOptions = {
+            isCaseSensitive: false,
+            shouldSort: true,
+            minMatchCharLength: 2,
+            limit: 10,
+          };
+          var results = fuse.search(query, searchOptions);
+          callback(results
+            .map(function(result) { return result.item; })
+          );
+        },
+        templates: {
+          suggestion: function(suggestion) {
+            var img = suggestion.preview && Object.keys(suggestion.preview).length > 0
+              ? `<img src="${offsetURL(suggestion.preview)}"</img>`
+              : '';
+            var html = `
+              <div class="search-item">
+                <h3>${suggestion.title}</h3>
+                <div class="search-item-description">
+                  ${suggestion.description || ''}
+                </div>
+                <div class="search-item-preview">
+                  ${img}
+                </div>
+              </div>
+            `;
+            return html;
+          }
+        }
+      }]).on('autocomplete:selected', function(event, suggestion) {
+        window.location.href = offsetURL(suggestion.path);
+      });
+      // remove inline display style on autocompleter (we want to
+      // manage responsive display via css)
+      $('.algolia-autocomplete').css("display", "");
+    })
+    .catch(function(error) {
+      console.log(error);
+    });
+
+});
+
+</script>
+
+<style type="text/css">
+
+.nav-search {
+  font-size: x-small;
+}
+
+/* Algolioa Autocomplete */
+
+.algolia-autocomplete {
+  display: inline-block;
+  margin-left: 10px;
+  vertical-align: sub;
+  background-color: white;
+  color: black;
+  padding: 6px;
+  padding-top: 8px;
+  padding-bottom: 0;
+  border-radius: 6px;
+  border: 1px #0F2E3D solid;
+  width: 180px;
+}
+
+
+@media screen and (max-width: 768px) {
+  .distill-site-nav .algolia-autocomplete {
+    display: none;
+    visibility: hidden;
+  }
+  .distill-site-nav.responsive .algolia-autocomplete {
+    display: inline-block;
+    visibility: visible;
+  }
+  .distill-site-nav.responsive .algolia-autocomplete .aa-dropdown-menu {
+    margin-left: 0;
+    width: 400px;
+    max-height: 400px;
+  }
+}
+
+.algolia-autocomplete .aa-input, .algolia-autocomplete .aa-hint {
+  width: 90%;
+  outline: none;
+  border: none;
+}
+
+.algolia-autocomplete .aa-hint {
+  color: #999;
+}
+.algolia-autocomplete .aa-dropdown-menu {
+  width: 550px;
+  max-height: 70vh;
+  overflow-x: visible;
+  overflow-y: scroll;
+  padding: 5px;
+  margin-top: 3px;
+  margin-left: -150px;
+  background-color: #fff;
+  border-radius: 5px;
+  border: 1px solid #999;
+  border-top: none;
+}
+
+.algolia-autocomplete .aa-dropdown-menu .aa-suggestion {
+  cursor: pointer;
+  padding: 5px 4px;
+  border-bottom: 1px solid #eee;
+}
+
+.algolia-autocomplete .aa-dropdown-menu .aa-suggestion:last-of-type {
+  border-bottom: none;
+  margin-bottom: 2px;
+}
+
+.algolia-autocomplete .aa-dropdown-menu .aa-suggestion .search-item {
+  overflow: hidden;
+  font-size: 0.8em;
+  line-height: 1.4em;
+}
+
+.algolia-autocomplete .aa-dropdown-menu .aa-suggestion .search-item h3 {
+  font-size: 1rem;
+  margin-block-start: 0;
+  margin-block-end: 5px;
+}
+
+.algolia-autocomplete .aa-dropdown-menu .aa-suggestion .search-item-description {
+  display: inline-block;
+  overflow: hidden;
+  height: 2.8em;
+  width: 80%;
+  margin-right: 4%;
+}
+
+.algolia-autocomplete .aa-dropdown-menu .aa-suggestion .search-item-preview {
+  display: inline-block;
+  width: 15%;
+}
+
+.algolia-autocomplete .aa-dropdown-menu .aa-suggestion .search-item-preview img {
+  height: 3em;
+  width: auto;
+  display: none;
+}
+
+.algolia-autocomplete .aa-dropdown-menu .aa-suggestion .search-item-preview img[src] {
+  display: initial;
+}
+
+.algolia-autocomplete .aa-dropdown-menu .aa-suggestion.aa-cursor {
+  background-color: #eee;
+}
+.algolia-autocomplete .aa-dropdown-menu .aa-suggestion em {
+  font-weight: bold;
+  font-style: normal;
+}
+
+</style>
+
+
+<!--/radix_placeholder_navigation_in_header-->
+  <!--radix_placeholder_distill-->
+
+<style type="text/css">
+
+body {
+  background-color: white;
+}
+
+.pandoc-table {
+  width: 100%;
+}
+
+.pandoc-table>caption {
+  margin-bottom: 10px;
+}
+
+.pandoc-table th:not([align]) {
+  text-align: left;
+}
+
+.pagedtable-footer {
+  font-size: 15px;
+}
+
+d-byline .byline {
+  grid-template-columns: 2fr 2fr;
+}
+
+d-byline .byline h3 {
+  margin-block-start: 1.5em;
+}
+
+d-byline .byline .authors-affiliations h3 {
+  margin-block-start: 0.5em;
+}
+
+.authors-affiliations .orcid-id {
+  width: 16px;
+  height:16px;
+  margin-left: 4px;
+  margin-right: 4px;
+  vertical-align: middle;
+  padding-bottom: 2px;
+}
+
+d-title .dt-tags {
+  margin-top: 1em;
+  grid-column: text;
+}
+
+.dt-tags .dt-tag {
+  text-decoration: none;
+  display: inline-block;
+  color: rgba(0,0,0,0.6);
+  padding: 0em 0.4em;
+  margin-right: 0.5em;
+  margin-bottom: 0.4em;
+  font-size: 70%;
+  border: 1px solid rgba(0,0,0,0.2);
+  border-radius: 3px;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+d-article table.gt_table td,
+d-article table.gt_table th {
+  border-bottom: none;
+}
+
+.html-widget {
+  margin-bottom: 2.0em;
+}
+
+.l-screen-inset {
+  padding-right: 16px;
+}
+
+.l-screen .caption {
+  margin-left: 10px;
+}
+
+.shaded {
+  background: rgb(247, 247, 247);
+  padding-top: 20px;
+  padding-bottom: 20px;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.shaded .html-widget {
+  margin-bottom: 0;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.shaded .shaded-content {
+  background: white;
+}
+
+.text-output {
+  margin-top: 0;
+  line-height: 1.5em;
+}
+
+.hidden {
+  display: none !important;
+}
+
+d-article {
+  padding-top: 2.5rem;
+  padding-bottom: 30px;
+}
+
+d-appendix {
+  padding-top: 30px;
+}
+
+d-article>p>img {
+  width: 100%;
+}
+
+d-article h2 {
+  margin: 1rem 0 1.5rem 0;
+}
+
+d-article h3 {
+  margin-top: 1.5rem;
+}
+
+d-article iframe {
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  margin-bottom: 2.0em;
+  width: 100%;
+}
+
+/* Tweak code blocks */
+
+d-article div.sourceCode code,
+d-article pre code {
+  font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+}
+
+d-article pre,
+d-article div.sourceCode,
+d-article div.sourceCode pre {
+  overflow: auto;
+}
+
+d-article div.sourceCode {
+  background-color: white;
+}
+
+d-article div.sourceCode pre {
+  padding-left: 10px;
+  font-size: 12px;
+  border-left: 2px solid rgba(0,0,0,0.1);
+}
+
+d-article pre {
+  font-size: 12px;
+  color: black;
+  background: none;
+  margin-top: 0;
+  text-align: left;
+  white-space: pre;
+  word-spacing: normal;
+  word-break: normal;
+  word-wrap: normal;
+  line-height: 1.5;
+
+  -moz-tab-size: 4;
+  -o-tab-size: 4;
+  tab-size: 4;
+
+  -webkit-hyphens: none;
+  -moz-hyphens: none;
+  -ms-hyphens: none;
+  hyphens: none;
+}
+
+d-article pre a {
+  border-bottom: none;
+}
+
+d-article pre a:hover {
+  border-bottom: none;
+  text-decoration: underline;
+}
+
+d-article details {
+  grid-column: text;
+  margin-bottom: 0.8em;
+}
+
+@media(min-width: 768px) {
+
+d-article pre,
+d-article div.sourceCode,
+d-article div.sourceCode pre {
+  overflow: visible !important;
+}
+
+d-article div.sourceCode pre {
+  padding-left: 18px;
+  font-size: 14px;
+}
+
+d-article pre {
+  font-size: 14px;
+}
+
+}
+
+figure img.external {
+  background: white;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.1);
+  padding: 18px;
+  box-sizing: border-box;
+}
+
+/* CSS for d-contents */
+
+.d-contents {
+  grid-column: text;
+  color: rgba(0,0,0,0.8);
+  font-size: 0.9em;
+  padding-bottom: 1em;
+  margin-bottom: 1em;
+  padding-bottom: 0.5em;
+  margin-bottom: 1em;
+  padding-left: 0.25em;
+  justify-self: start;
+}
+
+@media(min-width: 1000px) {
+  .d-contents.d-contents-float {
+    height: 0;
+    grid-column-start: 1;
+    grid-column-end: 4;
+    justify-self: center;
+    padding-right: 3em;
+    padding-left: 2em;
+  }
+}
+
+.d-contents nav h3 {
+  font-size: 18px;
+  margin-top: 0;
+  margin-bottom: 1em;
+}
+
+.d-contents li {
+  list-style-type: none
+}
+
+.d-contents nav > ul {
+  padding-left: 0;
+}
+
+.d-contents ul {
+  padding-left: 1em
+}
+
+.d-contents nav ul li {
+  margin-top: 0.6em;
+  margin-bottom: 0.2em;
+}
+
+.d-contents nav a {
+  font-size: 13px;
+  border-bottom: none;
+  text-decoration: none
+  color: rgba(0, 0, 0, 0.8);
+}
+
+.d-contents nav a:hover {
+  text-decoration: underline solid rgba(0, 0, 0, 0.6)
+}
+
+.d-contents nav > ul > li > a {
+  font-weight: 600;
+}
+
+.d-contents nav > ul > li > ul {
+  font-weight: inherit;
+}
+
+.d-contents nav > ul > li > ul > li {
+  margin-top: 0.2em;
+}
+
+
+.d-contents nav ul {
+  margin-top: 0;
+  margin-bottom: 0.25em;
+}
+
+.d-article-with-toc h2:nth-child(2) {
+  margin-top: 0;
+}
+
+
+/* Figure */
+
+.figure {
+  position: relative;
+  margin-bottom: 2.5em;
+  margin-top: 1.5em;
+}
+
+.figure img {
+  width: 100%;
+}
+
+.figure .caption {
+  color: rgba(0, 0, 0, 0.6);
+  font-size: 12px;
+  line-height: 1.5em;
+}
+
+.figure img.external {
+  background: white;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.1);
+  padding: 18px;
+  box-sizing: border-box;
+}
+
+.figure .caption a {
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.figure .caption b,
+.figure .caption strong, {
+  font-weight: 600;
+  color: rgba(0, 0, 0, 1.0);
+}
+
+/* Citations */
+
+d-article .citation {
+  color: inherit;
+  cursor: inherit;
+}
+
+div.hanging-indent{
+  margin-left: 1em; text-indent: -1em;
+}
+
+/* Citation hover box */
+
+.tippy-box[data-theme~=light-border] {
+  background-color: rgba(250, 250, 250, 0.95);
+}
+
+.tippy-content > p {
+  margin-bottom: 0;
+  padding: 2px;
+}
+
+
+/* Tweak 1000px media break to show more text */
+
+@media(min-width: 1000px) {
+  .base-grid,
+  distill-header,
+  d-title,
+  d-abstract,
+  d-article,
+  d-appendix,
+  distill-appendix,
+  d-byline,
+  d-footnote-list,
+  d-citation-list,
+  distill-footer {
+    grid-template-columns: [screen-start] 1fr [page-start kicker-start] 80px [middle-start] 50px [text-start kicker-end] 65px 65px 65px 65px 65px 65px 65px 65px [text-end gutter-start] 65px [middle-end] 65px [page-end gutter-end] 1fr [screen-end];
+    grid-column-gap: 16px;
+  }
+
+  .grid {
+    grid-column-gap: 16px;
+  }
+
+  d-article {
+    font-size: 1.06rem;
+    line-height: 1.7em;
+  }
+  figure .caption, .figure .caption, figure figcaption {
+    font-size: 13px;
+  }
+}
+
+@media(min-width: 1180px) {
+  .base-grid,
+  distill-header,
+  d-title,
+  d-abstract,
+  d-article,
+  d-appendix,
+  distill-appendix,
+  d-byline,
+  d-footnote-list,
+  d-citation-list,
+  distill-footer {
+    grid-template-columns: [screen-start] 1fr [page-start kicker-start] 60px [middle-start] 60px [text-start kicker-end] 60px 60px 60px 60px 60px 60px 60px 60px [text-end gutter-start] 60px [middle-end] 60px [page-end gutter-end] 1fr [screen-end];
+    grid-column-gap: 32px;
+  }
+
+  .grid {
+    grid-column-gap: 32px;
+  }
+}
+
+
+/* Get the citation styles for the appendix (not auto-injected on render since
+   we do our own rendering of the citation appendix) */
+
+d-appendix .citation-appendix,
+.d-appendix .citation-appendix {
+  font-size: 11px;
+  line-height: 15px;
+  border-left: 1px solid rgba(0, 0, 0, 0.1);
+  padding-left: 18px;
+  border: 1px solid rgba(0,0,0,0.1);
+  background: rgba(0, 0, 0, 0.02);
+  padding: 10px 18px;
+  border-radius: 3px;
+  color: rgba(150, 150, 150, 1);
+  overflow: hidden;
+  margin-top: -12px;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+/* Include appendix styles here so they can be overridden */
+
+d-appendix {
+  contain: layout style;
+  font-size: 0.8em;
+  line-height: 1.7em;
+  margin-top: 60px;
+  margin-bottom: 0;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  color: rgba(0,0,0,0.5);
+  padding-top: 60px;
+  padding-bottom: 48px;
+}
+
+d-appendix h3 {
+  grid-column: page-start / text-start;
+  font-size: 15px;
+  font-weight: 500;
+  margin-top: 1em;
+  margin-bottom: 0;
+  color: rgba(0,0,0,0.65);
+}
+
+d-appendix h3 + * {
+  margin-top: 1em;
+}
+
+d-appendix ol {
+  padding: 0 0 0 15px;
+}
+
+@media (min-width: 768px) {
+  d-appendix ol {
+    padding: 0 0 0 30px;
+    margin-left: -30px;
+  }
+}
+
+d-appendix li {
+  margin-bottom: 1em;
+}
+
+d-appendix a {
+  color: rgba(0, 0, 0, 0.6);
+}
+
+d-appendix > * {
+  grid-column: text;
+}
+
+d-appendix > d-footnote-list,
+d-appendix > d-citation-list,
+d-appendix > distill-appendix {
+  grid-column: screen;
+}
+
+/* Include footnote styles here so they can be overridden */
+
+d-footnote-list {
+  contain: layout style;
+}
+
+d-footnote-list > * {
+  grid-column: text;
+}
+
+d-footnote-list a.footnote-backlink {
+  color: rgba(0,0,0,0.3);
+  padding-left: 0.5em;
+}
+
+
+
+/* Anchor.js */
+
+.anchorjs-link {
+  /*transition: all .25s linear; */
+  text-decoration: none;
+  border-bottom: none;
+}
+*:hover > .anchorjs-link {
+  margin-left: -1.125em !important;
+  text-decoration: none;
+  border-bottom: none;
+}
+
+/* Social footer */
+
+.social_footer {
+  margin-top: 30px;
+  margin-bottom: 0;
+  color: rgba(0,0,0,0.67);
+}
+
+.disqus-comments {
+  margin-right: 30px;
+}
+
+.disqus-comment-count {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.4);
+  cursor: pointer;
+}
+
+#disqus_thread {
+  margin-top: 30px;
+}
+
+.article-sharing a {
+  border-bottom: none;
+  margin-right: 8px;
+}
+
+.article-sharing a:hover {
+  border-bottom: none;
+}
+
+.sidebar-section.subscribe {
+  font-size: 12px;
+  line-height: 1.6em;
+}
+
+.subscribe p {
+  margin-bottom: 0.5em;
+}
+
+
+.article-footer .subscribe {
+  font-size: 15px;
+  margin-top: 45px;
+}
+
+
+.sidebar-section.custom {
+  font-size: 12px;
+  line-height: 1.6em;
+}
+
+.custom p {
+  margin-bottom: 0.5em;
+}
+
+/* Styles for listing layout (hide title) */
+.layout-listing d-title, .layout-listing .d-title {
+  display: none;
+}
+
+/* Styles for posts lists (not auto-injected) */
+
+
+.posts-with-sidebar {
+  padding-left: 45px;
+  padding-right: 45px;
+}
+
+.posts-list .description h2,
+.posts-list .description p {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", Arial, sans-serif;
+}
+
+.posts-list .description h2 {
+  font-weight: 700;
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.posts-list h2.post-tag {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+  padding-bottom: 12px;
+}
+.posts-list {
+  margin-top: 60px;
+  margin-bottom: 24px;
+}
+
+.posts-list .post-preview {
+  text-decoration: none;
+  overflow: hidden;
+  display: block;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  padding: 24px 0;
+}
+
+.post-preview-last {
+  border-bottom: none !important;
+}
+
+.posts-list .posts-list-caption {
+  grid-column: screen;
+  font-weight: 400;
+}
+
+.posts-list .post-preview h2 {
+  margin: 0 0 6px 0;
+  line-height: 1.2em;
+  font-style: normal;
+  font-size: 24px;
+}
+
+.posts-list .post-preview p {
+  margin: 0 0 12px 0;
+  line-height: 1.4em;
+  font-size: 16px;
+}
+
+.posts-list .post-preview .thumbnail {
+  box-sizing: border-box;
+  margin-bottom: 24px;
+  position: relative;
+  max-width: 500px;
+}
+.posts-list .post-preview img {
+  width: 100%;
+  display: block;
+}
+
+.posts-list .metadata {
+  font-size: 12px;
+  line-height: 1.4em;
+  margin-bottom: 18px;
+}
+
+.posts-list .metadata > * {
+  display: inline-block;
+}
+
+.posts-list .metadata .publishedDate {
+  margin-right: 2em;
+}
+
+.posts-list .metadata .dt-authors {
+  display: block;
+  margin-top: 0.3em;
+  margin-right: 2em;
+}
+
+.posts-list .dt-tags {
+  display: block;
+  line-height: 1em;
+}
+
+.posts-list .dt-tags .dt-tag {
+  display: inline-block;
+  color: rgba(0,0,0,0.6);
+  padding: 0.3em 0.4em;
+  margin-right: 0.2em;
+  margin-bottom: 0.4em;
+  font-size: 60%;
+  border: 1px solid rgba(0,0,0,0.2);
+  border-radius: 3px;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+.posts-list img {
+  opacity: 1;
+}
+
+.posts-list img[data-src] {
+  opacity: 0;
+}
+
+.posts-more {
+  clear: both;
+}
+
+
+.posts-sidebar {
+  font-size: 16px;
+}
+
+.posts-sidebar h3 {
+  font-size: 16px;
+  margin-top: 0;
+  margin-bottom: 0.5em;
+  font-weight: 400;
+  text-transform: uppercase;
+}
+
+.sidebar-section {
+  margin-bottom: 30px;
+}
+
+.categories ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+.categories li {
+  color: rgba(0, 0, 0, 0.8);
+  margin-bottom: 0;
+}
+
+.categories li>a {
+  border-bottom: none;
+}
+
+.categories li>a:hover {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.4);
+}
+
+.categories .active {
+  font-weight: 600;
+}
+
+.categories .category-count {
+  color: rgba(0, 0, 0, 0.4);
+}
+
+
+@media(min-width: 768px) {
+  .posts-list .post-preview h2 {
+    font-size: 26px;
+  }
+  .posts-list .post-preview .thumbnail {
+    float: right;
+    width: 30%;
+    margin-bottom: 0;
+  }
+  .posts-list .post-preview .description {
+    float: left;
+    width: 45%;
+  }
+  .posts-list .post-preview .metadata {
+    float: left;
+    width: 20%;
+    margin-top: 8px;
+  }
+  .posts-list .post-preview p {
+    margin: 0 0 12px 0;
+    line-height: 1.5em;
+    font-size: 16px;
+  }
+  .posts-with-sidebar .posts-list {
+    float: left;
+    width: 75%;
+  }
+  .posts-with-sidebar .posts-sidebar {
+    float: right;
+    width: 20%;
+    margin-top: 60px;
+    padding-top: 24px;
+    padding-bottom: 24px;
+  }
+}
+
+
+/* Improve display for browsers without grid (IE/Edge <= 15) */
+
+.downlevel {
+  line-height: 1.6em;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", Arial, sans-serif;
+  margin: 0;
+}
+
+.downlevel .d-title {
+  padding-top: 6rem;
+  padding-bottom: 1.5rem;
+}
+
+.downlevel .d-title h1 {
+  font-size: 50px;
+  font-weight: 700;
+  line-height: 1.1em;
+  margin: 0 0 0.5rem;
+}
+
+.downlevel .d-title p {
+  font-weight: 300;
+  font-size: 1.2rem;
+  line-height: 1.55em;
+  margin-top: 0;
+}
+
+.downlevel .d-byline {
+  padding-top: 0.8em;
+  padding-bottom: 0.8em;
+  font-size: 0.8rem;
+  line-height: 1.8em;
+}
+
+.downlevel .section-separator {
+  border: none;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.downlevel .d-article {
+  font-size: 1.06rem;
+  line-height: 1.7em;
+  padding-top: 1rem;
+  padding-bottom: 2rem;
+}
+
+
+.downlevel .d-appendix {
+  padding-left: 0;
+  padding-right: 0;
+  max-width: none;
+  font-size: 0.8em;
+  line-height: 1.7em;
+  margin-bottom: 0;
+  color: rgba(0,0,0,0.5);
+  padding-top: 40px;
+  padding-bottom: 48px;
+}
+
+.downlevel .footnotes ol {
+  padding-left: 13px;
+}
+
+.downlevel .base-grid,
+.downlevel .distill-header,
+.downlevel .d-title,
+.downlevel .d-abstract,
+.downlevel .d-article,
+.downlevel .d-appendix,
+.downlevel .distill-appendix,
+.downlevel .d-byline,
+.downlevel .d-footnote-list,
+.downlevel .d-citation-list,
+.downlevel .distill-footer,
+.downlevel .appendix-bottom,
+.downlevel .posts-container {
+  padding-left: 40px;
+  padding-right: 40px;
+}
+
+@media(min-width: 768px) {
+  .downlevel .base-grid,
+  .downlevel .distill-header,
+  .downlevel .d-title,
+  .downlevel .d-abstract,
+  .downlevel .d-article,
+  .downlevel .d-appendix,
+  .downlevel .distill-appendix,
+  .downlevel .d-byline,
+  .downlevel .d-footnote-list,
+  .downlevel .d-citation-list,
+  .downlevel .distill-footer,
+  .downlevel .appendix-bottom,
+  .downlevel .posts-container {
+  padding-left: 150px;
+  padding-right: 150px;
+  max-width: 900px;
+}
+}
+
+.downlevel pre code {
+  display: block;
+  border-left: 2px solid rgba(0, 0, 0, .1);
+  padding: 0 0 0 20px;
+  font-size: 14px;
+}
+
+.downlevel code, .downlevel pre {
+  color: black;
+  background: none;
+  font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+  text-align: left;
+  white-space: pre;
+  word-spacing: normal;
+  word-break: normal;
+  word-wrap: normal;
+  line-height: 1.5;
+
+  -moz-tab-size: 4;
+  -o-tab-size: 4;
+  tab-size: 4;
+
+  -webkit-hyphens: none;
+  -moz-hyphens: none;
+  -ms-hyphens: none;
+  hyphens: none;
+}
+
+.downlevel .posts-list .post-preview {
+  color: inherit;
+}
+
+
+
+</style>
+
+<script type="application/javascript">
+
+function is_downlevel_browser() {
+  if (bowser.isUnsupportedBrowser({ msie: "12", msedge: "16"},
+                                 window.navigator.userAgent)) {
+    return true;
+  } else {
+    return window.load_distill_framework === undefined;
+  }
+}
+
+// show body when load is complete
+function on_load_complete() {
+
+  // add anchors
+  if (window.anchors) {
+    window.anchors.options.placement = 'left';
+    window.anchors.add('d-article > h2, d-article > h3, d-article > h4, d-article > h5');
+  }
+
+
+  // set body to visible
+  document.body.style.visibility = 'visible';
+
+  // force redraw for leaflet widgets
+  if (window.HTMLWidgets) {
+    var maps = window.HTMLWidgets.findAll(".leaflet");
+    $.each(maps, function(i, el) {
+      var map = this.getMap();
+      map.invalidateSize();
+      map.eachLayer(function(layer) {
+        if (layer instanceof L.TileLayer)
+          layer.redraw();
+      });
+    });
+  }
+
+  // trigger 'shown' so htmlwidgets resize
+  $('d-article').trigger('shown');
+}
+
+function init_distill() {
+
+  init_common();
+
+  // create front matter
+  var front_matter = $('<d-front-matter></d-front-matter>');
+  $('#distill-front-matter').wrap(front_matter);
+
+  // create d-title
+  $('.d-title').changeElementType('d-title');
+
+  // create d-byline
+  var byline = $('<d-byline></d-byline>');
+  $('.d-byline').replaceWith(byline);
+
+  // create d-article
+  var article = $('<d-article></d-article>');
+  $('.d-article').wrap(article).children().unwrap();
+
+  // move posts container into article
+  $('.posts-container').appendTo($('d-article'));
+
+  // create d-appendix
+  $('.d-appendix').changeElementType('d-appendix');
+
+  // flag indicating that we have appendix items
+  var appendix = $('.appendix-bottom').children('h3').length > 0;
+
+  // replace footnotes with <d-footnote>
+  $('.footnote-ref').each(function(i, val) {
+    appendix = true;
+    var href = $(this).attr('href');
+    var id = href.replace('#', '');
+    var fn = $('#' + id);
+    var fn_p = $('#' + id + '>p');
+    fn_p.find('.footnote-back').remove();
+    var text = fn_p.html();
+    var dtfn = $('<d-footnote></d-footnote>');
+    dtfn.html(text);
+    $(this).replaceWith(dtfn);
+  });
+  // remove footnotes
+  $('.footnotes').remove();
+
+  // move refs into #references-listing
+  $('#references-listing').replaceWith($('#refs'));
+
+  $('h1.appendix, h2.appendix').each(function(i, val) {
+    $(this).changeElementType('h3');
+  });
+  $('h3.appendix').each(function(i, val) {
+    var id = $(this).attr('id');
+    $('.d-contents a[href="#' + id + '"]').parent().remove();
+    appendix = true;
+    $(this).nextUntil($('h1, h2, h3')).addBack().appendTo($('d-appendix'));
+  });
+
+  // show d-appendix if we have appendix content
+  $("d-appendix").css('display', appendix ? 'grid' : 'none');
+
+  // localize layout chunks to just output
+  $('.layout-chunk').each(function(i, val) {
+
+    // capture layout
+    var layout = $(this).attr('data-layout');
+
+    // apply layout to markdown level block elements
+    var elements = $(this).children().not('details, div.sourceCode, pre, script');
+    elements.each(function(i, el) {
+      var layout_div = $('<div class="' + layout + '"></div>');
+      if (layout_div.hasClass('shaded')) {
+        var shaded_content = $('<div class="shaded-content"></div>');
+        $(this).wrap(shaded_content);
+        $(this).parent().wrap(layout_div);
+      } else {
+        $(this).wrap(layout_div);
+      }
+    });
+
+
+    // unwrap the layout-chunk div
+    $(this).children().unwrap();
+  });
+
+  // remove code block used to force  highlighting css
+  $('.distill-force-highlighting-css').parent().remove();
+
+  // remove empty line numbers inserted by pandoc when using a
+  // custom syntax highlighting theme
+  $('code.sourceCode a:empty').remove();
+
+  // load distill framework
+  load_distill_framework();
+
+  // wait for window.distillRunlevel == 4 to do post processing
+  function distill_post_process() {
+
+    if (!window.distillRunlevel || window.distillRunlevel < 4)
+      return;
+
+    // hide author/affiliations entirely if we have no authors
+    var front_matter = JSON.parse($("#distill-front-matter").html());
+    var have_authors = front_matter.authors && front_matter.authors.length > 0;
+    if (!have_authors)
+      $('d-byline').addClass('hidden');
+
+    // article with toc class
+    $('.d-contents').parent().addClass('d-article-with-toc');
+
+    // strip links that point to #
+    $('.authors-affiliations').find('a[href="#"]').removeAttr('href');
+
+    // add orcid ids
+    $('.authors-affiliations').find('.author').each(function(i, el) {
+      var orcid_id = front_matter.authors[i].orcidID;
+      if (orcid_id) {
+        var a = $('<a></a>');
+        a.attr('href', 'https://orcid.org/' + orcid_id);
+        var img = $('<img></img>');
+        img.addClass('orcid-id');
+        img.attr('alt', 'ORCID ID');
+        img.attr('src','data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA2ZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo1N0NEMjA4MDI1MjA2ODExOTk0QzkzNTEzRjZEQTg1NyIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDozM0NDOEJGNEZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDozM0NDOEJGM0ZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M1IE1hY2ludG9zaCI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOkZDN0YxMTc0MDcyMDY4MTE5NUZFRDc5MUM2MUUwNEREIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjU3Q0QyMDgwMjUyMDY4MTE5OTRDOTM1MTNGNkRBODU3Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+84NovQAAAR1JREFUeNpiZEADy85ZJgCpeCB2QJM6AMQLo4yOL0AWZETSqACk1gOxAQN+cAGIA4EGPQBxmJA0nwdpjjQ8xqArmczw5tMHXAaALDgP1QMxAGqzAAPxQACqh4ER6uf5MBlkm0X4EGayMfMw/Pr7Bd2gRBZogMFBrv01hisv5jLsv9nLAPIOMnjy8RDDyYctyAbFM2EJbRQw+aAWw/LzVgx7b+cwCHKqMhjJFCBLOzAR6+lXX84xnHjYyqAo5IUizkRCwIENQQckGSDGY4TVgAPEaraQr2a4/24bSuoExcJCfAEJihXkWDj3ZAKy9EJGaEo8T0QSxkjSwORsCAuDQCD+QILmD1A9kECEZgxDaEZhICIzGcIyEyOl2RkgwAAhkmC+eAm0TAAAAABJRU5ErkJggg==');
+        a.append(img);
+        $(this).append(a);
+      }
+    });
+
+    // hide elements of author/affiliations grid that have no value
+    function hide_byline_column(caption) {
+      $('d-byline').find('h3:contains("' + caption + '")').parent().css('visibility', 'hidden');
+    }
+
+    // affiliations
+    var have_affiliations = false;
+    for (var i = 0; i<front_matter.authors.length; ++i) {
+      var author = front_matter.authors[i];
+      if (author.affiliation !== "&nbsp;") {
+        have_affiliations = true;
+        break;
+      }
+    }
+    if (!have_affiliations)
+      $('d-byline').find('h3:contains("Affiliations")').css('visibility', 'hidden');
+
+    // published date
+    if (!front_matter.publishedDate)
+      hide_byline_column("Published");
+
+    // document object identifier
+    var doi = $('d-byline').find('h3:contains("DOI")');
+    var doi_p = doi.next().empty();
+    if (!front_matter.doi) {
+      // if we have a citation and valid citationText then link to that
+      if ($('#citation').length > 0 && front_matter.citationText) {
+        doi.html('Citation');
+        $('<a href="#citation"></a>')
+          .text(front_matter.citationText)
+          .appendTo(doi_p);
+      } else {
+        hide_byline_column("DOI");
+      }
+    } else {
+      $('<a></a>')
+         .attr('href', "https://doi.org/" + front_matter.doi)
+         .html(front_matter.doi)
+         .appendTo(doi_p);
+    }
+
+     // change plural form of authors/affiliations
+    if (front_matter.authors.length === 1) {
+      var grid = $('.authors-affiliations');
+      grid.children('h3:contains("Authors")').text('Author');
+      grid.children('h3:contains("Affiliations")').text('Affiliation');
+    }
+
+    // remove d-appendix and d-footnote-list local styles
+    $('d-appendix > style:first-child').remove();
+    $('d-footnote-list > style:first-child').remove();
+
+    // move appendix-bottom entries to the bottom
+    $('.appendix-bottom').appendTo('d-appendix').children().unwrap();
+    $('.appendix-bottom').remove();
+
+    // hoverable references
+    $('span.citation[data-cites]').each(function() {
+      var refHtml = $('#ref-' + $(this).attr('data-cites')).html();
+      window.tippy(this, {
+        allowHTML: true,
+        content: refHtml,
+        maxWidth: 500,
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'light-border',
+        placement: 'bottom-start'
+      });
+    });
+
+    // clear polling timer
+    clearInterval(tid);
+
+    // show body now that everything is ready
+    on_load_complete();
+  }
+
+  var tid = setInterval(distill_post_process, 50);
+  distill_post_process();
+
+}
+
+function init_downlevel() {
+
+  init_common();
+
+   // insert hr after d-title
+  $('.d-title').after($('<hr class="section-separator"/>'));
+
+  // check if we have authors
+  var front_matter = JSON.parse($("#distill-front-matter").html());
+  var have_authors = front_matter.authors && front_matter.authors.length > 0;
+
+  // manage byline/border
+  if (!have_authors)
+    $('.d-byline').remove();
+  $('.d-byline').after($('<hr class="section-separator"/>'));
+  $('.d-byline a').remove();
+
+  // remove toc
+  $('.d-contents').remove();
+
+  // move appendix elements
+  $('h1.appendix, h2.appendix').each(function(i, val) {
+    $(this).changeElementType('h3');
+  });
+  $('h3.appendix').each(function(i, val) {
+    $(this).nextUntil($('h1, h2, h3')).addBack().appendTo($('.d-appendix'));
+  });
+
+
+  // inject headers into references and footnotes
+  var refs_header = $('<h3></h3>');
+  refs_header.text('References');
+  $('#refs').prepend(refs_header);
+
+  var footnotes_header = $('<h3></h3');
+  footnotes_header.text('Footnotes');
+  $('.footnotes').children('hr').first().replaceWith(footnotes_header);
+
+  // move appendix-bottom entries to the bottom
+  $('.appendix-bottom').appendTo('.d-appendix').children().unwrap();
+  $('.appendix-bottom').remove();
+
+  // remove appendix if it's empty
+  if ($('.d-appendix').children().length === 0)
+    $('.d-appendix').remove();
+
+  // prepend separator above appendix
+  $('.d-appendix').before($('<hr class="section-separator" style="clear: both"/>'));
+
+  // trim code
+  $('pre>code').each(function(i, val) {
+    $(this).html($.trim($(this).html()));
+  });
+
+  // move posts-container right before article
+  $('.posts-container').insertBefore($('.d-article'));
+
+  $('body').addClass('downlevel');
+
+  on_load_complete();
+}
+
+
+function init_common() {
+
+  // jquery plugin to change element types
+  (function($) {
+    $.fn.changeElementType = function(newType) {
+      var attrs = {};
+
+      $.each(this[0].attributes, function(idx, attr) {
+        attrs[attr.nodeName] = attr.nodeValue;
+      });
+
+      this.replaceWith(function() {
+        return $("<" + newType + "/>", attrs).append($(this).contents());
+      });
+    };
+  })(jQuery);
+
+  // prevent underline for linked images
+  $('a > img').parent().css({'border-bottom' : 'none'});
+
+  // mark non-body figures created by knitr chunks as 100% width
+  $('.layout-chunk').each(function(i, val) {
+    var figures = $(this).find('img, .html-widget');
+    if ($(this).attr('data-layout') !== "l-body") {
+      figures.css('width', '100%');
+    } else {
+      figures.css('max-width', '100%');
+      figures.filter("[width]").each(function(i, val) {
+        var fig = $(this);
+        fig.css('width', fig.attr('width') + 'px');
+      });
+
+    }
+  });
+
+  // auto-append index.html to post-preview links in file: protocol
+  // and in rstudio ide preview
+  $('.post-preview').each(function(i, val) {
+    if (window.location.protocol === "file:")
+      $(this).attr('href', $(this).attr('href') + "index.html");
+  });
+
+  // get rid of index.html references in header
+  if (window.location.protocol !== "file:") {
+    $('.distill-site-header a[href]').each(function(i,val) {
+      $(this).attr('href', $(this).attr('href').replace("index.html", "./"));
+    });
+  }
+
+  // add class to pandoc style tables
+  $('tr.header').parent('thead').parent('table').addClass('pandoc-table');
+  $('.kable-table').children('table').addClass('pandoc-table');
+
+  // add figcaption style to table captions
+  $('caption').parent('table').addClass("figcaption");
+
+  // initialize posts list
+  if (window.init_posts_list)
+    window.init_posts_list();
+
+  // implmement disqus comment link
+  $('.disqus-comment-count').click(function() {
+    window.headroom_prevent_pin = true;
+    $('#disqus_thread').toggleClass('hidden');
+    if (!$('#disqus_thread').hasClass('hidden')) {
+      var offset = $(this).offset();
+      $(window).resize();
+      $('html, body').animate({
+        scrollTop: offset.top - 35
+      });
+    }
+  });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  if (is_downlevel_browser())
+    init_downlevel();
+  else
+    window.addEventListener('WebComponentsReady', init_distill);
+});
+
+</script>
+
+<!--/radix_placeholder_distill-->
+  <script src="../../site_libs/jquery-1.11.3/jquery.min.js"></script>
+  <script src="../../site_libs/popper-2.6.0/popper.min.js"></script>
+  <link href="../../site_libs/tippy-6.2.7/tippy.css" rel="stylesheet" />
+  <link href="../../site_libs/tippy-6.2.7/tippy-light-border.css" rel="stylesheet" />
+  <script src="../../site_libs/tippy-6.2.7/tippy.umd.min.js"></script>
+  <script src="../../site_libs/anchor-4.2.2/anchor.min.js"></script>
+  <script src="../../site_libs/bowser-1.9.3/bowser.min.js"></script>
+  <script src="../../site_libs/webcomponents-2.0.0/webcomponents.js"></script>
+  <script src="../../site_libs/distill-2.2.21/template.v2.js"></script>
+  <!--radix_placeholder_site_in_header-->
+<!--/radix_placeholder_site_in_header-->
+
+
+</head>
+
+<body>
+
+<!--radix_placeholder_front_matter-->
+
+<script id="distill-front-matter" type="text/json">
+{"title":"Feature Selection on the Titanic Data Set","description":"We give a short introduction to mlr3fselect.","authors":[{"author":"Marc Becker","authorURL":"#","affiliation":"&nbsp;","affiliationURL":"#","orcidID":""}],"publishedDate":"2021-01-08T00:00:00.000+01:00","citationText":"Becker, 2021"}
+</script>
+
+<!--/radix_placeholder_front_matter-->
+<!--radix_placeholder_navigation_before_body-->
+<header class="header header--fixed" role="banner">
+<nav class="distill-site-nav distill-site-header">
+<div class="nav-left">
+<a class="logo" href="https://mlr3.mlr-org.com">
+<img src="../../images/logo.png" alt="Logo"/>
+</a>
+<a href="../../index.html" class="title">mlr3gallery</a>
+<input id="distill-search" class="nav-search hidden" type="text" placeholder="Search..."/>
+</div>
+<div class="nav-right">
+<a href="https://github.com/mlr-org/mlr3gallery">
+<i class="fab fa-github" aria-hidden="true"></i>
+</a>
+<a href="javascript:void(0);" class="nav-toggle">&#9776;</a>
+</div>
+</nav>
+</header>
+<!--/radix_placeholder_navigation_before_body-->
+<!--radix_placeholder_site_before_body-->
+<!--/radix_placeholder_site_before_body-->
+
+<div class="d-title">
+<h1>Feature Selection on the Titanic Data Set</h1>
+<!--radix_placeholder_categories-->
+<div class="dt-tags">
+  <a href="../../index.html#category:mlr3fselect" class="dt-tag">mlr3fselect</a>
+  <a href="../../index.html#category:optimization" class="dt-tag">optimization</a>
+  <a href="../../index.html#category:feature_selection" class="dt-tag">feature selection</a>
+  <a href="../../index.html#category:nested_resampling" class="dt-tag">nested resampling</a>
+</div>
+<!--/radix_placeholder_categories-->
+<p>We give a short introduction to mlr3fselect.</p>
+</div>
+
+<div class="d-byline">
+  Marc Becker  
+  
+<br/>01-08-2021
+</div>
+
+<div class="d-article">
+<h2 id="introduction">Introduction</h2>
+<p>In this tutorial, we introduce the <strong>mlr3fselect</strong> package by comparing feature selection methods on the Titanic disaster data set. The objective of feature selection is to enhance the interpretability of models, speed up the learning process and increase the predictive performance.</p>
+<h2 id="titanic-data-set">Titanic data set</h2>
+<p>The <a href="https://www.kaggle.com/c/titanic/data">Titanic data set</a> contains data for 887 Titanic passengers, including whether they survived when the Titanic sank. Our goal will be to predict the survival of the Titanic passengers.</p>
+<p>After loading the data set from the <code>mlr3data</code> package, we impute the missing age values with the median age of the passengers, set missing embarked values to <code>s</code> and remove <code>character</code> features. We could use feature engineering to create new features from the <code>character</code> features, however we want to focus on feature selection in this tutorial.</p>
+<p>In addition to the <code>survived</code> column, the reduced data set contains the following attributes for each passenger:</p>
+<ul>
+<li><code>age</code> Age</li>
+<li><code>sex</code> Sex</li>
+<li><code>sib_sp</code> Number of siblings/ spouses aboard</li>
+<li><code>parch</code> Number of parents/ children aboard</li>
+<li><code>fare</code> Ammount paid for the ticket</li>
+<li><code>pc_class</code> Passenger class</li>
+<li><code>embarked</code> Port of embarkation</li>
+</ul>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://github.com/mlr-org/mlr3data'>mlr3data</a></span><span class='op'>)</span>
+
+<span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span><span class='op'>(</span><span class='st'>"titanic"</span>, package <span class='op'>=</span> <span class='st'>"mlr3data"</span><span class='op'>)</span>
+<span class='va'>titanic</span><span class='op'>$</span><span class='va'>age</span><span class='op'>[</span><span class='fu'><a href='https://rdrr.io/r/base/NA.html'>is.na</a></span><span class='op'>(</span><span class='va'>titanic</span><span class='op'>$</span><span class='va'>age</span><span class='op'>)</span><span class='op'>]</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/stats/median.html'>median</a></span><span class='op'>(</span><span class='va'>titanic</span><span class='op'>$</span><span class='va'>age</span>, na.rm <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>
+<span class='va'>titanic</span><span class='op'>$</span><span class='va'>embarked</span><span class='op'>[</span><span class='fu'><a href='https://rdrr.io/r/base/NA.html'>is.na</a></span><span class='op'>(</span><span class='va'>titanic</span><span class='op'>$</span><span class='va'>embarked</span><span class='op'>)</span><span class='op'>]</span> <span class='op'>=</span> <span class='st'>"S"</span>
+<span class='va'>titanic</span><span class='op'>$</span><span class='va'>ticket</span> <span class='op'>=</span> <span class='cn'>NULL</span>
+<span class='va'>titanic</span><span class='op'>$</span><span class='va'>name</span> <span class='op'>=</span> <span class='cn'>NULL</span>
+<span class='va'>titanic</span><span class='op'>$</span><span class='va'>cabin</span> <span class='op'>=</span> <span class='cn'>NULL</span>
+<span class='va'>titanic</span> <span class='op'>=</span> <span class='va'>titanic</span><span class='op'>[</span><span class='op'>!</span><span class='fu'><a href='https://rdrr.io/r/base/NA.html'>is.na</a></span><span class='op'>(</span><span class='va'>titanic</span><span class='op'>$</span><span class='va'>survived</span><span class='op'>)</span>,<span class='op'>]</span>
+</code></pre>
+</div>
+</div>
+<p>We construct a binary classification task.</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://mlr3.mlr-org.com'>mlr3</a></span><span class='op'>)</span>
+
+<span class='va'>task</span> <span class='op'>=</span> <span class='va'><a href='https://mlr3.mlr-org.com/reference/TaskClassif.html'>TaskClassif</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span>id <span class='op'>=</span> <span class='st'>"titanic"</span>, backend <span class='op'>=</span> <span class='va'>titanic</span>, target <span class='op'>=</span> <span class='st'>"survived"</span>, positive <span class='op'>=</span> <span class='st'>"yes"</span><span class='op'>)</span>
+</code></pre>
+</div>
+</div>
+<h2 id="model">Model</h2>
+<p>We use the logistic regression learner provided by the <code>mlr3learners</code> package.</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://mlr3learners.mlr-org.com'>mlr3learners</a></span><span class='op'>)</span>
+
+<span class='va'>learner</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>lrn</a></span><span class='op'>(</span><span class='st'>"classif.log_reg"</span><span class='op'>)</span>
+</code></pre>
+</div>
+</div>
+<p>To evaluate the predictive performance, we choose a <code>3-fold-cross-validation</code> and the classification error as the measure.</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>resampling</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>rsmp</a></span><span class='op'>(</span><span class='st'>"cv"</span>, folds <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span>
+<span class='va'>measure</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>msr</a></span><span class='op'>(</span><span class='st'>"classif.ce"</span><span class='op'>)</span>
+
+<span class='va'>resampling</span><span class='op'>$</span><span class='fu'>instantiate</span><span class='op'>(</span><span class='va'>task</span><span class='op'>)</span>
+</code></pre>
+</div>
+</div>
+<h2 id="classes">Classes</h2>
+<p>The <code>FSelectInstanceSingleCrit</code> class specifies a general feature selection scenario. It includes the <code>ObjectiveFSelect</code> object that encodes the black box objective function which is optimized by a feature selection algorithm. The evaluated feature sets are stored in an <code>ArchiveFSelect</code> object. The archive provides a method for querying the best performing feature set.</p>
+<p>The <code>Terminator</code> subclasses determine when to stop the feature selection. In this example we choose a terminator that stops the feature selection after 10 seconds. The sugar functions <code>trm()</code> and <code>trms()</code> can be used to retrieve terminators from the <code>mlr_terminators</code> dictionary.</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://mlr3fselect.mlr-org.com'>mlr3fselect</a></span><span class='op'>)</span>
+
+<span class='va'>terminator</span> <span class='op'>=</span> <span class='fu'><a href='https://bbotk.mlr-org.com/reference/trm.html'>trm</a></span><span class='op'>(</span><span class='st'>"run_time"</span>, secs <span class='op'>=</span> <span class='fl'>10</span><span class='op'>)</span>
+<span class='va'><a href='https://mlr3fselect.mlr-org.com/reference/FSelectInstanceSingleCrit.html'>FSelectInstanceSingleCrit</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span>
+  task <span class='op'>=</span> <span class='va'>task</span>, 
+  learner <span class='op'>=</span> <span class='va'>learner</span>, 
+  resampling <span class='op'>=</span> <span class='va'>resampling</span>, 
+  measure <span class='op'>=</span> <span class='va'>measure</span>, 
+  terminator <span class='op'>=</span> <span class='va'>terminator</span><span class='op'>)</span>
+</code></pre>
+</div>
+<pre><code>&lt;FSelectInstanceSingleCrit&gt;
+* State:  Not optimized
+* Objective: &lt;ObjectiveFSelect:classif.log_reg_on_titanic&gt;
+* Search Space:
+&lt;ParamSet&gt;
+         id    class lower upper nlevels        default value
+1:      age ParamLgl    NA    NA       2 &lt;NoDefault[3]&gt;      
+2: embarked ParamLgl    NA    NA       2 &lt;NoDefault[3]&gt;      
+3:     fare ParamLgl    NA    NA       2 &lt;NoDefault[3]&gt;      
+4:    parch ParamLgl    NA    NA       2 &lt;NoDefault[3]&gt;      
+5:   pclass ParamLgl    NA    NA       2 &lt;NoDefault[3]&gt;      
+6:      sex ParamLgl    NA    NA       2 &lt;NoDefault[3]&gt;      
+7:   sib_sp ParamLgl    NA    NA       2 &lt;NoDefault[3]&gt;      
+* Terminator: &lt;TerminatorRunTime&gt;
+* Terminated: FALSE
+* Archive:
+&lt;ArchiveFSelect&gt;
+Null data.table (0 rows and 0 cols)</code></pre>
+</div>
+<p>The <code>FSelector</code> subclasses describe the feature selection strategy. The sugar function <code>fs()</code> can be used to retrieve feature selection algorithms from the <code>mlr_fselectors</code> dictionary.</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>mlr_fselectors</span>
+</code></pre>
+</div>
+<pre><code>&lt;DictionaryFSelect&gt; with 6 stored values
+Keys: design_points, exhaustive_search, genetic_search,
+  random_search, rfe, sequential</code></pre>
+</div>
+<h2 id="random-search">Random search</h2>
+<p>Random search randomly draws feature sets and evaluates them in batches. We retrieve the <code>FSelectRandomSearch</code> class with the <code>fs()</code> sugar function and choose the <code>evals</code> terminator. We set the <code>n_evals</code> parameter to <code>10</code> which means that 10 feature sets are evaluated.</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>terminator</span> <span class='op'>=</span> <span class='fu'><a href='https://bbotk.mlr-org.com/reference/trm.html'>trm</a></span><span class='op'>(</span><span class='st'>"evals"</span>, n_evals <span class='op'>=</span> <span class='fl'>10</span><span class='op'>)</span>
+<span class='va'>instance</span> <span class='op'>=</span> <span class='va'><a href='https://mlr3fselect.mlr-org.com/reference/FSelectInstanceSingleCrit.html'>FSelectInstanceSingleCrit</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span>
+  task <span class='op'>=</span> <span class='va'>task</span>, 
+  learner <span class='op'>=</span> <span class='va'>learner</span>, 
+  resampling <span class='op'>=</span> <span class='va'>resampling</span>, 
+  measure <span class='op'>=</span> <span class='va'>measure</span>, 
+  terminator <span class='op'>=</span> <span class='va'>terminator</span><span class='op'>)</span>
+<span class='va'>fselector</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3fselect.mlr-org.com/reference/fs.html'>fs</a></span><span class='op'>(</span><span class='st'>"random_search"</span>, batch_size <span class='op'>=</span> <span class='fl'>5</span><span class='op'>)</span>
+</code></pre>
+</div>
+</div>
+<p>The feature selection is started by passing the <code>FSelectInstanceSingleCrit</code> object to the <code>$optimize()</code> method of <code>FSelectorRandomSearch</code> which generates the feature sets. These features set are internally passed to the <code>$eval_batch()</code> method of <code>FSelectInstanceSingleCrit</code> which evaluates them with the objective fuction and stores the results in the archive. This general interaction between the objects of <strong>mlr3fselect</strong> stays the same for the different feature selection methods. However, the way how new feature sets are generated differs depending on the chosen <code>FSelector</code> subclass.</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>fselector</span><span class='op'>$</span><span class='fu'>optimize</span><span class='op'>(</span><span class='va'>instance</span><span class='op'>)</span>
+</code></pre>
+</div>
+<pre><code>INFO  [21:34:08.785] [bbotk] Starting to optimize 7 parameter(s) with &#39;&lt;FSelectorRandomSearch&gt;&#39; and &#39;&lt;TerminatorEvals&gt; [n_evals=10]&#39; 
+INFO  [21:34:08.822] [bbotk] Evaluating 5 configuration(s) 
+INFO  [21:34:10.556] [bbotk] Result of batch 1: 
+INFO  [21:34:10.558] [bbotk]    age embarked  fare parch pclass   sex sib_sp classif.ce 
+INFO  [21:34:10.558] [bbotk]   TRUE     TRUE  TRUE  TRUE   TRUE  TRUE   TRUE  0.2031425 
+INFO  [21:34:10.558] [bbotk]   TRUE    FALSE FALSE FALSE  FALSE FALSE   TRUE  0.3838384 
+INFO  [21:34:10.558] [bbotk]  FALSE    FALSE FALSE  TRUE  FALSE FALSE   TRUE  0.3804714 
+INFO  [21:34:10.558] [bbotk]  FALSE    FALSE  TRUE FALSE  FALSE FALSE  FALSE  0.3288440 
+INFO  [21:34:10.558] [bbotk]  FALSE    FALSE  TRUE FALSE  FALSE  TRUE  FALSE  0.2188552 
+INFO  [21:34:10.558] [bbotk]                                 uhash 
+INFO  [21:34:10.558] [bbotk]  6221f7ac-c7b4-4215-82e5-fd4d74dbc5c9 
+INFO  [21:34:10.558] [bbotk]  93083170-9914-4f4e-8261-d4ff33651e75 
+INFO  [21:34:10.558] [bbotk]  c8804309-195b-4723-a862-7eb9aa12de4a 
+INFO  [21:34:10.558] [bbotk]  12fc9da4-3d4d-47e8-9162-b030bde3e9f0 
+INFO  [21:34:10.558] [bbotk]  30667d1e-ff06-499c-97a8-2ae76e075fd6 
+INFO  [21:34:10.559] [bbotk] Evaluating 5 configuration(s) 
+INFO  [21:34:12.000] [bbotk] Result of batch 2: 
+INFO  [21:34:12.002] [bbotk]    age embarked  fare parch pclass   sex sib_sp classif.ce 
+INFO  [21:34:12.002] [bbotk]  FALSE    FALSE FALSE FALSE   TRUE FALSE  FALSE  0.3209877 
+INFO  [21:34:12.002] [bbotk]   TRUE    FALSE FALSE FALSE  FALSE FALSE   TRUE  0.3838384 
+INFO  [21:34:12.002] [bbotk]   TRUE    FALSE  TRUE  TRUE   TRUE  TRUE   TRUE  0.2020202 
+INFO  [21:34:12.002] [bbotk]   TRUE     TRUE  TRUE  TRUE   TRUE  TRUE   TRUE  0.2031425 
+INFO  [21:34:12.002] [bbotk]   TRUE    FALSE  TRUE  TRUE  FALSE FALSE  FALSE  0.3389450 
+INFO  [21:34:12.002] [bbotk]                                 uhash 
+INFO  [21:34:12.002] [bbotk]  2bcfdb5e-acc0-4626-a2bc-208445987153 
+INFO  [21:34:12.002] [bbotk]  5e0f53ce-657d-4cd0-b7bd-e0df8b086630 
+INFO  [21:34:12.002] [bbotk]  11257e6a-764e-477c-ab40-33bfdde8bf57 
+INFO  [21:34:12.002] [bbotk]  17761185-c5dc-46c7-9800-b53996168a35 
+INFO  [21:34:12.002] [bbotk]  f5a1c309-79d0-4b38-8650-6ded4f2486e5 
+INFO  [21:34:12.007] [bbotk] Finished optimizing after 10 evaluation(s) 
+INFO  [21:34:12.008] [bbotk] Result: 
+INFO  [21:34:12.010] [bbotk]   age embarked fare parch pclass  sex sib_sp 
+INFO  [21:34:12.010] [bbotk]  TRUE    FALSE TRUE  TRUE   TRUE TRUE   TRUE 
+INFO  [21:34:12.010] [bbotk]                          features  x_domain classif.ce 
+INFO  [21:34:12.010] [bbotk]  age,fare,parch,pclass,sex,sib_sp &lt;list[7]&gt;  0.2020202 </code></pre>
+<pre><code>    age embarked fare parch pclass  sex sib_sp
+1: TRUE    FALSE TRUE  TRUE   TRUE TRUE   TRUE
+                           features  x_domain classif.ce
+1: age,fare,parch,pclass,sex,sib_sp &lt;list[7]&gt;  0.2020202</code></pre>
+</div>
+<p>The <code>ArchiveFSelect</code> stores a <code>data.table</code> which conists of the evaluated feature sets and the corresponding estimated predictive performances.</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/as.data.table.html'>as.data.table</a></span><span class='op'>(</span><span class='va'>instance</span><span class='op'>$</span><span class='va'>archive</span><span class='op'>)</span><span class='op'>[</span>, <span class='fl'>1</span><span class='op'>:</span><span class='fl'>8</span><span class='op'>]</span>
+</code></pre>
+</div>
+<pre><code>      age embarked  fare parch pclass   sex sib_sp classif.ce
+ 1:  TRUE     TRUE  TRUE  TRUE   TRUE  TRUE   TRUE  0.2031425
+ 2:  TRUE    FALSE FALSE FALSE  FALSE FALSE   TRUE  0.3838384
+ 3: FALSE    FALSE FALSE  TRUE  FALSE FALSE   TRUE  0.3804714
+ 4: FALSE    FALSE  TRUE FALSE  FALSE FALSE  FALSE  0.3288440
+ 5: FALSE    FALSE  TRUE FALSE  FALSE  TRUE  FALSE  0.2188552
+ 6: FALSE    FALSE FALSE FALSE   TRUE FALSE  FALSE  0.3209877
+ 7:  TRUE    FALSE FALSE FALSE  FALSE FALSE   TRUE  0.3838384
+ 8:  TRUE    FALSE  TRUE  TRUE   TRUE  TRUE   TRUE  0.2020202
+ 9:  TRUE     TRUE  TRUE  TRUE   TRUE  TRUE   TRUE  0.2031425
+10:  TRUE    FALSE  TRUE  TRUE  FALSE FALSE  FALSE  0.3389450</code></pre>
+</div>
+<p>The associated resampling iterations can be accessed in the <code>BenchmarkResult</code> by calling</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>instance</span><span class='op'>$</span><span class='va'>archive</span><span class='op'>$</span><span class='va'>benchmark_result</span>
+</code></pre>
+</div>
+<pre><code>&lt;BenchmarkResult&gt; of 30 rows with 10 resampling runs
+ nr task_id             learner_id resampling_id iters warnings
+  1 titanic select.classif.log_reg            cv     3        0
+  2 titanic select.classif.log_reg            cv     3        0
+  3 titanic select.classif.log_reg            cv     3        0
+  4 titanic select.classif.log_reg            cv     3        0
+  5 titanic select.classif.log_reg            cv     3        0
+  6 titanic select.classif.log_reg            cv     3        0
+  7 titanic select.classif.log_reg            cv     3        0
+  8 titanic select.classif.log_reg            cv     3        0
+  9 titanic select.classif.log_reg            cv     3        0
+ 10 titanic select.classif.log_reg            cv     3        0
+ errors
+      0
+      0
+      0
+      0
+      0
+      0
+      0
+      0
+      0
+      0</code></pre>
+</div>
+<p>We retrieve the best performing feature set with</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>instance</span><span class='op'>$</span><span class='va'>result</span>
+</code></pre>
+</div>
+<pre><code>    age embarked fare parch pclass  sex sib_sp
+1: TRUE    FALSE TRUE  TRUE   TRUE TRUE   TRUE
+                           features  x_domain classif.ce
+1: age,fare,parch,pclass,sex,sib_sp &lt;list[7]&gt;  0.2020202</code></pre>
+</div>
+<h2 id="sequential-forward-selection">Sequential forward selection</h2>
+<p>We try sequential forward selection. We chose the <code>stagnation</code> terminator that stops the feature selection if the predictive performance does not increase anymore.</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>terminator</span> <span class='op'>=</span> <span class='fu'><a href='https://bbotk.mlr-org.com/reference/trm.html'>trm</a></span><span class='op'>(</span><span class='st'>"stagnation"</span>, iters <span class='op'>=</span> <span class='fl'>5</span><span class='op'>)</span>
+<span class='va'>instance</span> <span class='op'>=</span> <span class='va'><a href='https://mlr3fselect.mlr-org.com/reference/FSelectInstanceSingleCrit.html'>FSelectInstanceSingleCrit</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span>
+  task <span class='op'>=</span> <span class='va'>task</span>, 
+  learner <span class='op'>=</span> <span class='va'>learner</span>, 
+  resampling <span class='op'>=</span> <span class='va'>resampling</span>, 
+  measure <span class='op'>=</span> <span class='va'>measure</span>, 
+  terminator <span class='op'>=</span> <span class='va'>terminator</span><span class='op'>)</span>
+
+<span class='va'>fselector</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3fselect.mlr-org.com/reference/fs.html'>fs</a></span><span class='op'>(</span><span class='st'>"sequential"</span><span class='op'>)</span>
+<span class='va'>fselector</span><span class='op'>$</span><span class='fu'>optimize</span><span class='op'>(</span><span class='va'>instance</span><span class='op'>)</span>
+</code></pre>
+</div>
+<pre><code>INFO  [21:34:12.136] [bbotk] Starting to optimize 7 parameter(s) with &#39;&lt;FSelectorSequential&gt;&#39; and &#39;&lt;TerminatorStagnation&gt; [iters=5, threshold=0]&#39; 
+INFO  [21:34:12.140] [bbotk] Evaluating 7 configuration(s) 
+INFO  [21:34:14.139] [bbotk] Result of batch 1: 
+INFO  [21:34:14.141] [bbotk]    age embarked  fare parch pclass   sex sib_sp classif.ce 
+INFO  [21:34:14.141] [bbotk]   TRUE    FALSE FALSE FALSE  FALSE FALSE  FALSE  0.3838384 
+INFO  [21:34:14.141] [bbotk]  FALSE     TRUE FALSE FALSE  FALSE FALSE  FALSE  0.3636364 
+INFO  [21:34:14.141] [bbotk]  FALSE    FALSE  TRUE FALSE  FALSE FALSE  FALSE  0.3288440 
+INFO  [21:34:14.141] [bbotk]  FALSE    FALSE FALSE  TRUE  FALSE FALSE  FALSE  0.3950617 
+INFO  [21:34:14.141] [bbotk]  FALSE    FALSE FALSE FALSE   TRUE FALSE  FALSE  0.3209877 
+INFO  [21:34:14.141] [bbotk]  FALSE    FALSE FALSE FALSE  FALSE  TRUE  FALSE  0.2132435 
+INFO  [21:34:14.141] [bbotk]  FALSE    FALSE FALSE FALSE  FALSE FALSE   TRUE  0.3838384 
+INFO  [21:34:14.141] [bbotk]                                 uhash 
+INFO  [21:34:14.141] [bbotk]  9cac5357-205c-4c19-8636-6fa1422d6366 
+INFO  [21:34:14.141] [bbotk]  f5d1a18c-6894-4dc5-8bf1-06e0e99b21b4 
+INFO  [21:34:14.141] [bbotk]  38388e1d-a6f6-486c-9c35-42aaad6eb74f 
+INFO  [21:34:14.141] [bbotk]  b765e49d-9e7f-42a5-8264-3f5c4e80ef49 
+INFO  [21:34:14.141] [bbotk]  d950fa32-016e-43d5-8fc6-c28e02582f94 
+INFO  [21:34:14.141] [bbotk]  45fc3f77-b62c-41bf-b0d6-95f92d9781aa 
+INFO  [21:34:14.141] [bbotk]  0a9c7358-9b8c-4f5a-846e-07dc073fe8dd 
+INFO  [21:34:14.145] [bbotk] Evaluating 6 configuration(s) 
+INFO  [21:34:16.274] [bbotk] Result of batch 2: 
+INFO  [21:34:16.276] [bbotk]    age embarked  fare parch pclass  sex sib_sp classif.ce 
+INFO  [21:34:16.276] [bbotk]   TRUE    FALSE FALSE FALSE  FALSE TRUE  FALSE  0.2132435 
+INFO  [21:34:16.276] [bbotk]  FALSE     TRUE FALSE FALSE  FALSE TRUE  FALSE  0.2132435 
+INFO  [21:34:16.276] [bbotk]  FALSE    FALSE  TRUE FALSE  FALSE TRUE  FALSE  0.2188552 
+INFO  [21:34:16.276] [bbotk]  FALSE    FALSE FALSE  TRUE  FALSE TRUE  FALSE  0.2132435 
+INFO  [21:34:16.276] [bbotk]  FALSE    FALSE FALSE FALSE   TRUE TRUE  FALSE  0.2132435 
+INFO  [21:34:16.276] [bbotk]  FALSE    FALSE FALSE FALSE  FALSE TRUE   TRUE  0.2087542 
+INFO  [21:34:16.276] [bbotk]                                 uhash 
+INFO  [21:34:16.276] [bbotk]  0cbdd433-9056-4030-b4a1-6669754c1c2f 
+INFO  [21:34:16.276] [bbotk]  64e4d848-2fb1-4ee2-9fe8-773f435e7170 
+INFO  [21:34:16.276] [bbotk]  31474f30-6f83-4148-8f41-f1bff526aab0 
+INFO  [21:34:16.276] [bbotk]  f0cd8865-154b-48af-a0ba-6a870c501fd5 
+INFO  [21:34:16.276] [bbotk]  237eb719-112a-481c-a537-bc6e2bf98e1b 
+INFO  [21:34:16.276] [bbotk]  47885e3d-6cb2-446b-a5b8-a41b0f27da59 
+INFO  [21:34:16.280] [bbotk] Evaluating 5 configuration(s) 
+INFO  [21:34:17.977] [bbotk] Result of batch 3: 
+INFO  [21:34:17.979] [bbotk]    age embarked  fare parch pclass  sex sib_sp classif.ce 
+INFO  [21:34:17.979] [bbotk]   TRUE    FALSE FALSE FALSE  FALSE TRUE   TRUE  0.2087542 
+INFO  [21:34:17.979] [bbotk]  FALSE     TRUE FALSE FALSE  FALSE TRUE   TRUE  0.2087542 
+INFO  [21:34:17.979] [bbotk]  FALSE    FALSE  TRUE FALSE  FALSE TRUE   TRUE  0.2132435 
+INFO  [21:34:17.979] [bbotk]  FALSE    FALSE FALSE  TRUE  FALSE TRUE   TRUE  0.2087542 
+INFO  [21:34:17.979] [bbotk]  FALSE    FALSE FALSE FALSE   TRUE TRUE   TRUE  0.1997755 
+INFO  [21:34:17.979] [bbotk]                                 uhash 
+INFO  [21:34:17.979] [bbotk]  2e6f046e-23e7-413e-9447-7ee6c1a2b97f 
+INFO  [21:34:17.979] [bbotk]  54777110-0100-4baa-a349-fde77f13ba88 
+INFO  [21:34:17.979] [bbotk]  d56d878c-1afc-4065-b75e-bd50bc09b7b7 
+INFO  [21:34:17.979] [bbotk]  25f2210d-cfba-4355-9664-170889139545 
+INFO  [21:34:17.979] [bbotk]  12df266d-e15c-4e67-bc02-f78df3c117ac 
+INFO  [21:34:17.982] [bbotk] Evaluating 4 configuration(s) 
+INFO  [21:34:19.228] [bbotk] Result of batch 4: 
+INFO  [21:34:19.230] [bbotk]    age embarked  fare parch pclass  sex sib_sp classif.ce 
+INFO  [21:34:19.230] [bbotk]   TRUE    FALSE FALSE FALSE   TRUE TRUE   TRUE  0.2143659 
+INFO  [21:34:19.230] [bbotk]  FALSE     TRUE FALSE FALSE   TRUE TRUE   TRUE  0.2132435 
+INFO  [21:34:19.230] [bbotk]  FALSE    FALSE  TRUE FALSE   TRUE TRUE   TRUE  0.2053872 
+INFO  [21:34:19.230] [bbotk]  FALSE    FALSE FALSE  TRUE   TRUE TRUE   TRUE  0.1964085 
+INFO  [21:34:19.230] [bbotk]                                 uhash 
+INFO  [21:34:19.230] [bbotk]  cd94d1d9-3132-4b41-95e2-c16b0931d800 
+INFO  [21:34:19.230] [bbotk]  da9e1b14-43ef-4bdc-b92b-18ffc9607f1f 
+INFO  [21:34:19.230] [bbotk]  f144fde3-4c9f-4cae-9002-6634f1756c27 
+INFO  [21:34:19.230] [bbotk]  5017c26e-c345-43b7-84f5-4dd81d9df8fd 
+INFO  [21:34:19.234] [bbotk] Evaluating 3 configuration(s) 
+INFO  [21:34:20.220] [bbotk] Result of batch 5: 
+INFO  [21:34:20.222] [bbotk]    age embarked  fare parch pclass  sex sib_sp classif.ce 
+INFO  [21:34:20.222] [bbotk]   TRUE    FALSE FALSE  TRUE   TRUE TRUE   TRUE  0.2065095 
+INFO  [21:34:20.222] [bbotk]  FALSE     TRUE FALSE  TRUE   TRUE TRUE   TRUE  0.2098765 
+INFO  [21:34:20.222] [bbotk]  FALSE    FALSE  TRUE  TRUE   TRUE TRUE   TRUE  0.1997755 
+INFO  [21:34:20.222] [bbotk]                                 uhash 
+INFO  [21:34:20.222] [bbotk]  d806ae5d-d51f-4f93-8ce9-cb5fb188de3c 
+INFO  [21:34:20.222] [bbotk]  eb98c4af-364a-452d-8432-21d190f4bf97 
+INFO  [21:34:20.222] [bbotk]  64132c56-cc12-4c52-a7df-4a7d678d3a29 
+INFO  [21:34:20.226] [bbotk] Evaluating 2 configuration(s) 
+INFO  [21:34:20.892] [bbotk] Result of batch 6: 
+INFO  [21:34:20.893] [bbotk]    age embarked fare parch pclass  sex sib_sp classif.ce 
+INFO  [21:34:20.893] [bbotk]   TRUE    FALSE TRUE  TRUE   TRUE TRUE   TRUE  0.2020202 
+INFO  [21:34:20.893] [bbotk]  FALSE     TRUE TRUE  TRUE   TRUE TRUE   TRUE  0.2121212 
+INFO  [21:34:20.893] [bbotk]                                 uhash 
+INFO  [21:34:20.893] [bbotk]  d959dfcf-40e3-4008-993f-e605a4a49c9a 
+INFO  [21:34:20.893] [bbotk]  b330812f-613f-458b-a046-c4a5b7a0ba30 
+INFO  [21:34:20.901] [bbotk] Finished optimizing after 27 evaluation(s) 
+INFO  [21:34:20.902] [bbotk] Result: 
+INFO  [21:34:20.903] [bbotk]    age embarked  fare parch pclass  sex sib_sp 
+INFO  [21:34:20.903] [bbotk]  FALSE    FALSE FALSE  TRUE   TRUE TRUE   TRUE 
+INFO  [21:34:20.903] [bbotk]                 features  x_domain classif.ce 
+INFO  [21:34:20.903] [bbotk]  parch,pclass,sex,sib_sp &lt;list[7]&gt;  0.1964085 </code></pre>
+<pre><code>     age embarked  fare parch pclass  sex sib_sp
+1: FALSE    FALSE FALSE  TRUE   TRUE TRUE   TRUE
+                  features  x_domain classif.ce
+1: parch,pclass,sex,sib_sp &lt;list[7]&gt;  0.1964085</code></pre>
+</div>
+<p>The <code>FSelectorSequential</code> object has a special method for displaying the optimization path of the sequential feature selection.</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>fselector</span><span class='op'>$</span><span class='fu'>optimization_path</span><span class='op'>(</span><span class='va'>instance</span><span class='op'>)</span>
+</code></pre>
+</div>
+<pre><code>   get  age embarked  fare parch pclass   sex sib_sp classif.ce
+1:   1 TRUE    FALSE FALSE FALSE  FALSE FALSE  FALSE  0.3838384
+2:   2 TRUE    FALSE FALSE FALSE  FALSE  TRUE  FALSE  0.2132435
+3:   3 TRUE    FALSE FALSE FALSE  FALSE  TRUE   TRUE  0.2087542
+4:   4 TRUE    FALSE FALSE FALSE   TRUE  TRUE   TRUE  0.2143659
+5:   5 TRUE    FALSE FALSE  TRUE   TRUE  TRUE   TRUE  0.2065095
+6:   6 TRUE    FALSE  TRUE  TRUE   TRUE  TRUE   TRUE  0.2020202
+                                  uhash  x_domain           timestamp
+1: 9cac5357-205c-4c19-8636-6fa1422d6366 &lt;list[7]&gt; 2021-03-08 21:34:14
+2: 0cbdd433-9056-4030-b4a1-6669754c1c2f &lt;list[7]&gt; 2021-03-08 21:34:16
+3: 2e6f046e-23e7-413e-9447-7ee6c1a2b97f &lt;list[7]&gt; 2021-03-08 21:34:17
+4: cd94d1d9-3132-4b41-95e2-c16b0931d800 &lt;list[7]&gt; 2021-03-08 21:34:19
+5: d806ae5d-d51f-4f93-8ce9-cb5fb188de3c &lt;list[7]&gt; 2021-03-08 21:34:20
+6: d959dfcf-40e3-4008-993f-e605a4a49c9a &lt;list[7]&gt; 2021-03-08 21:34:20
+   batch_nr
+1:        1
+2:        2
+3:        3
+4:        4
+5:        5
+6:        6</code></pre>
+</div>
+<h2 id="recursive-feature-elimination">Recursive feature elimination</h2>
+<p>Recrusive feature elemiation utilizes the <code>$importance()</code> method of learners. In each iteration the feature(s) with the lowest importance score is droped. We choose the non-recruvie algorithm (<code>recursive = FALSE</code>) which calculates the feature importance once on the complete feature set. The recrusive version (<code>recursive = TRUE</code>) recomputes the feature importance on the reduced feature set in every iteration.</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>learner</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>lrn</a></span><span class='op'>(</span><span class='st'>"classif.ranger"</span>, importance <span class='op'>=</span> <span class='st'>"impurity"</span><span class='op'>)</span>
+<span class='va'>terminator</span> <span class='op'>=</span> <span class='fu'><a href='https://bbotk.mlr-org.com/reference/trm.html'>trm</a></span><span class='op'>(</span><span class='st'>"none"</span><span class='op'>)</span>
+<span class='va'>instance</span> <span class='op'>=</span> <span class='va'><a href='https://mlr3fselect.mlr-org.com/reference/FSelectInstanceSingleCrit.html'>FSelectInstanceSingleCrit</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span>
+  task <span class='op'>=</span> <span class='va'>task</span>, 
+  learner <span class='op'>=</span> <span class='va'>learner</span>, 
+  resampling <span class='op'>=</span> <span class='va'>resampling</span>, 
+  measure <span class='op'>=</span> <span class='va'>measure</span>, 
+  terminator <span class='op'>=</span> <span class='va'>terminator</span>,
+  store_models <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>
+
+<span class='va'>fselector</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3fselect.mlr-org.com/reference/fs.html'>fs</a></span><span class='op'>(</span><span class='st'>"rfe"</span>, recursive <span class='op'>=</span> <span class='cn'>FALSE</span><span class='op'>)</span>
+<span class='va'>fselector</span><span class='op'>$</span><span class='fu'>optimize</span><span class='op'>(</span><span class='va'>instance</span><span class='op'>)</span>
+</code></pre>
+</div>
+<pre><code>INFO  [21:34:21.056] [bbotk] Starting to optimize 7 parameter(s) with &#39;&lt;FSelectorRFE&gt;&#39; and &#39;&lt;TerminatorNone&gt; [list()]&#39; 
+INFO  [21:34:21.057] [bbotk] Evaluating 1 configuration(s) 
+INFO  [21:34:22.711] [bbotk] Result of batch 1: 
+INFO  [21:34:22.713] [bbotk]   age embarked fare parch pclass  sex sib_sp classif.ce 
+INFO  [21:34:22.713] [bbotk]  TRUE     TRUE TRUE  TRUE   TRUE TRUE   TRUE  0.1694725 
+INFO  [21:34:22.713] [bbotk]                                 uhash 
+INFO  [21:34:22.713] [bbotk]  c6b32eec-a20d-4d0a-8af0-78441fb3e9e2 
+INFO  [21:34:22.874] [bbotk] Evaluating 1 configuration(s) 
+INFO  [21:34:23.455] [bbotk] Result of batch 2: 
+INFO  [21:34:23.456] [bbotk]   age embarked fare parch pclass  sex sib_sp classif.ce 
+INFO  [21:34:23.456] [bbotk]  TRUE    FALSE TRUE FALSE  FALSE TRUE  FALSE  0.2143659 
+INFO  [21:34:23.456] [bbotk]                                 uhash 
+INFO  [21:34:23.456] [bbotk]  442da668-dc55-4341-b333-4d5439f22e92 
+INFO  [21:34:23.458] [bbotk] Evaluating 1 configuration(s) 
+INFO  [21:34:23.971] [bbotk] Result of batch 3: 
+INFO  [21:34:23.973] [bbotk]    age embarked  fare parch pclass  sex sib_sp classif.ce 
+INFO  [21:34:23.973] [bbotk]  FALSE    FALSE FALSE FALSE  FALSE TRUE  FALSE  0.2132435 
+INFO  [21:34:23.973] [bbotk]                                 uhash 
+INFO  [21:34:23.973] [bbotk]  9721d748-4df3-4e99-bcc8-01ceb590bf17 
+INFO  [21:34:23.978] [bbotk] Finished optimizing after 3 evaluation(s) 
+INFO  [21:34:23.978] [bbotk] Result: 
+INFO  [21:34:23.980] [bbotk]   age embarked fare parch pclass  sex sib_sp 
+INFO  [21:34:23.980] [bbotk]  TRUE     TRUE TRUE  TRUE   TRUE TRUE   TRUE 
+INFO  [21:34:23.980] [bbotk]                                features  x_domain classif.ce 
+INFO  [21:34:23.980] [bbotk]  age,embarked,fare,parch,pclass,sex,... &lt;list[7]&gt;  0.1694725 </code></pre>
+<pre><code>    age embarked fare parch pclass  sex sib_sp
+1: TRUE     TRUE TRUE  TRUE   TRUE TRUE   TRUE
+                                 features  x_domain classif.ce
+1: age,embarked,fare,parch,pclass,sex,... &lt;list[7]&gt;  0.1694725</code></pre>
+</div>
+<p>We access the results.</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/as.data.table.html'>as.data.table</a></span><span class='op'>(</span><span class='va'>instance</span><span class='op'>$</span><span class='va'>archive</span><span class='op'>)</span><span class='op'>[</span>, <span class='fl'>1</span><span class='op'>:</span><span class='fl'>8</span><span class='op'>]</span>
+</code></pre>
+</div>
+<pre><code>     age embarked  fare parch pclass  sex sib_sp classif.ce
+1:  TRUE     TRUE  TRUE  TRUE   TRUE TRUE   TRUE  0.1694725
+2:  TRUE    FALSE  TRUE FALSE  FALSE TRUE  FALSE  0.2143659
+3: FALSE    FALSE FALSE FALSE  FALSE TRUE  FALSE  0.2132435</code></pre>
+</div>
+<h2 id="nested-resampling">Nested resampling</h2>
+<p>It is a common mistake to report the predictive performance estimated on resampling sets during the feature selection as the performance that can be expected from the combined feature selection and model training. The repeated evaluation of the model might leak information about the test sets into the model and thus leads to overfitting and over-optimistic performance results. <a href="https://mlr3book.mlr-org.com/nested-resampling.html">Nested resampling</a> uses an outer and inner resampling to separate the feature selection from the performance estimation of the model. We can use the <code>AutoFselector</code> class for running nested resampling. The <code>AutoFselector</code> essantially combines a given <code>Learner</code> and feature selection method into a <code>Learner</code> with internal automatic feature selection. The inner resampling loop that is used to determine the best feature set is conducted internally each time the <code>AutoFSelector</code> <code>Learner</code> object is trained.</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>resampling_inner</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>rsmp</a></span><span class='op'>(</span><span class='st'>"cv"</span>, folds <span class='op'>=</span> <span class='fl'>5</span><span class='op'>)</span>
+<span class='va'>measure</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>msr</a></span><span class='op'>(</span><span class='st'>"classif.ce"</span><span class='op'>)</span>
+
+<span class='va'>at</span> <span class='op'>=</span> <span class='va'><a href='https://mlr3fselect.mlr-org.com/reference/AutoFSelector.html'>AutoFSelector</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span>
+  learner <span class='op'>=</span> <span class='va'>learner</span>, 
+  resampling <span class='op'>=</span> <span class='va'>resampling_inner</span>, 
+  measure <span class='op'>=</span> <span class='va'>measure</span>,
+  terminator <span class='op'>=</span> <span class='va'>terminator</span>,
+  fselect <span class='op'>=</span> <span class='fu'><a href='https://mlr3fselect.mlr-org.com/reference/fs.html'>fs</a></span><span class='op'>(</span><span class='st'>"sequential"</span><span class='op'>)</span>,
+  store_models <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>
+</code></pre>
+</div>
+</div>
+<p>We put the <code>AutoFSelector</code> into a <code>resample()</code> call to get the outer resampling loop.</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>resampling_outer</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>rsmp</a></span><span class='op'>(</span><span class='st'>"cv"</span>, folds <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span>
+
+<span class='va'>rr</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/resample.html'>resample</a></span><span class='op'>(</span><span class='va'>task</span>, <span class='va'>at</span>, <span class='va'>resampling_outer</span>, store_models <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>
+</code></pre>
+</div>
+<pre><code>INFO  [21:34:24.186] [bbotk] Starting to optimize 7 parameter(s) with &#39;&lt;FSelectorSequential&gt;&#39; and &#39;&lt;TerminatorNone&gt; [list()]&#39; 
+INFO  [21:34:24.187] [bbotk] Evaluating 7 configuration(s) 
+INFO  [21:34:29.759] [bbotk] Result of batch 1: 
+INFO  [21:34:29.761] [bbotk]    age embarked  fare parch pclass   sex sib_sp classif.ce 
+INFO  [21:34:29.761] [bbotk]   TRUE    FALSE FALSE FALSE  FALSE FALSE  FALSE  0.4158809 
+INFO  [21:34:29.761] [bbotk]  FALSE     TRUE FALSE FALSE  FALSE FALSE  FALSE  0.3905569 
+INFO  [21:34:29.761] [bbotk]  FALSE    FALSE  TRUE FALSE  FALSE FALSE  FALSE  0.3349665 
+INFO  [21:34:29.761] [bbotk]  FALSE    FALSE FALSE  TRUE  FALSE FALSE  FALSE  0.3855291 
+INFO  [21:34:29.761] [bbotk]  FALSE    FALSE FALSE FALSE   TRUE FALSE  FALSE  0.3517875 
+INFO  [21:34:29.761] [bbotk]  FALSE    FALSE FALSE FALSE  FALSE  TRUE  FALSE  0.2306082 
+INFO  [21:34:29.761] [bbotk]  FALSE    FALSE FALSE FALSE  FALSE FALSE   TRUE  0.4241988 
+INFO  [21:34:29.761] [bbotk]                                 uhash 
+INFO  [21:34:29.761] [bbotk]  0eeb9c39-db57-4525-97ca-6292b82bb0e1 
+INFO  [21:34:29.761] [bbotk]  1ac41b86-497f-490c-a728-9bc6db41788f 
+INFO  [21:34:29.761] [bbotk]  22f4a145-58f2-47d3-b530-8f3a705f6849 
+INFO  [21:34:29.761] [bbotk]  d3e2790e-2eff-463f-9ead-7db786c44a5e 
+INFO  [21:34:29.761] [bbotk]  5a04defa-75b8-4aa9-811f-fde5bcf36909 
+INFO  [21:34:29.761] [bbotk]  a82f3678-7aa0-4ae5-9457-8efeef75bf0c 
+INFO  [21:34:29.761] [bbotk]  43d92442-c9a3-42f2-b446-662f618ba7d4 
+INFO  [21:34:29.764] [bbotk] Evaluating 6 configuration(s) 
+INFO  [21:34:33.924] [bbotk] Result of batch 2: 
+INFO  [21:34:33.926] [bbotk]    age embarked  fare parch pclass  sex sib_sp classif.ce 
+INFO  [21:34:33.926] [bbotk]   TRUE    FALSE FALSE FALSE  FALSE TRUE  FALSE  0.2221906 
+INFO  [21:34:33.926] [bbotk]  FALSE     TRUE FALSE FALSE  FALSE TRUE  FALSE  0.2306082 
+INFO  [21:34:33.926] [bbotk]  FALSE    FALSE  TRUE FALSE  FALSE TRUE  FALSE  0.2306082 
+INFO  [21:34:33.926] [bbotk]  FALSE    FALSE FALSE  TRUE  FALSE TRUE  FALSE  0.2322888 
+INFO  [21:34:33.926] [bbotk]  FALSE    FALSE FALSE FALSE   TRUE TRUE  FALSE  0.2356929 
+INFO  [21:34:33.926] [bbotk]  FALSE    FALSE FALSE FALSE  FALSE TRUE   TRUE  0.2188292 
+INFO  [21:34:33.926] [bbotk]                                 uhash 
+INFO  [21:34:33.926] [bbotk]  78b90ea4-599e-4e13-a5da-537bf8253649 
+INFO  [21:34:33.926] [bbotk]  17bbc00d-5cb5-4aec-aea7-3633af421cd0 
+INFO  [21:34:33.926] [bbotk]  a0333023-3e7f-4c96-b7bc-e6781aa52290 
+INFO  [21:34:33.926] [bbotk]  e8bd0216-4a9c-458e-887f-351547700c22 
+INFO  [21:34:33.926] [bbotk]  a8541a8f-d4fc-4dd5-8b53-3e5195acab30 
+INFO  [21:34:33.926] [bbotk]  44922c42-659d-4bd4-8142-1fd0cf201912 
+INFO  [21:34:33.929] [bbotk] Evaluating 5 configuration(s) 
+INFO  [21:34:37.351] [bbotk] Result of batch 3: 
+INFO  [21:34:37.353] [bbotk]    age embarked  fare parch pclass  sex sib_sp classif.ce 
+INFO  [21:34:37.353] [bbotk]   TRUE    FALSE FALSE FALSE  FALSE TRUE   TRUE  0.2087452 
+INFO  [21:34:37.353] [bbotk]  FALSE     TRUE FALSE FALSE  FALSE TRUE   TRUE  0.2154679 
+INFO  [21:34:37.353] [bbotk]  FALSE    FALSE  TRUE FALSE  FALSE TRUE   TRUE  0.2171628 
+INFO  [21:34:37.353] [bbotk]  FALSE    FALSE FALSE  TRUE  FALSE TRUE   TRUE  0.2171486 
+INFO  [21:34:37.353] [bbotk]  FALSE    FALSE FALSE FALSE   TRUE TRUE   TRUE  0.2154821 
+INFO  [21:34:37.353] [bbotk]                                 uhash 
+INFO  [21:34:37.353] [bbotk]  94d2ff92-6292-400d-8e8e-f93eb349847d 
+INFO  [21:34:37.353] [bbotk]  ef343789-d0c1-4680-803c-214c300ac49b 
+INFO  [21:34:37.353] [bbotk]  c770d74c-8fd6-436e-a33c-dc5d9f397631 
+INFO  [21:34:37.353] [bbotk]  cb133c84-2083-4bf5-a733-61630c8b4e53 
+INFO  [21:34:37.353] [bbotk]  78c701d7-ef6f-45a1-b129-313284b84574 
+INFO  [21:34:37.356] [bbotk] Evaluating 4 configuration(s) 
+INFO  [21:34:41.074] [bbotk] Result of batch 4: 
+INFO  [21:34:41.077] [bbotk]   age embarked  fare parch pclass  sex sib_sp classif.ce 
+INFO  [21:34:41.077] [bbotk]  TRUE     TRUE FALSE FALSE  FALSE TRUE   TRUE  0.2020225 
+INFO  [21:34:41.077] [bbotk]  TRUE    FALSE  TRUE FALSE  FALSE TRUE   TRUE  0.2221906 
+INFO  [21:34:41.077] [bbotk]  TRUE    FALSE FALSE  TRUE  FALSE TRUE   TRUE  0.1919100 
+INFO  [21:34:41.077] [bbotk]  TRUE    FALSE FALSE FALSE   TRUE TRUE   TRUE  0.1986469 
+INFO  [21:34:41.077] [bbotk]                                 uhash 
+INFO  [21:34:41.077] [bbotk]  036be103-7a72-460e-9a40-4cca290fb0df 
+INFO  [21:34:41.077] [bbotk]  e7dfa410-b762-42a3-bd21-980940fc80be 
+INFO  [21:34:41.077] [bbotk]  d54b9999-6a51-4163-8abe-55853114a2f5 
+INFO  [21:34:41.077] [bbotk]  eb1796cd-d23e-4188-8479-d7607099f131 
+INFO  [21:34:41.080] [bbotk] Evaluating 3 configuration(s) 
+INFO  [21:34:44.045] [bbotk] Result of batch 5: 
+INFO  [21:34:44.047] [bbotk]   age embarked  fare parch pclass  sex sib_sp classif.ce 
+INFO  [21:34:44.047] [bbotk]  TRUE     TRUE FALSE  TRUE  FALSE TRUE   TRUE  0.1902293 
+INFO  [21:34:44.047] [bbotk]  TRUE    FALSE  TRUE  TRUE  FALSE TRUE   TRUE  0.2188720 
+INFO  [21:34:44.047] [bbotk]  TRUE    FALSE FALSE  TRUE   TRUE TRUE   TRUE  0.1936334 
+INFO  [21:34:44.047] [bbotk]                                 uhash 
+INFO  [21:34:44.047] [bbotk]  31521965-85ed-4a22-8377-753c43ef4598 
+INFO  [21:34:44.047] [bbotk]  a14023da-8be3-483c-bc29-5724ea5a7504 
+INFO  [21:34:44.047] [bbotk]  a5abd3f8-77a5-481e-a8ea-ca0c49f10240 
+INFO  [21:34:44.050] [bbotk] Evaluating 2 configuration(s) 
+INFO  [21:34:46.333] [bbotk] Result of batch 6: 
+INFO  [21:34:46.335] [bbotk]   age embarked  fare parch pclass  sex sib_sp classif.ce 
+INFO  [21:34:46.335] [bbotk]  TRUE     TRUE  TRUE  TRUE  FALSE TRUE   TRUE  0.2239140 
+INFO  [21:34:46.335] [bbotk]  TRUE     TRUE FALSE  TRUE   TRUE TRUE   TRUE  0.1986754 
+INFO  [21:34:46.335] [bbotk]                                 uhash 
+INFO  [21:34:46.335] [bbotk]  0e7727bf-ba69-4737-b0a3-ba6d4c7156ba 
+INFO  [21:34:46.335] [bbotk]  3e149941-6dc6-40ac-9561-2cf8424984b3 
+INFO  [21:34:46.338] [bbotk] Evaluating 1 configuration(s) 
+INFO  [21:34:47.247] [bbotk] Result of batch 7: 
+INFO  [21:34:47.248] [bbotk]   age embarked fare parch pclass  sex sib_sp classif.ce 
+INFO  [21:34:47.248] [bbotk]  TRUE     TRUE TRUE  TRUE   TRUE TRUE   TRUE  0.2053981 
+INFO  [21:34:47.248] [bbotk]                                 uhash 
+INFO  [21:34:47.248] [bbotk]  31dcff9e-8bb4-40a0-9822-0bd1c6767004 
+INFO  [21:34:47.260] [bbotk] Finished optimizing after 28 evaluation(s) 
+INFO  [21:34:47.261] [bbotk] Result: 
+INFO  [21:34:47.262] [bbotk]   age embarked  fare parch pclass  sex sib_sp 
+INFO  [21:34:47.262] [bbotk]  TRUE     TRUE FALSE  TRUE  FALSE TRUE   TRUE 
+INFO  [21:34:47.262] [bbotk]                       features  x_domain classif.ce 
+INFO  [21:34:47.262] [bbotk]  age,embarked,parch,sex,sib_sp &lt;list[7]&gt;  0.1902293 
+INFO  [21:34:47.436] [bbotk] Starting to optimize 7 parameter(s) with &#39;&lt;FSelectorSequential&gt;&#39; and &#39;&lt;TerminatorNone&gt; [list()]&#39; 
+INFO  [21:34:47.437] [bbotk] Evaluating 7 configuration(s) 
+INFO  [21:34:52.506] [bbotk] Result of batch 1: 
+INFO  [21:34:52.508] [bbotk]    age embarked  fare parch pclass   sex sib_sp classif.ce 
+INFO  [21:34:52.508] [bbotk]   TRUE    FALSE FALSE FALSE  FALSE FALSE  FALSE  0.3973508 
+INFO  [21:34:52.508] [bbotk]  FALSE     TRUE FALSE FALSE  FALSE FALSE  FALSE  0.3366614 
+INFO  [21:34:52.508] [bbotk]  FALSE    FALSE  TRUE FALSE  FALSE FALSE  FALSE  0.3147557 
+INFO  [21:34:52.508] [bbotk]  FALSE    FALSE FALSE  TRUE  FALSE FALSE  FALSE  0.3517875 
+INFO  [21:34:52.508] [bbotk]  FALSE    FALSE FALSE FALSE   TRUE FALSE  FALSE  0.2963111 
+INFO  [21:34:52.508] [bbotk]  FALSE    FALSE FALSE FALSE  FALSE  TRUE  FALSE  0.1834354 
+INFO  [21:34:52.508] [bbotk]  FALSE    FALSE FALSE FALSE  FALSE FALSE   TRUE  0.3383848 
+INFO  [21:34:52.508] [bbotk]                                 uhash 
+INFO  [21:34:52.508] [bbotk]  50b99eb8-f0ce-4681-bd53-148f35ba95e7 
+INFO  [21:34:52.508] [bbotk]  fd5a5595-8e3a-429d-ae70-37b2409c1e9f 
+INFO  [21:34:52.508] [bbotk]  a158d729-f8da-42cb-b317-5423d2e010b6 
+INFO  [21:34:52.508] [bbotk]  dc3dad3c-b8ed-44d3-84ef-97df43283180 
+INFO  [21:34:52.508] [bbotk]  172252e3-d8bb-4970-9d76-29cf177cd2c2 
+INFO  [21:34:52.508] [bbotk]  a1088f6e-b8e6-45db-8c05-6c2e45ad7326 
+INFO  [21:34:52.508] [bbotk]  6c4e8530-44ae-4ca6-bfed-dbfc766db03e 
+INFO  [21:34:52.511] [bbotk] Evaluating 6 configuration(s) 
+INFO  [21:34:56.698] [bbotk] Result of batch 2: 
+INFO  [21:34:56.700] [bbotk]    age embarked  fare parch pclass  sex sib_sp classif.ce 
+INFO  [21:34:56.700] [bbotk]   TRUE    FALSE FALSE FALSE  FALSE TRUE  FALSE  0.1867968 
+INFO  [21:34:56.700] [bbotk]  FALSE     TRUE FALSE FALSE  FALSE TRUE  FALSE  0.1834354 
+INFO  [21:34:56.700] [bbotk]  FALSE    FALSE  TRUE FALSE  FALSE TRUE  FALSE  0.1851161 
+INFO  [21:34:56.700] [bbotk]  FALSE    FALSE FALSE  TRUE  FALSE TRUE  FALSE  0.1834354 
+INFO  [21:34:56.700] [bbotk]  FALSE    FALSE FALSE FALSE   TRUE TRUE  FALSE  0.1834354 
+INFO  [21:34:56.700] [bbotk]  FALSE    FALSE FALSE FALSE  FALSE TRUE   TRUE  0.1817690 
+INFO  [21:34:56.700] [bbotk]                                 uhash 
+INFO  [21:34:56.700] [bbotk]  8b1a8554-d5f8-4798-bb63-6ea5d938b02f 
+INFO  [21:34:56.700] [bbotk]  4c6b78b2-aa3c-4ef1-89d3-15acc3054e4a 
+INFO  [21:34:56.700] [bbotk]  76bc1ac1-b63f-4444-8c65-daeb878b14ec 
+INFO  [21:34:56.700] [bbotk]  b2fec1d8-0f0c-4f66-82ea-ecf38d2cb15a 
+INFO  [21:34:56.700] [bbotk]  fb84751b-0b1f-4666-93d1-e492fb2a477e 
+INFO  [21:34:56.700] [bbotk]  f7ea10d5-ae25-45f2-85c4-cca2c5f3e12e 
+INFO  [21:34:56.703] [bbotk] Evaluating 5 configuration(s) 
+INFO  [21:35:00.096] [bbotk] Result of batch 3: 
+INFO  [21:35:00.099] [bbotk]    age embarked  fare parch pclass  sex sib_sp classif.ce 
+INFO  [21:35:00.099] [bbotk]   TRUE    FALSE FALSE FALSE  FALSE TRUE   TRUE  0.1716565 
+INFO  [21:35:00.099] [bbotk]  FALSE     TRUE FALSE FALSE  FALSE TRUE   TRUE  0.1851303 
+INFO  [21:35:00.099] [bbotk]  FALSE    FALSE  TRUE FALSE  FALSE TRUE   TRUE  0.1851303 
+INFO  [21:35:00.099] [bbotk]  FALSE    FALSE FALSE  TRUE  FALSE TRUE   TRUE  0.1868110 
+INFO  [21:35:00.099] [bbotk]  FALSE    FALSE FALSE FALSE   TRUE TRUE   TRUE  0.1817690 
+INFO  [21:35:00.099] [bbotk]                                 uhash 
+INFO  [21:35:00.099] [bbotk]  16fc0d47-586f-4240-9b01-ae076b16ff79 
+INFO  [21:35:00.099] [bbotk]  66c72b95-490d-4782-9990-4cf75918d082 
+INFO  [21:35:00.099] [bbotk]  59a77481-f371-4b53-a1c9-3b7d7da56936 
+INFO  [21:35:00.099] [bbotk]  71024928-dae2-4e3f-a173-a33ac0de8eeb 
+INFO  [21:35:00.099] [bbotk]  018a3124-150d-4350-983f-dad23329e761 
+INFO  [21:35:00.102] [bbotk] Evaluating 4 configuration(s) 
+INFO  [21:35:03.601] [bbotk] Result of batch 4: 
+INFO  [21:35:03.603] [bbotk]   age embarked  fare parch pclass  sex sib_sp classif.ce 
+INFO  [21:35:03.603] [bbotk]  TRUE     TRUE FALSE FALSE  FALSE TRUE   TRUE  0.1733371 
+INFO  [21:35:03.603] [bbotk]  TRUE    FALSE  TRUE FALSE  FALSE TRUE   TRUE  0.1700328 
+INFO  [21:35:03.603] [bbotk]  TRUE    FALSE FALSE  TRUE  FALSE TRUE   TRUE  0.1733514 
+INFO  [21:35:03.603] [bbotk]  TRUE    FALSE FALSE FALSE   TRUE TRUE   TRUE  0.1548497 
+INFO  [21:35:03.603] [bbotk]                                 uhash 
+INFO  [21:35:03.603] [bbotk]  6936b8ce-f4c6-4c1a-ba3d-933a73c79560 
+INFO  [21:35:03.603] [bbotk]  25f48b94-e658-472c-b557-2eb7b0bf1437 
+INFO  [21:35:03.603] [bbotk]  7d6dc2ad-1c34-4c4a-8ad2-276bba70c529 
+INFO  [21:35:03.603] [bbotk]  eb2c0455-c231-4707-817e-dba1139ed11f 
+INFO  [21:35:03.606] [bbotk] Evaluating 3 configuration(s) 
+INFO  [21:35:06.433] [bbotk] Result of batch 5: 
+INFO  [21:35:06.435] [bbotk]   age embarked  fare parch pclass  sex sib_sp classif.ce 
+INFO  [21:35:06.435] [bbotk]  TRUE     TRUE FALSE FALSE   TRUE TRUE   TRUE  0.1497650 
+INFO  [21:35:06.435] [bbotk]  TRUE    FALSE  TRUE FALSE   TRUE TRUE   TRUE  0.1616152 
+INFO  [21:35:06.435] [bbotk]  TRUE    FALSE FALSE  TRUE   TRUE TRUE   TRUE  0.1649765 
+INFO  [21:35:06.435] [bbotk]                                 uhash 
+INFO  [21:35:06.435] [bbotk]  21f4101d-ae17-4dfc-9315-91aa5f0e2244 
+INFO  [21:35:06.435] [bbotk]  68283062-9480-4f1c-9626-6d37447a614a 
+INFO  [21:35:06.435] [bbotk]  914b9d7f-0ea0-404a-a2ea-fbe25ef04932 
+INFO  [21:35:06.438] [bbotk] Evaluating 2 configuration(s) 
+INFO  [21:35:08.480] [bbotk] Result of batch 6: 
+INFO  [21:35:08.482] [bbotk]   age embarked  fare parch pclass  sex sib_sp classif.ce 
+INFO  [21:35:08.482] [bbotk]  TRUE     TRUE  TRUE FALSE   TRUE TRUE   TRUE  0.1531833 
+INFO  [21:35:08.482] [bbotk]  TRUE     TRUE FALSE  TRUE   TRUE TRUE   TRUE  0.1582111 
+INFO  [21:35:08.482] [bbotk]                                 uhash 
+INFO  [21:35:08.482] [bbotk]  358b5af7-edb9-4904-8748-a002cbd7367a 
+INFO  [21:35:08.482] [bbotk]  4f5ad500-f38f-4541-a078-6335169421f8 
+INFO  [21:35:08.485] [bbotk] Evaluating 1 configuration(s) 
+INFO  [21:35:09.441] [bbotk] Result of batch 7: 
+INFO  [21:35:09.444] [bbotk]   age embarked fare parch pclass  sex sib_sp classif.ce 
+INFO  [21:35:09.444] [bbotk]  TRUE     TRUE TRUE  TRUE   TRUE TRUE   TRUE  0.1497792 
+INFO  [21:35:09.444] [bbotk]                                 uhash 
+INFO  [21:35:09.444] [bbotk]  da6362d1-f1d0-4acd-a88b-82641f1ba56e 
+INFO  [21:35:09.451] [bbotk] Finished optimizing after 28 evaluation(s) 
+INFO  [21:35:09.452] [bbotk] Result: 
+INFO  [21:35:09.453] [bbotk]   age embarked  fare parch pclass  sex sib_sp 
+INFO  [21:35:09.453] [bbotk]  TRUE     TRUE FALSE FALSE   TRUE TRUE   TRUE 
+INFO  [21:35:09.453] [bbotk]                        features  x_domain classif.ce 
+INFO  [21:35:09.453] [bbotk]  age,embarked,pclass,sex,sib_sp &lt;list[7]&gt;   0.149765 
+INFO  [21:35:09.695] [bbotk] Starting to optimize 7 parameter(s) with &#39;&lt;FSelectorSequential&gt;&#39; and &#39;&lt;TerminatorNone&gt; [list()]&#39; 
+INFO  [21:35:09.697] [bbotk] Evaluating 7 configuration(s) 
+INFO  [21:35:15.810] [bbotk] Result of batch 1: 
+INFO  [21:35:15.812] [bbotk]    age embarked  fare parch pclass   sex sib_sp classif.ce 
+INFO  [21:35:15.812] [bbotk]   TRUE    FALSE FALSE FALSE  FALSE FALSE  FALSE  0.4090585 
+INFO  [21:35:15.812] [bbotk]  FALSE     TRUE FALSE FALSE  FALSE FALSE  FALSE  0.3635949 
+INFO  [21:35:15.812] [bbotk]  FALSE    FALSE  TRUE FALSE  FALSE FALSE  FALSE  0.3316906 
+INFO  [21:35:15.812] [bbotk]  FALSE    FALSE FALSE  TRUE  FALSE FALSE  FALSE  0.3754024 
+INFO  [21:35:15.812] [bbotk]  FALSE    FALSE FALSE FALSE   TRUE FALSE  FALSE  0.3114798 
+INFO  [21:35:15.812] [bbotk]  FALSE    FALSE FALSE FALSE  FALSE  TRUE  FALSE  0.2254949 
+INFO  [21:35:15.812] [bbotk]  FALSE    FALSE FALSE FALSE  FALSE FALSE   TRUE  0.3720553 
+INFO  [21:35:15.812] [bbotk]                                 uhash 
+INFO  [21:35:15.812] [bbotk]  009fdfad-df8e-4492-afc0-8acb28f86d72 
+INFO  [21:35:15.812] [bbotk]  482c6c85-e8a3-480a-a6ec-7781d55c4b80 
+INFO  [21:35:15.812] [bbotk]  1c58fe64-96fa-41a1-a32e-8884506c5aea 
+INFO  [21:35:15.812] [bbotk]  9a18be3b-e4f6-4498-8b26-92fa086bb695 
+INFO  [21:35:15.812] [bbotk]  3cef05de-820b-4e06-9dc2-462fcc58f368 
+INFO  [21:35:15.812] [bbotk]  5f21fbd4-c829-4122-986d-b5c730e99044 
+INFO  [21:35:15.812] [bbotk]  12022839-5315-4281-b27e-ecfa45861320 
+INFO  [21:35:15.815] [bbotk] Evaluating 6 configuration(s) 
+INFO  [21:35:20.846] [bbotk] Result of batch 2: 
+INFO  [21:35:20.849] [bbotk]    age embarked  fare parch pclass  sex sib_sp classif.ce 
+INFO  [21:35:20.849] [bbotk]   TRUE    FALSE FALSE FALSE  FALSE TRUE  FALSE  0.2170916 
+INFO  [21:35:20.849] [bbotk]  FALSE     TRUE FALSE FALSE  FALSE TRUE  FALSE  0.2254949 
+INFO  [21:35:20.849] [bbotk]  FALSE    FALSE  TRUE FALSE  FALSE TRUE  FALSE  0.2254949 
+INFO  [21:35:20.849] [bbotk]  FALSE    FALSE FALSE  TRUE  FALSE TRUE  FALSE  0.2238143 
+INFO  [21:35:20.849] [bbotk]  FALSE    FALSE FALSE FALSE   TRUE TRUE  FALSE  0.2238428 
+INFO  [21:35:20.849] [bbotk]  FALSE    FALSE FALSE FALSE  FALSE TRUE   TRUE  0.2221478 
+INFO  [21:35:20.849] [bbotk]                                 uhash 
+INFO  [21:35:20.849] [bbotk]  f6815bbf-b4de-4638-a135-7c461c530245 
+INFO  [21:35:20.849] [bbotk]  dca2ef37-9b01-46a6-964c-e88cde22c57a 
+INFO  [21:35:20.849] [bbotk]  fcb32933-32c5-4eb8-a796-35642d72a972 
+INFO  [21:35:20.849] [bbotk]  47de05cc-a70f-4184-bf0a-c7ea057108d1 
+INFO  [21:35:20.849] [bbotk]  ee3c09cf-3c0e-427e-884c-a905b7783b5b 
+INFO  [21:35:20.849] [bbotk]  423f27a0-2a27-4ecd-901b-a2a6909430be 
+INFO  [21:35:20.853] [bbotk] Evaluating 5 configuration(s) 
+INFO  [21:35:24.853] [bbotk] Result of batch 3: 
+INFO  [21:35:24.855] [bbotk]   age embarked  fare parch pclass  sex sib_sp classif.ce 
+INFO  [21:35:24.855] [bbotk]  TRUE     TRUE FALSE FALSE  FALSE TRUE  FALSE  0.2221336 
+INFO  [21:35:24.855] [bbotk]  TRUE    FALSE  TRUE FALSE  FALSE TRUE  FALSE  0.2221336 
+INFO  [21:35:24.855] [bbotk]  TRUE    FALSE FALSE  TRUE  FALSE TRUE  FALSE  0.2137445 
+INFO  [21:35:24.855] [bbotk]  TRUE    FALSE FALSE FALSE   TRUE TRUE  FALSE  0.2053269 
+INFO  [21:35:24.855] [bbotk]  TRUE    FALSE FALSE FALSE  FALSE TRUE   TRUE  0.2036320 
+INFO  [21:35:24.855] [bbotk]                                 uhash 
+INFO  [21:35:24.855] [bbotk]  b44ce4de-18dd-425e-a773-7bab40594607 
+INFO  [21:35:24.855] [bbotk]  9a9b1627-2eff-4b09-b4d2-29f9c10d7292 
+INFO  [21:35:24.855] [bbotk]  6f56054f-6d0f-4ce2-bd60-5ce40580c07d 
+INFO  [21:35:24.855] [bbotk]  43dbea42-dd07-4d8c-9951-53ec9f4df131 
+INFO  [21:35:24.855] [bbotk]  25b6d6be-62cb-422e-801b-7b0c99233519 
+INFO  [21:35:24.858] [bbotk] Evaluating 4 configuration(s) 
+INFO  [21:35:28.030] [bbotk] Result of batch 4: 
+INFO  [21:35:28.032] [bbotk]   age embarked  fare parch pclass  sex sib_sp classif.ce 
+INFO  [21:35:28.032] [bbotk]  TRUE     TRUE FALSE FALSE  FALSE TRUE   TRUE  0.2087025 
+INFO  [21:35:28.032] [bbotk]  TRUE    FALSE  TRUE FALSE  FALSE TRUE   TRUE  0.1986469 
+INFO  [21:35:28.032] [bbotk]  TRUE    FALSE FALSE  TRUE  FALSE TRUE   TRUE  0.2019798 
+INFO  [21:35:28.032] [bbotk]  TRUE    FALSE FALSE FALSE   TRUE TRUE   TRUE  0.2036604 
+INFO  [21:35:28.032] [bbotk]                                 uhash 
+INFO  [21:35:28.032] [bbotk]  9fd32cfb-9642-406a-940c-09e40f72eecc 
+INFO  [21:35:28.032] [bbotk]  c8f4f595-76ec-43f9-a3c3-9012596a0e67 
+INFO  [21:35:28.032] [bbotk]  2e3232c2-063e-4e10-8924-7f89d40f49aa 
+INFO  [21:35:28.032] [bbotk]  88a80a32-0580-452d-be8d-e27c3387b02d 
+INFO  [21:35:28.035] [bbotk] Evaluating 3 configuration(s) 
+INFO  [21:35:31.461] [bbotk] Result of batch 5: 
+INFO  [21:35:31.464] [bbotk]   age embarked fare parch pclass  sex sib_sp classif.ce 
+INFO  [21:35:31.464] [bbotk]  TRUE     TRUE TRUE FALSE  FALSE TRUE   TRUE  0.1952713 
+INFO  [21:35:31.464] [bbotk]  TRUE    FALSE TRUE  TRUE  FALSE TRUE   TRUE  0.1919100 
+INFO  [21:35:31.464] [bbotk]  TRUE    FALSE TRUE FALSE   TRUE TRUE   TRUE  0.1817690 
+INFO  [21:35:31.464] [bbotk]                                 uhash 
+INFO  [21:35:31.464] [bbotk]  31a35af7-eee6-4738-82d2-d53f44a05e58 
+INFO  [21:35:31.464] [bbotk]  375208be-694d-44e8-9510-7f715076f44c 
+INFO  [21:35:31.464] [bbotk]  a89bf916-7ba9-449b-bcf4-0c7970f7773e 
+INFO  [21:35:31.469] [bbotk] Evaluating 2 configuration(s) 
+INFO  [21:35:33.658] [bbotk] Result of batch 6: 
+INFO  [21:35:33.660] [bbotk]   age embarked fare parch pclass  sex sib_sp classif.ce 
+INFO  [21:35:33.660] [bbotk]  TRUE     TRUE TRUE FALSE   TRUE TRUE   TRUE  0.1599202 
+INFO  [21:35:33.660] [bbotk]  TRUE    FALSE TRUE  TRUE   TRUE TRUE   TRUE  0.1716565 
+INFO  [21:35:33.660] [bbotk]                                 uhash 
+INFO  [21:35:33.660] [bbotk]  933a92b2-1346-402c-848d-3c35b06094da 
+INFO  [21:35:33.660] [bbotk]  f58c0724-91d5-4db4-bdae-57ac74435aaf 
+INFO  [21:35:33.662] [bbotk] Evaluating 1 configuration(s) 
+INFO  [21:35:34.827] [bbotk] Result of batch 7: 
+INFO  [21:35:34.831] [bbotk]   age embarked fare parch pclass  sex sib_sp classif.ce 
+INFO  [21:35:34.831] [bbotk]  TRUE     TRUE TRUE  TRUE   TRUE TRUE   TRUE  0.1666287 
+INFO  [21:35:34.831] [bbotk]                                 uhash 
+INFO  [21:35:34.831] [bbotk]  0e84e0d0-d801-4b37-b560-ee475ce51006 
+INFO  [21:35:34.838] [bbotk] Finished optimizing after 28 evaluation(s) 
+INFO  [21:35:34.840] [bbotk] Result: 
+INFO  [21:35:34.842] [bbotk]   age embarked fare parch pclass  sex sib_sp 
+INFO  [21:35:34.842] [bbotk]  TRUE     TRUE TRUE FALSE   TRUE TRUE   TRUE 
+INFO  [21:35:34.842] [bbotk]                             features  x_domain classif.ce 
+INFO  [21:35:34.842] [bbotk]  age,embarked,fare,pclass,sex,sib_sp &lt;list[7]&gt;  0.1599202 </code></pre>
+</div>
+<p>The aggregated performance of all outer resampling iterations is the unbiased predictive performance we can expected from the logisitic regression model with an optimized feature set found by sequential selection.</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>rr</span><span class='op'>$</span><span class='fu'>aggregate</span><span class='op'>(</span><span class='op'>)</span>
+</code></pre>
+</div>
+<pre><code>classif.ce 
+ 0.1840629 </code></pre>
+</div>
+<p>Next, we want to compare the predictive performances estimated on the outer resampling to the inner resampling. Significantly lower predictive performances on the outer resampling indicate that the models with the optimized feature sets overfit the data.</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>rr</span><span class='op'>$</span><span class='fu'>score</span><span class='op'>(</span><span class='op'>)</span>
+</code></pre>
+</div>
+<pre><code>                task task_id             learner
+1: &lt;TaskClassif[46]&gt; titanic &lt;AutoFSelector[41]&gt;
+2: &lt;TaskClassif[46]&gt; titanic &lt;AutoFSelector[41]&gt;
+3: &lt;TaskClassif[46]&gt; titanic &lt;AutoFSelector[41]&gt;
+                 learner_id         resampling resampling_id
+1: classif.ranger.fselector &lt;ResamplingCV[19]&gt;            cv
+2: classif.ranger.fselector &lt;ResamplingCV[19]&gt;            cv
+3: classif.ranger.fselector &lt;ResamplingCV[19]&gt;            cv
+   iteration              prediction classif.ce
+1:         1 &lt;PredictionClassif[19]&gt;  0.1649832
+2:         2 &lt;PredictionClassif[19]&gt;  0.2289562
+3:         3 &lt;PredictionClassif[19]&gt;  0.1582492</code></pre>
+</div>
+<p>We check whether the feature sets that were selected in the inner resampling are stable. The selected featute sets should not differ too much. We might observe unstable models in this example because the small data set and the low number of resampling iterations might introduces too much randomness. Usually, we aim for the selection of similiar feature sets for all outer training sets.</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/do.call.html'>do.call</a></span><span class='op'>(</span><span class='va'>rbind</span>, <span class='fu'><a href='https://rdrr.io/r/base/lapply.html'>lapply</a></span><span class='op'>(</span><span class='va'>rr</span><span class='op'>$</span><span class='va'>learners</span>, <span class='kw'>function</span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span> <span class='va'>x</span><span class='op'>$</span><span class='va'>fselect_result</span><span class='op'>)</span><span class='op'>)</span>
+</code></pre>
+</div>
+<pre><code>    age embarked  fare parch pclass  sex sib_sp
+1: TRUE     TRUE  TRUE FALSE   TRUE TRUE   TRUE
+2: TRUE     TRUE FALSE FALSE   TRUE TRUE   TRUE
+3: TRUE     TRUE FALSE  TRUE  FALSE TRUE   TRUE
+                              features  x_domain classif.ce
+1: age,embarked,fare,pclass,sex,sib_sp &lt;list[7]&gt;  0.1599202
+2:      age,embarked,pclass,sex,sib_sp &lt;list[7]&gt;  0.1497650
+3:       age,embarked,parch,sex,sib_sp &lt;list[7]&gt;  0.1902293</code></pre>
+</div>
+<p>The archive of the <code>AutoFSelector</code> gives us all evaluated hyperparameter configurations (i.e. feature sets) with the associated predictive performances.</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>rr</span><span class='op'>$</span><span class='va'>learners</span><span class='op'>[[</span><span class='fl'>1</span><span class='op'>]</span><span class='op'>]</span><span class='op'>$</span><span class='va'>archive</span><span class='op'>$</span><span class='va'>data</span><span class='op'>[</span>, <span class='fl'>1</span><span class='op'>:</span><span class='fl'>8</span><span class='op'>]</span>
+</code></pre>
+</div>
+<pre><code>      age embarked  fare parch pclass   sex sib_sp classif.ce
+ 1:  TRUE    FALSE FALSE FALSE  FALSE FALSE  FALSE  0.4090585
+ 2: FALSE     TRUE FALSE FALSE  FALSE FALSE  FALSE  0.3635949
+ 3: FALSE    FALSE  TRUE FALSE  FALSE FALSE  FALSE  0.3316906
+ 4: FALSE    FALSE FALSE  TRUE  FALSE FALSE  FALSE  0.3754024
+ 5: FALSE    FALSE FALSE FALSE   TRUE FALSE  FALSE  0.3114798
+ 6: FALSE    FALSE FALSE FALSE  FALSE  TRUE  FALSE  0.2254949
+ 7: FALSE    FALSE FALSE FALSE  FALSE FALSE   TRUE  0.3720553
+ 8:  TRUE    FALSE FALSE FALSE  FALSE  TRUE  FALSE  0.2170916
+ 9: FALSE     TRUE FALSE FALSE  FALSE  TRUE  FALSE  0.2254949
+10: FALSE    FALSE  TRUE FALSE  FALSE  TRUE  FALSE  0.2254949
+11: FALSE    FALSE FALSE  TRUE  FALSE  TRUE  FALSE  0.2238143
+12: FALSE    FALSE FALSE FALSE   TRUE  TRUE  FALSE  0.2238428
+13: FALSE    FALSE FALSE FALSE  FALSE  TRUE   TRUE  0.2221478
+14:  TRUE     TRUE FALSE FALSE  FALSE  TRUE  FALSE  0.2221336
+15:  TRUE    FALSE  TRUE FALSE  FALSE  TRUE  FALSE  0.2221336
+16:  TRUE    FALSE FALSE  TRUE  FALSE  TRUE  FALSE  0.2137445
+17:  TRUE    FALSE FALSE FALSE   TRUE  TRUE  FALSE  0.2053269
+18:  TRUE    FALSE FALSE FALSE  FALSE  TRUE   TRUE  0.2036320
+19:  TRUE     TRUE FALSE FALSE  FALSE  TRUE   TRUE  0.2087025
+20:  TRUE    FALSE  TRUE FALSE  FALSE  TRUE   TRUE  0.1986469
+21:  TRUE    FALSE FALSE  TRUE  FALSE  TRUE   TRUE  0.2019798
+22:  TRUE    FALSE FALSE FALSE   TRUE  TRUE   TRUE  0.2036604
+23:  TRUE     TRUE  TRUE FALSE  FALSE  TRUE   TRUE  0.1952713
+24:  TRUE    FALSE  TRUE  TRUE  FALSE  TRUE   TRUE  0.1919100
+25:  TRUE    FALSE  TRUE FALSE   TRUE  TRUE   TRUE  0.1817690
+26:  TRUE     TRUE  TRUE FALSE   TRUE  TRUE   TRUE  0.1599202
+27:  TRUE    FALSE  TRUE  TRUE   TRUE  TRUE   TRUE  0.1716565
+28:  TRUE     TRUE  TRUE  TRUE   TRUE  TRUE   TRUE  0.1666287
+      age embarked  fare parch pclass   sex sib_sp classif.ce</code></pre>
+</div>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
+<!--radix_placeholder_article_footer-->
+<!--/radix_placeholder_article_footer-->
+</div>
+
+<div class="d-appendix">
+</div>
+
+
+<!--radix_placeholder_site_after_body-->
+<!--/radix_placeholder_site_after_body-->
+<!--radix_placeholder_appendices-->
+<div class="appendix-bottom">
+  <h3 id="citation">Citation</h3>
+  <p>For attribution, please cite this work as</p>
+  <pre class="citation-appendix short">Becker (2021, Jan. 8). mlr3gallery: Feature Selection on the Titanic Data Set. Retrieved from https://mlr3gallery.mlr-org.com/posts/2020-09-14-mlr3fselect-basic/</pre>
+  <p>BibTeX citation</p>
+  <pre class="citation-appendix long">@misc{becker2021feature,
+  author = {Becker, Marc},
+  title = {mlr3gallery: Feature Selection on the Titanic Data Set},
+  url = {https://mlr3gallery.mlr-org.com/posts/2020-09-14-mlr3fselect-basic/},
+  year = {2021}
+}</pre>
+</div>
+<!--/radix_placeholder_appendices-->
+<!--radix_placeholder_navigation_after_body-->
+<!--/radix_placeholder_navigation_after_body-->
+
+</body>
+
+</html>
