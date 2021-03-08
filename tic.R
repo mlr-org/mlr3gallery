@@ -7,18 +7,13 @@ get_stage("script") %>%
     full.names = TRUE, recursive = TRUE)[30], rmarkdown::render))
 
 
-if (ci_get_branch() == "main") {
-  get_stage("before_deploy") %>%
-    add_step(step_setup_ssh()) %>%
-    add_step(step_setup_push_deploy())
+get_stage("before_deploy") %>%
+  add_step(step_setup_ssh()) %>%
+  add_step(step_setup_push_deploy())
 
-  get_stage("deploy") %>%
-    add_code_step(rmarkdown::render_site()) %>%
-    add_code_step(writeLines("mlr3gallery.mlr-org.com", "docs/CNAME")) %>%
-    add_step(step_do_push_deploy(
-      path = ".",
-      commit_paths = "docs/"))
-} else {
-  get_stage("deploy") %>%
-    add_code_step(rmarkdown::render_site())
-}
+get_stage("deploy") %>%
+  add_code_step(rmarkdown::render_site()) %>%
+  #add_code_step(writeLines("mlr3gallery.mlr-org.com", "docs/CNAME")) %>%
+  add_step(step_do_push_deploy(
+    path = ".",
+    commit_paths = "docs/"))
