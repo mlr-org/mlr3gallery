@@ -2118,7 +2118,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <div class="d-article">
 <h2 id="intro">Intro</h2>
 <p><a href="https://mlr3tuning.mlr-org.com/reference/Tuner.html"><code>Tuner</code></a> for real-valued search spaces are not able to tune on integer hyperparameters. However, it is possible to round the real values proposed by a <a href="https://mlr3tuning.mlr-org.com/reference/Tuner.html"><code>Tuner</code></a> to integers before passing them to the learner in the evaluation. We show how to apply a parameter transformation to a <a href="https://paradox.mlr-org.com/reference/ParamSet.html"><code>ParamSet</code></a> and use this set in the tuning process.</p>
-We load the <a href="https://mlr3verse.mlr-org.com">mlr3verse</a> package which pulls in the most important packages for this example and we decrease the verbosity of the logger to keep the output clearly represented.
+<p>We load the <a href="https://mlr3verse.mlr-org.com">mlr3verse</a> package which pulls in the most important packages for this example and we decrease the verbosity of the logger to keep the output clearly represented.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://mlr3verse.mlr-org.com'>mlr3verse</a></span><span class='op'>)</span>
@@ -2129,7 +2129,7 @@ We load the <a href="https://mlr3verse.mlr-org.com">mlr3verse</a> package which 
 </div>
 </div>
 <h2 id="task-and-learner">Task and Learner</h2>
-In this example, we use the k-Nearest-Neighbor classification learner. We want to tune the integer-valued hyperparameter <code>k</code> which defines the numbers of neighbors.
+<p>In this example, we use the k-Nearest-Neighbor classification learner. We want to tune the integer-valued hyperparameter <code>k</code> which defines the numbers of neighbors.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='va'>learner</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>lrn</a></span><span class='op'>(</span><span class='st'>"classif.kknn"</span><span class='op'>)</span>
@@ -2139,7 +2139,7 @@ In this example, we use the k-Nearest-Neighbor classification learner. We want t
 <pre><code>   id    class lower upper levels default
 1:  k ParamInt     1   Inf              7</code></pre>
 </div>
-We choose the <code>iris</code> dataset to demonstrate the tuning.
+<p>We choose the <code>iris</code> dataset to demonstrate the tuning.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='va'>task</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>tsk</a></span><span class='op'>(</span><span class='st'>"iris"</span><span class='op'>)</span>
@@ -2153,7 +2153,7 @@ We choose the <code>iris</code> dataset to demonstrate the tuning.
   - dbl (4): Petal.Length, Petal.Width, Sepal.Length, Sepal.Width</code></pre>
 </div>
 <h1 id="tuning">Tuning</h1>
-We choose generalized simulated annealing as tuning strategy. The <code>param_classes</code> field of <a href="https://mlr3tuning.mlr-org.com/reference/mlr_tuners_gensa.html"><code>TunerGenSA</code></a> states that the tuner only supports real-valued (<code>ParamDbl</code>) hyperparameter tuning.
+<p>We choose generalized simulated annealing as tuning strategy. The <code>param_classes</code> field of <a href="https://mlr3tuning.mlr-org.com/reference/mlr_tuners_gensa.html"><code>TunerGenSA</code></a> states that the tuner only supports real-valued (<code>ParamDbl</code>) hyperparameter tuning.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='va'>tuner</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3tuning.mlr-org.com/reference/tnr.html'>tnr</a></span><span class='op'>(</span><span class='st'>"gensa"</span><span class='op'>)</span>
@@ -2166,7 +2166,7 @@ We choose generalized simulated annealing as tuning strategy. The <code>param_cl
 * Properties: single-crit
 * Packages: GenSA</code></pre>
 </div>
-To get integer-valued hyperparameter values for <code>k</code>, we construct a search space with a transformation function. The <code>as.integer()</code> function converts any real valued number to an integer by removing the decimal places.
+<p>To get integer-valued hyperparameter values for <code>k</code>, we construct a search space with a transformation function. The <code>as.integer()</code> function converts any real valued number to an integer by removing the decimal places.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='va'>search_space</span> <span class='op'>=</span> <span class='fu'><a href='https://paradox.mlr-org.com/reference/ps.html'>ps</a></span><span class='op'>(</span>
@@ -2175,7 +2175,7 @@ To get integer-valued hyperparameter values for <code>k</code>, we construct a s
 </code></pre>
 </div>
 </div>
-We construct the other objects needed for tuning.
+<p>We construct the other objects needed for tuning.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='va'>instance</span> <span class='op'>=</span> <span class='va'><a href='https://mlr3tuning.mlr-org.com/reference/TuningInstanceSingleCrit.html'>TuningInstanceSingleCrit</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span>
@@ -2188,7 +2188,7 @@ We construct the other objects needed for tuning.
 </code></pre>
 </div>
 </div>
-We start the tuning and compare the results of the search space to the results in the space of the learners hyperparameter set.
+<p>We start the tuning and compare the results of the search space to the results in the space of the learners hyperparameter set.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='va'>tuner</span><span class='op'>$</span><span class='fu'>optimize</span><span class='op'>(</span><span class='va'>instance</span><span class='op'>)</span>
@@ -2197,7 +2197,7 @@ We start the tuning and compare the results of the search space to the results i
 <pre><code>          k learner_param_vals  x_domain classif.ce
 1: 7.532552          &lt;list[1]&gt; &lt;list[1]&gt;       0.04</code></pre>
 </div>
-The optimal <code>k</code> is still a real number in the search space.
+<p>The optimal <code>k</code> is still a real number in the search space.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='va'>instance</span><span class='op'>$</span><span class='va'>result_x_search_space</span>
@@ -2206,7 +2206,7 @@ The optimal <code>k</code> is still a real number in the search space.
 <pre><code>          k
 1: 7.532552</code></pre>
 </div>
-However, in the learners hyperparameters space, <code>k</code> is an integer value.
+<p>However, in the learners hyperparameters space, <code>k</code> is an integer value.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='va'>instance</span><span class='op'>$</span><span class='va'>result_x_domain</span>
@@ -2215,7 +2215,7 @@ However, in the learners hyperparameters space, <code>k</code> is an integer val
 <pre><code>$k
 [1] 7</code></pre>
 </div>
-The archive shows us that for all real-valued <code>k</code> proposed by <a href="https://cran.r-project.org/package=GenSA">GenSA</a>, an integer-valued <code>k</code> in the learner hyperparameter space (<code>x_domain_k</code>) was created.
+<p>The archive shows us that for all real-valued <code>k</code> proposed by <a href="https://cran.r-project.org/package=GenSA">GenSA</a>, an integer-valued <code>k</code> in the learner hyperparameter space (<code>x_domain_k</code>) was created.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/as.data.table.html'>as.data.table</a></span><span class='op'>(</span><span class='va'>instance</span><span class='op'>$</span><span class='va'>archive</span><span class='op'>)</span><span class='op'>[</span>, <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"k"</span>, <span class='st'>"classif.ce"</span>, <span class='st'>"x_domain_k"</span><span class='op'>)</span><span class='op'>]</span>
