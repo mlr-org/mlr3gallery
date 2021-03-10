@@ -1,5 +1,5 @@
 ---
-title: "Integer Hyperparameters in Tuners for Real-valued Search Spaces"
+title: Integer Hyperparameters in Tuners for Real-valued Search Spaces
 categories:
   - tuning
   - bbotk
@@ -31,6 +31,7 @@ However, it is possible to round the real values proposed by a `r ref("Tuner")` 
 We show how to apply a parameter transformation to a `r ref("ParamSet")` and use this set in the tuning process.
 
 We load the `r mlr_pkg("mlr3verse")` package which pulls in the most important packages for this example and we decrease the verbosity of the logger to keep the output clearly represented.
+
 ```{r}
 library(mlr3verse)
 
@@ -42,12 +43,14 @@ lgr::get_logger("bbotk")$set_threshold("warn")
 
 In this example, we use the k-Nearest-Neighbor classification learner.
 We want to tune the integer-valued hyperparameter `k` which defines the numbers of neighbors.
+
 ```{r}
 learner = lrn("classif.kknn")
 print(learner$param_set$params$k)
 ```
 
 We choose the `iris` dataset to demonstrate the tuning.
+
 ```{r}
 task = tsk("iris")
 print(task)
@@ -57,6 +60,7 @@ print(task)
 
 We choose generalized simulated annealing as tuning strategy.
 The `param_classes` field of `r ref("TunerGenSA")` states that the tuner only supports real-valued (`ParamDbl`) hyperparameter tuning.
+
 ```{r}
 tuner = tnr("gensa")
 print(tuner)
@@ -64,6 +68,7 @@ print(tuner)
 
 To get integer-valued hyperparameter values for `k`, we construct a search space with a transformation function.
 The `as.integer()` function converts any real valued number to an integer by removing the decimal places.
+
 ```{r}
 search_space = ps(
   k = p_dbl(lower = 3, upper = 7.99, trafo = as.integer)
@@ -71,6 +76,7 @@ search_space = ps(
 ```
 
 We construct the other objects needed for tuning.
+
 ```{r}
 instance = TuningInstanceSingleCrit$new(
   task = task,
@@ -82,21 +88,25 @@ instance = TuningInstanceSingleCrit$new(
 ```
 
 We start the tuning and compare the results of the search space to the results in the space of the learners hyperparameter set.
+
 ```{r}
 tuner$optimize(instance)
 ```
 
 The optimal `k` is still a real number in the search space.
+
 ```{r}
 instance$result_x_search_space
 ```
 
 However, in the learners hyperparameters space, `k` is an integer value.
+
 ```{r}
 instance$result_x_domain
 ```
 
 The archive shows us that for all real-valued `k` proposed by `r cran_pkg("GenSA")`, an integer-valued `k` in the learner hyperparameter space (`x_domain_k`) was created.
+
 ```{r}
 as.data.table(instance$archive)[, c("k", "classif.ce", "x_domain_k")]
 ```
