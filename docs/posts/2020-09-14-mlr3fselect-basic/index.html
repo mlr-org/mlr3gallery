@@ -2242,8 +2242,8 @@ Keys: design_points, exhaustive_search, genetic_search,
 </div>
 <pre><code>    age embarked fare parch pclass  sex sib_sp
 1: TRUE    FALSE TRUE  TRUE   TRUE TRUE   TRUE
-                           features  x_domain classif.ce
-1: age,fare,parch,pclass,sex,sib_sp &lt;list[7]&gt;  0.2020202</code></pre>
+                           features classif.ce
+1: age,fare,parch,pclass,sex,sib_sp  0.2020202</code></pre>
 </div>
 <p>The <code>ArchiveFSelect</code> stores a <code>data.table</code> which conists of the evaluated feature sets and the corresponding estimated predictive performances.</p>
 <div class="layout-chunk" data-layout="l-body">
@@ -2301,8 +2301,8 @@ Keys: design_points, exhaustive_search, genetic_search,
 </div>
 <pre><code>    age embarked fare parch pclass  sex sib_sp
 1: TRUE    FALSE TRUE  TRUE   TRUE TRUE   TRUE
-                           features  x_domain classif.ce
-1: age,fare,parch,pclass,sex,sib_sp &lt;list[7]&gt;  0.2020202</code></pre>
+                           features classif.ce
+1: age,fare,parch,pclass,sex,sib_sp  0.2020202</code></pre>
 </div>
 <h2 id="sequential-forward-selection">Sequential forward selection</h2>
 <p>We try sequential forward selection. We chose the <code>stagnation</code> terminator that stops the feature selection if the predictive performance does not increase anymore.</p>
@@ -2322,8 +2322,8 @@ Keys: design_points, exhaustive_search, genetic_search,
 </div>
 <pre><code>     age embarked  fare parch pclass  sex sib_sp
 1: FALSE    FALSE FALSE  TRUE   TRUE TRUE   TRUE
-                  features  x_domain classif.ce
-1: parch,pclass,sex,sib_sp &lt;list[7]&gt;  0.1964085</code></pre>
+                  features classif.ce
+1: parch,pclass,sex,sib_sp  0.1964085</code></pre>
 </div>
 <p>The <code>FSelectorSequential</code> object has a special method for displaying the optimization path of the sequential feature selection.</p>
 <div class="layout-chunk" data-layout="l-body">
@@ -2338,20 +2338,13 @@ Keys: design_points, exhaustive_search, genetic_search,
 4:   4 TRUE    FALSE FALSE FALSE   TRUE  TRUE   TRUE  0.2143659
 5:   5 TRUE    FALSE FALSE  TRUE   TRUE  TRUE   TRUE  0.2065095
 6:   6 TRUE    FALSE  TRUE  TRUE   TRUE  TRUE   TRUE  0.2020202
-                                  uhash  x_domain           timestamp
-1: db91772b-83ad-4131-9641-4840f2108158 &lt;list[7]&gt; 2021-03-09 08:21:04
-2: 01168aad-7908-4736-b33f-519ba0c9e126 &lt;list[7]&gt; 2021-03-09 08:21:06
-3: f976762d-4c19-4458-92b4-9571222d05a8 &lt;list[7]&gt; 2021-03-09 08:21:08
-4: e639b887-cd47-43e5-bc59-fce37c155e85 &lt;list[7]&gt; 2021-03-09 08:21:10
-5: 9fe9c266-3672-47bb-af7f-ec20b4a09b94 &lt;list[7]&gt; 2021-03-09 08:21:11
-6: 380916b4-2c39-427a-aad2-882801f7bbd0 &lt;list[7]&gt; 2021-03-09 08:21:12
-   batch_nr
-1:        1
-2:        2
-3:        3
-4:        4
-5:        5
-6:        6</code></pre>
+                                  uhash           timestamp batch_nr
+1: 508d6b0c-2074-44e4-bb7b-e3d9b12f158e 2021-03-10 04:55:24        1
+2: 1e249e83-48ba-4a0c-8897-dfa42bd755a4 2021-03-10 04:55:26        2
+3: 203db576-8559-4763-a10e-c0c597d2d1c3 2021-03-10 04:55:28        3
+4: f537bf07-1fe5-41e7-afc9-5eb82e99e276 2021-03-10 04:55:30        4
+5: 45099302-3d94-4cb9-9e57-032675195453 2021-03-10 04:55:31        5
+6: 0a95b29b-0b97-404a-9b89-a384cdbed702 2021-03-10 04:55:32        6</code></pre>
 </div>
 <h2 id="recursive-feature-elimination">Recursive feature elimination</h2>
 <p>Recrusive feature elemiation utilizes the <code>$importance()</code> method of learners. In each iteration the feature(s) with the lowest importance score is droped. We choose the non-recruvie algorithm (<code>recursive = FALSE</code>) which calculates the feature importance once on the complete feature set. The recrusive version (<code>recursive = TRUE</code>) recomputes the feature importance on the reduced feature set in every iteration.</p>
@@ -2373,8 +2366,8 @@ Keys: design_points, exhaustive_search, genetic_search,
 </div>
 <pre><code>    age embarked fare parch pclass  sex sib_sp
 1: TRUE     TRUE TRUE  TRUE   TRUE TRUE   TRUE
-                                 features  x_domain classif.ce
-1: age,embarked,fare,parch,pclass,sex,... &lt;list[7]&gt;  0.1694725</code></pre>
+                                 features classif.ce
+1: age,embarked,fare,parch,pclass,sex,...  0.1694725</code></pre>
 </div>
 <p>We access the results.</p>
 <div class="layout-chunk" data-layout="l-body">
@@ -2451,10 +2444,10 @@ Keys: design_points, exhaustive_search, genetic_search,
 1: TRUE     TRUE  TRUE FALSE   TRUE TRUE   TRUE
 2: TRUE     TRUE FALSE FALSE   TRUE TRUE   TRUE
 3: TRUE     TRUE FALSE  TRUE  FALSE TRUE   TRUE
-                              features  x_domain classif.ce
-1: age,embarked,fare,pclass,sex,sib_sp &lt;list[7]&gt;  0.1599202
-2:      age,embarked,pclass,sex,sib_sp &lt;list[7]&gt;  0.1497650
-3:       age,embarked,parch,sex,sib_sp &lt;list[7]&gt;  0.1902293</code></pre>
+                              features classif.ce
+1: age,embarked,fare,pclass,sex,sib_sp  0.1599202
+2:      age,embarked,pclass,sex,sib_sp  0.1497650
+3:       age,embarked,parch,sex,sib_sp  0.1902293</code></pre>
 </div>
 <p>The archive of the <code>AutoFSelector</code> gives us all evaluated hyperparameter configurations (i.e. feature sets) with the associated predictive performances.</p>
 <div class="layout-chunk" data-layout="l-body">
