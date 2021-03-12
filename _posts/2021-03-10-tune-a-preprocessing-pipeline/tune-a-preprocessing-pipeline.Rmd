@@ -207,16 +207,13 @@ graph_learner$param_set$values$encode.method = to_tune(c("one-hot", "treatment")
 We define a tuning instance and use grid search since we want to try all encode methods.
 
 ```{r, results = 'hide'}
-instance = TuningInstanceSingleCrit$new(
-  task = task,
-  learner = graph_learner,
-  resampling = resampling,
-  measure = msr("classif.ce"),
-  terminator = trm("none")
+instance = tune(
+  method = "grid_search", 
+  task = task, 
+  learner = graph_learner, 
+  resampling = resampling, 
+  measure = measure
 )
-
-tuner = tnr("grid_search")
-tuner$optimize(instance)
 ```
 
 The archive shows us the performance of the model with different encoding methods.

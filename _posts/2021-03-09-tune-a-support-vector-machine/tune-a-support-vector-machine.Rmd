@@ -163,6 +163,22 @@ The points mark the evaluated `cost` and `gamma` values.
 We should not infer the performance of new values from the heatmap since it is only an interpolation.
 However, we can see the general interaction between the hyperparameters.
 
+Tuning a learner can be shortened by using the `r ref("tune()")`-shortcut.
+```{r, eval = FALSE}
+learner = lrn("classif.svm", type = "C-classification", kernel = "radial")
+learner$param_set$values$cost = to_tune(0.1, 10)
+learner$param_set$values$gamma = to_tune(0, 5)
+
+instance = tune(
+  method = "grid_search", 
+  task = tsk("iris"), 
+  learner = learner, 
+  resampling = rsmp ("holdout"), 
+  measure = msr("classif.ce"),
+  resolution = 5
+)
+```
+
 # Transformation
 
 Next, we want to tune the `cost` and `gamma` hyperparameter more efficiently.
@@ -201,15 +217,14 @@ instance = readRDS("data/instance_2.rda")
 ```
 
 ```{r, eval = FALSE}
-instance = TuningInstanceSingleCrit$new(
-  task = task,
-  learner = learner,
-  resampling = resampling,
+instance = tune(
+  method = "grid_search", 
+  task = task, 
+  learner = learner, 
+  resampling = resampling, 
   measure = measure,
-  terminator = terminator
+  resolution = 5
 )
-tuner = tnr("grid_search", resolution = 5)
-tuner$optimize(instance)
 ```
 
 The hyperparameter values after the transformation are stored in the `x_domain` column as lists.
@@ -285,15 +300,14 @@ instance = readRDS("data/instance_3.rda")
 ```
 
 ```{r, eval = FALSE}
-instance = TuningInstanceSingleCrit$new(
-  task = task,
-  learner = learner,
-  resampling = resampling,
+instance = tune(
+  method = "grid_search", 
+  task = task, 
+  learner = learner, 
+  resampling = resampling, 
   measure = measure,
-  terminator = terminator
+  resolution = 3
 )
-tuner = tnr("grid_search", resolution = 3)
-tuner$optimize(instance)
 ```
 
 ```{r}
@@ -380,6 +394,26 @@ The aggregated performance of all outer resampling iterations is essentially the
 
 ```{r}
 rr$aggregate()
+```
+
+Applying nested resampling can be shortened by using the `r ref("tune_nested()")`-shortcut.
+
+```{r, eval = FALSE}
+learner = lrn("classif.svm", type = "C-classification")
+learner$param_set$values$cost = to_tune(p_dbl(1e-5, 1e5, logscale = TRUE))
+learner$param_set$values$gamma = to_tune(p_dbl(1e-5, 1e5, logscale = TRUE))
+learner$param_set$values$kernel = to_tune(c("polynomial", "radial"))
+learner$param_set$values$degree = to_tune(1, 4)
+
+rr = tune_nested(
+  method = "grid_search",
+  task = tsk("iris"),
+  learner = learner, 
+  inner_resampling = rsmp ("cv", folds = 3),
+  outer_resampling = rsmp("cv", folds = 3), 
+  measure = msr("classif.ce"),
+  resolution = 3
+)
 ```
 
 # Resources

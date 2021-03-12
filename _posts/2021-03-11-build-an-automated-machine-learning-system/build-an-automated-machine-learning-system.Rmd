@@ -163,16 +163,14 @@ instance = readRDS("data/instance_1.rda")
 ```
 
 ```{r, eval = FALSE}
-instance = TuningInstanceSingleCrit$new(
-  task = task,
-  learner = graph_learner,
-  resampling = rsmp("cv", folds = 3),
+instance = tune(
+  method = "random_search", 
+  task = task, 
+  learner = graph_learner, 
+  resampling = rsmp("cv", folds = 3), 
   measure = msr("classif.ce"),
-  terminator = trm("evals", n_evals = 20)
+  term_evals = 20
 )
-tuner = tnr("random_search")
-
-tuner$optimize(instance)
 ```
 
 The following shows a quick way to visualize the tuning results.
@@ -211,17 +209,15 @@ graph_learner$param_set$values$svm.cost = to_tune(p_dbl(-1, 1, trafo = function(
 graph_learner$param_set$values$ranger.mtry = to_tune(p_int(1, 8, depends = branch.selection == "ranger"))
 graph_learner$id = "graph_learner"
 
-inner_resampling = rsmp("cv", folds = 3)
-at = AutoTuner$new(
-  learner = graph_learner,
-  resampling = inner_resampling,
+rr = tune_nested(
+  method = "random_search",
+  task = task,
+  learner = graph_learner, 
+  inner_resampling = rsmp ("cv", folds = 3),
+  outer_resampling = rsmp("cv", folds = 3), 
   measure = msr("classif.ce"),
-  terminator = trm("evals", n_evals = 10),
-  tuner = tuner
+  term_evals = 10,
 )
-
-outer_resampling = rsmp("cv", folds = 3)
-rr = resample(task, at, outer_resampling, store_models = TRUE)
 ```
 
 We check the inner tuning results for stable hyperparameters.
