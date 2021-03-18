@@ -215,15 +215,17 @@ graph_learner$param_set$values$svm.cost = to_tune(p_dbl(-1, 1, trafo = function(
 graph_learner$param_set$values$ranger.mtry = to_tune(p_int(1, 8, depends = branch.selection == "ranger"))
 graph_learner$id = "graph_learner"
 
-rr = tune_nested(
-  method = "random_search",
-  task = task,
-  learner = graph_learner, 
-  inner_resampling = rsmp ("cv", folds = 3),
-  outer_resampling = rsmp("cv", folds = 3), 
+inner_resampling = rsmp("cv", folds = 3)
+at = AutoTuner$new(
+  learner = graph_learner,
+  resampling = inner_resampling,
   measure = msr("classif.ce"),
-  term_evals = 10,
+  terminator = trm("evals", n_evals = 10),
+  tuner = tuner
 )
+
+outer_resampling = rsmp("cv", folds = 3)
+rr = resample(task, at, outer_resampling, store_models = TRUE)
 ```
 
 We check the inner tuning results for stable hyperparameters.
@@ -246,6 +248,27 @@ The aggregated performance of all outer resampling iterations is essentially the
 
 ```{r}
 rr$aggregate()
+```
+
+Applying nested resampling can be shortened by using the `r ref("tune_nested()")`-shortcut.
+
+```{r, eval = FALSE}
+graph_learner = GraphLearner$new(graph)
+graph_learner$param_set$values$branch.selection = to_tune(c("kknn", "svm", "ranger"))
+graph_learner$param_set$values$kknn.k = to_tune(p_int(3, 50, logscale = TRUE, depends = branch.selection == "kknn"))
+graph_learner$param_set$values$svm.cost = to_tune(p_dbl(-1, 1, trafo = function(x) 10^x, depends = branch.selection == "svm"))
+graph_learner$param_set$values$ranger.mtry = to_tune(p_int(1, 8, depends = branch.selection == "ranger"))
+graph_learner$id = "graph_learner"
+
+rr = tune_nested(
+  method = "random_search",
+  task = task,
+  learner = graph_learner, 
+  inner_resampling = rsmp ("cv", folds = 3),
+  outer_resampling = rsmp("cv", folds = 3), 
+  measure = msr("classif.ce"),
+  term_evals = 10,
+)
 ```
 
 # Resources
