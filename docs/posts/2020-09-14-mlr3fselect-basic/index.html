@@ -121,7 +121,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
   <!--radix_placeholder_rmarkdown_metadata-->
 
 <script type="text/json" id="radix-rmarkdown-metadata">
-{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["title","categories","description","author","date","output","citation_url","canonical_url"]}},"value":[{"type":"character","attributes":{},"value":["Feature Selection on the Titanic Data Set"]},{"type":"character","attributes":{},"value":["mlr3fselect","optimization","feature selection","nested resampling"]},{"type":"character","attributes":{},"value":["We give a short introduction to mlr3fselect."]},{"type":"list","attributes":{},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name"]}},"value":[{"type":"character","attributes":{},"value":["Marc Becker"]}]}]},{"type":"character","attributes":{},"value":["01-08-2021"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["distill::distill_article"]}},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["self_contained"]}},"value":[{"type":"logical","attributes":{},"value":[false]}]}]},{"type":"character","attributes":{},"value":["https://mlr3gallery.mlr-org.com/posts/2020-09-14-mlr3fselect-basic/"]},{"type":"character","attributes":{},"value":["https://mlr3gallery.mlr-org.com/posts/2020-09-14-mlr3fselect-basic/"]}]}
+{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["title","categories","description","author","date","output","citation_url","canonical_url"]}},"value":[{"type":"character","attributes":{},"value":["Feature Selection on the Titanic Data Set"]},{"type":"character","attributes":{},"value":["mlr3fselect","optimization","feature selection","nested resampling","titanic data set","classification"]},{"type":"character","attributes":{},"value":["We give a short introduction to mlr3fselect."]},{"type":"list","attributes":{},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name"]}},"value":[{"type":"character","attributes":{},"value":["Marc Becker"]}]}]},{"type":"character","attributes":{},"value":["01-08-2021"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["distill::distill_article"]}},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["self_contained"]}},"value":[{"type":"logical","attributes":{},"value":[false]}]}]},{"type":"character","attributes":{},"value":["https://mlr3gallery.mlr-org.com/posts/2020-09-14-mlr3fselect-basic/"]},{"type":"character","attributes":{},"value":["https://mlr3gallery.mlr-org.com/posts/2020-09-14-mlr3fselect-basic/"]}]}
 </script>
 <!--/radix_placeholder_rmarkdown_metadata-->
   
@@ -2104,6 +2104,8 @@ document.addEventListener('DOMContentLoaded', function() {
   <a href="../../index.html#category:optimization" class="dt-tag">optimization</a>
   <a href="../../index.html#category:feature_selection" class="dt-tag">feature selection</a>
   <a href="../../index.html#category:nested_resampling" class="dt-tag">nested resampling</a>
+  <a href="../../index.html#category:titanic_data_set" class="dt-tag">titanic data set</a>
+  <a href="../../index.html#category:classification" class="dt-tag">classification</a>
 </div>
 <!--/radix_placeholder_categories-->
 <p><p>We give a short introduction to mlr3fselect.</p></p>
@@ -2117,20 +2119,49 @@ document.addEventListener('DOMContentLoaded', function() {
 
 <div class="d-article">
 <h2 id="introduction">Introduction</h2>
-<p>In this tutorial, we introduce the <strong>mlr3fselect</strong> package by comparing feature selection methods on the Titanic disaster data set. The objective of feature selection is to enhance the interpretability of models, speed up the learning process and increase the predictive performance.</p>
+<p>In this tutorial, we introduce the <a href="https://mlr3fselect.mlr-org.com">mlr3fselect</a> package by comparing feature selection methods on the Titanic disaster data set. The objective of feature selection is to enhance the interpretability of models, speed up the learning process and increase the predictive performance.</p>
 <h2 id="titanic-data-set">Titanic data set</h2>
 <p>The <a href="https://www.kaggle.com/c/titanic/data">Titanic data set</a> contains data for 887 Titanic passengers, including whether they survived when the Titanic sank. Our goal will be to predict the survival of the Titanic passengers.</p>
-<p>After loading the data set from the <code>mlr3data</code> package, we impute the missing age values with the median age of the passengers, set missing embarked values to <code>s</code> and remove <code>character</code> features. We could use feature engineering to create new features from the <code>character</code> features, however we want to focus on feature selection in this tutorial.</p>
+<p>After loading the data set from the <a href="https://mlr3data.mlr-org.com">mlr3data</a> package, we impute the missing age values with the median age of the passengers, set missing embarked values to <code>"s"</code> and remove <code>character</code> features. We could use feature engineering to create new features from the <code>character</code> features, however we want to focus on feature selection in this tutorial.</p>
 <p>In addition to the <code>survived</code> column, the reduced data set contains the following attributes for each passenger:</p>
-<ul>
-<li><code>age</code> Age</li>
-<li><code>sex</code> Sex</li>
-<li><code>sib_sp</code> Number of siblings/ spouses aboard</li>
-<li><code>parch</code> Number of parents/ children aboard</li>
-<li><code>fare</code> Ammount paid for the ticket</li>
-<li><code>pc_class</code> Passenger class</li>
-<li><code>embarked</code> Port of embarkation</li>
-</ul>
+<table>
+<thead>
+<tr class="header">
+<th>Feature</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>age</code></td>
+<td>Age</td>
+</tr>
+<tr class="even">
+<td><code>sex</code></td>
+<td>Sex</td>
+</tr>
+<tr class="odd">
+<td><code>sib_sp</code></td>
+<td>Number of siblings / spouses aboard</td>
+</tr>
+<tr class="even">
+<td><code>parch</code></td>
+<td>Number of parents / children aboard</td>
+</tr>
+<tr class="odd">
+<td><code>fare</code></td>
+<td>Amount paid for the ticket</td>
+</tr>
+<tr class="even">
+<td><code>pc_class</code></td>
+<td>Passenger class</td>
+</tr>
+<tr class="odd">
+<td><code>embarked</code></td>
+<td>Port of embarkation</td>
+</tr>
+</tbody>
+</table>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://github.com/mlr-org/mlr3data'>mlr3data</a></span><span class='op'>)</span>
@@ -2155,7 +2186,7 @@ document.addEventListener('DOMContentLoaded', function() {
 </div>
 </div>
 <h2 id="model">Model</h2>
-<p>We use the logistic regression learner provided by the <code>mlr3learners</code> package.</p>
+<p>We use the logistic regression learner provided by the <a href="https://mlr3learners.mlr-org.com">mlr3learners</a> package.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://mlr3learners.mlr-org.com'>mlr3learners</a></span><span class='op'>)</span>
@@ -2164,7 +2195,7 @@ document.addEventListener('DOMContentLoaded', function() {
 </code></pre>
 </div>
 </div>
-<p>To evaluate the predictive performance, we choose a <code>3-fold-cross-validation</code> and the classification error as the measure.</p>
+<p>To evaluate the predictive performance, we choose a 3-fold cross-validation and the classification error as the measure.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='va'>resampling</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>rsmp</a></span><span class='op'>(</span><span class='st'>"cv"</span>, folds <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span>
@@ -2175,8 +2206,8 @@ document.addEventListener('DOMContentLoaded', function() {
 </div>
 </div>
 <h2 id="classes">Classes</h2>
-<p>The <code>FSelectInstanceSingleCrit</code> class specifies a general feature selection scenario. It includes the <code>ObjectiveFSelect</code> object that encodes the black box objective function which is optimized by a feature selection algorithm. The evaluated feature sets are stored in an <code>ArchiveFSelect</code> object. The archive provides a method for querying the best performing feature set.</p>
-<p>The <code>Terminator</code> subclasses determine when to stop the feature selection. In this example we choose a terminator that stops the feature selection after 10 seconds. The sugar functions <code>trm()</code> and <code>trms()</code> can be used to retrieve terminators from the <code>mlr_terminators</code> dictionary.</p>
+<p>The <a href="https://mlr3fselect.mlr-org.com/reference/FSelectInstanceSingleCrit.html"><code>FSelectInstanceSingleCrit</code></a> class specifies a general feature selection scenario. It includes the <a href="https://mlr3fselect.mlr-org.com/reference/ObjectiveFSelect.html"><code>ObjectiveFSelect</code></a> object that encodes the black box objective function which is optimized by a feature selection algorithm. The evaluated feature sets are stored in an <a href="https://mlr3fselect.mlr-org.com/reference/ArchiveFSelect.html"><code>ArchiveFSelect</code></a> object. The archive provides a method for querying the best performing feature set.</p>
+<p>The <a href="https://bbotk.mlr-org.com/reference/Terminator.html"><code>Terminator</code></a> classes determine when to stop the feature selection. In this example we choose a terminator that stops the feature selection after 10 seconds. The sugar functions <a href="https://bbotk.mlr-org.com/reference/trm.html"><code>trm()</code></a> and <a href="https://bbotk.mlr-org.com/reference/trm.html"><code>trms()</code></a> can be used to retrieve terminators from the <a href="https://bbotk.mlr-org.com/reference/mlr_terminators.html"><code>mlr_terminators</code></a> dictionary.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://mlr3fselect.mlr-org.com'>mlr3fselect</a></span><span class='op'>)</span>
@@ -2209,7 +2240,7 @@ document.addEventListener('DOMContentLoaded', function() {
 &lt;ArchiveFSelect&gt;
 Null data.table (0 rows and 0 cols)</code></pre>
 </div>
-<p>The <code>FSelector</code> subclasses describe the feature selection strategy. The sugar function <code>fs()</code> can be used to retrieve feature selection algorithms from the <code>mlr_fselectors</code> dictionary.</p>
+<p>The <a href="https://mlr3fselect.mlr-org.com/reference/FSelector.html"><code>FSelector</code></a> subclasses describe the feature selection strategy. The sugar function <a href="https://mlr3fselect.mlr-org.com/reference/fs.html"><code>fs()</code></a> can be used to retrieve feature selection algorithms from the <a href="https://mlr3fselect.mlr-org.com/reference/mlr_fselectors.html"><code>mlr_fselectors</code></a> dictionary.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='va'>mlr_fselectors</span>
@@ -2220,7 +2251,7 @@ Keys: design_points, exhaustive_search, genetic_search,
   random_search, rfe, sequential</code></pre>
 </div>
 <h2 id="random-search">Random search</h2>
-<p>Random search randomly draws feature sets and evaluates them in batches. We retrieve the <code>FSelectRandomSearch</code> class with the <code>fs()</code> sugar function and choose the <code>evals</code> terminator. We set the <code>n_evals</code> parameter to <code>10</code> which means that 10 feature sets are evaluated.</p>
+<p>Random search randomly draws feature sets and evaluates them in batches. We retrieve the <a href="https://mlr3fselect.mlr-org.com/reference/FSelectorRandomSearch.html"><code>FSelectorRandomSearch</code></a> class with the <a href="https://mlr3fselect.mlr-org.com/reference/fs.html"><code>fs()</code></a> sugar function and choose <a href="https://bbotk.mlr-org.com/reference/mlr_terminators_evals.html"><code>TerminatorEvals</code></a>. We set the <code>n_evals</code> parameter to <code>10</code> which means that 10 feature sets are evaluated.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='va'>terminator</span> <span class='op'>=</span> <span class='fu'><a href='https://bbotk.mlr-org.com/reference/trm.html'>trm</a></span><span class='op'>(</span><span class='st'>"evals"</span>, n_evals <span class='op'>=</span> <span class='fl'>10</span><span class='op'>)</span>
@@ -2234,7 +2265,7 @@ Keys: design_points, exhaustive_search, genetic_search,
 </code></pre>
 </div>
 </div>
-<p>The feature selection is started by passing the <code>FSelectInstanceSingleCrit</code> object to the <code>$optimize()</code> method of <code>FSelectorRandomSearch</code> which generates the feature sets. These features set are internally passed to the <code>$eval_batch()</code> method of <code>FSelectInstanceSingleCrit</code> which evaluates them with the objective fuction and stores the results in the archive. This general interaction between the objects of <strong>mlr3fselect</strong> stays the same for the different feature selection methods. However, the way how new feature sets are generated differs depending on the chosen <code>FSelector</code> subclass.</p>
+<p>The feature selection is started by passing the <a href="https://mlr3fselect.mlr-org.com/reference/FSelectInstanceSingleCrit.html"><code>FSelectInstanceSingleCrit</code></a> object to the <code>$optimize()</code> method of <a href="https://mlr3fselect.mlr-org.com/reference/FSelectorRandomSearch.html"><code>FSelectorRandomSearch</code></a> which generates the feature sets. These features set are internally passed to the <code>$eval_batch()</code> method of <a href="https://mlr3fselect.mlr-org.com/reference/FSelectInstanceSingleCrit.html"><code>FSelectInstanceSingleCrit</code></a> which evaluates them with the objective function and stores the results in the archive. This general interaction between the objects of <strong>mlr3fselect</strong> stays the same for the different feature selection methods. However, the way how new feature sets are generated differs depending on the chosen <a href="https://mlr3fselect.mlr-org.com/reference/FSelector.html"><code>FSelector</code></a> subclass.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='va'>fselector</span><span class='op'>$</span><span class='fu'>optimize</span><span class='op'>(</span><span class='va'>instance</span><span class='op'>)</span>
@@ -2245,7 +2276,7 @@ Keys: design_points, exhaustive_search, genetic_search,
                            features classif.ce
 1: age,fare,parch,pclass,sex,sib_sp  0.2020202</code></pre>
 </div>
-<p>The <code>ArchiveFSelect</code> stores a <code>data.table</code> which conists of the evaluated feature sets and the corresponding estimated predictive performances.</p>
+<p>The <a href="https://mlr3fselect.mlr-org.com/reference/ArchiveFSelect.html"><code>ArchiveFSelect</code></a> stores a <code>data.table::data.table()</code> which consists of the evaluated feature sets and the corresponding estimated predictive performances.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/as.data.table.html'>as.data.table</a></span><span class='op'>(</span><span class='va'>instance</span><span class='op'>$</span><span class='va'>archive</span><span class='op'>)</span><span class='op'>[</span>, <span class='fl'>1</span><span class='op'>:</span><span class='fl'>8</span><span class='op'>]</span>
@@ -2263,7 +2294,7 @@ Keys: design_points, exhaustive_search, genetic_search,
  9:  TRUE     TRUE  TRUE  TRUE   TRUE  TRUE   TRUE  0.2031425
 10:  TRUE    FALSE  TRUE  TRUE  FALSE FALSE  FALSE  0.3389450</code></pre>
 </div>
-<p>The associated resampling iterations can be accessed in the <code>BenchmarkResult</code> by calling</p>
+<p>The associated resampling iterations can be accessed in the <a href="https://mlr3.mlr-org.com/reference/BenchmarkResult.html"><code>BenchmarkResult</code></a> by calling</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='va'>instance</span><span class='op'>$</span><span class='va'>archive</span><span class='op'>$</span><span class='va'>benchmark_result</span>
@@ -2305,7 +2336,7 @@ Keys: design_points, exhaustive_search, genetic_search,
 1: age,fare,parch,pclass,sex,sib_sp  0.2020202</code></pre>
 </div>
 <h2 id="sequential-forward-selection">Sequential forward selection</h2>
-<p>We try sequential forward selection. We chose the <code>stagnation</code> terminator that stops the feature selection if the predictive performance does not increase anymore.</p>
+<p>We try sequential forward selection. We chose <a href="https://bbotk.mlr-org.com/reference/mlr_terminators_stagnation.html"><code>TerminatorStagnation</code></a> that stops the feature selection if the predictive performance does not increase anymore.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='va'>terminator</span> <span class='op'>=</span> <span class='fu'><a href='https://bbotk.mlr-org.com/reference/trm.html'>trm</a></span><span class='op'>(</span><span class='st'>"stagnation"</span>, iters <span class='op'>=</span> <span class='fl'>5</span><span class='op'>)</span>
@@ -2325,7 +2356,7 @@ Keys: design_points, exhaustive_search, genetic_search,
                   features classif.ce
 1: parch,pclass,sex,sib_sp  0.1964085</code></pre>
 </div>
-<p>The <code>FSelectorSequential</code> object has a special method for displaying the optimization path of the sequential feature selection.</p>
+<p>The <a href="https://mlr3fselect.mlr-org.com/reference/FSelectorSequential.html"><code>FSelectorSequential</code></a> object has a special method for displaying the optimization path of the sequential feature selection.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='va'>fselector</span><span class='op'>$</span><span class='fu'>optimization_path</span><span class='op'>(</span><span class='va'>instance</span><span class='op'>)</span>
@@ -2339,15 +2370,15 @@ Keys: design_points, exhaustive_search, genetic_search,
 5:   5 TRUE    FALSE FALSE  TRUE   TRUE  TRUE   TRUE  0.2065095
 6:   6 TRUE    FALSE  TRUE  TRUE   TRUE  TRUE   TRUE  0.2020202
                                   uhash           timestamp batch_nr
-1: 7649260a-8006-462a-9786-d84f5e9a56bd 2021-03-19 09:14:19        1
-2: eb43a424-9854-4f85-ae56-9d16e4504095 2021-03-19 09:14:21        2
-3: 70d2478b-e798-4016-95c4-9b8dcc398bd2 2021-03-19 09:14:23        3
-4: 116bfafb-fe56-4725-882b-fc6bef64aa6b 2021-03-19 09:14:24        4
-5: 8e9dfe65-9146-4b9f-8110-8ac143db01ea 2021-03-19 09:14:26        5
-6: f252b06b-fdf6-4cb7-b757-63d7ad04cce6 2021-03-19 09:14:26        6</code></pre>
+1: 39921646-a01c-47e1-96ea-c354c758ad95 2021-03-22 05:11:23        1
+2: f7bf78e6-99aa-448a-aad0-0b176a1f8ca1 2021-03-22 05:11:26        2
+3: 17885b1a-b04d-4ebc-8ede-c48eb1c2cd05 2021-03-22 05:11:28        3
+4: 655a73b4-0678-4c6e-8018-8549735e5359 2021-03-22 05:11:29        4
+5: 4fd60f19-fb6c-4b52-bf70-332b9365b9a8 2021-03-22 05:11:31        5
+6: d160be67-c680-4975-b471-4c364aa2ef9c 2021-03-22 05:11:31        6</code></pre>
 </div>
 <h2 id="recursive-feature-elimination">Recursive feature elimination</h2>
-<p>Recrusive feature elemiation utilizes the <code>$importance()</code> method of learners. In each iteration the feature(s) with the lowest importance score is droped. We choose the non-recruvie algorithm (<code>recursive = FALSE</code>) which calculates the feature importance once on the complete feature set. The recrusive version (<code>recursive = TRUE</code>) recomputes the feature importance on the reduced feature set in every iteration.</p>
+<p>Recursive feature elimination utilizes the <code>$importance()</code> method of learners. In each iteration the feature(s) with the lowest importance score is dropped. We choose the non-recursive algorithm (<code>recursive = FALSE</code>) which calculates the feature importance once on the complete feature set. The recursive version (<code>recursive = TRUE</code>) recomputes the feature importance on the reduced feature set in every iteration.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='va'>learner</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>lrn</a></span><span class='op'>(</span><span class='st'>"classif.ranger"</span>, importance <span class='op'>=</span> <span class='st'>"impurity"</span><span class='op'>)</span>
@@ -2381,7 +2412,7 @@ Keys: design_points, exhaustive_search, genetic_search,
 3: FALSE    FALSE FALSE FALSE  FALSE TRUE  FALSE  0.2132435</code></pre>
 </div>
 <h2 id="nested-resampling">Nested resampling</h2>
-<p>It is a common mistake to report the predictive performance estimated on resampling sets during the feature selection as the performance that can be expected from the combined feature selection and model training. The repeated evaluation of the model might leak information about the test sets into the model and thus leads to overfitting and over-optimistic performance results. <a href="https://mlr3book.mlr-org.com/nested-resampling.html">Nested resampling</a> uses an outer and inner resampling to separate the feature selection from the performance estimation of the model. We can use the <code>AutoFselector</code> class for running nested resampling. The <code>AutoFselector</code> essantially combines a given <code>Learner</code> and feature selection method into a <code>Learner</code> with internal automatic feature selection. The inner resampling loop that is used to determine the best feature set is conducted internally each time the <code>AutoFSelector</code> <code>Learner</code> object is trained.</p>
+<p>It is a common mistake to report the predictive performance estimated on resampling sets during the feature selection as the performance that can be expected from the combined feature selection and model training. The repeated evaluation of the model might leak information about the test sets into the model and thus leads to over-fitting and over-optimistic performance results. <a href="https://mlr3book.mlr-org.com/nested-resampling.html">Nested resampling</a> uses an outer and inner resampling to separate the feature selection from the performance estimation of the model. We can use the <a href="https://mlr3fselect.mlr-org.com/reference/AutoFSelector.html"><code>AutoFSelector</code></a> class for running nested resampling. The <a href="https://mlr3fselect.mlr-org.com/reference/AutoFSelector.html"><code>AutoFSelector</code></a> essentially combines a given <a href="https://mlr3.mlr-org.com/reference/Learner.html"><code>Learner</code></a> and feature selection method into a <a href="https://mlr3.mlr-org.com/reference/Learner.html"><code>Learner</code></a> with internal automatic feature selection. The inner resampling loop that is used to determine the best feature set is conducted internally each time the <a href="https://mlr3fselect.mlr-org.com/reference/AutoFSelector.html"><code>AutoFSelector</code></a> <a href="https://mlr3.mlr-org.com/reference/Learner.html"><code>Learner</code></a> object is trained.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='va'>resampling_inner</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>rsmp</a></span><span class='op'>(</span><span class='st'>"cv"</span>, folds <span class='op'>=</span> <span class='fl'>5</span><span class='op'>)</span>
@@ -2397,7 +2428,7 @@ Keys: design_points, exhaustive_search, genetic_search,
 </code></pre>
 </div>
 </div>
-<p>We put the <code>AutoFSelector</code> into a <code>resample()</code> call to get the outer resampling loop.</p>
+<p>We put the <a href="https://mlr3fselect.mlr-org.com/reference/AutoFSelector.html"><code>AutoFSelector</code></a> into a <a href="https://mlr3.mlr-org.com/reference/resample.html"><code>resample()</code></a> call to get the outer resampling loop.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='va'>resampling_outer</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>rsmp</a></span><span class='op'>(</span><span class='st'>"cv"</span>, folds <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span>
@@ -2406,7 +2437,7 @@ Keys: design_points, exhaustive_search, genetic_search,
 </code></pre>
 </div>
 </div>
-<p>The aggregated performance of all outer resampling iterations is the unbiased predictive performance we can expected from the logisitic regression model with an optimized feature set found by sequential selection.</p>
+<p>The aggregated performance of all outer resampling iterations is the unbiased predictive performance we can expected from the logistic regression model with an optimized feature set found by sequential selection.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='va'>rr</span><span class='op'>$</span><span class='fu'>aggregate</span><span class='op'>(</span><span class='op'>)</span>
@@ -2414,6 +2445,21 @@ Keys: design_points, exhaustive_search, genetic_search,
 </div>
 <pre><code>classif.ce 
  0.1840629 </code></pre>
+</div>
+<p>We check whether the feature sets that were selected in the inner resampling are stable. The selected feature sets should not differ too much. We might observe unstable models in this example because the small data set and the low number of resampling iterations might introduces too much randomness. Usually, we aim for the selection of similar feature sets for all outer training sets.</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/do.call.html'>do.call</a></span><span class='op'>(</span><span class='va'>rbind</span>, <span class='fu'><a href='https://rdrr.io/r/base/lapply.html'>lapply</a></span><span class='op'>(</span><span class='va'>rr</span><span class='op'>$</span><span class='va'>learners</span>, <span class='kw'>function</span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span> <span class='va'>x</span><span class='op'>$</span><span class='va'>fselect_result</span><span class='op'>)</span><span class='op'>)</span>
+</code></pre>
+</div>
+<pre><code>    age embarked  fare parch pclass  sex sib_sp
+1: TRUE     TRUE  TRUE FALSE   TRUE TRUE   TRUE
+2: TRUE     TRUE FALSE FALSE   TRUE TRUE   TRUE
+3: TRUE     TRUE FALSE  TRUE  FALSE TRUE   TRUE
+                              features classif.ce
+1: age,embarked,fare,pclass,sex,sib_sp  0.1599202
+2:      age,embarked,pclass,sex,sib_sp  0.1497650
+3:       age,embarked,parch,sex,sib_sp  0.1902293</code></pre>
 </div>
 <p>Next, we want to compare the predictive performances estimated on the outer resampling to the inner resampling. Significantly lower predictive performances on the outer resampling indicate that the models with the optimized feature sets overfit the data.</p>
 <div class="layout-chunk" data-layout="l-body">
@@ -2434,22 +2480,7 @@ Keys: design_points, exhaustive_search, genetic_search,
 2:         2 &lt;PredictionClassif[19]&gt;  0.2289562
 3:         3 &lt;PredictionClassif[19]&gt;  0.1582492</code></pre>
 </div>
-<p>We check whether the feature sets that were selected in the inner resampling are stable. The selected featute sets should not differ too much. We might observe unstable models in this example because the small data set and the low number of resampling iterations might introduces too much randomness. Usually, we aim for the selection of similiar feature sets for all outer training sets.</p>
-<div class="layout-chunk" data-layout="l-body">
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/do.call.html'>do.call</a></span><span class='op'>(</span><span class='va'>rbind</span>, <span class='fu'><a href='https://rdrr.io/r/base/lapply.html'>lapply</a></span><span class='op'>(</span><span class='va'>rr</span><span class='op'>$</span><span class='va'>learners</span>, <span class='kw'>function</span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span> <span class='va'>x</span><span class='op'>$</span><span class='va'>fselect_result</span><span class='op'>)</span><span class='op'>)</span>
-</code></pre>
-</div>
-<pre><code>    age embarked  fare parch pclass  sex sib_sp
-1: TRUE     TRUE  TRUE FALSE   TRUE TRUE   TRUE
-2: TRUE     TRUE FALSE FALSE   TRUE TRUE   TRUE
-3: TRUE     TRUE FALSE  TRUE  FALSE TRUE   TRUE
-                              features classif.ce
-1: age,embarked,fare,pclass,sex,sib_sp  0.1599202
-2:      age,embarked,pclass,sex,sib_sp  0.1497650
-3:       age,embarked,parch,sex,sib_sp  0.1902293</code></pre>
-</div>
-<p>The archive of the <code>AutoFSelector</code> gives us all evaluated hyperparameter configurations (i.e. feature sets) with the associated predictive performances.</p>
+<p>The archive of the <a href="https://mlr3fselect.mlr-org.com/reference/AutoFSelector.html"><code>AutoFSelector</code></a> gives us all evaluated hyperparameter configurations (i.e. feature sets) with the associated predictive performances.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='va'>rr</span><span class='op'>$</span><span class='va'>learners</span><span class='op'>[[</span><span class='fl'>1</span><span class='op'>]</span><span class='op'>]</span><span class='op'>$</span><span class='va'>archive</span><span class='op'>$</span><span class='va'>data</span><span class='op'>[</span>, <span class='fl'>1</span><span class='op'>:</span><span class='fl'>8</span><span class='op'>]</span>
