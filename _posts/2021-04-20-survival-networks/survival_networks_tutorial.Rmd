@@ -1,0 +1,265 @@
+---
+title: Survival Networks with mlr3proba
+description: |
+  A demonstration of training, tuning, and comparing survival networks.
+categories:
+  - mlr3proba
+  - survival analysis
+  - tuning
+  - optimization
+  - nested resampling
+author:
+  - name: Raphael Sonabend
+date: 04-20-2021
+output:
+  distill::distill_article:
+    self_contained: false
+bibliography: bibliography.bib
+---
+
+```{r setup, include=FALSE}
+ knitr::opts_chunk$set(
+  echo = TRUE,
+  R.options = list(width = 80)
+)
+library(survivalmodels)
+library(mlr3book)
+py_pkg <- function(pkg) sprintf("[pycox](https://pypi.org/project/%s/)", pkg)
+```
+
+I have received many questions about survival neural networks (‘survival networks’) in R, ranging from “is this even possible?” to “how do I install Python in R?” and “how can I tune these models?”. If you are an R user with an interest in survival networks then this is the article for you! This is not a tutorial of how to use the relevant packages but a demonstration to answer these questions.
+
+This is an advanced demonstration and I’m going to assume you know: i) what survival analysis is; ii) what neural networks are (and common hyper-parameters); iii) basic machine learning (ML) methods like resampling and tuning. I’m happy to cover these topics fully in future articles if requested.
+
+In this article we will cover how to: i) install Python modules in R; ii) use models implemented in `r cran_pkg("survivalmodels")`[@pkgsurvivalmodels] with `r mlr_pkg("mlr3proba")`[@pkgmlr3proba] ; iii) tune models with `r mlr_pkg("mlr3tuning")`[@pkgmlr3tuning] and preprocess data with `r mlr_pkg("mlr3pipelines")`[@pkgmlr3pipelines]; iv) benchmark and compare models in `r mlr_pkg("mlr3proba")`; v) analyse results in `r mlr_pkg("mlr3benchmark")`[@pkgmlr3benchmark]. Many of these packages live in the mlr3 family and if you want to learn more about them I’d recommend starting with the mlr3book[@pkgmlr3book].
+
+The code in this demonstration is a ‘toy’ example with choices made to run the code quickly on my very old laptop, all models are expected to perform poorly.
+
+Let’s get deep learning!
+
+# Installing Packages
+
+We will be using several packages, to follow along make sure you install the following:
+
+```{r install.packages, eval = FALSE}
+install.packages(c("ggplot2", "mlr3benchmark", "mlr3pipelines", "mlr3proba", 
+                   "mlr3tuning", "survivalmodels"))
+remotes::install_github("mlr-org/mlr3extralearners")
+```
+
+I have installed the following versions:
+```{r version, echo=FALSE}
+vapply(sort(c("ggplot2", "mlr3proba", "mlr3tuning", "mlr3pipelines", 
+              "mlr3benchmark", "survivalmodels", "reticulate", 
+              "mlr3extralearners")), 
+       function(x) as.character(packageVersion(x)), character(1))
+```
+
+# survivalmodels
+
+The package `r cran_pkg("survivalmodels")` currently contains the neural networks:
+
+* CoxTime[@Kvamme2019a]
+* DeepHit[@Lee2018a]
+* DeepSurv[@Katzman2018]
+* Logistic-Hazard[@Gensheimer2019] [@Kvamme2019]
+* PCHazard[@Kvamme2019]
+* DNNSurv[@Zhao2020]
+
+The first five of these use `r cran_pkg("reticulate")` [@pkgreticulate] to connect the great Python `r py_pkg("pycox")` [@pkgpycox] package, written by Håvard Kvamme, this means you can use neural networks in R with the speed of Python. DNNSurv uses the R `r cran_pkg("keras")` [@pkgkeras] package.
+
+In this article, we’re just going to look at the first five as they are better established in the literature and they have an identical interface, which simplifies tuning as we will see below. No description of the networks is provided in this article but if this is requested then I am happy to describe these in detail in future posts.
+
+## Using Python in R
+
+To use the Python models in `r cran_pkg("survivalmodels")` you need to set up a Miniconda environment within R and install the required Python modules. Installing the required modules is possible with functions from `r cran_pkg("survivalmodels")`:
+
+```{r installing survivalmodels, eval = FALSE}
+library(survivalmodels)
+
+install_pycox(pip = TRUE, install_torch = TRUE)
+install_keras(pip = TRUE, install_tensorflow = TRUE)
+```
+
+`install_pycox` uses `reticulate::py_install` to install the Python packages `r py_pkg("pycox")` and optionally `r py_pkg("torch")`[@pkgtorch] (`install_torch = TRUE`). `install_keras` will install `r py_pkg("keras")` and optionally `r py_pkg("tensorflow")`[@pkgtensorflow] (`install_tensorflow = TRUE`).
+
+## Setting Seeds
+
+Ensuring reproducible results from models implemented in Python is slightly more tricky than usual as seeds have to be set in multiple places. `r cran_pkg("survivalmodels")` simplifies this with one function called, `set_seed`.
+
+```{r seed}
+set_seed(1234)
+```
+
+# mlr3proba
+
+To run these models once they’re installed, we’re going to use a different interface. `r cran_pkg("survivalmodels")` has limited functionality, which is okay for basic model fitting/predicting, but neural networks typically require data pre-processing and model tuning, so instead we’re going to use `r mlr_pkg("mlr3proba")`, which is part of the `r mlr_pkg("mlr3")`[@pkgmlr3] family of packages and includes functionality for probabilistic supervised learning, of which survival analysis is a part of. `r mlr_pkg("mlr3")` packages use the R6[@pkgR6] interface for object-oriented machine learning in R. Full tutorials for mlr3 can be found in the `r mlr_pkg("mlr3book")` and there is also a chapter for survival analysis with `r mlr_pkg("mlr3proba")`[@pkgmlr3booksurv].
+
+Now let’s set up our experiment!
+
+## Survival data
+
+The first thing we need to do is get some survival datasets for training our models, in `r mlr_pkg("mlr3proba")` datasets are saved in tasks which include information about features and targets. We will use one task that comes with `r mlr_pkg("mlr3proba")`, `whas`, and one which we’ll set up ourselves (though is also already available in `r mlr_pkg("mlr3proba")`, this is just for example).
+
+```{r tasks,results='hide'}
+library(mlr3)
+library(mlr3proba)
+
+## get the `whas` task from mlr3proba
+whas <- tsk("whas")
+
+## create our own task from the rats dataset
+rats_data <- survival::rats
+## convert characters to factors
+rats_data$sex <- factor(rats_data$sex, levels = c("f", "m"))
+rats <- TaskSurv$new("rats", rats_data, time = "time", event = "status")
+
+## combine in list
+tasks <- list(whas, rats)
+```
+
+## Getting and tuning learners
+
+Now the part you are here for! We are going to train and tune the Pycox neural networks in `r cran_pkg("survivalmodels")` (all but DNNSurv). Tuning is handled by the `r mlr_pkg("mlr3tuning")` package. We are not going to specify a custom architecture for the models but will instead use the defaults, if you are familiar with PyTorch then you have the option to create your own architecture if you prefer by passing this to the custom_net parameter in the models.
+
+### Hyper-parameter configurations
+
+Training and tuning neural networks is an art but for this article, we are keeping it simple. We’re going to tune the neural networks with the following configurations:
+
+* Dropout fraction tuned over [0, 1]
+* Weight decay over [0, 0.5]
+* Learning rate over [0, 1]
+* Number of nodes in a layer over {1,…,32}
+* Number of hidden layers over {1,…,4}
+
+To set this up we use the `r mlr_pkg("paradox")`[@pkgparadox] package (also part of `r mlr_pkg("mlr3")`) to create the hyper-parameter search space. All Pycox learners in `r cran_pkg("survivalmodels")` have an identical parameter interface so only one search space has to be provided. In `r cran_pkg("survivalmodels")`, the number of nodes, `num_nodes`, is specified as a vector of any length, which is not directly tunable. Therefore we instead separately tune over the number of nodes in a layer, `nodes`, and the number of layers, `k`, then provide a transformation to combine the two.
+
+```{r search space,results='hide'}
+library(paradox)
+search_space = ps(
+  # p_dbl for numeric valued parameters
+  dropout = p_dbl(lower = 0, upper = 1),
+  weight_decay = p_dbl(lower = 0, upper = 0.5),
+  learning_rate = p_dbl(lower = 0, upper = 1),
+  
+  # p_int for integer valued parameters
+  nodes = p_int(lower = 1, upper = 32),
+  k = p_int(lower = 1, upper = 4)
+)
+
+search_space$trafo = function(x, param_set) {
+  x$num_nodes = rep(x$nodes, x$k)
+  x$nodes = x$k = NULL
+  return(x)
+}
+```
+
+Notice that in our transformation we assume the same number of nodes per layer, this is a fairly usual assumption but one could consider more advanced transformations.
+
+We now wrap the learners in an `AutoTuner`, which allows the learner to be easily tuned inside the benchmark experiment. As we are tuning multiple similar learners, we can create a function that makes creating the AutoTuner easier. For tuning we use: 2/3 split holdout, c-index optimisation, and 2 iteration random search. These settings should not be used in practice and are just to make things run faster for this demonstration, in practice I usually recommend 3-fold nested cross-validation, `rsmp("cv", folds = 3)`, and 60 iteration random search[@Bergstra2012], `trm("evals", n_evals = 60)`.
+
+```{r AutoTuner}
+library(mlr3tuning)
+
+create_autotuner <- function(learner) {
+  AutoTuner$new(
+  learner = learner,
+  search_space = search_space,
+  resampling = rsmp("holdout"),
+  measure = msr("surv.cindex"),
+  terminator = trm("evals", n_evals = 2),
+  tuner = tnr("random_search"))
+}
+```
+
+Now let’s get our learners and apply our function. For all learners we’re going to set the following hyper-parameters:
+
+* 30% of nested training data will be held-back as validation data for early_stopping, `frac = 0.3, early_stopping = TRUE`
+* Adam optimizer, `optimizer = “adam"`
+* A maximum of 10 epochs, `epochs = 10`
+
+As we are using early-stopping the number of epochs would usually be massively increased (say to 100 minimum) but again it’s reduced here to run quicker. All other hyper-parameters use the model defaults.
+
+```{r get learners,results='hide'}
+## learners are stored in mlr3extralearners
+library(mlr3extralearners)
+
+## load learners
+learners <- lrns(paste0("surv.", c("coxtime", "deephit", "deepsurv", 
+                                   "loghaz", "pchazard")),
+                 frac = 0.3, early_stopping = TRUE, epochs = 10,
+                 optimizer = "adam"
+)
+ 
+# apply our function
+learners <- lapply(learners, create_autotuner)
+```
+
+### Pre-processing
+
+All neural networks require some data pre-processing. This is made simple with the `r mlr_pkg("mlr3pipelines")` package and in particular the `encode` and `scale` pipeops, which respectively perform one-hot encoding and feature standardization (other methods available by changing parameters). Again we’ll make a function that can be applied to all our learners.
+
+```{r mlr3pipelines}
+library(mlr3pipelines)
+
+create_pipeops <- function(learner) {
+  po("encode") %>>% po("scale") %>>% po("learner", learner)
+}
+
+# apply our function
+learners <- lapply(learners, create_pipeops)
+```
+
+### Benchmark
+
+And we’re ready! For our experiment we’re going to use 3-fold cross-validation but usually 5-fold cross-validation would be preferred, `rsmp("cv", folds = 5)` . For comparison we’re also going to add Kaplan-Meier[@KaplanMeier1958] and Cox PH[@Cox1972] learners to the experiment. We will aggregate our benchmark results with Harrell’s C-index[@Harrell1982] and the Integrated Graf Score[@Graf1999] (many other measures are also available).
+
+```{r benchmark,results='hide'}
+## select holdout as the resampling strategy
+resampling <- rsmp("cv", folds = 3)
+
+## add KM and CPH
+learners <- c(learners, lrns(c("surv.kaplan", "surv.coxph")))
+design <- benchmark_grid(tasks, learners, resampling)
+bm <- benchmark(design)
+```
+
+We can aggregate results by different measures:
+
+```{r aggregate}
+## Concordance index and Integrated Graf Score
+msrs <- msrs(c("surv.cindex", "surv.graf"))
+bm$aggregate(msrs)[, c(3, 4, 7, 8)]
+```
+In our toy demonstration we can tentatively conclude from these results that Cox PH is the best performing and DeepHit is the worst performing.
+
+## Analysing results
+
+As we have run our models on multiple independent datasets, we can compare our results in more detail with `r mlr_pkg("mlr3benchmark")`. The commented code below is just a showcase of what is possible but no detail is provided (let me know if you’re interested in this for a future tutorial!).
+
+```{r mlr3benchmark}
+library(mlr3benchmark)
+
+## create mlr3benchmark object
+bma <- as.BenchmarkAggr(bm, 
+                        measures = msrs(c("surv.cindex", "surv.graf")))
+
+## run global Friedman test
+bma$friedman_test()
+```
+
+The Friedman test results indicate there are no significant differences between the models with respect to either measure (assuming p ≤ 0.05 is significant). For now let’s say models are significantly different if p ≤ 0.1 (I don’t recommend this is in general) just so we can take a look at a critical difference diagram[@Demsar2006] to compare these models.
+
+```{r autoplots}
+## load ggplot2 for autoplots
+library(ggplot2)
+
+## critical difference diagrams for IGS
+autoplot(bma, meas = "graf", type = "cd", ratio = 1/3, p.value = 0.1)
+```
+
+The results show that no model outperforms the Kaplan-Meier baseline and our analysis is complete (not surprising with this toy set-up!).
+
+# Summary
+
+In this demonstration we used neural networks implemented in Python and interfaced through `r cran_pkg("survivalmodels")`. We used the `r mlr_pkg("mlr3proba")` interface to load these models and get some survival tasks. We used `r mlr_pkg("mlr3tuning")` to set-up hyper-parameter configurations and tuning controls, and `r mlr_pkg("mlr3pipelines")` for data pre-processing. Finally we used `r mlr_pkg("mlr3benchmark")` to analyse the results across multiple datasets. I hope this article demonstrates how the mlr3 interface makes it simpler to select, tune, and compare models from `r cran_pkg("survivalmodels")`.
