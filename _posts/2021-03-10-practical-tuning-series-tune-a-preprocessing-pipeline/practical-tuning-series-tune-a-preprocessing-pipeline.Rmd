@@ -24,7 +24,7 @@ output:
     self_contained: false
 ---
 
-```{r setup, include=FALSE}
+```{r practical-tuning-series-tune-a-preprocessing-pipeline-001, include=FALSE}
  knitr::opts_chunk$set(
   echo = TRUE,
   R.options = list(width = 80)
@@ -53,7 +53,7 @@ Finally, nested resampling is used to compare the performance of two imputation 
 
 We load the `r mlr_pkg("mlr3verse")`  package which pulls in the most important packages for this example.
 
-```{r, message = FALSE}
+```{r practical-tuning-series-tune-a-preprocessing-pipeline-002, message = FALSE}
 library(mlr3verse)
 ```
 
@@ -61,7 +61,7 @@ We initialize the random number generator with a fixed seed for reproducibility,
 The [`lgr`](https://mlr3book.mlr-org.com/logging.html) package is used for logging in all `r mlr_pkg("mlr3")` packages.
 The `r mlr_pkg("mlr3")` logger prints the logging messages from the base package, whereas the `r mlr_pkg("bbotk")`  logger is responsible for logging messages from the optimization packages (e.g. `r mlr_pkg("mlr3tuning")` ).
 
-```{r}
+```{r practical-tuning-series-tune-a-preprocessing-pipeline-003}
 set.seed(7832)
 lgr::get_logger("mlr3")$set_threshold("warn")
 lgr::get_logger("bbotk")$set_threshold("warn")
@@ -71,7 +71,7 @@ In this example, we use the [Pima Indians Diabetes data set](https://mlr3.mlr-or
 The patients are characterized by 8 numeric features of which some have missing values.
 We alter the data set by categorizing the feature `pressure` (blood pressure) into the categories `"low"`, `"mid"`, and `"high"`.
 
-```{r}
+```{r practical-tuning-series-tune-a-preprocessing-pipeline-004}
 # retrieve the task from mlr3
 task = tsk("pima")
 
@@ -89,7 +89,7 @@ skimr::skim(task$data())
 
 We choose the xgboost algorithm from the `r cran_pkg("xgboost")` package as learner.
 
-```{r}
+```{r practical-tuning-series-tune-a-preprocessing-pipeline-005}
 learner = lrn("classif.xgboost", nrounds = 100, id = "xgboost", verbose = 0)
 ```
 
@@ -97,7 +97,7 @@ learner = lrn("classif.xgboost", nrounds = 100, id = "xgboost", verbose = 0)
 
 The task has missing data in five columns.
 
-```{r}
+```{r practical-tuning-series-tune-a-preprocessing-pipeline-006}
 round(task$missings() / task$nrow, 2)
 ```
 
@@ -105,13 +105,13 @@ The `xgboost` learner has an internal method for handling missing data but some 
 We will try to beat the internal method in terms of predictive performance.
 The `r mlr_pkg("mlr3pipelines")` package offers various methods to impute missing values.
 
-```{r}
+```{r practical-tuning-series-tune-a-preprocessing-pipeline-007}
 mlr_pipeops$keys("^impute")
 ```
 
 We choose the `r ref("PipeOpImputeOOR")` that adds the new factor level `".MISSING".` to factorial features and imputes numerical features by constant values shifted below the minimum (default) or above the maximum.
 
-```{r}
+```{r practical-tuning-series-tune-a-preprocessing-pipeline-008}
 imputer = po("imputeoor")
 print(imputer)
 ```
@@ -119,14 +119,14 @@ print(imputer)
 As the output suggests, the in- and output of this pipe operator is a `r ref("Task")` for both the training and the predict step.
 We can manually train the pipe operator to check its functionality:
 
-```{r}
+```{r practical-tuning-series-tune-a-preprocessing-pipeline-009}
 task_imputed = imputer$train(list(task))[[1]]
 task_imputed$missings()
 ```
 
 Let's compare an observation with missing values to the observation with imputed observation.
 
-```{r}
+```{r practical-tuning-series-tune-a-preprocessing-pipeline-010}
 rbind(
   task$data()[8,],
   task_imputed$data()[8,]
@@ -144,13 +144,13 @@ For this, we argument the `xgboost` learner with automatic factor encoding.
 The `r ref("PipeOpEncode")` encodes factor columns with one of six methods.
 In this example, we use `one-hot` encoding which creates a new binary column for each factor level.
 
-```{r}
+```{r practical-tuning-series-tune-a-preprocessing-pipeline-011}
 factor_encoding = po("encode", method = "one-hot")
 ```
 
 We manually trigger the encoding on the task.
 
-```{r}
+```{r practical-tuning-series-tune-a-preprocessing-pipeline-012}
 factor_encoding$train(list(task))
 ```
 
@@ -163,7 +163,7 @@ However, if we do this before resampling, information from the test can leak int
 To avoid this, we add the preprocessing steps to the `r ref("Learner")` itself, creating a `r ref("GraphLearner")`.
 For this, we create a `r ref("Graph")` first.
 
-```{r}
+```{r practical-tuning-series-tune-a-preprocessing-pipeline-013}
 graph = po("encode") %>>%
   po("imputeoor") %>>%
   learner
@@ -172,7 +172,7 @@ plot(graph)
 
 We wrap the `r ref("Graph")` into `r ref("GraphLearner")` which allows us to use the graph like a normal learner.
 
-```{r}
+```{r practical-tuning-series-tune-a-preprocessing-pipeline-014}
 graph_learner = GraphLearner$new(graph)
 
 # short learner id for printing
@@ -183,13 +183,13 @@ The `r ref("GraphLearner")` can be trained and used for making predictions.
 Instead of calling `$train()` or `$predict()` manually, we will directly use it for resampling.
 We choose a 3-fold cross-validation as the resampling strategy.
 
-```{r, results = 'hide'}
+```{r practical-tuning-series-tune-a-preprocessing-pipeline-015, results = 'hide'}
 resampling = rsmp("cv", folds = 3)
 
 rr = resample(task = task, learner = graph_learner, resampling = resampling)
 ```
 
-```{r}
+```{r practical-tuning-series-tune-a-preprocessing-pipeline-016}
 rr$score()
 ```
 
@@ -215,31 +215,31 @@ Let's have a look at the parameter set of the `r ref("GraphLearner")`.
 It consists of the `xgboost` hyperparameters, and additionally, the parameter of the  `r ref("PipeOp")` `encode` and `imputeoor`.
 All hyperparameters are prefixed with the id of the respective `r ref("PipeOp")` or learner.
 
-```{r}
+```{r practical-tuning-series-tune-a-preprocessing-pipeline-017}
 print(graph_learner$param_set)
 ```
 
 We will tune the encode method.
 
-```{r}
+```{r practical-tuning-series-tune-a-preprocessing-pipeline-018}
 graph_learner$param_set$values$encode.method = to_tune(c("one-hot", "treatment"))
 ```
 
 We define a tuning instance and use grid search since we want to try all encode methods.
 
-```{r, results = 'hide'}
+```{r practical-tuning-series-tune-a-preprocessing-pipeline-019, results = 'hide'}
 instance = tune(
-  method = "grid_search", 
-  task = task, 
-  learner = graph_learner, 
-  resampling = resampling, 
+  method = "grid_search",
+  task = task,
+  learner = graph_learner,
+  resampling = resampling,
   measure = measure
 )
 ```
 
 The archive shows us the performance of the model with different encoding methods.
 
-```{r}
+```{r practical-tuning-series-tune-a-preprocessing-pipeline-020}
 print(instance$archive)
 ```
 
@@ -248,7 +248,7 @@ print(instance$archive)
 We create one `r ref("GraphLearner")` with `imputeoor` and test it against a `r ref("GraphLearner")` that uses the internal imputation method of `xgboost`.
 Applying nested resampling ensures a fair comparison of the predictive performances.
 
-```{r}
+```{r practical-tuning-series-tune-a-preprocessing-pipeline-021}
 graph_1 = po("encode") %>>%
   learner
 graph_learner_1 = GraphLearner$new(graph_1)
@@ -265,7 +265,7 @@ at_1 = AutoTuner$new(
 )
 ```
 
-```{r}
+```{r practical-tuning-series-tune-a-preprocessing-pipeline-022}
 graph_2 = po("encode") %>>%
   po("imputeoor") %>>%
   learner
@@ -285,11 +285,11 @@ at_2 = AutoTuner$new(
 
 We run the benchmark.
 
-```{r, echo = FALSE}
+```{r practical-tuning-series-tune-a-preprocessing-pipeline-023, echo = FALSE}
 bmr = readRDS("data/bmr_1.rda")
 ```
 
-```{r, eval = FALSE}
+```{r practical-tuning-series-tune-a-preprocessing-pipeline-024, eval = FALSE}
 resampling_outer = rsmp("cv", folds = 3)
 design = benchmark_grid(task, list(at_1, at_2), resampling_outer)
 
@@ -298,7 +298,7 @@ bmr = benchmark(design, store_models = TRUE)
 
 We compare the aggregated performances on the outer test sets which give us an unbiased performance estimate of the `r ref("GraphLearner")`s with the different encoding methods.
 
-```{r}
+```{r practical-tuning-series-tune-a-preprocessing-pipeline-025}
 bmr$aggregate()
 autoplot(bmr)
 ```
@@ -310,7 +310,7 @@ Otherwise, comparing preprocessing steps is not feasible and can lead to wrong c
 
 We train the chosen `r ref("GraphLearner")` with the `r ref("AutoTuner")` to get a final model with optimized hyperparameters.
 
-```{r, eval = FALSE}
+```{r practical-tuning-series-tune-a-preprocessing-pipeline-026, eval = FALSE}
 at_2$train(task)
 ```
 
@@ -319,5 +319,5 @@ The pipeline ensures that the preprocessing is always a part of the train and pr
 
 # Resources
 
-The [mlr3book](https://mlr3book.mlr-org.com/) includes chapters on [pipelines](https://mlr3book.mlr-org.com/pipelines.html) and [hyperparameter tuning](https://mlr3book.mlr-org.com/tuning.html). 
+The [mlr3book](https://mlr3book.mlr-org.com/) includes chapters on [pipelines](https://mlr3book.mlr-org.com/pipelines.html) and [hyperparameter tuning](https://mlr3book.mlr-org.com/tuning.html).
 The [mlr3cheatsheets](https://cheatsheets.mlr-org.com/) contain frequently used commands and workflows of mlr3.

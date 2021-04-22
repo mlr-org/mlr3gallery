@@ -21,7 +21,7 @@ output:
 
 ## Intro
 
-```{r, echo = FALSE}
+```{r 2020-04-23-pipelines-selectors-branches-001, echo = FALSE}
 library(knitr)
 opts_chunk$set(R.options = list(width = 100),
                echo = TRUE)
@@ -46,7 +46,7 @@ This post covers:
 
 ## Prerequisites
 
-```{r}
+```{r 2020-04-23-pipelines-selectors-branches-002}
 library(mlr3)
 library(mlr3pipelines)
 library(mlr3tuning)
@@ -55,7 +55,7 @@ library(paradox)
 
 The [Pima Indian Diabetes classification task](https://mlr3.mlr-org.com/reference/mlr_tasks_pima.html) will be used.
 
-```{r}
+```{r 2020-04-23-pipelines-selectors-branches-003}
 pima_tsk = tsk("pima")
 pima_tsk$data()
 skimr::skim(pima_tsk$data())
@@ -65,7 +65,7 @@ skimr::skim(pima_tsk$data())
 
 Several features of the `pima` task have missing values:
 
-```{r}
+```{r 2020-04-23-pipelines-selectors-branches-004}
 pima_tsk$missings()
 ```
 
@@ -81,7 +81,7 @@ In the following subsections, we show two approaches to implement this.
 
 Using the `affect_columns` argument of a `PipeOp` to define the variables on which a `PipeOp` will operate with an appropriate [`selector`](https://mlr3pipelines.mlr-org.com/reference/Selector.html) function:
 
-```{r}
+```{r 2020-04-23-pipelines-selectors-branches-005}
 # imputes values based on histogram
 hist_imp = po("imputehist",
               param_vals = list(affect_columns = selector_name(c("glucose", "mass", "pressure"))))
@@ -94,7 +94,7 @@ miss_ind = po("missind")
 
 When `PipeOp`s are constructed this way, they will perform the specified preprocessing step on the appropriate features and pass all the input features to the subsequent steps:
 
-```{r}
+```{r 2020-04-23-pipelines-selectors-branches-006}
 # no missings in "glucose", "mass" and "pressure"
 hist_imp$train(list(pima_tsk))[[1]]$missings()
 # no missings in "insulin" and "triceps"
@@ -106,7 +106,7 @@ Here, `hist_imp` will impute the features "glucose", "mass" and "pressure", and 
 In each preprocessing step, all the input features are passed to the next step.
 In the end, we obtain a data set without missing values:
 
-```{r, fig.height = 6, fig.width = 6}
+```{r 2020-04-23-pipelines-selectors-branches-007, fig.height = 6, fig.width = 6}
 # combine the two impuation methods
 impute_graph = hist_imp %>>% median_imp
 impute_graph$plot(html = FALSE)
@@ -115,7 +115,7 @@ impute_graph$train(pima_tsk)[[1]]$missings()
 
 The [`missind`](https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_missind.html) operator replaces features with missing values with a missing value indicator:
 
-```{r}
+```{r 2020-04-23-pipelines-selectors-branches-008}
 miss_ind$train(list(pima_tsk))[[1]]$data()
 ```
 
@@ -123,7 +123,7 @@ Obviously, this step can not be applied to the already imputed data as there are
 If we want to combine the previous two imputation steps with a third step that adds missing value indicators, we would need to [`copy`](https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_copy.html) the data two times and supply the first copy to `impute_graph` and the second copy to `miss_ind` using [`gunion`](https://mlr3pipelines.mlr-org.com/reference/gunion.html).
 Finally, the two outputs can be combined with [`featureunion`](https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_featureunion.html):
 
-```{r, fig.height = 6, fig.width = 6}
+```{r 2020-04-23-pipelines-selectors-branches-009, fig.height = 6, fig.width = 6}
 impute_missind = po("copy", 2) %>>%
   gunion(list(impute_graph, miss_ind)) %>>%
   po("featureunion")
@@ -135,7 +135,7 @@ impute_missind$train(pima_tsk)[[1]]$data()
 
 We can use the [`select`](https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_select.html) `PipeOp` to select the appropriate features and then apply the desired impute `PipeOp` on them:
 
-```{r, fig.height = 6, fig.width = 6}
+```{r 2020-04-23-pipelines-selectors-branches-010, fig.height = 6, fig.width = 6}
 hist_imp2 = po("select",
   selector = selector_name(c("glucose", "mass", "pressure")),
   id = "slct1") %>>% # unique id so we can combine it in a pipeline with other select PipeOps
@@ -155,7 +155,7 @@ To reproduce the result of the fist example (1.), we need to copy the data four 
 The fourth copy is required to select the features without missing values and to append it to the final result.
 We can do this as follows:
 
-```{r, fig.height = 6, fig.width = 6}
+```{r 2020-04-23-pipelines-selectors-branches-011, fig.height = 6, fig.width = 6}
 other_features = pima_tsk$feature_names[pima_tsk$missings()[-1] == 0]
 
 impute_missind2 = po("copy", 4) %>>%
@@ -173,7 +173,7 @@ impute_missind2$train(pima_tsk)[[1]]$data()
 Note that when there is one input channel, it is automatically copied as many times as needed for the downstream `PipeOp`s.
 In other words, the code above works also without `po("copy", 4)`:
 
-```{r}
+```{r 2020-04-23-pipelines-selectors-branches-012}
 impute_missind3 = gunion(list(hist_imp2,
   median_imp2,
   miss_ind,
@@ -192,7 +192,7 @@ Maybe it would have been better to just use [`imputemedian`](https://mlr3pipelin
 We could investigate this assumption by adding an alternative path to the graph with the mentioned `imputemedian`.
 This is possible using the ["branch"](https://mlr3pipelines.mlr-org.com/reference/branch.html) `PipeOp`:
 
-```{r, fig.height = 7, fig.width = 7}
+```{r 2020-04-23-pipelines-selectors-branches-013, fig.height = 7, fig.width = 7}
 median_imp3 = po("imputemedian", id = "simple_median") # add the id so it does not clash with `median_imp`
 
 branches = c("impute_missind", "simple_median") # names of the branches
@@ -208,7 +208,7 @@ graph_branch$plot(html = FALSE)
 
 To finalize the graph, we combine it with a rpart learner:
 
-```{r, fig.height = 7, fig.width = 7}
+```{r 2020-04-23-pipelines-selectors-branches-014, fig.height = 7, fig.width = 7}
 rpart_lrn = lrn("classif.rpart")
 
 grph = graph_branch %>>%
@@ -219,13 +219,13 @@ grph$plot(html = FALSE)
 
 To define the parameters to be tuned, we first check the available ones in the graph:
 
-```{r}
+```{r 2020-04-23-pipelines-selectors-branches-015}
 grph$param_set
 ```
 
 We decide to jointly tune the "branch.selection", "classif.rpart.cp" and "classif.rpart.minbucket" hyperparameters:
 
-```{r}
+```{r 2020-04-23-pipelines-selectors-branches-016}
 ps = ParamSet$new(
   list(
     ParamFct$new("branch.selection", levels = c("impute_missind", "simple_median")),
@@ -236,7 +236,7 @@ ps = ParamSet$new(
 
 In order to tune the graph, it needs to be converted to a learner:
 
-```{r}
+```{r 2020-04-23-pipelines-selectors-branches-017}
 grph_lrn =  GraphLearner$new(grph)
 
 cv3 = rsmp("cv", folds = 3)
@@ -262,7 +262,7 @@ instance$archive
 
 The best performance in this short tuned experiment was achieved with `r dQuote(instance$result$params$branch.selection)`.
 
-```{r}
+```{r 2020-04-23-pipelines-selectors-branches-018}
 instance$result
 ```
 

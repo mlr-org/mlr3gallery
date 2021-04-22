@@ -21,7 +21,7 @@ output:
 bibliography: biblio.bib
 ---
 
-```{r, include = FALSE}
+```{r 2020-03-30-imbalanced-data-001, include = FALSE}
 ## Just some preparation
 knitr::opts_chunk$set(
   echo = TRUE,
@@ -52,7 +52,7 @@ These steps are performed:
 
 ## Loading required packages
 
-```{r}
+```{r 2020-03-30-imbalanced-data-002}
 library("mlr3") # mlr3 base package
 library("mlr3misc") # contains some helper functions
 library("mlr3pipelines") # create ML pipelines
@@ -70,7 +70,7 @@ library("mlr3data") # another way to obtain data sets
 [OpenML.org](https://www.openml.org) is an open machine learning platform, which allows users to share data, code and machine learning experiments.
 The OpenML R package can query available data sets using a filter-like approach by providing desired dataset characteristics like `number.of.classes` or `number.of.features`.
 
-```{r, eval = FALSE}
+```{r 2020-03-30-imbalanced-data-003, eval = FALSE}
 # get list of curated binary classification data sets (see https://arxiv.org/abs/1708.03731v2)
 ds = listOMLDataSets(
   number.of.classes = 2,
@@ -89,7 +89,7 @@ d
 
 After downloading the chosen data set, we create an `mlr3` classification task:
 
-```{r, eval = FALSE}
+```{r 2020-03-30-imbalanced-data-004, eval = FALSE}
 # make sure target is a factor and create mlr3 tasks
 data = as.data.frame(d)
 data[[d$target.features]] = as.factor(data[[d$target.features]])
@@ -101,14 +101,14 @@ task
 
 Please note that the `optdigits` dataset is also included in the `mlr3data` package where you can get the preprocessed (integers properly encoded as such, etc.) data via:
 
-```{r}
+```{r 2020-03-30-imbalanced-data-005}
 data("optdigits", package = "mlr3data")
 task = TaskClassif$new("optdigits", backend = optdigits, target = "binaryclass", positive = "P")
 ```
 
 Quick overview of the data:
 
-```{r}
+```{r 2020-03-30-imbalanced-data-006}
 skimr::skim(task$data())
 ```
 
@@ -119,7 +119,7 @@ Below, we define the undersampling, oversampling and SMOTE `PipeOp`s/`Graph`.
 All three imbalance correction methods have hyperparameters to control the degree of class imbalance.
 We apply the `PipeOp`s/`Graph` to the current `task` with specific hyperparameter values to see how the class balance changes:
 
-```{r}
+```{r 2020-03-30-imbalanced-data-007}
 # check original class balance
 table(task$truth())
 
@@ -141,7 +141,7 @@ table(po_over$train(list(task))$output$truth())
 Note that the original SMOTE algorithm only accepts numeric features (see `?smotefamily::SMOTE`).
 To keep it simple, we therefore preprocess the data and coerce integers to numerics prior to running `SMOTE` and reverse this afterwards:
 
-```{r}
+```{r 2020-03-30-imbalanced-data-008}
 # SMOTE enriches the minority class with synthetic data
 gr_smote =
   po("colapply", id = "int_to_num",
@@ -157,7 +157,7 @@ table(gr_smote$train(task)[[1L]]$truth())
 
 We combine the `PipeOp`s/`Graph` with a learner (here `ranger`) to make each pipeline graph behave like a learner:
 
-```{r}
+```{r 2020-03-30-imbalanced-data-009}
 # create random forest learner
 lrn = lrn("classif.ranger", num.trees = 50)
 
@@ -172,7 +172,7 @@ lrn_smote$id = "smote.ranger"
 
 We define the search space in order to tune the hyperparameters of the class imbalance methods.
 
-```{r}
+```{r 2020-03-30-imbalanced-data-010}
 # define parameter search space for each method
 ps_under = ParamSet$new(list(ParamDbl$new("undersample.ratio", lower = 1 / 6, upper = 1)))
 ps_over = ParamSet$new(list(ParamDbl$new("oversample.ratio", lower = 1, upper = 6)))
@@ -196,7 +196,7 @@ While `K` changes the behavior of the SMOTE algorithm, `dup_size` will affect ov
 To focus on the effect of the oversampling rate on the performance, we will consider SMOTE with K = 2 as a different imbalance correction method as SMOTE with K = 4 (and so on).
 Hence, we use grid search with 5 different hyperparameter configurations for the undersampling method, the oversampling method and each SMOTE variant for tuning:
 
-```{r}
+```{r 2020-03-30-imbalanced-data-011}
 inner_cv3 = rsmp("cv", folds = 3)
 measure = msr("classif.fbeta")
 
@@ -234,7 +234,7 @@ The `AutoTuner` is a fully tuned graph that behaves like a usual learner.
 For the tuning a 3-fold CV is used.
 Now, we use the `benchmark` function to compare the tuned class imbalance pipeline graphs based on a holdout for the outer evaluation:
 
-```{r}
+```{r 2020-03-30-imbalanced-data-012}
 # NOTE: This code runs about 5 minutes
 outer_resampling = rsmp("holdout")
 design = benchmark_grid(
@@ -250,7 +250,7 @@ bmr = benchmark(design, store_models = TRUE)
 
 ### Visualize benchmark results
 
-```{r}
+```{r 2020-03-30-imbalanced-data-013}
 bmr$aggregate(measure)
 # one value per boxplot since we used holdout as outer resampling
 autoplot(bmr, measure = measure)
@@ -261,7 +261,7 @@ autoplot(bmr, measure = measure)
 With `store_models = TRUE` we allow the `benchmark` function to store each single model that was computed during tuning.
 Therefore, we can plot the tuning path of the best learner from the subsampling iterations:
 
-```{r}
+```{r 2020-03-30-imbalanced-data-014}
 library(ggplot2)
 bmr_data_learners = as.data.table(bmr)$learner
 utune_path = bmr_data_learners[[1]]$model$tuning_instance$archive$data
