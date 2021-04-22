@@ -107,7 +107,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 <meta property="og:type" content="article"/>
 <meta property="og:description" content="We implement a simple automated machine learning (AutoML) system which includes preprocessing, a switch between multiple learners and hyperparameter tuning."/>
 <meta property="og:url" content="https://mlr3gallery.mlr-org.com/posts/2021-03-11-practical-tuning-series-build-an-automated-machine-learning-system/"/>
-<meta property="og:image" content="https://mlr3gallery.mlr-org.com/posts/2021-03-11-practical-tuning-series-build-an-automated-machine-learning-system/practical-tuning-series-build-an-automated-machine-learning-system_files/figure-html5/unnamed-chunk-5-1.png"/>
+<meta property="og:image" content="https://mlr3gallery.mlr-org.com/posts/2021-03-11-practical-tuning-series-build-an-automated-machine-learning-system/practical-tuning-series-build-an-automated-machine-learning-system_files/figure-html5/practical-tuning-series-build-an-automated-machine-learning-system-006-1.png"/>
 <meta property="og:image:width" content="1248"/>
 <meta property="og:image:height" content="768"/>
 <meta property="og:locale" content="en_US"/>
@@ -118,7 +118,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 <meta property="twitter:title" content="mlr3gallery: Practical Tuning Series - Build an Automated Machine Learning System"/>
 <meta property="twitter:description" content="We implement a simple automated machine learning (AutoML) system which includes preprocessing, a switch between multiple learners and hyperparameter tuning."/>
 <meta property="twitter:url" content="https://mlr3gallery.mlr-org.com/posts/2021-03-11-practical-tuning-series-build-an-automated-machine-learning-system/"/>
-<meta property="twitter:image" content="https://mlr3gallery.mlr-org.com/posts/2021-03-11-practical-tuning-series-build-an-automated-machine-learning-system/practical-tuning-series-build-an-automated-machine-learning-system_files/figure-html5/unnamed-chunk-5-1.png"/>
+<meta property="twitter:image" content="https://mlr3gallery.mlr-org.com/posts/2021-03-11-practical-tuning-series-build-an-automated-machine-learning-system/practical-tuning-series-build-an-automated-machine-learning-system_files/figure-html5/practical-tuning-series-build-an-automated-machine-learning-system-006-1.png"/>
 <meta property="twitter:image:width" content="1248"/>
 <meta property="twitter:image:height" content="768"/>
 
@@ -142,7 +142,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 <!--/radix_placeholder_rmarkdown_metadata-->
   
   <script type="text/json" id="radix-resource-manifest">
-  {"type":"character","attributes":{},"value":["data/instance_1.rda","data/rr_1.rda","practical-tuning-series-build-an-automated-machine-learning-system_files/figure-html5/unnamed-chunk-15-1.png","practical-tuning-series-build-an-automated-machine-learning-system_files/figure-html5/unnamed-chunk-5-1.png","practical-tuning-series-build-an-automated-machine-learning-system_files/figure-html5/unnamed-chunk-8-1.png"]}
+  {"type":"character","attributes":{},"value":["data/instance_1.rda","data/rr_1.rda","practical-tuning-series-build-an-automated-machine-learning-system_files/figure-html5/practical-tuning-series-build-an-automated-machine-learning-system-006-1.png","practical-tuning-series-build-an-automated-machine-learning-system_files/figure-html5/practical-tuning-series-build-an-automated-machine-learning-system-009-1.png","practical-tuning-series-build-an-automated-machine-learning-system_files/figure-html5/practical-tuning-series-build-an-automated-machine-learning-system-016-1.png"]}
   </script>
   <!--radix_placeholder_navigation_in_header-->
 <meta name="distill:offset" content="../.."/>
@@ -2194,14 +2194,14 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>The <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_branch.html"><code>PipeOpBranch</code></a> allows us to specify multiple alternatives paths. In this graph, the paths lead to the different learner models. The <code>selection</code> hyperparameter controls which path is executed i.e., which learner is used to fit a model. It is important to use the <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_branch.html"><code>PipeOpBranch</code></a> after the branching so that the outputs are merged into one result object. We visualize the graph with branching below.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>graph</span> <span class='op'>=</span> 
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>graph</span> <span class='op'>=</span>
   <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"branch"</span>, options <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"kknn"</span>, <span class='st'>"svm"</span>, <span class='st'>"ranger"</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>%&gt;&gt;%</span>
   <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/gunion.html'>gunion</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/lapply.html'>lapply</a></span><span class='op'>(</span><span class='va'>learners</span>, <span class='va'>po</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>%&gt;&gt;%</span>
   <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"unbranch"</span><span class='op'>)</span>
 <span class='va'>graph</span><span class='op'>$</span><span class='fu'>plot</span><span class='op'>(</span><span class='op'>)</span>
 </code></pre>
 </div>
-<p><img src="practical-tuning-series-build-an-automated-machine-learning-system_files/figure-html5/unnamed-chunk-5-1.png" width="624" /></p>
+<p><img src="practical-tuning-series-build-an-automated-machine-learning-system_files/figure-html5/practical-tuning-series-build-an-automated-machine-learning-system-006-1.png" width="624" /></p>
 </div>
 <p>Alternatively, we can use the <a href="https://mlr3pipelines.mlr-org.com/reference/ppl.html"><code>ppl()</code></a>-shortcut to load a predefined graph from the <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_graphs.html"><code>mlr_graphs</code></a> dictionary. For this, the learner list must be named.</p>
 <div class="layout-chunk" data-layout="l-body">
@@ -2236,7 +2236,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <span class='fu'><a href='https://rdrr.io/r/graphics/plot.default.html'>plot</a></span><span class='op'>(</span><span class='va'>graph</span><span class='op'>)</span>
 </code></pre>
 </div>
-<p><img src="practical-tuning-series-build-an-automated-machine-learning-system_files/figure-html5/unnamed-chunk-8-1.png" width="624" /></p>
+<p><img src="practical-tuning-series-build-an-automated-machine-learning-system_files/figure-html5/practical-tuning-series-build-an-automated-machine-learning-system-009-1.png" width="624" /></p>
 </div>
 <p>We could also create the preprocessing pipeline manually.</p>
 <div class="layout-chunk" data-layout="l-body">
@@ -2423,10 +2423,10 @@ document.addEventListener('DOMContentLoaded', function() {
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='va'>instance</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3tuning.mlr-org.com/reference/tune.html'>tune</a></span><span class='op'>(</span>
-  method <span class='op'>=</span> <span class='st'>"random_search"</span>, 
-  task <span class='op'>=</span> <span class='va'>task</span>, 
-  learner <span class='op'>=</span> <span class='va'>graph_learner</span>, 
-  resampling <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>rsmp</a></span><span class='op'>(</span><span class='st'>"cv"</span>, folds <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span>, 
+  method <span class='op'>=</span> <span class='st'>"random_search"</span>,
+  task <span class='op'>=</span> <span class='va'>task</span>,
+  learner <span class='op'>=</span> <span class='va'>graph_learner</span>,
+  resampling <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>rsmp</a></span><span class='op'>(</span><span class='st'>"cv"</span>, folds <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span>,
   measure <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>msr</a></span><span class='op'>(</span><span class='st'>"classif.ce"</span><span class='op'>)</span>,
   term_evals <span class='op'>=</span> <span class='fl'>20</span>
 <span class='op'>)</span>
@@ -2439,7 +2439,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://ggplot2.tidyverse.org/reference/autoplot.html'>autoplot</a></span><span class='op'>(</span><span class='va'>instance</span>, type <span class='op'>=</span> <span class='st'>"marginal"</span>, cols_x <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"x_domain_kknn.k"</span>,<span class='st'>"x_domain_svm.cost"</span>, <span class='st'>"ranger.mtry"</span><span class='op'>)</span><span class='op'>)</span>
 </code></pre>
 </div>
-<p><img src="practical-tuning-series-build-an-automated-machine-learning-system_files/figure-html5/unnamed-chunk-15-1.png" width="960" /></p>
+<p><img src="practical-tuning-series-build-an-automated-machine-learning-system_files/figure-html5/practical-tuning-series-build-an-automated-machine-learning-system-016-1.png" width="960" /></p>
 </div>
 <h1 id="final-model">Final Model</h1>
 <p>We add the optimized hyperparameters to the graph learner and train the learner on the full dataset.</p>
@@ -2536,9 +2536,9 @@ document.addEventListener('DOMContentLoaded', function() {
 <span class='va'>rr</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3tuning.mlr-org.com/reference/tune_nested.html'>tune_nested</a></span><span class='op'>(</span>
   method <span class='op'>=</span> <span class='st'>"random_search"</span>,
   task <span class='op'>=</span> <span class='va'>task</span>,
-  learner <span class='op'>=</span> <span class='va'>graph_learner</span>, 
+  learner <span class='op'>=</span> <span class='va'>graph_learner</span>,
   inner_resampling <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>rsmp</a></span> <span class='op'>(</span><span class='st'>"cv"</span>, folds <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span>,
-  outer_resampling <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>rsmp</a></span><span class='op'>(</span><span class='st'>"cv"</span>, folds <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span>, 
+  outer_resampling <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>rsmp</a></span><span class='op'>(</span><span class='st'>"cv"</span>, folds <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span>,
   measure <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>msr</a></span><span class='op'>(</span><span class='st'>"classif.ce"</span><span class='op'>)</span>,
   term_evals <span class='op'>=</span> <span class='fl'>10</span>,
 <span class='op'>)</span>

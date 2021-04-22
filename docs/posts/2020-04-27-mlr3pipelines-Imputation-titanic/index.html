@@ -102,7 +102,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 <meta property="og:type" content="article"/>
 <meta property="og:description" content="This post shows how to build a Graph using the mlr3pipelines package on the &quot;titanic&quot; dataset. Moreover, feature engineering, data imputation and benchmarking are covered."/>
 <meta property="og:url" content="https://mlr3gallery.mlr-org.com/posts/2020-04-27-mlr3pipelines-Imputation-titanic/"/>
-<meta property="og:image" content="https://mlr3gallery.mlr-org.com/posts/2020-04-27-mlr3pipelines-Imputation-titanic/2020-04-27-mlr3pipelines-titanic-advanced_files/figure-html5/unnamed-chunk-11-1.png"/>
+<meta property="og:image" content="https://mlr3gallery.mlr-org.com/posts/2020-04-27-mlr3pipelines-Imputation-titanic/2020-04-27-mlr3pipelines-titanic-advanced_files/figure-html5/2020-04-27-mlr3pipelines-titanic-advanced-011-1.png"/>
 <meta property="og:image:width" content="1248"/>
 <meta property="og:image:height" content="768"/>
 <meta property="og:locale" content="en_US"/>
@@ -113,7 +113,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 <meta property="twitter:title" content="mlr3gallery: A Pipeline for the Titanic Data Set - Advanced"/>
 <meta property="twitter:description" content="This post shows how to build a Graph using the mlr3pipelines package on the &quot;titanic&quot; dataset. Moreover, feature engineering, data imputation and benchmarking are covered."/>
 <meta property="twitter:url" content="https://mlr3gallery.mlr-org.com/posts/2020-04-27-mlr3pipelines-Imputation-titanic/"/>
-<meta property="twitter:image" content="https://mlr3gallery.mlr-org.com/posts/2020-04-27-mlr3pipelines-Imputation-titanic/2020-04-27-mlr3pipelines-titanic-advanced_files/figure-html5/unnamed-chunk-11-1.png"/>
+<meta property="twitter:image" content="https://mlr3gallery.mlr-org.com/posts/2020-04-27-mlr3pipelines-Imputation-titanic/2020-04-27-mlr3pipelines-titanic-advanced_files/figure-html5/2020-04-27-mlr3pipelines-titanic-advanced-011-1.png"/>
 <meta property="twitter:image:width" content="1248"/>
 <meta property="twitter:image:height" content="768"/>
 
@@ -132,7 +132,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 <!--/radix_placeholder_rmarkdown_metadata-->
   
   <script type="text/json" id="radix-resource-manifest">
-  {"type":"character","attributes":{},"value":["2020-04-27-mlr3pipelines-titanic-advanced_files/figure-html5/unnamed-chunk-11-1.png","2020-04-27-mlr3pipelines-titanic-advanced_files/figure-html5/unnamed-chunk-17-1.png","2020-04-27-mlr3pipelines-titanic-advanced_files/figure-html5/unnamed-chunk-23-1.png","2020-04-27-mlr3pipelines-titanic-advanced_files/figure-html5/unnamed-chunk-24-1.png","2020-04-27-mlr3pipelines-titanic-advanced_files/figure-html5/unnamed-chunk-25-1.png"]}
+  {"type":"character","attributes":{},"value":["2020-04-27-mlr3pipelines-titanic-advanced_files/figure-html5/2020-04-27-mlr3pipelines-titanic-advanced-011-1.png","2020-04-27-mlr3pipelines-titanic-advanced_files/figure-html5/2020-04-27-mlr3pipelines-titanic-advanced-017-1.png","2020-04-27-mlr3pipelines-titanic-advanced_files/figure-html5/2020-04-27-mlr3pipelines-titanic-advanced-023-1.png","2020-04-27-mlr3pipelines-titanic-advanced_files/figure-html5/2020-04-27-mlr3pipelines-titanic-advanced-024-1.png","2020-04-27-mlr3pipelines-titanic-advanced_files/figure-html5/2020-04-27-mlr3pipelines-titanic-advanced-025-1.png"]}
   </script>
   <!--radix_placeholder_navigation_in_header-->
 <meta name="distill:offset" content="../.."/>
@@ -2240,7 +2240,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://ggplot2.tidyverse.org/reference/autoplot.html'>autoplot</a></span><span class='op'>(</span><span class='va'>task_imputed</span><span class='op'>)</span>
 </code></pre>
 </div>
-<p><img src="2020-04-27-mlr3pipelines-titanic-advanced_files/figure-html5/unnamed-chunk-11-1.png" width="624" /></p>
+<p><img src="2020-04-27-mlr3pipelines-titanic-advanced_files/figure-html5/2020-04-27-mlr3pipelines-titanic-advanced-011-1.png" width="624" /></p>
 </div>
 <p>We could now use <code>task_imputed</code> for resampling and see whether a <strong>ranger</strong> model does better. But this is dangerous! If we preprocess all training data at once, data could leak through the different cross-validation folds. In order to do this properly, we have to process the training data in every fold separately. Luckily, this is automatically handled in our <code>Graph</code>, if we use it through a <code>GraphLearner</code>.</p>
 <p>We can simply append a <code>ranger</code> learner to the Graph and create a <code>GraphLearner</code> from this.</p>
@@ -2337,7 +2337,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://ggplot2.tidyverse.org/reference/autoplot.html'>autoplot</a></span><span class='op'>(</span><span class='va'>task_eng</span><span class='op'>$</span><span class='fu'>clone</span><span class='op'>(</span><span class='op'>)</span><span class='op'>$</span><span class='fu'>select</span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"sex"</span>, <span class='st'>"age"</span><span class='op'>)</span><span class='op'>)</span>, type <span class='op'>=</span> <span class='st'>"pairs"</span><span class='op'>)</span>
 </code></pre>
 </div>
-<p><img src="2020-04-27-mlr3pipelines-titanic-advanced_files/figure-html5/unnamed-chunk-17-1.png" width="624" /></p>
+<p><img src="2020-04-27-mlr3pipelines-titanic-advanced_files/figure-html5/2020-04-27-mlr3pipelines-titanic-advanced-017-1.png" width="624" /></p>
 </div>
 <p>Now we can put everything together again, we concatenate our new <code>PipeOp</code> with the <code>Graph</code> created above and use <code>PipeOpSelect</code> in order to de-select the <code>character</code> features we used for feature extraction. Additionally, we collapse the ‘surname’, so only surnames that make up more than 0.6 % of the data are kept.</p>
 <p>In summary, we do the following:</p>
@@ -2422,7 +2422,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://ggplot2.tidyverse.org/reference/autoplot.html'>autoplot</a></span><span class='op'>(</span><span class='va'>bmr</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/theme.html'>theme</a></span><span class='op'>(</span>axis.text.x <span class='op'>=</span> <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/element.html'>element_text</a></span><span class='op'>(</span>angle <span class='op'>=</span> <span class='fl'>45</span>, hjust <span class='op'>=</span> <span class='fl'>1</span><span class='op'>)</span><span class='op'>)</span>
 </code></pre>
 </div>
-<p><img src="2020-04-27-mlr3pipelines-titanic-advanced_files/figure-html5/unnamed-chunk-23-1.png" width="624" /></p>
+<p><img src="2020-04-27-mlr3pipelines-titanic-advanced_files/figure-html5/2020-04-27-mlr3pipelines-titanic-advanced-023-1.png" width="624" /></p>
 </div>
 <p>Further we are able to compare sensitivity and specificity. Here we need to ensure that the benchmark results only contain a single Task:</p>
 <div class="layout-chunk" data-layout="l-body">
@@ -2430,7 +2430,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://ggplot2.tidyverse.org/reference/autoplot.html'>autoplot</a></span><span class='op'>(</span><span class='va'>bmr</span><span class='op'>$</span><span class='fu'>clone</span><span class='op'>(</span><span class='op'>)</span><span class='op'>$</span><span class='fu'>filter</span><span class='op'>(</span>task_id <span class='op'>=</span> <span class='st'>"titanic"</span><span class='op'>)</span>, type <span class='op'>=</span> <span class='st'>"roc"</span><span class='op'>)</span>
 </code></pre>
 </div>
-<p><img src="2020-04-27-mlr3pipelines-titanic-advanced_files/figure-html5/unnamed-chunk-24-1.png" width="624" /></p>
+<p><img src="2020-04-27-mlr3pipelines-titanic-advanced_files/figure-html5/2020-04-27-mlr3pipelines-titanic-advanced-024-1.png" width="624" /></p>
 </div>
 <p>Moreover, one can compare the precision-recall:</p>
 <div class="layout-chunk" data-layout="l-body">
@@ -2439,7 +2439,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <span class='fu'>ggplot2</span><span class='fu'>::</span><span class='fu'><a href='https://ggplot2.tidyverse.org/reference/autoplot.html'>autoplot</a></span><span class='op'>(</span><span class='va'>bmr</span>, type <span class='op'>=</span> <span class='st'>"prc"</span><span class='op'>)</span>
 </code></pre>
 </div>
-<p><img src="2020-04-27-mlr3pipelines-titanic-advanced_files/figure-html5/unnamed-chunk-25-1.png" width="624" /></p>
+<p><img src="2020-04-27-mlr3pipelines-titanic-advanced_files/figure-html5/2020-04-27-mlr3pipelines-titanic-advanced-025-1.png" width="624" /></p>
 </div>
 <p>As one can see, there are various options when it comes to benchmarking and visualizing. You could have a look at some other use cases in our gallery for inspiration.</p>
 <h2 id="future">Future</h2>
