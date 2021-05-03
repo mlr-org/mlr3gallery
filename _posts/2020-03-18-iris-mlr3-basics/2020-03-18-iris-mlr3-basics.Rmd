@@ -17,7 +17,7 @@ output:
     css: ../../custom.css
 ---
 
-```{r setup, include=FALSE}
+```{r 2020-03-18-iris-mlr3-basics-001, include=FALSE}
 knitr::opts_chunk$set(
   echo = TRUE,
   R.options = list(width = 80)
@@ -43,7 +43,7 @@ The following operations are shown:
 
 ## Loading basic packages
 
-```{r}
+```{r 2020-03-18-iris-mlr3-basics-002}
 # tasks, train, predict, resample, benchmark
 library("mlr3")
 # about a dozen reasonable learners
@@ -55,7 +55,7 @@ library("mlr3learners")
 Let's work on the canonical, simple iris data set, and try out some ML algorithms.
 We will start by using a decision tree with default settings.
 
-```{r}
+```{r 2020-03-18-iris-mlr3-basics-003}
 # creates mlr3 task from scratch, from a data.frame
 # 'target' names the column in the dataset we want to learn to predict
 task = TaskClassif$new(id = "iris", backend = iris, target = "Species")
@@ -75,7 +75,7 @@ print(learner1)
 
 Now the usual ML operations: Train on some observations, predict on others.
 
-```{r}
+```{r 2020-03-18-iris-mlr3-basics-004}
 # train learner on subset of task
 learner1$train(task, row_ids = 1:120)
 # this is what the decision tree looks like
@@ -92,7 +92,7 @@ print(preds)
 Let's score our `r ref("Prediction")` object with some metrics.
 And take a deeper look by inspecting the `confusion matrix`.
 
-```{r}
+```{r 2020-03-18-iris-mlr3-basics-005}
 head(as.data.table(mlr_measures))
 s = preds$score(msr("classif.acc"))
 print(s)
@@ -107,7 +107,7 @@ print(cm)
 The `r ref("Learner")` contains information about all parameters that can be configured, including data type, constraints, defaults, etc.
 We can change the hyperparameters either during construction of later through an active binding.
 
-```{r}
+```{r 2020-03-18-iris-mlr3-basics-006}
 print(learner1$param_set)
 learner2 = lrn("classif.rpart", predict_type = "prob", minsplit = 50)
 learner2$param_set$values$minsplit = 50
@@ -117,7 +117,7 @@ learner2$param_set$values$minsplit = 50
 
 `r ref("Resampling")` simply repeats the train-predict-score loop and collects all results in a nice `data.table`.
 
-```{r, size = "tiny"}
+```{r 2020-03-18-iris-mlr3-basics-007, size = "tiny"}
 cv10 = rsmp("cv", folds = 10)
 r = resample(task, learner1, cv10)
 print(r)
@@ -137,7 +137,7 @@ We can list them from the dictionary.
 If we want more, we can install an extension package, `r mlr_pkg("mlr3extralearners")`, from GitHub.
 Note how after the installation the dictionary increases in size.
 
-```{r, message = FALSE}
+```{r 2020-03-18-iris-mlr3-basics-008, message = FALSE}
 head(as.data.table(mlr_learners)[, c("key", "packages")])
 # remotes::install_github("mlr-org/mlr3extralearners")
 library(mlr3extralearners)
@@ -148,7 +148,7 @@ print(as.data.table(mlr_learners)[, c("key", "packages")])
 
 The `r ref("benchmark")` function can conveniently compare `r ref("Learner", "Learners") on the same dataset(s).
 
-```{r}
+```{r 2020-03-18-iris-mlr3-basics-009}
 learners = list(learner1, learner2, lrn("classif.randomForest"))
 bm_grid = benchmark_grid(task, learners, cv10)
 bm = benchmark(bm_grid)
