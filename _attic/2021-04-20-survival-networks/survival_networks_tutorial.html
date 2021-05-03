@@ -1,0 +1,1859 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1"/>
+  <meta name="generator" content="distill" />
+
+  <style type="text/css">
+  /* Hide doc at startup (prevent jankiness while JS renders/transforms) */
+  body {
+    visibility: hidden;
+  }
+  </style>
+
+ <!--radix_placeholder_import_source-->
+ <!--/radix_placeholder_import_source-->
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css" data-origin="pandoc">
+a.sourceLine { display: inline-block; line-height: 1.25; }
+a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
+a.sourceLine:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+a.sourceLine { text-indent: -1em; padding-left: 1em; }
+}
+pre.numberSource a.sourceLine
+  { position: relative; left: -4em; }
+pre.numberSource a.sourceLine::before
+  { content: attr(title);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; pointer-events: all; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {  }
+@media screen {
+a.sourceLine::before { text-decoration: underline; }
+}
+code span.al { color: #ad0000; } /* Alert */
+code span.an { color: #5e5e5e; } /* Annotation */
+code span.at { color: #20794d; } /* Attribute */
+code span.bn { color: #ad0000; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007ba5; } /* ControlFlow */
+code span.ch { color: #20794d; } /* Char */
+code span.cn { color: #8f5902; } /* Constant */
+code span.co { color: #5e5e5e; } /* Comment */
+code span.cv { color: #5e5e5e; font-style: italic; } /* CommentVar */
+code span.do { color: #5e5e5e; font-style: italic; } /* Documentation */
+code span.dt { color: #ad0000; } /* DataType */
+code span.dv { color: #ad0000; } /* DecVal */
+code span.er { color: #ad0000; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #ad0000; } /* Float */
+code span.fu { color: #4758ab; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #5e5e5e; } /* Information */
+code span.kw { color: #007ba5; } /* Keyword */
+code span.op { color: #5e5e5e; } /* Operator */
+code span.ot { color: #007ba5; } /* Other */
+code span.pp { color: #ad0000; } /* Preprocessor */
+code span.sc { color: #20794d; } /* SpecialChar */
+code span.ss { color: #20794d; } /* SpecialString */
+code span.st { color: #20794d; } /* String */
+code span.va { color: #111111; } /* Variable */
+code span.vs { color: #20794d; } /* VerbatimString */
+code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
+</style>
+
+  <!--radix_placeholder_meta_tags-->
+  <title>Survival Networks with mlr3proba</title>
+  
+  <meta property="description" itemprop="description" content="A demonstration of training, tuning, and comparing survival networks."/>
+  
+  
+  <!--  https://schema.org/Article -->
+  <meta property="article:published" itemprop="datePublished" content="2021-04-20"/>
+  <meta property="article:created" itemprop="dateCreated" content="2021-04-20"/>
+  <meta name="article:author" content="Raphael Sonabend"/>
+  
+  <!--  https://developers.facebook.com/docs/sharing/webmasters#markup -->
+  <meta property="og:title" content="Survival Networks with mlr3proba"/>
+  <meta property="og:type" content="article"/>
+  <meta property="og:description" content="A demonstration of training, tuning, and comparing survival networks."/>
+  <meta property="og:locale" content="en_US"/>
+  
+  <!--  https://dev.twitter.com/cards/types/summary -->
+  <meta property="twitter:card" content="summary"/>
+  <meta property="twitter:title" content="Survival Networks with mlr3proba"/>
+  <meta property="twitter:description" content="A demonstration of training, tuning, and comparing survival networks."/>
+  
+  <!--/radix_placeholder_meta_tags-->
+  
+  <meta name="citation_reference" content="citation_title=&lt;span class=&quot;nocase&quot;&gt;survivalmodels: Models for Survival Analysis&lt;/span&gt;;citation_publication_date=2020;citation_publisher=CRAN;citation_author=Raphael Sonabend"/>
+  <meta name="citation_reference" content="citation_title=&lt;span class=&quot;nocase&quot;&gt;mlr3proba: An R Package for Machine Learning in Survival Analysis&lt;/span&gt;;citation_publication_date=2021;citation_doi=10.1093/bioinformatics/btab039;citation_issn=1367-4803;citation_author=Raphael Sonabend;citation_author=Franz J Király;citation_author=Andreas Bender;citation_author=Bernd Bischl;citation_author=Michel Lang"/>
+  <meta name="citation_reference" content="citation_title=&lt;span class=&quot;nocase&quot;&gt;mlr3tuning: Tuning for ’mlr3’&lt;/span&gt;;citation_publication_date=2019;citation_publisher=CRAN;citation_author=Michel Lang;citation_author=Jakob Richter;citation_author=Bernd Bischl;citation_author=Daniel Schalk"/>
+  <meta name="citation_reference" content="citation_title=&lt;span class=&quot;nocase&quot;&gt;mlr3pipelines: Preprocessing Operators and Pipelines for ’mlr3’&lt;/span&gt;;citation_publication_date=2019;citation_publisher=CRAN;citation_author=Martin Binder;citation_author=Florian Pfisterer;citation_author=Bernd Bischl;citation_author=Michel Lang;citation_author=Susanne Dandl"/>
+  <meta name="citation_reference" content="citation_title=&lt;span class=&quot;nocase&quot;&gt;mlr3benchmark: Benchmarking analysis for ’mlr3’&lt;/span&gt;;citation_publication_date=2020;citation_publisher=CRAN;citation_author=Raphael Sonabend;citation_author=Florian Pfisterer"/>
+  <meta name="citation_reference" content="citation_title=Mlr3 book;citation_publication_date=2021;citation_author=Marc Becker;citation_author=Martin Binder;citation_author=Bernd Bischl;citation_author=Michel Lang;citation_author=Florian Pfisterer;citation_author=Nicholas G. Reich;citation_author=Jakob Richter;citation_author=Patrick Schratz;citation_author=Raphael Sonabend"/>
+  <meta name="citation_reference" content="citation_title=&lt;span class=&quot;nocase&quot;&gt;Time-to-event prediction with neural networks and Cox regression&lt;/span&gt;;citation_publication_date=2019;citation_volume=20;citation_issn=1533-7928;citation_author=Håvard Kvamme;citation_author=Ørnulf Borgan;citation_author=Ida Scheel"/>
+  <meta name="citation_reference" content="citation_title=&lt;span class=&quot;nocase&quot;&gt;Deephit: A deep learning approach to survival analysis with competing risks&lt;/span&gt;;citation_publication_date=2018;citation_author=Changhee Lee;citation_author=William R Zame;citation_author=Jinsung Yoon;citation_author=Mihaela Schaar"/>
+  <meta name="citation_reference" content="citation_title=&lt;span class=&quot;nocase&quot;&gt;DeepSurv: personalized treatment recommender system using a Cox proportional hazards deep neural network&lt;/span&gt;;citation_publication_date=2018;citation_volume=18;citation_doi=10.1186/s12874-018-0482-1;citation_issn=1471-2288;citation_author=Jared L Katzman;citation_author=Uri Shaham;citation_author=Alexander Cloninger;citation_author=Jonathan Bates;citation_author=Tingting Jiang;citation_author=Yuval Kluger"/>
+  <meta name="citation_reference" content="citation_title=&lt;span class=&quot;nocase&quot;&gt;A scalable discrete-time survival model for neural networks&lt;/span&gt;;citation_publication_date=2019;citation_publisher=PeerJ Inc.;citation_volume=7;citation_issn=2167-8359;citation_author=Michael F Gensheimer;citation_author=Balasubramanian Narasimhan"/>
+  <meta name="citation_reference" content="citation_title=&lt;span class=&quot;nocase&quot;&gt;Continuous and discrete-time survival prediction with neural networks&lt;/span&gt;;citation_publication_date=2019;citation_author=Håvard Kvamme;citation_author=Ørnulf Borgan"/>
+  <meta name="citation_reference" content="citation_title=&lt;span class=&quot;nocase&quot;&gt;DNNSurv: Deep Neural Networks for Survival Analysis Using Pseudo Values&lt;/span&gt;;citation_publication_date=2020;citation_author=Lili Zhao;citation_author=Dai Feng"/>
+  <meta name="citation_reference" content="citation_title=&lt;span class=&quot;nocase&quot;&gt;reticulate: Interface to ’Python’&lt;/span&gt;;citation_publication_date=2020;citation_publisher=CRAN;citation_author=Kevin Ushey;citation_author=J J Allaire;citation_author=Yuan Tang"/>
+  <meta name="citation_reference" content="citation_title=Pycox;citation_publication_date=2018;citation_author=Håvard Kvamme"/>
+  <meta name="citation_reference" content="citation_title=&lt;span class=&quot;nocase&quot;&gt;keras: R Interface to ’Keras’&lt;/span&gt;;citation_publication_date=2020;citation_publisher=CRAN;citation_author=J J Allaire;citation_author=François Chollet"/>
+  <meta name="citation_reference" content="citation_title=&lt;span class=&quot;nocase&quot;&gt;Automatic differentiation in pytorch&lt;/span&gt;;citation_publication_date=2017;citation_author=Adam Paszke;citation_author=Sam Gross;citation_author=Soumith Chintala;citation_author=Gregory Chanan;citation_author=Edward Yang;citation_author=Zachary DeVito;citation_author=Zeming Lin;citation_author=Alban Desmaison;citation_author=Luca Antiga;citation_author=Adam Lerer"/>
+  <meta name="citation_reference" content="citation_title=&lt;span class=&quot;nocase&quot;&gt;TensorFlow: Large-Scale Machine Learning on Heterogeneous Systems&lt;/span&gt;;citation_publication_date=2015;citation_author=Martín Abadi;citation_author=Ashish Agarwal;citation_author=Paul Barham;citation_author=Eugene Brevdo;citation_author=Zhifeng Chen;citation_author=Craig Citro;citation_author=Greg S. Corrado;citation_author=Andy Davis;citation_author=Jeffrey Dean;citation_author=Matthieu Devin;citation_author=Sanjay Ghemawat;citation_author=Ian Goodfellow;citation_author=Andrew Harp;citation_author=Geoffrey Irving;citation_author=Michael Isard;citation_author=Rafal Jozefowicz;citation_author=Yangqing Jia;citation_author=Lukasz Kaiser;citation_author=Manjunath Kudlur;citation_author=Josh Levenberg;citation_author=Dan Mané;citation_author=Mike Schuster;citation_author=Rajat Monga;citation_author=Sherry Moore;citation_author=Derek Murray;citation_author=Chris Olah;citation_author=Jonathon Shlens;citation_author=Benoit Steiner;citation_author=Ilya Sutskever;citation_author=Kunal Talwar;citation_author=Paul Tucker;citation_author=Vincent Vanhoucke;citation_author=Vijay Vasudevan;citation_author=Fernanda Viégas;citation_author=Oriol Vinyals;citation_author=Pete Warden;citation_author=Martin Wattenberg;citation_author=Martin Wicke;citation_author=Yuan Yu;citation_author=Xiaoqiang Zheng"/>
+  <meta name="citation_reference" content="citation_title=&lt;span class=&quot;nocase&quot;&gt;mlr3: A modern object-oriented machine learning framework in R&lt;/span&gt;;citation_publication_date=2019;citation_volume=4;citation_doi=10.21105/joss.01903;citation_author=Michel Lang;citation_author=Martin Binder;citation_author=Jakob Richter;citation_author=Patrick Schratz;citation_author=Florian Pfisterer;citation_author=Stefan Coors;citation_author=Quay Au;citation_author=Giuseppe Casalicchio;citation_author=Lars Kotthoff;citation_author=Bernd Bischl"/>
+  <meta name="citation_reference" content="citation_title=&lt;span class=&quot;nocase&quot;&gt;R6: Classes with Reference Semantics&lt;/span&gt;;citation_publication_date=2018;citation_author=Winston Chang"/>
+  <meta name="citation_reference" content="citation_title=Survival Analysis;citation_publication_date=2021;citation_author=Marc Becker;citation_author=Martin Binder;citation_author=Bernd Bischl;citation_author=Michel Lang;citation_author=Florian Pfisterer;citation_author=Nicholas G. Reich;citation_author=Jakob Richter;citation_author=Patrick Schratz;citation_author=Raphael Sonabend"/>
+  <meta name="citation_reference" content="citation_title=&lt;span class=&quot;nocase&quot;&gt;paradox: Define and Work with Parameter Spaces for Complex Algorithms&lt;/span&gt;;citation_publication_date=2019;citation_publisher=CRAN;citation_author=Michel Lang;citation_author=Bernd Bischl;citation_author=Jakob Richter;citation_author=Xudong Sun;citation_author=Martin Binder"/>
+  <meta name="citation_reference" content="citation_title=&lt;span class=&quot;nocase&quot;&gt;Random search for hyper-parameter optimization&lt;/span&gt;;citation_publication_date=2012;citation_publisher=JMLR. org;citation_volume=13;citation_issn=1532-4435;citation_author=James Bergstra;citation_author=Yoshua Bengio"/>
+  <meta name="citation_reference" content="citation_title=&lt;span class=&quot;nocase&quot;&gt;Nonparametric Estimation from Incomplete Observations&lt;/span&gt;;citation_publication_date=1958;citation_volume=53;citation_doi=10.2307/2281868;citation_issn=01621459;citation_author=E. L. Kaplan;citation_author=Paul Meier"/>
+  <meta name="citation_reference" content="citation_title=&lt;span class=&quot;nocase&quot;&gt;Regression Models and Life-Tables&lt;/span&gt;;citation_publication_date=1972;citation_volume=34;citation_author=D. R. Cox"/>
+  <meta name="citation_reference" content="citation_title=&lt;span class=&quot;nocase&quot;&gt;Evaluating the yield of medical tests&lt;/span&gt;;citation_publication_date=1982;citation_volume=247;citation_issn=0098-7484;citation_author=Frank E. Harrell;citation_author=Robert M. Califf;citation_author=David B. Pryor"/>
+  <meta name="citation_reference" content="citation_title=&lt;span class=&quot;nocase&quot;&gt;Assessment and comparison of prognostic classification schemes for survival data&lt;/span&gt;;citation_publication_date=1999;citation_volume=18;citation_doi=10.1002/(SICI)1097-0258(19990915/30)18:17/18&lt;2529::AID-SIM274&gt;3.0.CO;2-5;citation_issn=0277-6715;citation_author=Erika Graf;citation_author=Claudia Schmoor;citation_author=Willi Sauerbrei;citation_author=Martin Schumacher"/>
+  <meta name="citation_reference" content="citation_title=&lt;span class=&quot;nocase&quot;&gt;Statistical comparisons of classifiers over multiple data sets&lt;/span&gt;;citation_publication_date=2006;citation_volume=7;citation_author=Janez Demšar"/>
+  <!--radix_placeholder_rmarkdown_metadata-->
+  
+  <script type="text/json" id="radix-rmarkdown-metadata">
+  {"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["title","description","categories","author","date","output","bibliography"]}},"value":[{"type":"character","attributes":{},"value":["Survival Networks with mlr3proba"]},{"type":"character","attributes":{},"value":["A demonstration of training, tuning, and comparing survival networks.\n"]},{"type":"character","attributes":{},"value":["mlr3proba","survival analysis","tuning","optimization","nested resampling"]},{"type":"list","attributes":{},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name"]}},"value":[{"type":"character","attributes":{},"value":["Raphael Sonabend"]}]}]},{"type":"character","attributes":{},"value":["04-20-2021"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["distill::distill_article"]}},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["self_contained"]}},"value":[{"type":"logical","attributes":{},"value":[false]}]}]},{"type":"character","attributes":{},"value":["bibliography.bib"]}]}
+  </script>
+  <!--/radix_placeholder_rmarkdown_metadata-->
+  
+  <script type="text/json" id="radix-resource-manifest">
+  {"type":"character","attributes":{},"value":["bibliography.bib","survival_networks_tutorial_files/anchor-4.2.2/anchor.min.js","survival_networks_tutorial_files/bowser-1.9.3/bowser.min.js","survival_networks_tutorial_files/distill-2.2.21/template.v2.js","survival_networks_tutorial_files/figure-html5/autoplots-1.png","survival_networks_tutorial_files/jquery-1.11.3/jquery.min.js","survival_networks_tutorial_files/popper-2.6.0/popper.min.js","survival_networks_tutorial_files/tippy-6.2.7/tippy-bundle.umd.min.js","survival_networks_tutorial_files/tippy-6.2.7/tippy-light-border.css","survival_networks_tutorial_files/tippy-6.2.7/tippy.css","survival_networks_tutorial_files/tippy-6.2.7/tippy.umd.min.js","survival_networks_tutorial_files/webcomponents-2.0.0/webcomponents.js"]}
+  </script>
+  <!--radix_placeholder_navigation_in_header-->
+  <!--/radix_placeholder_navigation_in_header-->
+  <!--radix_placeholder_distill-->
+  
+  <style type="text/css">
+  
+  body {
+    background-color: white;
+  }
+  
+  .pandoc-table {
+    width: 100%;
+  }
+  
+  .pandoc-table>caption {
+    margin-bottom: 10px;
+  }
+  
+  .pandoc-table th:not([align]) {
+    text-align: left;
+  }
+  
+  .pagedtable-footer {
+    font-size: 15px;
+  }
+  
+  d-byline .byline {
+    grid-template-columns: 2fr 2fr;
+  }
+  
+  d-byline .byline h3 {
+    margin-block-start: 1.5em;
+  }
+  
+  d-byline .byline .authors-affiliations h3 {
+    margin-block-start: 0.5em;
+  }
+  
+  .authors-affiliations .orcid-id {
+    width: 16px;
+    height:16px;
+    margin-left: 4px;
+    margin-right: 4px;
+    vertical-align: middle;
+    padding-bottom: 2px;
+  }
+  
+  d-title .dt-tags {
+    margin-top: 1em;
+    grid-column: text;
+  }
+  
+  .dt-tags .dt-tag {
+    text-decoration: none;
+    display: inline-block;
+    color: rgba(0,0,0,0.6);
+    padding: 0em 0.4em;
+    margin-right: 0.5em;
+    margin-bottom: 0.4em;
+    font-size: 70%;
+    border: 1px solid rgba(0,0,0,0.2);
+    border-radius: 3px;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+  
+  d-article table.gt_table td,
+  d-article table.gt_table th {
+    border-bottom: none;
+  }
+  
+  .html-widget {
+    margin-bottom: 2.0em;
+  }
+  
+  .l-screen-inset {
+    padding-right: 16px;
+  }
+  
+  .l-screen .caption {
+    margin-left: 10px;
+  }
+  
+  .shaded {
+    background: rgb(247, 247, 247);
+    padding-top: 20px;
+    padding-bottom: 20px;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  }
+  
+  .shaded .html-widget {
+    margin-bottom: 0;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+  }
+  
+  .shaded .shaded-content {
+    background: white;
+  }
+  
+  .text-output {
+    margin-top: 0;
+    line-height: 1.5em;
+  }
+  
+  .hidden {
+    display: none !important;
+  }
+  
+  d-article {
+    padding-top: 2.5rem;
+    padding-bottom: 30px;
+  }
+  
+  d-appendix {
+    padding-top: 30px;
+  }
+  
+  d-article>p>img {
+    width: 100%;
+  }
+  
+  d-article h2 {
+    margin: 1rem 0 1.5rem 0;
+  }
+  
+  d-article h3 {
+    margin-top: 1.5rem;
+  }
+  
+  d-article iframe {
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    margin-bottom: 2.0em;
+    width: 100%;
+  }
+  
+  /* Tweak code blocks */
+  
+  d-article div.sourceCode code,
+  d-article pre code {
+    font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+  }
+  
+  d-article pre,
+  d-article div.sourceCode,
+  d-article div.sourceCode pre {
+    overflow: auto;
+  }
+  
+  d-article div.sourceCode {
+    background-color: white;
+  }
+  
+  d-article div.sourceCode pre {
+    padding-left: 10px;
+    font-size: 12px;
+    border-left: 2px solid rgba(0,0,0,0.1);
+  }
+  
+  d-article pre {
+    font-size: 12px;
+    color: black;
+    background: none;
+    margin-top: 0;
+    text-align: left;
+    white-space: pre;
+    word-spacing: normal;
+    word-break: normal;
+    word-wrap: normal;
+    line-height: 1.5;
+  
+    -moz-tab-size: 4;
+    -o-tab-size: 4;
+    tab-size: 4;
+  
+    -webkit-hyphens: none;
+    -moz-hyphens: none;
+    -ms-hyphens: none;
+    hyphens: none;
+  }
+  
+  d-article pre a {
+    border-bottom: none;
+  }
+  
+  d-article pre a:hover {
+    border-bottom: none;
+    text-decoration: underline;
+  }
+  
+  d-article details {
+    grid-column: text;
+    margin-bottom: 0.8em;
+  }
+  
+  @media(min-width: 768px) {
+  
+  d-article pre,
+  d-article div.sourceCode,
+  d-article div.sourceCode pre {
+    overflow: visible !important;
+  }
+  
+  d-article div.sourceCode pre {
+    padding-left: 18px;
+    font-size: 14px;
+  }
+  
+  d-article pre {
+    font-size: 14px;
+  }
+  
+  }
+  
+  figure img.external {
+    background: white;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    box-shadow: 0 1px 8px rgba(0, 0, 0, 0.1);
+    padding: 18px;
+    box-sizing: border-box;
+  }
+  
+  /* CSS for d-contents */
+  
+  .d-contents {
+    grid-column: text;
+    color: rgba(0,0,0,0.8);
+    font-size: 0.9em;
+    padding-bottom: 1em;
+    margin-bottom: 1em;
+    padding-bottom: 0.5em;
+    margin-bottom: 1em;
+    padding-left: 0.25em;
+    justify-self: start;
+  }
+  
+  @media(min-width: 1000px) {
+    .d-contents.d-contents-float {
+      height: 0;
+      grid-column-start: 1;
+      grid-column-end: 4;
+      justify-self: center;
+      padding-right: 3em;
+      padding-left: 2em;
+    }
+  }
+  
+  .d-contents nav h3 {
+    font-size: 18px;
+    margin-top: 0;
+    margin-bottom: 1em;
+  }
+  
+  .d-contents li {
+    list-style-type: none
+  }
+  
+  .d-contents nav > ul {
+    padding-left: 0;
+  }
+  
+  .d-contents ul {
+    padding-left: 1em
+  }
+  
+  .d-contents nav ul li {
+    margin-top: 0.6em;
+    margin-bottom: 0.2em;
+  }
+  
+  .d-contents nav a {
+    font-size: 13px;
+    border-bottom: none;
+    text-decoration: none
+    color: rgba(0, 0, 0, 0.8);
+  }
+  
+  .d-contents nav a:hover {
+    text-decoration: underline solid rgba(0, 0, 0, 0.6)
+  }
+  
+  .d-contents nav > ul > li > a {
+    font-weight: 600;
+  }
+  
+  .d-contents nav > ul > li > ul {
+    font-weight: inherit;
+  }
+  
+  .d-contents nav > ul > li > ul > li {
+    margin-top: 0.2em;
+  }
+  
+  
+  .d-contents nav ul {
+    margin-top: 0;
+    margin-bottom: 0.25em;
+  }
+  
+  .d-article-with-toc h2:nth-child(2) {
+    margin-top: 0;
+  }
+  
+  
+  /* Figure */
+  
+  .figure {
+    position: relative;
+    margin-bottom: 2.5em;
+    margin-top: 1.5em;
+  }
+  
+  .figure img {
+    width: 100%;
+  }
+  
+  .figure .caption {
+    color: rgba(0, 0, 0, 0.6);
+    font-size: 12px;
+    line-height: 1.5em;
+  }
+  
+  .figure img.external {
+    background: white;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    box-shadow: 0 1px 8px rgba(0, 0, 0, 0.1);
+    padding: 18px;
+    box-sizing: border-box;
+  }
+  
+  .figure .caption a {
+    color: rgba(0, 0, 0, 0.6);
+  }
+  
+  .figure .caption b,
+  .figure .caption strong, {
+    font-weight: 600;
+    color: rgba(0, 0, 0, 1.0);
+  }
+  
+  /* Citations */
+  
+  d-article .citation {
+    color: inherit;
+    cursor: inherit;
+  }
+  
+  div.hanging-indent{
+    margin-left: 1em; text-indent: -1em;
+  }
+  
+  /* Citation hover box */
+  
+  .tippy-box[data-theme~=light-border] {
+    background-color: rgba(250, 250, 250, 0.95);
+  }
+  
+  .tippy-content > p {
+    margin-bottom: 0;
+    padding: 2px;
+  }
+  
+  
+  /* Tweak 1000px media break to show more text */
+  
+  @media(min-width: 1000px) {
+    .base-grid,
+    distill-header,
+    d-title,
+    d-abstract,
+    d-article,
+    d-appendix,
+    distill-appendix,
+    d-byline,
+    d-footnote-list,
+    d-citation-list,
+    distill-footer {
+      grid-template-columns: [screen-start] 1fr [page-start kicker-start] 80px [middle-start] 50px [text-start kicker-end] 65px 65px 65px 65px 65px 65px 65px 65px [text-end gutter-start] 65px [middle-end] 65px [page-end gutter-end] 1fr [screen-end];
+      grid-column-gap: 16px;
+    }
+  
+    .grid {
+      grid-column-gap: 16px;
+    }
+  
+    d-article {
+      font-size: 1.06rem;
+      line-height: 1.7em;
+    }
+    figure .caption, .figure .caption, figure figcaption {
+      font-size: 13px;
+    }
+  }
+  
+  @media(min-width: 1180px) {
+    .base-grid,
+    distill-header,
+    d-title,
+    d-abstract,
+    d-article,
+    d-appendix,
+    distill-appendix,
+    d-byline,
+    d-footnote-list,
+    d-citation-list,
+    distill-footer {
+      grid-template-columns: [screen-start] 1fr [page-start kicker-start] 60px [middle-start] 60px [text-start kicker-end] 60px 60px 60px 60px 60px 60px 60px 60px [text-end gutter-start] 60px [middle-end] 60px [page-end gutter-end] 1fr [screen-end];
+      grid-column-gap: 32px;
+    }
+  
+    .grid {
+      grid-column-gap: 32px;
+    }
+  }
+  
+  
+  /* Get the citation styles for the appendix (not auto-injected on render since
+     we do our own rendering of the citation appendix) */
+  
+  d-appendix .citation-appendix,
+  .d-appendix .citation-appendix {
+    font-size: 11px;
+    line-height: 15px;
+    border-left: 1px solid rgba(0, 0, 0, 0.1);
+    padding-left: 18px;
+    border: 1px solid rgba(0,0,0,0.1);
+    background: rgba(0, 0, 0, 0.02);
+    padding: 10px 18px;
+    border-radius: 3px;
+    color: rgba(150, 150, 150, 1);
+    overflow: hidden;
+    margin-top: -12px;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+  }
+  
+  /* Include appendix styles here so they can be overridden */
+  
+  d-appendix {
+    contain: layout style;
+    font-size: 0.8em;
+    line-height: 1.7em;
+    margin-top: 60px;
+    margin-bottom: 0;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    color: rgba(0,0,0,0.5);
+    padding-top: 60px;
+    padding-bottom: 48px;
+  }
+  
+  d-appendix h3 {
+    grid-column: page-start / text-start;
+    font-size: 15px;
+    font-weight: 500;
+    margin-top: 1em;
+    margin-bottom: 0;
+    color: rgba(0,0,0,0.65);
+  }
+  
+  d-appendix h3 + * {
+    margin-top: 1em;
+  }
+  
+  d-appendix ol {
+    padding: 0 0 0 15px;
+  }
+  
+  @media (min-width: 768px) {
+    d-appendix ol {
+      padding: 0 0 0 30px;
+      margin-left: -30px;
+    }
+  }
+  
+  d-appendix li {
+    margin-bottom: 1em;
+  }
+  
+  d-appendix a {
+    color: rgba(0, 0, 0, 0.6);
+  }
+  
+  d-appendix > * {
+    grid-column: text;
+  }
+  
+  d-appendix > d-footnote-list,
+  d-appendix > d-citation-list,
+  d-appendix > distill-appendix {
+    grid-column: screen;
+  }
+  
+  /* Include footnote styles here so they can be overridden */
+  
+  d-footnote-list {
+    contain: layout style;
+  }
+  
+  d-footnote-list > * {
+    grid-column: text;
+  }
+  
+  d-footnote-list a.footnote-backlink {
+    color: rgba(0,0,0,0.3);
+    padding-left: 0.5em;
+  }
+  
+  
+  
+  /* Anchor.js */
+  
+  .anchorjs-link {
+    /*transition: all .25s linear; */
+    text-decoration: none;
+    border-bottom: none;
+  }
+  *:hover > .anchorjs-link {
+    margin-left: -1.125em !important;
+    text-decoration: none;
+    border-bottom: none;
+  }
+  
+  /* Social footer */
+  
+  .social_footer {
+    margin-top: 30px;
+    margin-bottom: 0;
+    color: rgba(0,0,0,0.67);
+  }
+  
+  .disqus-comments {
+    margin-right: 30px;
+  }
+  
+  .disqus-comment-count {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.4);
+    cursor: pointer;
+  }
+  
+  #disqus_thread {
+    margin-top: 30px;
+  }
+  
+  .article-sharing a {
+    border-bottom: none;
+    margin-right: 8px;
+  }
+  
+  .article-sharing a:hover {
+    border-bottom: none;
+  }
+  
+  .sidebar-section.subscribe {
+    font-size: 12px;
+    line-height: 1.6em;
+  }
+  
+  .subscribe p {
+    margin-bottom: 0.5em;
+  }
+  
+  
+  .article-footer .subscribe {
+    font-size: 15px;
+    margin-top: 45px;
+  }
+  
+  
+  .sidebar-section.custom {
+    font-size: 12px;
+    line-height: 1.6em;
+  }
+  
+  .custom p {
+    margin-bottom: 0.5em;
+  }
+  
+  /* Styles for listing layout (hide title) */
+  .layout-listing d-title, .layout-listing .d-title {
+    display: none;
+  }
+  
+  /* Styles for posts lists (not auto-injected) */
+  
+  
+  .posts-with-sidebar {
+    padding-left: 45px;
+    padding-right: 45px;
+  }
+  
+  .posts-list .description h2,
+  .posts-list .description p {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", Arial, sans-serif;
+  }
+  
+  .posts-list .description h2 {
+    font-weight: 700;
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+  
+  .posts-list h2.post-tag {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+    padding-bottom: 12px;
+  }
+  .posts-list {
+    margin-top: 60px;
+    margin-bottom: 24px;
+  }
+  
+  .posts-list .post-preview {
+    text-decoration: none;
+    overflow: hidden;
+    display: block;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    padding: 24px 0;
+  }
+  
+  .post-preview-last {
+    border-bottom: none !important;
+  }
+  
+  .posts-list .posts-list-caption {
+    grid-column: screen;
+    font-weight: 400;
+  }
+  
+  .posts-list .post-preview h2 {
+    margin: 0 0 6px 0;
+    line-height: 1.2em;
+    font-style: normal;
+    font-size: 24px;
+  }
+  
+  .posts-list .post-preview p {
+    margin: 0 0 12px 0;
+    line-height: 1.4em;
+    font-size: 16px;
+  }
+  
+  .posts-list .post-preview .thumbnail {
+    box-sizing: border-box;
+    margin-bottom: 24px;
+    position: relative;
+    max-width: 500px;
+  }
+  .posts-list .post-preview img {
+    width: 100%;
+    display: block;
+  }
+  
+  .posts-list .metadata {
+    font-size: 12px;
+    line-height: 1.4em;
+    margin-bottom: 18px;
+  }
+  
+  .posts-list .metadata > * {
+    display: inline-block;
+  }
+  
+  .posts-list .metadata .publishedDate {
+    margin-right: 2em;
+  }
+  
+  .posts-list .metadata .dt-authors {
+    display: block;
+    margin-top: 0.3em;
+    margin-right: 2em;
+  }
+  
+  .posts-list .dt-tags {
+    display: block;
+    line-height: 1em;
+  }
+  
+  .posts-list .dt-tags .dt-tag {
+    display: inline-block;
+    color: rgba(0,0,0,0.6);
+    padding: 0.3em 0.4em;
+    margin-right: 0.2em;
+    margin-bottom: 0.4em;
+    font-size: 60%;
+    border: 1px solid rgba(0,0,0,0.2);
+    border-radius: 3px;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+  
+  .posts-list img {
+    opacity: 1;
+  }
+  
+  .posts-list img[data-src] {
+    opacity: 0;
+  }
+  
+  .posts-more {
+    clear: both;
+  }
+  
+  
+  .posts-sidebar {
+    font-size: 16px;
+  }
+  
+  .posts-sidebar h3 {
+    font-size: 16px;
+    margin-top: 0;
+    margin-bottom: 0.5em;
+    font-weight: 400;
+    text-transform: uppercase;
+  }
+  
+  .sidebar-section {
+    margin-bottom: 30px;
+  }
+  
+  .categories ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+  }
+  
+  .categories li {
+    color: rgba(0, 0, 0, 0.8);
+    margin-bottom: 0;
+  }
+  
+  .categories li>a {
+    border-bottom: none;
+  }
+  
+  .categories li>a:hover {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.4);
+  }
+  
+  .categories .active {
+    font-weight: 600;
+  }
+  
+  .categories .category-count {
+    color: rgba(0, 0, 0, 0.4);
+  }
+  
+  
+  @media(min-width: 768px) {
+    .posts-list .post-preview h2 {
+      font-size: 26px;
+    }
+    .posts-list .post-preview .thumbnail {
+      float: right;
+      width: 30%;
+      margin-bottom: 0;
+    }
+    .posts-list .post-preview .description {
+      float: left;
+      width: 45%;
+    }
+    .posts-list .post-preview .metadata {
+      float: left;
+      width: 20%;
+      margin-top: 8px;
+    }
+    .posts-list .post-preview p {
+      margin: 0 0 12px 0;
+      line-height: 1.5em;
+      font-size: 16px;
+    }
+    .posts-with-sidebar .posts-list {
+      float: left;
+      width: 75%;
+    }
+    .posts-with-sidebar .posts-sidebar {
+      float: right;
+      width: 20%;
+      margin-top: 60px;
+      padding-top: 24px;
+      padding-bottom: 24px;
+    }
+  }
+  
+  
+  /* Improve display for browsers without grid (IE/Edge <= 15) */
+  
+  .downlevel {
+    line-height: 1.6em;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", Arial, sans-serif;
+    margin: 0;
+  }
+  
+  .downlevel .d-title {
+    padding-top: 6rem;
+    padding-bottom: 1.5rem;
+  }
+  
+  .downlevel .d-title h1 {
+    font-size: 50px;
+    font-weight: 700;
+    line-height: 1.1em;
+    margin: 0 0 0.5rem;
+  }
+  
+  .downlevel .d-title p {
+    font-weight: 300;
+    font-size: 1.2rem;
+    line-height: 1.55em;
+    margin-top: 0;
+  }
+  
+  .downlevel .d-byline {
+    padding-top: 0.8em;
+    padding-bottom: 0.8em;
+    font-size: 0.8rem;
+    line-height: 1.8em;
+  }
+  
+  .downlevel .section-separator {
+    border: none;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+  }
+  
+  .downlevel .d-article {
+    font-size: 1.06rem;
+    line-height: 1.7em;
+    padding-top: 1rem;
+    padding-bottom: 2rem;
+  }
+  
+  
+  .downlevel .d-appendix {
+    padding-left: 0;
+    padding-right: 0;
+    max-width: none;
+    font-size: 0.8em;
+    line-height: 1.7em;
+    margin-bottom: 0;
+    color: rgba(0,0,0,0.5);
+    padding-top: 40px;
+    padding-bottom: 48px;
+  }
+  
+  .downlevel .footnotes ol {
+    padding-left: 13px;
+  }
+  
+  .downlevel .base-grid,
+  .downlevel .distill-header,
+  .downlevel .d-title,
+  .downlevel .d-abstract,
+  .downlevel .d-article,
+  .downlevel .d-appendix,
+  .downlevel .distill-appendix,
+  .downlevel .d-byline,
+  .downlevel .d-footnote-list,
+  .downlevel .d-citation-list,
+  .downlevel .distill-footer,
+  .downlevel .appendix-bottom,
+  .downlevel .posts-container {
+    padding-left: 40px;
+    padding-right: 40px;
+  }
+  
+  @media(min-width: 768px) {
+    .downlevel .base-grid,
+    .downlevel .distill-header,
+    .downlevel .d-title,
+    .downlevel .d-abstract,
+    .downlevel .d-article,
+    .downlevel .d-appendix,
+    .downlevel .distill-appendix,
+    .downlevel .d-byline,
+    .downlevel .d-footnote-list,
+    .downlevel .d-citation-list,
+    .downlevel .distill-footer,
+    .downlevel .appendix-bottom,
+    .downlevel .posts-container {
+    padding-left: 150px;
+    padding-right: 150px;
+    max-width: 900px;
+  }
+  }
+  
+  .downlevel pre code {
+    display: block;
+    border-left: 2px solid rgba(0, 0, 0, .1);
+    padding: 0 0 0 20px;
+    font-size: 14px;
+  }
+  
+  .downlevel code, .downlevel pre {
+    color: black;
+    background: none;
+    font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+    text-align: left;
+    white-space: pre;
+    word-spacing: normal;
+    word-break: normal;
+    word-wrap: normal;
+    line-height: 1.5;
+  
+    -moz-tab-size: 4;
+    -o-tab-size: 4;
+    tab-size: 4;
+  
+    -webkit-hyphens: none;
+    -moz-hyphens: none;
+    -ms-hyphens: none;
+    hyphens: none;
+  }
+  
+  .downlevel .posts-list .post-preview {
+    color: inherit;
+  }
+  
+  
+  
+  </style>
+  
+  <script type="application/javascript">
+  
+  function is_downlevel_browser() {
+    if (bowser.isUnsupportedBrowser({ msie: "12", msedge: "16"},
+                                   window.navigator.userAgent)) {
+      return true;
+    } else {
+      return window.load_distill_framework === undefined;
+    }
+  }
+  
+  // show body when load is complete
+  function on_load_complete() {
+  
+    // add anchors
+    if (window.anchors) {
+      window.anchors.options.placement = 'left';
+      window.anchors.add('d-article > h2, d-article > h3, d-article > h4, d-article > h5');
+    }
+  
+  
+    // set body to visible
+    document.body.style.visibility = 'visible';
+  
+    // force redraw for leaflet widgets
+    if (window.HTMLWidgets) {
+      var maps = window.HTMLWidgets.findAll(".leaflet");
+      $.each(maps, function(i, el) {
+        var map = this.getMap();
+        map.invalidateSize();
+        map.eachLayer(function(layer) {
+          if (layer instanceof L.TileLayer)
+            layer.redraw();
+        });
+      });
+    }
+  
+    // trigger 'shown' so htmlwidgets resize
+    $('d-article').trigger('shown');
+  }
+  
+  function init_distill() {
+  
+    init_common();
+  
+    // create front matter
+    var front_matter = $('<d-front-matter></d-front-matter>');
+    $('#distill-front-matter').wrap(front_matter);
+  
+    // create d-title
+    $('.d-title').changeElementType('d-title');
+  
+    // create d-byline
+    var byline = $('<d-byline></d-byline>');
+    $('.d-byline').replaceWith(byline);
+  
+    // create d-article
+    var article = $('<d-article></d-article>');
+    $('.d-article').wrap(article).children().unwrap();
+  
+    // move posts container into article
+    $('.posts-container').appendTo($('d-article'));
+  
+    // create d-appendix
+    $('.d-appendix').changeElementType('d-appendix');
+  
+    // flag indicating that we have appendix items
+    var appendix = $('.appendix-bottom').children('h3').length > 0;
+  
+    // replace footnotes with <d-footnote>
+    $('.footnote-ref').each(function(i, val) {
+      appendix = true;
+      var href = $(this).attr('href');
+      var id = href.replace('#', '');
+      var fn = $('#' + id);
+      var fn_p = $('#' + id + '>p');
+      fn_p.find('.footnote-back').remove();
+      var text = fn_p.html();
+      var dtfn = $('<d-footnote></d-footnote>');
+      dtfn.html(text);
+      $(this).replaceWith(dtfn);
+    });
+    // remove footnotes
+    $('.footnotes').remove();
+  
+    // move refs into #references-listing
+    $('#references-listing').replaceWith($('#refs'));
+  
+    $('h1.appendix, h2.appendix').each(function(i, val) {
+      $(this).changeElementType('h3');
+    });
+    $('h3.appendix').each(function(i, val) {
+      var id = $(this).attr('id');
+      $('.d-contents a[href="#' + id + '"]').parent().remove();
+      appendix = true;
+      $(this).nextUntil($('h1, h2, h3')).addBack().appendTo($('d-appendix'));
+    });
+  
+    // show d-appendix if we have appendix content
+    $("d-appendix").css('display', appendix ? 'grid' : 'none');
+  
+    // localize layout chunks to just output
+    $('.layout-chunk').each(function(i, val) {
+  
+      // capture layout
+      var layout = $(this).attr('data-layout');
+  
+      // apply layout to markdown level block elements
+      var elements = $(this).children().not('details, div.sourceCode, pre, script');
+      elements.each(function(i, el) {
+        var layout_div = $('<div class="' + layout + '"></div>');
+        if (layout_div.hasClass('shaded')) {
+          var shaded_content = $('<div class="shaded-content"></div>');
+          $(this).wrap(shaded_content);
+          $(this).parent().wrap(layout_div);
+        } else {
+          $(this).wrap(layout_div);
+        }
+      });
+  
+  
+      // unwrap the layout-chunk div
+      $(this).children().unwrap();
+    });
+  
+    // remove code block used to force  highlighting css
+    $('.distill-force-highlighting-css').parent().remove();
+  
+    // remove empty line numbers inserted by pandoc when using a
+    // custom syntax highlighting theme
+    $('code.sourceCode a:empty').remove();
+  
+    // load distill framework
+    load_distill_framework();
+  
+    // wait for window.distillRunlevel == 4 to do post processing
+    function distill_post_process() {
+  
+      if (!window.distillRunlevel || window.distillRunlevel < 4)
+        return;
+  
+      // hide author/affiliations entirely if we have no authors
+      var front_matter = JSON.parse($("#distill-front-matter").html());
+      var have_authors = front_matter.authors && front_matter.authors.length > 0;
+      if (!have_authors)
+        $('d-byline').addClass('hidden');
+  
+      // article with toc class
+      $('.d-contents').parent().addClass('d-article-with-toc');
+  
+      // strip links that point to #
+      $('.authors-affiliations').find('a[href="#"]').removeAttr('href');
+  
+      // add orcid ids
+      $('.authors-affiliations').find('.author').each(function(i, el) {
+        var orcid_id = front_matter.authors[i].orcidID;
+        if (orcid_id) {
+          var a = $('<a></a>');
+          a.attr('href', 'https://orcid.org/' + orcid_id);
+          var img = $('<img></img>');
+          img.addClass('orcid-id');
+          img.attr('alt', 'ORCID ID');
+          img.attr('src','data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA2ZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo1N0NEMjA4MDI1MjA2ODExOTk0QzkzNTEzRjZEQTg1NyIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDozM0NDOEJGNEZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDozM0NDOEJGM0ZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M1IE1hY2ludG9zaCI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOkZDN0YxMTc0MDcyMDY4MTE5NUZFRDc5MUM2MUUwNEREIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjU3Q0QyMDgwMjUyMDY4MTE5OTRDOTM1MTNGNkRBODU3Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+84NovQAAAR1JREFUeNpiZEADy85ZJgCpeCB2QJM6AMQLo4yOL0AWZETSqACk1gOxAQN+cAGIA4EGPQBxmJA0nwdpjjQ8xqArmczw5tMHXAaALDgP1QMxAGqzAAPxQACqh4ER6uf5MBlkm0X4EGayMfMw/Pr7Bd2gRBZogMFBrv01hisv5jLsv9nLAPIOMnjy8RDDyYctyAbFM2EJbRQw+aAWw/LzVgx7b+cwCHKqMhjJFCBLOzAR6+lXX84xnHjYyqAo5IUizkRCwIENQQckGSDGY4TVgAPEaraQr2a4/24bSuoExcJCfAEJihXkWDj3ZAKy9EJGaEo8T0QSxkjSwORsCAuDQCD+QILmD1A9kECEZgxDaEZhICIzGcIyEyOl2RkgwAAhkmC+eAm0TAAAAABJRU5ErkJggg==');
+          a.append(img);
+          $(this).append(a);
+        }
+      });
+  
+      // hide elements of author/affiliations grid that have no value
+      function hide_byline_column(caption) {
+        $('d-byline').find('h3:contains("' + caption + '")').parent().css('visibility', 'hidden');
+      }
+  
+      // affiliations
+      var have_affiliations = false;
+      for (var i = 0; i<front_matter.authors.length; ++i) {
+        var author = front_matter.authors[i];
+        if (author.affiliation !== "&nbsp;") {
+          have_affiliations = true;
+          break;
+        }
+      }
+      if (!have_affiliations)
+        $('d-byline').find('h3:contains("Affiliations")').css('visibility', 'hidden');
+  
+      // published date
+      if (!front_matter.publishedDate)
+        hide_byline_column("Published");
+  
+      // document object identifier
+      var doi = $('d-byline').find('h3:contains("DOI")');
+      var doi_p = doi.next().empty();
+      if (!front_matter.doi) {
+        // if we have a citation and valid citationText then link to that
+        if ($('#citation').length > 0 && front_matter.citationText) {
+          doi.html('Citation');
+          $('<a href="#citation"></a>')
+            .text(front_matter.citationText)
+            .appendTo(doi_p);
+        } else {
+          hide_byline_column("DOI");
+        }
+      } else {
+        $('<a></a>')
+           .attr('href', "https://doi.org/" + front_matter.doi)
+           .html(front_matter.doi)
+           .appendTo(doi_p);
+      }
+  
+       // change plural form of authors/affiliations
+      if (front_matter.authors.length === 1) {
+        var grid = $('.authors-affiliations');
+        grid.children('h3:contains("Authors")').text('Author');
+        grid.children('h3:contains("Affiliations")').text('Affiliation');
+      }
+  
+      // remove d-appendix and d-footnote-list local styles
+      $('d-appendix > style:first-child').remove();
+      $('d-footnote-list > style:first-child').remove();
+  
+      // move appendix-bottom entries to the bottom
+      $('.appendix-bottom').appendTo('d-appendix').children().unwrap();
+      $('.appendix-bottom').remove();
+  
+      // hoverable references
+      $('span.citation[data-cites]').each(function() {
+        var refHtml = $('#ref-' + $(this).attr('data-cites')).html();
+        window.tippy(this, {
+          allowHTML: true,
+          content: refHtml,
+          maxWidth: 500,
+          interactive: true,
+          interactiveBorder: 10,
+          theme: 'light-border',
+          placement: 'bottom-start'
+        });
+      });
+  
+      // clear polling timer
+      clearInterval(tid);
+  
+      // show body now that everything is ready
+      on_load_complete();
+    }
+  
+    var tid = setInterval(distill_post_process, 50);
+    distill_post_process();
+  
+  }
+  
+  function init_downlevel() {
+  
+    init_common();
+  
+     // insert hr after d-title
+    $('.d-title').after($('<hr class="section-separator"/>'));
+  
+    // check if we have authors
+    var front_matter = JSON.parse($("#distill-front-matter").html());
+    var have_authors = front_matter.authors && front_matter.authors.length > 0;
+  
+    // manage byline/border
+    if (!have_authors)
+      $('.d-byline').remove();
+    $('.d-byline').after($('<hr class="section-separator"/>'));
+    $('.d-byline a').remove();
+  
+    // remove toc
+    $('.d-contents').remove();
+  
+    // move appendix elements
+    $('h1.appendix, h2.appendix').each(function(i, val) {
+      $(this).changeElementType('h3');
+    });
+    $('h3.appendix').each(function(i, val) {
+      $(this).nextUntil($('h1, h2, h3')).addBack().appendTo($('.d-appendix'));
+    });
+  
+  
+    // inject headers into references and footnotes
+    var refs_header = $('<h3></h3>');
+    refs_header.text('References');
+    $('#refs').prepend(refs_header);
+  
+    var footnotes_header = $('<h3></h3');
+    footnotes_header.text('Footnotes');
+    $('.footnotes').children('hr').first().replaceWith(footnotes_header);
+  
+    // move appendix-bottom entries to the bottom
+    $('.appendix-bottom').appendTo('.d-appendix').children().unwrap();
+    $('.appendix-bottom').remove();
+  
+    // remove appendix if it's empty
+    if ($('.d-appendix').children().length === 0)
+      $('.d-appendix').remove();
+  
+    // prepend separator above appendix
+    $('.d-appendix').before($('<hr class="section-separator" style="clear: both"/>'));
+  
+    // trim code
+    $('pre>code').each(function(i, val) {
+      $(this).html($.trim($(this).html()));
+    });
+  
+    // move posts-container right before article
+    $('.posts-container').insertBefore($('.d-article'));
+  
+    $('body').addClass('downlevel');
+  
+    on_load_complete();
+  }
+  
+  
+  function init_common() {
+  
+    // jquery plugin to change element types
+    (function($) {
+      $.fn.changeElementType = function(newType) {
+        var attrs = {};
+  
+        $.each(this[0].attributes, function(idx, attr) {
+          attrs[attr.nodeName] = attr.nodeValue;
+        });
+  
+        this.replaceWith(function() {
+          return $("<" + newType + "/>", attrs).append($(this).contents());
+        });
+      };
+    })(jQuery);
+  
+    // prevent underline for linked images
+    $('a > img').parent().css({'border-bottom' : 'none'});
+  
+    // mark non-body figures created by knitr chunks as 100% width
+    $('.layout-chunk').each(function(i, val) {
+      var figures = $(this).find('img, .html-widget');
+      if ($(this).attr('data-layout') !== "l-body") {
+        figures.css('width', '100%');
+      } else {
+        figures.css('max-width', '100%');
+        figures.filter("[width]").each(function(i, val) {
+          var fig = $(this);
+          fig.css('width', fig.attr('width') + 'px');
+        });
+  
+      }
+    });
+  
+    // auto-append index.html to post-preview links in file: protocol
+    // and in rstudio ide preview
+    $('.post-preview').each(function(i, val) {
+      if (window.location.protocol === "file:")
+        $(this).attr('href', $(this).attr('href') + "index.html");
+    });
+  
+    // get rid of index.html references in header
+    if (window.location.protocol !== "file:") {
+      $('.distill-site-header a[href]').each(function(i,val) {
+        $(this).attr('href', $(this).attr('href').replace("index.html", "./"));
+      });
+    }
+  
+    // add class to pandoc style tables
+    $('tr.header').parent('thead').parent('table').addClass('pandoc-table');
+    $('.kable-table').children('table').addClass('pandoc-table');
+  
+    // add figcaption style to table captions
+    $('caption').parent('table').addClass("figcaption");
+  
+    // initialize posts list
+    if (window.init_posts_list)
+      window.init_posts_list();
+  
+    // implmement disqus comment link
+    $('.disqus-comment-count').click(function() {
+      window.headroom_prevent_pin = true;
+      $('#disqus_thread').toggleClass('hidden');
+      if (!$('#disqus_thread').hasClass('hidden')) {
+        var offset = $(this).offset();
+        $(window).resize();
+        $('html, body').animate({
+          scrollTop: offset.top - 35
+        });
+      }
+    });
+  }
+  
+  document.addEventListener('DOMContentLoaded', function() {
+    if (is_downlevel_browser())
+      init_downlevel();
+    else
+      window.addEventListener('WebComponentsReady', init_distill);
+  });
+  
+  </script>
+  
+  <!--/radix_placeholder_distill-->
+  <script src="survival_networks_tutorial_files/jquery-1.11.3/jquery.min.js"></script>
+  <script src="survival_networks_tutorial_files/popper-2.6.0/popper.min.js"></script>
+  <link href="survival_networks_tutorial_files/tippy-6.2.7/tippy.css" rel="stylesheet" />
+  <link href="survival_networks_tutorial_files/tippy-6.2.7/tippy-light-border.css" rel="stylesheet" />
+  <script src="survival_networks_tutorial_files/tippy-6.2.7/tippy.umd.min.js"></script>
+  <script src="survival_networks_tutorial_files/anchor-4.2.2/anchor.min.js"></script>
+  <script src="survival_networks_tutorial_files/bowser-1.9.3/bowser.min.js"></script>
+  <script src="survival_networks_tutorial_files/webcomponents-2.0.0/webcomponents.js"></script>
+  <script src="survival_networks_tutorial_files/distill-2.2.21/template.v2.js"></script>
+  <!--radix_placeholder_site_in_header-->
+  <!--/radix_placeholder_site_in_header-->
+
+
+</head>
+
+<body>
+
+<!--radix_placeholder_front_matter-->
+
+<script id="distill-front-matter" type="text/json">
+{"title":"Survival Networks with mlr3proba","description":"A demonstration of training, tuning, and comparing survival networks.","authors":[{"author":"Raphael Sonabend","authorURL":"#","affiliation":"&nbsp;","affiliationURL":"#","orcidID":""}],"publishedDate":"2021-04-20T00:00:00.000+02:00","citationText":"Sonabend, 2021"}
+</script>
+
+<!--/radix_placeholder_front_matter-->
+<!--radix_placeholder_navigation_before_body-->
+<!--/radix_placeholder_navigation_before_body-->
+<!--radix_placeholder_site_before_body-->
+<!--/radix_placeholder_site_before_body-->
+
+<div class="d-title">
+<h1>Survival Networks with mlr3proba</h1>
+<!--radix_placeholder_categories-->
+<div class="dt-tags">
+<div class="dt=tag">mlr3proba</div>
+<div class="dt=tag">survival analysis</div>
+<div class="dt=tag">tuning</div>
+<div class="dt=tag">optimization</div>
+<div class="dt=tag">nested resampling</div>
+</div>
+<!--/radix_placeholder_categories-->
+<p>A demonstration of training, tuning, and comparing survival networks.</p>
+</div>
+
+<div class="d-byline">
+  Raphael Sonabend  
+  
+<br/>04-20-2021
+</div>
+
+<div class="d-article">
+<p>I have received many questions about survival neural networks (‘survival networks’) in R, ranging from “is this even possible?” to “how do I install Python in R?” and “how can I tune these models?”. If you are an R user with an interest in survival networks then this is the article for you! This is not a tutorial of how to use the relevant packages but a demonstration to answer these questions.</p>
+<p>This is an advanced demonstration and I’m going to assume you know: i) what survival analysis is; ii) what neural networks are (and common hyper-parameters); iii) basic machine learning (ML) methods like resampling and tuning. I’m happy to cover these topics fully in future articles if requested.</p>
+<p>In this article we will cover how to: i) install Python modules in R; ii) use models implemented in <a href="https://cran.r-project.org/package=survivalmodels">survivalmodels</a><span class="citation" data-cites="pkgsurvivalmodels">(Sonabend <a href="#ref-pkgsurvivalmodels">2020</a>)</span> with <a href="https://mlr3proba.mlr-org.com">mlr3proba</a><span class="citation" data-cites="pkgmlr3proba">(Sonabend et al. <a href="#ref-pkgmlr3proba">2021</a>)</span> ; iii) tune models with <a href="https://mlr3tuning.mlr-org.com">mlr3tuning</a><span class="citation" data-cites="pkgmlr3tuning">(Lang, Richter, et al. <a href="#ref-pkgmlr3tuning">2019</a>)</span> and preprocess data with <a href="https://mlr3pipelines.mlr-org.com">mlr3pipelines</a><span class="citation" data-cites="pkgmlr3pipelines">(Binder et al. <a href="#ref-pkgmlr3pipelines">2019</a>)</span>; iv) benchmark and compare models in <a href="https://mlr3proba.mlr-org.com">mlr3proba</a>; v) analyse results in <a href="https://mlr3benchmark.mlr-org.com">mlr3benchmark</a><span class="citation" data-cites="pkgmlr3benchmark">(Sonabend and Pfisterer <a href="#ref-pkgmlr3benchmark">2020</a>)</span>. Many of these packages live in the mlr3 family and if you want to learn more about them I’d recommend starting with the mlr3book<span class="citation" data-cites="pkgmlr3book">(Becker et al. <a href="#ref-pkgmlr3book">2021</a><a href="#ref-pkgmlr3book">a</a>)</span>.</p>
+<p>The code in this demonstration is a ‘toy’ example with choices made to run the code quickly on my very old laptop, all models are expected to perform poorly.</p>
+<p>Let’s get deep learning!</p>
+<h1 id="installing-packages">Installing Packages</h1>
+<p>We will be using several packages, to follow along make sure you install the following:</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/utils/install.packages.html'>install.packages</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"ggplot2"</span>, <span class='st'>"mlr3benchmark"</span>, <span class='st'>"mlr3pipelines"</span>, <span class='st'>"mlr3proba"</span>, 
+                   <span class='st'>"mlr3tuning"</span>, <span class='st'>"survivalmodels"</span><span class='op'>)</span><span class='op'>)</span>
+<span class='fu'>remotes</span><span class='fu'>::</span><span class='fu'><a href='https://remotes.r-lib.org/reference/install_github.html'>install_github</a></span><span class='op'>(</span><span class='st'>"mlr-org/mlr3extralearners"</span><span class='op'>)</span>
+</code></pre>
+</div>
+</div>
+<p>I have installed the following versions:</p>
+<div class="layout-chunk" data-layout="l-body">
+<pre><code>          ggplot2     mlr3benchmark mlr3extralearners     mlr3pipelines 
+          &quot;3.3.3&quot;           &quot;0.1.2&quot;      &quot;0.3.0.9000&quot;           &quot;0.3.4&quot; 
+        mlr3proba        mlr3tuning        reticulate    survivalmodels 
+          &quot;0.3.2&quot;      &quot;0.8.0.9000&quot;            &quot;1.19&quot;           &quot;0.1.8&quot; </code></pre>
+</div>
+<h1 id="survivalmodels">survivalmodels</h1>
+<p>The package <a href="https://cran.r-project.org/package=survivalmodels">survivalmodels</a> currently contains the neural networks:</p>
+<ul>
+<li>CoxTime<span class="citation" data-cites="Kvamme2019a">(Kvamme, Borgan, and Scheel <a href="#ref-Kvamme2019a">2019</a>)</span></li>
+<li>DeepHit<span class="citation" data-cites="Lee2018a">(Lee et al. <a href="#ref-Lee2018a">2018</a>)</span></li>
+<li>DeepSurv<span class="citation" data-cites="Katzman2018">(Katzman et al. <a href="#ref-Katzman2018">2018</a>)</span></li>
+<li>Logistic-Hazard<span class="citation" data-cites="Gensheimer2019">(Gensheimer and Narasimhan <a href="#ref-Gensheimer2019">2019</a>)</span> <span class="citation" data-cites="Kvamme2019">(Kvamme and Borgan <a href="#ref-Kvamme2019">2019</a>)</span></li>
+<li>PCHazard<span class="citation" data-cites="Kvamme2019">(Kvamme and Borgan <a href="#ref-Kvamme2019">2019</a>)</span></li>
+<li>DNNSurv<span class="citation" data-cites="Zhao2020">(Zhao and Feng <a href="#ref-Zhao2020">2020</a>)</span></li>
+</ul>
+<p>The first five of these use <a href="https://cran.r-project.org/package=reticulate">reticulate</a> <span class="citation" data-cites="pkgreticulate">(Ushey, Allaire, and Tang <a href="#ref-pkgreticulate">2020</a>)</span> to connect the great Python <a href="https://pypi.org/project/pycox/">pycox</a> <span class="citation" data-cites="pkgpycox">(Kvamme <a href="#ref-pkgpycox">2018</a>)</span> package, written by Håvard Kvamme, this means you can use neural networks in R with the speed of Python. DNNSurv uses the R <a href="https://cran.r-project.org/package=keras">keras</a> <span class="citation" data-cites="pkgkeras">(Allaire and Chollet <a href="#ref-pkgkeras">2020</a>)</span> package.</p>
+<p>In this article, we’re just going to look at the first five as they are better established in the literature and they have an identical interface, which simplifies tuning as we will see below. No description of the networks is provided in this article but if this is requested then I am happy to describe these in detail in future posts.</p>
+<h2 id="using-python-in-r">Using Python in R</h2>
+<p>To use the Python models in <a href="https://cran.r-project.org/package=survivalmodels">survivalmodels</a> you need to set up a Miniconda environment within R and install the required Python modules. Installing the required modules is possible with functions from <a href="https://cran.r-project.org/package=survivalmodels">survivalmodels</a>:</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://github.com/RaphaelS1/survivalmodels/'>survivalmodels</a></span><span class='op'>)</span>
+
+<span class='fu'><a href='https://rdrr.io/pkg/survivalmodels/man/install_pycox.html'>install_pycox</a></span><span class='op'>(</span>pip <span class='op'>=</span> <span class='cn'>TRUE</span>, install_torch <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>
+<span class='fu'><a href='https://rdrr.io/pkg/survivalmodels/man/install_keras.html'>install_keras</a></span><span class='op'>(</span>pip <span class='op'>=</span> <span class='cn'>TRUE</span>, install_tensorflow <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>
+</code></pre>
+</div>
+</div>
+<p><code>install_pycox</code> uses <code>reticulate::py_install</code> to install the Python packages <a href="https://pypi.org/project/pycox/">pycox</a> and optionally <a href="https://pypi.org/project/torch/">pycox</a><span class="citation" data-cites="pkgtorch">(Paszke et al. <a href="#ref-pkgtorch">2017</a>)</span> (<code>install_torch = TRUE</code>). <code>install_keras</code> will install <a href="https://pypi.org/project/keras/">pycox</a> and optionally <a href="https://pypi.org/project/tensorflow/">pycox</a><span class="citation" data-cites="pkgtensorflow">(Abadi et al. <a href="#ref-pkgtensorflow">2015</a>)</span> (<code>install_tensorflow = TRUE</code>).</p>
+<h2 id="setting-seeds">Setting Seeds</h2>
+<p>Ensuring reproducible results from models implemented in Python is slightly more tricky than usual as seeds have to be set in multiple places. <a href="https://cran.r-project.org/package=survivalmodels">survivalmodels</a> simplifies this with one function called, <code>set_seed</code>.</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/pkg/survivalmodels/man/set_seed.html'>set_seed</a></span><span class='op'>(</span><span class='fl'>1234</span><span class='op'>)</span>
+</code></pre>
+</div>
+</div>
+<h1 id="mlr3proba">mlr3proba</h1>
+<p>To run these models once they’re installed, we’re going to use a different interface. <a href="https://cran.r-project.org/package=survivalmodels">survivalmodels</a> has limited functionality, which is okay for basic model fitting/predicting, but neural networks typically require data pre-processing and model tuning, so instead we’re going to use <a href="https://mlr3proba.mlr-org.com">mlr3proba</a>, which is part of the <a href="https://mlr3.mlr-org.com">mlr3</a><span class="citation" data-cites="pkgmlr3">(Lang, Binder, et al. <a href="#ref-pkgmlr3">2019</a>)</span> family of packages and includes functionality for probabilistic supervised learning, of which survival analysis is a part of. <a href="https://mlr3.mlr-org.com">mlr3</a> packages use the R6<span class="citation" data-cites="pkgR6">(Chang <a href="#ref-pkgR6">2018</a>)</span> interface for object-oriented machine learning in R. Full tutorials for mlr3 can be found in the <a href="https://mlr3book.mlr-org.com">mlr3book</a> and there is also a chapter for survival analysis with <a href="https://mlr3proba.mlr-org.com">mlr3proba</a><span class="citation" data-cites="pkgmlr3booksurv">(Becker et al. <a href="#ref-pkgmlr3booksurv">2021</a><a href="#ref-pkgmlr3booksurv">b</a>)</span>.</p>
+<p>Now let’s set up our experiment!</p>
+<h2 id="survival-data">Survival data</h2>
+<p>The first thing we need to do is get some survival datasets for training our models, in <a href="https://mlr3proba.mlr-org.com">mlr3proba</a> datasets are saved in tasks which include information about features and targets. We will use one task that comes with <a href="https://mlr3proba.mlr-org.com">mlr3proba</a>, <code>whas</code>, and one which we’ll set up ourselves (though is also already available in <a href="https://mlr3proba.mlr-org.com">mlr3proba</a>, this is just for example).</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://mlr3.mlr-org.com'>mlr3</a></span><span class='op'>)</span>
+<span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://mlr3proba.mlr-org.com'>mlr3proba</a></span><span class='op'>)</span>
+
+<span class='co'>## get the `whas` task from mlr3proba</span>
+<span class='va'>whas</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>tsk</a></span><span class='op'>(</span><span class='st'>"whas"</span><span class='op'>)</span>
+
+<span class='co'>## create our own task from the rats dataset</span>
+<span class='va'>rats_data</span> <span class='op'>&lt;-</span> <span class='fu'>survival</span><span class='fu'>::</span><span class='va'><a href='https://rdrr.io/pkg/survival/man/rats.html'>rats</a></span>
+<span class='co'>## convert characters to factors</span>
+<span class='va'>rats_data</span><span class='op'>$</span><span class='va'>sex</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/factor.html'>factor</a></span><span class='op'>(</span><span class='va'>rats_data</span><span class='op'>$</span><span class='va'>sex</span>, levels <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"f"</span>, <span class='st'>"m"</span><span class='op'>)</span><span class='op'>)</span>
+<span class='va'>rats</span> <span class='op'>&lt;-</span> <span class='va'><a href='https://mlr3proba.mlr-org.com/reference/TaskSurv.html'>TaskSurv</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='st'>"rats"</span>, <span class='va'>rats_data</span>, time <span class='op'>=</span> <span class='st'>"time"</span>, event <span class='op'>=</span> <span class='st'>"status"</span><span class='op'>)</span>
+
+<span class='co'>## combine in list</span>
+<span class='va'>tasks</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='va'>whas</span>, <span class='va'>rats</span><span class='op'>)</span>
+</code></pre>
+</div>
+</div>
+<h2 id="getting-and-tuning-learners">Getting and tuning learners</h2>
+<p>Now the part you are here for! We are going to train and tune the Pycox neural networks in <a href="https://cran.r-project.org/package=survivalmodels">survivalmodels</a> (all but DNNSurv). Tuning is handled by the <a href="https://mlr3tuning.mlr-org.com">mlr3tuning</a> package. We are not going to specify a custom architecture for the models but will instead use the defaults, if you are familiar with PyTorch then you have the option to create your own architecture if you prefer by passing this to the custom_net parameter in the models.</p>
+<h3 id="hyper-parameter-configurations">Hyper-parameter configurations</h3>
+<p>Training and tuning neural networks is an art but for this article, we are keeping it simple. We’re going to tune the neural networks with the following configurations:</p>
+<ul>
+<li>Dropout fraction tuned over [0, 1]</li>
+<li>Weight decay over [0, 0.5]</li>
+<li>Learning rate over [0, 1]</li>
+<li>Number of nodes in a layer over {1,…,32}</li>
+<li>Number of hidden layers over {1,…,4}</li>
+</ul>
+<p>To set this up we use the <a href="https://paradox.mlr-org.com">paradox</a><span class="citation" data-cites="pkgparadox">(Lang, Bischl, et al. <a href="#ref-pkgparadox">2019</a>)</span> package (also part of <a href="https://mlr3.mlr-org.com">mlr3</a>) to create the hyper-parameter search space. All Pycox learners in <a href="https://cran.r-project.org/package=survivalmodels">survivalmodels</a> have an identical parameter interface so only one search space has to be provided. In <a href="https://cran.r-project.org/package=survivalmodels">survivalmodels</a>, the number of nodes, <code>num_nodes</code>, is specified as a vector of any length, which is not directly tunable. Therefore we instead separately tune over the number of nodes in a layer, <code>nodes</code>, and the number of layers, <code>k</code>, then provide a transformation to combine the two.</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://paradox.mlr-org.com'>paradox</a></span><span class='op'>)</span>
+<span class='va'>search_space</span> <span class='op'>=</span> <span class='fu'><a href='https://paradox.mlr-org.com/reference/ps.html'>ps</a></span><span class='op'>(</span>
+  <span class='co'># p_dbl for numeric valued parameters</span>
+  dropout <span class='op'>=</span> <span class='fu'><a href='https://paradox.mlr-org.com/reference/Domain.html'>p_dbl</a></span><span class='op'>(</span>lower <span class='op'>=</span> <span class='fl'>0</span>, upper <span class='op'>=</span> <span class='fl'>1</span><span class='op'>)</span>,
+  weight_decay <span class='op'>=</span> <span class='fu'><a href='https://paradox.mlr-org.com/reference/Domain.html'>p_dbl</a></span><span class='op'>(</span>lower <span class='op'>=</span> <span class='fl'>0</span>, upper <span class='op'>=</span> <span class='fl'>0.5</span><span class='op'>)</span>,
+  learning_rate <span class='op'>=</span> <span class='fu'><a href='https://paradox.mlr-org.com/reference/Domain.html'>p_dbl</a></span><span class='op'>(</span>lower <span class='op'>=</span> <span class='fl'>0</span>, upper <span class='op'>=</span> <span class='fl'>1</span><span class='op'>)</span>,
+  
+  <span class='co'># p_int for integer valued parameters</span>
+  nodes <span class='op'>=</span> <span class='fu'><a href='https://paradox.mlr-org.com/reference/Domain.html'>p_int</a></span><span class='op'>(</span>lower <span class='op'>=</span> <span class='fl'>1</span>, upper <span class='op'>=</span> <span class='fl'>32</span><span class='op'>)</span>,
+  k <span class='op'>=</span> <span class='fu'><a href='https://paradox.mlr-org.com/reference/Domain.html'>p_int</a></span><span class='op'>(</span>lower <span class='op'>=</span> <span class='fl'>1</span>, upper <span class='op'>=</span> <span class='fl'>4</span><span class='op'>)</span>
+<span class='op'>)</span>
+
+<span class='va'>search_space</span><span class='op'>$</span><span class='va'>trafo</span> <span class='op'>=</span> <span class='kw'>function</span><span class='op'>(</span><span class='va'>x</span>, <span class='va'>param_set</span><span class='op'>)</span> <span class='op'>{</span>
+  <span class='va'>x</span><span class='op'>$</span><span class='va'>num_nodes</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span><span class='op'>(</span><span class='va'>x</span><span class='op'>$</span><span class='va'>nodes</span>, <span class='va'>x</span><span class='op'>$</span><span class='va'>k</span><span class='op'>)</span>
+  <span class='va'>x</span><span class='op'>$</span><span class='va'>nodes</span> <span class='op'>=</span> <span class='va'>x</span><span class='op'>$</span><span class='va'>k</span> <span class='op'>=</span> <span class='cn'>NULL</span>
+  <span class='kw'><a href='https://rdrr.io/r/base/function.html'>return</a></span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span>
+<span class='op'>}</span>
+</code></pre>
+</div>
+</div>
+<p>Notice that in our transformation we assume the same number of nodes per layer, this is a fairly usual assumption but one could consider more advanced transformations.</p>
+<p>We now wrap the learners in an <code>AutoTuner</code>, which allows the learner to be easily tuned inside the benchmark experiment. As we are tuning multiple similar learners, we can create a function that makes creating the AutoTuner easier. For tuning we use: 2/3 split holdout, c-index optimisation, and 2 iteration random search. These settings should not be used in practice and are just to make things run faster for this demonstration, in practice I usually recommend 3-fold nested cross-validation, <code>rsmp("cv", folds = 3)</code>, and 60 iteration random search<span class="citation" data-cites="Bergstra2012">(Bergstra and Bengio <a href="#ref-Bergstra2012">2012</a>)</span>, <code>trm("evals", n_evals = 60)</code>.</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://mlr3tuning.mlr-org.com'>mlr3tuning</a></span><span class='op'>)</span>
+
+<span class='va'>create_autotuner</span> <span class='op'>&lt;-</span> <span class='kw'>function</span><span class='op'>(</span><span class='va'>learner</span><span class='op'>)</span> <span class='op'>{</span>
+  <span class='va'><a href='https://mlr3tuning.mlr-org.com/reference/AutoTuner.html'>AutoTuner</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span>
+  learner <span class='op'>=</span> <span class='va'>learner</span>,
+  search_space <span class='op'>=</span> <span class='va'>search_space</span>,
+  resampling <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>rsmp</a></span><span class='op'>(</span><span class='st'>"holdout"</span><span class='op'>)</span>,
+  measure <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>msr</a></span><span class='op'>(</span><span class='st'>"surv.cindex"</span><span class='op'>)</span>,
+  terminator <span class='op'>=</span> <span class='fu'><a href='https://bbotk.mlr-org.com/reference/trm.html'>trm</a></span><span class='op'>(</span><span class='st'>"evals"</span>, n_evals <span class='op'>=</span> <span class='fl'>2</span><span class='op'>)</span>,
+  tuner <span class='op'>=</span> <span class='fu'><a href='https://mlr3tuning.mlr-org.com/reference/tnr.html'>tnr</a></span><span class='op'>(</span><span class='st'>"random_search"</span><span class='op'>)</span><span class='op'>)</span>
+<span class='op'>}</span>
+</code></pre>
+</div>
+</div>
+<p>Now let’s get our learners and apply our function. For all learners we’re going to set the following hyper-parameters:</p>
+<ul>
+<li>30% of nested training data will be held-back as validation data for early_stopping, <code>frac = 0.3, early_stopping = TRUE</code></li>
+<li>Adam optimizer, <code>optimizer = “adam"</code></li>
+<li>A maximum of 10 epochs, <code>epochs = 10</code></li>
+</ul>
+<p>As we are using early-stopping the number of epochs would usually be massively increased (say to 100 minimum) but again it’s reduced here to run quicker. All other hyper-parameters use the model defaults.</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='co'>## learners are stored in mlr3extralearners</span>
+<span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'>mlr3extralearners</span><span class='op'>)</span>
+
+<span class='co'>## load learners</span>
+<span class='va'>learners</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/pkg/mlr3extralearners/man/lrn.html'>lrns</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/paste.html'>paste0</a></span><span class='op'>(</span><span class='st'>"surv."</span>, <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"coxtime"</span>, <span class='st'>"deephit"</span>, <span class='st'>"deepsurv"</span>, 
+                                   <span class='st'>"loghaz"</span>, <span class='st'>"pchazard"</span><span class='op'>)</span><span class='op'>)</span>,
+                 frac <span class='op'>=</span> <span class='fl'>0.3</span>, early_stopping <span class='op'>=</span> <span class='cn'>TRUE</span>, epochs <span class='op'>=</span> <span class='fl'>10</span>,
+                 optimizer <span class='op'>=</span> <span class='st'>"adam"</span>
+<span class='op'>)</span>
+ 
+<span class='co'># apply our function</span>
+<span class='va'>learners</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/lapply.html'>lapply</a></span><span class='op'>(</span><span class='va'>learners</span>, <span class='va'>create_autotuner</span><span class='op'>)</span>
+</code></pre>
+</div>
+</div>
+<h3 id="pre-processing">Pre-processing</h3>
+<p>All neural networks require some data pre-processing. This is made simple with the <a href="https://mlr3pipelines.mlr-org.com">mlr3pipelines</a> package and in particular the <code>encode</code> and <code>scale</code> pipeops, which respectively perform one-hot encoding and feature standardization (other methods available by changing parameters). Again we’ll make a function that can be applied to all our learners.</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://mlr3pipelines.mlr-org.com'>mlr3pipelines</a></span><span class='op'>)</span>
+
+<span class='va'>create_pipeops</span> <span class='op'>&lt;-</span> <span class='kw'>function</span><span class='op'>(</span><span class='va'>learner</span><span class='op'>)</span> <span class='op'>{</span>
+  <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"encode"</span><span class='op'>)</span> <span class='op'>%&gt;&gt;%</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"scale"</span><span class='op'>)</span> <span class='op'>%&gt;&gt;%</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"learner"</span>, <span class='va'>learner</span><span class='op'>)</span>
+<span class='op'>}</span>
+
+<span class='co'># apply our function</span>
+<span class='va'>learners</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/lapply.html'>lapply</a></span><span class='op'>(</span><span class='va'>learners</span>, <span class='va'>create_pipeops</span><span class='op'>)</span>
+</code></pre>
+</div>
+</div>
+<h3 id="benchmark">Benchmark</h3>
+<p>And we’re ready! For our experiment we’re going to use 3-fold cross-validation but usually 5-fold cross-validation would be preferred, <code>rsmp("cv", folds = 5)</code> . For comparison we’re also going to add Kaplan-Meier<span class="citation" data-cites="KaplanMeier1958">(Kaplan and Meier <a href="#ref-KaplanMeier1958">1958</a>)</span> and Cox PH<span class="citation" data-cites="Cox1972">(Cox <a href="#ref-Cox1972">1972</a>)</span> learners to the experiment. We will aggregate our benchmark results with Harrell’s C-index<span class="citation" data-cites="Harrell1982">(Harrell, Califf, and Pryor <a href="#ref-Harrell1982">1982</a>)</span> and the Integrated Graf Score<span class="citation" data-cites="Graf1999">(Graf et al. <a href="#ref-Graf1999">1999</a>)</span> (many other measures are also available).</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='co'>## select holdout as the resampling strategy</span>
+<span class='va'>resampling</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>rsmp</a></span><span class='op'>(</span><span class='st'>"cv"</span>, folds <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span>
+
+<span class='co'>## add KM and CPH</span>
+<span class='va'>learners</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='va'>learners</span>, <span class='fu'><a href='https://rdrr.io/pkg/mlr3extralearners/man/lrn.html'>lrns</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"surv.kaplan"</span>, <span class='st'>"surv.coxph"</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>
+<span class='va'>design</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/benchmark_grid.html'>benchmark_grid</a></span><span class='op'>(</span><span class='va'>tasks</span>, <span class='va'>learners</span>, <span class='va'>resampling</span><span class='op'>)</span>
+<span class='va'>bm</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/benchmark.html'>benchmark</a></span><span class='op'>(</span><span class='va'>design</span><span class='op'>)</span>
+</code></pre>
+</div>
+</div>
+<p>We can aggregate results by different measures:</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='co'>## Concordance index and Integrated Graf Score</span>
+<span class='va'>msrs</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>msrs</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"surv.cindex"</span>, <span class='st'>"surv.graf"</span><span class='op'>)</span><span class='op'>)</span>
+<span class='va'>bm</span><span class='op'>$</span><span class='fu'>aggregate</span><span class='op'>(</span><span class='va'>msrs</span><span class='op'>)</span><span class='op'>[</span>, <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>3</span>, <span class='fl'>4</span>, <span class='fl'>7</span>, <span class='fl'>8</span><span class='op'>)</span><span class='op'>]</span>
+</code></pre>
+</div>
+<pre><code>    task_id                       learner_id surv.harrell_c  surv.graf
+ 1:    whas  encode.scale.surv.coxtime.tuned      0.5402544 0.23660491
+ 2:    whas  encode.scale.surv.deephit.tuned      0.4930036 0.39716194
+ 3:    whas encode.scale.surv.deepsurv.tuned      0.6951130 0.21126205
+ 4:    whas   encode.scale.surv.loghaz.tuned      0.5116887 0.28632792
+ 5:    whas encode.scale.surv.pchazard.tuned      0.5247859 0.29908496
+ 6:    whas                      surv.kaplan      0.5000000 0.23717567
+ 7:    whas                       surv.coxph      0.7391565 0.20120291
+ 8:    rats  encode.scale.surv.coxtime.tuned      0.6309753 0.05685849
+ 9:    rats  encode.scale.surv.deephit.tuned      0.3769910 0.36025715
+10:    rats encode.scale.surv.deepsurv.tuned      0.5693399 0.05736899
+11:    rats   encode.scale.surv.loghaz.tuned      0.6154914 0.15546280
+12:    rats encode.scale.surv.pchazard.tuned      0.6745137 0.34789168
+13:    rats                      surv.kaplan      0.5000000 0.05799158
+14:    rats                       surv.coxph      0.7762968 0.05321489</code></pre>
+</div>
+<p>In our toy demonstration we can tentatively conclude from these results that Cox PH is the best performing and DeepHit is the worst performing.</p>
+<h2 id="analysing-results">Analysing results</h2>
+<p>As we have run our models on multiple independent datasets, we can compare our results in more detail with <a href="https://mlr3benchmark.mlr-org.com">mlr3benchmark</a>. The commented code below is just a showcase of what is possible but no detail is provided (let me know if you’re interested in this for a future tutorial!).</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://mlr3benchmark.mlr-org.com'>mlr3benchmark</a></span><span class='op'>)</span>
+
+<span class='co'>## create mlr3benchmark object</span>
+<span class='va'>bma</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://mlr3benchmark.mlr-org.com/reference/as.BenchmarkAggr.html'>as.BenchmarkAggr</a></span><span class='op'>(</span><span class='va'>bm</span>, 
+                        measures <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>msrs</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"surv.cindex"</span>, <span class='st'>"surv.graf"</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>
+
+<span class='co'>## run global Friedman test</span>
+<span class='va'>bma</span><span class='op'>$</span><span class='fu'>friedman_test</span><span class='op'>(</span><span class='op'>)</span>
+</code></pre>
+</div>
+<pre><code>                X2 df    p.value p.signif
+harrell_c     10.5  6  0.1051144         
+graf      11.78571  6 0.06692358        .</code></pre>
+</div>
+<p>The Friedman test results indicate there are no significant differences between the models with respect to either measure (assuming p ≤ 0.05 is significant). For now let’s say models are significantly different if p ≤ 0.1 (I don’t recommend this is in general) just so we can take a look at a critical difference diagram<span class="citation" data-cites="Demsar2006">(Demšar <a href="#ref-Demsar2006">2006</a>)</span> to compare these models.</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='co'>## load ggplot2 for autoplots</span>
+<span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://ggplot2.tidyverse.org'>ggplot2</a></span><span class='op'>)</span>
+
+<span class='co'>## critical difference diagrams for IGS</span>
+<span class='fu'><a href='https://ggplot2.tidyverse.org/reference/autoplot.html'>autoplot</a></span><span class='op'>(</span><span class='va'>bma</span>, meas <span class='op'>=</span> <span class='st'>"graf"</span>, type <span class='op'>=</span> <span class='st'>"cd"</span>, ratio <span class='op'>=</span> <span class='fl'>1</span><span class='op'>/</span><span class='fl'>3</span>, p.value <span class='op'>=</span> <span class='fl'>0.1</span><span class='op'>)</span>
+</code></pre>
+</div>
+<p><img src="survival_networks_tutorial_files/figure-html5/autoplots-1.png" width="624" /></p>
+</div>
+<p>The results show that no model outperforms the Kaplan-Meier baseline and our analysis is complete (not surprising with this toy set-up!).</p>
+<h1 id="summary">Summary</h1>
+<p>In this demonstration we used neural networks implemented in Python and interfaced through <a href="https://cran.r-project.org/package=survivalmodels">survivalmodels</a>. We used the <a href="https://mlr3proba.mlr-org.com">mlr3proba</a> interface to load these models and get some survival tasks. We used <a href="https://mlr3tuning.mlr-org.com">mlr3tuning</a> to set-up hyper-parameter configurations and tuning controls, and <a href="https://mlr3pipelines.mlr-org.com">mlr3pipelines</a> for data pre-processing. Finally we used <a href="https://mlr3benchmark.mlr-org.com">mlr3benchmark</a> to analyse the results across multiple datasets. I hope this article demonstrates how the mlr3 interface makes it simpler to select, tune, and compare models from <a href="https://cran.r-project.org/package=survivalmodels">survivalmodels</a>.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
+<div id="refs" class="references">
+<div id="ref-pkgtensorflow">
+<p>Abadi, Martín, Ashish Agarwal, Paul Barham, Eugene Brevdo, Zhifeng Chen, Craig Citro, Greg S. Corrado, et al. 2015. “TensorFlow: Large-Scale Machine Learning on Heterogeneous Systems.” <a href="https://www.tensorflow.org/">https://www.tensorflow.org/</a>.</p>
+</div>
+<div id="ref-pkgkeras">
+<p>Allaire, J J, and François Chollet. 2020. “keras: R Interface to ’Keras’.” CRAN. <a href="https://cran.r-project.org/package=keras">https://cran.r-project.org/package=keras</a>.</p>
+</div>
+<div id="ref-pkgmlr3book">
+<p>Becker, Marc, Martin Binder, Bernd Bischl, Michel Lang, Florian Pfisterer, Nicholas G. Reich, Jakob Richter, Patrick Schratz, and Raphael Sonabend. 2021a. <em>Mlr3 Book</em>. <a href="https://mlr3book.mlr-org.com">https://mlr3book.mlr-org.com</a>.</p>
+</div>
+<div id="ref-pkgmlr3booksurv">
+<p>———. 2021b. “Survival Analysis.” In <em>Mlr3book</em>. <a href="https://mlr3book.mlr-org.com/survival.html">https://mlr3book.mlr-org.com/survival.html</a>.</p>
+</div>
+<div id="ref-Bergstra2012">
+<p>Bergstra, James, and Yoshua Bengio. 2012. “Random search for hyper-parameter optimization.” <em>The Journal of Machine Learning Research</em> 13 (1): 281–305.</p>
+</div>
+<div id="ref-pkgmlr3pipelines">
+<p>Binder, Martin, Florian Pfisterer, Bernd Bischl, Michel Lang, and Susanne Dandl. 2019. “mlr3pipelines: Preprocessing Operators and Pipelines for ’mlr3’.” CRAN. <a href="https://cran.r-project.org/package=mlr3pipelines">https://cran.r-project.org/package=mlr3pipelines</a>.</p>
+</div>
+<div id="ref-pkgR6">
+<p>Chang, Winston. 2018. “R6: Classes with Reference Semantics.” <a href="https://cran.r-project.org/package=R6">https://cran.r-project.org/package=R6</a>.</p>
+</div>
+<div id="ref-Cox1972">
+<p>Cox, D. R. 1972. “Regression Models and Life-Tables.” <em>Journal of the Royal Statistical Society: Series B (Statistical Methodology)</em> 34 (2): 187–220.</p>
+</div>
+<div id="ref-Demsar2006">
+<p>Demšar, Janez. 2006. “Statistical comparisons of classifiers over multiple data sets.” <em>Journal of Machine Learning Research</em> 7 (Jan): 1–30.</p>
+</div>
+<div id="ref-Gensheimer2019">
+<p>Gensheimer, Michael F, and Balasubramanian Narasimhan. 2019. “A scalable discrete-time survival model for neural networks.” <em>PeerJ</em> 7: e6257.</p>
+</div>
+<div id="ref-Graf1999">
+<p>Graf, Erika, Claudia Schmoor, Willi Sauerbrei, and Martin Schumacher. 1999. “Assessment and comparison of prognostic classification schemes for survival data.” <em>Statistics in Medicine</em> 18 (17-18): 2529–45. <a href="https://doi.org/10.1002/(SICI)1097-0258(19990915/30)18:17/18&lt;2529::AID-SIM274&gt;3.0.CO;2-5">https://doi.org/10.1002/(SICI)1097-0258(19990915/30)18:17/18&lt;2529::AID-SIM274&gt;3.0.CO;2-5</a>.</p>
+</div>
+<div id="ref-Harrell1982">
+<p>Harrell, Frank E., Robert M. Califf, and David B. Pryor. 1982. “Evaluating the yield of medical tests.” <em>JAMA</em> 247 (18): 2543–6. <a href="http://dx.doi.org/10.1001/jama.1982.03320430047030">http://dx.doi.org/10.1001/jama.1982.03320430047030</a>.</p>
+</div>
+<div id="ref-KaplanMeier1958">
+<p>Kaplan, E. L., and Paul Meier. 1958. “Nonparametric Estimation from Incomplete Observations.” <em>Journal of the American Statistical Association</em> 53 (282): 457–81. <a href="https://doi.org/10.2307/2281868">https://doi.org/10.2307/2281868</a>.</p>
+</div>
+<div id="ref-Katzman2018">
+<p>Katzman, Jared L, Uri Shaham, Alexander Cloninger, Jonathan Bates, Tingting Jiang, and Yuval Kluger. 2018. “DeepSurv: personalized treatment recommender system using a Cox proportional hazards deep neural network.” <em>BMC Medical Research Methodology</em> 18 (1): 24. <a href="https://doi.org/10.1186/s12874-018-0482-1">https://doi.org/10.1186/s12874-018-0482-1</a>.</p>
+</div>
+<div id="ref-pkgpycox">
+<p>Kvamme, Håvard. 2018. “Pycox.” <a href="https://pypi.org/project/pycox/">https://pypi.org/project/pycox/</a>.</p>
+</div>
+<div id="ref-Kvamme2019">
+<p>Kvamme, Håvard, and Ørnulf Borgan. 2019. “Continuous and discrete-time survival prediction with neural networks.” <em>arXiv Preprint arXiv:1910.06724</em>.</p>
+</div>
+<div id="ref-Kvamme2019a">
+<p>Kvamme, Håvard, Ørnulf Borgan, and Ida Scheel. 2019. “Time-to-event prediction with neural networks and Cox regression.” <em>Journal of Machine Learning Research</em> 20 (129): 1–30.</p>
+</div>
+<div id="ref-pkgmlr3">
+<p>Lang, Michel, Martin Binder, Jakob Richter, Patrick Schratz, Florian Pfisterer, Stefan Coors, Quay Au, Giuseppe Casalicchio, Lars Kotthoff, and Bernd Bischl. 2019. “mlr3: A modern object-oriented machine learning framework in R.” <em>Journal of Open Source Software</em> 4 (44): 1903. <a href="https://doi.org/10.21105/joss.01903">https://doi.org/10.21105/joss.01903</a>.</p>
+</div>
+<div id="ref-pkgparadox">
+<p>Lang, Michel, Bernd Bischl, Jakob Richter, Xudong Sun, and Martin Binder. 2019. “paradox: Define and Work with Parameter Spaces for Complex Algorithms.” CRAN. <a href="https://cran.r-project.org/package=paradox">https://cran.r-project.org/package=paradox</a>.</p>
+</div>
+<div id="ref-pkgmlr3tuning">
+<p>Lang, Michel, Jakob Richter, Bernd Bischl, and Daniel Schalk. 2019. “mlr3tuning: Tuning for ’mlr3’.” CRAN. <a href="https://cran.r-project.org/package=mlr3tuning">https://cran.r-project.org/package=mlr3tuning</a>.</p>
+</div>
+<div id="ref-Lee2018a">
+<p>Lee, Changhee, William R Zame, Jinsung Yoon, and Mihaela van der Schaar. 2018. “Deephit: A deep learning approach to survival analysis with competing risks.” In <em>Thirty-Second Aaai Conference on Artificial Intelligence</em>.</p>
+</div>
+<div id="ref-pkgtorch">
+<p>Paszke, Adam, Sam Gross, Soumith Chintala, Gregory Chanan, Edward Yang, Zachary DeVito, Zeming Lin, Alban Desmaison, Luca Antiga, and Adam Lerer. 2017. “Automatic differentiation in pytorch.”</p>
+</div>
+<div id="ref-pkgsurvivalmodels">
+<p>Sonabend, Raphael. 2020. “survivalmodels: Models for Survival Analysis.” CRAN. <a href="https://cran.r-project.org/package=survivalmodels">https://cran.r-project.org/package=survivalmodels</a>.</p>
+</div>
+<div id="ref-pkgmlr3proba">
+<p>Sonabend, Raphael, Franz J Király, Andreas Bender, Bernd Bischl, and Michel Lang. 2021. “mlr3proba: An R Package for Machine Learning in Survival Analysis.” <em>Bioinformatics</em>, February. <a href="https://doi.org/10.1093/bioinformatics/btab039">https://doi.org/10.1093/bioinformatics/btab039</a>.</p>
+</div>
+<div id="ref-pkgmlr3benchmark">
+<p>Sonabend, Raphael, and Florian Pfisterer. 2020. “mlr3benchmark: Benchmarking analysis for ’mlr3’.” CRAN. <a href="https://cran.r-project.org/package=mlr3benchmark">https://cran.r-project.org/package=mlr3benchmark</a>.</p>
+</div>
+<div id="ref-pkgreticulate">
+<p>Ushey, Kevin, J J Allaire, and Yuan Tang. 2020. “reticulate: Interface to ’Python’.” CRAN. <a href="https://cran.r-project.org/package=reticulate">https://cran.r-project.org/package=reticulate</a>.</p>
+</div>
+<div id="ref-Zhao2020">
+<p>Zhao, Lili, and Dai Feng. 2020. “DNNSurv: Deep Neural Networks for Survival Analysis Using Pseudo Values.” <a href="https://arxiv.org/abs/1908.02337">https://arxiv.org/abs/1908.02337</a>.</p>
+</div>
+</div>
+<!--radix_placeholder_article_footer-->
+<!--/radix_placeholder_article_footer-->
+</div>
+
+<div class="d-appendix">
+</div>
+
+
+<!--radix_placeholder_site_after_body-->
+<!--/radix_placeholder_site_after_body-->
+<!--radix_placeholder_appendices-->
+<div class="appendix-bottom">
+<h3 id="references">References</h3>
+<div id="references-listing"></div>
+</div>
+<!--/radix_placeholder_appendices-->
+<!--radix_placeholder_navigation_after_body-->
+<!--/radix_placeholder_navigation_after_body-->
+
+</body>
+
+</html>
