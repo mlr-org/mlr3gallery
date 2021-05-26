@@ -58,7 +58,7 @@ Following features are illustrated:
 
 ## House Price Prediction in King County {#use-case-regr-houses}
 
-We use the `kc_housing` dataset contained in the package `r mlr_pkg("mlr3book")` in order to provide a use-case for the application of `r mlr_pkg("mlr3")` on real-world data.
+We use the `kc_housing` dataset contained in the package `r mlr_pkg("mlr3data")` in order to provide a use-case for the application of `r mlr_pkg("mlr3")` on real-world data.
 
 ```{r 2020-01-30-house-prices-in-king-county-002}
 library(mlr3)
@@ -154,15 +154,14 @@ This can often greatly enhance predictive performance.
 A simple example: A house which has `yr_renovated == 0` means that is has not been renovated yet.
 Additionally, we want to drop features which should not have any influence (`id column`).
 
-After those initial manipulations, we load all required packages and create a Task containing our data.
+After those initial manipulations, we load all required packages and create a `r ref("TaskRegr")` containing our data.
 
 ```{r 2020-01-30-house-prices-in-king-county-011}
-library(mlr3)
 library(mlr3viz)
-tsk = TaskRegr$new("sales", kc_housing, target = "price")
+tsk = as_task_regr(kc_housing, target = "price")
 ```
 
-We can inspect associations between variables using `mlr3viz`'s `autoplot` function in order to get some good first impressions for our data.
+We can inspect associations between variables using `r mlr_pkg("mlr3viz")`'s `autoplot` function in order to get some good first impressions for our data.
 Note, that this does in no way prevent us from using other powerful plot functions of our choice on the original data.
 
 #### Distribution of the price:
@@ -172,7 +171,6 @@ The `autoplot` function provides a good first glimpse on our data.
 As the resulting object is a `ggplot2` object, we can use `faceting` and other functions from **ggplot2** in order to enhance plots.
 
 ```{r 2020-01-30-house-prices-in-king-county-012}
-library(ggplot2)
 autoplot(tsk) + facet_wrap(~renovated)
 ```
 
@@ -230,8 +228,10 @@ Again, we use `$clone()`, so we do not change the original task.
 
 ```{r 2020-01-30-house-prices-in-king-county-018}
 tsk_nozip = task_train$clone()$select(setdiff(tsk$feature_names, "zipcode"))
+
 # Get the learner
 lrn = lrn("regr.rpart")
+
 # And train on the task
 lrn$train(tsk_nozip, row_ids = train.idx)
 ```
@@ -411,15 +411,14 @@ For a more in-depth insight, refer to the sections on `mlr3pipelines` and `mlr3f
 ```{r 2020-01-30-house-prices-in-king-county-031}
 library(mlr3pipelines)
 library(mlr3filters)
-filter = FilterMRMR$new()
+filter = flt("mrmr")
 ```
 
 The resulting **RMSE** is slightly higher, and at the same time we only use $12$ features.
 
 ```{r 2020-01-30-house-prices-in-king-county-032}
-lrn_filter = GraphLearner$new(
-  po("filter", filter, param_vals = list(filter.nfeat = 12)) %>>% po("learner", lrn("regr.ranger"))
-  )
+graph = po("filter", filter, param_vals = list(filter.nfeat = 12)) %>>% po("learner", lrn("regr.ranger"))
+lrn_filter = as_learner(graph)
 res = resample(task = task_train, lrn_filter, cv3)
 res$score(msr("regr.rmse"))
 sprintf("RMSE of ranger with filtering: %s", round(sqrt(res$aggregate()), 2))
