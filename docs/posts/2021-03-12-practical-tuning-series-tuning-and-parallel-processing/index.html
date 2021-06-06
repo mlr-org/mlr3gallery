@@ -2147,8 +2147,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <li><a href="https://mlr3gallery.mlr-org.com/posts/2021-03-10-practical-tuning-series-tune-a-preprocessing-pipeline/">Part II - Tune a Preprocessing Pipeline</a></li>
 <li><a href="https://mlr3gallery.mlr-org.com/posts/2021-03-11-practical-tuning-series-build-an-automated-machine-learning-system/">Part III - Build an Automated Machine Learning System</a></li>
 </ul>
-<p>In this post, we teach how to run various jobs in <a href="https://mlr3.mlr-org.com">mlr3</a> in parallel.<br />
-The goal is to map <em>computational jobs</em> (e.g. evaluation of one configuration) to a pool of <em>workers</em> (usually physical CPU cores, sometimes remote computational nodes) to reduce the run time needed for tuning.</p>
+<p>In this post, we teach how to run various jobs in <a href="https://mlr3.mlr-org.com">mlr3</a> in parallel. The goal is to map <em>computational jobs</em> (e.g. evaluation of one configuration) to a pool of <em>workers</em> (usually physical CPU cores, sometimes remote computational nodes) to reduce the run time needed for tuning.</p>
 <h1 id="prerequisites">Prerequisites</h1>
 <p>We load the <a href="https://mlr3verse.mlr-org.com">mlr3verse</a> package which pulls in the most important packages for this example. Additionally, make sure you have installed the packages <a href="https://cran.r-project.org/package=future">future</a> and <a href="https://cran.r-project.org/package=future.apply">future.apply</a>.</p>
 <div class="layout-chunk" data-layout="l-body">
@@ -2244,10 +2243,10 @@ The goal is to map <em>computational jobs</em> (e.g. evaluation of one configur
 <span class='va'>learner</span><span class='op'>$</span><span class='va'>param_set</span><span class='op'>$</span><span class='va'>values</span><span class='op'>$</span><span class='va'>minsplit</span> <span class='op'>=</span> <span class='fu'><a href='https://paradox.mlr-org.com/reference/to_tune.html'>to_tune</a></span><span class='op'>(</span><span class='fl'>1</span>, <span class='fl'>10</span><span class='op'>)</span>
 
 <span class='va'>instance</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3tuning.mlr-org.com/reference/tune.html'>tune</a></span><span class='op'>(</span>
-  method <span class='op'>=</span> <span class='st'>"random_search"</span>, 
-  task <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>tsk</a></span><span class='op'>(</span><span class='st'>"pima"</span><span class='op'>)</span>, 
-  learner <span class='op'>=</span> <span class='va'>learner</span>, 
-  resampling <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>rsmp</a></span><span class='op'>(</span><span class='st'>"cv"</span>, folds <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span>, 
+  method <span class='op'>=</span> <span class='st'>"random_search"</span>,
+  task <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>tsk</a></span><span class='op'>(</span><span class='st'>"pima"</span><span class='op'>)</span>,
+  learner <span class='op'>=</span> <span class='va'>learner</span>,
+  resampling <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>rsmp</a></span><span class='op'>(</span><span class='st'>"cv"</span>, folds <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span>,
   measure <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>msr</a></span><span class='op'>(</span><span class='st'>"classif.ce"</span><span class='op'>)</span>,
   term_evals <span class='op'>=</span> <span class='fl'>10</span>,
   batch_size <span class='op'>=</span> <span class='fl'>5</span> <span class='co'># random search suggests 5 configurations per batch</span>
@@ -2273,9 +2272,9 @@ The goal is to map <em>computational jobs</em> (e.g. evaluation of one configur
 <span class='va'>rr</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3tuning.mlr-org.com/reference/tune_nested.html'>tune_nested</a></span><span class='op'>(</span>
   method <span class='op'>=</span> <span class='st'>"random_search"</span>,
   task <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>tsk</a></span><span class='op'>(</span><span class='st'>"pima"</span><span class='op'>)</span>,
-  learner <span class='op'>=</span> <span class='va'>learner</span>, 
+  learner <span class='op'>=</span> <span class='va'>learner</span>,
   inner_resampling <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>rsmp</a></span> <span class='op'>(</span><span class='st'>"cv"</span>, folds <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span>,
-  outer_resampling <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>rsmp</a></span><span class='op'>(</span><span class='st'>"cv"</span>, folds <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span>, 
+  outer_resampling <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>rsmp</a></span><span class='op'>(</span><span class='st'>"cv"</span>, folds <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span>,
   measure <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>msr</a></span><span class='op'>(</span><span class='st'>"classif.ce"</span><span class='op'>)</span>,
   term_evals <span class='op'>=</span> <span class='fl'>10</span>,
   batch_size <span class='op'>=</span> <span class='fl'>5</span>
