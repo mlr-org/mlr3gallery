@@ -18,8 +18,6 @@ output:
     self_contained: false
     css: ../../custom.css
 bibliography: bibliography.bib
-params:
-  evaluate_all: FALSE
 ---
 
 ```{r 2020-09-11-liver-patient-classification-001, include=FALSE}
@@ -406,11 +404,11 @@ task_liver$col_roles$stratum = task_liver$target_names # Stratification
 To rank the different learners and finally decide which one fits best for the task at hand, we used benchmarking.
 The following code chunk executes our benchmarking with all learners.
 
-```{r 2020-09-11-liver-patient-classification-019, echo=FALSE, eval=!params$evaluate_all}
+```{r 2020-09-11-liver-patient-classification-019, echo=FALSE, eval = TRUE}
 bmr = readRDS("bmr.RDS")
 ```
 
-```{r 2020-09-11-liver-patient-classification-020, echo = TRUE, results = 'hide', warning = FALSE, eval=params$evaluate_all}
+```{r 2020-09-11-liver-patient-classification-020, echo = TRUE, results = 'hide', warning = FALSE, eval= FALSE}
 set.seed(123)
 bm_design = benchmark_grid(
   tasks = task_liver,
@@ -586,7 +584,7 @@ You can have a look at all the confusion matrices, if you run the script.
 
 ```{r 2020-09-11-liver-patient-classification-027, results='asis', echo=FALSE, out.extra=''}
 names = sapply(1:14, function(x) bmr$resample_result(x)$learner$id)
-confusion = lapply(setNames(1:14, names), function(x) ftable(bmr$resample_result(x)$prediction()$confusion))
+lapply(setNames(1:14, names), function(x) ftable(bmr$resample_result(x)$prediction()$confusion))
 ```
 
 
