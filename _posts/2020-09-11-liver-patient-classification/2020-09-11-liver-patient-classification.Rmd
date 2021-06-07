@@ -70,7 +70,7 @@ Section 3 presents learners and their hyperparameter tuning while section 4, dea
 
 The data set we used for our project is the "Indian Liver Patient Dataset" which was obtained from the `r mlr_pkg("mlr3data")` package. It was donated by three professors from India in 2012 @Dua2017.
 
-```{r 2020-09-11-liver-patient-classification-003, include=FALSE}
+```{r 2020-09-11-liver-patient-classification-003}
 # Importing data
 data("ilpd", package = "mlr3data")
 ```
@@ -224,9 +224,9 @@ Since we did not notice any fundamental differences in the data for these two fe
 
 ## Final Dataset
 
-```{r 2020-09-11-liver-patient-classification-010, include=FALSE}
+```{r 2020-09-11-liver-patient-classification-010}
 ## Reducing, transforming and scaling dataset
-ilpd_log = ilpd %>%
+ilpd = ilpd %>%
   select(-total_bilirubin, -alanine_transaminase, -total_protein,
          -albumin_globulin_ratio) %>%
   mutate(
@@ -269,7 +269,7 @@ The specification of the positive class has an impact on the evaluation later on
 
 ```{r 2020-09-11-liver-patient-classification-011}
 ## Task definition
-task_liver = TaskClassif$new(id = "task_liver", backend = ilpd_log, target = "diseased", positive = "1")
+task_liver = as_task_classif(ilpd, target = "diseased", positive = "1")
 ```
 
 In the following we are going to evaluate logistic regression, linear discriminant analysis (LDA), quadratic discriminant analysis (QDA), naive Bayes, k-nearest neighbour (k-NN), classification trees (CART) and random forest on the binary target.
@@ -291,17 +291,7 @@ learners = list(
 ```
 
 In order to find optimal hyperparameters through tuning, we used random search to better cover the hyperparameter space.
-We employed 5-fold cross-validation for the inner loop of the nested resampling. The number of evaluations was set to 100 as the stopping criterion. As an evaluation metric we used AUC.
-
-```{r 2020-09-11-liver-patient-classification-013}
-# Parameters for AutoTuner for k-NN, CART and random forest
-resampling_inner = rsmp("cv", folds = 5L)
-measure = msr("classif.auc")
-terminator = trm("evals", n_evals = 100)
-tuner = tnr("random_search")
-```
-
-The next step was to define the hyperparameters to tune.
+We define the hyperparameters to tune.
 We only tuned hyperparameters for k-NN, CART and random forest since the other methods have strong assumptions and serve as baseline.
 The following table shows the assumptions of the methods we chose.
 
@@ -323,63 +313,64 @@ The following table shows the hyperparameters we tuned.
 | CART          | minsplit, cp        |
 | Random forest | min.node.size, mtry |
 
-For k-NN we chose 3 as the lower limit and 50 as the upper limit for k (number of neighbors).
+For k-NN we chose 3 as the lower limit and 50 as the upper limit for `k` (number of neighbors).
 A too small k can lead to overfitting.
 We also tried different distance measures (e.g. 1 for Manhattan distance, 2 for Euclidean distance) and kernels.
 For CART we tuned the hyperparameters cp (complexity parameter) and minsplit (minimum number of observations in a node in order to attempt a split).
-cp controls the size of the tree: small values can result in overfitting while large values can cause underfitting. We also tuned parameters for the minimum size of terminal nodes and the number of variables randomly sampled as candidates at each split (from 1 to number of features) for random forest.
+`cp` controls the size of the tree: small values can result in overfitting while large values can cause underfitting. We also tuned parameters for the minimum size of terminal nodes and the number of variables randomly sampled as candidates at each split (from 1 to number of features) for random forest.
 
 ```{r 2020-09-11-liver-patient-classification-014}
-tune_ps_knn = ParamSet$new(list(
-  ParamInt$new("k", lower = 3, upper = 50), # Number of neighbors considered
-  ParamDbl$new("distance", lower = 1, upper = 3),
-  ParamFct$new("kernel", c("rectangular", "gaussian", "rank", "optimal"))
-))
-tune_ps_rpart = ParamSet$new(list(
+tune_ps_knn = ps(
+  k = p_int(lower = 3, upper = 50), # Number of neighbors considered
+  distance = p_dbl(lower = 1, upper = 3),
+  kernel = p_fct(levels = c("rectangular", "gaussian", "rank", "optimal"))
+)
+tune_ps_rpart = ps(
   # Minimum number of observations that must exist in a node in order for a
   # split to be attempted
-  ParamInt$new("minsplit", lower = 10, upper = 40),
-  ParamDbl$new("cp", lower = 0.001, upper = 0.1) # Complexity parameter
-))
-tune_ps_rf = ParamSet$new(list(
+  minsplit = p_int(lower = 10, upper = 40),
+  cp = p_dbl(lower = 0.001, upper = 0.1) # Complexity parameter
+)
+tune_ps_rf = ps(
   # Minimum size of terminal nodes
-  ParamInt$new("min.node.size", lower = 10, upper = 50),
+  min.node.size = p_int(lower = 10, upper = 50),
   # Number of variables randomly sampled as candidates at each split
-  ParamInt$new("mtry", lower = 1, upper = 6)
-))
+  mtry = p_int(lower = 1, upper = 6)
+)
 ```
 
 The next step is to instantiate the AutoTuner from `r mlr_pkg("mlr3tuning")`.
+We employed 5-fold cross-validation for the inner loop of the nested resampling. The number of evaluations was set to 100 as the stopping criterion. As an evaluation metric we used AUC.
 
 ```{r 2020-09-11-liver-patient-classification-015}
 # AutoTuner for k-NN, CART and random forest
-learners$learner_knn = AutoTuner$new(
+learners$learner_knn = auto_tuner(
+  method = "random_search",
   learner = learners$learner_knn,
-  resampling = resampling_inner,
-  measure = measure,
+  resampling = rsmp("cv", folds = 5L),
+  measure = msr("classif.auc"),
   search_space = tune_ps_knn,
-  terminator = terminator,
-  tuner = tuner
+  term_evals = 100,
 )
 learners$learner_knn$predict_sets = c("train", "test")
 
-learners$learner_rpart = AutoTuner$new(
+learners$learner_rpart = auto_tuner(
+  method = "random_search",
   learner = learners$learner_rpart,
-  resampling = resampling_inner,
-  measure = measure,
+  resampling = rsmp("cv", folds = 5L),
+  measure = msr("classif.auc"),
   search_space = tune_ps_rpart,
-  terminator = terminator,
-  tuner = tuner
+  term_evals = 100,
 )
 learners$learner_rpart$predict_sets = c("train", "test")
 
-learners$learner_rf = AutoTuner$new(
+learners$learner_rf = auto_tuner(
+  method = "random_search",
   learner = learners$learner_rf,
-  resampling = resampling_inner,
-  measure = measure,
+  resampling = rsmp("cv", folds = 5L),
+  measure = msr("classif.auc"),
   search_space = tune_ps_rf,
-  terminator = terminator,
-  tuner = tuner
+  term_evals = 100,
 )
 learners$learner_rf$predict_sets = c("train", "test")
 ```
