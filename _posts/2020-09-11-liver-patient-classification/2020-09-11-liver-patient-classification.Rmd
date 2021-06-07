@@ -46,6 +46,7 @@ library(dplyr)
 library(tidyr)
 library(DataExplorer)
 library(mlr3verse)
+library(mlr3tuning)
 library(ggplot2)
 library(gridExtra)
 library(paradox)
@@ -228,16 +229,20 @@ ilpd = ilpd %>%
   select(-total_bilirubin, -alanine_transaminase, -total_protein,
          -albumin_globulin_ratio) %>%
   mutate(
-    gender = as.numeric(ifelse(gender == "Female", 1, 0)), # Recode gender
-    diseased = factor(ifelse(diseased == "yes", 1, 0)), # Remove labels for class
-    alkaline_phosphatase = log(alkaline_phosphatase), # Log for features with skewed distributions
+    # Recode gender
+    gender = as.numeric(ifelse(gender == "Female", 1, 0)),
+     # Remove labels for class
+    diseased = factor(ifelse(diseased == "yes", 1, 0)),
+     # Log for features with skewed distributions
+    alkaline_phosphatase = log(alkaline_phosphatase),
     aspartate_transaminase = log(aspartate_transaminase),
     direct_bilirubin = log(direct_bilirubin)
   )
 
 po_scale = po("scale")
-po_scale$param_set$values$affect_columns = selector_name(c("age", "direct_bilirubin", "alkaline_phosphatase",
-                                                           "aspartate_transaminase", "albumin"))
+po_scale$param_set$values$affect_columns = 
+  selector_name(c("age", "direct_bilirubin", "alkaline_phosphatase",
+  "aspartate_transaminase", "albumin"))
 ```
 
 Lastly, we standardized all metric features, as different ranges and units might weigh features.
@@ -278,13 +283,20 @@ In the following we are going to evaluate logistic regression, linear discrimina
 # detect overfitting
 
 learners = list(
-  learner_logreg = lrn("classif.log_reg", predict_type = "prob", predict_sets = c("train", "test")),
-  learner_lda = lrn("classif.lda", predict_type = "prob", predict_sets = c("train", "test")),
-  learner_qda = lrn("classif.qda", predict_type = "prob", predict_sets = c("train", "test")),
-  learner_nb = lrn("classif.naive_bayes", predict_type = "prob", predict_sets = c("train", "test")),
-  learner_knn = lrn("classif.kknn", scale = FALSE, predict_type = "prob"),
-  learner_rpart = lrn("classif.rpart", predict_type = "prob"),
-  learner_rf = lrn("classif.ranger", num.trees = 1000, predict_type = "prob")
+  learner_logreg = lrn("classif.log_reg", predict_type = "prob",
+    predict_sets = c("train", "test")),
+  learner_lda = lrn("classif.lda", predict_type = "prob",
+    predict_sets = c("train", "test")),
+  learner_qda = lrn("classif.qda", predict_type = "prob", 
+    predict_sets = c("train", "test")),
+  learner_nb = lrn("classif.naive_bayes", predict_type = "prob",
+    predict_sets = c("train", "test")),
+  learner_knn = lrn("classif.kknn", scale = FALSE,
+    predict_type = "prob"),
+  learner_rpart = lrn("classif.rpart",
+    predict_type = "prob"),
+  learner_rf = lrn("classif.ranger", num.trees = 1000,
+    predict_type = "prob")
 )
 ```
 
@@ -386,7 +398,9 @@ table(po_over$train(list(task_liver))$output$truth()) # Check class balance
 
 ```{r 2020-09-11-liver-patient-classification-017, results="hide"}
 # Learners with balanced/oversampled data
-learners_bal = lapply(learners, function(x) GraphLearner$new(po_scale %>>% po_over %>>% x))
+learners_bal = lapply(learners, function(x) {
+  GraphLearner$new(po_scale %>>% po_over %>>% x)
+})
 lapply(learners_bal, function(x) x$predict_sets = c("train", "test"))
 ```
 
@@ -397,8 +411,11 @@ We opted for stratified 5-fold cross-validation to maintain the distribution of 
 However, it turned out that normal cross-validation without stratification yields very similar results.
 
 ```{r 2020-09-11-liver-patient-classification-018, echo = TRUE, results = 'hide'}
-resampling_outer = rsmp(id = "cv", .key = "cv", folds = 5L) # 5-fold cross-validation
-task_liver$col_roles$stratum = task_liver$target_names # Stratification
+# 5-fold cross-validation
+resampling_outer = rsmp(id = "cv", .key = "cv", folds = 5L)
+
+# Stratification
+task_liver$col_roles$stratum = task_liver$target_names
 ```
 
 To rank the different learners and finally decide which one fits best for the task at hand, we used benchmarking.
@@ -582,9 +599,12 @@ ggplot(compare_df3[which(compare_df3$learner_id_wo == "classif.ranger.tuned"), ]
 To get a look at performance from yet another angle, we next considered the confusion matrix for each learner, which simply contrasts the absolute numbers of predictions and true values by category, with and without oversampling.
 You can have a look at all the confusion matrices, if you run the script.
 
-```{r 2020-09-11-liver-patient-classification-027, results='asis', echo=FALSE, out.extra=''}
+```{r 2020-09-11-liver-patient-classification-027, echo=FALSE, out.extra=''}
 names = sapply(1:14, function(x) bmr$resample_result(x)$learner$id)
-lapply(setNames(1:14, names), function(x) ftable(bmr$resample_result(x)$prediction()$confusion))
+for (x in 1:14) {
+  print(names[x])
+  print(bmr$resample_result(x)$prediction()$confusion)
+}
 ```
 
 
