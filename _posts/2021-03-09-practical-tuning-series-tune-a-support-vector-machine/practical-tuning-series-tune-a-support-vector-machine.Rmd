@@ -22,14 +22,18 @@ output:
   distill::distill_article:
     self_contained: false
 bibliography: bibliography.bib
+params:
+  eval_all: FALSE
 ---
 
 ```{r practical-tuning-series-tune-a-support-vector-machine-001, include=FALSE}
  knitr::opts_chunk$set(
   echo = TRUE,
-  R.options = list(width = 80)
+  R.options = list(width = 120)
 )
 library(mlr3book)
+library(rmarkdown)
+library(mlr3tuning) # mlr3verse CRAN update for `tune()`
 ```
 
 # Scope
@@ -160,12 +164,16 @@ generate_design_grid(learner$param_set$search_space(), resolution = 5)
 
 We trigger the tuning by passing the `r ref("TuningInstanceSingleCrit")` to the `$optimize()` method of the `r ref("Tuner")`. The instance is modified in-place.
 
-```{r practical-tuning-series-tune-a-support-vector-machine-013, echo = FALSE}
-instance = readRDS("data/instance_1.rda")
+```{r practical-tuning-series-tune-a-support-vector-machine-014, eval = params$eval_all}
+tuner$optimize(instance)
 ```
 
-```{r practical-tuning-series-tune-a-support-vector-machine-014, eval = FALSE}
-tuner$optimize(instance)
+```{r practical-tuning-series-tune-a-support-vector-machine-0137777, echo = FALSE, eval = params$eval_all}
+saveRDS(instance, "data/instance_1.rda")
+```
+
+```{r practical-tuning-series-tune-a-support-vector-machine-013, echo = FALSE}
+instance = readRDS("data/instance_1.rda")
 ```
 
 We plot the performances depending on the evaluated `cost` and `gamma` values.
@@ -233,11 +241,7 @@ learner$param_set$values$gamma = to_tune(p_dbl(1e-5, 1e5, logscale = TRUE))
 
 We use the `r ref("tune()")`-shortcut to run the tuning.
 
-```{r practical-tuning-series-tune-a-support-vector-machine-020, echo = FALSE}
-instance = readRDS("data/instance_2.rda")
-```
-
-```{r practical-tuning-series-tune-a-support-vector-machine-021, eval = FALSE}
+```{r practical-tuning-series-tune-a-support-vector-machine-021, eval = params$eval_all}
 instance = tune(
   method = "grid_search",
   task = task,
@@ -246,6 +250,14 @@ instance = tune(
   measure = measure,
   resolution = 5
 )
+```
+
+```{r practical-tuning-series-tune-a-support-vector-machine-0137778, echo = FALSE, eval = params$eval_all}
+saveRDS(instance, "data/instance_2.rda")
+```
+
+```{r practical-tuning-series-tune-a-support-vector-machine-020, echo = FALSE}
+instance = readRDS("data/instance_2.rda")
 ```
 
 The hyperparameter values after the transformation are stored in the `x_domain` column as lists.
@@ -316,11 +328,7 @@ The value for `degree` is `NA` if the dependency on the `kernel` is not satisfie
 
 We use the `r ref("tune()")`-shortcut to run the tuning.
 
-```{r practical-tuning-series-tune-a-support-vector-machine-029, echo = FALSE}
-instance = readRDS("data/instance_3.rda")
-```
-
-```{r practical-tuning-series-tune-a-support-vector-machine-030, eval = FALSE}
+```{r practical-tuning-series-tune-a-support-vector-machine-030, eval = params$eval_all}
 instance = tune(
   method = "grid_search",
   task = task,
@@ -329,6 +337,14 @@ instance = tune(
   measure = measure,
   resolution = 3
 )
+```
+
+```{r practical-tuning-series-tune-a-support-vector-machine-0137779, echo = FALSE, eval = params$eval_all}
+saveRDS(instance, "data/instance_3.rda")
+```
+
+```{r practical-tuning-series-tune-a-support-vector-machine-029, echo = FALSE}
+instance = readRDS("data/instance_3.rda")
 ```
 
 ```{r practical-tuning-series-tune-a-support-vector-machine-031}
@@ -380,13 +396,17 @@ at = AutoTuner$new(
 
 We put the `r ref("AutoTuner")` into a `r ref("resample()")` call to get the outer resampling loop.
 
-```{r practical-tuning-series-tune-a-support-vector-machine-034, echo = FALSE}
-rr = readRDS("data/rr_1.rda")
-```
-
-```{r practical-tuning-series-tune-a-support-vector-machine-035, eval = FALSE}
+```{r practical-tuning-series-tune-a-support-vector-machine-035, eval = params$eval_all}
 resampling_outer = rsmp("cv", folds = 3)
 rr = resample(task = task, learner = at, resampling = resampling_outer, store_models = TRUE)
+```
+
+```{r practical-tuning-series-tune-a-support-vector-machine-0137771, echo = FALSE, eval = params$eval_all}
+saveRDS(rr, "data/rr_1.rda")
+```
+
+```{r practical-tuning-series-tune-a-support-vector-machine-034, echo = FALSE}
+rr = readRDS("data/rr_1.rda")
 ```
 
 We check the inner tuning results for stable hyperparameters.
@@ -402,7 +422,7 @@ Next, we want to compare the predictive performances estimated on the outer resa
 Significantly lower predictive performances on the outer resampling indicate that the models with the optimized hyperparameters overfit the data.
 
 ```{r practical-tuning-series-tune-a-support-vector-machine-037}
-rr$score()
+rr$score()[, list(iteration, classif.ce)]
 ```
 
 The archive of the `r ref("AutoTuner")`s allows us to inspect all evaluated hyperparameters configurations with the associated predictive performances.
