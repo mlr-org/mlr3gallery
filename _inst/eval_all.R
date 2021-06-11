@@ -1,0 +1,8 @@
+posts = c(
+  "2021-03-09-practical-tuning-series-tune-a-support-vector-machine",
+  "2021-03-10-practical-tuning-series-tune-a-preprocessing-pipeline",
+  "2021-03-11-practical-tuning-series-build-an-automated-machine-learning-system"
+)
+
+files = list.files(file.path("./_posts/", posts), pattern = "^.*\\.Rmd", full.names = TRUE)
+lapply(files, function(file) rmarkdown::render(file, encoding = "UTF-8", params = list(eval_all = TRUE)))

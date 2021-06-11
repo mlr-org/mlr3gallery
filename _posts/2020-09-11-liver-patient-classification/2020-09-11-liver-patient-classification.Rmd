@@ -23,7 +23,7 @@ bibliography: bibliography.bib
 ```{r 2020-09-11-liver-patient-classification-001, include=FALSE}
 knitr::opts_chunk$set(
   echo = TRUE,
-  R.options = list(width = 80)
+  R.options = list(width = 120)
 )
 library(mlr3book)
 ```
@@ -240,7 +240,7 @@ ilpd = ilpd %>%
   )
 
 po_scale = po("scale")
-po_scale$param_set$values$affect_columns = 
+po_scale$param_set$values$affect_columns =
   selector_name(c("age", "direct_bilirubin", "alkaline_phosphatase",
   "aspartate_transaminase", "albumin"))
 ```
@@ -287,7 +287,7 @@ learners = list(
     predict_sets = c("train", "test")),
   learner_lda = lrn("classif.lda", predict_type = "prob",
     predict_sets = c("train", "test")),
-  learner_qda = lrn("classif.qda", predict_type = "prob", 
+  learner_qda = lrn("classif.qda", predict_type = "prob",
     predict_sets = c("train", "test")),
   learner_nb = lrn("classif.naive_bayes", predict_type = "prob",
     predict_sets = c("train", "test")),
@@ -329,7 +329,7 @@ We also tried different distance measures (e.g. 1 for Manhattan distance, 2 for 
 For CART we tuned the hyperparameters cp (complexity parameter) and minsplit (minimum number of observations in a node in order to attempt a split).
 `cp` controls the size of the tree: small values can result in overfitting while large values can cause underfitting. We also tuned parameters for the minimum size of terminal nodes and the number of variables randomly sampled as candidates at each split (from 1 to number of features) for random forest.
 
-```{r 2020-09-11-liver-patient-classification-014}
+```{r 2020-09-11-liver-patient-classification-013}
 tune_ps_knn = ps(
   k = p_int(lower = 3, upper = 50), # Number of neighbors considered
   distance = p_dbl(lower = 1, upper = 3),
@@ -352,7 +352,7 @@ tune_ps_rf = ps(
 The next step is to instantiate the AutoTuner from `r mlr_pkg("mlr3tuning")`.
 We employed 5-fold cross-validation for the inner loop of the nested resampling. The number of evaluations was set to 100 as the stopping criterion. As an evaluation metric we used AUC.
 
-```{r 2020-09-11-liver-patient-classification-015}
+```{r 2020-09-11-liver-patient-classification-014}
 # AutoTuner for k-NN, CART and random forest
 learners$learner_knn = auto_tuner(
   method = "random_search",
@@ -388,7 +388,7 @@ learners$learner_rf$predict_sets = c("train", "test")
 During our research we found that oversampling can potentially increase the performance of the learners.
 As mentioned in section 2.2, we opted for perfectly balancing the classes. By using `r mlr_pkg("mlr3pipelines")` we can apply the benchmark function later on.
 
-```{r 2020-09-11-liver-patient-classification-016}
+```{r 2020-09-11-liver-patient-classification-015}
 # Oversampling minority class to get perfectly balanced classes
 set.seed(123)
 po_over = po("classbalancing", id = "oversample", adjust = "minor",
@@ -396,7 +396,7 @@ po_over = po("classbalancing", id = "oversample", adjust = "minor",
 table(po_over$train(list(task_liver))$output$truth()) # Check class balance
 ```
 
-```{r 2020-09-11-liver-patient-classification-017, results="hide"}
+```{r 2020-09-11-liver-patient-classification-016, results="hide"}
 # Learners with balanced/oversampled data
 learners_bal = lapply(learners, function(x) {
   GraphLearner$new(po_scale %>>% po_over %>>% x)
@@ -410,7 +410,7 @@ With the learners defined, the inner method of the nested resampling chosen and 
 We opted for stratified 5-fold cross-validation to maintain the distribution of the target variable, independent of oversampling.
 However, it turned out that normal cross-validation without stratification yields very similar results.
 
-```{r 2020-09-11-liver-patient-classification-018, echo = TRUE, results = 'hide'}
+```{r 2020-09-11-liver-patient-classification-017, echo = TRUE, results = 'hide'}
 # 5-fold cross-validation
 resampling_outer = rsmp(id = "cv", .key = "cv", folds = 5L)
 
@@ -421,11 +421,11 @@ task_liver$col_roles$stratum = task_liver$target_names
 To rank the different learners and finally decide which one fits best for the task at hand, we used benchmarking.
 The following code chunk executes our benchmarking with all learners.
 
-```{r 2020-09-11-liver-patient-classification-019, echo=FALSE, eval = TRUE}
+```{r 2020-09-11-liver-patient-classification-018, echo=FALSE, eval = TRUE}
 bmr = readRDS("bmr.RDS")
 ```
 
-```{r 2020-09-11-liver-patient-classification-020, echo = TRUE, results = 'hide', warning = FALSE, eval= FALSE}
+```{r 2020-09-11-liver-patient-classification-019, echo = TRUE, results = 'hide', warning = FALSE, eval= FALSE}
 set.seed(123)
 bm_design = benchmark_grid(
   tasks = task_liver,
@@ -442,7 +442,7 @@ While each one of them has its specific use case, we opted for AUC, a performanc
 
 We first present a comparison of all learners by AUC, with and without oversampling, and for both training and test data.
 
-```{r 2020-09-11-liver-patient-classification-021, echo=FALSE}
+```{r 2020-09-11-liver-patient-classification-020, echo=FALSE}
 # Table with train and test AUC by learner
 measures = list(
   msr("classif.auc", id = "auc_train", predict_sets = "train"),
@@ -459,7 +459,7 @@ Furthermore, oversampling leaves AUC performance almost untouched for all learne
 
 The boxplots below graphically summarize AUC performance of all learners, with the blue dots indicating mean AUC performance.
 
-```{r 2020-09-11-liver-patient-classification-022, echo=FALSE, fig.height = 6, fig.width = 12, out.width='95%', fig.align="center"}
+```{r 2020-09-11-liver-patient-classification-021, echo=FALSE, fig.height = 6, fig.width = 12, out.width='95%', fig.align="center"}
 # Boxplots to compare learners by AUC
 compare_df = as.data.frame(bmr$score(list(
   msr("classif.auc"),
@@ -491,7 +491,7 @@ Whereas mean AUC is roughly between 0.65 and 0.75 for all learners, the individu
 
 As a first step towards "AUC decomposition", we consider the ROC curve, which provides valuable graphical insights into performance - even more so since AUC is directly derived from it.
 
-```{r 2020-09-11-liver-patient-classification-023, echo=FALSE, out.width='85%', fig.align="center"}
+```{r 2020-09-11-liver-patient-classification-022, echo=FALSE, out.width='85%', fig.align="center"}
 # Plotting ROC curves
 autoplot(bmr, type = "roc", show_cb = FALSE) +
   theme_minimal()
@@ -499,7 +499,7 @@ autoplot(bmr, type = "roc", show_cb = FALSE) +
 
 Subsequently, sensitivity, specificity, false negative rate (FNR), and false positive rate (FPR) for each learner are shown explicitly in the output below, next to AUC.
 
-```{r 2020-09-11-liver-patient-classification-024, echo=FALSE}
+```{r 2020-09-11-liver-patient-classification-023, echo=FALSE}
 # Table with train AUC, sensitivity, specificity, false negative rate and false positive rate
 bmr$aggregate(list(
   msr("classif.auc"),
@@ -522,7 +522,7 @@ By definition, high sensitivity (specificity) results from a low false negative 
 
 With oversampling, specificity increases at the cost of sensitivity for all learners (even for those which already had high specificity), as can be seen in the two graphs below.
 
-```{r 2020-09-11-liver-patient-classification-025, echo=FALSE, out.width='90%', fig.align="center"}
+```{r 2020-09-11-liver-patient-classification-024, echo=FALSE, out.width='90%', fig.align="center"}
 # Creating dataframe with the performance measures for the barplots
 compare_df2 = as.data.frame(bmr$aggregate(list(
   msr("classif.auc"),
@@ -579,7 +579,7 @@ grid.arrange(arrangeGrob(plot1 + theme(legend.position = "none"),
 
 For a given learner, say random forest, the different performance metrics and their dependence upon target variable balance are shown in the following graph.
 
-```{r 2020-09-11-liver-patient-classification-026, echo=FALSE, out.width='75%', fig.align="center"}
+```{r 2020-09-11-liver-patient-classification-025, echo=FALSE, out.width='75%', fig.align="center"}
 compare_df3 = gather(compare_df2, "measure", "value", 2:6)
 
 # Plotting all measures for random forest, comparing original and oversampled dataset
@@ -599,7 +599,7 @@ ggplot(compare_df3[which(compare_df3$learner_id_wo == "classif.ranger.tuned"), ]
 To get a look at performance from yet another angle, we next considered the confusion matrix for each learner, which simply contrasts the absolute numbers of predictions and true values by category, with and without oversampling.
 You can have a look at all the confusion matrices, if you run the script.
 
-```{r 2020-09-11-liver-patient-classification-027, echo=FALSE, out.extra=''}
+```{r 2020-09-11-liver-patient-classification-026, echo=FALSE, out.extra=''}
 names = sapply(1:14, function(x) bmr$resample_result(x)$learner$id)
 for (x in 1:14) {
   print(names[x])

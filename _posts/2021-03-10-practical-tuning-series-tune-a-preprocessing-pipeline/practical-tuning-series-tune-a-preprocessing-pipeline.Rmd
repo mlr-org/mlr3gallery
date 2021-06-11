@@ -22,12 +22,14 @@ date: 03-10-2021
 output:
   distill::distill_article:
     self_contained: false
+params:
+  eval_all: FALSE
 ---
 
 ```{r practical-tuning-series-tune-a-preprocessing-pipeline-001, include=FALSE}
  knitr::opts_chunk$set(
   echo = TRUE,
-  R.options = list(width = 80)
+  R.options = list(width = 120)
 )
 library(mlr3book)
 ```
@@ -232,8 +234,8 @@ instance = tune(
   method = "grid_search",
   task = task,
   learner = graph_learner,
-  resampling = resampling,
-  measure = measure
+  resampling = rsmp("cv", folds = 3),
+  measure = msr("classif.ce")
 )
 ```
 
@@ -285,20 +287,24 @@ at_2 = AutoTuner$new(
 
 We run the benchmark.
 
-```{r practical-tuning-series-tune-a-preprocessing-pipeline-023, echo = FALSE}
-bmr = readRDS("data/bmr_1.rda")
-```
-
-```{r practical-tuning-series-tune-a-preprocessing-pipeline-024, eval = FALSE}
+```{r practical-tuning-series-tune-a-preprocessing-pipeline-023, eval = params$eval_all}
 resampling_outer = rsmp("cv", folds = 3)
 design = benchmark_grid(task, list(at_1, at_2), resampling_outer)
 
 bmr = benchmark(design, store_models = TRUE)
 ```
 
+```{r practical-tuning-series-tune-a-preprocessing-pipeline-024, echo = FALSE, eval = params$eval_all}
+saveRDS(bmr, "data/bmr_1.rda")
+```
+
+```{r practical-tuning-series-tune-a-preprocessing-pipeline-025, echo = FALSE}
+bmr = readRDS("data/bmr_1.rda")
+```
+
 We compare the aggregated performances on the outer test sets which give us an unbiased performance estimate of the `r ref("GraphLearner")`s with the different encoding methods.
 
-```{r practical-tuning-series-tune-a-preprocessing-pipeline-025}
+```{r practical-tuning-series-tune-a-preprocessing-pipeline-026}
 bmr$aggregate()
 autoplot(bmr)
 ```
@@ -310,7 +316,7 @@ Otherwise, comparing preprocessing steps is not feasible and can lead to wrong c
 
 We train the chosen `r ref("GraphLearner")` with the `r ref("AutoTuner")` to get a final model with optimized hyperparameters.
 
-```{r practical-tuning-series-tune-a-preprocessing-pipeline-026, eval = FALSE}
+```{r practical-tuning-series-tune-a-preprocessing-pipeline-027, eval = FALSE}
 at_2$train(task)
 ```
 
