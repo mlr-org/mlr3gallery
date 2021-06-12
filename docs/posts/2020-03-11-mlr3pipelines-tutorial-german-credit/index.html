@@ -2198,18 +2198,14 @@ document.addEventListener('DOMContentLoaded', function() {
 </code></pre>
 </div>
 <pre><code>&lt;DictionaryPipeOp&gt; with 64 stored values
-Keys: boxcox, branch, chunk, classbalancing, classifavg, classweights,
-  colapply, collapsefactors, colroles, copy, datefeatures, encode,
-  encodeimpact, encodelmer, featureunion, filter, fixfactors, histbin,
-  ica, imputeconstant, imputehist, imputelearner, imputemean,
-  imputemedian, imputemode, imputeoor, imputesample, kernelpca,
-  learner, learner_cv, missind, modelmatrix, multiplicityexply,
-  multiplicityimply, mutate, nmf, nop, ovrsplit, ovrunite, pca, proxy,
-  quantilebin, randomprojection, randomresponse, regravg,
-  removeconstants, renamecolumns, replicate, scale, scalemaxabs,
-  scalerange, select, smote, spatialsign, subsample, targetinvert,
-  targetmutate, targettrafoscalerange, textvectorizer, threshold,
-  tunethreshold, unbranch, vtreat, yeojohnson</code></pre>
+Keys: boxcox, branch, chunk, classbalancing, classifavg, classweights, colapply, collapsefactors, colroles,
+  copy, datefeatures, encode, encodeimpact, encodelmer, featureunion, filter, fixfactors, histbin, ica,
+  imputeconstant, imputehist, imputelearner, imputemean, imputemedian, imputemode, imputeoor, imputesample,
+  kernelpca, learner, learner_cv, missind, modelmatrix, multiplicityexply, multiplicityimply, mutate, nmf,
+  nop, ovrsplit, ovrunite, pca, proxy, quantilebin, randomprojection, randomresponse, regravg,
+  removeconstants, renamecolumns, replicate, scale, scalemaxabs, scalerange, select, smote, spatialsign,
+  subsample, targetinvert, targetmutate, targettrafoscalerange, textvectorizer, threshold, tunethreshold,
+  unbranch, vtreat, yeojohnson</code></pre>
 </div>
 <h2 id="missing-value-imputation">Missing Value Imputation</h2>
 <p>We have just introduced missing values into our data. While some <code>Learner</code>s can deal with missing value, many cannot. Trying to train a random forest fails because of this:</p>
@@ -2227,8 +2223,8 @@ Keys: boxcox, branch, chunk, classbalancing, classifavg, classweights,
 <pre class="sourceCode r"><code class="sourceCode r"><span class='va'>mlr_pipeops</span><span class='op'>$</span><span class='fu'>keys</span><span class='op'>(</span><span class='st'>"^impute"</span><span class='op'>)</span>
 </code></pre>
 </div>
-<pre><code>[1] &quot;imputeconstant&quot; &quot;imputehist&quot;     &quot;imputelearner&quot;  &quot;imputemean&quot;    
-[5] &quot;imputemedian&quot;   &quot;imputemode&quot;     &quot;imputeoor&quot;      &quot;imputesample&quot;  </code></pre>
+<pre><code>[1] &quot;imputeconstant&quot; &quot;imputehist&quot;     &quot;imputelearner&quot;  &quot;imputemean&quot;     &quot;imputemedian&quot;   &quot;imputemode&quot;    
+[7] &quot;imputeoor&quot;      &quot;imputesample&quot;  </code></pre>
 </div>
 <p>We choose to impute factorial features using a new level (via <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_imputeoor.html"><code>PipeOpImputeOOR</code></a>). Let’s use the <code>PipeOp</code> itself to create an imputed <code>Task</code>. This shows us how the <code>PipeOp</code> actually works:</p>
 <div class="layout-chunk" data-layout="l-body">
@@ -2238,64 +2234,46 @@ Keys: boxcox, branch, chunk, classbalancing, classifavg, classweights,
 <span class='va'>task_imputed</span><span class='op'>$</span><span class='fu'>missings</span><span class='op'>(</span><span class='op'>)</span>
 </code></pre>
 </div>
-<pre><code>            credit_risk          credit_history     employment_duration 
-                      0                       0                       0 
-         foreign_worker                 housing        installment_rate 
-                      0                       0                       0 
-                    job          number_credits           other_debtors 
-                      0                       0                       0 
-other_installment_plans           people_liable     personal_status_sex 
-                      0                       0                       0 
-      present_residence                property                 purpose 
-                      0                       0                       0 
+<pre><code>            credit_risk          credit_history     employment_duration          foreign_worker                 housing 
+                      0                       0                       0                       0                       0 
+       installment_rate                     job          number_credits           other_debtors other_installment_plans 
+                      0                       0                       0                       0                       0 
+          people_liable     personal_status_sex       present_residence                property                 purpose 
+                      0                       0                       0                       0                       0 
                 savings                  status               telephone 
                       0                       0                       0 </code></pre>
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span><span class='op'>(</span><span class='va'>task_imputed</span><span class='op'>$</span><span class='fu'>data</span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span>
 </code></pre>
 </div>
-<pre><code>   credit_risk                              credit_history employment_duration
-1:        good     all credits at this bank paid back duly            &gt;= 7 yrs
-2:         bad no credits taken/all credits paid back duly    1 &lt;= ... &lt; 4 yrs
-3:        good     all credits at this bank paid back duly    4 &lt;= ... &lt; 7 yrs
-4:        good no credits taken/all credits paid back duly    4 &lt;= ... &lt; 7 yrs
-5:         bad    existing credits paid back duly till now    1 &lt;= ... &lt; 4 yrs
-6:        good                                    .MISSING    1 &lt;= ... &lt; 4 yrs
-   foreign_worker housing installment_rate                       job
-1:             no    rent             &lt; 20 skilled employee/official
-2:       .MISSING    rent   25 &lt;= ... &lt; 35 skilled employee/official
-3:       .MISSING    rent   25 &lt;= ... &lt; 35      unskilled - resident
-4:             no     own   25 &lt;= ... &lt; 35 skilled employee/official
-5:             no     own   20 &lt;= ... &lt; 25 skilled employee/official
-6:             no     own   25 &lt;= ... &lt; 35      unskilled - resident
-   number_credits other_debtors other_installment_plans people_liable
-1:            2-3          none                    none        0 to 2
-2:              1          none                    none        0 to 2
-3:       .MISSING          none                    none     3 or more
-4:              1      .MISSING                    none     3 or more
-5:            2-3      .MISSING                    none     3 or more
-6:              1          none                    none     3 or more
-                    personal_status_sex present_residence              property
-1:                             .MISSING          &gt;= 7 yrs              .MISSING
-2: female : non-single or male : single  1 &lt;= ... &lt; 4 yrs unknown / no property
-3:                             .MISSING  4 &lt;= ... &lt; 7 yrs unknown / no property
-4:               male : married/widowed          &gt;= 7 yrs          car or other
-5:               male : married/widowed          &gt;= 7 yrs           real estate
-6:               male : married/widowed          &gt;= 7 yrs           real estate
-               purpose                    savings
-1: furniture/equipment             ... &gt;= 1000 DM
-2: furniture/equipment unknown/no savings account
-3:             repairs unknown/no savings account
-4:          car (used) unknown/no savings account
-5:              others unknown/no savings account
-6:             repairs             ... &gt;= 1000 DM
-                                       status                 telephone
-1:                                   .MISSING yes (under customer name)
-2:                                 ... &lt; 0 DM                  .MISSING
-3: ... &gt;= 200 DM / salary for at least 1 year                        no
-4:                        no checking account                  .MISSING
-5:                        no checking account                        no
-6: ... &gt;= 200 DM / salary for at least 1 year yes (under customer name)</code></pre>
+<pre><code>   credit_risk                              credit_history employment_duration foreign_worker housing installment_rate
+1:        good     all credits at this bank paid back duly            &gt;= 7 yrs             no    rent             &lt; 20
+2:         bad no credits taken/all credits paid back duly    1 &lt;= ... &lt; 4 yrs       .MISSING    rent   25 &lt;= ... &lt; 35
+3:        good     all credits at this bank paid back duly    4 &lt;= ... &lt; 7 yrs       .MISSING    rent   25 &lt;= ... &lt; 35
+4:        good no credits taken/all credits paid back duly    4 &lt;= ... &lt; 7 yrs             no     own   25 &lt;= ... &lt; 35
+5:         bad    existing credits paid back duly till now    1 &lt;= ... &lt; 4 yrs             no     own   20 &lt;= ... &lt; 25
+6:        good                                    .MISSING    1 &lt;= ... &lt; 4 yrs             no     own   25 &lt;= ... &lt; 35
+                         job number_credits other_debtors other_installment_plans people_liable
+1: skilled employee/official            2-3          none                    none        0 to 2
+2: skilled employee/official              1          none                    none        0 to 2
+3:      unskilled - resident       .MISSING          none                    none     3 or more
+4: skilled employee/official              1      .MISSING                    none     3 or more
+5: skilled employee/official            2-3      .MISSING                    none     3 or more
+6:      unskilled - resident              1          none                    none     3 or more
+                    personal_status_sex present_residence              property             purpose
+1:                             .MISSING          &gt;= 7 yrs              .MISSING furniture/equipment
+2: female : non-single or male : single  1 &lt;= ... &lt; 4 yrs unknown / no property furniture/equipment
+3:                             .MISSING  4 &lt;= ... &lt; 7 yrs unknown / no property             repairs
+4:               male : married/widowed          &gt;= 7 yrs          car or other          car (used)
+5:               male : married/widowed          &gt;= 7 yrs           real estate              others
+6:               male : married/widowed          &gt;= 7 yrs           real estate             repairs
+                      savings                                     status                 telephone
+1:             ... &gt;= 1000 DM                                   .MISSING yes (under customer name)
+2: unknown/no savings account                                 ... &lt; 0 DM                  .MISSING
+3: unknown/no savings account ... &gt;= 200 DM / salary for at least 1 year                        no
+4: unknown/no savings account                        no checking account                  .MISSING
+5: unknown/no savings account                        no checking account                        no
+6:             ... &gt;= 1000 DM ... &gt;= 200 DM / salary for at least 1 year yes (under customer name)</code></pre>
 </div>
 <p>We do not only need complete data during training but also during prediction. Using the same imputation heuristic for both is the most consistent strategy. This way the imputation strategy can, in fact, be seen as a part of the complete learner (which could be tuned).</p>
 <p>If we used the imputed <code>Task</code> for Resampling, we would <em>leak</em> information from the test set into the training set. Therefore, it is mandatory to attach the imputation operator to the <code>Learner</code> itself, creating a <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_learners_graph.html"><code>GraphLearner</code></a>:</p>
@@ -2325,9 +2303,8 @@ other_installment_plans           people_liable     personal_status_sex
 </code></pre>
 </div>
 <pre><code>&lt;DictionaryFilter&gt; with 19 stored values
-Keys: anova, auc, carscore, cmim, correlation, disr, find_correlation,
-  importance, information_gain, jmi, jmim, kruskal_test, mim, mrmr,
-  njmim, performance, permutation, relief, variance</code></pre>
+Keys: anova, auc, carscore, cmim, correlation, disr, find_correlation, importance, information_gain, jmi,
+  jmim, kruskal_test, mim, mrmr, njmim, performance, permutation, relief, variance</code></pre>
 </div>
 <p>We apply the <a href="https://mlr3filters.mlr-org.com/reference/mlr_filters_mim.html"><code>FilterMIM</code></a> (mutual information maximization) <code>Filter</code> as implemented in the <a href="https://cran.r-project.org/package=praznik">praznik</a> package. This <code>Filter</code> allows for the selection of the top-<code>k</code> features of best mutual information.</p>
 <div class="layout-chunk" data-layout="l-body">
@@ -2336,16 +2313,12 @@ Keys: anova, auc, carscore, cmim, correlation, disr, find_correlation,
 <span class='va'>filter</span><span class='op'>$</span><span class='fu'>calculate</span><span class='op'>(</span><span class='va'>task_imputed</span><span class='op'>)</span><span class='op'>$</span><span class='va'>scores</span>
 </code></pre>
 </div>
-<pre><code>                 status          credit_history                 savings 
-                    1.0                     0.5                     0.0 
-    personal_status_sex        installment_rate other_installment_plans 
-                     NA                      NA                      NA 
-                purpose                property          foreign_worker 
-                     NA                      NA                      NA 
-                    job       present_residence               telephone 
-                     NA                      NA                      NA 
-          people_liable     employment_duration                 housing 
-                     NA                      NA                      NA 
+<pre><code>                 status          credit_history                 savings     personal_status_sex        installment_rate 
+                    1.0                     0.5                     0.0                      NA                      NA 
+other_installment_plans                 purpose                property          foreign_worker                     job 
+                     NA                      NA                      NA                      NA                      NA 
+      present_residence               telephone           people_liable     employment_duration                 housing 
+                     NA                      NA                      NA                      NA                      NA 
           other_debtors          number_credits 
                      NA                      NA </code></pre>
 </div>
@@ -2356,20 +2329,20 @@ Keys: anova, auc, carscore, cmim, correlation, disr, find_correlation,
 <span class='va'>fpipe</span><span class='op'>$</span><span class='fu'>train</span><span class='op'>(</span><span class='va'>task</span><span class='op'>)</span><span class='op'>[[</span><span class='fl'>1</span><span class='op'>]</span><span class='op'>]</span><span class='op'>$</span><span class='fu'>head</span><span class='op'>(</span><span class='op'>)</span>
 </code></pre>
 </div>
-<pre><code>   credit_risk                              credit_history
-1:        good     all credits at this bank paid back duly
-2:         bad no credits taken/all credits paid back duly
-3:        good     all credits at this bank paid back duly
-4:        good no credits taken/all credits paid back duly
-5:         bad    existing credits paid back duly till now
-6:        good                                    .MISSING
-                      savings                                     status
-1:             ... &gt;= 1000 DM                                   .MISSING
-2: unknown/no savings account                                 ... &lt; 0 DM
-3: unknown/no savings account ... &gt;= 200 DM / salary for at least 1 year
-4: unknown/no savings account                        no checking account
-5: unknown/no savings account                        no checking account
-6:             ... &gt;= 1000 DM ... &gt;= 200 DM / salary for at least 1 year</code></pre>
+<pre><code>   credit_risk                              credit_history                    savings
+1:        good     all credits at this bank paid back duly             ... &gt;= 1000 DM
+2:         bad no credits taken/all credits paid back duly unknown/no savings account
+3:        good     all credits at this bank paid back duly unknown/no savings account
+4:        good no credits taken/all credits paid back duly unknown/no savings account
+5:         bad    existing credits paid back duly till now unknown/no savings account
+6:        good                                    .MISSING             ... &gt;= 1000 DM
+                                       status
+1:                                   .MISSING
+2:                                 ... &lt; 0 DM
+3: ... &gt;= 200 DM / salary for at least 1 year
+4:                        no checking account
+5:                        no checking account
+6: ... &gt;= 200 DM / salary for at least 1 year</code></pre>
 </div>
 <p>We can now tune over the <code>mim.filter.nfeat</code> parameter. It steers how many features are kept by the <code>Filter</code> and eventually used by the learner:</p>
 <div class="layout-chunk" data-layout="l-body">
@@ -2447,16 +2420,11 @@ Keys: anova, auc, carscore, cmim, correlation, disr, find_correlation,
 <span class='va'>bmr</span><span class='op'>$</span><span class='fu'>aggregate</span><span class='op'>(</span><span class='op'>)</span><span class='op'>[</span>, <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"learner_id"</span>, <span class='st'>"classif.ce"</span><span class='op'>)</span><span class='op'>]</span>
 </code></pre>
 </div>
-<pre><code>                                                           learner_id
-1: imputeoor.classif.ranger.classif.kknn.featureunion.classif.log_reg
-2:                                           imputeoor.classif.ranger
-3:                                             imputeoor.classif.kknn
-4:                                          imputeoor.classif.log_reg
-   classif.ce
-1:      0.250
-2:      0.259
-3:      0.323
-4:      0.284</code></pre>
+<pre><code>                                                           learner_id classif.ce
+1: imputeoor.classif.ranger.classif.kknn.featureunion.classif.log_reg      0.250
+2:                                           imputeoor.classif.ranger      0.259
+3:                                             imputeoor.classif.kknn      0.323
+4:                                          imputeoor.classif.log_reg      0.284</code></pre>
 </div>
 <p>If we train the stacked learner and look into the final <code>Learner</code> (the logistic regression), we can see how “important” each <code>Learner</code> of the stacked learner is:</p>
 <div class="layout-chunk" data-layout="l-body">

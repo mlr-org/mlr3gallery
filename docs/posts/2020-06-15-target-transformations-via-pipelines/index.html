@@ -2249,8 +2249,8 @@ function (inputs)
     assert_list(inputs, len = 1L, types = &quot;Prediction&quot;)
     list(private$.invert(inputs[[1L]], predict_phase_state))
 }
-&lt;bytecode: 0x55db59ea39a0&gt;
-&lt;environment: 0x55db59ea0660&gt;
+&lt;bytecode: 0x55da3aaf3458&gt;
+&lt;environment: 0x55da3aaf2b98&gt;
 
 $output
 &lt;TaskRegr:mtcars&gt; (32 x 11)
@@ -2320,10 +2320,10 @@ Call:
 stats::lm(formula = task$formula(), data = task$data())
 
 Coefficients:
-(Intercept)           am         carb          cyl         disp         drat  
-  2.776e+00    4.738e-02   -2.012e-02    7.657e-03    4.989e-05    2.220e-02  
-       gear           hp         qsec           vs           wt  
-  5.925e-02   -8.964e-04    3.077e-02   -2.874e-03   -1.723e-01  
+(Intercept)           am         carb          cyl         disp         drat         gear           hp         qsec  
+  2.776e+00    4.738e-02   -2.012e-02    7.657e-03    4.989e-05    2.220e-02    5.925e-02   -8.964e-04    3.077e-02  
+         vs           wt  
+ -2.874e-03   -1.723e-01  
 
 
 $model$regr.lm$log
@@ -2348,7 +2348,7 @@ $log
 Empty data.table (0 rows and 3 cols): stage,class,msg
 
 $train_time
-[1] 0.07
+[1] 0.055
 
 $train_task
 &lt;TaskRegr:mtcars&gt; (32 x 11)
@@ -2383,17 +2383,17 @@ Call:
 stats::lm(formula = task$formula(), data = task$data())
 
 Coefficients:
-(Intercept)           am         carb          cyl         disp         drat  
-   12.30337      2.52023     -0.19942     -0.11144      0.01334      0.78711  
-       gear           hp         qsec           vs           wt  
-    0.65541     -0.02148      0.82104      0.31776     -3.71530  
+(Intercept)           am         carb          cyl         disp         drat         gear           hp         qsec  
+   12.30337      2.52023     -0.19942     -0.11144      0.01334      0.78711      0.65541     -0.02148      0.82104  
+         vs           wt  
+    0.31776     -3.71530  
 
 
 $log
 Empty data.table (0 rows and 3 cols): stage,class,msg
 
 $train_time
-[1] 0.004
+[1] 0.007
 
 $train_task
 &lt;TaskRegr:mtcars&gt; (32 x 11)
@@ -2571,17 +2571,17 @@ Call:
 stats::lm(formula = task$formula(), data = task$data())
 
 Coefficients:
-(Intercept)           am         carb          cyl         disp         drat  
- -0.6272999    0.1670950   -0.0663126    0.0237529    0.0002376    0.0759944  
-       gear           hp         qsec           vs           wt  
-  0.1963335   -0.0030367    0.1043210   -0.0080166   -0.5800635  
+(Intercept)           am         carb          cyl         disp         drat         gear           hp         qsec  
+ -0.6272999    0.1670950   -0.0663126    0.0237529    0.0002376    0.0759944    0.1963335   -0.0030367    0.1043210  
+         vs           wt  
+ -0.0080166   -0.5800635  
 
 
 $model$regr.lm$log
 Empty data.table (0 rows and 3 cols): stage,class,msg
 
 $model$regr.lm$train_time
-[1] 0.007
+[1] 0.008
 
 $model$regr.lm$train_task
 &lt;TaskRegr:mtcars&gt; (32 x 11)
@@ -2645,14 +2645,10 @@ $train_task
 <pre class="sourceCode r"><code class="sourceCode r"><span class='va'>b</span><span class='op'>$</span><span class='fu'>aggregate</span><span class='op'>(</span><span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>msr</a></span><span class='op'>(</span><span class='st'>"regr.mse"</span><span class='op'>)</span><span class='op'>)</span>
 </code></pre>
 </div>
-<pre><code>   nr      resample_result task_id                             learner_id
-1:  1 &lt;ResampleResult[21]&gt;  mtcars                                regr.lm
-2:  2 &lt;ResampleResult[21]&gt;  mtcars      targetmutate.regr.lm.targetinvert
-3:  3 &lt;ResampleResult[21]&gt;  mtcars targettrafoboxcox.regr.lm.targetinvert
-   resampling_id iters  regr.mse
-1:            cv    10 11.489667
-2:            cv    10  8.266933
-3:            cv    10  8.278439</code></pre>
+<pre><code>   nr      resample_result task_id                             learner_id resampling_id iters  regr.mse
+1:  1 &lt;ResampleResult[21]&gt;  mtcars                                regr.lm            cv    10 11.489667
+2:  2 &lt;ResampleResult[21]&gt;  mtcars      targetmutate.regr.lm.targetinvert            cv    10  8.266933
+3:  3 &lt;ResampleResult[21]&gt;  mtcars targettrafoboxcox.regr.lm.targetinvert            cv    10  8.278439</code></pre>
 </div>
 <div class="sourceCode" id="cb15"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
 <!--radix_placeholder_article_footer-->

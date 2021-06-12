@@ -2143,8 +2143,7 @@ document.addEventListener('DOMContentLoaded', function() {
 * Target: diabetes
 * Properties: twoclass
 * Features (8):
-  - dbl (8): age, glucose, insulin, mass, pedigree, pregnant, pressure,
-    triceps</code></pre>
+  - dbl (8): age, glucose, insulin, mass, pedigree, pregnant, pressure, triceps</code></pre>
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='va'>learner</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>lrn</a></span><span class='op'>(</span><span class='st'>"classif.ranger"</span><span class='op'>)</span>
 <span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span><span class='op'>(</span><span class='va'>learner</span><span class='op'>)</span>
@@ -2164,10 +2163,8 @@ document.addEventListener('DOMContentLoaded', function() {
 <pre class="sourceCode r"><code class="sourceCode r"><span class='va'>task</span><span class='op'>$</span><span class='fu'>missings</span><span class='op'>(</span><span class='op'>)</span>
 </code></pre>
 </div>
-<pre><code>diabetes      age  glucose  insulin     mass pedigree pregnant pressure 
-       0        0        5      374       11        0        0       35 
- triceps 
-     227 </code></pre>
+<pre><code>diabetes      age  glucose  insulin     mass pedigree pregnant pressure  triceps 
+       0        0        5      374       11        0        0       35      227 </code></pre>
 </div>
 <p>Additionally, we can see that the <a href="https://mlr3learners.mlr-org.com/reference/mlr_learners_classif.ranger.html"><code>ranger learner</code></a> can not handle missing values:</p>
 <div class="layout-chunk" data-layout="l-body">
@@ -2183,8 +2180,8 @@ document.addEventListener('DOMContentLoaded', function() {
 <pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>lrn</a></span><span class='op'>(</span><span class='st'>"classif.rpart"</span><span class='op'>)</span><span class='op'>$</span><span class='va'>properties</span>
 </code></pre>
 </div>
-<pre><code>[1] &quot;importance&quot;        &quot;missings&quot;          &quot;multiclass&quot;       
-[4] &quot;selected_features&quot; &quot;twoclass&quot;          &quot;weights&quot;          </code></pre>
+<pre><code>[1] &quot;importance&quot;        &quot;missings&quot;          &quot;multiclass&quot;        &quot;selected_features&quot; &quot;twoclass&quot;         
+[6] &quot;weights&quot;          </code></pre>
 </div>
 <p>Before we dive deeper, we quickly try to visualize the columns with many missing values:</p>
 <div class="layout-chunk" data-layout="l-body">
@@ -2204,36 +2201,26 @@ document.addEventListener('DOMContentLoaded', function() {
 <span class='va'>dt</span><span class='op'>[</span><span class='fu'><a href='https://rdrr.io/r/base/grep.html'>grepl</a></span><span class='op'>(</span><span class='st'>"impute"</span>, <span class='va'>dt</span><span class='op'>$</span><span class='va'>key</span><span class='op'>)</span> <span class='op'>|</span> <span class='fu'><a href='https://rdrr.io/r/base/grep.html'>grepl</a></span><span class='op'>(</span><span class='st'>"miss"</span>, <span class='va'>dt</span><span class='op'>$</span><span class='va'>key</span><span class='op'>)</span>, <span class='op'>]</span>
 </code></pre>
 </div>
-<pre><code>              key packages                    tags
-1: imputeconstant                         missings
-2:     imputehist graphics                missings
-3:  imputelearner                         missings
-4:     imputemean                         missings
-5:   imputemedian    stats                missings
-6:     imputemode                         missings
-7:      imputeoor                         missings
-8:   imputesample                         missings
-9:        missind          missings,data transform
-                                          feature_types input.num output.num
-1: logical,integer,numeric,character,factor,ordered,...         1          1
-2:                                      integer,numeric         1          1
-3:                               logical,factor,ordered         1          1
-4:                                      numeric,integer         1          1
-5:                                      numeric,integer         1          1
-6:               factor,integer,logical,numeric,ordered         1          1
-7:             character,factor,integer,numeric,ordered         1          1
-8:               factor,integer,logical,numeric,ordered         1          1
-9: logical,integer,numeric,character,factor,ordered,...         1          1
-   input.type.train input.type.predict output.type.train output.type.predict
-1:             Task               Task              Task                Task
-2:             Task               Task              Task                Task
-3:             Task               Task              Task                Task
-4:             Task               Task              Task                Task
-5:             Task               Task              Task                Task
-6:             Task               Task              Task                Task
-7:             Task               Task              Task                Task
-8:             Task               Task              Task                Task
-9:             Task               Task              Task                Task</code></pre>
+<pre><code>              key packages                    tags                                        feature_types input.num
+1: imputeconstant                         missings logical,integer,numeric,character,factor,ordered,...         1
+2:     imputehist graphics                missings                                      integer,numeric         1
+3:  imputelearner                         missings                               logical,factor,ordered         1
+4:     imputemean                         missings                                      numeric,integer         1
+5:   imputemedian    stats                missings                                      numeric,integer         1
+6:     imputemode                         missings               factor,integer,logical,numeric,ordered         1
+7:      imputeoor                         missings             character,factor,integer,numeric,ordered         1
+8:   imputesample                         missings               factor,integer,logical,numeric,ordered         1
+9:        missind          missings,data transform logical,integer,numeric,character,factor,ordered,...         1
+   output.num input.type.train input.type.predict output.type.train output.type.predict
+1:          1             Task               Task              Task                Task
+2:          1             Task               Task              Task                Task
+3:          1             Task               Task              Task                Task
+4:          1             Task               Task              Task                Task
+5:          1             Task               Task              Task                Task
+6:          1             Task               Task              Task                Task
+7:          1             Task               Task              Task                Task
+8:          1             Task               Task              Task                Task
+9:          1             Task               Task              Task                Task</code></pre>
 </div>
 <!-- Replace with something using tags at some point-->
 <h2 id="construct-operators">Construct Operators</h2>
@@ -2259,30 +2246,18 @@ document.addEventListener('DOMContentLoaded', function() {
 <span class='va'>ext_task</span><span class='op'>$</span><span class='fu'>data</span><span class='op'>(</span><span class='op'>)</span>
 </code></pre>
 </div>
-<pre><code>     diabetes missing_glucose missing_insulin missing_mass missing_pressure
-  1:      pos         present         missing      present          present
-  2:      neg         present         missing      present          present
-  3:      pos         present         missing      present          present
-  4:      neg         present         present      present          present
-  5:      pos         present         present      present          present
- ---                                                                       
-764:      neg         present         present      present          present
-765:      neg         present         missing      present          present
-766:      neg         present         present      present          present
-767:      pos         present         missing      present          present
-768:      neg         present         missing      present          present
-     missing_triceps
-  1:         present
-  2:         present
-  3:         missing
-  4:         present
-  5:         present
- ---                
-764:         present
-765:         present
-766:         present
-767:         missing
-768:         present</code></pre>
+<pre><code>     diabetes missing_glucose missing_insulin missing_mass missing_pressure missing_triceps
+  1:      pos         present         missing      present          present         present
+  2:      neg         present         missing      present          present         present
+  3:      pos         present         missing      present          present         missing
+  4:      neg         present         present      present          present         present
+  5:      pos         present         present      present          present         present
+ ---                                                                                       
+764:      neg         present         present      present          present         present
+765:      neg         present         missing      present          present         present
+766:      neg         present         present      present          present         present
+767:      pos         present         missing      present          present         missing
+768:      neg         present         missing      present          present         present</code></pre>
 </div>
 <p>For <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_imputehist.html"><code>imputehist</code></a>, we can do the same:</p>
 <div class="layout-chunk" data-layout="l-body">
@@ -2310,10 +2285,8 @@ document.addEventListener('DOMContentLoaded', function() {
 <pre class="sourceCode r"><code class="sourceCode r"><span class='va'>ext_task</span><span class='op'>$</span><span class='fu'>missings</span><span class='op'>(</span><span class='op'>)</span>
 </code></pre>
 </div>
-<pre><code>diabetes      age pedigree pregnant  glucose  insulin     mass pressure 
-       0        0        0        0        0        0        0        0 
- triceps 
-       0 </code></pre>
+<pre><code>diabetes      age pedigree pregnant  glucose  insulin     mass pressure  triceps 
+       0        0        0        0        0        0        0        0        0 </code></pre>
 </div>
 <h2 id="putting-everything-together">Putting everything together</h2>
 <p>Now we have to put all <a href="https://mlr3pipelines.mlr-org.com/reference/PipeOp.html"><code>PipeOp</code></a>s together in order to form a graph that handles imputation automatically.</p>

@@ -20,9 +20,9 @@
 
 <style type="text/css">code{white-space: pre;}</style>
 <style type="text/css" data-origin="pandoc">
-a.sourceLine { display: inline-block; line-height: 1.25; }
-a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
-a.sourceLine:empty { height: 1.2em; }
+code.sourceCode > span { display: inline-block; line-height: 1.25; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode { white-space: pre; position: relative; }
 div.sourceCode { margin: 1em 0; }
@@ -32,14 +32,16 @@ div.sourceCode { overflow: auto; }
 }
 @media print {
 code.sourceCode { white-space: pre-wrap; }
-a.sourceLine { text-indent: -1em; padding-left: 1em; }
+code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
 }
-pre.numberSource a.sourceLine
-  { position: relative; left: -4em; }
-pre.numberSource a.sourceLine::before
-  { content: attr(title);
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
     position: relative; left: -1em; text-align: right; vertical-align: baseline;
-    border: none; pointer-events: all; display: inline-block;
+    border: none; display: inline-block;
     -webkit-touch-callout: none; -webkit-user-select: none;
     -khtml-user-select: none; -moz-user-select: none;
     -ms-user-select: none; user-select: none;
@@ -48,9 +50,9 @@ pre.numberSource a.sourceLine::before
   }
 pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
 div.sourceCode
-  {  }
+  {   }
 @media screen {
-a.sourceLine::before { text-decoration: underline; }
+code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 code span.al { color: #ad0000; } /* Alert */
 code span.an { color: #5e5e5e; } /* Annotation */
@@ -2084,7 +2086,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <!--radix_placeholder_front_matter-->
 
 <script id="distill-front-matter" type="text/json">
-{"title":"Practical Tuning Series - Build an Automated Machine Learning System","description":"We implement a simple automated machine learning (AutoML) system which includes preprocessing, a switch between multiple learners and hyperparameter tuning.","authors":[{"author":"Marc Becker","authorURL":"#","affiliation":"&nbsp;","affiliationURL":"#","orcidID":""},{"author":"Theresa Ullmann","authorURL":"#","affiliation":"&nbsp;","affiliationURL":"#","orcidID":""},{"author":"Michel Lang","authorURL":"#","affiliation":"&nbsp;","affiliationURL":"#","orcidID":""},{"author":"Bernd Bischl","authorURL":"#","affiliation":"&nbsp;","affiliationURL":"#","orcidID":""},{"author":"Jakob Richter","authorURL":"#","affiliation":"&nbsp;","affiliationURL":"#","orcidID":""},{"author":"Martin Binder","authorURL":"#","affiliation":"&nbsp;","affiliationURL":"#","orcidID":""}],"publishedDate":"2021-03-11T00:00:00.000+01:00","citationText":"Becker, et al., 2021"}
+{"title":"Practical Tuning Series - Build an Automated Machine Learning System","description":"We implement a simple automated machine learning (AutoML) system which includes preprocessing, a switch between multiple learners and hyperparameter tuning.","authors":[{"author":"Marc Becker","authorURL":"#","affiliation":"&nbsp;","affiliationURL":"#","orcidID":""},{"author":"Theresa Ullmann","authorURL":"#","affiliation":"&nbsp;","affiliationURL":"#","orcidID":""},{"author":"Michel Lang","authorURL":"#","affiliation":"&nbsp;","affiliationURL":"#","orcidID":""},{"author":"Bernd Bischl","authorURL":"#","affiliation":"&nbsp;","affiliationURL":"#","orcidID":""},{"author":"Jakob Richter","authorURL":"#","affiliation":"&nbsp;","affiliationURL":"#","orcidID":""},{"author":"Martin Binder","authorURL":"#","affiliation":"&nbsp;","affiliationURL":"#","orcidID":""}],"publishedDate":"2021-03-11T00:00:00.000+00:00","citationText":"Becker, et al., 2021"}
 </script>
 
 <!--/radix_placeholder_front_matter-->
@@ -2125,7 +2127,7 @@ document.addEventListener('DOMContentLoaded', function() {
   <a href="../../index.html#category:practical_tuning_series" class="dt-tag">practical tuning series</a>
 </div>
 <!--/radix_placeholder_categories-->
-<p>We implement a simple automated machine learning (AutoML) system which includes preprocessing, a switch between multiple learners and hyperparameter tuning.</p>
+<p><p>We implement a simple automated machine learning (AutoML) system which includes preprocessing, a switch between multiple learners and hyperparameter tuning.</p></p>
 </div>
 
 <div class="d-byline">
@@ -2262,7 +2264,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>The parameter set of the graph learner includes all hyperparameters from all contained learners. The hyperparameter ids are prefixed with the corresponding learner ids. The first hyperparameter <code>branch.selection</code> controls which learner is used.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span><span class='op'>(</span><span class='va'>graph_learner</span><span class='op'>$</span><span class='va'>param_set</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://docs.ropensci.org/skimr/reference/print.html'>print</a></span><span class='op'>(</span><span class='va'>graph_learner</span><span class='op'>$</span><span class='va'>param_set</span><span class='op'>)</span>
 </code></pre>
 </div>
 <pre><code>&lt;ParamSetCollection&gt;

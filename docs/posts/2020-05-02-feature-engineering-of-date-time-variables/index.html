@@ -2184,10 +2184,10 @@ document.addEventListener('DOMContentLoaded', function() {
 <span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>bikes</span><span class='op'>$</span><span class='va'>date</span><span class='op'>)</span>
 </code></pre>
 </div>
-<pre><code>                 Min.               1st Qu.                Median 
-&quot;2011-01-01 00:00:00&quot; &quot;2011-07-04 22:30:00&quot; &quot;2012-01-02 21:00:00&quot; 
-                 Mean               3rd Qu.                  Max. 
-&quot;2012-01-02 15:41:22&quot; &quot;2012-07-02 06:30:00&quot; &quot;2012-12-31 23:00:00&quot; </code></pre>
+<pre><code>                 Min.               1st Qu.                Median                  Mean               3rd Qu. 
+&quot;2011-01-01 00:00:00&quot; &quot;2011-07-04 22:30:00&quot; &quot;2012-01-02 21:00:00&quot; &quot;2012-01-02 15:41:22&quot; &quot;2012-07-02 06:30:00&quot; 
+                 Max. 
+&quot;2012-12-31 23:00:00&quot; </code></pre>
 </div>
 <h2 id="baseline-random-forest">Baseline Random Forest</h2>
 <p>We construct a new regression task and create a vector of train and test indices:</p>
@@ -2238,14 +2238,14 @@ document.addEventListener('DOMContentLoaded', function() {
 <span class='va'>res_rf</span><span class='op'>$</span><span class='fu'>score</span><span class='op'>(</span><span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>msr</a></span><span class='op'>(</span><span class='st'>"regr.mse"</span><span class='op'>)</span><span class='op'>)</span>
 </code></pre>
 </div>
-<pre><code>             task task_id                 learner  learner_id
-1: &lt;TaskRegr[43]&gt;   bikes &lt;LearnerRegrRanger[34]&gt; regr.ranger
-2: &lt;TaskRegr[43]&gt;   bikes &lt;LearnerRegrRanger[34]&gt; regr.ranger
-3: &lt;TaskRegr[43]&gt;   bikes &lt;LearnerRegrRanger[34]&gt; regr.ranger
-           resampling resampling_id iteration           prediction regr.mse
-1: &lt;ResamplingCV[19]&gt;            cv         1 &lt;PredictionRegr[18]&gt; 4492.038
-2: &lt;ResamplingCV[19]&gt;            cv         2 &lt;PredictionRegr[18]&gt; 4720.677
-3: &lt;ResamplingCV[19]&gt;            cv         3 &lt;PredictionRegr[18]&gt; 4381.281</code></pre>
+<pre><code>             task task_id                 learner  learner_id         resampling resampling_id iteration
+1: &lt;TaskRegr[43]&gt;   bikes &lt;LearnerRegrRanger[34]&gt; regr.ranger &lt;ResamplingCV[19]&gt;            cv         1
+2: &lt;TaskRegr[43]&gt;   bikes &lt;LearnerRegrRanger[34]&gt; regr.ranger &lt;ResamplingCV[19]&gt;            cv         2
+3: &lt;TaskRegr[43]&gt;   bikes &lt;LearnerRegrRanger[34]&gt; regr.ranger &lt;ResamplingCV[19]&gt;            cv         3
+             prediction regr.mse
+1: &lt;PredictionRegr[18]&gt; 4492.038
+2: &lt;PredictionRegr[18]&gt; 4720.677
+3: &lt;PredictionRegr[18]&gt; 4381.281</code></pre>
 </div>
 <p>The average RMSE is given by:</p>
 <div class="layout-chunk" data-layout="l-body">
@@ -2284,12 +2284,10 @@ document.addEventListener('DOMContentLoaded', function() {
 * Target: cnt
 * Properties: -
 * Features (28):
-  - dbl (23): atemp, date.day_of_month, date.day_of_month_cos,
-    date.day_of_month_sin, date.day_of_week, date.day_of_week_cos,
-    date.day_of_week_sin, date.day_of_year, date.day_of_year_cos,
-    date.day_of_year_sin, date.hour, date.hour_cos, date.hour_sin,
-    date.month, date.month_cos, date.month_sin, date.week_of_year,
-    date.week_of_year_cos, date.week_of_year_sin, date.year, hum, temp,
+  - dbl (23): atemp, date.day_of_month, date.day_of_month_cos, date.day_of_month_sin, date.day_of_week,
+    date.day_of_week_cos, date.day_of_week_sin, date.day_of_year, date.day_of_year_cos,
+    date.day_of_year_sin, date.hour, date.hour_cos, date.hour_sin, date.month, date.month_cos,
+    date.month_sin, date.week_of_year, date.week_of_year_cos, date.week_of_year_sin, date.year, hum, temp,
     windspeed
   - lgl (3): date.is_day, holiday, workingday
   - fct (2): season, weathersit</code></pre>
@@ -2321,14 +2319,14 @@ document.addEventListener('DOMContentLoaded', function() {
 <span class='va'>res_grl</span><span class='op'>$</span><span class='fu'>score</span><span class='op'>(</span><span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>msr</a></span><span class='op'>(</span><span class='st'>"regr.mse"</span><span class='op'>)</span><span class='op'>)</span>
 </code></pre>
 </div>
-<pre><code>             task task_id            learner               learner_id
-1: &lt;TaskRegr[43]&gt;   bikes &lt;GraphLearner[33]&gt; datefeatures.regr.ranger
-2: &lt;TaskRegr[43]&gt;   bikes &lt;GraphLearner[33]&gt; datefeatures.regr.ranger
-3: &lt;TaskRegr[43]&gt;   bikes &lt;GraphLearner[33]&gt; datefeatures.regr.ranger
-           resampling resampling_id iteration           prediction regr.mse
-1: &lt;ResamplingCV[19]&gt;            cv         1 &lt;PredictionRegr[18]&gt; 2372.984
-2: &lt;ResamplingCV[19]&gt;            cv         2 &lt;PredictionRegr[18]&gt; 2444.461
-3: &lt;ResamplingCV[19]&gt;            cv         3 &lt;PredictionRegr[18]&gt; 2376.875</code></pre>
+<pre><code>             task task_id            learner               learner_id         resampling resampling_id iteration
+1: &lt;TaskRegr[43]&gt;   bikes &lt;GraphLearner[33]&gt; datefeatures.regr.ranger &lt;ResamplingCV[19]&gt;            cv         1
+2: &lt;TaskRegr[43]&gt;   bikes &lt;GraphLearner[33]&gt; datefeatures.regr.ranger &lt;ResamplingCV[19]&gt;            cv         2
+3: &lt;TaskRegr[43]&gt;   bikes &lt;GraphLearner[33]&gt; datefeatures.regr.ranger &lt;ResamplingCV[19]&gt;            cv         3
+             prediction regr.mse
+1: &lt;PredictionRegr[18]&gt; 2372.984
+2: &lt;PredictionRegr[18]&gt; 2444.461
+3: &lt;PredictionRegr[18]&gt; 2376.875</code></pre>
 </div>
 <p>The average RMSE is given by</p>
 <div class="layout-chunk" data-layout="l-body">

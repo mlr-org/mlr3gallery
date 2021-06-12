@@ -2182,12 +2182,9 @@ document.addEventListener('DOMContentLoaded', function() {
 <span class='va'>base</span><span class='op'>$</span><span class='fu'>aggregate</span><span class='op'>(</span>measures <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>msr</a></span><span class='op'>(</span><span class='st'>"classif.acc"</span><span class='op'>)</span><span class='op'>)</span>
 </code></pre>
 </div>
-<pre><code>   nr      resample_result task_id     learner_id resampling_id iters
-1:  1 &lt;ResampleResult[21]&gt;   SRBCT    classif.lda            cv     3
-2:  2 &lt;ResampleResult[21]&gt;   SRBCT classif.ranger            cv     3
-   classif.acc
-1:   0.6190476
-2:   0.9682540</code></pre>
+<pre><code>   nr      resample_result task_id     learner_id resampling_id iters classif.acc
+1:  1 &lt;ResampleResult[21]&gt;   SRBCT    classif.lda            cv     3   0.6190476
+2:  2 &lt;ResampleResult[21]&gt;   SRBCT classif.ranger            cv     3   0.9682540</code></pre>
 </div>
 <p>The out-of-the-box <code>ranger</code> appears to already have good performance on the training task. Regarding the <code>LDA</code>, we do get a warning message that some features are colinear. This strongly suggests to reduce the dimensionality of the feature space. Let’s see if we can get some better performance, at least for the <code>LDA</code>.</p>
 <h2 id="branching">Branching</h2>
@@ -2226,64 +2223,35 @@ document.addEventListener('DOMContentLoaded', function() {
 <pre class="sourceCode r"><code class="sourceCode r"><span class='va'>graph1</span><span class='op'>$</span><span class='va'>param_set</span><span class='op'>$</span><span class='fu'>ids</span><span class='op'>(</span><span class='op'>)</span>
 </code></pre>
 </div>
-<pre><code> [1] &quot;colapply.applicator&quot;                        
- [2] &quot;colapply.affect_columns&quot;                    
- [3] &quot;scale.center&quot;                               
- [4] &quot;scale.scale&quot;                                
- [5] &quot;scale.robust&quot;                               
- [6] &quot;scale.affect_columns&quot;                       
- [7] &quot;branch_learner.selection&quot;                   
- [8] &quot;branch_preproc_lda.selection&quot;               
- [9] &quot;pca.center&quot;                                 
-[10] &quot;pca.scale.&quot;                                 
-[11] &quot;pca.rank.&quot;                                  
-[12] &quot;pca.affect_columns&quot;                         
-[13] &quot;ica.n.comp&quot;                                 
-[14] &quot;ica.alg.typ&quot;                                
-[15] &quot;ica.fun&quot;                                    
-[16] &quot;ica.alpha&quot;                                  
-[17] &quot;ica.method&quot;                                 
-[18] &quot;ica.row.norm&quot;                               
-[19] &quot;ica.maxit&quot;                                  
-[20] &quot;ica.tol&quot;                                    
-[21] &quot;ica.verbose&quot;                                
-[22] &quot;ica.w.init&quot;                                 
-[23] &quot;ica.affect_columns&quot;                         
-[24] &quot;classif.lda.prior&quot;                          
-[25] &quot;classif.lda.tol&quot;                            
-[26] &quot;classif.lda.method&quot;                         
-[27] &quot;classif.lda.nu&quot;                             
-[28] &quot;classif.lda.predict.method&quot;                 
-[29] &quot;classif.lda.predict.prior&quot;                  
-[30] &quot;classif.lda.dimen&quot;                          
-[31] &quot;classif.ranger.num.trees&quot;                   
-[32] &quot;classif.ranger.mtry&quot;                        
-[33] &quot;classif.ranger.importance&quot;                  
-[34] &quot;classif.ranger.write.forest&quot;                
-[35] &quot;classif.ranger.min.node.size&quot;               
-[36] &quot;classif.ranger.replace&quot;                     
-[37] &quot;classif.ranger.sample.fraction&quot;             
-[38] &quot;classif.ranger.class.weights&quot;               
-[39] &quot;classif.ranger.splitrule&quot;                   
-[40] &quot;classif.ranger.num.random.splits&quot;           
-[41] &quot;classif.ranger.split.select.weights&quot;        
-[42] &quot;classif.ranger.always.split.variables&quot;      
-[43] &quot;classif.ranger.respect.unordered.factors&quot;   
-[44] &quot;classif.ranger.scale.permutation.importance&quot;
-[45] &quot;classif.ranger.keep.inbag&quot;                  
-[46] &quot;classif.ranger.holdout&quot;                     
-[47] &quot;classif.ranger.num.threads&quot;                 
-[48] &quot;classif.ranger.save.memory&quot;                 
-[49] &quot;classif.ranger.verbose&quot;                     
-[50] &quot;classif.ranger.oob.error&quot;                   
-[51] &quot;classif.ranger.max.depth&quot;                   
-[52] &quot;classif.ranger.alpha&quot;                       
-[53] &quot;classif.ranger.min.prop&quot;                    
-[54] &quot;classif.ranger.regularization.factor&quot;       
-[55] &quot;classif.ranger.regularization.usedepth&quot;     
-[56] &quot;classif.ranger.seed&quot;                        
-[57] &quot;classif.ranger.minprop&quot;                     
-[58] &quot;classif.ranger.se.method&quot;                   </code></pre>
+<pre><code> [1] &quot;colapply.applicator&quot;                         &quot;colapply.affect_columns&quot;                    
+ [3] &quot;scale.center&quot;                                &quot;scale.scale&quot;                                
+ [5] &quot;scale.robust&quot;                                &quot;scale.affect_columns&quot;                       
+ [7] &quot;branch_learner.selection&quot;                    &quot;branch_preproc_lda.selection&quot;               
+ [9] &quot;pca.center&quot;                                  &quot;pca.scale.&quot;                                 
+[11] &quot;pca.rank.&quot;                                   &quot;pca.affect_columns&quot;                         
+[13] &quot;ica.n.comp&quot;                                  &quot;ica.alg.typ&quot;                                
+[15] &quot;ica.fun&quot;                                     &quot;ica.alpha&quot;                                  
+[17] &quot;ica.method&quot;                                  &quot;ica.row.norm&quot;                               
+[19] &quot;ica.maxit&quot;                                   &quot;ica.tol&quot;                                    
+[21] &quot;ica.verbose&quot;                                 &quot;ica.w.init&quot;                                 
+[23] &quot;ica.affect_columns&quot;                          &quot;classif.lda.prior&quot;                          
+[25] &quot;classif.lda.tol&quot;                             &quot;classif.lda.method&quot;                         
+[27] &quot;classif.lda.nu&quot;                              &quot;classif.lda.predict.method&quot;                 
+[29] &quot;classif.lda.predict.prior&quot;                   &quot;classif.lda.dimen&quot;                          
+[31] &quot;classif.ranger.num.trees&quot;                    &quot;classif.ranger.mtry&quot;                        
+[33] &quot;classif.ranger.importance&quot;                   &quot;classif.ranger.write.forest&quot;                
+[35] &quot;classif.ranger.min.node.size&quot;                &quot;classif.ranger.replace&quot;                     
+[37] &quot;classif.ranger.sample.fraction&quot;              &quot;classif.ranger.class.weights&quot;               
+[39] &quot;classif.ranger.splitrule&quot;                    &quot;classif.ranger.num.random.splits&quot;           
+[41] &quot;classif.ranger.split.select.weights&quot;         &quot;classif.ranger.always.split.variables&quot;      
+[43] &quot;classif.ranger.respect.unordered.factors&quot;    &quot;classif.ranger.scale.permutation.importance&quot;
+[45] &quot;classif.ranger.keep.inbag&quot;                   &quot;classif.ranger.holdout&quot;                     
+[47] &quot;classif.ranger.num.threads&quot;                  &quot;classif.ranger.save.memory&quot;                 
+[49] &quot;classif.ranger.verbose&quot;                      &quot;classif.ranger.oob.error&quot;                   
+[51] &quot;classif.ranger.max.depth&quot;                    &quot;classif.ranger.alpha&quot;                       
+[53] &quot;classif.ranger.min.prop&quot;                     &quot;classif.ranger.regularization.factor&quot;       
+[55] &quot;classif.ranger.regularization.usedepth&quot;      &quot;classif.ranger.seed&quot;                        
+[57] &quot;classif.ranger.minprop&quot;                      &quot;classif.ranger.se.method&quot;                   </code></pre>
 </div>
 <p>The <code>id</code>’s are prefixed by the respective <a href="https://mlr3pipelines.mlr-org.com/reference/PipeOp.html"><code>PipeOp</code></a> they belong to, e.g., <code>pca.rank.</code> refers to the <code>rank.</code> parameter of <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_pca.html"><code>PipeOpPCA</code></a>.</p>
 <h2 id="search-space">Search Space</h2>
@@ -2377,66 +2345,66 @@ document.addEventListener('DOMContentLoaded', function() {
 </code></pre>
 </div>
 <pre><code>&lt;Design&gt; with 28 rows:
-    branch_learner.selection branch_preproc_lda.selection pca.rank. ica.n.comp
- 1:              pca_ica_lda                          pca         1         NA
- 2:              pca_ica_lda                          pca        10         NA
- 3:              pca_ica_lda                          pca        20         NA
- 4:              pca_ica_lda                          pca        30         NA
- 5:              pca_ica_lda                          ica        NA          1
- 6:              pca_ica_lda                          ica        NA          1
- 7:              pca_ica_lda                          ica        NA         10
- 8:              pca_ica_lda                          ica        NA         10
- 9:              pca_ica_lda                          ica        NA         20
-10:              pca_ica_lda                          ica        NA         20
-11:              pca_ica_lda                          ica        NA         30
-12:              pca_ica_lda                          ica        NA         30
-13:                   ranger                         &lt;NA&gt;        NA         NA
-14:                   ranger                         &lt;NA&gt;        NA         NA
-15:                   ranger                         &lt;NA&gt;        NA         NA
-16:                   ranger                         &lt;NA&gt;        NA         NA
-17:                   ranger                         &lt;NA&gt;        NA         NA
-18:                   ranger                         &lt;NA&gt;        NA         NA
-19:                   ranger                         &lt;NA&gt;        NA         NA
-20:                   ranger                         &lt;NA&gt;        NA         NA
-21:                   ranger                         &lt;NA&gt;        NA         NA
-22:                   ranger                         &lt;NA&gt;        NA         NA
-23:                   ranger                         &lt;NA&gt;        NA         NA
-24:                   ranger                         &lt;NA&gt;        NA         NA
-25:                   ranger                         &lt;NA&gt;        NA         NA
-26:                   ranger                         &lt;NA&gt;        NA         NA
-27:                   ranger                         &lt;NA&gt;        NA         NA
-28:                   ranger                         &lt;NA&gt;        NA         NA
-    branch_learner.selection branch_preproc_lda.selection pca.rank. ica.n.comp
-    classif.lda.method classif.ranger.mtry classif.ranger.num.trees
- 1:               &lt;NA&gt;                  NA                       NA
- 2:               &lt;NA&gt;                  NA                       NA
- 3:               &lt;NA&gt;                  NA                       NA
- 4:               &lt;NA&gt;                  NA                       NA
- 5:             moment                  NA                       NA
- 6:                mve                  NA                       NA
- 7:             moment                  NA                       NA
- 8:                mve                  NA                       NA
- 9:             moment                  NA                       NA
-10:                mve                  NA                       NA
-11:             moment                  NA                       NA
-12:                mve                  NA                       NA
-13:               &lt;NA&gt;                 200                      500
-14:               &lt;NA&gt;                 200                     1000
-15:               &lt;NA&gt;                 200                     1500
-16:               &lt;NA&gt;                 200                     2000
-17:               &lt;NA&gt;                 466                      500
-18:               &lt;NA&gt;                 466                     1000
-19:               &lt;NA&gt;                 466                     1500
-20:               &lt;NA&gt;                 466                     2000
-21:               &lt;NA&gt;                 733                      500
-22:               &lt;NA&gt;                 733                     1000
-23:               &lt;NA&gt;                 733                     1500
-24:               &lt;NA&gt;                 733                     2000
-25:               &lt;NA&gt;                1000                      500
-26:               &lt;NA&gt;                1000                     1000
-27:               &lt;NA&gt;                1000                     1500
-28:               &lt;NA&gt;                1000                     2000
-    classif.lda.method classif.ranger.mtry classif.ranger.num.trees</code></pre>
+    branch_learner.selection branch_preproc_lda.selection pca.rank. ica.n.comp classif.lda.method classif.ranger.mtry
+ 1:              pca_ica_lda                          pca         1         NA               &lt;NA&gt;                  NA
+ 2:              pca_ica_lda                          pca        10         NA               &lt;NA&gt;                  NA
+ 3:              pca_ica_lda                          pca        20         NA               &lt;NA&gt;                  NA
+ 4:              pca_ica_lda                          pca        30         NA               &lt;NA&gt;                  NA
+ 5:              pca_ica_lda                          ica        NA          1             moment                  NA
+ 6:              pca_ica_lda                          ica        NA          1                mve                  NA
+ 7:              pca_ica_lda                          ica        NA         10             moment                  NA
+ 8:              pca_ica_lda                          ica        NA         10                mve                  NA
+ 9:              pca_ica_lda                          ica        NA         20             moment                  NA
+10:              pca_ica_lda                          ica        NA         20                mve                  NA
+11:              pca_ica_lda                          ica        NA         30             moment                  NA
+12:              pca_ica_lda                          ica        NA         30                mve                  NA
+13:                   ranger                         &lt;NA&gt;        NA         NA               &lt;NA&gt;                 200
+14:                   ranger                         &lt;NA&gt;        NA         NA               &lt;NA&gt;                 200
+15:                   ranger                         &lt;NA&gt;        NA         NA               &lt;NA&gt;                 200
+16:                   ranger                         &lt;NA&gt;        NA         NA               &lt;NA&gt;                 200
+17:                   ranger                         &lt;NA&gt;        NA         NA               &lt;NA&gt;                 466
+18:                   ranger                         &lt;NA&gt;        NA         NA               &lt;NA&gt;                 466
+19:                   ranger                         &lt;NA&gt;        NA         NA               &lt;NA&gt;                 466
+20:                   ranger                         &lt;NA&gt;        NA         NA               &lt;NA&gt;                 466
+21:                   ranger                         &lt;NA&gt;        NA         NA               &lt;NA&gt;                 733
+22:                   ranger                         &lt;NA&gt;        NA         NA               &lt;NA&gt;                 733
+23:                   ranger                         &lt;NA&gt;        NA         NA               &lt;NA&gt;                 733
+24:                   ranger                         &lt;NA&gt;        NA         NA               &lt;NA&gt;                 733
+25:                   ranger                         &lt;NA&gt;        NA         NA               &lt;NA&gt;                1000
+26:                   ranger                         &lt;NA&gt;        NA         NA               &lt;NA&gt;                1000
+27:                   ranger                         &lt;NA&gt;        NA         NA               &lt;NA&gt;                1000
+28:                   ranger                         &lt;NA&gt;        NA         NA               &lt;NA&gt;                1000
+    branch_learner.selection branch_preproc_lda.selection pca.rank. ica.n.comp classif.lda.method classif.ranger.mtry
+    classif.ranger.num.trees
+ 1:                       NA
+ 2:                       NA
+ 3:                       NA
+ 4:                       NA
+ 5:                       NA
+ 6:                       NA
+ 7:                       NA
+ 8:                       NA
+ 9:                       NA
+10:                       NA
+11:                       NA
+12:                       NA
+13:                      500
+14:                     1000
+15:                     1500
+16:                     2000
+17:                      500
+18:                     1000
+19:                     1500
+20:                     2000
+21:                      500
+22:                     1000
+23:                     1500
+24:                     2000
+25:                      500
+26:                     1000
+27:                     1500
+28:                     2000
+    classif.ranger.num.trees</code></pre>
 </div>
 <p>Before starting the tuning we set some logging thresholds (i.e., only print warnings on the console):</p>
 <div class="layout-chunk" data-layout="l-body">
@@ -2452,12 +2420,10 @@ document.addEventListener('DOMContentLoaded', function() {
 <span class='va'>tuner_gs</span><span class='op'>$</span><span class='fu'>optimize</span><span class='op'>(</span><span class='va'>tune1</span><span class='op'>)</span>
 </code></pre>
 </div>
-<pre><code>   branch_learner.selection branch_preproc_lda.selection pca.rank. ica.n.comp
-1:                   ranger                         &lt;NA&gt;        NA         NA
-   classif.lda.method classif.ranger.mtry classif.ranger.num.trees
-1:               &lt;NA&gt;                 466                     1500
-   learner_param_vals  x_domain classif.acc
-1:          &lt;list[8]&gt; &lt;list[3]&gt;           1</code></pre>
+<pre><code>   branch_learner.selection branch_preproc_lda.selection pca.rank. ica.n.comp classif.lda.method classif.ranger.mtry
+1:                   ranger                         &lt;NA&gt;        NA         NA               &lt;NA&gt;                 466
+   classif.ranger.num.trees learner_param_vals  x_domain classif.acc
+1:                     1500          &lt;list[8]&gt; &lt;list[3]&gt;           1</code></pre>
 </div>
 <p>Now, we can inspect the results ordered by the <code>classification accuracy</code>:</p>
 <div class="layout-chunk" data-layout="l-body">
@@ -2466,96 +2432,66 @@ document.addEventListener('DOMContentLoaded', function() {
 <span class='va'>tune1_results</span><span class='op'>[</span><span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/setorder.html'>order</a></span><span class='op'>(</span><span class='va'>classif.acc</span><span class='op'>)</span>, <span class='op'>]</span>
 </code></pre>
 </div>
-<pre><code>    branch_learner.selection branch_preproc_lda.selection pca.rank. ica.n.comp
- 1:              pca_ica_lda                          ica        NA          1
- 2:              pca_ica_lda                          pca         1         NA
- 3:              pca_ica_lda                          ica        NA          1
- 4:              pca_ica_lda                          ica        NA         10
- 5:              pca_ica_lda                          ica        NA         10
- 6:              pca_ica_lda                          pca        10         NA
- 7:              pca_ica_lda                          ica        NA         20
- 8:              pca_ica_lda                          ica        NA         20
- 9:              pca_ica_lda                          pca        20         NA
-10:              pca_ica_lda                          pca        30         NA
-11:              pca_ica_lda                          ica        NA         30
-12:              pca_ica_lda                          ica        NA         30
-13:                   ranger                         &lt;NA&gt;        NA         NA
-14:                   ranger                         &lt;NA&gt;        NA         NA
-15:                   ranger                         &lt;NA&gt;        NA         NA
-16:                   ranger                         &lt;NA&gt;        NA         NA
-17:                   ranger                         &lt;NA&gt;        NA         NA
-18:                   ranger                         &lt;NA&gt;        NA         NA
-19:                   ranger                         &lt;NA&gt;        NA         NA
-20:                   ranger                         &lt;NA&gt;        NA         NA
-21:                   ranger                         &lt;NA&gt;        NA         NA
-22:                   ranger                         &lt;NA&gt;        NA         NA
-23:                   ranger                         &lt;NA&gt;        NA         NA
-24:                   ranger                         &lt;NA&gt;        NA         NA
-25:                   ranger                         &lt;NA&gt;        NA         NA
-26:                   ranger                         &lt;NA&gt;        NA         NA
-27:                   ranger                         &lt;NA&gt;        NA         NA
-28:                   ranger                         &lt;NA&gt;        NA         NA
-    branch_learner.selection branch_preproc_lda.selection pca.rank. ica.n.comp
-    classif.lda.method classif.ranger.mtry classif.ranger.num.trees classif.acc
- 1:             moment                  NA                       NA   0.2380952
- 2:               &lt;NA&gt;                  NA                       NA   0.2380952
- 3:                mve                  NA                       NA   0.2698413
- 4:                mve                  NA                       NA   0.8571429
- 5:             moment                  NA                       NA   0.8730159
- 6:               &lt;NA&gt;                  NA                       NA   0.8730159
- 7:                mve                  NA                       NA   0.8888889
- 8:             moment                  NA                       NA   0.9682540
- 9:               &lt;NA&gt;                  NA                       NA   0.9682540
-10:               &lt;NA&gt;                  NA                       NA   0.9841270
-11:                mve                  NA                       NA   0.9841270
-12:             moment                  NA                       NA   0.9841270
-13:               &lt;NA&gt;                 466                     1500   1.0000000
-14:               &lt;NA&gt;                1000                     1500   1.0000000
-15:               &lt;NA&gt;                 200                     1000   1.0000000
-16:               &lt;NA&gt;                 733                      500   1.0000000
-17:               &lt;NA&gt;                1000                     1000   1.0000000
-18:               &lt;NA&gt;                 200                      500   1.0000000
-19:               &lt;NA&gt;                 466                      500   1.0000000
-20:               &lt;NA&gt;                 200                     1500   1.0000000
-21:               &lt;NA&gt;                 733                     2000   1.0000000
-22:               &lt;NA&gt;                1000                      500   1.0000000
-23:               &lt;NA&gt;                 733                     1000   1.0000000
-24:               &lt;NA&gt;                 466                     1000   1.0000000
-25:               &lt;NA&gt;                 200                     2000   1.0000000
-26:               &lt;NA&gt;                 466                     2000   1.0000000
-27:               &lt;NA&gt;                 733                     1500   1.0000000
-28:               &lt;NA&gt;                1000                     2000   1.0000000
-    classif.lda.method classif.ranger.mtry classif.ranger.num.trees classif.acc
-                                   uhash  x_domain           timestamp batch_nr
- 1: 86a235e0-096c-49ff-a8ba-c2513d58d664 &lt;list[4]&gt; 2021-06-12 05:14:18        3
- 2: 37bd9776-9720-4060-a8e9-f23383101432 &lt;list[3]&gt; 2021-06-12 05:26:20       24
- 3: feb1e856-f799-44c1-b8cb-1f2d2e19eb1d &lt;list[4]&gt; 2021-06-12 05:20:25       15
- 4: 7683dd48-9ad0-4598-b11b-5847dba113c5 &lt;list[4]&gt; 2021-06-12 05:23:25       20
- 5: f78464c1-0a53-40ea-b673-d8fb84dc8ba8 &lt;list[4]&gt; 2021-06-12 05:12:03        2
- 6: 82efac73-dc75-49da-96af-33e04853e326 &lt;list[3]&gt; 2021-06-12 05:15:09       10
- 7: cf179841-432f-4d18-be08-18696baf7e74 &lt;list[4]&gt; 2021-06-12 05:26:01       21
- 8: d2b0a2ab-cfae-4c79-90d3-049e5fe7acfe &lt;list[4]&gt; 2021-06-12 05:09:46        1
- 9: e0589bdb-05a7-4041-bda6-3d4d3f55f40d &lt;list[3]&gt; 2021-06-12 05:15:13       11
-10: 0e127957-53c7-4bca-9c78-b00bd7ecf3be &lt;list[3]&gt; 2021-06-12 05:14:49        7
-11: b1efea86-b9b5-4644-8168-32fee7f4a516 &lt;list[4]&gt; 2021-06-12 05:17:52       12
-12: cb71fd8f-6021-4641-87ce-90ecd148c778 &lt;list[4]&gt; 2021-06-12 05:29:06       26
-13: 5d440ce0-0af5-48af-9912-4ed0156292ff &lt;list[3]&gt; 2021-06-12 05:14:27        4
-14: ccab1940-23b9-4c5a-9ff7-1c7663da27a3 &lt;list[3]&gt; 2021-06-12 05:14:40        5
-15: 41cb7ff2-7d7f-4991-b75e-cf91c939653f &lt;list[3]&gt; 2021-06-12 05:14:46        6
-16: 5b149560-0f69-4cc4-8f77-e58b7430bca0 &lt;list[3]&gt; 2021-06-12 05:14:55        8
-17: 3c4e43c1-192a-455e-beff-831885db5fe5 &lt;list[3]&gt; 2021-06-12 05:15:06        9
-18: e6c13242-7e98-4bca-a653-ba25b90178c1 &lt;list[3]&gt; 2021-06-12 05:17:57       13
-19: ba83fc0f-cc0a-4e58-8ebe-03319ddfacbe &lt;list[3]&gt; 2021-06-12 05:18:02       14
-20: c093573d-ea4e-451c-8a93-3c6380b882f1 &lt;list[3]&gt; 2021-06-12 05:20:32       16
-21: 18d894ca-5a6a-432f-831d-1d45b988db4e &lt;list[3]&gt; 2021-06-12 05:20:45       17
-22: 8400be93-ada0-41ee-97e7-7fd732fc072d &lt;list[3]&gt; 2021-06-12 05:20:52       18
-23: 66dad796-5458-4b8d-90da-f9b3cc012d3b &lt;list[3]&gt; 2021-06-12 05:21:01       19
-24: 54ca0e0c-d0b5-4b9f-afde-6648960025f9 &lt;list[3]&gt; 2021-06-12 05:26:08       22
-25: ccc97a0a-22e9-4bb0-901c-d1a2e0c38fd4 &lt;list[3]&gt; 2021-06-12 05:26:16       23
-26: 91bbedf9-3413-46ee-9ffa-2f3a3aa63b41 &lt;list[3]&gt; 2021-06-12 05:26:30       25
-27: ed171f29-548e-47d3-b59b-7b599df0e3c6 &lt;list[3]&gt; 2021-06-12 05:29:17       27
-28: 78885241-fe56-4459-8938-24e4736a8491 &lt;list[3]&gt; 2021-06-12 05:29:34       28
-                                   uhash  x_domain           timestamp batch_nr</code></pre>
+<pre><code>    branch_learner.selection branch_preproc_lda.selection pca.rank. ica.n.comp classif.lda.method classif.ranger.mtry
+ 1:              pca_ica_lda                          ica        NA          1             moment                  NA
+ 2:              pca_ica_lda                          pca         1         NA               &lt;NA&gt;                  NA
+ 3:              pca_ica_lda                          ica        NA          1                mve                  NA
+ 4:              pca_ica_lda                          ica        NA         10                mve                  NA
+ 5:              pca_ica_lda                          ica        NA         10             moment                  NA
+ 6:              pca_ica_lda                          pca        10         NA               &lt;NA&gt;                  NA
+ 7:              pca_ica_lda                          ica        NA         20                mve                  NA
+ 8:              pca_ica_lda                          ica        NA         20             moment                  NA
+ 9:              pca_ica_lda                          pca        20         NA               &lt;NA&gt;                  NA
+10:              pca_ica_lda                          pca        30         NA               &lt;NA&gt;                  NA
+11:              pca_ica_lda                          ica        NA         30                mve                  NA
+12:              pca_ica_lda                          ica        NA         30             moment                  NA
+13:                   ranger                         &lt;NA&gt;        NA         NA               &lt;NA&gt;                 466
+14:                   ranger                         &lt;NA&gt;        NA         NA               &lt;NA&gt;                1000
+15:                   ranger                         &lt;NA&gt;        NA         NA               &lt;NA&gt;                 200
+16:                   ranger                         &lt;NA&gt;        NA         NA               &lt;NA&gt;                 733
+17:                   ranger                         &lt;NA&gt;        NA         NA               &lt;NA&gt;                1000
+18:                   ranger                         &lt;NA&gt;        NA         NA               &lt;NA&gt;                 200
+19:                   ranger                         &lt;NA&gt;        NA         NA               &lt;NA&gt;                 466
+20:                   ranger                         &lt;NA&gt;        NA         NA               &lt;NA&gt;                 200
+21:                   ranger                         &lt;NA&gt;        NA         NA               &lt;NA&gt;                 733
+22:                   ranger                         &lt;NA&gt;        NA         NA               &lt;NA&gt;                1000
+23:                   ranger                         &lt;NA&gt;        NA         NA               &lt;NA&gt;                 733
+24:                   ranger                         &lt;NA&gt;        NA         NA               &lt;NA&gt;                 466
+25:                   ranger                         &lt;NA&gt;        NA         NA               &lt;NA&gt;                 200
+26:                   ranger                         &lt;NA&gt;        NA         NA               &lt;NA&gt;                 466
+27:                   ranger                         &lt;NA&gt;        NA         NA               &lt;NA&gt;                 733
+28:                   ranger                         &lt;NA&gt;        NA         NA               &lt;NA&gt;                1000
+    branch_learner.selection branch_preproc_lda.selection pca.rank. ica.n.comp classif.lda.method classif.ranger.mtry
+    classif.ranger.num.trees classif.acc                                uhash  x_domain           timestamp batch_nr
+ 1:                       NA   0.2380952 b01a42ed-2ecf-4df2-b0f0-1a84b4298418 &lt;list[4]&gt; 2021-06-12 12:19:35        3
+ 2:                       NA   0.2380952 e4844d32-ff92-47a1-b38c-f2fa9a418dea &lt;list[3]&gt; 2021-06-12 12:32:30       24
+ 3:                       NA   0.2698413 9360bf53-e9d8-4c71-b86a-033615d30f45 &lt;list[4]&gt; 2021-06-12 12:26:06       15
+ 4:                       NA   0.8571429 c1b2c0f3-71b1-4ede-8c2d-73bcf49b2b31 &lt;list[4]&gt; 2021-06-12 12:29:28       20
+ 5:                       NA   0.8730159 5b815ba1-a504-4e8f-b83c-efd65890fdb7 &lt;list[4]&gt; 2021-06-12 12:16:48        2
+ 6:                       NA   0.8730159 a8eef8ad-eaae-4868-b5ab-ead55717d276 &lt;list[3]&gt; 2021-06-12 12:20:23       10
+ 7:                       NA   0.8888889 0bcba854-6e35-4bc4-bf8e-596a81bc3b66 &lt;list[4]&gt; 2021-06-12 12:32:15       21
+ 8:                       NA   0.9682540 ec1f8534-feed-4e11-a9ab-c4a417c5302f &lt;list[4]&gt; 2021-06-12 12:14:02        1
+ 9:                       NA   0.9682540 a42d38b4-236f-4a04-a38b-cb4680fc4c5b &lt;list[3]&gt; 2021-06-12 12:20:26       11
+10:                       NA   0.9841270 25086871-539c-4f35-89bb-b1de62bdfac0 &lt;list[3]&gt; 2021-06-12 12:20:05        7
+11:                       NA   0.9841270 7d4b4bca-9641-42f8-8902-4c68049b8f17 &lt;list[4]&gt; 2021-06-12 12:23:12       12
+12:                       NA   0.9841270 3245a873-46c1-457f-9f6a-872ae9119ed6 &lt;list[4]&gt; 2021-06-12 12:35:28       26
+13:                     1500   1.0000000 d091c846-455f-43bc-8fa5-b46c45749a0a &lt;list[3]&gt; 2021-06-12 12:19:43        4
+14:                     1500   1.0000000 60b5e989-ff1b-4510-a80a-cdfe53291763 &lt;list[3]&gt; 2021-06-12 12:19:58        5
+15:                     1000   1.0000000 13339837-aa54-43a5-89b8-865343298623 &lt;list[3]&gt; 2021-06-12 12:20:02        6
+16:                      500   1.0000000 bb9b5d66-fc1b-413b-ba8c-990e75560bb9 &lt;list[3]&gt; 2021-06-12 12:20:10        8
+17:                     1000   1.0000000 01f098d4-a0ce-4d38-aebf-aacac0369930 &lt;list[3]&gt; 2021-06-12 12:20:20        9
+18:                      500   1.0000000 8caa97ec-282f-45da-80b0-414c06081edf &lt;list[3]&gt; 2021-06-12 12:23:15       13
+19:                      500   1.0000000 d2639d50-d335-471b-bc45-7d125cbc44fc &lt;list[3]&gt; 2021-06-12 12:23:20       14
+20:                     1500   1.0000000 e0f795fc-2658-47ea-8ea2-09edfc20b635 &lt;list[3]&gt; 2021-06-12 12:26:11       16
+21:                     2000   1.0000000 1356e547-5380-437f-bb9b-03c5f9e04007 &lt;list[3]&gt; 2021-06-12 12:26:25       17
+22:                      500   1.0000000 f05e9053-f2d5-4bad-ba71-18c47c1fca44 &lt;list[3]&gt; 2021-06-12 12:26:32       18
+23:                     1000   1.0000000 d993d378-92f5-47bf-b164-ae077138f747 &lt;list[3]&gt; 2021-06-12 12:26:40       19
+24:                     1000   1.0000000 ab789407-d7a5-4e59-903e-bb9e5e0a9f90 &lt;list[3]&gt; 2021-06-12 12:32:21       22
+25:                     2000   1.0000000 6cdf0f3a-47a6-49e4-8470-26b0e825562d &lt;list[3]&gt; 2021-06-12 12:32:27       23
+26:                     2000   1.0000000 b0e5242d-4c74-4be7-bf0f-24fd332e9531 &lt;list[3]&gt; 2021-06-12 12:32:40       25
+27:                     1500   1.0000000 47c40498-2731-42db-bf37-dcc65f264331 &lt;list[3]&gt; 2021-06-12 12:35:39       27
+28:                     2000   1.0000000 b08efc8f-03e1-4eac-868e-93b8effddd61 &lt;list[3]&gt; 2021-06-12 12:35:56       28
+    classif.ranger.num.trees classif.acc                                uhash  x_domain           timestamp batch_nr</code></pre>
 </div>
 <p>We achieve very good accuracy using <code>ranger</code>, more or less regardless how <code>mtry</code> and <code>num.trees</code> are set. However, the <code>LDA</code> also shows very good accuracy when combined with <code>PCA</code> or <code>ICA</code> retaining 30 components.</p>
 <p>For now, we decide to use <code>ranger</code> with <code>mtry</code> set to 200 and <code>num.trees</code> set to 1000.</p>
@@ -2603,10 +2539,8 @@ NULL</code></pre>
 <pre class="sourceCode r"><code class="sourceCode r"><span class='va'>graph2</span><span class='op'>$</span><span class='va'>param_set</span><span class='op'>$</span><span class='fu'>ids</span><span class='op'>(</span><span class='op'>)</span>
 </code></pre>
 </div>
-<pre><code>[1] &quot;colapply.applicator&quot;     &quot;colapply.affect_columns&quot;
-[3] &quot;scale.center&quot;            &quot;scale.scale&quot;            
-[5] &quot;scale.robust&quot;            &quot;scale.affect_columns&quot;   
-[7] &quot;proxy.content&quot;          </code></pre>
+<pre><code>[1] &quot;colapply.applicator&quot;     &quot;colapply.affect_columns&quot; &quot;scale.center&quot;            &quot;scale.scale&quot;            
+[5] &quot;scale.robust&quot;            &quot;scale.affect_columns&quot;    &quot;proxy.content&quot;          </code></pre>
 </div>
 <p>We can tune the graph by using the same search space as before. However, here the <code>trafo</code> function is of central importance to actually set our options and parameters:</p>
 <div class="layout-chunk" data-layout="l-body">

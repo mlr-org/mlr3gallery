@@ -2226,30 +2226,18 @@ response pos neg
 </code></pre>
 </div>
 <pre><code>&lt;ParamSetCollection&gt;
-                              id    class lower upper nlevels        default
- 1:       classif.rpart.minsplit ParamInt     1   Inf     Inf             20
- 2:      classif.rpart.minbucket ParamInt     1   Inf     Inf &lt;NoDefault[3]&gt;
- 3:             classif.rpart.cp ParamDbl     0     1     Inf           0.01
- 4:     classif.rpart.maxcompete ParamInt     0   Inf     Inf              4
- 5:   classif.rpart.maxsurrogate ParamInt     0   Inf     Inf              5
- 6:       classif.rpart.maxdepth ParamInt     1    30      30             30
- 7:   classif.rpart.usesurrogate ParamInt     0     2       3              2
- 8: classif.rpart.surrogatestyle ParamInt     0     1       2              0
- 9:           classif.rpart.xval ParamInt     0   Inf     Inf             10
-10:     classif.rpart.keep_model ParamLgl    NA    NA       2          FALSE
-11:         threshold.thresholds ParamUty    NA    NA     Inf &lt;NoDefault[3]&gt;
-    value
- 1:      
- 2:      
- 3:      
- 4:      
- 5:      
- 6:      
- 7:      
- 8:      
- 9:     0
-10:      
-11:   0.5</code></pre>
+                              id    class lower upper nlevels        default value
+ 1:       classif.rpart.minsplit ParamInt     1   Inf     Inf             20      
+ 2:      classif.rpart.minbucket ParamInt     1   Inf     Inf &lt;NoDefault[3]&gt;      
+ 3:             classif.rpart.cp ParamDbl     0     1     Inf           0.01      
+ 4:     classif.rpart.maxcompete ParamInt     0   Inf     Inf              4      
+ 5:   classif.rpart.maxsurrogate ParamInt     0   Inf     Inf              5      
+ 6:       classif.rpart.maxdepth ParamInt     1    30      30             30      
+ 7:   classif.rpart.usesurrogate ParamInt     0     2       3              2      
+ 8: classif.rpart.surrogatestyle ParamInt     0     1       2              0      
+ 9:           classif.rpart.xval ParamInt     0   Inf     Inf             10     0
+10:     classif.rpart.keep_model ParamLgl    NA    NA       2          FALSE      
+11:         threshold.thresholds ParamUty    NA    NA     Inf &lt;NoDefault[3]&gt;   0.5</code></pre>
 </div>
 <p>We can now tune those thresholds from the outside as follows:</p>
 <p>Before <code>tuning</code>, we have to define which hyperparameters we want to tune over. In this example, we only tune over the <code>thresholds</code> parameter of the <code>threshold</code> <code>PipeOp</code>. you can easily imagine, that we can also jointly tune over additional hyperparameters, i.e. rpart’s <code>cp</code> parameter.</p>
@@ -2327,42 +2315,24 @@ response pos neg
 </code></pre>
 </div>
 <pre><code>&lt;ParamSetCollection&gt;
-                                        id    class lower upper nlevels
- 1:        classif.rpart.resampling.method ParamFct    NA    NA       2
- 2:         classif.rpart.resampling.folds ParamInt     2   Inf     Inf
- 3: classif.rpart.resampling.keep_response ParamLgl    NA    NA       2
- 4:                 classif.rpart.minsplit ParamInt     1   Inf     Inf
- 5:                classif.rpart.minbucket ParamInt     1   Inf     Inf
- 6:                       classif.rpart.cp ParamDbl     0     1     Inf
- 7:               classif.rpart.maxcompete ParamInt     0   Inf     Inf
- 8:             classif.rpart.maxsurrogate ParamInt     0   Inf     Inf
- 9:                 classif.rpart.maxdepth ParamInt     1    30      30
-10:             classif.rpart.usesurrogate ParamInt     0     2       3
-11:           classif.rpart.surrogatestyle ParamInt     0     1       2
-12:                     classif.rpart.xval ParamInt     0   Inf     Inf
-13:               classif.rpart.keep_model ParamLgl    NA    NA       2
-14:           classif.rpart.affect_columns ParamUty    NA    NA     Inf
-15:                  tunethreshold.measure ParamUty    NA    NA     Inf
-16:                tunethreshold.optimizer ParamUty    NA    NA     Inf
-17:                tunethreshold.log_level ParamUty    NA    NA     Inf
-           default      value
- 1: &lt;NoDefault[3]&gt;         cv
- 2: &lt;NoDefault[3]&gt;          3
- 3: &lt;NoDefault[3]&gt;      FALSE
- 4:             20           
- 5: &lt;NoDefault[3]&gt;           
- 6:           0.01           
- 7:              4           
- 8:              5           
- 9:             30           
-10:              2           
-11:              0           
-12:             10          0
-13:          FALSE           
-14:  &lt;Selector[1]&gt;           
-15: &lt;NoDefault[3]&gt; classif.ce
-16: &lt;NoDefault[3]&gt;      gensa
-17:  &lt;function[1]&gt;       warn</code></pre>
+                                        id    class lower upper nlevels        default      value
+ 1:        classif.rpart.resampling.method ParamFct    NA    NA       2 &lt;NoDefault[3]&gt;         cv
+ 2:         classif.rpart.resampling.folds ParamInt     2   Inf     Inf &lt;NoDefault[3]&gt;          3
+ 3: classif.rpart.resampling.keep_response ParamLgl    NA    NA       2 &lt;NoDefault[3]&gt;      FALSE
+ 4:                 classif.rpart.minsplit ParamInt     1   Inf     Inf             20           
+ 5:                classif.rpart.minbucket ParamInt     1   Inf     Inf &lt;NoDefault[3]&gt;           
+ 6:                       classif.rpart.cp ParamDbl     0     1     Inf           0.01           
+ 7:               classif.rpart.maxcompete ParamInt     0   Inf     Inf              4           
+ 8:             classif.rpart.maxsurrogate ParamInt     0   Inf     Inf              5           
+ 9:                 classif.rpart.maxdepth ParamInt     1    30      30             30           
+10:             classif.rpart.usesurrogate ParamInt     0     2       3              2           
+11:           classif.rpart.surrogatestyle ParamInt     0     1       2              0           
+12:                     classif.rpart.xval ParamInt     0   Inf     Inf             10          0
+13:               classif.rpart.keep_model ParamLgl    NA    NA       2          FALSE           
+14:           classif.rpart.affect_columns ParamUty    NA    NA     Inf  &lt;Selector[1]&gt;           
+15:                  tunethreshold.measure ParamUty    NA    NA     Inf &lt;NoDefault[3]&gt; classif.ce
+16:                tunethreshold.optimizer ParamUty    NA    NA     Inf &lt;NoDefault[3]&gt;      gensa
+17:                tunethreshold.log_level ParamUty    NA    NA     Inf  &lt;function[1]&gt;       warn</code></pre>
 </div>
 <p>If we now use the <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_learners_graph.html"><code>GraphLearner</code></a>, it automatically adjusts the <code>thresholds</code> during prediction.</p>
 <p>Note that we can set <a href="https://mlr3.mlr-org.com/reference/mlr_resamplings_insample.html"><code>ResamplingInsample</code></a> as a resampling strategy for <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_learner_cv.html"><code>PipeOpLearnerCV</code></a> in order to evaluate predictions on the “training” data. This is generally not advised, as it might lead to over-fitting on the thresholds but can significantly reduce runtime.</p>
@@ -2381,12 +2351,9 @@ response pos neg
 <span class='va'>bmr</span><span class='op'>$</span><span class='fu'>aggregate</span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>msr</a></span><span class='op'>(</span><span class='st'>"classif.ce"</span><span class='op'>)</span>, <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>msr</a></span><span class='op'>(</span><span class='st'>"classif.fnr"</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>
 </code></pre>
 </div>
-<pre><code>   nr      resample_result       task_id                  learner_id
-1:  1 &lt;ResampleResult[21]&gt; german_credit               classif.rpart
-2:  2 &lt;ResampleResult[21]&gt; german_credit classif.rpart.tunethreshold
-   resampling_id iters classif.ce classif.fnr
-1:            cv     3  0.2699796   0.1249980
-2:            cv     3  0.2719906   0.0878889</code></pre>
+<pre><code>   nr      resample_result       task_id                  learner_id resampling_id iters classif.ce classif.fnr
+1:  1 &lt;ResampleResult[21]&gt; german_credit               classif.rpart            cv     3  0.2699796   0.1249980
+2:  2 &lt;ResampleResult[21]&gt; german_credit classif.rpart.tunethreshold            cv     3  0.2719906   0.0878889</code></pre>
 </div>
 <p>We obtained a slightly better classification error and false negatives rate!</p>
 <div class="sourceCode" id="cb9"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>

@@ -20,9 +20,9 @@
 
 <style type="text/css">code{white-space: pre;}</style>
 <style type="text/css" data-origin="pandoc">
-a.sourceLine { display: inline-block; line-height: 1.25; }
-a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
-a.sourceLine:empty { height: 1.2em; }
+code.sourceCode > span { display: inline-block; line-height: 1.25; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode { white-space: pre; position: relative; }
 div.sourceCode { margin: 1em 0; }
@@ -32,14 +32,16 @@ div.sourceCode { overflow: auto; }
 }
 @media print {
 code.sourceCode { white-space: pre-wrap; }
-a.sourceLine { text-indent: -1em; padding-left: 1em; }
+code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
 }
-pre.numberSource a.sourceLine
-  { position: relative; left: -4em; }
-pre.numberSource a.sourceLine::before
-  { content: attr(title);
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
     position: relative; left: -1em; text-align: right; vertical-align: baseline;
-    border: none; pointer-events: all; display: inline-block;
+    border: none; display: inline-block;
     -webkit-touch-callout: none; -webkit-user-select: none;
     -khtml-user-select: none; -moz-user-select: none;
     -ms-user-select: none; user-select: none;
@@ -48,9 +50,9 @@ pre.numberSource a.sourceLine::before
   }
 pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
 div.sourceCode
-  {  }
+  {   }
 @media screen {
-a.sourceLine::before { text-decoration: underline; }
+code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 code span.al { color: #ad0000; } /* Alert */
 code span.an { color: #5e5e5e; } /* Annotation */
@@ -133,7 +135,6 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 <meta name="citation_author" content="Martin Binder"/>
 <!--/radix_placeholder_meta_tags-->
   
-  <meta name="citation_reference" content="citation_title=A Practical Guide to Support Vector Classification;citation_publication_date=2003;citation_author=Chih-wei Hsu;citation_author=Chih-chung Chang;citation_author=Chih-Jen Lin"/>
   <!--radix_placeholder_rmarkdown_metadata-->
 
 <script type="text/json" id="radix-rmarkdown-metadata">
@@ -142,7 +143,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 <!--/radix_placeholder_rmarkdown_metadata-->
   
   <script type="text/json" id="radix-resource-manifest">
-  {"type":"character","attributes":{},"value":["bibliography.bib","data/instance_1.rda","data/instance_2.rda","data/instance_3.rda","data/rr_1.rda","practical-tuning-series-tune-a-support-vector-machine_files/anchor-4.2.2/anchor.min.js","practical-tuning-series-tune-a-support-vector-machine_files/bowser-1.9.3/bowser.min.js","practical-tuning-series-tune-a-support-vector-machine_files/distill-2.2.21/template.v2.js","practical-tuning-series-tune-a-support-vector-machine_files/figure-html5/practical-tuning-series-tune-a-support-vector-machine-017-1.png","practical-tuning-series-tune-a-support-vector-machine_files/figure-html5/practical-tuning-series-tune-a-support-vector-machine-025-1.png","practical-tuning-series-tune-a-support-vector-machine_files/jquery-1.11.3/jquery.min.js","practical-tuning-series-tune-a-support-vector-machine_files/popper-2.6.0/popper.min.js","practical-tuning-series-tune-a-support-vector-machine_files/tippy-6.2.7/tippy-bundle.umd.min.js","practical-tuning-series-tune-a-support-vector-machine_files/tippy-6.2.7/tippy-light-border.css","practical-tuning-series-tune-a-support-vector-machine_files/tippy-6.2.7/tippy.css","practical-tuning-series-tune-a-support-vector-machine_files/tippy-6.2.7/tippy.umd.min.js","practical-tuning-series-tune-a-support-vector-machine_files/webcomponents-2.0.0/webcomponents.js"]}
+  {"type":"character","attributes":{},"value":["bibliography.bib","data/instance_1.rda","data/instance_2.rda","data/instance_3.rda","data/rr_1.rda","practical-tuning-series-tune-a-support-vector-machine_files/figure-html5/practical-tuning-series-tune-a-support-vector-machine-017-1.png","practical-tuning-series-tune-a-support-vector-machine_files/figure-html5/practical-tuning-series-tune-a-support-vector-machine-025-1.png"]}
   </script>
   <!--radix_placeholder_navigation_in_header-->
 <meta name="distill:offset" content="../.."/>
@@ -2086,7 +2087,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <!--radix_placeholder_front_matter-->
 
 <script id="distill-front-matter" type="text/json">
-{"title":"Practical Tuning Series - Tune a Support Vector Machine","description":"We demonstrate how to optimize the hyperparameters of a support vector machine (SVM).","authors":[{"author":"Marc Becker","authorURL":"#","affiliation":"&nbsp;","affiliationURL":"#","orcidID":""},{"author":"Theresa Ullmann","authorURL":"#","affiliation":"&nbsp;","affiliationURL":"#","orcidID":""},{"author":"Michel Lang","authorURL":"#","affiliation":"&nbsp;","affiliationURL":"#","orcidID":""},{"author":"Bernd Bischl","authorURL":"#","affiliation":"&nbsp;","affiliationURL":"#","orcidID":""},{"author":"Jakob Richter","authorURL":"#","affiliation":"&nbsp;","affiliationURL":"#","orcidID":""},{"author":"Martin Binder","authorURL":"#","affiliation":"&nbsp;","affiliationURL":"#","orcidID":""}],"publishedDate":"2021-03-09T00:00:00.000+01:00","citationText":"Becker, et al., 2021"}
+{"title":"Practical Tuning Series - Tune a Support Vector Machine","description":"We demonstrate how to optimize the hyperparameters of a support vector machine (SVM).","authors":[{"author":"Marc Becker","authorURL":"#","affiliation":"&nbsp;","affiliationURL":"#","orcidID":""},{"author":"Theresa Ullmann","authorURL":"#","affiliation":"&nbsp;","affiliationURL":"#","orcidID":""},{"author":"Michel Lang","authorURL":"#","affiliation":"&nbsp;","affiliationURL":"#","orcidID":""},{"author":"Bernd Bischl","authorURL":"#","affiliation":"&nbsp;","affiliationURL":"#","orcidID":""},{"author":"Jakob Richter","authorURL":"#","affiliation":"&nbsp;","affiliationURL":"#","orcidID":""},{"author":"Martin Binder","authorURL":"#","affiliation":"&nbsp;","affiliationURL":"#","orcidID":""}],"publishedDate":"2021-03-09T00:00:00.000+00:00","citationText":"Becker, et al., 2021"}
 </script>
 
 <!--/radix_placeholder_front_matter-->
@@ -2125,7 +2126,7 @@ document.addEventListener('DOMContentLoaded', function() {
   <a href="../../index.html#category:practical_tuning_series" class="dt-tag">practical tuning series</a>
 </div>
 <!--/radix_placeholder_categories-->
-<p>We demonstrate how to optimize the hyperparameters of a support vector machine (SVM).</p>
+<p><p>We demonstrate how to optimize the hyperparameters of a support vector machine (SVM).</p></p>
 </div>
 
 <div class="d-byline">
@@ -2181,143 +2182,325 @@ document.addEventListener('DOMContentLoaded', function() {
 <span class='fu'>skimr</span><span class='fu'>::</span><span class='fu'><a href='https://docs.ropensci.org/skimr/reference/skim.html'>skim</a></span><span class='op'>(</span><span class='va'>task</span><span class='op'>$</span><span class='fu'>data</span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span>
 </code></pre>
 </div>
-<table>
-<caption><span id="tab:practical-tuning-series-tune-a-support-vector-machine-004">Table 1: </span>Data summary</caption>
+<table style='width: auto;'
+        class='table table-condensed'>
+<caption>
+<span id="tab:practical-tuning-series-tune-a-support-vector-machine-004">Table 1: </span>Data summary
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:left;">
+</th>
+</tr>
+</thead>
 <tbody>
-<tr class="odd">
-<td style="text-align: left;">Name</td>
-<td style="text-align: left;">task$data()</td>
+<tr>
+<td style="text-align:left;">
+Name
+</td>
+<td style="text-align:left;">
+task$data()
+</td>
 </tr>
-<tr class="even">
-<td style="text-align: left;">Number of rows</td>
-<td style="text-align: left;">150</td>
+<tr>
+<td style="text-align:left;">
+Number of rows
+</td>
+<td style="text-align:left;">
+150
+</td>
 </tr>
-<tr class="odd">
-<td style="text-align: left;">Number of columns</td>
-<td style="text-align: left;">5</td>
+<tr>
+<td style="text-align:left;">
+Number of columns
+</td>
+<td style="text-align:left;">
+5
+</td>
 </tr>
-<tr class="even">
-<td style="text-align: left;">Key</td>
-<td style="text-align: left;">NULL</td>
+<tr>
+<td style="text-align:left;">
+Key
+</td>
+<td style="text-align:left;">
+NULL
+</td>
 </tr>
-<tr class="odd">
-<td style="text-align: left;">_______________________</td>
-<td style="text-align: left;"></td>
+<tr>
+<td style="text-align:left;">
+_______________________
+</td>
+<td style="text-align:left;">
+</td>
 </tr>
-<tr class="even">
-<td style="text-align: left;">Column type frequency:</td>
-<td style="text-align: left;"></td>
+<tr>
+<td style="text-align:left;">
+Column type frequency:
+</td>
+<td style="text-align:left;">
+</td>
 </tr>
-<tr class="odd">
-<td style="text-align: left;">factor</td>
-<td style="text-align: left;">1</td>
+<tr>
+<td style="text-align:left;">
+factor
+</td>
+<td style="text-align:left;">
+1
+</td>
 </tr>
-<tr class="even">
-<td style="text-align: left;">numeric</td>
-<td style="text-align: left;">4</td>
+<tr>
+<td style="text-align:left;">
+numeric
+</td>
+<td style="text-align:left;">
+4
+</td>
 </tr>
-<tr class="odd">
-<td style="text-align: left;">________________________</td>
-<td style="text-align: left;"></td>
+<tr>
+<td style="text-align:left;">
+________________________
+</td>
+<td style="text-align:left;">
+</td>
 </tr>
-<tr class="even">
-<td style="text-align: left;">Group variables</td>
-<td style="text-align: left;">None</td>
+<tr>
+<td style="text-align:left;">
+Group variables
+</td>
+<td style="text-align:left;">
+None
+</td>
 </tr>
 </tbody>
 </table>
 <p><strong>Variable type: factor</strong></p>
 <table>
 <thead>
-<tr class="header">
-<th style="text-align: left;">skim_variable</th>
-<th style="text-align: right;">n_missing</th>
-<th style="text-align: right;">complete_rate</th>
-<th style="text-align: left;">ordered</th>
-<th style="text-align: right;">n_unique</th>
-<th style="text-align: left;">top_counts</th>
+<tr>
+<th style="text-align:left;">
+skim_variable
+</th>
+<th style="text-align:right;">
+n_missing
+</th>
+<th style="text-align:right;">
+complete_rate
+</th>
+<th style="text-align:left;">
+ordered
+</th>
+<th style="text-align:right;">
+n_unique
+</th>
+<th style="text-align:left;">
+top_counts
+</th>
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
-<td style="text-align: left;">Species</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">1</td>
-<td style="text-align: left;">FALSE</td>
-<td style="text-align: right;">3</td>
-<td style="text-align: left;">set: 50, ver: 50, vir: 50</td>
+<tr>
+<td style="text-align:left;">
+Species
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:left;">
+set: 50, ver: 50, vir: 50
+</td>
 </tr>
 </tbody>
 </table>
 <p><strong>Variable type: numeric</strong></p>
 <table>
 <thead>
-<tr class="header">
-<th style="text-align: left;">skim_variable</th>
-<th style="text-align: right;">n_missing</th>
-<th style="text-align: right;">complete_rate</th>
-<th style="text-align: right;">mean</th>
-<th style="text-align: right;">sd</th>
-<th style="text-align: right;">p0</th>
-<th style="text-align: right;">p25</th>
-<th style="text-align: right;">p50</th>
-<th style="text-align: right;">p75</th>
-<th style="text-align: right;">p100</th>
-<th style="text-align: left;">hist</th>
+<tr>
+<th style="text-align:left;">
+skim_variable
+</th>
+<th style="text-align:right;">
+n_missing
+</th>
+<th style="text-align:right;">
+complete_rate
+</th>
+<th style="text-align:right;">
+mean
+</th>
+<th style="text-align:right;">
+sd
+</th>
+<th style="text-align:right;">
+p0
+</th>
+<th style="text-align:right;">
+p25
+</th>
+<th style="text-align:right;">
+p50
+</th>
+<th style="text-align:right;">
+p75
+</th>
+<th style="text-align:right;">
+p100
+</th>
+<th style="text-align:left;">
+hist
+</th>
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
-<td style="text-align: left;">Petal.Length</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">1</td>
-<td style="text-align: right;">3.76</td>
-<td style="text-align: right;">1.77</td>
-<td style="text-align: right;">1.0</td>
-<td style="text-align: right;">1.6</td>
-<td style="text-align: right;">4.35</td>
-<td style="text-align: right;">5.1</td>
-<td style="text-align: right;">6.9</td>
-<td style="text-align: left;">▇▁▆▇▂</td>
+<tr>
+<td style="text-align:left;">
+Petal.Length
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+3.76
+</td>
+<td style="text-align:right;">
+1.77
+</td>
+<td style="text-align:right;">
+1.0
+</td>
+<td style="text-align:right;">
+1.6
+</td>
+<td style="text-align:right;">
+4.35
+</td>
+<td style="text-align:right;">
+5.1
+</td>
+<td style="text-align:right;">
+6.9
+</td>
+<td style="text-align:left;">
+▇▁▆▇▂
+</td>
 </tr>
-<tr class="even">
-<td style="text-align: left;">Petal.Width</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">1</td>
-<td style="text-align: right;">1.20</td>
-<td style="text-align: right;">0.76</td>
-<td style="text-align: right;">0.1</td>
-<td style="text-align: right;">0.3</td>
-<td style="text-align: right;">1.30</td>
-<td style="text-align: right;">1.8</td>
-<td style="text-align: right;">2.5</td>
-<td style="text-align: left;">▇▁▇▅▃</td>
+<tr>
+<td style="text-align:left;">
+Petal.Width
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1.20
+</td>
+<td style="text-align:right;">
+0.76
+</td>
+<td style="text-align:right;">
+0.1
+</td>
+<td style="text-align:right;">
+0.3
+</td>
+<td style="text-align:right;">
+1.30
+</td>
+<td style="text-align:right;">
+1.8
+</td>
+<td style="text-align:right;">
+2.5
+</td>
+<td style="text-align:left;">
+▇▁▇▅▃
+</td>
 </tr>
-<tr class="odd">
-<td style="text-align: left;">Sepal.Length</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">1</td>
-<td style="text-align: right;">5.84</td>
-<td style="text-align: right;">0.83</td>
-<td style="text-align: right;">4.3</td>
-<td style="text-align: right;">5.1</td>
-<td style="text-align: right;">5.80</td>
-<td style="text-align: right;">6.4</td>
-<td style="text-align: right;">7.9</td>
-<td style="text-align: left;">▆▇▇▅▂</td>
+<tr>
+<td style="text-align:left;">
+Sepal.Length
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+5.84
+</td>
+<td style="text-align:right;">
+0.83
+</td>
+<td style="text-align:right;">
+4.3
+</td>
+<td style="text-align:right;">
+5.1
+</td>
+<td style="text-align:right;">
+5.80
+</td>
+<td style="text-align:right;">
+6.4
+</td>
+<td style="text-align:right;">
+7.9
+</td>
+<td style="text-align:left;">
+▆▇▇▅▂
+</td>
 </tr>
-<tr class="even">
-<td style="text-align: left;">Sepal.Width</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">1</td>
-<td style="text-align: right;">3.06</td>
-<td style="text-align: right;">0.44</td>
-<td style="text-align: right;">2.0</td>
-<td style="text-align: right;">2.8</td>
-<td style="text-align: right;">3.00</td>
-<td style="text-align: right;">3.3</td>
-<td style="text-align: right;">4.4</td>
-<td style="text-align: left;">▁▆▇▂▁</td>
+<tr>
+<td style="text-align:left;">
+Sepal.Width
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+3.06
+</td>
+<td style="text-align:right;">
+0.44
+</td>
+<td style="text-align:right;">
+2.0
+</td>
+<td style="text-align:right;">
+2.8
+</td>
+<td style="text-align:right;">
+3.00
+</td>
+<td style="text-align:right;">
+3.3
+</td>
+<td style="text-align:right;">
+4.4
+</td>
+<td style="text-align:left;">
+▁▆▇▂▁
+</td>
 </tr>
 </tbody>
 </table>
@@ -2333,7 +2516,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>For tuning, it is important to create a search space that defines the type and range of the hyperparameters. A learner stores all information about its hyperparameters in the slot <code>$param_set</code>. Not all parameters are tunable. We have to choose a subset of the hyperparameters we want to tune.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span><span class='op'>(</span><span class='va'>learner</span><span class='op'>$</span><span class='va'>param_set</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://docs.ropensci.org/skimr/reference/print.html'>print</a></span><span class='op'>(</span><span class='va'>learner</span><span class='op'>$</span><span class='va'>param_set</span><span class='op'>)</span>
 </code></pre>
 </div>
 <pre><code>&lt;ParamSet&gt;
@@ -2389,7 +2572,7 @@ document.addEventListener('DOMContentLoaded', function() {
   terminator <span class='op'>=</span> <span class='va'>terminator</span>
 <span class='op'>)</span>
 
-<span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span><span class='op'>(</span><span class='va'>instance</span><span class='op'>)</span>
+<span class='fu'><a href='https://docs.ropensci.org/skimr/reference/print.html'>print</a></span><span class='op'>(</span><span class='va'>instance</span><span class='op'>)</span>
 </code></pre>
 </div>
 <pre><code>&lt;TuningInstanceSingleCrit&gt;
@@ -2411,7 +2594,7 @@ Null data.table (0 rows and 0 cols)</code></pre>
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='va'>tuner</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3tuning.mlr-org.com/reference/tnr.html'>tnr</a></span><span class='op'>(</span><span class='st'>"grid_search"</span>, resolution <span class='op'>=</span> <span class='fl'>5</span><span class='op'>)</span>
 
-<span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span><span class='op'>(</span><span class='va'>tuner</span><span class='op'>)</span>
+<span class='fu'><a href='https://docs.ropensci.org/skimr/reference/print.html'>print</a></span><span class='op'>(</span><span class='va'>tuner</span><span class='op'>)</span>
 </code></pre>
 </div>
 <pre><code>&lt;TunerGridSearch&gt;
@@ -2461,8 +2644,6 @@ Null data.table (0 rows and 0 cols)</code></pre>
 <pre class="sourceCode r"><code class="sourceCode r"><span class='va'>tuner</span><span class='op'>$</span><span class='fu'>optimize</span><span class='op'>(</span><span class='va'>instance</span><span class='op'>)</span>
 </code></pre>
 </div>
-<pre><code>   cost gamma learner_param_vals  x_domain classif.ce
-1: 5.05  1.25          &lt;list[4]&gt; &lt;list[2]&gt;       0.04</code></pre>
 </div>
 <div class="layout-chunk" data-layout="l-body">
 
@@ -2500,7 +2681,7 @@ Null data.table (0 rows and 0 cols)</code></pre>
 </div>
 </div>
 <h1 id="transformation">Transformation</h1>
-<p>Next, we want to tune the <code>cost</code> and <code>gamma</code> hyperparameter more efficiently. It is recommended to tune <code>cost</code> and <code>gamma</code> on the logarithmic scale <span class="citation" data-cites="hsuPracticalGuideSupport2003">(Hsu, Chang, and Lin <a href="#ref-hsuPracticalGuideSupport2003">2003</a>)</span>. The log transformation emphasizes smaller <code>cost</code> and <code>gamma</code> values but also creates large values. Therefore, we use a log transformation to emphasize this region of the search space with a denser grid.</p>
+<p>Next, we want to tune the <code>cost</code> and <code>gamma</code> hyperparameter more efficiently. It is recommended to tune <code>cost</code> and <code>gamma</code> on the logarithmic scale <span class="citation" data-cites="hsuPracticalGuideSupport2003">(Hsu, Chang, and Lin <a href="#ref-hsuPracticalGuideSupport2003" role="doc-biblioref">2003</a>)</span>. The log transformation emphasizes smaller <code>cost</code> and <code>gamma</code> values but also creates large values. Therefore, we use a log transformation to emphasize this region of the search space with a denser grid.</p>
 <p>Generally speaking, transformations can be used to convert hyperparameters to a new scale. These transformations are applied before the proposed configuration is passed to the <a href="https://mlr3.mlr-org.com/reference/Learner.html"><code>Learner</code></a>. We can directly define the transformation in the <a href="https://paradox.mlr-org.com/reference/to_tune.html"><code>to_tune()</code></a> function. The lower and upper bound is set on the original scale.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
@@ -2767,42 +2948,42 @@ Null data.table (0 rows and 0 cols)</code></pre>
 </div>
 <pre><code>&lt;ArchiveTuning&gt;
     cost gamma     kernel degree classif.ce           timestamp batch_nr
- 1:   12    12 polynomial      2      0.171 2021-06-11 16:57:19        1
- 2:  -12   -12 polynomial      1      0.539 2021-06-11 16:57:19        2
- 3:  -12    12     radial     NA      0.620 2021-06-11 16:57:20        3
- 4:    0     0 polynomial      4      0.121 2021-06-11 16:57:20        4
- 5:    0     0     radial     NA      0.070 2021-06-11 16:57:20        5
- 6:  -12     0 polynomial      1      0.539 2021-06-11 16:57:20        6
- 7:    0   -12     radial     NA      0.539 2021-06-11 16:57:20        7
- 8:   12   -12 polynomial      4      0.600 2021-06-11 16:57:21        8
- 9:  -12     0     radial     NA      0.539 2021-06-11 16:57:21        9
-10:    0     0 polynomial      1      0.050 2021-06-11 16:57:21       10
-11:  -12    12 polynomial      1      0.050 2021-06-11 16:57:21       11
-12:    0     0 polynomial      2      0.131 2021-06-11 16:57:21       12
-13:   12     0 polynomial      4      0.141 2021-06-11 16:57:22       13
-14:    0   -12 polynomial      1      0.539 2021-06-11 16:57:22       14
-15:  -12   -12 polynomial      4      0.671 2021-06-11 16:57:22       15
-16:    0    12 polynomial      1      0.040 2021-06-11 16:57:23       16
-17:   12   -12 polynomial      1      0.050 2021-06-11 16:57:23       17
-18:   12    12 polynomial      4      0.141 2021-06-11 16:57:23       18
-19:  -12     0 polynomial      2      0.539 2021-06-11 16:57:24       19
-20:   12     0 polynomial      1      0.040 2021-06-11 16:57:24       20
-21:    0    12 polynomial      4      0.141 2021-06-11 16:57:24       21
-22:    0   -12 polynomial      4      0.671 2021-06-11 16:57:24       22
-23:   12     0 polynomial      2      0.171 2021-06-11 16:57:25       23
-24:   12     0     radial     NA      0.081 2021-06-11 16:57:25       24
-25:   12    12 polynomial      1      0.099 2021-06-11 16:57:27       25
-26:  -12    12 polynomial      2      0.171 2021-06-11 16:57:27       26
-27:   12    12     radial     NA      0.600 2021-06-11 16:57:27       27
-28:  -12   -12     radial     NA      0.539 2021-06-11 16:57:28       28
-29:    0    12     radial     NA      0.600 2021-06-11 16:57:28       29
-30:    0    12 polynomial      2      0.171 2021-06-11 16:57:28       30
-31:  -12   -12 polynomial      2      0.539 2021-06-11 16:57:28       31
-32:    0   -12 polynomial      2      0.539 2021-06-11 16:57:28       32
-33:  -12    12 polynomial      4      0.141 2021-06-11 16:57:29       33
-34:   12   -12 polynomial      2      0.539 2021-06-11 16:57:29       34
-35:   12   -12     radial     NA      0.040 2021-06-11 16:57:29       35
-36:  -12     0 polynomial      4      0.600 2021-06-11 16:57:29       36
+ 1:   12    12 polynomial      2      0.171 2021-06-11 14:57:19        1
+ 2:  -12   -12 polynomial      1      0.539 2021-06-11 14:57:19        2
+ 3:  -12    12     radial     NA      0.620 2021-06-11 14:57:20        3
+ 4:    0     0 polynomial      4      0.121 2021-06-11 14:57:20        4
+ 5:    0     0     radial     NA      0.070 2021-06-11 14:57:20        5
+ 6:  -12     0 polynomial      1      0.539 2021-06-11 14:57:20        6
+ 7:    0   -12     radial     NA      0.539 2021-06-11 14:57:20        7
+ 8:   12   -12 polynomial      4      0.600 2021-06-11 14:57:21        8
+ 9:  -12     0     radial     NA      0.539 2021-06-11 14:57:21        9
+10:    0     0 polynomial      1      0.050 2021-06-11 14:57:21       10
+11:  -12    12 polynomial      1      0.050 2021-06-11 14:57:21       11
+12:    0     0 polynomial      2      0.131 2021-06-11 14:57:21       12
+13:   12     0 polynomial      4      0.141 2021-06-11 14:57:22       13
+14:    0   -12 polynomial      1      0.539 2021-06-11 14:57:22       14
+15:  -12   -12 polynomial      4      0.671 2021-06-11 14:57:22       15
+16:    0    12 polynomial      1      0.040 2021-06-11 14:57:23       16
+17:   12   -12 polynomial      1      0.050 2021-06-11 14:57:23       17
+18:   12    12 polynomial      4      0.141 2021-06-11 14:57:23       18
+19:  -12     0 polynomial      2      0.539 2021-06-11 14:57:24       19
+20:   12     0 polynomial      1      0.040 2021-06-11 14:57:24       20
+21:    0    12 polynomial      4      0.141 2021-06-11 14:57:24       21
+22:    0   -12 polynomial      4      0.671 2021-06-11 14:57:24       22
+23:   12     0 polynomial      2      0.171 2021-06-11 14:57:25       23
+24:   12     0     radial     NA      0.081 2021-06-11 14:57:25       24
+25:   12    12 polynomial      1      0.099 2021-06-11 14:57:27       25
+26:  -12    12 polynomial      2      0.171 2021-06-11 14:57:27       26
+27:   12    12     radial     NA      0.600 2021-06-11 14:57:27       27
+28:  -12   -12     radial     NA      0.539 2021-06-11 14:57:28       28
+29:    0    12     radial     NA      0.600 2021-06-11 14:57:28       29
+30:    0    12 polynomial      2      0.171 2021-06-11 14:57:28       30
+31:  -12   -12 polynomial      2      0.539 2021-06-11 14:57:28       31
+32:    0   -12 polynomial      2      0.539 2021-06-11 14:57:28       32
+33:  -12    12 polynomial      4      0.141 2021-06-11 14:57:29       33
+34:   12   -12 polynomial      2      0.539 2021-06-11 14:57:29       34
+35:   12   -12     radial     NA      0.040 2021-06-11 14:57:29       35
+36:  -12     0 polynomial      4      0.600 2021-06-11 14:57:29       36
     cost gamma     kernel degree classif.ce           timestamp batch_nr</code></pre>
 </div>
 <p>The aggregated performance of all outer resampling iterations is essentially the unbiased performance of an SVM with optimal hyperparameter found by grid search.</p>
@@ -2837,8 +3018,8 @@ Null data.table (0 rows and 0 cols)</code></pre>
 </div>
 <h1 id="resources">Resources</h1>
 <p>The <a href="https://mlr3book.mlr-org.com/">mlr3book</a> includes chapters on <a href="https://mlr3book.mlr-org.com/searchspace.html">tuning spaces</a> and <a href="https://mlr3book.mlr-org.com/tuning.html">hyperparameter tuning</a>. The <a href="https://cheatsheets.mlr-org.com/">mlr3cheatsheets</a> contain frequently used commands and workflows of mlr3.</p>
-<div class="sourceCode" id="cb16"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
-<div id="refs" class="references">
+<div class="sourceCode" id="cb15"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
+<div id="refs" class="references" role="doc-bibliography">
 <div id="ref-hsuPracticalGuideSupport2003">
 <p>Hsu, Chih-wei, Chih-chung Chang, and Chih-Jen Lin. 2003. “A Practical Guide to Support Vector Classification.”</p>
 </div>
