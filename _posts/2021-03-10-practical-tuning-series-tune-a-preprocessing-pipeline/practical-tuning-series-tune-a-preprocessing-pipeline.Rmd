@@ -192,7 +192,7 @@ rr = resample(task = task, learner = graph_learner, resampling = resampling)
 ```
 
 ```{r practical-tuning-series-tune-a-preprocessing-pipeline-016}
-rr$score()
+rr$score()[, .(iteration, task_id, learner_id, resampling_id, classif.ce)]
 ```
 
 For each resampling iteration, the following steps are performed:
@@ -218,7 +218,7 @@ It consists of the `xgboost` hyperparameters, and additionally, the parameter of
 All hyperparameters are prefixed with the id of the respective `r ref("PipeOp")` or learner.
 
 ```{r practical-tuning-series-tune-a-preprocessing-pipeline-017}
-print(graph_learner$param_set)
+as.data.table(graph_learner$param_set)[, .(id, class, lower, upper, levels)]
 ```
 
 We will tune the encode method.

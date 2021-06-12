@@ -151,10 +151,10 @@ graph_learner = GraphLearner$new(graph)
 
 The parameter set of the graph learner includes all hyperparameters from all contained learners.
 The hyperparameter ids are prefixed with the corresponding learner ids.
-The first hyperparameter `branch.selection` controls which learner is used.
+The hyperparameter `branch.selection` controls which learner is used.
 
 ```{r practical-tuning-series-build-an-automated-machine-learning-system-012}
-print(graph_learner$param_set)
+as.data.table(graph_learner$param_set)[, .(id, class, lower, upper, levels)]
 ```
 
 # Tune the pipeline
@@ -268,7 +268,7 @@ Next, we want to compare the predictive performances estimated on the outer resa
 Significantly lower predictive performances on the outer resampling indicate that the models with the optimized hyperparameters overfit the data.
 
 ```{r practical-tuning-series-build-an-automated-machine-learning-system-023}
-rr$score()
+rr$score()[, .(iteration, task_id, learner_id, resampling_id, classif.ce)]
 ```
 
 The aggregated performance of all outer resampling iterations is essentially the unbiased performance of the graph learner with optimal hyperparameter found by random search.
