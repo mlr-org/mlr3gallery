@@ -2194,30 +2194,22 @@ document.addEventListener('DOMContentLoaded', function() {
 <span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>moneyball</span><span class='op'>)</span>
 </code></pre>
 </div>
-<pre><code>      team     league        year            rs               ra        
- BAL    : 47   AL:616   Min.   :1962   Min.   : 463.0   Min.   : 472.0  
- BOS    : 47   NL:616   1st Qu.:1977   1st Qu.: 652.0   1st Qu.: 649.8  
- CHC    : 47            Median :1989   Median : 711.0   Median : 709.0  
- CHW    : 47            Mean   :1989   Mean   : 715.1   Mean   : 715.1  
- CIN    : 47            3rd Qu.:2002   3rd Qu.: 775.0   3rd Qu.: 774.2  
- CLE    : 47            Max.   :2012   Max.   :1009.0   Max.   :1103.0  
- (Other):950                                                            
-       w              obp              slg               ba         playoffs
- Min.   : 40.0   Min.   :0.2770   Min.   :0.3010   Min.   :0.2140   0:988   
- 1st Qu.: 73.0   1st Qu.:0.3170   1st Qu.:0.3750   1st Qu.:0.2510   1:244   
- Median : 81.0   Median :0.3260   Median :0.3960   Median :0.2600           
- Mean   : 80.9   Mean   :0.3263   Mean   :0.3973   Mean   :0.2593           
- 3rd Qu.: 89.0   3rd Qu.:0.3370   3rd Qu.:0.4210   3rd Qu.:0.2680           
- Max.   :116.0   Max.   :0.3730   Max.   :0.4910   Max.   :0.2940           
-                                                                            
-   rankseason  rankplayoffs       g            oobp             oslg       
- 2      : 53   1   : 47     162    :954   Min.   :0.2940   Min.   :0.3460  
- 1      : 52   2   : 47     161    :139   1st Qu.:0.3210   1st Qu.:0.4010  
- 3      : 44   3   : 80     163    : 93   Median :0.3310   Median :0.4190  
- 4      : 44   4   : 68     160    : 23   Mean   :0.3323   Mean   :0.4197  
- 5      : 21   5   :  2     159    : 10   3rd Qu.:0.3430   3rd Qu.:0.4380  
- (Other): 30   NA&#39;s:988     164    : 10   Max.   :0.3840   Max.   :0.4990  
- NA&#39;s   :988                (Other):  3   NA&#39;s   :812      NA&#39;s   :812     </code></pre>
+<pre><code>      team     league        year            rs               ra               w              obp        
+ BAL    : 47   AL:616   Min.   :1962   Min.   : 463.0   Min.   : 472.0   Min.   : 40.0   Min.   :0.2770  
+ BOS    : 47   NL:616   1st Qu.:1977   1st Qu.: 652.0   1st Qu.: 649.8   1st Qu.: 73.0   1st Qu.:0.3170  
+ CHC    : 47            Median :1989   Median : 711.0   Median : 709.0   Median : 81.0   Median :0.3260  
+ CHW    : 47            Mean   :1989   Mean   : 715.1   Mean   : 715.1   Mean   : 80.9   Mean   :0.3263  
+ CIN    : 47            3rd Qu.:2002   3rd Qu.: 775.0   3rd Qu.: 774.2   3rd Qu.: 89.0   3rd Qu.:0.3370  
+ CLE    : 47            Max.   :2012   Max.   :1009.0   Max.   :1103.0   Max.   :116.0   Max.   :0.3730  
+ (Other):950                                                                                             
+      slg               ba         playoffs   rankseason  rankplayoffs       g            oobp             oslg       
+ Min.   :0.3010   Min.   :0.2140   0:988    2      : 53   1   : 47     162    :954   Min.   :0.2940   Min.   :0.3460  
+ 1st Qu.:0.3750   1st Qu.:0.2510   1:244    1      : 52   2   : 47     161    :139   1st Qu.:0.3210   1st Qu.:0.4010  
+ Median :0.3960   Median :0.2600            3      : 44   3   : 80     163    : 93   Median :0.3310   Median :0.4190  
+ Mean   :0.3973   Mean   :0.2593            4      : 44   4   : 68     160    : 23   Mean   :0.3323   Mean   :0.4197  
+ 3rd Qu.:0.4210   3rd Qu.:0.2680            5      : 21   5   :  2     159    : 10   3rd Qu.:0.3430   3rd Qu.:0.4380  
+ Max.   :0.4910   Max.   :0.2940            (Other): 30   NA&#39;s:988     164    : 10   Max.   :0.3840   Max.   :0.4990  
+                                            NA&#39;s   :988                (Other):  3   NA&#39;s   :812      NA&#39;s   :812     </code></pre>
 </div>
 <p>The summary shows how this data we are dealing with looks like: Some data is missing, however, this has structural reasons. There are <span class="math inline">\(39\)</span> teams with each maximally <span class="math inline">\(47\)</span> years (<span class="math inline">\(1962\)</span> - <span class="math inline">\(2012\)</span>). For <span class="math inline">\(988\)</span> cases the information on <code>rankseason</code> and <code>rankplayoffs</code> is missing. This is since these simply did not reach the playoffs and hence have no reported rank.</p>
 <div class="layout-chunk" data-layout="l-body">
@@ -2278,12 +2270,10 @@ document.addEventListener('DOMContentLoaded', function() {
 <span class='va'>task</span><span class='op'>$</span><span class='fu'>missings</span><span class='op'>(</span><span class='op'>)</span>
 </code></pre>
 </div>
-<pre><code>          rs           ba            g       league          obp         oobp 
-           0            0            0            0            0          812 
-        oslg     playoffs           ra rankplayoffs   rankseason          slg 
-         812            0            0          988          988            0 
-        team            w         year 
-           0            0            0 </code></pre>
+<pre><code>          rs           ba            g       league          obp         oobp         oslg     playoffs           ra 
+           0            0            0            0            0          812          812            0            0 
+rankplayoffs   rankseason          slg         team            w         year 
+         988          988            0            0            0            0 </code></pre>
 </div>
 <p>The <code>missings</code> method indicates what we already knew: our missing values. Missing values are not always a problem. Some learners can deal with them pretty well. However, we want to use a random forest for our task.</p>
 <div class="layout-chunk" data-layout="l-body">
@@ -2358,23 +2348,17 @@ document.addEventListener('DOMContentLoaded', function() {
 </code></pre>
 </div>
 <pre><code>&lt;DictionaryMeasure&gt; with 78 stored values
-Keys: classif.acc, classif.auc, classif.bacc, classif.bbrier,
-  classif.ce, classif.costs, classif.dor, classif.fbeta, classif.fdr,
-  classif.fn, classif.fnr, classif.fomr, classif.fp, classif.fpr,
-  classif.logloss, classif.mbrier, classif.mcc, classif.npv,
-  classif.ppv, classif.prauc, classif.precision, classif.recall,
-  classif.sensitivity, classif.specificity, classif.tn, classif.tnr,
-  classif.tp, classif.tpr, debug, dens.logloss, oob_error, regr.bias,
-  regr.ktau, regr.mae, regr.mape, regr.maxae, regr.medae, regr.medse,
-  regr.mse, regr.msle, regr.pbias, regr.rae, regr.rmse, regr.rmsle,
-  regr.rrse, regr.rse, regr.rsq, regr.sae, regr.smape, regr.srho,
-  regr.sse, selected_features, surv.brier, surv.calib_alpha,
-  surv.calib_beta, surv.chambless_auc, surv.cindex, surv.dcalib,
-  surv.graf, surv.hung_auc, surv.intlogloss, surv.logloss, surv.mae,
-  surv.mse, surv.nagelk_r2, surv.oquigley_r2, surv.rmse, surv.schmid,
-  surv.song_auc, surv.song_tnr, surv.song_tpr, surv.uno_auc,
-  surv.uno_tnr, surv.uno_tpr, surv.xu_r2, time_both, time_predict,
-  time_train</code></pre>
+Keys: classif.acc, classif.auc, classif.bacc, classif.bbrier, classif.ce, classif.costs, classif.dor,
+  classif.fbeta, classif.fdr, classif.fn, classif.fnr, classif.fomr, classif.fp, classif.fpr,
+  classif.logloss, classif.mbrier, classif.mcc, classif.npv, classif.ppv, classif.prauc, classif.precision,
+  classif.recall, classif.sensitivity, classif.specificity, classif.tn, classif.tnr, classif.tp,
+  classif.tpr, debug, dens.logloss, oob_error, regr.bias, regr.ktau, regr.mae, regr.mape, regr.maxae,
+  regr.medae, regr.medse, regr.mse, regr.msle, regr.pbias, regr.rae, regr.rmse, regr.rmsle, regr.rrse,
+  regr.rse, regr.rsq, regr.sae, regr.smape, regr.srho, regr.sse, selected_features, surv.brier,
+  surv.calib_alpha, surv.calib_beta, surv.chambless_auc, surv.cindex, surv.dcalib, surv.graf,
+  surv.hung_auc, surv.intlogloss, surv.logloss, surv.mae, surv.mse, surv.nagelk_r2, surv.oquigley_r2,
+  surv.rmse, surv.schmid, surv.song_auc, surv.song_tnr, surv.song_tpr, surv.uno_auc, surv.uno_tnr,
+  surv.uno_tpr, surv.xu_r2, time_both, time_predict, time_train</code></pre>
 </div>
 <p>We choose the mean absolute error (<code>regr.mae</code>) and the mean squared error (<code>regr.mse</code>).</p>
 <div class="layout-chunk" data-layout="l-body">
@@ -2383,39 +2367,28 @@ Keys: classif.acc, classif.auc, classif.bacc, classif.bbrier,
 <span class='va'>scores</span>
 </code></pre>
 </div>
-<pre><code>              task   task_id            learner
- 1: &lt;TaskRegr[43]&gt; moneyball &lt;GraphLearner[33]&gt;
- 2: &lt;TaskRegr[43]&gt; moneyball &lt;GraphLearner[33]&gt;
- 3: &lt;TaskRegr[43]&gt; moneyball &lt;GraphLearner[33]&gt;
- 4: &lt;TaskRegr[43]&gt; moneyball &lt;GraphLearner[33]&gt;
- 5: &lt;TaskRegr[43]&gt; moneyball &lt;GraphLearner[33]&gt;
- 6: &lt;TaskRegr[43]&gt; moneyball &lt;GraphLearner[33]&gt;
- 7: &lt;TaskRegr[43]&gt; moneyball &lt;GraphLearner[33]&gt;
- 8: &lt;TaskRegr[43]&gt; moneyball &lt;GraphLearner[33]&gt;
- 9: &lt;TaskRegr[43]&gt; moneyball &lt;GraphLearner[33]&gt;
-10: &lt;TaskRegr[43]&gt; moneyball &lt;GraphLearner[33]&gt;
-                          learner_id         resampling resampling_id iteration
- 1: imputehist.imputeoor.regr.ranger &lt;ResamplingCV[19]&gt;            cv         1
- 2: imputehist.imputeoor.regr.ranger &lt;ResamplingCV[19]&gt;            cv         2
- 3: imputehist.imputeoor.regr.ranger &lt;ResamplingCV[19]&gt;            cv         3
- 4: imputehist.imputeoor.regr.ranger &lt;ResamplingCV[19]&gt;            cv         4
- 5: imputehist.imputeoor.regr.ranger &lt;ResamplingCV[19]&gt;            cv         5
- 6: imputehist.imputeoor.regr.ranger &lt;ResamplingCV[19]&gt;            cv         6
- 7: imputehist.imputeoor.regr.ranger &lt;ResamplingCV[19]&gt;            cv         7
- 8: imputehist.imputeoor.regr.ranger &lt;ResamplingCV[19]&gt;            cv         8
- 9: imputehist.imputeoor.regr.ranger &lt;ResamplingCV[19]&gt;            cv         9
-10: imputehist.imputeoor.regr.ranger &lt;ResamplingCV[19]&gt;            cv        10
-              prediction regr.mae regr.mse
- 1: &lt;PredictionRegr[18]&gt; 19.59415 619.0158
- 2: &lt;PredictionRegr[18]&gt; 18.26726 533.1473
- 3: &lt;PredictionRegr[18]&gt; 22.51755 792.7933
- 4: &lt;PredictionRegr[18]&gt; 19.83573 608.2372
- 5: &lt;PredictionRegr[18]&gt; 21.85814 785.5617
- 6: &lt;PredictionRegr[18]&gt; 18.59886 531.2656
- 7: &lt;PredictionRegr[18]&gt; 17.50763 495.5710
- 8: &lt;PredictionRegr[18]&gt; 18.05779 511.2827
- 9: &lt;PredictionRegr[18]&gt; 19.83747 725.6058
-10: &lt;PredictionRegr[18]&gt; 18.28481 494.6057</code></pre>
+<pre><code>              task   task_id            learner                       learner_id         resampling resampling_id
+ 1: &lt;TaskRegr[43]&gt; moneyball &lt;GraphLearner[33]&gt; imputehist.imputeoor.regr.ranger &lt;ResamplingCV[19]&gt;            cv
+ 2: &lt;TaskRegr[43]&gt; moneyball &lt;GraphLearner[33]&gt; imputehist.imputeoor.regr.ranger &lt;ResamplingCV[19]&gt;            cv
+ 3: &lt;TaskRegr[43]&gt; moneyball &lt;GraphLearner[33]&gt; imputehist.imputeoor.regr.ranger &lt;ResamplingCV[19]&gt;            cv
+ 4: &lt;TaskRegr[43]&gt; moneyball &lt;GraphLearner[33]&gt; imputehist.imputeoor.regr.ranger &lt;ResamplingCV[19]&gt;            cv
+ 5: &lt;TaskRegr[43]&gt; moneyball &lt;GraphLearner[33]&gt; imputehist.imputeoor.regr.ranger &lt;ResamplingCV[19]&gt;            cv
+ 6: &lt;TaskRegr[43]&gt; moneyball &lt;GraphLearner[33]&gt; imputehist.imputeoor.regr.ranger &lt;ResamplingCV[19]&gt;            cv
+ 7: &lt;TaskRegr[43]&gt; moneyball &lt;GraphLearner[33]&gt; imputehist.imputeoor.regr.ranger &lt;ResamplingCV[19]&gt;            cv
+ 8: &lt;TaskRegr[43]&gt; moneyball &lt;GraphLearner[33]&gt; imputehist.imputeoor.regr.ranger &lt;ResamplingCV[19]&gt;            cv
+ 9: &lt;TaskRegr[43]&gt; moneyball &lt;GraphLearner[33]&gt; imputehist.imputeoor.regr.ranger &lt;ResamplingCV[19]&gt;            cv
+10: &lt;TaskRegr[43]&gt; moneyball &lt;GraphLearner[33]&gt; imputehist.imputeoor.regr.ranger &lt;ResamplingCV[19]&gt;            cv
+    iteration           prediction regr.mae regr.mse
+ 1:         1 &lt;PredictionRegr[18]&gt; 19.59415 619.0158
+ 2:         2 &lt;PredictionRegr[18]&gt; 18.26726 533.1473
+ 3:         3 &lt;PredictionRegr[18]&gt; 22.51755 792.7933
+ 4:         4 &lt;PredictionRegr[18]&gt; 19.83573 608.2372
+ 5:         5 &lt;PredictionRegr[18]&gt; 21.85814 785.5617
+ 6:         6 &lt;PredictionRegr[18]&gt; 18.59886 531.2656
+ 7:         7 &lt;PredictionRegr[18]&gt; 17.50763 495.5710
+ 8:         8 &lt;PredictionRegr[18]&gt; 18.05779 511.2827
+ 9:         9 &lt;PredictionRegr[18]&gt; 19.83747 725.6058
+10:        10 &lt;PredictionRegr[18]&gt; 18.28481 494.6057</code></pre>
 </div>
 <p>We can also compute now by how much our model was on average wrong when predicting the runs scored.</p>
 <div class="layout-chunk" data-layout="l-body">
@@ -2476,12 +2449,10 @@ Keys: classif.acc, classif.auc, classif.bacc, classif.bbrier,
 <pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/sort.html'>sort</a></span><span class='op'>(</span><span class='va'>lrn</span><span class='op'>$</span><span class='va'>model</span><span class='op'>$</span><span class='va'>regr.ranger</span><span class='op'>$</span><span class='va'>model</span><span class='op'>$</span><span class='va'>variable.importance</span>, decreasing <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>
 </code></pre>
 </div>
-<pre><code>         slg          obp           ba            w           ra         year 
- 3435.643552  2485.771229   936.206663   715.235512   501.303163   269.429878 
-  rankseason rankplayoffs     playoffs       league         oobp         oslg 
-  132.335915   106.292475    97.366197    35.753015    25.235380    25.087355 
-        team            g 
-   16.611604     9.464481 </code></pre>
+<pre><code>         slg          obp           ba            w           ra         year   rankseason rankplayoffs     playoffs 
+ 3435.643552  2485.771229   936.206663   715.235512   501.303163   269.429878   132.335915   106.292475    97.366197 
+      league         oobp         oslg         team            g 
+   35.753015    25.235380    25.087355    16.611604     9.464481 </code></pre>
 </div>
 <p>We see that according to this the left out <code>oobp</code> and <code>oslg</code> seem to have solely rudimentary explanatory power. This may be because there were simply too many instances or because the features are themselves not very powerful.</p>
 <h2 id="conclusion">Conclusion</h2>
