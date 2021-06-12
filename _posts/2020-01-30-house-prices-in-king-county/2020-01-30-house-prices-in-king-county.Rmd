@@ -35,7 +35,7 @@ lgr::get_logger("bbotk")$set_threshold("warn")
 ```
 
 ```{r tuning-a-complex-graph-002, include=FALSE, eval = params$eval_all}
-future::plan("multicore")
+future::plan("multisession")
 ```
 
 The use-case illustrated below touches on the following concepts:
@@ -337,12 +337,12 @@ at = AutoTuner$new(
   resampling = rsmp("holdout"),
   measure = msr("regr.rmse"),
   terminator = terminator,
-  tuner = tnr("random_search"),
+  tuner = tnr("random_search", batch_size = 40),
   search_space = ps
 )
 ```
 
-```{r 2020-01-30-house-prices-in-king-county-026, echo = FALSE, results = 'hide', eval = params$eval_all}
+```{r 2020-01-30-house-prices-in-king-county-026, eval = params$eval_all}
 # And resample the AutoTuner
 res = resample(tsk_nozip, at, cv3, store_models = TRUE)
 ```
@@ -351,7 +351,7 @@ res = resample(tsk_nozip, at, cv3, store_models = TRUE)
 saveRDS(res, "data/res.rda")
 ```
 
-```{r chunk-name, echo = FALSE}
+```{r chunk-name2, echo = FALSE}
 res = readRDS("data/res.rda")
 ```
 
@@ -425,10 +425,21 @@ filter = flt("mrmr")
 
 The resulting **RMSE** is slightly higher, and at the same time we only use $12$ features.
 
-```{r 2020-01-30-house-prices-in-king-county-032}
+```{r 2020-01-30-house-prices-in-king-county-032, eval = params$eval_all}
 graph = po("filter", filter, param_vals = list(filter.nfeat = 12)) %>>% po("learner", lrn("regr.ranger"))
 lrn_filter = as_learner(graph)
 res = resample(task = task_train, lrn_filter, cv3)
+```
+
+```{r chunk-name1, echo = FALSE, eval = params$eval_all}
+saveRDS(res, "data/res2.rda")
+```
+
+```{r chunk-name12, echo = FALSE}
+res = readRDS("data/res2.rda")
+```
+
+```{r chunk-name13}
 res$score(msr("regr.rmse"))
 sprintf("RMSE of ranger with filtering: %s", round(sqrt(res$aggregate()), 2))
 ```
