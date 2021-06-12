@@ -20,7 +20,7 @@ output:
     css: ../../custom.css
 ---
 
-```{r 2020-03-11-mlr3tuning_tutorial_german_credit-001_tutorial_german_credit-001_tutorial_german_credit-001, include=FALSE}
+```{r 2020-03-11-mlr3tuning_tutorial_german_credit-001_tutorial_german_credit-001_tutorial_german_credit-001_tutorial_german_credit-001, include=FALSE}
 # Just some preparation
 knitr::opts_chunk$set(
   echo = TRUE,
@@ -51,7 +51,7 @@ We will continue working with the German credit dataset. In Part I, we peeked in
 
 First, load the packages we are going to use:
 
-```{r 2020-03-11-mlr3tuning_tutorial_german_credit-002_tutorial_german_credit-002_tutorial_german_credit-002, message=FALSE, warning=FALSE}
+```{r 2020-03-11-mlr3tuning_tutorial_german_credit-002_tutorial_german_credit-002_tutorial_german_credit-002_tutorial_german_credit-002, message=FALSE, warning=FALSE}
 library("data.table")
 library("ggplot2")
 library("mlr3")
@@ -60,19 +60,19 @@ library("mlr3tuning")
 library("paradox")
 ```
 
-```{r 2020-03-11-mlr3tuning_tutorial_german_credit-003_tutorial_german_credit-003_tutorial_german_credit-003, include=FALSE}
+```{r 2020-03-11-mlr3tuning_tutorial_german_credit-003_tutorial_german_credit-003_tutorial_german_credit-003_tutorial_german_credit-003, include=FALSE}
 theme_set(theme_light())
 ```
 
 We use the same `Task` as in Part I:
 
-```{r 2020-03-11-mlr3tuning_tutorial_german_credit-004_tutorial_german_credit-004_tutorial_german_credit-004, message=FALSE}
+```{r 2020-03-11-mlr3tuning_tutorial_german_credit-004_tutorial_german_credit-004_tutorial_german_credit-004_tutorial_german_credit-004, message=FALSE}
 task = tsk("german_credit")
 ```
 
 We also might want to use multiple cores to reduce long run times of tuning runs.
 
-```{r 2020-03-11-mlr3tuning_tutorial_german_credit-005_tutorial_german_credit-005_tutorial_german_credit-005, warning=FALSE}
+```{r 2020-03-11-mlr3tuning_tutorial_german_credit-005_tutorial_german_credit-005_tutorial_german_credit-005_tutorial_german_credit-005, warning=FALSE}
 # future::plan("multiprocess") # uncomment for parallelization
 ```
 
@@ -82,7 +82,7 @@ We will evaluate all  hyperparameter configurations using 10-fold CV.
 We use a *fixed* train-test split, i.e. the same splits for each evaluation.
 Otherwise, some evaluation could get unusually "hard" splits, which would make comparisons unfair.
 
-```{r 2020-03-11-mlr3tuning_tutorial_german_credit-006_tutorial_german_credit-006_tutorial_german_credit-006}
+```{r 2020-03-11-mlr3tuning_tutorial_german_credit-006_tutorial_german_credit-006_tutorial_german_credit-006_tutorial_german_credit-006}
 set.seed(8008135)
 cv10_instance = rsmp("cv", folds = 10)
 
@@ -106,7 +106,7 @@ First, we need to decide what `r ref("Learner")` we want to optimize.
 We will use `r ref("LearnerClassifKKNN")`, the "kernelized" k-nearest neighbor classifier.
 We will use `kknn` as a normal kNN without weighting first (i.e., using the rectangular kernel):
 
-```{r 2020-03-11-mlr3tuning_tutorial_german_credit-007_tutorial_german_credit-007_tutorial_german_credit-007}
+```{r 2020-03-11-mlr3tuning_tutorial_german_credit-007_tutorial_german_credit-007_tutorial_german_credit-007_tutorial_german_credit-007}
 knn = lrn("classif.kknn", predict_type = "prob")
 knn$param_set$values$kernel = "rectangular"
 ```
@@ -114,7 +114,7 @@ knn$param_set$values$kernel = "rectangular"
 As a next step, we decide what parameters we optimize over.
 Before that, though, we are interested in the parameter set on which we could tune:
 
-```{r 2020-03-11-mlr3tuning_tutorial_german_credit-008_tutorial_german_credit-008_tutorial_german_credit-008}
+```{r 2020-03-11-mlr3tuning_tutorial_german_credit-008_tutorial_german_credit-008_tutorial_german_credit-008_tutorial_german_credit-008}
 knn$param_set
 ```
 
@@ -122,7 +122,7 @@ We first tune the `k` parameter (i.e. the number of nearest neighbors), between 
 Second, we tune the `distance` function, allowing L1 and L2 distances.
 To do so, we use the `paradox` package to define a search space (see the [online vignette](https://mlr3book.mlr-org.com/paradox.html) for a more complete introduction.
 
-```{r 2020-03-11-mlr3tuning_tutorial_german_credit-009_tutorial_german_credit-009_tutorial_german_credit-009}
+```{r 2020-03-11-mlr3tuning_tutorial_german_credit-009_tutorial_german_credit-009_tutorial_german_credit-009_tutorial_german_credit-009}
 search_space = ParamSet$new(list(
   ParamInt$new("k", lower = 3, upper = 20),
   ParamInt$new("distance", lower = 1, upper = 2)
@@ -131,7 +131,7 @@ search_space = ParamSet$new(list(
 
 As a next step, we define a `r ref("TuningInstanceSingleCrit")` that represents the problem we are trying to optimize.
 
-```{r 2020-03-11-mlr3tuning_tutorial_german_credit-010_tutorial_german_credit-010_tutorial_german_credit-010}
+```{r 2020-03-11-mlr3tuning_tutorial_german_credit-010_tutorial_german_credit-010_tutorial_german_credit-010_tutorial_german_credit-010}
 instance_grid = TuningInstanceSingleCrit$new(
   task = task,
   learner = knn,
@@ -151,7 +151,7 @@ While it is very intuitive and simple, it is inefficient if the search space is 
 For this simple use case, it suffices, though.
 We get the `r ref("TunerGridSearch", "grid_search tuner")` via:
 
-```{r 2020-03-11-mlr3tuning_tutorial_german_credit-011_tutorial_german_credit-011_tutorial_german_credit-011}
+```{r 2020-03-11-mlr3tuning_tutorial_german_credit-011_tutorial_german_credit-011_tutorial_german_credit-011_tutorial_german_credit-011}
 set.seed(1)
 tuner_grid = tnr("grid_search", resolution = 18, batch_size = 36)
 ```
@@ -161,31 +161,31 @@ Note that the tuning procedure *modifies* our tuning instance (as usual for `R6`
 The result can be found in the `instance` object.
 Before tuning it is empty:
 
-```{r 2020-03-11-mlr3tuning_tutorial_german_credit-012_tutorial_german_credit-012_tutorial_german_credit-012}
+```{r 2020-03-11-mlr3tuning_tutorial_german_credit-012_tutorial_german_credit-012_tutorial_german_credit-012_tutorial_german_credit-012}
 instance_grid$result
 ```
 
 Now, we tune:
 
-```{r 2020-03-11-mlr3tuning_tutorial_german_credit-013_tutorial_german_credit-013_tutorial_german_credit-013}
+```{r 2020-03-11-mlr3tuning_tutorial_german_credit-013_tutorial_german_credit-013_tutorial_german_credit-013_tutorial_german_credit-013}
 tuner_grid$optimize(instance_grid)
 ```
 
 The result is returned by `$optimize()` together with its performance. It can be also accessed with the  `$result` slot:
 
-```{r 2020-03-11-mlr3tuning_tutorial_german_credit-014_tutorial_german_credit-014_tutorial_german_credit-014}
+```{r 2020-03-11-mlr3tuning_tutorial_german_credit-014_tutorial_german_credit-014_tutorial_german_credit-014_tutorial_german_credit-014}
 instance_grid$result
 ```
 
 We can also look at the `Archive` of evaluated configurations:
 
-```{r 2020-03-11-mlr3tuning_tutorial_german_credit-015_tutorial_german_credit-015_tutorial_german_credit-015}
+```{r 2020-03-11-mlr3tuning_tutorial_german_credit-015_tutorial_german_credit-015_tutorial_german_credit-015_tutorial_german_credit-015}
 as.data.table(instance_grid$archive)
 ```
 
 We plot the performances depending on the sampled `k` and `distance`:
 
-```{r 2020-03-11-mlr3tuning_tutorial_german_credit-016_tutorial_german_credit-016_tutorial_german_credit-016}
+```{r 2020-03-11-mlr3tuning_tutorial_german_credit-016_tutorial_german_credit-016_tutorial_german_credit-016_tutorial_german_credit-016}
 ggplot(as.data.table(instance_grid$archive), aes(x = k, y = classif.ce, color = as.factor(distance))) +
   geom_line() + geom_point(size = 3)
 ```
@@ -210,7 +210,7 @@ To account for this we will use a **transformation function** for `k` and optimi
 We define the range for `k` from `log(3)` to `log(50)` and exponentiate in the transformation.
 Now, as `k` has become a double instead of an int (in the search space, before transformation), we round it in the `trafo`.
 
-```{r 2020-03-11-mlr3tuning_tutorial_german_credit-017_tutorial_german_credit-017_tutorial_german_credit-017}
+```{r 2020-03-11-mlr3tuning_tutorial_german_credit-017_tutorial_german_credit-017_tutorial_german_credit-017_tutorial_german_credit-017}
 large_searchspace = ParamSet$new(list(
   ParamDbl$new("k", lower = log(3), upper = log(50)),
   ParamDbl$new("distance", lower = 1, upper = 3),
@@ -231,7 +231,7 @@ We need to specify in the *tuning instance* a *termination criterion*.
 The criterion tells the search algorithm when to stop.
 Here, we will terminate after 36 evaluations:
 
-```{r 2020-03-11-mlr3tuning_tutorial_german_credit-018_tutorial_german_credit-018_tutorial_german_credit-018}
+```{r 2020-03-11-mlr3tuning_tutorial_german_credit-018_tutorial_german_credit-018_tutorial_german_credit-018_tutorial_german_credit-018}
 tuner_random = tnr("random_search", batch_size = 36)
 
 instance_random = TuningInstanceSingleCrit$new(
@@ -244,7 +244,7 @@ instance_random = TuningInstanceSingleCrit$new(
 )
 ```
 
-```{r 2020-03-11-mlr3tuning_tutorial_german_credit-019_tutorial_german_credit-019_tutorial_german_credit-019}
+```{r 2020-03-11-mlr3tuning_tutorial_german_credit-019_tutorial_german_credit-019_tutorial_german_credit-019_tutorial_german_credit-019}
 tuner_random$optimize(instance_random)
 ```
 
@@ -252,14 +252,14 @@ Like before, we can review the `Archive`.
 It includes the points before and after the transformation.
 The archive includes a column for each parameter the `Tuner` sampled on the search space (values before the transformation) and additional columns with prefix `x_domain_*` that refer to the parameters used by the learner (values after the transformation):
 
-```{r 2020-03-11-mlr3tuning_tutorial_german_credit-020_tutorial_german_credit-020_tutorial_german_credit-020}
+```{r 2020-03-11-mlr3tuning_tutorial_german_credit-020_tutorial_german_credit-020_tutorial_german_credit-020_tutorial_german_credit-020}
 as.data.table(instance_random$archive)
 ```
 
 Let's now investigate the performance by parameters.
 This is especially easy using visualization:
 
-```{r 2020-03-11-mlr3tuning_tutorial_german_credit-021_tutorial_german_credit-021_tutorial_german_credit-021}
+```{r 2020-03-11-mlr3tuning_tutorial_german_credit-021_tutorial_german_credit-021_tutorial_german_credit-021_tutorial_german_credit-021}
 ggplot(as.data.table(instance_random$archive),
   aes(x = x_domain_k, y = classif.ce, color = x_domain_scale)) +
   geom_point(size = 3) + geom_line()
@@ -268,7 +268,7 @@ ggplot(as.data.table(instance_random$archive),
 The previous plot suggests that `scale` has a strong influence on performance.
 For the kernel, there does not seem to be a strong influence:
 
-```{r 2020-03-11-mlr3tuning_tutorial_german_credit-022_tutorial_german_credit-022_tutorial_german_credit-022}
+```{r 2020-03-11-mlr3tuning_tutorial_german_credit-022_tutorial_german_credit-022_tutorial_german_credit-022_tutorial_german_credit-022}
 ggplot(as.data.table(instance_random$archive),
   aes(x = x_domain_k, y = classif.ce, color = x_domain_kernel)) +
   geom_point(size = 3) + geom_line()
@@ -279,7 +279,7 @@ ggplot(as.data.table(instance_random$archive),
 Having determined tuned configurations that seem to work well, we want to find out which performance we can expect from them.
 However, this may require more than this naive approach:
 
-```{r 2020-03-11-mlr3tuning_tutorial_german_credit-023_tutorial_german_credit-023_tutorial_german_credit-023}
+```{r 2020-03-11-mlr3tuning_tutorial_german_credit-023_tutorial_german_credit-023_tutorial_german_credit-023_tutorial_german_credit-023}
 instance_random$result_y
 instance_grid$result_y
 ```
@@ -295,7 +295,7 @@ Then, we actually train a model with optimal hyperparameters on the whole traini
 
 The `AutoTuner` finds the best parameters and uses them for training:
 
-```{r 2020-03-11-mlr3tuning_tutorial_german_credit-024_tutorial_german_credit-024_tutorial_german_credit-024, eval=FALSE}
+```{r 2020-03-11-mlr3tuning_tutorial_german_credit-024_tutorial_german_credit-024_tutorial_german_credit-024_tutorial_german_credit-024, eval=FALSE}
 grid_auto = AutoTuner$new(
   learner = knn,
   resampling = rsmp("cv", folds = 5), # we can NOT use fixed resampling here
@@ -309,24 +309,24 @@ grid_auto = AutoTuner$new(
 The `AutoTuner` behaves just like a regular `Learner`.
 It can be used to combine the steps of hyperparameter tuning and model fitting but is especially useful for resampling and *fair* comparison of performance through benchmarking:
 
-```{r 2020-03-11-mlr3tuning_tutorial_german_credit-025_tutorial_german_credit-025_tutorial_german_credit-025, eval=FALSE}
+```{r 2020-03-11-mlr3tuning_tutorial_german_credit-025_tutorial_german_credit-025_tutorial_german_credit-025_tutorial_german_credit-025, eval=FALSE}
 rr = resample(task, grid_auto, cv10_instance, store_models = TRUE)
 ```
 
 We aggregate the performances of all resampling iterations:
 
-```{r 2020-03-11-mlr3tuning_tutorial_german_credit-026_tutorial_german_credit-026_tutorial_german_credit-026, echo=FALSE}
+```{r 2020-03-11-mlr3tuning_tutorial_german_credit-026_tutorial_german_credit-026_tutorial_german_credit-026_tutorial_german_credit-026, echo=FALSE}
 rr = readRDS("resample_result.rds")
 ```
 
-```{r 2020-03-11-mlr3tuning_tutorial_german_credit-027_tutorial_german_credit-027_tutorial_german_credit-027}
+```{r 2020-03-11-mlr3tuning_tutorial_german_credit-027_tutorial_german_credit-027_tutorial_german_credit-027_tutorial_german_credit-027}
 rr$aggregate()
 ```
 
 Essentially, this is the performance of a "knn with optimal hyperparameters found by grid search". Note that `grid_auto` is not changed since `resample()` creates a clone for each
 resampling iteration. The trained `AutoTuner` objects can be accessed by using
 
-```{r 2020-03-11-mlr3tuning_tutorial_german_credit-028_tutorial_german_credit-028_tutorial_german_credit-028}
+```{r 2020-03-11-mlr3tuning_tutorial_german_credit-028_tutorial_german_credit-028_tutorial_german_credit-028_tutorial_german_credit-028}
 rr$learners[[1]]
 rr$learners[[1]]$tuning_result
 ```
@@ -338,7 +338,7 @@ rr$learners[[1]]$tuning_result
 
 It is always interesting to look at what could have been. The following dataset contains an optimization run result with 3600 evaluations -- more than above by a factor of 100:
 
-```{r 2020-03-11-mlr3tuning_tutorial_german_credit-029_tutorial_german_credit-029_tutorial_german_credit-029, echo=FALSE, eval=FALSE}
+```{r 2020-03-11-mlr3tuning_tutorial_german_credit-029_tutorial_german_credit-029_tutorial_german_credit-029_tutorial_german_credit-029, echo=FALSE, eval=FALSE}
 set.seed(2409)
 instance_random = TuningInstanceSingleCrit$new(
   task = task,
@@ -354,28 +354,28 @@ perfdata = as.data.table(instance_random$archive)
 perfdata
 ```
 
-```{r 2020-03-11-mlr3tuning_tutorial_german_credit-030_tutorial_german_credit-030_tutorial_german_credit-030, echo=FALSE}
+```{r 2020-03-11-mlr3tuning_tutorial_german_credit-030_tutorial_german_credit-030_tutorial_german_credit-030_tutorial_german_credit-030, echo=FALSE}
 perfdata = readRDS("randomsearch_3600.rds")
 perfdata
 ```
 
 The scale effect is just as visible as before with fewer data:
 
-```{r 2020-03-11-mlr3tuning_tutorial_german_credit-031_tutorial_german_credit-031_tutorial_german_credit-031}
+```{r 2020-03-11-mlr3tuning_tutorial_german_credit-031_tutorial_german_credit-031_tutorial_german_credit-031_tutorial_german_credit-031}
 ggplot(perfdata, aes(x = x_domain_k, y = classif.ce, color = scale)) +
   geom_point(size = 2, alpha = 0.3)
 ```
 
 Now, there seems to be a visible pattern by kernel as well:
 
-```{r 2020-03-11-mlr3tuning_tutorial_german_credit-032_tutorial_german_credit-032_tutorial_german_credit-032}
+```{r 2020-03-11-mlr3tuning_tutorial_german_credit-032_tutorial_german_credit-032_tutorial_german_credit-032_tutorial_german_credit-032}
 ggplot(perfdata, aes(x = x_domain_k, y = classif.ce, color = kernel)) +
   geom_point(size = 2, alpha = 0.3)
 ```
 
 In fact, if we zoom in to `(5, 40)` $\times$ `(0.23, 0.28)` and do decrease smoothing we see that different kernels have their optimum at different values of `k`:
 
-```{r 2020-03-11-mlr3tuning_tutorial_german_credit-033_tutorial_german_credit-033_tutorial_german_credit-033, warning=FALSE}
+```{r 2020-03-11-mlr3tuning_tutorial_german_credit-033_tutorial_german_credit-033_tutorial_german_credit-033_tutorial_german_credit-033, warning=FALSE}
 ggplot(perfdata, aes(x = x_domain_k, y = classif.ce, color = kernel,
   group = interaction(kernel, scale))) +
   geom_point(size = 2, alpha = 0.3) + geom_smooth() +
@@ -385,7 +385,7 @@ ggplot(perfdata, aes(x = x_domain_k, y = classif.ce, color = kernel,
 What about the `distance` parameter?
 If we select all results with `k` between 10 and 20 and plot distance and kernel we see an approximate relationship:
 
-```{r 2020-03-11-mlr3tuning_tutorial_german_credit-034_tutorial_german_credit-034_tutorial_german_credit-034, warning=FALSE}
+```{r 2020-03-11-mlr3tuning_tutorial_german_credit-034_tutorial_german_credit-034_tutorial_german_credit-034_tutorial_german_credit-034, warning=FALSE}
 ggplot(perfdata[x_domain_k > 10 & x_domain_k < 20 & scale == TRUE],
   aes(x = distance, y = classif.ce, color = kernel)) +
   geom_point(size = 2) + geom_smooth()
