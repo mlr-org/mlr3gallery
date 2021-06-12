@@ -18,6 +18,8 @@ output:
   distill::distill_article:
     self_contained: false
     css: ../../custom.css
+params:
+  eval_all: FALSE
 ---
 
 ```{r 2020-01-30-house-prices-in-king-county-001, include = FALSE}
@@ -30,6 +32,10 @@ library(mlr3)
 library(mlr3tuning)
 lgr::get_logger("mlr3")$set_threshold("warn")
 lgr::get_logger("bbotk")$set_threshold("warn")
+```
+
+```{r tuning-a-complex-graph-002, include=FALSE, eval = params$eval_all}
+future::plan("multicore")
 ```
 
 The use-case illustrated below touches on the following concepts:
@@ -301,18 +307,13 @@ In this case, we resort to tune a different kind of model: **Gradient Boosted De
 
 ### A better baseline: `AutoTuner`
 
-<!-- The following snips are not evaluated because of runtime, no idea how we want to handle this.-->
-```{r 2020-01-30-house-prices-in-king-county-024, echo=FALSE, results = 'hide'}
-  eval_tune = TRUE
-```
-
 Tuning can often further improve the performance.
 In this case, we *tune* the xgboost learner in order to see whether this can improve performance.
 For the `AutoTuner` we have to specify a **Termination Criterion** (how long the tuning should run) a **Tuner** (which tuning method to use) and a **ParamSet** (which space we might want to search through).
 For now, we do not use the **zipcode** column, as `r cran_pkg("xgboost")` cannot naturally deal with categorical features.
 The **AutoTuner** automatically performs nested cross-validation.
 
-```{r 2020-01-30-house-prices-in-king-county-025, eval = eval_tune}
+```{r 2020-01-30-house-prices-in-king-county-025}
 set.seed(444L)
 library(mlr3tuning)
 library(paradox)
@@ -341,19 +342,27 @@ at = AutoTuner$new(
 )
 ```
 
-```{r 2020-01-30-house-prices-in-king-county-026, echo = FALSE, results = 'hide', eval = eval_tune}
+```{r 2020-01-30-house-prices-in-king-county-026, echo = FALSE, results = 'hide', eval = params$eval_all}
 # And resample the AutoTuner
 res = resample(tsk_nozip, at, cv3, store_models = TRUE)
 ```
 
-```{r 2020-01-30-house-prices-in-king-county-027, eval = eval_tune}
+```{r chunk-name, echo = FALSE, eval = params$eval_all}
+saveRDS(res, "data/res.rda")
+```
+
+```{r chunk-name, echo = FALSE}
+res = readRDS("data/res.rda")
+```
+
+```{r 2020-01-30-house-prices-in-king-county-027}
 res$score(msr("regr.rmse"))
 sprintf("RMSE of the tuned xgboost: %s", round(sqrt(res$aggregate()), 2))
 ```
 
 We can obtain the resulting parameters in the respective splits by accessing the `r ref("ResampleResult")`.
 
-```{r 2020-01-30-house-prices-in-king-county-028, eval = eval_tune}
+```{r 2020-01-30-house-prices-in-king-county-028}
 sapply(res$learners, function(x) x$learner$param_set$values)[-2,]
 ```
 
