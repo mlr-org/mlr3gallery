@@ -2758,17 +2758,13 @@ Output channels &lt;name [train type, predict type]&gt;:
 </div>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>rr</span><span class='op'>$</span><span class='fu'>score</span><span class='op'>(</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>rr</span><span class='op'>$</span><span class='fu'>score</span><span class='op'>(</span><span class='op'>)</span><span class='op'>[</span>, <span class='fu'>.</span><span class='op'>(</span><span class='va'>iteration</span>, <span class='va'>task_id</span>, <span class='va'>learner_id</span>, <span class='va'>resampling_id</span>, <span class='va'>classif.ce</span><span class='op'>)</span><span class='op'>]</span>
 </code></pre>
 </div>
-<pre><code>                task task_id            learner    learner_id         resampling resampling_id iteration
-1: &lt;TaskClassif[46]&gt;    pima &lt;GraphLearner[33]&gt; graph_learner &lt;ResamplingCV[19]&gt;            cv         1
-2: &lt;TaskClassif[46]&gt;    pima &lt;GraphLearner[33]&gt; graph_learner &lt;ResamplingCV[19]&gt;            cv         2
-3: &lt;TaskClassif[46]&gt;    pima &lt;GraphLearner[33]&gt; graph_learner &lt;ResamplingCV[19]&gt;            cv         3
-                prediction classif.ce
-1: &lt;PredictionClassif[19]&gt;  0.2851562
-2: &lt;PredictionClassif[19]&gt;  0.2460938
-3: &lt;PredictionClassif[19]&gt;  0.2968750</code></pre>
+<pre><code>   iteration task_id    learner_id resampling_id classif.ce
+1:         1    pima graph_learner            cv  0.2851562
+2:         2    pima graph_learner            cv  0.2460938
+3:         3    pima graph_learner            cv  0.2968750</code></pre>
 </div>
 <p>For each resampling iteration, the following steps are performed:</p>
 <ol type="1">
@@ -2789,140 +2785,74 @@ Output channels &lt;name [train type, predict type]&gt;:
 <p>Let’s have a look at the parameter set of the <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_learners_graph.html"><code>GraphLearner</code></a>. It consists of the <code>xgboost</code> hyperparameters, and additionally, the parameter of the <a href="https://mlr3pipelines.mlr-org.com/reference/PipeOp.html"><code>PipeOp</code></a> <code>encode</code> and <code>imputeoor</code>. All hyperparameters are prefixed with the id of the respective <a href="https://mlr3pipelines.mlr-org.com/reference/PipeOp.html"><code>PipeOp</code></a> or learner.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://docs.ropensci.org/skimr/reference/print.html'>print</a></span><span class='op'>(</span><span class='va'>graph_learner</span><span class='op'>$</span><span class='va'>param_set</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/as.data.table.html'>as.data.table</a></span><span class='op'>(</span><span class='va'>graph_learner</span><span class='op'>$</span><span class='va'>param_set</span><span class='op'>)</span><span class='op'>[</span>, <span class='fu'>.</span><span class='op'>(</span><span class='va'>id</span>, <span class='va'>class</span>, <span class='va'>lower</span>, <span class='va'>upper</span>, <span class='va'>levels</span><span class='op'>)</span><span class='op'>]</span>
 </code></pre>
 </div>
-<pre><code>&lt;ParamSetCollection&gt;
-                                 id    class lower upper nlevels         default
- 1:           encode.affect_columns ParamUty    NA    NA     Inf   &lt;Selector[1]&gt;
- 2:                   encode.method ParamFct    NA    NA       5  &lt;NoDefault[3]&gt;
- 3:        imputeoor.affect_columns ParamUty    NA    NA     Inf  &lt;NoDefault[3]&gt;
- 4:                   imputeoor.min ParamLgl    NA    NA       2  &lt;NoDefault[3]&gt;
- 5:            imputeoor.multiplier ParamDbl     0   Inf     Inf  &lt;NoDefault[3]&gt;
- 6:                imputeoor.offset ParamDbl     0   Inf     Inf  &lt;NoDefault[3]&gt;
- 7:                   xgboost.alpha ParamDbl     0   Inf     Inf               0
- 8:           xgboost.approxcontrib ParamLgl    NA    NA       2           FALSE
- 9:              xgboost.base_score ParamDbl  -Inf   Inf     Inf             0.5
-10:                 xgboost.booster ParamFct    NA    NA       3          gbtree
-11:               xgboost.callbacks ParamUty    NA    NA     Inf       &lt;list[0]&gt;
-12:       xgboost.colsample_bylevel ParamDbl     0     1     Inf               1
-13:        xgboost.colsample_bynode ParamDbl     0     1     Inf               1
-14:        xgboost.colsample_bytree ParamDbl     0     1     Inf               1
-15:   xgboost.early_stopping_rounds ParamInt     1   Inf     Inf                
-16:                     xgboost.eta ParamDbl     0     1     Inf             0.3
-17:             xgboost.eval_metric ParamUty    NA    NA     Inf           error
-18:        xgboost.feature_selector ParamFct    NA    NA       5          cyclic
-19:                   xgboost.feval ParamUty    NA    NA     Inf                
-20:                   xgboost.gamma ParamDbl     0   Inf     Inf               0
-21:             xgboost.grow_policy ParamFct    NA    NA       2       depthwise
-22: xgboost.interaction_constraints ParamUty    NA    NA     Inf  &lt;NoDefault[3]&gt;
-23:                  xgboost.lambda ParamDbl     0   Inf     Inf               1
-24:             xgboost.lambda_bias ParamDbl     0   Inf     Inf               0
-25:                 xgboost.max_bin ParamInt     2   Inf     Inf             256
-26:          xgboost.max_delta_step ParamDbl     0   Inf     Inf               0
-27:               xgboost.max_depth ParamInt     0   Inf     Inf               6
-28:              xgboost.max_leaves ParamInt     0   Inf     Inf               0
-29:                xgboost.maximize ParamLgl    NA    NA       2                
-30:        xgboost.min_child_weight ParamDbl     0   Inf     Inf               1
-31:                 xgboost.missing ParamDbl  -Inf   Inf     Inf              NA
-32:    xgboost.monotone_constraints ParamInt    -1     1       3               0
-33:          xgboost.normalize_type ParamFct    NA    NA       2            tree
-34:                 xgboost.nrounds ParamInt     1   Inf     Inf               1
-35:                 xgboost.nthread ParamInt     1   Inf     Inf               1
-36:              xgboost.ntreelimit ParamInt     1   Inf     Inf                
-37:       xgboost.num_parallel_tree ParamInt     1   Inf     Inf               1
-38:               xgboost.objective ParamUty    NA    NA     Inf binary:logistic
-39:                xgboost.one_drop ParamLgl    NA    NA       2           FALSE
-40:            xgboost.outputmargin ParamLgl    NA    NA       2           FALSE
-41:             xgboost.predcontrib ParamLgl    NA    NA       2           FALSE
-42:               xgboost.predictor ParamFct    NA    NA       2   cpu_predictor
-43:         xgboost.predinteraction ParamLgl    NA    NA       2           FALSE
-44:                xgboost.predleaf ParamLgl    NA    NA       2           FALSE
-45:           xgboost.print_every_n ParamInt     1   Inf     Inf               1
-46:               xgboost.rate_drop ParamDbl     0     1     Inf               0
-47:            xgboost.refresh_leaf ParamLgl    NA    NA       2            TRUE
-48:                 xgboost.reshape ParamLgl    NA    NA       2           FALSE
-49:             xgboost.sample_type ParamFct    NA    NA       2         uniform
-50:               xgboost.save_name ParamUty    NA    NA     Inf                
-51:             xgboost.save_period ParamInt     0   Inf     Inf                
-52:        xgboost.scale_pos_weight ParamDbl  -Inf   Inf     Inf               1
-53:              xgboost.sketch_eps ParamDbl     0     1     Inf            0.03
-54:               xgboost.skip_drop ParamDbl     0     1     Inf               0
-55:               xgboost.subsample ParamDbl     0     1     Inf               1
-56:                   xgboost.top_k ParamInt     0   Inf     Inf               0
-57:                xgboost.training ParamLgl    NA    NA       2           FALSE
-58:             xgboost.tree_method ParamFct    NA    NA       5            auto
-59:  xgboost.tweedie_variance_power ParamDbl     1     2     Inf             1.5
-60:                 xgboost.updater ParamUty    NA    NA     Inf  &lt;NoDefault[3]&gt;
-61:                 xgboost.verbose ParamInt     0     2       3               1
-62:               xgboost.watchlist ParamUty    NA    NA     Inf                
-63:               xgboost.xgb_model ParamUty    NA    NA     Inf                
-                                 id    class lower upper nlevels         default
-                                     parents   value
- 1:                                                 
- 2:                                          one-hot
- 3:                                                 
- 4:                                             TRUE
- 5:                                                1
- 6:                                                1
- 7:                                                 
- 8:                                                 
- 9:                                                 
-10:                                                 
-11:                                                 
-12:                                                 
-13:                                                 
-14:                                                 
-15:                                                 
-16:                                                 
-17:                                                 
-18:                          xgboost.booster        
-19:                                                 
-20:                                                 
-21:                      xgboost.tree_method        
-22:                                                 
-23:                                                 
-24:                                                 
-25:                      xgboost.tree_method        
-26:                                                 
-27:                                                 
-28:                      xgboost.grow_policy        
-29:                                                 
-30:                                                 
-31:                                                 
-32:                                                 
-33:                          xgboost.booster        
-34:                                              100
-35:                                                1
-36:                                                 
-37:                                                 
-38:                                                 
-39:                          xgboost.booster        
-40:                                                 
-41:                                                 
-42:                                                 
-43:                                                 
-44:                                                 
-45:                          xgboost.verbose        
-46:                          xgboost.booster        
-47:                                                 
-48:                                                 
-49:                          xgboost.booster        
-50:                                                 
-51:                                                 
-52:                                                 
-53:                      xgboost.tree_method        
-54:                          xgboost.booster        
-55:                                                 
-56: xgboost.booster,xgboost.feature_selector        
-57:                                                 
-58:                          xgboost.booster        
-59:                        xgboost.objective        
-60:                                                 
-61:                                                0
-62:                                                 
-63:                                                 
-                                     parents   value</code></pre>
+<pre><code>                                 id    class lower upper                               levels
+ 1:                   encode.method ParamFct    NA    NA   one-hot,treatment,helmert,poly,sum
+ 2:           encode.affect_columns ParamUty    NA    NA                                     
+ 3:                   imputeoor.min ParamLgl    NA    NA                           TRUE,FALSE
+ 4:                imputeoor.offset ParamDbl     0   Inf                                     
+ 5:            imputeoor.multiplier ParamDbl     0   Inf                                     
+ 6:        imputeoor.affect_columns ParamUty    NA    NA                                     
+ 7:                 xgboost.booster ParamFct    NA    NA                 gbtree,gblinear,dart
+ 8:               xgboost.watchlist ParamUty    NA    NA                                     
+ 9:                     xgboost.eta ParamDbl     0     1                                     
+10:                   xgboost.gamma ParamDbl     0   Inf                                     
+11:               xgboost.max_depth ParamInt     0   Inf                                     
+12:        xgboost.min_child_weight ParamDbl     0   Inf                                     
+13:               xgboost.subsample ParamDbl     0     1                                     
+14:        xgboost.colsample_bytree ParamDbl     0     1                                     
+15:       xgboost.colsample_bylevel ParamDbl     0     1                                     
+16:        xgboost.colsample_bynode ParamDbl     0     1                                     
+17:       xgboost.num_parallel_tree ParamInt     1   Inf                                     
+18:                  xgboost.lambda ParamDbl     0   Inf                                     
+19:             xgboost.lambda_bias ParamDbl     0   Inf                                     
+20:                   xgboost.alpha ParamDbl     0   Inf                                     
+21:               xgboost.objective ParamUty    NA    NA                                     
+22:             xgboost.eval_metric ParamUty    NA    NA                                     
+23:              xgboost.base_score ParamDbl  -Inf   Inf                                     
+24:          xgboost.max_delta_step ParamDbl     0   Inf                                     
+25:                 xgboost.missing ParamDbl  -Inf   Inf                                     
+26:    xgboost.monotone_constraints ParamInt    -1     1                                     
+27:  xgboost.tweedie_variance_power ParamDbl     1     2                                     
+28:                 xgboost.nthread ParamInt     1   Inf                                     
+29:                 xgboost.nrounds ParamInt     1   Inf                                     
+30:                   xgboost.feval ParamUty    NA    NA                                     
+31:                 xgboost.verbose ParamInt     0     2                                     
+32:           xgboost.print_every_n ParamInt     1   Inf                                     
+33:   xgboost.early_stopping_rounds ParamInt     1   Inf                                     
+34:                xgboost.maximize ParamLgl    NA    NA                           TRUE,FALSE
+35:             xgboost.sample_type ParamFct    NA    NA                     uniform,weighted
+36:          xgboost.normalize_type ParamFct    NA    NA                          tree,forest
+37:               xgboost.rate_drop ParamDbl     0     1                                     
+38:               xgboost.skip_drop ParamDbl     0     1                                     
+39:                xgboost.one_drop ParamLgl    NA    NA                           TRUE,FALSE
+40:             xgboost.tree_method ParamFct    NA    NA      auto,exact,approx,hist,gpu_hist
+41:             xgboost.grow_policy ParamFct    NA    NA                  depthwise,lossguide
+42:              xgboost.max_leaves ParamInt     0   Inf                                     
+43:                 xgboost.max_bin ParamInt     2   Inf                                     
+44:               xgboost.callbacks ParamUty    NA    NA                                     
+45:              xgboost.sketch_eps ParamDbl     0     1                                     
+46:        xgboost.scale_pos_weight ParamDbl  -Inf   Inf                                     
+47:                 xgboost.updater ParamUty    NA    NA                                     
+48:            xgboost.refresh_leaf ParamLgl    NA    NA                           TRUE,FALSE
+49:        xgboost.feature_selector ParamFct    NA    NA cyclic,shuffle,random,greedy,thrifty
+50:                   xgboost.top_k ParamInt     0   Inf                                     
+51:               xgboost.predictor ParamFct    NA    NA          cpu_predictor,gpu_predictor
+52:             xgboost.save_period ParamInt     0   Inf                                     
+53:               xgboost.save_name ParamUty    NA    NA                                     
+54:               xgboost.xgb_model ParamUty    NA    NA                                     
+55: xgboost.interaction_constraints ParamUty    NA    NA                                     
+56:            xgboost.outputmargin ParamLgl    NA    NA                           TRUE,FALSE
+57:              xgboost.ntreelimit ParamInt     1   Inf                                     
+58:                xgboost.predleaf ParamLgl    NA    NA                           TRUE,FALSE
+59:             xgboost.predcontrib ParamLgl    NA    NA                           TRUE,FALSE
+60:           xgboost.approxcontrib ParamLgl    NA    NA                           TRUE,FALSE
+61:         xgboost.predinteraction ParamLgl    NA    NA                           TRUE,FALSE
+62:                 xgboost.reshape ParamLgl    NA    NA                           TRUE,FALSE
+63:                xgboost.training ParamLgl    NA    NA                           TRUE,FALSE
+                                 id    class lower upper                               levels</code></pre>
 </div>
 <p>We will tune the encode method.</p>
 <div class="layout-chunk" data-layout="l-body">
@@ -2952,8 +2882,8 @@ Output channels &lt;name [train type, predict type]&gt;:
 </div>
 <pre><code>&lt;ArchiveTuning&gt;
    encode.method classif.ce           timestamp batch_nr
-1:       one-hot       0.27 2021-06-12 12:36:09        1
-2:     treatment       0.27 2021-06-12 12:36:10        2</code></pre>
+1:       one-hot       0.27 2021-06-12 13:35:06        1
+2:     treatment       0.27 2021-06-12 13:35:07        2</code></pre>
 </div>
 <h1 id="nested-resampling">Nested Resampling</h1>
 <p>We create one <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_learners_graph.html"><code>GraphLearner</code></a> with <code>imputeoor</code> and test it against a <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_learners_graph.html"><code>GraphLearner</code></a> that uses the internal imputation method of <code>xgboost</code>. Applying nested resampling ensures a fair comparison of the predictive performances.</p>

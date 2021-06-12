@@ -2932,13 +2932,13 @@ Null data.table (0 rows and 0 cols)</code></pre>
 <p>Next, we want to compare the predictive performances estimated on the outer resampling to the inner resampling (<code>extract_inner_tuning_results(rr)</code>). Significantly lower predictive performances on the outer resampling indicate that the models with the optimized hyperparameters overfit the data.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>rr</span><span class='op'>$</span><span class='fu'>score</span><span class='op'>(</span><span class='op'>)</span><span class='op'>[</span>, <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='va'>iteration</span>, <span class='va'>classif.ce</span><span class='op'>)</span><span class='op'>]</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>rr</span><span class='op'>$</span><span class='fu'>score</span><span class='op'>(</span><span class='op'>)</span><span class='op'>[</span>, <span class='fu'>.</span><span class='op'>(</span><span class='va'>iteration</span>, <span class='va'>task_id</span>, <span class='va'>learner_id</span>, <span class='va'>resampling_id</span>, <span class='va'>classif.ce</span><span class='op'>)</span><span class='op'>]</span>
 </code></pre>
 </div>
-<pre><code>   iteration classif.ce
-1:         1       0.06
-2:         2       0.04
-3:         3       0.04</code></pre>
+<pre><code>   iteration task_id        learner_id resampling_id classif.ce
+1:         1    iris classif.svm.tuned            cv       0.06
+2:         2    iris classif.svm.tuned            cv       0.04
+3:         3    iris classif.svm.tuned            cv       0.04</code></pre>
 </div>
 <p>The archive of the <a href="https://mlr3tuning.mlr-org.com/reference/AutoTuner.html"><code>AutoTuner</code></a>s allows us to inspect all evaluated hyperparameters configurations with the associated predictive performances.</p>
 <div class="layout-chunk" data-layout="l-body">
