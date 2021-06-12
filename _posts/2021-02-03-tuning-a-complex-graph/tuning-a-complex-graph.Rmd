@@ -17,6 +17,8 @@ output:
     self_contained: false
     css: ../../custom.css
 bibliography: biblio.bib
+params:
+  eval_all: FALSE
 ---
 
 ```{r tuning-a-complex-graph-001, include=FALSE}
@@ -25,6 +27,7 @@ knitr::opts_chunk$set(
   R.options = list(width = 120)
 )
 library(mlr3book)
+library(rmarkdown)
 ```
 
 In this use case we show how to tune a rather complex graph consisting of different preprocessing steps and different learners where each preprocessing step and learner itself has parameters that can be tuned.
@@ -236,8 +239,12 @@ tune1 = TuningInstanceSingleCrit$new(
 We then perform a `grid search` using a resolution of 4 for the numeric parameters.
 The grid being used will look like the following (note that the dependencies we specified above are handled automatically):
 
-```{r tuning-a-complex-graph-017}
+```{r tuning-a-complex-graph-017, eval = FALSE}
 generate_design_grid(tune_ps1, resolution = 4)
+```
+
+```{r tuning-a-complex-graph-0171, echo = FALSE}
+paged_table(generate_design_grid(tune_ps1, resolution = 4)$data)
 ```
 
 Before starting the tuning we set some logging thresholds (i.e., only print warnings on the console):
@@ -247,9 +254,17 @@ lgr::get_logger("mlr3")$set_threshold("warn")
 lgr::get_logger("bbotk")$set_threshold("warn")
 ```
 
-```{r tuning-a-complex-graph-019}
+```{r tuning-a-complex-graph-019, eval = params$eval_all}
 tuner_gs = tnr("grid_search", resolution = 4)
 tuner_gs$optimize(tune1)
+```
+
+```{r chunk-name, echo = FALSE, eval = params$eval_all}
+saveRDS(tune1, "data/tune1.rda")
+```
+
+```{r chunk-name2, echo = FALSE}
+tune1 = readRDS("data/tune1.rda")
 ```
 
 Now, we can inspect the results ordered by the `classification accuracy`:
