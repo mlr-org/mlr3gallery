@@ -15,6 +15,8 @@ date: 01-08-2021
 output:
   distill::distill_article:
     self_contained: false
+params:
+  eval_all: FALSE
 ---
 
 ```{r mlr3fselect-basic-001, include=FALSE}
@@ -23,6 +25,10 @@ if (require("data.table")) data.table::setDTthreads(1)
 set.seed(7832)
 lgr::get_logger("mlr3")$set_threshold("warn")
 library(mlr3book)
+```
+
+```{r mlr3fselect-basic-002, include=FALSE, eval = params$eval_all}
+future::plan("multicore")
 ```
 
 ## Introduction
@@ -50,7 +56,7 @@ In addition to the `survived` column, the reduced data set contains the followin
 | `pc_class` | Passenger class                     |
 | `embarked` | Port of embarkation                 |
 
-```{r mlr3fselect-basic-002}
+```{r mlr3fselect-basic-003}
 library(mlr3data)
 
 data("titanic", package = "mlr3data")
@@ -64,7 +70,7 @@ titanic = titanic[!is.na(titanic$survived),]
 
 We construct a binary classification task.
 
-```{r mlr3fselect-basic-003}
+```{r mlr3fselect-basic-004}
 library(mlr3)
 
 task = TaskClassif$new(id = "titanic", backend = titanic, target = "survived", positive = "yes")
@@ -74,7 +80,7 @@ task = TaskClassif$new(id = "titanic", backend = titanic, target = "survived", p
 
 We use the logistic regression learner provided by the `r mlr_pkg("mlr3learners")` package.
 
-```{r mlr3fselect-basic-004}
+```{r mlr3fselect-basic-005}
 library(mlr3learners)
 
 learner = lrn("classif.log_reg")
@@ -82,7 +88,7 @@ learner = lrn("classif.log_reg")
 
 To evaluate the predictive performance, we choose a 3-fold cross-validation and the classification error as the measure.
 
-```{r mlr3fselect-basic-005}
+```{r mlr3fselect-basic-006}
 resampling = rsmp("cv", folds = 3)
 measure = msr("classif.ce")
 
@@ -100,7 +106,7 @@ The `r ref("Terminator")` classes determine when to stop the feature selection.
 In this example we choose a terminator that stops the feature selection after 10 seconds.
 The sugar functions `r ref("trm()")` and `r ref("trms()")` can be used to retrieve terminators from the `r ref("mlr_terminators")` dictionary.
 
-```{r mlr3fselect-basic-006}
+```{r mlr3fselect-basic-007}
 library(mlr3fselect)
 
 terminator = trm("run_time", secs = 10)
@@ -114,7 +120,7 @@ FSelectInstanceSingleCrit$new(
 
 The `r ref("FSelector")` subclasses describe the feature selection strategy. The sugar function `r ref("fs()")` can be used to retrieve feature selection algorithms from the `r ref("mlr_fselectors")` dictionary.
 
-```{r mlr3fselect-basic-007}
+```{r mlr3fselect-basic-008}
 mlr_fselectors
 ```
 
@@ -124,7 +130,7 @@ Random search randomly draws feature sets and evaluates them in batches.
 We retrieve the `r ref("FSelectorRandomSearch")` class with the `r ref("fs()")` sugar function and choose `r ref("TerminatorEvals")`.
 We set the `n_evals` parameter to `10` which means that 10 feature sets are evaluated.
 
-```{r mlr3fselect-basic-008}
+```{r mlr3fselect-basic-009}
 terminator = trm("evals", n_evals = 10)
 instance = FSelectInstanceSingleCrit$new(
   task = task,
@@ -140,25 +146,25 @@ These features set are internally passed to the `$eval_batch()` method of `r ref
 This general interaction between the objects of **mlr3fselect** stays the same for the different feature selection methods.
 However, the way how new feature sets are generated differs depending on the chosen `r ref("FSelector")` subclass.
 
-```{r mlr3fselect-basic-009}
+```{r mlr3fselect-basic-010}
 fselector$optimize(instance)
 ```
 
 The `r ref("ArchiveFSelect")` stores a `data.table::data.table()` which consists of the evaluated feature sets and the corresponding estimated predictive performances.
 
-```{r mlr3fselect-basic-010}
+```{r mlr3fselect-basic-011}
 as.data.table(instance$archive)[, 1:8]
 ```
 
 The associated resampling iterations can be accessed in the `r ref("BenchmarkResult")` by calling
 
-```{r mlr3fselect-basic-011}
+```{r mlr3fselect-basic-012}
 instance$archive$benchmark_result
 ```
 
 We retrieve the best performing feature set with
 
-```{r mlr3fselect-basic-012}
+```{r mlr3fselect-basic-013}
 instance$result
 ```
 
@@ -166,7 +172,7 @@ instance$result
 
 We try sequential forward selection. We chose `r ref("TerminatorStagnation")` that stops the feature selection if the predictive performance does not increase anymore.
 
-```{r mlr3fselect-basic-013}
+```{r mlr3fselect-basic-014}
 terminator = trm("stagnation", iters = 5)
 instance = FSelectInstanceSingleCrit$new(
   task = task,
@@ -181,7 +187,7 @@ fselector$optimize(instance)
 
 The `r ref("FSelectorSequential")` object has a special method for displaying the optimization path of the sequential feature selection.
 
-```{r mlr3fselect-basic-014}
+```{r mlr3fselect-basic-015}
 fselector$optimization_path(instance)
 ```
 
@@ -192,7 +198,7 @@ In each iteration the feature(s) with the lowest importance score is dropped.
 We choose the non-recursive algorithm (`recursive = FALSE`) which calculates the feature importance once on the complete feature set.
 The recursive version (`recursive = TRUE`) recomputes the feature importance on the reduced feature set in every iteration.
 
-```{r mlr3fselect-basic-015}
+```{r mlr3fselect-basic-016}
 learner = lrn("classif.ranger", importance = "impurity")
 terminator = trm("none")
 instance = FSelectInstanceSingleCrit$new(
@@ -209,7 +215,7 @@ fselector$optimize(instance)
 
 We access the results.
 
-```{r mlr3fselect-basic-016}
+```{r mlr3fselect-basic-017}
 as.data.table(instance$archive)[, 1:8]
 ```
 
@@ -222,7 +228,7 @@ We can use the `r ref("AutoFSelector")` class for running nested resampling.
 The `r ref("AutoFSelector")` essentially combines a given `r ref("Learner")` and feature selection method into a `r ref("Learner")` with internal automatic feature selection.
 The inner resampling loop that is used to determine the best feature set is conducted internally each time the `r ref("AutoFSelector")` `r ref("Learner")` object is trained.
 
-```{r mlr3fselect-basic-017}
+```{r mlr3fselect-basic-018}
 resampling_inner = rsmp("cv", folds = 5)
 measure = msr("classif.ce")
 
@@ -237,15 +243,23 @@ at = AutoFSelector$new(
 
 We put the `r ref("AutoFSelector")` into a `r ref("resample()")` call to get the outer resampling loop.
 
-```{r mlr3fselect-basic-018}
+```{r mlr3fselect-basic-019, eval = params$eval_all}
 resampling_outer = rsmp("cv", folds = 3)
 
 rr = resample(task, at, resampling_outer, store_models = TRUE)
 ```
 
+```{r mlr3fselect-basic-020, echo = FALSE, eval = params$eval_all}
+saveRDS(rr, "data/rr.rda")
+```
+
+```{r mlr3fselect-basic-021, echo = FALSE}
+rr = readRDS("data/rr.rda")
+```
+
 The aggregated performance of all outer resampling iterations is the unbiased predictive performance we can expected from the logistic regression model with an optimized feature set found by sequential selection.
 
-```{r mlr3fselect-basic-019}
+```{r mlr3fselect-basic-022}
 rr$aggregate()
 ```
 
@@ -254,19 +268,19 @@ The selected feature sets should not differ too much.
 We might observe unstable models in this example because the small data set and the low number of resampling iterations might introduces too much randomness.
 Usually, we aim for the selection of similar feature sets for all outer training sets.
 
-```{r mlr3fselect-basic-020}
+```{r mlr3fselect-basic-023}
 do.call(rbind, lapply(rr$learners, function(x) x$fselect_result))
 ```
 
 Next, we want to compare the predictive performances estimated on the outer resampling to the inner resampling.
 Significantly lower predictive performances on the outer resampling indicate that the models with the optimized feature sets overfit the data.
 
-```{r mlr3fselect-basic-021}
+```{r mlr3fselect-basic-024}
 rr$score()
 ```
 
 The archive of the `r ref("AutoFSelector")` gives us all evaluated hyperparameter configurations (i.e. feature sets) with the associated predictive performances.
 
-```{r mlr3fselect-basic-022}
+```{r mlr3fselect-basic-025}
 rr$learners[[1]]$archive$data[, 1:8]
 ```
