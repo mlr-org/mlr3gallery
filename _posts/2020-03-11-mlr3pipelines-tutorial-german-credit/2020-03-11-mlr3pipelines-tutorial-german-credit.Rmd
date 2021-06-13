@@ -213,14 +213,23 @@ tuner = tnr("grid_search")
 
 The tuning procedure may take some time:
 
-```{r 2020-03-11-mlr3pipelines-tutorial-german-credit-018, warning=FALSE}
+```{r 2020-03-11-mlr3pipelines-tutorial-german-credit-018, warning=FALSE, eval = params$eval_all}
 tuner$optimize(inst)
 ```
+
+```{r 2020-03-11-mlr3pipelines-tutorial-german-credit-019, echo = FALSE, eval = params$eval_all}
+saveRDS(inst, "data/inst.rda")
+```
+
+```{r 2020-03-11-mlr3pipelines-tutorial-german-credit-020, echo = FALSE}
+inst = readRDS("data/inst.rda")
+```
+
 
 We can plot the performance against the number of features.
 If we do so, we see the possible trade-off between sparsity and predictive performance:
 
-```{r 2020-03-11-mlr3pipelines-tutorial-german-credit-019}
+```{r 2020-03-11-mlr3pipelines-tutorial-german-credit-021}
 arx = as.data.table(inst$archive)
 ggplot(arx, aes(x = mim.filter.nfeat, y = classif.ce)) + geom_line()
 ```
@@ -233,7 +242,7 @@ This is a very specific case that is luckily handled by `r ref("PipeOpLearnerCV"
 `PipeOpLearnerCV` performs cross-validation during the training phase and returns the cross-validated predictions.
 We use `"prob"` predictions because they carry more information than response prediction:
 
-```{r 2020-03-11-mlr3pipelines-tutorial-german-credit-020}
+```{r 2020-03-11-mlr3pipelines-tutorial-german-credit-022}
 stackgraph = po("imputeoor") %>>%
   gunion(list(
     po("learner_cv", lrn("classif.ranger", predict_type = "prob")),
@@ -244,13 +253,13 @@ stackgraph = po("imputeoor") %>>%
 We built a pretty complex `r ref("Graph")` already.
 Therefore, we plot it:
 
-```{r 2020-03-11-mlr3pipelines-tutorial-german-credit-021}
+```{r 2020-03-11-mlr3pipelines-tutorial-german-credit-023}
 stackgraph$plot()
 ```
 
 We now compare the performance of the stacked learner to the performance of the individual `Learner`s:
 
-```{r 2020-03-11-mlr3pipelines-tutorial-german-credit-022, warning=FALSE}
+```{r 2020-03-11-mlr3pipelines-tutorial-german-credit-024, warning=FALSE, eval = params$eval_all}
 bmr = benchmark(data.table(
   task = list(task),
   learner = list(
@@ -259,12 +268,23 @@ bmr = benchmark(data.table(
     GraphLearner$new(po("imputeoor") %>>% lrn("classif.kknn")),
     GraphLearner$new(po("imputeoor") %>>% lrn("classif.log_reg"))),
   resampling = list(cv10_instance)))
+```
+
+```{r 2020-03-11-mlr3pipelines-tutorial-german-credit-025, echo = FALSE, eval = params$eval_all}
+saveRDS(bmr, "data/bmr.rda")
+```
+
+```{r 2020-03-11-mlr3pipelines-tutorial-german-credit-026, echo = FALSE}
+bmr = readRDS("data/bmr.rda")
+```
+
+```{r 2020-03-11-mlr3pipelines-tutorial-german-credit-027, echo = FALSE}
 bmr$aggregate()[, c("learner_id", "classif.ce")]
 ```
 
 If we train the stacked learner and look into the final `Learner` (the logistic regression), we can see how "important" each `Learner` of the stacked learner is:
 
-```{r 2020-03-11-mlr3pipelines-tutorial-german-credit-023}
+```{r 2020-03-11-mlr3pipelines-tutorial-german-credit-028}
 stackgraph$train(task)
 
 summary(stackgraph$pipeops$classif.log_reg$state$model)
@@ -276,7 +296,7 @@ The random forest has a higher contribution.
 
 We now shift the context, using the complete German credit dataset:
 
-```{r 2020-03-11-mlr3pipelines-tutorial-german-credit-024, message=FALSE}
+```{r 2020-03-11-mlr3pipelines-tutorial-german-credit-029, message=FALSE}
 task = tsk("german_credit")
 ```
 
@@ -285,7 +305,7 @@ It may occur that not all possible factor levels have been used by the `Learner`
 This happens because these rare instances are simply not sampled.
 The prediction then may fail because the `Learner` does not know how to handle unseen factor levels:
 
-```{r 2020-03-11-mlr3pipelines-tutorial-german-credit-025, error=TRUE, warning=FALSE}
+```{r 2020-03-11-mlr3pipelines-tutorial-german-credit-030, error=TRUE, warning=FALSE}
 task_unseen = task$clone()$filter(1:30)
 logreg = lrn("classif.log_reg")
 logreg$train(task_unseen)
@@ -300,7 +320,7 @@ To solve this issue we can use `r ref("PipeOpImputeSample")`, but with `affect_c
 
 Another observation is that all-constant features may also be a problem:
 
-```{r 2020-03-11-mlr3pipelines-tutorial-german-credit-026, error=TRUE, warning=FALSE}
+```{r 2020-03-11-mlr3pipelines-tutorial-german-credit-031, error=TRUE, warning=FALSE}
 task_constant = task$clone()$filter(1:2)
 logreg = lrn("classif.log_reg")
 logreg$train(task_constant)
@@ -310,7 +330,7 @@ This can be fixed using `r ref("PipeOpRemoveConstants")`.
 
 Both, handling unseen levels and all-constant features can be handled simultaneously using the following `Graph`:
 
-```{r 2020-03-11-mlr3pipelines-tutorial-german-credit-027}
+```{r 2020-03-11-mlr3pipelines-tutorial-german-credit-032}
 robustify = po("fixfactors") %>>%
   po("removeconstants") %>>%
   po("imputesample", affect_columns = selector_type(c("ordered", "factor")))
@@ -320,7 +340,7 @@ robustify$plot()
 
 This robust learner works even in very pathological conditions:
 
-```{r 2020-03-11-mlr3pipelines-tutorial-german-credit-028, warning=FALSE}
+```{r 2020-03-11-mlr3pipelines-tutorial-german-credit-033, warning=FALSE}
 roblogreg = GraphLearner$new(robustify %>>% logreg)
 
 roblogreg$train(task_constant)
