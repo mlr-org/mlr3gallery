@@ -4,6 +4,7 @@ posts = c(
   "2021-03-11-practical-tuning-series-build-an-automated-machine-learning-system"
   "2021-02-03-tuning-a-complex-graph"
   "2020-01-30-house-prices-in-king-county"
+  "2020-03-11-mlr3pipelines-tutorial-german-credit"
 )
 
 files = list.files(file.path("./_posts/", posts), pattern = "^.*\\.Rmd", full.names = TRUE)
