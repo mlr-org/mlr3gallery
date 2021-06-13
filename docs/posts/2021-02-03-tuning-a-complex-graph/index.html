@@ -123,12 +123,12 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
   <!--radix_placeholder_rmarkdown_metadata-->
 
 <script type="text/json" id="radix-rmarkdown-metadata">
-{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["title","categories","author","date","description","output","bibliography","citation_url","canonical_url"]}},"value":[{"type":"character","attributes":{},"value":["Tuning a Complex Graph"]},{"type":"character","attributes":{},"value":["mlr3tuning","tuning","optimization","mlr3pipelines","classification","bst data set"]},{"type":"list","attributes":{},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name"]}},"value":[{"type":"character","attributes":{},"value":["Lennart Schneider"]}]}]},{"type":"character","attributes":{},"value":["02-03-2021"]},{"type":"character","attributes":{},"value":["We show how to tune a complex graph for a single task."]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["distill::distill_article"]}},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["self_contained","css"]}},"value":[{"type":"logical","attributes":{},"value":[false]},{"type":"character","attributes":{},"value":["../../custom.css"]}]}]},{"type":"character","attributes":{},"value":["biblio.bib"]},{"type":"character","attributes":{},"value":["https://mlr3gallery.mlr-org.com/posts/2021-02-03-tuning-a-complex-graph/"]},{"type":"character","attributes":{},"value":["https://mlr3gallery.mlr-org.com/posts/2021-02-03-tuning-a-complex-graph/"]}]}
+{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["title","categories","author","date","description","output","bibliography","params","citation_url","canonical_url"]}},"value":[{"type":"character","attributes":{},"value":["Tuning a Complex Graph"]},{"type":"character","attributes":{},"value":["mlr3tuning","tuning","optimization","mlr3pipelines","classification","bst data set"]},{"type":"list","attributes":{},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name"]}},"value":[{"type":"character","attributes":{},"value":["Lennart Schneider"]}]}]},{"type":"character","attributes":{},"value":["02-03-2021"]},{"type":"character","attributes":{},"value":["We show how to tune a complex graph for a single task."]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["distill::distill_article"]}},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["self_contained","css"]}},"value":[{"type":"logical","attributes":{},"value":[false]},{"type":"character","attributes":{},"value":["../../custom.css"]}]}]},{"type":"character","attributes":{},"value":["bibliography.bib"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["eval_all"]}},"value":[{"type":"logical","attributes":{},"value":[false]}]},{"type":"character","attributes":{},"value":["https://mlr3gallery.mlr-org.com/posts/2021-02-03-tuning-a-complex-graph/"]},{"type":"character","attributes":{},"value":["https://mlr3gallery.mlr-org.com/posts/2021-02-03-tuning-a-complex-graph/"]}]}
 </script>
 <!--/radix_placeholder_rmarkdown_metadata-->
   
   <script type="text/json" id="radix-resource-manifest">
-  {"type":"character","attributes":{},"value":["biblio.bib","tuning-a-complex-graph_files/figure-html5/tuning-a-complex-graph-007, graph1-1.png","tuning-a-complex-graph_files/figure-html5/tuning-a-complex-graph-023, graph2-1.png"]}
+  {"type":"character","attributes":{},"value":["bibliography.bib","data/tune1.rda","tuning-a-complex-graph_files/figure-html5/tuning-a-complex-graph-008, graph1-1.png","tuning-a-complex-graph_files/figure-html5/tuning-a-complex-graph-028, graph2-1.png"]}
   </script>
   <!--radix_placeholder_navigation_in_header-->
 <meta name="distill:offset" content="../.."/>
@@ -2052,6 +2052,8 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 <!--/radix_placeholder_distill-->
+  <script src="../../site_libs/kePrint-0.0.1/kePrint.js"></script>
+  <link href="../../site_libs/lightable-0.0.1/lightable.css" rel="stylesheet" />
   <script src="../../site_libs/jquery-1.11.3/jquery.min.js"></script>
   <script src="../../site_libs/popper-2.6.0/popper.min.js"></script>
   <link href="../../site_libs/tippy-6.2.7/tippy.css" rel="stylesheet" />
@@ -2215,7 +2217,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <pre class="sourceCode r"><code class="sourceCode r"><span class='va'>graph1</span><span class='op'>$</span><span class='fu'>plot</span><span class='op'>(</span><span class='op'>)</span>
 </code></pre>
 </div>
-<p><img src="tuning-a-complex-graph_files/figure-html5/tuning-a-complex-graph-007,%20graph1-1.png" width="624" /></p>
+<p><img src="tuning-a-complex-graph_files/figure-html5/tuning-a-complex-graph-008,%20graph1-1.png" width="624" /></p>
 </div>
 <p>We can inspect the parameters of the <a href="https://paradox.mlr-org.com/reference/ParamSet.html"><code>ParamSet</code></a> of the graph to see which parameters can be set:</p>
 <div class="layout-chunk" data-layout="l-body">
@@ -2344,67 +2346,683 @@ document.addEventListener('DOMContentLoaded', function() {
 <pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://paradox.mlr-org.com/reference/generate_design_grid.html'>generate_design_grid</a></span><span class='op'>(</span><span class='va'>tune_ps1</span>, resolution <span class='op'>=</span> <span class='fl'>4</span><span class='op'>)</span>
 </code></pre>
 </div>
-<pre><code>&lt;Design&gt; with 28 rows:
-    branch_learner.selection branch_preproc_lda.selection pca.rank. ica.n.comp classif.lda.method classif.ranger.mtry
- 1:              pca_ica_lda                          pca         1         NA               &lt;NA&gt;                  NA
- 2:              pca_ica_lda                          pca        10         NA               &lt;NA&gt;                  NA
- 3:              pca_ica_lda                          pca        20         NA               &lt;NA&gt;                  NA
- 4:              pca_ica_lda                          pca        30         NA               &lt;NA&gt;                  NA
- 5:              pca_ica_lda                          ica        NA          1             moment                  NA
- 6:              pca_ica_lda                          ica        NA          1                mve                  NA
- 7:              pca_ica_lda                          ica        NA         10             moment                  NA
- 8:              pca_ica_lda                          ica        NA         10                mve                  NA
- 9:              pca_ica_lda                          ica        NA         20             moment                  NA
-10:              pca_ica_lda                          ica        NA         20                mve                  NA
-11:              pca_ica_lda                          ica        NA         30             moment                  NA
-12:              pca_ica_lda                          ica        NA         30                mve                  NA
-13:                   ranger                         &lt;NA&gt;        NA         NA               &lt;NA&gt;                 200
-14:                   ranger                         &lt;NA&gt;        NA         NA               &lt;NA&gt;                 200
-15:                   ranger                         &lt;NA&gt;        NA         NA               &lt;NA&gt;                 200
-16:                   ranger                         &lt;NA&gt;        NA         NA               &lt;NA&gt;                 200
-17:                   ranger                         &lt;NA&gt;        NA         NA               &lt;NA&gt;                 466
-18:                   ranger                         &lt;NA&gt;        NA         NA               &lt;NA&gt;                 466
-19:                   ranger                         &lt;NA&gt;        NA         NA               &lt;NA&gt;                 466
-20:                   ranger                         &lt;NA&gt;        NA         NA               &lt;NA&gt;                 466
-21:                   ranger                         &lt;NA&gt;        NA         NA               &lt;NA&gt;                 733
-22:                   ranger                         &lt;NA&gt;        NA         NA               &lt;NA&gt;                 733
-23:                   ranger                         &lt;NA&gt;        NA         NA               &lt;NA&gt;                 733
-24:                   ranger                         &lt;NA&gt;        NA         NA               &lt;NA&gt;                 733
-25:                   ranger                         &lt;NA&gt;        NA         NA               &lt;NA&gt;                1000
-26:                   ranger                         &lt;NA&gt;        NA         NA               &lt;NA&gt;                1000
-27:                   ranger                         &lt;NA&gt;        NA         NA               &lt;NA&gt;                1000
-28:                   ranger                         &lt;NA&gt;        NA         NA               &lt;NA&gt;                1000
-    branch_learner.selection branch_preproc_lda.selection pca.rank. ica.n.comp classif.lda.method classif.ranger.mtry
-    classif.ranger.num.trees
- 1:                       NA
- 2:                       NA
- 3:                       NA
- 4:                       NA
- 5:                       NA
- 6:                       NA
- 7:                       NA
- 8:                       NA
- 9:                       NA
-10:                       NA
-11:                       NA
-12:                       NA
-13:                      500
-14:                     1000
-15:                     1500
-16:                     2000
-17:                      500
-18:                     1000
-19:                     1500
-20:                     2000
-21:                      500
-22:                     1000
-23:                     1500
-24:                     2000
-25:                      500
-26:                     1000
-27:                     1500
-28:                     2000
-    classif.ranger.num.trees</code></pre>
+</div>
+<div class="layout-chunk" data-layout="l-body">
+<div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:400px; ">
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
+branch_learner.selection
+</th>
+<th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
+branch_preproc_lda.selection
+</th>
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+pca.rank.
+</th>
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+ica.n.comp
+</th>
+<th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
+classif.lda.method
+</th>
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+classif.ranger.mtry
+</th>
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+classif.ranger.num.trees
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+pca_ica_lda
+</td>
+<td style="text-align:left;">
+pca
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+pca_ica_lda
+</td>
+<td style="text-align:left;">
+pca
+</td>
+<td style="text-align:right;">
+10
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+pca_ica_lda
+</td>
+<td style="text-align:left;">
+pca
+</td>
+<td style="text-align:right;">
+20
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+pca_ica_lda
+</td>
+<td style="text-align:left;">
+pca
+</td>
+<td style="text-align:right;">
+30
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+pca_ica_lda
+</td>
+<td style="text-align:left;">
+ica
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:left;">
+moment
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+pca_ica_lda
+</td>
+<td style="text-align:left;">
+ica
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:left;">
+mve
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+pca_ica_lda
+</td>
+<td style="text-align:left;">
+ica
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+10
+</td>
+<td style="text-align:left;">
+moment
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+pca_ica_lda
+</td>
+<td style="text-align:left;">
+ica
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+10
+</td>
+<td style="text-align:left;">
+mve
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+pca_ica_lda
+</td>
+<td style="text-align:left;">
+ica
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+20
+</td>
+<td style="text-align:left;">
+moment
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+pca_ica_lda
+</td>
+<td style="text-align:left;">
+ica
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+20
+</td>
+<td style="text-align:left;">
+mve
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+pca_ica_lda
+</td>
+<td style="text-align:left;">
+ica
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+30
+</td>
+<td style="text-align:left;">
+moment
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+pca_ica_lda
+</td>
+<td style="text-align:left;">
+ica
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+30
+</td>
+<td style="text-align:left;">
+mve
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ranger
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:right;">
+200
+</td>
+<td style="text-align:right;">
+500
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ranger
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:right;">
+200
+</td>
+<td style="text-align:right;">
+1000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ranger
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:right;">
+200
+</td>
+<td style="text-align:right;">
+1500
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ranger
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:right;">
+200
+</td>
+<td style="text-align:right;">
+2000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ranger
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:right;">
+466
+</td>
+<td style="text-align:right;">
+500
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ranger
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:right;">
+466
+</td>
+<td style="text-align:right;">
+1000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ranger
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:right;">
+466
+</td>
+<td style="text-align:right;">
+1500
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ranger
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:right;">
+466
+</td>
+<td style="text-align:right;">
+2000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ranger
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:right;">
+733
+</td>
+<td style="text-align:right;">
+500
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ranger
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:right;">
+733
+</td>
+<td style="text-align:right;">
+1000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ranger
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:right;">
+733
+</td>
+<td style="text-align:right;">
+1500
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ranger
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:right;">
+733
+</td>
+<td style="text-align:right;">
+2000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ranger
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:right;">
+1000
+</td>
+<td style="text-align:right;">
+500
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ranger
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:right;">
+1000
+</td>
+<td style="text-align:right;">
+1000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ranger
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:right;">
+1000
+</td>
+<td style="text-align:right;">
+1500
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ranger
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:right;">
+1000
+</td>
+<td style="text-align:right;">
+2000
+</td>
+</tr>
+</tbody>
+</table>
+</div>
 </div>
 <p>Before starting the tuning we set some logging thresholds (i.e., only print warnings on the console):</p>
 <div class="layout-chunk" data-layout="l-body">
@@ -2416,14 +3034,16 @@ document.addEventListener('DOMContentLoaded', function() {
 </div>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>tuner_gs</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3tuning.mlr-org.com/reference/tnr.html'>tnr</a></span><span class='op'>(</span><span class='st'>"grid_search"</span>, resolution <span class='op'>=</span> <span class='fl'>4</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>tuner_gs</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3tuning.mlr-org.com/reference/tnr.html'>tnr</a></span><span class='op'>(</span><span class='st'>"grid_search"</span>, resolution <span class='op'>=</span> <span class='fl'>4</span>, batch_size <span class='op'>=</span> <span class='fl'>10</span><span class='op'>)</span>
 <span class='va'>tuner_gs</span><span class='op'>$</span><span class='fu'>optimize</span><span class='op'>(</span><span class='va'>tune1</span><span class='op'>)</span>
 </code></pre>
 </div>
-<pre><code>   branch_learner.selection branch_preproc_lda.selection pca.rank. ica.n.comp classif.lda.method classif.ranger.mtry
-1:                   ranger                         &lt;NA&gt;        NA         NA               &lt;NA&gt;                 466
-   classif.ranger.num.trees learner_param_vals  x_domain classif.acc
-1:                     1500          &lt;list[8]&gt; &lt;list[3]&gt;           1</code></pre>
+</div>
+<div class="layout-chunk" data-layout="l-body">
+
+</div>
+<div class="layout-chunk" data-layout="l-body">
+
 </div>
 <p>Now, we can inspect the results ordered by the <code>classification accuracy</code>:</p>
 <div class="layout-chunk" data-layout="l-body">
@@ -2432,66 +3052,1118 @@ document.addEventListener('DOMContentLoaded', function() {
 <span class='va'>tune1_results</span><span class='op'>[</span><span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/setorder.html'>order</a></span><span class='op'>(</span><span class='va'>classif.acc</span><span class='op'>)</span>, <span class='op'>]</span>
 </code></pre>
 </div>
-<pre><code>    branch_learner.selection branch_preproc_lda.selection pca.rank. ica.n.comp classif.lda.method classif.ranger.mtry
- 1:              pca_ica_lda                          ica        NA          1             moment                  NA
- 2:              pca_ica_lda                          pca         1         NA               &lt;NA&gt;                  NA
- 3:              pca_ica_lda                          ica        NA          1                mve                  NA
- 4:              pca_ica_lda                          ica        NA         10                mve                  NA
- 5:              pca_ica_lda                          ica        NA         10             moment                  NA
- 6:              pca_ica_lda                          pca        10         NA               &lt;NA&gt;                  NA
- 7:              pca_ica_lda                          ica        NA         20                mve                  NA
- 8:              pca_ica_lda                          ica        NA         20             moment                  NA
- 9:              pca_ica_lda                          pca        20         NA               &lt;NA&gt;                  NA
-10:              pca_ica_lda                          pca        30         NA               &lt;NA&gt;                  NA
-11:              pca_ica_lda                          ica        NA         30                mve                  NA
-12:              pca_ica_lda                          ica        NA         30             moment                  NA
-13:                   ranger                         &lt;NA&gt;        NA         NA               &lt;NA&gt;                 466
-14:                   ranger                         &lt;NA&gt;        NA         NA               &lt;NA&gt;                1000
-15:                   ranger                         &lt;NA&gt;        NA         NA               &lt;NA&gt;                 200
-16:                   ranger                         &lt;NA&gt;        NA         NA               &lt;NA&gt;                 733
-17:                   ranger                         &lt;NA&gt;        NA         NA               &lt;NA&gt;                1000
-18:                   ranger                         &lt;NA&gt;        NA         NA               &lt;NA&gt;                 200
-19:                   ranger                         &lt;NA&gt;        NA         NA               &lt;NA&gt;                 466
-20:                   ranger                         &lt;NA&gt;        NA         NA               &lt;NA&gt;                 200
-21:                   ranger                         &lt;NA&gt;        NA         NA               &lt;NA&gt;                 733
-22:                   ranger                         &lt;NA&gt;        NA         NA               &lt;NA&gt;                1000
-23:                   ranger                         &lt;NA&gt;        NA         NA               &lt;NA&gt;                 733
-24:                   ranger                         &lt;NA&gt;        NA         NA               &lt;NA&gt;                 466
-25:                   ranger                         &lt;NA&gt;        NA         NA               &lt;NA&gt;                 200
-26:                   ranger                         &lt;NA&gt;        NA         NA               &lt;NA&gt;                 466
-27:                   ranger                         &lt;NA&gt;        NA         NA               &lt;NA&gt;                 733
-28:                   ranger                         &lt;NA&gt;        NA         NA               &lt;NA&gt;                1000
-    branch_learner.selection branch_preproc_lda.selection pca.rank. ica.n.comp classif.lda.method classif.ranger.mtry
-    classif.ranger.num.trees classif.acc                                uhash  x_domain           timestamp batch_nr
- 1:                       NA   0.2380952 cd335e1c-e06d-4685-8985-141a588a2d68 &lt;list[4]&gt; 2021-06-13 05:15:28        3
- 2:                       NA   0.2380952 60cf0dd9-0062-4999-8f10-80ece143ec7a &lt;list[3]&gt; 2021-06-13 05:27:59       24
- 3:                       NA   0.2698413 5a7d88fc-32c4-4863-a31e-d39de6ece07e &lt;list[4]&gt; 2021-06-13 05:21:50       15
- 4:                       NA   0.8571429 1e5d1036-74db-4518-8ad1-96cbd1315487 &lt;list[4]&gt; 2021-06-13 05:25:03       20
- 5:                       NA   0.8730159 6dad881e-1431-4d07-be11-2518e7205e4a &lt;list[4]&gt; 2021-06-13 05:12:48        2
- 6:                       NA   0.8730159 9eb8ffe9-6376-412f-9da0-69366215cf48 &lt;list[3]&gt; 2021-06-13 05:16:21       10
- 7:                       NA   0.8888889 646121e6-7547-41ba-85b2-72b60607215b &lt;list[4]&gt; 2021-06-13 05:27:42       21
- 8:                       NA   0.9682540 66e05dee-a1f2-49c6-ad52-ec12230bb7e0 &lt;list[4]&gt; 2021-06-13 05:10:13        1
- 9:                       NA   0.9682540 3c99daba-7612-45db-8908-31f96431b4ad &lt;list[3]&gt; 2021-06-13 05:16:25       11
-10:                       NA   0.9841270 354ce994-258e-4afc-8b44-fde0f021455d &lt;list[3]&gt; 2021-06-13 05:16:00        7
-11:                       NA   0.9841270 c77a1df9-2bae-4bbe-bec8-fa05a8c14085 &lt;list[4]&gt; 2021-06-13 05:19:02       12
-12:                       NA   0.9841270 237d6bf0-3304-4f52-bf5e-4578d3567812 &lt;list[4]&gt; 2021-06-13 05:30:49       26
-13:                     1500   1.0000000 8cffb0e1-bbb6-44a1-8a92-ef732a08ee67 &lt;list[3]&gt; 2021-06-13 05:15:37        4
-14:                     1500   1.0000000 d0dcb477-743a-4ea8-af89-cb68c70a76bc &lt;list[3]&gt; 2021-06-13 05:15:51        5
-15:                     1000   1.0000000 7f5cca1e-f2b7-4264-befd-a0b86156b102 &lt;list[3]&gt; 2021-06-13 05:15:56        6
-16:                      500   1.0000000 4d546f8c-e56a-4e33-af4a-fcf57fc7086f &lt;list[3]&gt; 2021-06-13 05:16:07        8
-17:                     1000   1.0000000 95945b8d-e9ed-401a-b152-462508dfacd2 &lt;list[3]&gt; 2021-06-13 05:16:17        9
-18:                      500   1.0000000 b1d55255-8474-4321-b487-22b6194a0cd4 &lt;list[3]&gt; 2021-06-13 05:19:07       13
-19:                      500   1.0000000 917dbec6-5922-4024-8cba-8ee15184a20d &lt;list[3]&gt; 2021-06-13 05:19:12       14
-20:                     1500   1.0000000 387f8a6c-6683-4f57-8fac-7d32a09b5a92 &lt;list[3]&gt; 2021-06-13 05:21:57       16
-21:                     2000   1.0000000 9624d9c6-9551-4f92-8978-3266d550e1e8 &lt;list[3]&gt; 2021-06-13 05:22:12       17
-22:                      500   1.0000000 a892e09b-1208-43dd-a891-96147127de83 &lt;list[3]&gt; 2021-06-13 05:22:19       18
-23:                     1000   1.0000000 cc27a6f1-ab2f-42a0-bb15-5c249e7d1996 &lt;list[3]&gt; 2021-06-13 05:22:28       19
-24:                     1000   1.0000000 dcfde910-1990-4d65-a5ae-eaa71c34a397 &lt;list[3]&gt; 2021-06-13 05:27:49       22
-25:                     2000   1.0000000 8a400623-6c63-4974-8ad7-c9a1d6211ae4 &lt;list[3]&gt; 2021-06-13 05:27:56       23
-26:                     2000   1.0000000 2f0ec9af-d681-4f9b-8d34-1cce53fd952a &lt;list[3]&gt; 2021-06-13 05:28:10       25
-27:                     1500   1.0000000 3c65b3ab-ea04-4480-a60d-c4a5b4f22ddc &lt;list[3]&gt; 2021-06-13 05:31:00       27
-28:                     2000   1.0000000 31faf04b-a9cb-44b1-b7fa-576632ee9fa2 &lt;list[3]&gt; 2021-06-13 05:31:16       28
-    classif.ranger.num.trees classif.acc                                uhash  x_domain           timestamp batch_nr</code></pre>
+</div>
+<div class="layout-chunk" data-layout="l-page">
+<div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:400px; overflow-x: scroll; width:100%; ">
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
+branch_learner.selection
+</th>
+<th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
+branch_preproc_lda.selection
+</th>
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+pca.rank.
+</th>
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+ica.n.comp
+</th>
+<th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
+classif.lda.method
+</th>
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+classif.ranger.mtry
+</th>
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+classif.ranger.num.trees
+</th>
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+classif.acc
+</th>
+<th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
+uhash
+</th>
+<th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
+x_domain
+</th>
+<th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
+timestamp
+</th>
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+batch_nr
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+pca_ica_lda
+</td>
+<td style="text-align:left;">
+pca
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+0.2380952
+</td>
+<td style="text-align:left;">
+91642aac-41db-4aa6-a937-3749904eae7f
+</td>
+<td style="text-align:left;">
+pca_ica_lda, pca , 1
+</td>
+<td style="text-align:left;">
+2021-06-12 13:55:20
+</td>
+<td style="text-align:right;">
+3
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+pca_ica_lda
+</td>
+<td style="text-align:left;">
+ica
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:left;">
+moment
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+0.2380952
+</td>
+<td style="text-align:left;">
+077d1cd9-9e69-4512-9d06-8c23e854d59f
+</td>
+<td style="text-align:left;">
+pca_ica_lda, ica , 1 , moment
+</td>
+<td style="text-align:left;">
+2021-06-12 13:55:20
+</td>
+<td style="text-align:right;">
+3
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+pca_ica_lda
+</td>
+<td style="text-align:left;">
+ica
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:left;">
+mve
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+0.2698413
+</td>
+<td style="text-align:left;">
+b561ed8b-b91c-4549-b412-16a9bda12b74
+</td>
+<td style="text-align:left;">
+pca_ica_lda, ica , 1 , mve
+</td>
+<td style="text-align:left;">
+2021-06-12 13:55:20
+</td>
+<td style="text-align:right;">
+3
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+pca_ica_lda
+</td>
+<td style="text-align:left;">
+pca
+</td>
+<td style="text-align:right;">
+10
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+0.8730159
+</td>
+<td style="text-align:left;">
+86b6fc9d-1a67-496b-bd90-8cdcabc1c1fd
+</td>
+<td style="text-align:left;">
+pca_ica_lda, pca , 10
+</td>
+<td style="text-align:left;">
+2021-06-12 13:52:35
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+pca_ica_lda
+</td>
+<td style="text-align:left;">
+ica
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+10
+</td>
+<td style="text-align:left;">
+moment
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+0.8730159
+</td>
+<td style="text-align:left;">
+dc5de8ad-aecc-4383-8e77-22b77e147dba
+</td>
+<td style="text-align:left;">
+pca_ica_lda, ica , 10 , moment
+</td>
+<td style="text-align:left;">
+2021-06-12 13:53:55
+</td>
+<td style="text-align:right;">
+2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+pca_ica_lda
+</td>
+<td style="text-align:left;">
+ica
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+10
+</td>
+<td style="text-align:left;">
+mve
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+0.8730159
+</td>
+<td style="text-align:left;">
+7a4aa629-d371-4510-9109-344d3625a237
+</td>
+<td style="text-align:left;">
+pca_ica_lda, ica , 10 , mve
+</td>
+<td style="text-align:left;">
+2021-06-12 13:53:55
+</td>
+<td style="text-align:right;">
+2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+pca_ica_lda
+</td>
+<td style="text-align:left;">
+ica
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+20
+</td>
+<td style="text-align:left;">
+mve
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+0.9365079
+</td>
+<td style="text-align:left;">
+c1669de9-d9d8-4305-8c2f-a978ce0d6684
+</td>
+<td style="text-align:left;">
+pca_ica_lda, ica , 20 , mve
+</td>
+<td style="text-align:left;">
+2021-06-12 13:55:20
+</td>
+<td style="text-align:right;">
+3
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+pca_ica_lda
+</td>
+<td style="text-align:left;">
+ica
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+30
+</td>
+<td style="text-align:left;">
+mve
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+0.9365079
+</td>
+<td style="text-align:left;">
+79c2e9db-4588-41f5-9e97-87faefd56896
+</td>
+<td style="text-align:left;">
+pca_ica_lda, ica , 30 , mve
+</td>
+<td style="text-align:left;">
+2021-06-12 13:55:20
+</td>
+<td style="text-align:right;">
+3
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+pca_ica_lda
+</td>
+<td style="text-align:left;">
+ica
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+20
+</td>
+<td style="text-align:left;">
+moment
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+0.9682540
+</td>
+<td style="text-align:left;">
+3f982a35-63f4-4957-aebb-558699f2d28b
+</td>
+<td style="text-align:left;">
+pca_ica_lda, ica , 20 , moment
+</td>
+<td style="text-align:left;">
+2021-06-12 13:52:35
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+pca_ica_lda
+</td>
+<td style="text-align:left;">
+pca
+</td>
+<td style="text-align:right;">
+20
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+0.9682540
+</td>
+<td style="text-align:left;">
+84123ac6-2251-4ea5-bb6f-5b45fdd3f0bb
+</td>
+<td style="text-align:left;">
+pca_ica_lda, pca , 20
+</td>
+<td style="text-align:left;">
+2021-06-12 13:53:55
+</td>
+<td style="text-align:right;">
+2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+pca_ica_lda
+</td>
+<td style="text-align:left;">
+pca
+</td>
+<td style="text-align:right;">
+30
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+0.9841270
+</td>
+<td style="text-align:left;">
+a434901f-20ee-466a-8159-ad4202171289
+</td>
+<td style="text-align:left;">
+pca_ica_lda, pca , 30
+</td>
+<td style="text-align:left;">
+2021-06-12 13:52:35
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+pca_ica_lda
+</td>
+<td style="text-align:left;">
+ica
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+30
+</td>
+<td style="text-align:left;">
+moment
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+0.9841270
+</td>
+<td style="text-align:left;">
+0bad930f-bb8d-440b-8ae4-cbd12eba53c2
+</td>
+<td style="text-align:left;">
+pca_ica_lda, ica , 30 , moment
+</td>
+<td style="text-align:left;">
+2021-06-12 13:53:55
+</td>
+<td style="text-align:right;">
+2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ranger
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:right;">
+1000
+</td>
+<td style="text-align:right;">
+500
+</td>
+<td style="text-align:right;">
+0.9841270
+</td>
+<td style="text-align:left;">
+2e903d89-46f5-4da5-943a-62694bf542bc
+</td>
+<td style="text-align:left;">
+ranger, 1000 , 500
+</td>
+<td style="text-align:left;">
+2021-06-12 13:55:20
+</td>
+<td style="text-align:right;">
+3
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ranger
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:right;">
+200
+</td>
+<td style="text-align:right;">
+500
+</td>
+<td style="text-align:right;">
+1.0000000
+</td>
+<td style="text-align:left;">
+d6c90463-3720-47c6-bdf3-e13a1db04621
+</td>
+<td style="text-align:left;">
+ranger, 200 , 500
+</td>
+<td style="text-align:left;">
+2021-06-12 13:52:35
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ranger
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:right;">
+200
+</td>
+<td style="text-align:right;">
+1500
+</td>
+<td style="text-align:right;">
+1.0000000
+</td>
+<td style="text-align:left;">
+9d366f57-7f35-433b-9b57-2cd4af6f7640
+</td>
+<td style="text-align:left;">
+ranger, 200 , 1500
+</td>
+<td style="text-align:left;">
+2021-06-12 13:52:35
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ranger
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:right;">
+466
+</td>
+<td style="text-align:right;">
+1000
+</td>
+<td style="text-align:right;">
+1.0000000
+</td>
+<td style="text-align:left;">
+35cf6d9b-b327-4eec-a56c-ebeb3e0a1cb4
+</td>
+<td style="text-align:left;">
+ranger, 466 , 1000
+</td>
+<td style="text-align:left;">
+2021-06-12 13:52:35
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ranger
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:right;">
+466
+</td>
+<td style="text-align:right;">
+1500
+</td>
+<td style="text-align:right;">
+1.0000000
+</td>
+<td style="text-align:left;">
+88081c06-3b44-46bb-8af0-f21b2abf0c51
+</td>
+<td style="text-align:left;">
+ranger, 466 , 1500
+</td>
+<td style="text-align:left;">
+2021-06-12 13:52:35
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ranger
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:right;">
+466
+</td>
+<td style="text-align:right;">
+2000
+</td>
+<td style="text-align:right;">
+1.0000000
+</td>
+<td style="text-align:left;">
+14d8f251-8e3f-4ad8-b58b-5c09c44c99e0
+</td>
+<td style="text-align:left;">
+ranger, 466 , 2000
+</td>
+<td style="text-align:left;">
+2021-06-12 13:52:35
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ranger
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:right;">
+733
+</td>
+<td style="text-align:right;">
+1000
+</td>
+<td style="text-align:right;">
+1.0000000
+</td>
+<td style="text-align:left;">
+f6eb7873-4320-4d55-a816-83448b6f9935
+</td>
+<td style="text-align:left;">
+ranger, 733 , 1000
+</td>
+<td style="text-align:left;">
+2021-06-12 13:52:35
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ranger
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:right;">
+1000
+</td>
+<td style="text-align:right;">
+2000
+</td>
+<td style="text-align:right;">
+1.0000000
+</td>
+<td style="text-align:left;">
+913a1e1c-883d-4c31-9c69-081181885c3b
+</td>
+<td style="text-align:left;">
+ranger, 1000 , 2000
+</td>
+<td style="text-align:left;">
+2021-06-12 13:52:35
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ranger
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:right;">
+200
+</td>
+<td style="text-align:right;">
+2000
+</td>
+<td style="text-align:right;">
+1.0000000
+</td>
+<td style="text-align:left;">
+b5b740f1-e483-4f0b-8be5-dda07561a7bf
+</td>
+<td style="text-align:left;">
+ranger, 200 , 2000
+</td>
+<td style="text-align:left;">
+2021-06-12 13:53:55
+</td>
+<td style="text-align:right;">
+2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ranger
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:right;">
+466
+</td>
+<td style="text-align:right;">
+500
+</td>
+<td style="text-align:right;">
+1.0000000
+</td>
+<td style="text-align:left;">
+eefbd0d1-9f4b-4bb8-9570-50d75b6c0f4d
+</td>
+<td style="text-align:left;">
+ranger, 466 , 500
+</td>
+<td style="text-align:left;">
+2021-06-12 13:53:55
+</td>
+<td style="text-align:right;">
+2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ranger
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:right;">
+733
+</td>
+<td style="text-align:right;">
+500
+</td>
+<td style="text-align:right;">
+1.0000000
+</td>
+<td style="text-align:left;">
+ee800410-f5e0-44d5-8f80-31056ebe6270
+</td>
+<td style="text-align:left;">
+ranger, 733 , 500
+</td>
+<td style="text-align:left;">
+2021-06-12 13:53:55
+</td>
+<td style="text-align:right;">
+2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ranger
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:right;">
+733
+</td>
+<td style="text-align:right;">
+2000
+</td>
+<td style="text-align:right;">
+1.0000000
+</td>
+<td style="text-align:left;">
+794f3c10-d675-4042-b590-59a3c7e47b5b
+</td>
+<td style="text-align:left;">
+ranger, 733 , 2000
+</td>
+<td style="text-align:left;">
+2021-06-12 13:53:55
+</td>
+<td style="text-align:right;">
+2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ranger
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:right;">
+1000
+</td>
+<td style="text-align:right;">
+1500
+</td>
+<td style="text-align:right;">
+1.0000000
+</td>
+<td style="text-align:left;">
+862a0afa-862b-475b-94ad-f7f89fe23e57
+</td>
+<td style="text-align:left;">
+ranger, 1000 , 1500
+</td>
+<td style="text-align:left;">
+2021-06-12 13:53:55
+</td>
+<td style="text-align:right;">
+2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ranger
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:right;">
+200
+</td>
+<td style="text-align:right;">
+1000
+</td>
+<td style="text-align:right;">
+1.0000000
+</td>
+<td style="text-align:left;">
+f0dbf08b-7ed4-4d41-bf62-e2f010fc2f3e
+</td>
+<td style="text-align:left;">
+ranger, 200 , 1000
+</td>
+<td style="text-align:left;">
+2021-06-12 13:55:20
+</td>
+<td style="text-align:right;">
+3
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ranger
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:right;">
+733
+</td>
+<td style="text-align:right;">
+1500
+</td>
+<td style="text-align:right;">
+1.0000000
+</td>
+<td style="text-align:left;">
+f3f68af3-2aa6-42c4-bb57-988e303d8f34
+</td>
+<td style="text-align:left;">
+ranger, 733 , 1500
+</td>
+<td style="text-align:left;">
+2021-06-12 13:55:20
+</td>
+<td style="text-align:right;">
+3
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ranger
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:right;">
+1000
+</td>
+<td style="text-align:right;">
+1000
+</td>
+<td style="text-align:right;">
+1.0000000
+</td>
+<td style="text-align:left;">
+25069eb5-af8b-4165-99c2-164254c5c56e
+</td>
+<td style="text-align:left;">
+ranger, 1000 , 1000
+</td>
+<td style="text-align:left;">
+2021-06-12 13:55:20
+</td>
+<td style="text-align:right;">
+3
+</td>
+</tr>
+</tbody>
+</table>
+</div>
 </div>
 <p>We achieve very good accuracy using <code>ranger</code>, more or less regardless how <code>mtry</code> and <code>num.trees</code> are set. However, the <code>LDA</code> also shows very good accuracy when combined with <code>PCA</code> or <code>ICA</code> retaining 30 components.</p>
 <p>For now, we decide to use <code>ranger</code> with <code>mtry</code> set to 200 and <code>num.trees</code> set to 1000.</p>
@@ -2531,7 +4203,7 @@ NULL</code></pre>
 <pre class="sourceCode r"><code class="sourceCode r"><span class='va'>graph2</span><span class='op'>$</span><span class='fu'>plot</span><span class='op'>(</span><span class='op'>)</span>
 </code></pre>
 </div>
-<p><img src="tuning-a-complex-graph_files/figure-html5/tuning-a-complex-graph-023,%20graph2-1.png" width="624" /></p>
+<p><img src="tuning-a-complex-graph_files/figure-html5/tuning-a-complex-graph-028,%20graph2-1.png" width="624" /></p>
 </div>
 <p>At first, this may look like a linear graph. However, as the <code>content</code> parameter of <code>PipeOpProxy</code> can be tuned and set to contain any other <code>PipeOp</code> or <code>Graph</code>, this will allow for a similar non-linear graph as when doing branching.</p>
 <div class="layout-chunk" data-layout="l-body">
@@ -2633,7 +4305,7 @@ NULL</code></pre>
 </code></pre>
 </div>
 </div>
-<div class="sourceCode" id="cb10"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
 <div id="refs" class="references" role="doc-bibliography">
 <div id="ref-morais2018">
 <p>Morais, Camilo LM, and Kássio MG Lima. 2018. “Principal Component Analysis with Linear and Quadratic Discriminant Analysis for Identification of Cancer Samples Based on Mass Spectrometry.” <em>Journal of the Brazilian Chemical Society</em> 29 (3): 472–81. <a href="https://doi.org/10.21577/0103-5053.20170159">https://doi.org/10.21577/0103-5053.20170159</a>.</p>
