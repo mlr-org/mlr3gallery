@@ -51,21 +51,13 @@ learner = lrn("classif.kknn")
 print(learner$param_set$params$k)
 ```
 
-We choose the `iris` dataset to demonstrate the tuning.
-
-```{r integer-hyperparameters-in-tuners-for-real-valued-search-spaces-004}
-task = tsk("iris")
-print(task)
-```
-
 # Tuning
 
 We choose generalized simulated annealing as tuning strategy.
 The `param_classes` field of `r ref("TunerGenSA")` states that the tuner only supports real-valued (`ParamDbl`) hyperparameter tuning.
 
 ```{r integer-hyperparameters-in-tuners-for-real-valued-search-spaces-005}
-tuner = tnr("gensa")
-print(tuner)
+print(tnr("gensa"))
 ```
 
 To get integer-valued hyperparameter values for `k`, we construct a search space with a transformation function.
@@ -77,22 +69,17 @@ search_space = ps(
 )
 ```
 
-We construct the other objects needed for tuning.
+We start the tuning and compare the results of the search space to the results in the space of the learners hyperparameter set.
 
 ```{r integer-hyperparameters-in-tuners-for-real-valued-search-spaces-007}
-instance = TuningInstanceSingleCrit$new(
-  task = task,
+instance = tune(
+  method = "gensa",
+  task = tsk("iris"),
   learner = learner,
   resampling = rsmp("holdout"),
   measure = msr("classif.ce"),
-  terminator = trm("evals", n_evals = 20),
+  term_evals = 20,
   search_space = search_space)
-```
-
-We start the tuning and compare the results of the search space to the results in the space of the learners hyperparameter set.
-
-```{r integer-hyperparameters-in-tuners-for-real-valued-search-spaces-008}
-tuner$optimize(instance)
 ```
 
 The optimal `k` is still a real number in the search space.
