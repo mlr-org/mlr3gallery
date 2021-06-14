@@ -30,6 +30,10 @@ knitr::opts_chunk$set(
 library(mlr3book)
 ```
 
+```{r practical-tuning-series-tune-a-support-vector-machine-002, include=FALSE, eval = params$eval_all}
+future::plan("multicore")
+```
+
 # Preamble
 
 The following examples were created as part of the Introduction to Machine Learning Lecture at LMU Munich.
@@ -429,7 +433,7 @@ task_liver$col_roles$stratum = task_liver$target_names
 To rank the different learners and finally decide which one fits best for the task at hand, we used benchmarking.
 The following code chunk executes our benchmarking with all learners.
 
-```{r 2020-09-11-liver-patient-classification-019, warning = FALSE, eval = params$eval_all
+```{r 2020-09-11-liver-patient-classification-019, warning = FALSE, eval = params$eval_all}
 design = benchmark_grid(
   tasks = task_liver,
   learners = c(learners, learners_bal),
