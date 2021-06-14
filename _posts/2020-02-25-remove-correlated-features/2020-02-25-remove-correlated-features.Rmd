@@ -46,13 +46,13 @@ The example describes a very involved use-case, where the behavior of `r ref("Pi
 
 We load the `r mlr_pkg("mlr3verse")` package which pulls in the most important packages for this example.
 
-```{r integer-hyperparameters-in-tuners-for-real-valued-search-spaces-002}
+```{r 2020-02-25-remove-correlated-features-002}
 library(mlr3verse)
 ```
 
 We initialize the random number generator with a fixed seed for reproducibility, and decrease the verbosity of the logger to keep the output clearly represented.
 
-```{r practical-tuning-series-build-an-automated-machine-learning-system-003}
+```{r 2020-02-25-remove-correlated-features-003}
 set.seed(7832)
 lgr::get_logger("mlr3")$set_threshold("warn")
 lgr::get_logger("bbotk")$set_threshold("warn")
@@ -116,11 +116,11 @@ In order to demonstrate that different cutoff values result in different feature
 Note this inspects only the trained models of the first CV fold of each evaluated model.
 The features being excluded depends on the training data seen by the pipeline and may be different in different folds, even at the same cutoff value.
 
-```{r 2020-02-25-remove-correlated-features-009, echo=FALSE}
+```{r 2020-02-25-remove-correlated-features-008, echo=FALSE}
 resample_result = inst$archive$benchmark_result$resample_results$resample_result
 ```
 
-```{r 2020-02-25-remove-correlated-features-010}
+```{r 2020-02-25-remove-correlated-features-009}
 as.data.table(inst$archive)[
   order(cutoff),
   list(cutoff, classif.ce,
