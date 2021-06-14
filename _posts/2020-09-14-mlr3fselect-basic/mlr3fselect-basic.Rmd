@@ -15,6 +15,7 @@ date: 01-08-2021
 output:
   distill::distill_article:
     self_contained: false
+    css: ../../custom.css
 params:
   eval_all: FALSE
 ---
@@ -26,6 +27,7 @@ knitr::opts_chunk$set(
 )
 
 library("mlr3book")
+library("kableExtra")
 ```
 
 ```{r mlr3fselect-basic-002, include=FALSE, eval = params$eval_all}
@@ -226,8 +228,15 @@ fselector$optimize(instance)
 
 We access the results.
 
-```{r mlr3fselect-basic-019}
+```{r mlr3fselect-basic-019, eval = FALSE}
 as.data.table(instance$archive, exclude_columns = c("runtime_learners", "timestamp", "batch_nr", "resample_result", "uhash"))
+```
+
+```{r mlr3fselect-basic-020, echo = FALSE}
+as.data.table(instance$archive, exclude_columns = c("runtime_learners", "timestamp", "batch_nr", "resample_result", "uhash")) %>%
+  kable(format = "html") %>%
+  kable_styling() %>%
+  kableExtra::scroll_box(width = "100%", height = "200px")
 ```
 
 ## Nested resampling
@@ -239,7 +248,7 @@ We can use the `r ref("AutoFSelector")` class for running nested resampling.
 The `r ref("AutoFSelector")` essentially combines a given `r ref("Learner")` and feature selection method into a `r ref("Learner")` with internal automatic feature selection.
 The inner resampling loop that is used to determine the best feature set is conducted internally each time the `r ref("AutoFSelector")` `r ref("Learner")` object is trained.
 
-```{r mlr3fselect-basic-020}
+```{r mlr3fselect-basic-021}
 resampling_inner = rsmp("cv", folds = 5)
 measure = msr("classif.ce")
 
@@ -254,23 +263,23 @@ at = AutoFSelector$new(
 
 We put the `r ref("AutoFSelector")` into a `r ref("resample()")` call to get the outer resampling loop.
 
-```{r mlr3fselect-basic-021, eval = params$eval_all}
+```{r mlr3fselect-basic-022, eval = params$eval_all}
 resampling_outer = rsmp("cv", folds = 3)
 
 rr = resample(task, at, resampling_outer, store_models = TRUE)
 ```
 
-```{r mlr3fselect-basic-022, echo = FALSE, eval = params$eval_all}
+```{r mlr3fselect-basic-023, echo = FALSE, eval = params$eval_all}
 saveRDS(rr, "data/rr.rda")
 ```
 
-```{r mlr3fselect-basic-023, echo = FALSE}
+```{r mlr3fselect-basic-024, echo = FALSE}
 rr = readRDS("data/rr.rda")
 ```
 
 The aggregated performance of all outer resampling iterations is the unbiased predictive performance we can expected from the logistic regression model with an optimized feature set found by sequential selection.
 
-```{r mlr3fselect-basic-024}
+```{r mlr3fselect-basic-025}
 rr$aggregate()
 ```
 
@@ -279,28 +288,42 @@ The selected feature sets should not differ too much.
 We might observe unstable models in this example because the small data set and the low number of resampling iterations might introduces too much randomness.
 Usually, we aim for the selection of similar feature sets for all outer training sets.
 
-```{r mlr3fselect-basic-025}
+```{r mlr3fselect-basic-026, eval = FALSE}
 extract_inner_fselect_results(rr)
+```
+
+```{r mlr3fselect-basic-027, echo = FALSE, layout="l-body-outset"}
+extract_inner_fselect_results(rr) %>%
+  kable(format = "html") %>%
+  kable_styling() %>%
+  kableExtra::scroll_box(width = "100%", height = "400px")
 ```
 
 Next, we want to compare the predictive performances estimated on the outer resampling to the inner resampling.
 Significantly lower predictive performances on the outer resampling indicate that the models with the optimized feature sets overfit the data.
 
-```{r mlr3fselect-basic-026}
+```{r mlr3fselect-basic-028}
 rr$score()[, .(iteration, task_id, learner_id, resampling_id, classif.ce)]
 ```
 
 The archives of the `r ref("AutoFSelector")`s gives us all evaluated hyperparameter configurations (i.e. feature sets) with the associated predictive performances.
 
-```{r mlr3fselect-basic-027}
+```{r mlr3fselect-basic-029, eval = FALSE}
 extract_inner_fselect_archives(rr)
+```
+
+```{r mlr3fselect-basic-030, echo = FALSE, layout="l-page"}
+extract_inner_fselect_archives(rr) %>%
+  kable(format = "html") %>%
+  kable_styling() %>%
+  kableExtra::scroll_box(width = "100%", height = "400px")
 ```
 
 ## Shortcuts
 
 Selecting a feature subset can be shortened by using the `r ref("fselect()")`-shortcut.
 
-```{r practical-tuning-series-tune-a-support-vector-machine-019, eval = FALSE}
+```{r mlr3fselect-basic-031, eval = FALSE}
 instance = fselect(
   method = "random_search",
   task = tsk("iris"),
@@ -313,7 +336,7 @@ instance = fselect(
 
 Applying nested resampling can be shortened by using the `r ref("fselect_nested()")`-shortcut.
 
-```{r practical-tuning-series-tune-a-support-vector-machine-045, eval = FALSE}
+```{r mlr3fselect-basic-032, eval = FALSE}
 rr = fselect_nested(
   method = "random_search",
   task = tsk("iris"),
