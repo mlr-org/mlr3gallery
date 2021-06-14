@@ -18,6 +18,8 @@ output:
     self_contained: false
     css: ../../custom.css
 bibliography: bibliography.bib
+params:
+  eval_all: FALSE
 ---
 
 ```{r 2020-09-11-liver-patient-classification-001, include=FALSE}
@@ -40,16 +42,23 @@ Note, that correctness of the results can not be guaranteed.
 
 This tutorial assumes familiarity with the basics of `r mlr_pkg("mlr3tuning")` and `r mlr_pkg("mlr3pipelines")`.
 Consult the [mlr3book](https://mlr3book.mlr-org.com/pipelines.html) if some aspects are not fully understandable.
+We load the most important packages for this example.
 
 ```{r 2020-09-11-liver-patient-classification-002}
+library(mlr3verse)
 library(dplyr)
 library(tidyr)
 library(DataExplorer)
-library(mlr3verse)
-library(mlr3tuning)
 library(ggplot2)
 library(gridExtra)
-library(paradox)
+```
+
+We initialize the random number generator with a fixed seed for reproducibility, and decrease the verbosity of the logger to keep the output clearly represented.
+
+```{r mlr3fselect-basic-004}
+set.seed(7832)
+lgr::get_logger("mlr3")$set_threshold("warn")
+lgr::get_logger("bbotk")$set_threshold("warn")
 ```
 
 Note, that expensive calculations are pre-saved in rds files in this tutorial to save computational time.
@@ -390,7 +399,6 @@ As mentioned in section 2.2, we opted for perfectly balancing the classes. By us
 
 ```{r 2020-09-11-liver-patient-classification-015}
 # Oversampling minority class to get perfectly balanced classes
-set.seed(123)
 po_over = po("classbalancing", id = "oversample", adjust = "minor",
               reference = "minor", shuffle = FALSE, ratio = 416/167)
 table(po_over$train(list(task_liver))$output$truth()) # Check class balance
@@ -421,18 +429,22 @@ task_liver$col_roles$stratum = task_liver$target_names
 To rank the different learners and finally decide which one fits best for the task at hand, we used benchmarking.
 The following code chunk executes our benchmarking with all learners.
 
-```{r 2020-09-11-liver-patient-classification-018, echo=FALSE, eval = TRUE}
-bmr = readRDS("bmr.RDS")
-```
-
-```{r 2020-09-11-liver-patient-classification-019, echo = TRUE, results = 'hide', warning = FALSE, eval= FALSE}
-set.seed(123)
-bm_design = benchmark_grid(
+```{r 2020-09-11-liver-patient-classification-019, warning = FALSE, eval = params$eval_all
+design = benchmark_grid(
   tasks = task_liver,
   learners = c(learners, learners_bal),
   resamplings = resampling_outer
 )
-bmr = benchmark(bm_design, store_models = FALSE)
+
+bmr = benchmark(design, store_models = FALSE)
+```
+
+```{r mlr3fselect-basic-023, echo = FALSE, eval = params$eval_all}
+saveRDS(bmr, "data/bmr.rda")
+```
+
+```{r mlr3fselect-basic-024, echo = FALSE}
+bmr = readRDS("data/bmr.rda")
 ```
 
 As mentioned above, stratified 5-fold cross-validation was chosen.
