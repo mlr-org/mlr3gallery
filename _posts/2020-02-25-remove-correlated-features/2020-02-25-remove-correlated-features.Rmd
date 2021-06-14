@@ -44,14 +44,16 @@ The example describes a very involved use-case, where the behavior of `r ref("Pi
 
 ## Getting started
 
-```{r 2020-02-25-remove-correlated-features-002}
-library("mlr3")
-library("mlr3pipelines")
-library("paradox")
-library("mlr3tuning")
+We load the `r mlr_pkg("mlr3verse")` package which pulls in the most important packages for this example.
+
+```{r integer-hyperparameters-in-tuners-for-real-valued-search-spaces-002}
+library(mlr3verse)
 ```
 
-```{r 2020-02-25-remove-correlated-features-003, include = FALSE}
+We initialize the random number generator with a fixed seed for reproducibility, and decrease the verbosity of the logger to keep the output clearly represented.
+
+```{r practical-tuning-series-build-an-automated-machine-learning-system-003}
+set.seed(7832)
 lgr::get_logger("mlr3")$set_threshold("warn")
 lgr::get_logger("bbotk")$set_threshold("warn")
 ```
@@ -70,7 +72,7 @@ This function has a `cutoff` parameter, that specifies the maximum correlation a
 In order to expose this variable as a `numeric` parameter we can tune over we specify the following `r ref("ParamSet")`:
 
 ```{r 2020-02-25-remove-correlated-features-005}
-ps = ParamSet$new(list(ParamDbl$new("cutoff", 0, 1)))
+ps = ps(cutoff = p_dbl(0, 1))
 ```
 
 We define a function `select_cutoff` that takes as input a `r ref("Task")` and returns a list of features we aim to keep.
@@ -95,26 +97,19 @@ ps$trafo = function(x, param_set) {
 If you are not sure, you understand the `trafo` concept, consult the [mlr3book](https://mlr3book.mlr-org.com/paradox.html).
 It has a section on the `trafo` concept.
 
-To now tune over different values for `cutoff`, we first create a `r ref("TuningInstanceSingleCrit")`.
+Now we tune over different values for `cutoff`.
 
 ```{r 2020-02-25-remove-correlated-features-007}
-inst = TuningInstanceSingleCrit$new(
+inst = tune(
+  method = "grid_search",
   task = tsk("iris"),
   learner = pipeline,
   resampling = rsmp("cv", folds = 3L),
   measure = msr("classif.ce"),
   search_space = ps,
-  terminator = trm("none"),
   # don't need the following line for optimization, this is for
   # demonstration that different features were selected
-  store_models = TRUE
-)
-```
-
-Then we run the tuning:
-
-```{r 2020-02-25-remove-correlated-features-008}
-tnr("grid_search")$optimize(inst)
+  store_models = TRUE)
 ```
 
 In order to demonstrate that different cutoff values result in different features being selected, we can run the following to inspect the trained models.
