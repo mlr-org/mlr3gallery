@@ -10,7 +10,7 @@ author:
   - name: Florian Pfisterer
 date: 01-31-2020
 description: |
-  We show how to use mlr3pipelines to augment the "mlr_learners_classif.ranger" learner with automatic imputation.
+  We show how to use mlr3pipelines to augment the ranger learner with automatic imputation.
 output:
   distill::distill_article:
     self_contained: false
@@ -26,8 +26,6 @@ output:
 library(mlr3book)
 library(kableExtra)
 
-set.seed(7832)
-
 ggplot2::theme_set(ggplot2::theme_light())
 ```
 
@@ -40,14 +38,26 @@ It deals with the problem of missing data.
 The random forest implementation in the package `r cran_pkg("ranger")` unfortunately does not support missing values.
 Therefore, it is required to impute missing features before passing the data to the learner.
 
-We show how to use `r mlr_pkg("mlr3pipelines")` to augment the `r ref("mlr_learners_classif.ranger", "ranger random forest learner")` with automatic imputation.
+We show how to use `r mlr_pkg("mlr3pipelines")` to augment the `r ref("mlr_learners_classif.ranger", "ranger learner ")` with automatic imputation.
+
+We load the `r mlr_pkg("mlr3verse")` package which pulls in the most important packages for this example.
+
+```{r mlr3fselect-basic-003}
+library(mlr3verse)
+```
+
+We initialize the random number generator with a fixed seed for reproducibility, and decrease the verbosity of the logger to keep the output clearly represented.
+
+```{r 2020-07-27-bikesharing-demand-004}
+set.seed(7832)
+lgr::get_logger("mlr3")$set_threshold("warn")
+```
 
 ## Construct the Base Objects
 
 First, we take an example task with missing values (`r ref("mlr_tasks_pima", "pima")`) and create the `r ref("mlr_learners_classif.ranger", "ranger learner")`:
 
 ```{r 2020-01-30-impute-missing-levels-002}
-library(mlr3)
 library(mlr3learners)
 
 task = tsk("pima")
@@ -57,7 +67,7 @@ learner = lrn("classif.ranger")
 print(learner)
 ```
 
-We can now inspect the task for missing values.
+We can now inspect the task for missing values. 
 `task$missings()` returns the count of missing values for each variable.
 
 ```{r 2020-01-30-impute-missing-levels-003}
@@ -78,8 +88,7 @@ lrn("classif.rpart")$properties
 
 Before we dive deeper, we quickly try to visualize the columns with many missing values:
 
-```{r 2020-01-30-impute-missing-levels-006, message = FALSE, warning = FALSE}
-library(mlr3viz)
+```{r 2020-01-30-impute-missing-levels-006, message = FALSE, warning = FALSE, fig.width=10, fig.height=8}
 autoplot(task$clone()$select(c("insulin", "triceps")), type = "pairs")
 ```
 
@@ -88,11 +97,8 @@ autoplot(task$clone()$select(c("insulin", "triceps")), type = "pairs")
 An overview over implemented `r ref("PipeOp")`s for imputation can be obtained like so:
 
 ```{r 2020-01-30-impute-missing-levels-007}
-library(mlr3pipelines)
-dt = as.data.table(mlr_pipeops)
-dt[grepl("impute", dt$key) | grepl("miss", dt$key), ]
+as.data.table(mlr_pipeops)[tags %in% "missings", list(key)]
 ```
-<!-- Replace with something using tags at some point-->
 
 ## Construct Operators
 
@@ -161,7 +167,7 @@ graph = graph %>>% po(learner)
 
 We can now visualize the resulting graph:
 
-```{r 2020-01-30-impute-missing-levels-014}
+```{r 2020-01-30-impute-missing-levels-014, fig.width=10, fig.height=8}
 graph$plot()
 ```
 
