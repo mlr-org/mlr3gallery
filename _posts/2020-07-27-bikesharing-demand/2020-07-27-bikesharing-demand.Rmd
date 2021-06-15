@@ -17,11 +17,13 @@ categories:
   - branching
   - bike sharing data set
   - regression
-bibliography: bs.bib
+bibliography: bibliography.bib
 output:
   distill::distill_article:
     self_contained: false
     css: ../../custom.css
+params:
+  eval_all: FALSE
 ---
 
 ```{r practical-tuning-series-tune-a-support-vector-machine-001, include=FALSE}
@@ -42,7 +44,7 @@ ggplot2::theme_set(ggplot2::theme_light())
 
 The following examples were created as part of the Introduction to Machine Learning Lecture at LMU Munich.
 The goal of the project was to create and compare one or several machine learning pipelines for the problem at hand together with exploratory analysis and an exposition of results.
-The posts were contributed to the mlr3gallery by the authors and edited for better legibility by the editor.
+The posts were contributed to the `mlr3gallery` by the authors and edited for better legibility by the editor.
 We want to thank the authors for allowing us to publish their results.
 Note, that correctness of the results can not be guaranteed.
 
@@ -51,22 +53,20 @@ Note, that correctness of the results can not be guaranteed.
 Bike sharing is a network of publicly shared bicycles that can be rented for a certain period of time at different locations within a city and then returned at any station.
 For the suppliers of those networks, it is important to always have enough bicycles available, whereby the demand depends on a variety of factors.
 Therefore it is essential to have a forecasting system that predicts the demand taking into account several variables.
-In this document, we develop such a system using the `mlr3verse` package.
-For our analysis, we used the [Kaggle Bike Sharing Demand](https://www.kaggle.com/c/bike-sharing-demand/data) data set, which was provided by Hadi Fanaee Tork using data from Capital Bikeshare. [@Fanaee]
+In this document, we develop such a system using the `r mlr_pkg("mlr3verse")` package.
+For our analysis, we used the [Kaggle Bike Sharing Demand](https://www.kaggle.com/c/bike-sharing-demand/data) data set, which was provided by Hadi Fanaee Tork using data from Capital Bikeshare [@Fanaee].
 After ingesting the data into R we continue with some descriptive statistics for our training data set.
 We then preprocess the data and carry out feature and target engineering.
-Afterwards we proceed with the modeling process in which we fit, tune and benchmark the *KNN*, *CART* and *RandomForest* learner of the `mlr3verse` package.
+Afterwards we proceed with the modeling process in which we fit, tune and benchmark the *KNN*, *CART* and *RandomForest* learner.
 We conclude with our model prediction for the data.
 
 ## Prerequisites
 
 This tutorial assumes familiarity with the basics of `r mlr_pkg("mlr3tuning")` and `r mlr_pkg("mlr3pipelines")`.
-Consult the [mlr3book](https://mlr3book.mlr-org.com/pipelines.html) if some aspects are not  fully understandable.
+Consult the [mlr3book](https://mlr3book.mlr-org.com) if some aspects are not  fully understandable.
+Note, that expensive calculations are pre-saved in `rda` files in this tutorial to save computational time.
 
 ```{r 2020-07-27-bikesharing-demand-002}
-# rmd
-library(knitr)
-library(kableExtra)
 # descriptive
 library(ggplot2)
 library(GGally)
@@ -79,33 +79,34 @@ library(tidyr)
 library(mlr3verse)
 ```
 
-Note, that expensive calculations are pre-saved in rds files in this tutorial to save computational time.
-<!--
-To recheck the code is still up to date and syntax sticks to the current mlr3 version initialize `long_run = TRUE`.
-This will run *all* code chunks no matter the computational effort.
--->
+We initialize the random number generator with a fixed seed for reproducibility, and decrease the verbosity of the logger to keep the output clearly represented.
+
+```{r mlr3fselect-basic-004}
+set.seed(7832)
+lgr::get_logger("mlr3")$set_threshold("warn")
+lgr::get_logger("bbotk")$set_threshold("warn")
+```
 
 # Data
 
 Note that we use the data from [UCI Machinelearning Repository](http://archive.ics.uci.edu/ml/datasets/Bike+Sharing+Dataset) here instead of the Kaggle data set due to License restrictions. The UCI dataset is a slightly adjusted version of the same underlying data.
 
 ```{r 2020-07-27-bikesharing-demand-003, echo=FALSE}
-tmp <- tempfile()
-download.file(
-  "https://archive.ics.uci.edu/ml/machine-learning-databases/00275/Bike-Sharing-Dataset.zip",
-  tmp)
+tmp = tempfile()
+download.file("https://archive.ics.uci.edu/ml/machine-learning-databases/00275/Bike-Sharing-Dataset.zip", tmp)
 
 bikes = read.csv(unz(tmp, filename = "hour.csv"), as.is = TRUE) %>%
   mutate(datetime = ymd_h(paste(dteday, hr))) %>%
   mutate(day = day(datetime)) %>%
-  select(datetime, season, holiday, workingday, weather = weathersit, temp, atemp, humidity = hum, windspeed, casual, registered, count = cnt, day)
+  select(datetime, season, holiday, workingday, weather = weathersit, temp, atemp, humidity = hum, windspeed, casual,
+    registered, count = cnt, day)
 
-train <- bikes %>%
+train = bikes %>%
   filter(day < 20) %>%
   mutate(datetime = as.factor(datetime)) %>%
   select(-day)
 
-test <- bikes %>%
+test = bikes %>%
   filter(day >= 20) %>%
   mutate(datetime = as.factor(datetime)) %>%
   select(-day, -count, -registered, -casual)
@@ -117,12 +118,7 @@ test <- bikes %>%
 train_datetime = train$datetime
 ```
 
-```{r 2020-07-27-bikesharing-demand-005, echo=FALSE}
-nrow_train = nrow(train)
-ncol_train = ncol(train)
-```
-
-The Bike Sharing Demand data set contains `r nrow_train` rows and `r ncol_train` columns.
+The Bike Sharing Demand data set contains 10886 rows and 12 columns.
 
 ```{r 2020-07-27-bikesharing-demand-006, echo=FALSE}
 column_descr = data.frame(
@@ -180,24 +176,6 @@ Moreover, we have the date and hour of the observation as well as holiday and wo
 Since there are no missing values in our data, we do not need to apply any further imputation methods.
 
 ## Descriptive Statistics
-
-<!--
-# FIXME: reiterate through figure numbers if you uncomment
-In Figure 1 we show the density estimates of the continuous variables in the training data.
-We find that our target variable `count` is highly right-skewed, which we examine further during pre-processing in chapter 2.3.
-
-```{r 2020-07-27-bikesharing-demand-007, echo=FALSE, fig.cap="Density estimates of the continuous variables in training data", fig.height=3.3}
-#plot_density(train,
-#  ncol = 3L,
-#  ggtheme = theme_bw(),
-#  theme_config = list(
-#    plot.title = element_text(size = 10),
-#    axis.title = element_text(size = 9),
-#    axis.text = element_text(size = 5)
-#  )
-#)
-```
--->
 
 The correlation of the continuous variables of our training data is shown in Figure 1.
 We find that there is an almost perfect positive correlation between `atemp` and `temp` ($r = 0.98$), swhich makes sense, since the 'feels like' temperature is very similar to the real temperature.
@@ -293,7 +271,9 @@ train = preprocess(train)
 ```
 
 ```{r 2020-07-27-bikesharing-demand-015, echo=FALSE, warning=FALSE}
-train %>% summary.default %>% as.data.frame %>%
+train %>% 
+  summary.default %>% 
+  as.data.frame %>%
   dplyr::group_by(Var1) %>%
   tidyr::spread(key = Var2, value = Freq) %>%
   ungroup() %>%
@@ -301,8 +281,7 @@ train %>% summary.default %>% as.data.frame %>%
   mutate(Variable = as.character(Variable)) %>%
   arrange(Variable, Class, Mode) %>%
   as.data.frame() %>%
-  kable("html", booktabs = TRUE,  caption = "Processed training data",
-      linesep = "\\addlinespace", longtable = TRUE) %>%
+  kable("html", booktabs = TRUE,  caption = "Processed training data", linesep = "\\addlinespace", longtable = TRUE) %>%
   kable_styling(full_width = TRUE, latex_options = c("repeat_header"))
 ```
 
@@ -345,8 +324,7 @@ train %>% summary.default %>% as.data.frame %>%
   mutate(Variable = as.character(Variable)) %>%
   arrange(Variable, Class, Mode) %>%
   as.data.frame() %>%
-  kable("html", booktabs = TRUE,  caption = "Feature engineered training data",
-      linesep = "\\addlinespace", longtable = TRUE) %>%
+  kable("html", booktabs = TRUE,  caption = "Feature engineered training data", linesep = "\\addlinespace", longtable = TRUE) %>%
   kable_styling(full_width = TRUE)
 ```
 
@@ -371,13 +349,11 @@ ggplot(train) +
 
 ## Target engineering
 
-As mentioned in our descriptive analysis (chapter 2.2), we find that our target variable `count` is
-highly right-skewed.
+As mentioned in our descriptive analysis (chapter 2.2), we find that our target variable `count` is highly right-skewed.
 Since this could cause problems during model fitting, we perform a $z = log(x + 1)$ transformation.
-In the right plot in Figure 5, we see that the distribution of our transformed `count` variable is much less
-skewed than before.
+In the right plot in Figure 5, we see that the distribution of our transformed `count` variable is much less skewed than before.
 
-```{r 2020-07-27-bikesharing-demand-020,echo = FALSE, warning=FALSE, out.width=c('50%', '50%'), fig.show='hold', fig.cap="Density transformation of `count`"}
+```{r 2020-07-27-bikesharing-demand-020, echo = FALSE, warning=FALSE, out.width=c('50%', '50%'), fig.show='hold', fig.cap="Density transformation of `count`"}
 ggplot(train, aes(count)) +
   geom_density() +
   labs(x = "Count", y = "Density") +
@@ -399,8 +375,8 @@ into our original scale afterwards.
 ```{r 2020-07-27-bikesharing-demand-021}
 log1p_target_trafo = function(learner, graph = TRUE) {
   ppl = ppl("targettrafo", graph = learner)
-  ppl$param_set$values$targettrafosimple.trafo = function(x) log1p(x)
-  ppl$param_set$values$targettrafosimple.inverter = function(x) expm1(x)
+  ppl$param_set$values$targetmutate.trafo = function(x) log(x)
+  ppl$param_set$values$targetmutate.inverter = function(x) list(response =  expm1(x$response))
   if (graph == TRUE) return(GraphLearner$new(ppl, task_type = "regr"))
   ppl
 }
@@ -414,12 +390,12 @@ First, we have to initialize our bike task.
 As back-end, we use our training data and as target variable `count`.
 
 ```{r 2020-07-27-bikesharing-demand-022}
-bike_task = TaskRegr$new("bike_sharing", backend = train, target = "count")
+bike_task = as_task_regr(train, target = "count", id = "bike_sharing")
 ```
 
 ## Descriptive Analysis with  `mlr3`
 
-The `mlr3viz` package enables the user to quickly create insightful descriptive graphics.
+The `r mlr_pkg("mlr3viz`")` package enables the user to quickly create insightful descriptive graphics.
 We use this function to compare the values of our target variable `count` over the seasons and between holidays and other days.
 The results are visualized in Figure 6.
 We notice that there is almost no difference between the seasons with the exception of spring when the value of `count` is lower.
@@ -462,43 +438,51 @@ autoplot(bike_task,
 
 ## Model training
 
-In our modeling process, we consider three learners: `kknn`, `rpart` and `ranger`.
-For parameter optimization, we use the so-called `autotuner`.
-An `Autotuner` is a learner, that tunes its hyperparameters during training.
-The technical implementation is provided by `mlr3tuning`.
-For more details see the [mlr3manual](https://mlr3book.mlr-org.com/tuning.html).
+In our modeling process, we consider three learners: k-Nearest-Neighbor classification (`kknn`),  classification tree (`rpart`) and random classification forest (`ranger`).
+For parameter optimization, we use the so-called `r ref("AutoTuner")`.
+An `r ref("AutoTuner")` is a learner, that tunes its hyperparameters during training.
+The technical implementation is provided by `r mlr_pkg("mlr3tuning")`.
+For more details see the [mlr3book](https://mlr3book.mlr-org.com/tuning.html).
 
-In order to achieve maximum comparability between the learners the `Resampling` objects and which enable us to measure a learner-configuration's performance as well as the tuning strategy are kept fixed for all compared learners.
-If a learner's settings differ from the general case, the reason is given in the
-section on the `autotuner` concerned.
+In order to achieve maximum comparability between the learners the resampling strategy (`r ref("Resampling")`) which enable us to measure a learner-configuration's performance as well as the tuning strategy are kept fixed for all compared learners.
+If a learner's settings differ from the general case, the reason is given in the section on the `r ref("AutoTuner")` concerned.
+
+* Nested resampling is a method to obtain an unbiased performance estimation for each learner.
+For more information see [nested resamling](https://mlr3book.mlr-org.com/nested-resampling.html).
+During our modeling process, we use 5-fold CV for inner resampling to avoid overfitting when optimizing the model parameters (`resampling_cv_5`).
+In order to avoid overfitting during hyperparameter tuning, we use 3-fold CV as outer resampling method (`resampling_outer_cv3`).
+Nested resampling is done in our Chapter 5 "Nested Resampling" where we evaluate and compare the performance of the learners in a single Graph Learner.
 
 ```{r 2020-07-27-bikesharing-demand-026}
 resampling_cv_5 = rsmp("cv", folds = 5L)
 resampling_outer_cv3 = rsmp("cv", folds = 3L)
-measures = msr("regr.rmse")
-tuner_grid_10 = mlr3tuning::tnr("grid_search", resolution = 10L)
-term_evals20 = trm("evals", n_evals = 20L)
 ```
 
-* `nested resampling` is a method to obtain an unbiased performance estimation for each learner.
-For more information see [Nested Resamling](https://mlr3book.mlr-org.com/nested-resampling.html).
-During our modeling process, we use 5-fold CV for `inner resampling` to avoid overfitting when optimizing the model parameters (`resampling_cv_5`).
-In order to avoid overfitting during hyperparameter tuning, we use 3-fold CV as `outer resampling` method (`resampling_outer_cv3`).
-Nested resampling is done in our Chapter 5 "Nested Resampling" where we evaluate and compare the performance of the learners in a single Graph Learner.
+* `r ref("Measure")` defines the loss function that the `r ref("AutoTuner")` evaluates during training.
+As the Kaggle competition requires participants to minimize the root mean squared log error (RMSLE), we use the root mean squared error (RMSE) measure since our target variable is already log-transformed.
 
-* `measure` defines the loss function that the autotuner evaluates during training.
-As the Kaggle competition requires participants to minimize the `RMSLE` we use the `RMSE measure` since our target variable is already log-transformed.
+```{r 2020-07-27-bikesharing-demand-026}
+measures = msr("regr.rmse")
+```
 
-* `tuning method` will be Grid Search with a grid resolution of 10.
-As we chose two hyperparameters to tune over, the two-dimensional grid consists of $10^{2} = 100$ configurations. The tuner grid is called `tuner_grid_10`.
+* Tuning method will be grid search with a grid resolution of 10.
+As we chose two hyperparameters to tune over, the two-dimensional grid consists of $10^{2} = 100$ configurations.
 
-* `terminator` limits the tuning process to 20 hyperparameter combinations, which will be drawn randomly from the `tuner_grid_10`.
-The terminator is called `term_evals20`.
+```{r 2020-07-27-bikesharing-demand-026}
+tnr("grid_search", resolution = 10L)
+```
 
-As the computational time of `nested resampling` is high and tuning over multiple parameters would be very complex, the `autotuners` are be restricted to two hyperparameters, that seem to have a strong influence on the `regr.rmse`.
+* `r ref("Terminator")` limits the tuning process to 20 hyperparameter combinations, which will be drawn randomly from the grid.
+
+```{r 2020-07-27-bikesharing-demand-026}
+trm("evals", n_evals = 20L)
+```
+
+
+As the computational time of nested resampling is high and tuning over multiple parameters would be very complex, the `r ref("AutoTuner")` are be restricted to two hyperparameters, that seem to have a strong influence on the RMSE.
 The hyperparameter space of numeric hyperparameter is set around their default values for tuning.
 
-Resampling and Terminator during auto tuning are set to relatively small iterations to save up computational effort.
+`r ref("Resampling")` and `r ref("Terminator")`  during auto tuning are set to relatively small iterations to save up computational effort.
 In regular cases we would suggest using 5- or 10-fold crossvalidiation.
 Auto tuning should exploit enough grid points to give the user an impression about the whole hyperparameter space.
 
@@ -513,12 +497,11 @@ kknn_learner$param_set
 
 ```{r 2020-07-27-bikesharing-demand-028, echo=FALSE}
 df_params = as.data.table(kknn_learner$param_set)[,c("id", "lower", "upper", "levels", "default")]
-kable(df_params, "html", booktabs = TRUE,  caption = "Paramters of kknn learner",
-      linesep = "\\addlinespace", longtable = TRUE) %>%
-kable_styling(full_width = TRUE) %>%
-column_spec(4, width = "8cm") %>%
-column_spec(1, width = "2cm") %>%
-column_spec(c(2, 3), width = "1.5cm")
+kable(df_params, "html", booktabs = TRUE,  caption = "Paramters of kknn learner", linesep = "\\addlinespace", longtable = TRUE) %>%
+  kable_styling(full_width = TRUE) %>%
+  column_spec(4, width = "8cm") %>%
+  column_spec(1, width = "2cm") %>%
+  column_spec(c(2, 3), width = "1.5cm")
 ```
 
 For simplicity we tune only two of those parameters:
@@ -529,53 +512,47 @@ For simplicity we tune only two of those parameters:
 2. `distance`
 > Parameter of Minkowski distance
 
-For more information see the
-[kknn documentation](https://cran.r-project.org/web/packages/kknn/kknn.pdf).
+For more information see the [kknn documentation](https://cran.r-project.org/web/packages/kknn/kknn.pdf).
 
 ```{r 2020-07-27-bikesharing-demand-029}
-param_set_kknn = ParamSet$new(
-  params = list(
-    ParamInt$new("regr.kknn.k", lower = 1L, upper = 50L), # k
-    ParamInt$new("regr.kknn.distance", lower = 1L, upper = 3L) # distance
-  )
-)
+search_space_kknn = ps(
+  regr.kknn.k = p_int(lower = 1L, upper = 50L),
+  regr.kknn.distance = p_int(lower = 1L, upper = 3L))
 ```
 
 Now we set up the autotuner for the `kknn` learner and train it.
 
-```{r 2020-07-27-bikesharing-demand-030, message=FALSE, eval=long_run}
-set.seed(123456)
+```{r 2020-07-27-bikesharing-demand-030, message = FALSE, eval = params$eval_all}
 ppl_kknn = log1p_target_trafo(kknn_learner)
-at_kknn = AutoTuner$new(ppl_kknn,
+
+at_kknn = auto_tuner(
+  method = "grid_search",
+  learner = ppl_kknn,
   resampling = resampling_cv_5,
   measure = measures,
-  search_space = param_set_kknn,
-  terminator = term_evals20,
-  tuner = tuner_grid_10
+  search_space = search_space_kknn,
+  term_evals = 20,
+  resolution = 10L
 )
 
 at_kknn$train(bike_task)
 
-
-archive_kknn = at_kknn$archive$data[, c("regr.rmse",
-                                          "regr.kknn.k",
-                                          "regr.kknn.distance")]
+archive_kknn = at_kknn$archive$data[, .("regr.rmse", "regr.kknn.k", "regr.kknn.distance")]
 ```
 
-```{r 2020-07-27-bikesharing-demand-031, echo=FALSE, eval=long_run}
-saveRDS(archive_kknn, file = "archive_kknn.rds")
+```{r 2020-07-27-bikesharing-demand-031, echo = FALSE, eval = params$eval_all}
+saveRDS(archive_kknn, "archive_kknn.rda")
 ```
 
-
-```{r 2020-07-27-bikesharing-demand-032, echo=FALSE, eval=!long_run}
-archive_kknn = readRDS("archive_kknn.rds")
+```{r 2020-07-27-bikesharing-demand-032, echo = FALSE}
+archive_kknn = readRDS("data/archive_kknn.rda")
 ```
 
-In Figure 8 we see the RMSE for the considered hyperparameter of the `kknn` autotuner.
-It seems that a higher order `p` of the Minkowski distance leads to a lower `RMSE`.
-Moreover, we see that the `RMSE` is lowest around `k = 10` neighbors.
-For smaller `k` the estimation might be too wiggly, for higher `k` it might be too global (Bias-Variance trade off).
-The minimal RMSE that the `autotuner` could find is given for `p = 3` and `k = 12`.
+In Figure 8 we see the RMSE for the considered hyperparameter of the `kknn`.
+It seems that a higher order `p` of the Minkowski distance leads to a lower RMSE.
+Moreover, we see that the RMSE is lowest around `k = 10` neighbors.
+For smaller `k` the estimation might be too wiggly, for higher `k` it might be too global (bias–variance tradeoff).
+The minimal RMSE that the `r ref("AutoTuner")` could find is given for `p = 3` and `k = 12`.
 
 ```{r 2020-07-27-bikesharing-demand-033, echo=FALSE, fig.cap="RMSE on tuning grid of kknn autotuner"}
 ggplot(archive_kknn, aes(x = regr.kknn.k, y = regr.kknn.distance, col = regr.rmse)) +
@@ -613,8 +590,7 @@ rpart_learner$param_set
 
 ```{r 2020-07-27-bikesharing-demand-035, echo=FALSE}
 df_params = as.data.table(rpart_learner$param_set)[,c("id", "lower", "upper", "levels", "default")]
-kable(df_params, "html", booktabs = TRUE,  caption = "Paramters of rpart learner",
-      linesep = "\\addlinespace") %>%
+kable(df_params, "html", booktabs = TRUE,  caption = "Paramters of rpart learner", linesep = "\\addlinespace") %>%
 kable_styling(full_width = TRUE)
 ```
 
@@ -633,47 +609,44 @@ not attempted.
 For more information browse the [rpart Documentation](https://cran.r-project.org/web/packages/rpart/rpart.pdf).
 
 ```{r 2020-07-27-bikesharing-demand-036}
-param_set_cart = ParamSet$new(
-  params = list(
-    ParamInt$new("regr.rpart.minsplit", lower = 1L, upper = 30L),
-    ParamDbl$new("regr.rpart.cp", lower = 0.001, upper = 0.1)
-  )
-)
+search_space_cart = ps(
+  regr.rpart.minsplit = p_int(lower = 1L, upper = 30L),
+  regr.rpart.cp = p_dbl(lower = 0.001, upper = 0.1))
 ```
 
 Now we set up the autotuner for the `rpart` learner and train it.
 
-```{r 2020-07-27-bikesharing-demand-037, message=FALSE, eval=long_run}
-set.seed(123456)
+```{r 2020-07-27-bikesharing-demand-037, message = FALSE, eval = params$eval_all}
 ppl_rpart = log1p_target_trafo(rpart_learner)
-at_rpart = AutoTuner$new(ppl_rpart,
+
+at_rpart = auto_tuner(
+  method = "grid_search",
+  learner = ppl_rpart,
   resampling = resampling_cv_5,
   measure = measures,
-  search_space = param_set_cart,
-  terminator = term_evals20,
-  tuner = tuner_grid_10
+  search_space = search_space_cart,
+  term_evals = 20L,
+  resolution = 10L
 )
 at_rpart$train(bike_task)
-archive_rpart = at_rpart$archive$data[, c("regr.rmse",
-                                            "regr.rpart.minsplit",
-                                            "regr.rpart.cp")]
+
+archive_rpart = at_rpart$archive$data[, c("regr.rmse", "regr.rpart.minsplit", "regr.rpart.cp")]
 ```
 
-```{r 2020-07-27-bikesharing-demand-038, echo=FALSE, eval=long_run}
-saveRDS(archive_rpart, file = "archive_rpart.rds")
+```{r 2020-07-27-bikesharing-demand-038, echo = FALSE, eval = params$eval_all}
+saveRDS(archive_rpart, file = "data/archive_rpart.rda")
 ```
 
-
-```{r 2020-07-27-bikesharing-demand-039, echo=FALSE, eval=!long_run}
-archive_rpart = readRDS("archive_rpart.rds")
+```{r 2020-07-27-bikesharing-demand-039, echo = FALSE}
+archive_rpart = readRDS("data/archive_rpart.rda")
 ```
 
-In Figure 9 we see the RMSE for the considered hyperparameter of the `rpart` autotuner.
+In Figure 9 we see the RMSE for the considered hyperparameter of the `rpart`.
 The learner performs the worst if we set the minimum size of nodes in `minsplit < 3`.
 For splitting criteria `minsplit > 3` seems to have no significant influence on the RMSE in the given hyperparameter space.
 In contrast, we find that for relatively low `cp` the error decreases considerably.
 Lowering `cp` reduces the level of pruning, resulting in larger trees.
-We reach the minimal `regr.rmse` at the lowest considered `cp = 0.001`.
+We reach the minimal RMSE at the lowest considered `cp = 0.001`.
 
 ```{r 2020-07-27-bikesharing-demand-040, echo=FALSE, fig.cap="RMSE on tuning grid rpart learner"}
 ggplot(archive_rpart, aes(x = regr.rpart.cp, y = regr.rpart.minsplit, col = regr.rmse)) +
@@ -703,7 +676,7 @@ ggplot(archive_rpart, aes(x = regr.rpart.cp, y = regr.rpart.minsplit, col = regr
 
 ### Random Forest
 
-`ranger` is a Random Forest Learner whose hyperparameters are shown in Table 6.
+`ranger` is a random forest learner whose hyperparameters are shown in Table 6.
 
 ```{r 2020-07-27-bikesharing-demand-041, results="hide"}
 ranger_learner = lrn("regr.ranger", importance = "impurity")
@@ -717,15 +690,14 @@ df_params_table = data.frame("id" = rep(NA, 7), "levels" = rep(NA, 7))
 df_params_table[1:3,] = df_params[1:3,]
 df_params_table[4,] = c("...")
 df_params_table[5:7,] = df_params[(n_params - 2):n_params,]
-kable(df_params_table, "html", booktabs = TRUE,  caption = "Paramters of ranger learner",
-      linesep = "\\addlinespace", longtable = TRUE) %>%
+kable(df_params_table, "html", booktabs = TRUE,  caption = "Paramters of ranger learner", linesep = "\\addlinespace", longtable = TRUE) %>%
 kable_styling(full_width = TRUE, latex_options = "repeat_header")
 ```
 
 **Feature Importance**
 
-First, we take advantage of the ability of the `ranger_learner` to calculate the importance of its features.
-The `importance filter` implemented in `mlr3filters` provides the possibility to access this calculation via `mlr3` syntax.
+First, we take advantage of the ability of the ranger model to calculate the importance of its features.
+The importance filter implemented in `r mlr_pkg("mlr3filters")` provides the possibility to access this calculation via `r mlr_pkg("mlr3")` syntax.
 
 ```{r 2020-07-27-bikesharing-demand-043}
 filter_ranger = flt("importance", learner = ranger_learner)
@@ -753,7 +725,7 @@ Therefore, we set up a graph learner in the next step.
 **Ranger Pipe**
 
 Setting up the Ranger Pipe enables us to compare models with different feature combinations.
-Therefore we use the `mlr3` packages `mlr3pipelines` and `mlr3filters` and create a new learner `ranger_feature`.
+Therefore we use the `r mlr_pkg("mlr3")` packages `r mlr_pkg("mlr3pipelines")` and `r mlr_pkg("mlr3filters")` and create a new learner `ranger_feature`.
 This learner is now able to select the most important features from the impurity filtering.
 
 ```{r 2020-07-27-bikesharing-demand-045}
@@ -779,12 +751,9 @@ in the model.
 For more information see the [ranger documentation](https://cran.r-project.org/web/packages/ranger/ranger.pdf) and [mlr3 pipelines](https://mlr3book.mlr-org.com/pipelines.html).
 
 ```{r 2020-07-27-bikesharing-demand-046}
-param_set_ranger = ParamSet$new(
-  params = list(
-    ParamInt$new("regr.ranger.mtry", lower = 1L, upper = 11L),
-    ParamInt$new("importance.filter.nfeat", lower = 1L, upper = 11L)
-  )
-)
+search_space_ranger = ps(
+  regr.ranger.mtry = p_int(lower = 1L, upper = 11L),
+  importance.filter.nfeat = p_int(lower = 1L, upper = 11L))
 ```
 
 To ensure that `regr.ranger.mtry` never exceeds `importance.filter.nfeat`, we define the search space for the tuner manually.
@@ -792,15 +761,14 @@ We constraint the possible number of features to the 1, 6 , 10 and 11 most impor
 The resulting grid shown in Figure 11, expands to over 28 combinations to tune our learner on.
 
 ```{r 2020-07-27-bikesharing-demand-047}
-grid = generate_design_grid(param_set_ranger, resolution = 11)
+grid = generate_design_grid(search_space_ranger, resolution = 11)
 grid$data = grid$data[regr.ranger.mtry <= importance.filter.nfeat]
 grid$data = grid$data[importance.filter.nfeat %in% c(1, 6, 10, 11)]
 ```
 
 
 ```{r 2020-07-27-bikesharing-demand-048, echo=FALSE, fig.cap="Search space for ranger autotuner"}
-ggplot(grid$data, aes(x = importance.filter.nfeat,
-                      y = regr.ranger.mtry)) +
+ggplot(grid$data, aes(x = importance.filter.nfeat, y = regr.ranger.mtry)) +
   geom_point() +
   theme_bw() +
   theme(
@@ -813,37 +781,37 @@ To ensure that `regr.ranger.mtry` never exceeds, `importance.filter.nfeat` we de
 Since the space for hyperparameters is limited, one could consider here to exploit the whole parameter space for `nfeat` and `mtry`.
 To save up time we will stick to 28 combinations here, including all possible combinations at 1, 6, 10 and 11 levels.
 
-```{r 2020-07-27-bikesharing-demand-049, message=FALSE, eval=long_run}
+```{r 2020-07-27-bikesharing-demand-049, message = FALSE, eval = params$eval_all}
 set.seed(123456)
+
 ranger_feature = log1p_target_trafo(po_flt)
-at_ranger = AutoTuner$new(ranger_feature,
+
+at_ranger = auto_tuner(
+  method = "design_points",
+  learner = ranger_feature,
   resampling = resampling_cv_5,
   measure = measures,
-  search_space = param_set_ranger,
-  terminator = trm("evals", n_evals = 28L),
-  tuner = mlr3tuning::tnr("design_points", design = grid$data)
+  search_space = search_space_ranger,
+  design = grid$data
 )
-# at_ranger$store_tuning_instance = FALSE
+
 at_ranger$train(bike_task)
 
-archive_ranger = at_ranger$archive$data[, c("regr.rmse",
-                                              "importance.filter.nfeat",
-                                              "regr.ranger.mtry")]
+archive_ranger = at_ranger$archive$data[, .(regr.rmse, importance.filter.nfeat, regr.ranger.mtry)]
 ```
 
-```{r 2020-07-27-bikesharing-demand-050, echo=FALSE, eval=long_run}
-saveRDS(archive_ranger, "archive_ranger.rds")
+```{r 2020-07-27-bikesharing-demand-050, echo = FALSE, eval = params$eval_all}
+saveRDS(archive_ranger, "data/archive_ranger.rda")
 ```
 
-
-```{r 2020-07-27-bikesharing-demand-051, echo=FALSE, eval=!long_run}
-archive_ranger = readRDS("archive_ranger.rds")
+```{r 2020-07-27-bikesharing-demand-051, echo = FALSE}
+archive_ranger = readRDS("data/archive_ranger.rda")
 ```
-
 
 In Figure 12 we see the RMSE for the evaluated hyperparameter of the ranger autotuner.
-With increasing `mtry` and the number `features` used in the model, the RMSE decreases.
-The best considered combination is achieved with 11 `features` and `mtry = 10`. For higher values of `mtry` and number of features `features` the `RMSE` is slightly higher.
+With increasing `mtry` and the number features used in the model, the RMSE decreases.
+The best considered combination is achieved with 11 features and `mtry = 10`.
+For higher values of `mtry` and number of features `features` the RMSE is slightly higher.
 
 ```{r 2020-07-27-bikesharing-demand-052, echo=FALSE, fig.cap="RMSE on tuning grid ranger learner"}
 ggplot(archive_ranger, aes(x = importance.filter.nfeat,
@@ -881,7 +849,7 @@ Second, we want to compare the models with each other and examine how tuning imp
 As stated in Chapter 3.3 we use a 3-fold CV as our benchmarking resampling method, a 5-fold CV is evaluated inside each auto tuned object to obtain the best hyperparameter combination.
 Note, that this method does not lead to an unbiased GE, but rather is a step to compare the learners to each other.
 
-```{r 2020-07-27-bikesharing-demand-053, message=FALSE, results='hide', eval=long_run}
+```{r 2020-07-27-bikesharing-demand-053, message = FALSE, results = 'hide', eval = params$eval_all}
 lrns = list(
   rpart_learner, at_rpart,
   ranger_learner, at_ranger,
@@ -896,16 +864,15 @@ set.seed(123456)
 bmr = benchmark(design)
 bmr_table = bmr$aggregate(msr("regr.rmse")) %>%
   select(-c(nr, resample_result, task_id))
-
 ```
 
-```{r 2020-07-27-bikesharing-demand-054, echo=FALSE, eval=long_run}
-saveRDS(bmr_table, "bmr_table.rds")
+```{r 2020-07-27-bikesharing-demand-054, echo = FALSE, eval = params$eval_all}
+saveRDS(bmr_table, "data/bmr_table.rda")
 ```
 
 
-```{r 2020-07-27-bikesharing-demand-055, echo=FALSE, eval=!long_run}
-bmr_table = readRDS("bmr_table.rds")
+```{r 2020-07-27-bikesharing-demand-055, echo = FALSE}
+bmr_table = readRDS("data/bmr_table.rda")
 ```
 
 
@@ -988,13 +955,13 @@ For this purpose we add *dependencies* to the parameter.
 
 ```{r 2020-07-27-bikesharing-demand-059, message=FALSE, results='hide', eval=FALSE}
 ps = ParamSet$new(list(
-  ParamInt$new("branch.selection", lower = 1L, upper = 3L),
-  ParamInt$new("targettrafosimple.regr.kknn.targetinverter.regr.kknn.k", lower = 1L, upper = 50L),
-  ParamInt$new("targettrafosimple.regr.kknn.targetinverter.regr.kknn.distance", lower = 1L, upper = 3L),
-  ParamInt$new("targettrafosimple.regr.rpart.targetinverter.regr.rpart.minsplit", lower = 1L, upper = 30L),
-  ParamDbl$new("targettrafosimple.regr.rpart.targetinverter.regr.rpart.cp", lower = 0.001, upper = 0.1),
+  p_int("branch.selection", lower = 1L, upper = 3L),
+  p_int("targettrafosimple.regr.kknn.targetinverter.regr.kknn.k", lower = 1L, upper = 50L),
+  p_int("targettrafosimple.regr.kknn.targetinverter.regr.kknn.distance", lower = 1L, upper = 3L),
+  p_int("targettrafosimple.regr.rpart.targetinverter.regr.rpart.minsplit", lower = 1L, upper = 30L),
+  p_dbl("targettrafosimple.regr.rpart.targetinverter.regr.rpart.cp", lower = 0.001, upper = 0.1),
   ParamFct$new("importance.filter.nfeat", levels = c("6", "9", "11")),
-  ParamInt$new("importance.mtry", lower = 7L, upper = 11L)
+  p_int("importance.mtry", lower = 7L, upper = 11L)
 ))
 
 apply(
@@ -1043,12 +1010,12 @@ multi_at_archiv = lapply(
 ```
 
 ```{r 2020-07-27-bikesharing-demand-061, echo=FALSE, eval=long_run}
-saveRDS(multi_at_archiv, "multi_at_archiv.rds")
+saveRDS(multi_at_archiv, "multi_at_archiv.rda")
 ```
 
 
 ```{r 2020-07-27-bikesharing-demand-062, echo=FALSE, eval=!long_run}
-multi_at_archiv = readRDS("multi_at_archiv.rds")
+multi_at_archiv = readRDS("multi_at_archiv.rda")
 ```
 
 ```{r 2020-07-27-bikesharing-demand-063, echo=FALSE}
@@ -1093,11 +1060,11 @@ data_test = data.frame("datetime" = ymd_hms(test_datetime),
                         "response" = pred_test$response)
 
 data_total = rbind(data_train, data_test)
-saveRDS(data_total, "data_total.rds")
+saveRDS(data_total, "data_total.rda")
 ```
 
 ```{r 2020-07-27-bikesharing-demand-067, echo=FALSE, eval=!long_run}
-data_total = readRDS("data_total.rds")
+data_total = readRDS("data_total.rda")
 ```
 
 A visual comparison between the predicted demand with the actual demand is shown in Figure 14.
@@ -1157,7 +1124,7 @@ ggplot(data_grouped_day, aes(x = day, y = count)) +
 
 # Conclusion
 
-The `mlr3verse`  makes the process of model fitting, tuning, benchmarking and nested resampling intuitive and fast.
+The `r mlr_pkg("mlr3verse")` makes the process of model fitting, tuning, benchmarking and nested resampling intuitive and fast.
 The included packages provide access to a set of commonly used learners and their train and predict methods using R6 classes.
 Moreover one can increase the capabilities of learners of the original packages through tuning, benchmarking as well as imputing and even ensembling.
 `mlr3` provides these methods in a simple syntax to create understandable and comparable code architectures.
