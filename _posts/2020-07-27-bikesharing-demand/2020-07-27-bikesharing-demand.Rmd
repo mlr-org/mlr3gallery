@@ -200,7 +200,7 @@ ggcorr(train[, c("count", "windspeed", "humidity", "atemp", "temp")], geom = "bl
 Figure 2 shows the Bike Sharing demand over the entire time frame of our training data.
 We find an overall positive trend with seasonality, whereby the demand is higher in summer than in winter.
 
-```{r 2020-07-27-bikesharing-demand-009, echo = FALSE, message=FALSE, fig.cap="Bike Sharing demand over time"}
+```{r 2020-07-27-bikesharing-demand-009, echo = FALSE, message = FALSE, fig.cap="Bike Sharing demand over time"}
 ggplot(train, aes(x = as.POSIXct(datetime), y = count)) +
   geom_point(size = 0.5, color = "darkgrey") +
   geom_smooth(fill = "blue") +
@@ -852,10 +852,6 @@ Second, we want to compare the models with each other and examine how tuning imp
 As stated in Chapter 3.3 we use a 3-fold CV as our benchmarking resampling method, a 5-fold CV is evaluated inside each auto tuned object to obtain the best hyperparameter combination.
 Note, that this method does not lead to an unbiased GE, but rather is a step to compare the learners to each other.
 
-```{r 2020-07-27-bikesharing-demand-056, include = FALSE, eval = params$eval_all}
-future::plan(list("sequential", "multisession"))
-```
-
 ```{r 2020-07-27-bikesharing-demand-057, message = FALSE, results = 'hide', eval = params$eval_all}
 lrns = list(
   rpart_learner, at_rpart,
@@ -954,13 +950,13 @@ For this purpose we add *dependencies* to the parameter.
 - In the `ParameterSet` `nfeat` is set to `levels`. This is used to control the levels, a grid can tune over.
 `mtry` is initialized in the transformation depending on the randomly chosen `nfeat`.
 
-```{r 2020-07-27-bikesharing-demand-063, message=FALSE, results='hide', eval=FALSE}
+```{r 2020-07-27-bikesharing-demand-063, message = FALSE, results = 'hide', eval = TRUE}
 search_space = ps(
   branch.selection = p_int(lower = 1L, upper = 3L),
-  targetmutate.regr.kknn.targetinverter.regr.kknn.k = p_int(lower = 1L, upper = 50L, depends = branch.selection == 1),
-  targetmutate.regr.kknn.targetinverter.regr.kknn.distance = p_int(lower = 1L, upper = 3L, depends = branch.selection == 1),
-  targetmutate.regr.rpart.targetinverter.regr.rpart.minsplit = p_int(lower = 1L, upper = 30L, depends = branch.selection == 2),
-  targetmutate.regr.rpart.targetinverter.regr.rpart.cp = p_dbl(lower = 0.001, upper = 0.1, depends = branch.selection == 2),
+  targetmutate.regr.kknn.targetinvert.regr.kknn.k = p_int(lower = 1L, upper = 50L, depends = branch.selection == 1),
+  targetmutate.regr.kknn.targetinvert.regr.kknn.distance = p_int(lower = 1L, upper = 3L, depends = branch.selection == 1),
+  targetmutate.regr.rpart.targetinvert.regr.rpart.minsplit = p_int(lower = 1L, upper = 30L, depends = branch.selection == 2),
+  targetmutate.regr.rpart.targetinvert.regr.rpart.cp = p_dbl(lower = 0.001, upper = 0.1, depends = branch.selection == 2),
   importance.filter.nfeat = p_fct(levels = c("6", "9", "11"), depends = branch.selection == 3),
   importance.mtry = p_int(lower = 7L, upper = 11L, depends = branch.selection == 3),
   .extra_trafo = function(x, param_set) {
@@ -979,40 +975,35 @@ Now we can perform nested resampling using our previously created pipe.
 We directly resample this autotuner to reduce computing time.
 We can save the tuned learners in our resampling result by setting `store_model = TRUE`.
 
-```{r 2020-07-27-bikesharing-demand-064, eval = TRUE}
+```{r 2020-07-27-bikesharing-demand-064, eval = params$eval_all}
 multi_at = auto_tuner(
-    method = "random_search",
-    learner = GraphLearner$new(pipe, task_type = "regr"),
-    resampling =  resampling_cv_5,
-    measure = measures,
-    search_space = search_space,
-    term_evals = 21L,
-    batch_size = 8L)
+  method = "random_search",
+  learner = GraphLearner$new(pipe, task_type = "regr"),
+  resampling =  resampling_cv_5,
+  measure = measures,
+  search_space = search_space,
+  term_evals = 21L,
+  batch_size = 8L)
 
 multi_at_rr = resample(bike_task, multi_at, resampling_outer_cv3, store_models = TRUE)
-
-#arrange archive
-cols = c("regr.rmse", "branch.selection",
-          "targetmutate.regr.kknn.targetinverter.regr.kknn.k",
-          "targetmutate.regr.kknn.targetinverter.regr.kknn.distance",
-          "targetmutate.regr.rpart.targetinverter.regr.rpart.minsplit",
-          "targetmutate.regr.rpart.targetinverter.regr.rpart.cp",
-          "importance.filter.nfeat", "importance.mtry")
-multi_at_archiv = lapply(1:3, function(x) multi_at_rr$data$learner[[x]]$archive$data[, ..cols])
 ```
 
-```{r 2020-07-27-bikesharing-demand-065, echo = FALSE, eval = TRUE}
-saveRDS(multi_at_archiv, "data/multi_at_archiv.rda")
-```
+```{r 2020-07-27-bikesharing-demand-065, echo = FALSE, eval = params$eval_all}
+multi_at_archive = extract_inner_tuning_archives(multi_at_rr) %>%
+  select(regr.rmse, branch.selection, targetmutate.regr.kknn.targetinvert.regr.kknn.k, 
+    targetmutate.regr.kknn.targetinvert.regr.kknn.distance, targetmutate.regr.rpart.targetinvert.regr.rpart.minsplit,
+    targetmutate.regr.rpart.targetinvert.regr.rpart.cp, importance.filter.nfeat, importance.mtry)
 
+saveRDS(multi_at_archive, "data/multi_at_archive.rda")
+```
 
 ```{r 2020-07-27-bikesharing-demand-066, echo = FALSE}
-multi_at_archiv = readRDS("data/multi_at_archiv.rda")
+multi_at_archive = readRDS("data/multi_at_archive.rda")
 ```
 
 ```{r 2020-07-27-bikesharing-demand-067, echo = FALSE}
-kable(rbind(multi_at_archiv[[1]], multi_at_archiv[[2]], multi_at_archiv[[3]]), "html", booktabs = TRUE,  caption = "nested resampling outer-cv results",
-      linesep = "\\addlinespace", col.names = c("RMSE", "learner-branch", "k", "distance", "minsplit", "cp", "nfeat", "mtry")) %>%
+kable(multi_at_archive , "html", booktabs = TRUE,  caption = "nested resampling outer-cv results", 
+  linesep = "\\addlinespace", col.names = c("RMSE", "learner-branch", "k", "distance", "minsplit", "cp", "nfeat", "mtry")) %>%
   kable_styling(full_width = TRUE) %>%
   pack_rows("Outer CV-1", 1, 21) %>%
   pack_rows("Outer CV-2", 22,42) %>%
@@ -1042,7 +1033,7 @@ pred_train = at_ranger$predict(bike_task)
 pred_test = at_ranger$predict_newdata(test)
 ```
 
-```{r 2020-07-27-bikesharing-demand-070, echo = FALSE, message=FALSE}
+```{r 2020-07-27-bikesharing-demand-070, echo = FALSE, message = FALSE}
 data_train = data.frame("datetime" = ymd_hms(train_datetime),
                          "truth" = pred_train$truth,
                          "response" = pred_train$response)
