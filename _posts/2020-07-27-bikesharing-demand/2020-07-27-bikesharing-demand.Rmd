@@ -74,10 +74,12 @@ Note, that expensive calculations are pre-saved in `rda` files in this tutorial 
 library(ggplot2)
 library(GGally)
 library(ggrepel)
+
 # tools
 library(dplyr)
 library(lubridate)
 library(tidyr)
+
 # analytic
 library(mlr3verse)
 ```
@@ -429,7 +431,7 @@ my_sample = function(data, mapping, ...) {
 }
 ```
 
-```{r 2020-07-27-bikesharing-demand-025, fig.cap="Relationship between atemp, windspeed and count by year", fig.height=4, echo = FALSE}
+```{r 2020-07-27-bikesharing-demand-025, fig.cap="Relationship between atemp, windspeed and count by year", fig.width=10, fig.height=8, echo = FALSE}
 autoplot(bike_task,
   type = "pairs",
   columns = c("count", "atemp", "windspeed"),
@@ -442,7 +444,7 @@ autoplot(bike_task,
 
 ## Model training
 
-In our modeling process, we consider three learners: k-Nearest-Neighbor classification (`kknn`),  classification tree (`rpart`) and random classification forest (`ranger`).
+In our modeling process, we consider three learners: `r ref("mlr_learners_classif.kknn", "kknn")`, `r ref("mlr_learners_classif.rpart", "rpart")`, `r ref("mlr_learners_classif.ranger", "ranger learner")`.
 For parameter optimization, we use the so-called `r ref("AutoTuner")`.
 An `r ref("AutoTuner")` is a learner, that tunes its hyperparameters during training.
 The technical implementation is provided by `r mlr_pkg("mlr3tuning")`.
