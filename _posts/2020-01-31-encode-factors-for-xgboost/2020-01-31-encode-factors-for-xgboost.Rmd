@@ -35,12 +35,24 @@ The package `r cran_pkg("xgboost")` unfortunately does not support handling of c
 Therefore, it is required to manually convert factor columns to numerical dummy features.
 We show how to use `r mlr_pkg("mlr3pipelines")` to augment the `r ref("mlr_learners_classif.xgboost", "xgboost learner")` with an automatic factor encoding.
 
+We load the `r mlr_pkg("mlr3verse")` package which pulls in the most important packages for this example.
+
+```{r mlr3fselect-basic-003}
+library(mlr3verse)
+```
+
+We initialize the random number generator with a fixed seed for reproducibility, and decrease the verbosity of the logger to keep the output clearly represented.
+
+```{r 2020-07-27-bikesharing-demand-004}
+set.seed(7832)
+lgr::get_logger("mlr3")$set_threshold("warn")
+```
+
 ## Construct the Base Objects
 
 First, we take an example task with factors (`r ref("mlr_tasks_german_credit", "german_credit")`) and create the `r ref("mlr_learners_classif.xgboost", "xgboost learner")`:
 
 ```{r 2020-01-31-encode-factors-for-xgboost-002}
-library(mlr3)
 library(mlr3learners)
 
 task = tsk("german_credit")
@@ -69,9 +81,7 @@ Here, we decide to use "treatment" encoding (first factor level serves as baseli
 We restrict the operator to factor columns using the respective `r ref("Selector")` `selector_type()`:
 
 ```{r 2020-01-31-encode-factors-for-xgboost-004}
-library(mlr3pipelines)
-fencoder = po("encode", method = "treatment",
-  affect_columns = selector_type("factor"))
+fencoder = po("encode", method = "treatment", affect_columns = selector_type("factor"))
 ```
 
 We can manually trigger the `r ref("PipeOp")` to test the operator on our task:
@@ -84,8 +94,7 @@ The ordered factor remained untouched, all other factors have been converted to 
 To also convert the ordered variables `installment_rate`, `number_credits`, and `present_residence`, we construct the `r ref("mlr_pipeops_colapply", "colapply")` operator with the converter `as.integer()`:
 
 ```{r 2020-01-31-encode-factors-for-xgboost-006}
-ord_to_int = po("colapply", applicator = as.integer,
-  affect_columns = selector_type("ordered"))
+ord_to_int = po("colapply", applicator = as.integer, affect_columns = selector_type("ordered"))
 ```
 
 Applied on the original task, it changes factor columns to `integer`:
