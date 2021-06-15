@@ -21,7 +21,7 @@ params:
   eval_all: FALSE
 ---
 
-```{r practical-tuning-series-tune-a-support-vector-machine-001, include=FALSE}
+```{r tuning-a-complex-graph-001, include=FALSE}
  knitr::opts_chunk$set(
   echo = TRUE,
   R.options = list(width = 120)
@@ -220,7 +220,7 @@ generate_design_grid(tune_ps1, resolution = 4)
 ```{r tuning-a-complex-graph-014, echo = FALSE}
 generate_design_grid(tune_ps1, resolution = 4)$data %>%
   kable(format = "html") %>%
-  kable_styling() %>%
+  kable_styling(full_width = TRUE) %>%
   kableExtra::scroll_box(height = "400px")
 ```
 
@@ -248,8 +248,8 @@ as.data.table(tune1$archive, unnest = NULL, exclude_columns = c("x_domain", "uha
 ```{r tuning-a-complex-graph-019, echo = FALSE, layout="l-page"}
 as.data.table(tune1$archive, unnest = NULL, exclude_columns = c("x_domain", "uhash", "resample_result"))[order(classif.acc), ] %>%
   kable(format = "html") %>%
-  kable_styling() %>%
-  kableExtra::scroll_box(width = "100%", height = "400px")
+  kable_styling(full_width = TRUE) %>%
+  kableExtra::scroll_box(height = "400px")
 ```
 
 We achieve very good accuracy using `ranger`, more or less regardless how `mtry` and `num.trees` are set. However, the `LDA` also shows very good accuracy when combined with `PCA` or `ICA` retaining 30 components.
@@ -285,7 +285,7 @@ graph2 =
 
 This graph now looks like the following:
 
-```{r tuning-a-complex-graph-022, graph2}
+```{r tuning-a-complex-graph-022, graph2, fig.width=10, fig.height=8}
 graph2$plot()
 ```
 

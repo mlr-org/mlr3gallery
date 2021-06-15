@@ -19,7 +19,7 @@ output:
     css: ../../custom.css
 ---
 
-```{r practical-tuning-series-tune-a-support-vector-machine-001, include=FALSE}
+```{r 2020-02-01-tuning-multiplexer-001, include=FALSE}
  knitr::opts_chunk$set(
   echo = TRUE,
   R.options = list(width = 120)
@@ -27,8 +27,6 @@ output:
 
 library(mlr3book)
 library(kableExtra)
-
-set.seed(7832)
 
 ggplot2::theme_set(ggplot2::theme_light())
 ```
@@ -57,25 +55,14 @@ We will consider 2 cases: (a) Running the learners in their default, so without 
 Let's load some packages and define our learners.
 
 ```{r 2020-02-01-tuning-multiplexer-002}
-knitr::opts_chunk$set(
-  echo = TRUE,
-  R.options = list(width = 120)
-)
-```
-
-
-```{r 2020-02-01-tuning-multiplexer-003}
-set.seed(1)
-library(mlr3)
-library(mlr3tuning)
-library(mlr3pipelines)
+set.seed(7832)
+library(mlr3verse)
 library(mlr3learners)
-library(paradox)
 lgr::get_logger("mlr3")$set_threshold("warn")
 lgr::get_logger("bbotk")$set_threshold("warn")
 
 learns = list(
-  lrn("classif.xgboost", id = "xgb"),
+  lrn("classif.xgboost", id = "xgb", eval_metric = "logloss"),
   lrn("classif.ranger", id = "rf")
 )
 learns_ids = sapply(learns, function(x) x$id)
@@ -91,8 +78,7 @@ cv2 = rsmp("cv", folds = 5) # outer loop for nested CV
 Assume we don't want to perform tuning and or with running all learner in their respective defaults.
 Simply run benchmark on the learners and the tasks. That tabulates our results nicely and shows us what works best.
 
-
-```{r 2020-02-01-tuning-multiplexer-004}
+```{r 2020-02-01-tuning-multiplexer-003}
 bg = benchmark_grid(task, learns, cv2)
 b = benchmark(bg)
 b$aggregate(measures = msr("classif.ce"))
@@ -124,7 +110,7 @@ The pipe consists of three elements:
 * our learners (combined with `r ref("gunion")`)
 * `r ref("mlr_pipeops_unbranch", text = "unbranch")` combines the forked paths at the end.
 
-```{r 2020-02-01-tuning-multiplexer-005}
+```{r 2020-02-01-tuning-multiplexer-004, fig.width = 10, fig.height = 8}
 pipe =
   po("branch", options = learns_ids) %>>%
   gunion(lapply(learns, po)) %>>%
@@ -138,7 +124,7 @@ But as we don't tune them here (yet), we don't care (yet).
 But the first hyperparameter is special.
 `branch.selection` controls over which (named) branching channel our data flows.
 
-```{r 2020-02-01-tuning-multiplexer-006}
+```{r 2020-02-01-tuning-multiplexer-005}
 pipe$param_set$ids()
 pipe$param_set$params$branch.selection
 ```
@@ -147,40 +133,59 @@ We can now tune over this pipeline, and probably running grid search seems a goo
 available learner.
 NB: We have now written down in (much more complicated code) what we did before with `benchmark`.
 
-```{r 2020-02-01-tuning-multiplexer-007}
+```{r 2020-02-01-tuning-multiplexer-006, results = "hide"}
 glrn = GraphLearner$new(pipe, id = "g") # connect pipe to mlr3
-ps = ParamSet$new(list(
-  ParamFct$new("branch.selection", levels = c("rf", "xgb"))
-))
-instance = TuningInstanceSingleCrit$new(
+glrn$param_set$values$branch.selection = to_tune(levels = c("rf", "xgb"))
+
+instance = tune(
+  method = "grid_search",
   task = task,
   learner = glrn,
   resampling = cv1,
-  measure = msr("classif.ce"),
-  terminator = trm("none"),
-  search_space = ps
-)
-tuner = tnr("grid_search")
-tuner$optimize(instance)
+  measure = msr("classif.ce"))
+
 as.data.table(instance$archive)
+```
+
+```{r 2020-02-01-tuning-multiplexer-007, echo = FALSE}
+as.data.table(instance$archive) %>%
+  kable(format = "html") %>%
+  kable_styling(full_width = TRUE) %>%
+  kableExtra::scroll_box(height = "400px")
 ```
 
 But: Via this approach we can now get unbiased performance results via nested resampling and using the `r ref("AutoTuner")` (which would make much more sense if we would select from 100 models and not 2).
 
-```{r 2020-02-01-tuning-multiplexer-008}
-at = AutoTuner$new(
+```{r 2020-02-01-tuning-multiplexer-008, results = 'hide'}
+at = auto_tuner(
+  method = "grid_search",
   learner = glrn,
   resampling = cv1,
   measure = msr("classif.ce"),
-  search_space = ps,
-  terminator = trm("none"),
-  tuner = tuner
 )
 rr = resample(task, at, cv2, store_models = TRUE)
-# access 1st inner tuning result
-ll = rr$learners[[1]]$model$tuning_instance
-ll$result
-ll$archive$data
+
+# access inner tuning result
+extract_inner_tuning_results(rr)
+```
+
+```{r 2020-02-01-tuning-multiplexer-009, echo = FALSE}
+extract_inner_tuning_results(rr) %>%
+  kable(format = "html") %>%
+  kable_styling() %>%
+  kableExtra::scroll_box(height = "400px")
+```
+
+```{r 2020-02-01-tuning-multiplexer-010, results = 'hide'}
+# access inner tuning archives
+extract_inner_tuning_archives(rr)
+```
+
+```{r 2020-02-01-tuning-multiplexer-011, echo = FALSE, layout="l-page"}
+extract_inner_tuning_archives(rr) %>%
+  kable(format = "html") %>%
+  kable_styling() %>%
+  kableExtra::scroll_box(height = "400px")
 ```
 
 ## Model-Selection and Tuning with Pipelines
@@ -196,7 +201,7 @@ NB: Many AutoML systems work in a very similar way.
 Remember, that the pipeline contains a joint set of all contained hyperparameters.
 Prefixed with the respective PipeOp ID, to make names unique.
 
-```{r 2020-02-01-tuning-multiplexer-009}
+```{r 2020-02-01-tuning-multiplexer-012}
 as.data.table(pipe$param_set)[,1:4]
 ```
 
@@ -207,18 +212,11 @@ We also have to reflect the hierarchical order of the parameter sets (admittedly
 We can only set the `mtry` value if the pipe is configured to use the random forest (`ranger`).
 The same applies for the xgboost parameter.
 
-```{r 2020-02-01-tuning-multiplexer-010}
-ps = ParamSet$new(list(
-  ParamFct$new("branch.selection", levels = c("rf", "xgb")),
-  # more complicated, but programmtic way for the above:
-  # pipe$param_set$params$branch.selection$clone()
-  ParamInt$new("rf.mtry", lower = 1L, upper = 20L),
-  ParamInt$new("xgb.nrounds", lower = 1, upper = 500)
-))
-
-# FIXME this seems pretty inconvenient
-ps$add_dep("rf.mtry", "branch.selection", CondEqual$new("rf"))
-ps$add_dep("xgb.nrounds", "branch.selection", CondEqual$new("xgb"))
+```{r 2020-02-01-tuning-multiplexer-013}
+search_space = ps(
+  branch.selection = p_fct(levels = c("rf", "xgb")),
+  rf.mtry = p_int(lower = 1L, upper = 20L, depends = branch.selection == "rf"),
+  xgb.nrounds = p_int(lower = 1, upper = 500, depends = branch.selection == "xgb"))
 ```
 
 ### Tune the Pipeline with a Random Search
@@ -226,23 +224,33 @@ ps$add_dep("xgb.nrounds", "branch.selection", CondEqual$new("xgb"))
 Very similar code as before, we just swap out the search space.
 And now use random search.
 
-```{r 2020-02-01-tuning-multiplexer-011}
-instance = TuningInstanceSingleCrit$new(
+```{r 2020-02-01-tuning-multiplexer-014, results = 'hide'}
+glrn = GraphLearner$new(pipe, id = "g")
+
+instance = tune(
+  method = "random_search",
   task = task,
   learner = glrn,
   resampling = cv1,
   measure = msr("classif.ce"),
-  search_space = ps,
-  terminator = trm("evals", n_evals = 10)
+  search_space = search_space,
+  term_evals = 10
 )
-tuner = tnr("random_search")
-tuner$optimize(instance)
+
 as.data.table(instance$archive)
 ```
 
+```{r 2020-02-01-tuning-multiplexer-015, echo = FALSE, layout="l-page"}
+as.data.table(instance$archive) %>%
+  kable(format = "html") %>%
+  kable_styling() %>%
+  kableExtra::scroll_box(height = "400px")
+```
+
+
 The following shows a quick way to visualize the tuning results.
 
-```{r 2020-02-01-tuning-multiplexer-012}
+```{r 2020-02-01-tuning-multiplexer-016}
 resdf = as.data.table(instance$archive)
 resdf = reshape(resdf,
   varying = c("xgb.nrounds","rf.mtry"),
@@ -259,18 +267,25 @@ g
 
 Nested resampling, now really needed:
 
-```{r 2020-02-01-tuning-multiplexer-013}
-at = AutoTuner$new(
+```{r 2020-02-01-tuning-multiplexer-017, results = 'hide'}
+rr = tune_nested(
+  method = "grid_search",
+  task = task,
   learner = glrn,
-  resampling = cv1,
+  inner_resampling = cv1,
+  outer_resampling = cv2,
   measure = msr("classif.ce"),
-  search_space = ps,
-  terminator = trm("evals", n_evals = 10),
-  tuner = tuner
+  search_space = search_space,
+  term_evals = 10L
 )
-rr = resample(task, at, cv2, store_models = TRUE)
-# access 1st inner tuning result
-ll = rr$learners[[1]]$model$tuning_instance
-ll$result
-as.data.table(instance$archive)
+
+# access inner tuning result
+extract_inner_tuning_results(rr)
+```
+
+```{r 2020-02-01-tuning-multiplexer-018, echo = FALSE}
+extract_inner_tuning_results(rr) %>%
+  kable(format = "html") %>%
+  kable_styling() %>%
+  kableExtra::scroll_box(height = "400px")
 ```

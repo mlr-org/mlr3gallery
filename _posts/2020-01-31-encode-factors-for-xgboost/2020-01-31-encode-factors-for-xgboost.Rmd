@@ -17,7 +17,7 @@ output:
     css: ../../custom.css
 ---
 
-```{r practical-tuning-series-tune-a-support-vector-machine-001, include=FALSE}
+```{r 2020-01-31-encode-factors-for-xgboost-001, include=FALSE}
  knitr::opts_chunk$set(
   echo = TRUE,
   R.options = list(width = 120)
@@ -37,13 +37,13 @@ We show how to use `r mlr_pkg("mlr3pipelines")` to augment the `r ref("mlr_learn
 
 We load the `r mlr_pkg("mlr3verse")` package which pulls in the most important packages for this example.
 
-```{r mlr3fselect-basic-003}
+```{r 2020-01-31-encode-factors-for-xgboost-002}
 library(mlr3verse)
 ```
 
 We initialize the random number generator with a fixed seed for reproducibility, and decrease the verbosity of the logger to keep the output clearly represented.
 
-```{r 2020-07-27-bikesharing-demand-004}
+```{r 2020-01-31-encode-factors-for-xgboost-003}
 set.seed(7832)
 lgr::get_logger("mlr3")$set_threshold("warn")
 ```
@@ -52,7 +52,7 @@ lgr::get_logger("mlr3")$set_threshold("warn")
 
 First, we take an example task with factors (`r ref("mlr_tasks_german_credit", "german_credit")`) and create the `r ref("mlr_learners_classif.xgboost", "xgboost learner")`:
 
-```{r 2020-01-31-encode-factors-for-xgboost-002}
+```{r 2020-01-31-encode-factors-for-xgboost-004}
 library(mlr3learners)
 
 task = tsk("german_credit")
@@ -64,7 +64,7 @@ print(learner)
 
 We now compare the feature types of the task and the supported feature types:
 
-```{r 2020-01-31-encode-factors-for-xgboost-003}
+```{r 2020-01-31-encode-factors-for-xgboost-005}
 unique(task$feature_types$type)
 learner$feature_types
 setdiff(task$feature_types$type, learner$feature_types)
@@ -80,26 +80,26 @@ The factor encoder's man page can be found under `r ref("mlr_pipeops_encode")`.
 Here, we decide to use "treatment" encoding (first factor level serves as baseline, and there will be a new binary column for each additional level).
 We restrict the operator to factor columns using the respective `r ref("Selector")` `selector_type()`:
 
-```{r 2020-01-31-encode-factors-for-xgboost-004}
+```{r 2020-01-31-encode-factors-for-xgboost-006}
 fencoder = po("encode", method = "treatment", affect_columns = selector_type("factor"))
 ```
 
 We can manually trigger the `r ref("PipeOp")` to test the operator on our task:
 
-```{r 2020-01-31-encode-factors-for-xgboost-005}
+```{r 2020-01-31-encode-factors-for-xgboost-007}
 fencoder$train(list(task))
 ```
 
 The ordered factor remained untouched, all other factors have been converted to numeric columns.
 To also convert the ordered variables `installment_rate`, `number_credits`, and `present_residence`, we construct the `r ref("mlr_pipeops_colapply", "colapply")` operator with the converter `as.integer()`:
 
-```{r 2020-01-31-encode-factors-for-xgboost-006}
+```{r 2020-01-31-encode-factors-for-xgboost-008}
 ord_to_int = po("colapply", applicator = as.integer, affect_columns = selector_type("ordered"))
 ```
 
 Applied on the original task, it changes factor columns to `integer`:
 
-```{r 2020-01-31-encode-factors-for-xgboost-007}
+```{r 2020-01-31-encode-factors-for-xgboost-009}
 ord_to_int$train(list(task))
 ```
 
@@ -111,20 +111,20 @@ Finally, we construct a linear pipeline consisting of
 2. the ordered factor converter `ord_to_int`, and
 3. the xgboost base learner.
 
-```{r 2020-01-31-encode-factors-for-xgboost-008}
+```{r 2020-01-31-encode-factors-for-xgboost-010}
 pipe = fencoder %>>% ord_to_int %>>% learner
 print(pipe)
 ```
 
 The pipeline is wrapped in a `r ref("GraphLearner")` so that it behaves like a regular learner:
 
-```{r 2020-01-31-encode-factors-for-xgboost-009}
+```{r 2020-01-31-encode-factors-for-xgboost-011}
 glearner = GraphLearner$new(pipe)
 ```
 
 We can now apply the new learner on the task, here with a 3-fold cross validation:
 
-```{r 2020-01-31-encode-factors-for-xgboost-010}
+```{r 2020-01-31-encode-factors-for-xgboost-012}
 rr = resample(task, glearner, rsmp("cv", folds = 3))
 rr$aggregate()
 ```
