@@ -4,6 +4,7 @@ author:
   - name: Henri Funk
   - name: Andreas Hofheinz
   - name: Marius Girnat
+  - name: Marc Becker
 date: 07-27-2020
 description: |
   This use case provides an example on tuning and benchmarking in mlr3verse using data from Capital Bikeshare.
@@ -34,8 +35,6 @@ params:
 
 library(mlr3book)
 library(kableExtra)
-
-set.seed(7832)
 
 ggplot2::theme_set(ggplot2::theme_light())
 ```
@@ -377,12 +376,13 @@ Using `PipeOpTargetTrafo` we can dynamically transform our target before the pre
 into our original scale afterwards.
 
 ```{r 2020-07-27-bikesharing-demand-021}
-log1p_target_trafo = function(learner, graph = TRUE) {
+log1p_target_trafo = function(learner) {
   ppl = ppl("targettrafo", graph = learner)
   ppl$param_set$values$targetmutate.trafo = function(x) log(x)
   ppl$param_set$values$targetmutate.inverter = function(x) list(response =  expm1(x$response))
-  if (graph == TRUE) return(GraphLearner$new(ppl, task_type = "regr"))
-  ppl
+  glrn = GraphLearner$new(ppl, task_type = "regr")
+  glrn$id = paste0("glrn.", learner$id)
+  glrn
 }
 ```
 
@@ -490,7 +490,7 @@ The hyperparameter space of numeric hyperparameter is set around their default v
 In regular cases we would suggest using 5- or 10-fold crossvalidiation.
 Auto tuning should exploit enough grid points to give the user an impression about the whole hyperparameter space.
 
-### KNN
+### KKNN
 
 `kknn` is a k-nearest-neighbor learner whose hyperparameters are shown in Table 4.
 
@@ -510,11 +510,9 @@ kable(df_params, "html", booktabs = TRUE,  caption = "Paramters of kknn learner"
 
 For simplicity we tune only two of those parameters:
 
-1. `k`
-> Number of neighbors considered.
+1. `k`: Number of neighbors considered.
 
-2. `distance`
-> Parameter of Minkowski distance
+2. `distance`: Parameter of Minkowski distance
 
 For more information see the [kknn documentation](https://cran.r-project.org/web/packages/kknn/kknn.pdf).
 
@@ -555,7 +553,7 @@ In Figure 8 we see the RMSE for the considered hyperparameter of the `kknn`.
 It seems that a higher order `p` of the Minkowski distance leads to a lower RMSE.
 Moreover, we see that the RMSE is lowest around `k = 10` neighbors.
 For smaller `k` the estimation might be too wiggly, for higher `k` it might be too global (bias–variance tradeoff).
-The minimal RMSE that the `r ref("AutoTuner")` could find is given for `p = 3` and `k = 12`.
+The minimal RMSE that the `r ref("AutoTuner")` could find is given for `p = 3` and `k = 6`.
 
 ```{r 2020-07-27-bikesharing-demand-036, echo = FALSE, fig.cap="RMSE on tuning grid of kknn autotuner"}
 archive_kknn = as.data.table(at_kknn$archive)
@@ -583,9 +581,9 @@ ggplot(archive_kknn, aes(x = regr.kknn.k, y = regr.kknn.distance, col = regr.rms
     legend.title = element_text(size = 9))
 ```
 
-### CART
+### rpart
 
-`rpart` is CART learner whose hyperparameters are shown in Table 5.
+`rpart` is a CART learner whose hyperparameters are shown in Table 5.
 
 ```{r 2020-07-27-bikesharing-demand-037, results="hide"}
 rpart_learner = lrn("regr.rpart")
@@ -600,15 +598,11 @@ kable_styling(full_width = TRUE)
 
 Again, for simplicity, we tune only two of those parameters:
 
-1. `minsplit`
-> the minimum number of observations that must exist in a node in order for a
+1. `minsplit`: the minimum number of observations that must exist in a node in order for a
 split to be attempted.
 
-2. `cp`
-> complexity parameter.
-Any split that does not decrease the overall lack of fit by a factor of cp is
+2. `cp`: complexity parameter. Any split that does not decrease the overall lack of fit by a factor of cp is
 not attempted.
-[...]
 
 For more information browse the [rpart Documentation](https://cran.r-project.org/web/packages/rpart/rpart.pdf).
 
@@ -679,7 +673,7 @@ ggplot(archive_rpart, aes(x = regr.rpart.cp, y = regr.rpart.minsplit, col = regr
     legend.title = element_text(size = 9))
 ```
 
-### Random Forest
+### ranger
 
 `ranger` is a random forest learner whose hyperparameters are shown in Table 6.
 
@@ -744,13 +738,10 @@ In addition to the regular `ranger` features, we are now able to tune on any par
 
 Again, for simplicity, we tune only two of those parameters:
 
-1. `regr.ranger.mtry`
-> Number of variables to possibly split at in each node. Default is the (rounded
+1. `regr.ranger.mtry`: Number of variables to possibly split at in each node. Default is the (rounded
 down) square root of the number variables.
-[...]
 
-2. `importance.filter.nfeat`
-> A param from `importance` that allows to control the size of features computed
+2. `importance.filter.nfeat`: A param from `importance` that allows to control the size of features computed
 in the model.
 
 For more information see the [ranger documentation](https://cran.r-project.org/web/packages/ranger/ranger.pdf) and [mlr3 pipelines](https://mlr3book.mlr-org.com/pipelines.html).
@@ -858,6 +849,7 @@ lrns = list(
   ranger_learner, at_ranger,
   kknn_learner, at_kknn
 )
+
 design = benchmark_grid(
   tasks = bike_task,
   learners = lrns,
@@ -870,7 +862,6 @@ bmr = benchmark(design)
 ```{r 2020-07-27-bikesharing-demand-058, echo = FALSE, eval = params$eval_all}
 saveRDS(bmr, "data/bmr.rda")
 ```
-
 
 ```{r 2020-07-27-bikesharing-demand-059, echo = FALSE}
 bmr = readRDS("data/bmr.rda")
@@ -899,39 +890,37 @@ The benchmarking resampling validates our results from hyperparameter tuning for
 We find that with auto tuning each of the learners could increase its performance compared to its' equivalent that is using default hyperparameters.
 However, for `rpart` not only performance is increasing but also variance.
 That does not apply to  the tuned `kknn` and `ranger` learners for which the results seem to be comparatively stable.
-With a RMSE of 0.31 the tuned random forest performs the best among tuned and untuned learners compared in benchmarking.
+The tuned random forest performs the best among tuned and untuned learners compared in benchmarking.
 Consequently, the tuned `ranger` is our learner of choice for prediction.
 
 ```{r 2020-07-27-bikesharing-demand-061, warning = FALSE, echo = FALSE}
 autoplot(bmr, measure = msr("regr.rmse")) +
   theme_bw() +
-  scale_x_discrete(labels = c("KNN", "Random Forest", "CART", "Random Forest Tuned"  ,  "KNN Tuned", "CART Tuned")) +
   labs(y = "RMSE") +
   coord_flip() +
   theme(axis.title = element_text(size = 9))
 ```
 
-# Nested Resampling - Autotune a Graphlearner
+# Nested Resampling
 
 Benchmarking is a fast and simple way to compare different approaches to each other.
 However, from a theoretical perspective, this approach does not lead to unbiased general error estimators.
 Since we only used three different learners for benchmarking this bias should be insignificant.
-Nevertheless, we would like to provide a showcase for how to obtain unbiased results with more advanced techniques that are available in `mlr3`.
+Nevertheless, we would like to provide a showcase for how to obtain unbiased results with more advanced techniques that are available in `r mlr_pkg("mlr3")`.
 Therefore we evaluate the performance of our learners by "true" unbiased nested resampling.
 In this case, tuning and model selection is only performed during inner resampling.
 The purpose of outer resampling is to evaluate the unbiased score from inner resampling.
 This method is also more exhaustive, as it tunes the graph learner in each of the three outer resampling CVs again.
 Benchmarking on the other hand, "only" tunes each autotuner once and cross-validates with the optimized hyperparameters from the first iteration.
 
-
-## The Pipe
+## The Pipeline
 
 We create a simple branched pipe, with our already known learners from the previous chapters.
 Note that we do not implement the autotuners but the actual learners here, since we aim to tune over the whole pipeline as a learner here, rather than over each learner individually.
 Therefore our selected learners `kknn`, `rpart` and `importance.ranger` can be considered as hyperparameters in a more universal graph-learner `glrn`.
 For more information see [mlr3pipelines](https://mlr3book.mlr-org.com/pipelines.html).
 
-```{r 2020-07-27-bikesharing-demand-062, fig.cap="Pipeline Learner", fig.width = 5, fig.height = 4.3}
+```{r 2020-07-27-bikesharing-demand-062, fig.cap="Pipeline Learner", fig.width = 10, fig.height = 8.6}
 list = sapply(list(po(kknn_learner), po(rpart_learner), po(ranger_learner)), log1p_target_trafo)
 list[[3]] = po("filter", filter_ranger, param_vals = list(filter.nfeat = 11L)) %>>%
   po("learner", list[[3]]$clone())
@@ -950,13 +939,13 @@ For this purpose we add *dependencies* to the parameter.
 - In the `ParameterSet` `nfeat` is set to `levels`. This is used to control the levels, a grid can tune over.
 `mtry` is initialized in the transformation depending on the randomly chosen `nfeat`.
 
-```{r 2020-07-27-bikesharing-demand-063, message = FALSE, results = 'hide', eval = TRUE}
+```{r 2020-07-27-bikesharing-demand-063, message = FALSE, results = 'hide'}
 search_space = ps(
   branch.selection = p_int(lower = 1L, upper = 3L),
-  targetmutate.regr.kknn.targetinvert.regr.kknn.k = p_int(lower = 1L, upper = 50L, depends = branch.selection == 1),
-  targetmutate.regr.kknn.targetinvert.regr.kknn.distance = p_int(lower = 1L, upper = 3L, depends = branch.selection == 1),
-  targetmutate.regr.rpart.targetinvert.regr.rpart.minsplit = p_int(lower = 1L, upper = 30L, depends = branch.selection == 2),
-  targetmutate.regr.rpart.targetinvert.regr.rpart.cp = p_dbl(lower = 0.001, upper = 0.1, depends = branch.selection == 2),
+  glrn.regr.kknn.regr.kknn.k = p_int(lower = 1L, upper = 50L, depends = branch.selection == 1),
+  glrn.regr.kknn.regr.kknn.distance = p_int(lower = 1L, upper = 3L, depends = branch.selection == 1),
+  glrn.regr.rpart.regr.rpart.minsplit = p_int(lower = 1L, upper = 30L, depends = branch.selection == 2),
+  glrn.regr.rpart.regr.rpart.cp = p_dbl(lower = 0.001, upper = 0.1, depends = branch.selection == 2),
   importance.filter.nfeat = p_fct(levels = c("6", "9", "11"), depends = branch.selection == 3),
   importance.mtry = p_int(lower = 7L, upper = 11L, depends = branch.selection == 3),
   .extra_trafo = function(x, param_set) {
@@ -969,7 +958,7 @@ search_space = ps(
 )
 ```
 
-## Resampling the Autotuner
+## Resampling the AutoTuner
 
 Now we can perform nested resampling using our previously created pipe.
 We directly resample this autotuner to reduce computing time.
@@ -990,9 +979,9 @@ multi_at_rr = resample(bike_task, multi_at, resampling_outer_cv3, store_models =
 
 ```{r 2020-07-27-bikesharing-demand-065, echo = FALSE, eval = params$eval_all}
 multi_at_archive = extract_inner_tuning_archives(multi_at_rr) %>%
-  select(regr.rmse, branch.selection, targetmutate.regr.kknn.targetinvert.regr.kknn.k, 
-    targetmutate.regr.kknn.targetinvert.regr.kknn.distance, targetmutate.regr.rpart.targetinvert.regr.rpart.minsplit,
-    targetmutate.regr.rpart.targetinvert.regr.rpart.cp, importance.filter.nfeat, importance.mtry)
+  select(regr.rmse, branch.selection, glrn.regr.kknn.regr.kknn.k, 
+    glrn.regr.kknn.regr.kknn.distance, glrn.regr.rpart.regr.rpart.minsplit,
+    glrn.regr.rpart.regr.rpart.cp, importance.filter.nfeat, importance.mtry)
 
 saveRDS(multi_at_archive, "data/multi_at_archive.rda")
 ```
@@ -1043,11 +1032,6 @@ data_test = data.frame("datetime" = ymd_hms(test_datetime),
                         "response" = pred_test$response)
 
 data_total = rbind(data_train, data_test)
-# saveRDS(data_total, "data_total.rda")
-```
-
-```{r 2020-07-27-bikesharing-demand-071, echo = FALSE, eval=!long_run}
-# data_total = readRDS("data_total.rda")
 ```
 
 A visual comparison between the predicted demand with the actual demand is shown in Figure 14.
@@ -1110,7 +1094,7 @@ ggplot(data_grouped_day, aes(x = day, y = count)) +
 The `r mlr_pkg("mlr3verse")` makes the process of model fitting, tuning, benchmarking and nested resampling intuitive and fast.
 The included packages provide access to a set of commonly used learners and their train and predict methods using R6 classes.
 Moreover one can increase the capabilities of learners of the original packages through tuning, benchmarking as well as imputing and even ensembling.
-`mlr3` provides these methods in a simple syntax to create understandable and comparable code architectures.
+`r mlr_pkg("mlr3")` provides these methods in a simple syntax to create understandable and comparable code architectures.
 Using these resources we set up a generalized tuning process for `kknn`, `rpart` and `ranger` learners.
 By tuning two hyperparameters of each learner, we were able to considerably increase performance of each learner.
 Performance comparison through nested resampling provided a solid foundation for choosing the best learner to predict the test set.
