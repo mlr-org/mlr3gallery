@@ -8,13 +8,14 @@ categories:
   - titanic data set
   - classification
 description: |
-  We give a short introduction to mlr3fselect.
+  Short introduction to feature selection with mlr3fselect.
 author:
   - name: Marc Becker
 date: 01-08-2021
 output:
   distill::distill_article:
     self_contained: false
+    highlight_downlit: true
     css: ../../custom.css
 params:
   eval_all: FALSE
@@ -28,8 +29,7 @@ params:
 
 library(mlr3book)
 library(kableExtra)
-
-set.seed(7832)
+library(downlit)
 
 ggplot2::theme_set(ggplot2::theme_light())
 ```
@@ -239,8 +239,7 @@ as.data.table(instance$archive, exclude_columns = c("runtime_learners", "timesta
 ```{r mlr3fselect-basic-020, echo = FALSE}
 as.data.table(instance$archive, exclude_columns = c("runtime_learners", "timestamp", "batch_nr", "resample_result", "uhash")) %>%
   kable(format = "html") %>%
-  kable_styling() %>%
-  kableExtra::scroll_box(height = "200px")
+  kable_styling(full_width = TRUE)
 ```
 
 ## Nested resampling
@@ -299,8 +298,7 @@ extract_inner_fselect_results(rr)
 ```{r mlr3fselect-basic-027, echo = FALSE, layout="l-body-outset"}
 extract_inner_fselect_results(rr) %>%
   kable(format = "html") %>%
-  kable_styling() %>%
-  kableExtra::scroll_box(height = "400px")
+  kable_styling(full_width = TRUE)
 ```
 
 Next, we want to compare the predictive performances estimated on the outer resampling to the inner resampling.
@@ -310,7 +308,7 @@ Significantly lower predictive performances on the outer resampling indicate tha
 rr$score()[, .(iteration, task_id, learner_id, resampling_id, classif.ce)]
 ```
 
-The archives of the `r ref("AutoFSelector")`s gives us all evaluated hyperparameter configurations (i.e. feature sets) with the associated predictive performances.
+The archives of the `r ref("AutoFSelector")`s gives us all evaluated feature sets with the associated predictive performances.
 
 ```{r mlr3fselect-basic-029, eval = FALSE}
 extract_inner_fselect_archives(rr)
@@ -319,8 +317,8 @@ extract_inner_fselect_archives(rr)
 ```{r mlr3fselect-basic-030, echo = FALSE, layout="l-page"}
 extract_inner_fselect_archives(rr) %>%
   kable(format = "html") %>%
-  kable_styling() %>%
-  kableExtra::scroll_box(height = "400px")
+  kable_styling(full_width = TRUE) %>%
+  kableExtra::scroll_box(height = "400px", extra_css = "border: 0px !important;")
 ```
 
 ## Shortcuts
