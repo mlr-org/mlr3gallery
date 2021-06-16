@@ -15,6 +15,7 @@ description: |
 output:
   distill::distill_article:
     self_contained: false
+    highlight_downlit: true
     css: ../../custom.css
 bibliography: bibliography.bib
 params:
@@ -149,7 +150,7 @@ Therefore we go with `"pca_ica_lda"` / `"ranger`" and `"pca"` / `"ica"`.
 Finally, we also could have used the `branch` `r ref("ppl", "ppl")` to make branching easier (we will come back to this in the [Proxy](#Proxy) section).
 The graph looks like the following:
 
-```{r tuning-a-complex-graph-009, layout="l-body-outset", fig.width=6}
+```{r tuning-a-complex-graph-009, fig.width=10, fig.height=10}
 graph1$plot()
 ```
 We can inspect the parameters of the `r ref("ParamSet", "ParamSet")` of the graph to see which parameters can be set:
@@ -173,13 +174,20 @@ Moreover, we set the lower bound of `classif.ranger.mtry` to 200 (which is aroun
 
 ```{r tuning-a-complex-graph-011}
 tune_ps1 = ps(
-  branch_learner.selection = p_fct(levels = c("pca_ica_lda", "ranger")),
-  branch_preproc_lda.selection = p_fct(levels = c("pca", "ica"), depends = branch_learner.selection == "pca_ica_lda"),
-  pca.rank. = p_int(lower = 1, upper = 30, depends = branch_preproc_lda.selection == "pca"),
-  ica.n.comp = p_int(lower = 1, upper = 30, depends = branch_preproc_lda.selection == "ica"),
-  classif.lda.method = p_fct(levels = c("moment", "mve"), depends = branch_preproc_lda.selection == "ica"),
-  classif.ranger.mtry = p_int(lower = 200, upper = 1000, depends = branch_learner.selection == "ranger"),
-  classif.ranger.num.trees = p_int(lower = 500, upper = 2000, depends = branch_learner.selection == "ranger"))
+  branch_learner.selection = 
+    p_fct(c("pca_ica_lda", "ranger")),
+  branch_preproc_lda.selection = 
+    p_fct(c("pca", "ica"), depends = branch_learner.selection == "pca_ica_lda"),
+  pca.rank. = 
+    p_int(1, 30, depends = branch_preproc_lda.selection == "pca"),
+  ica.n.comp = 
+    p_int(1, 30, depends = branch_preproc_lda.selection == "ica"),
+  classif.lda.method = 
+    p_fct(c("moment", "mve"), depends = branch_preproc_lda.selection == "ica"),
+  classif.ranger.mtry = 
+    p_int(200, 1000, depends = branch_learner.selection == "ranger"),
+  classif.ranger.num.trees = 
+    p_int(500, 2000, depends = branch_learner.selection == "ranger"))
 ```
 
 The parameter `branch_learner.selection` defines whether we go down the left (`PCA` / `ICA` followed by `LDA`) or the right branch (`ranger`).
@@ -217,11 +225,11 @@ The grid being used will look like the following (note that the dependencies we 
 generate_design_grid(tune_ps1, resolution = 4)
 ```
 
-```{r tuning-a-complex-graph-014, echo = FALSE}
+```{r tuning-a-complex-graph-014, echo = FALSE, layout="l-body-outset"}
 generate_design_grid(tune_ps1, resolution = 4)$data %>%
   kable(format = "html") %>%
   kable_styling(full_width = TRUE) %>%
-  kableExtra::scroll_box(height = "400px")
+  kableExtra::scroll_box(height = "400px", extra_css = "border: 0px !important;")
 ```
 
 We trigger the tuning.
@@ -242,14 +250,14 @@ tune1 = readRDS("data/tune1.rda")
 Now, we can inspect the results ordered by the `classification accuracy`:
 
 ```{r tuning-a-complex-graph-018, eval = FALSE}
-as.data.table(tune1$archive, unnest = NULL, exclude_columns = c("x_domain", "uhash", "resample_result"))[order(classif.acc), ]
+as.data.table(tune1$archive)[order(classif.acc), ]
 ```
 
 ```{r tuning-a-complex-graph-019, echo = FALSE, layout="l-page"}
 as.data.table(tune1$archive, unnest = NULL, exclude_columns = c("x_domain", "uhash", "resample_result"))[order(classif.acc), ] %>%
   kable(format = "html") %>%
   kable_styling(full_width = TRUE) %>%
-  kableExtra::scroll_box(height = "400px")
+  kableExtra::scroll_box(height = "400px", extra_css = "border: 0px !important;")
 ```
 
 We achieve very good accuracy using `ranger`, more or less regardless how `mtry` and `num.trees` are set. However, the `LDA` also shows very good accuracy when combined with `PCA` or `ICA` retaining 30 components.
