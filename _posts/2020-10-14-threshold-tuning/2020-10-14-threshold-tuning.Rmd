@@ -7,6 +7,8 @@ categories:
   - nested resampling
   - mlr3pipelines
   - pima data set
+  - german credit data set
+  - iris data set
   - classification
 author:
   - name: Florian Pfisterer
@@ -17,6 +19,7 @@ description: |
 output:
   distill::distill_article:
     self_contained: false
+    highlight_downlit: true
     css: ../../custom.css
 ---
 
@@ -47,15 +50,19 @@ This post is a more in-depth version of the [article on threshold tuning in the 
 
 ## Prerequisites
 
-Before we start, we have load all required packages:
+We load the `r mlr_pkg("mlr3verse")` package which pulls in the most important packages for this example.
 
-```{r 2020-10-14-threshold-tuning-002}
-library(mlr3)
-library(mlr3pipelines)
-library(mlr3tuning)
+```{r mlr3fselect-basic-003}
+library(mlr3verse)
 ```
 
+We initialize the random number generator with a fixed seed for reproducibility, and decrease the verbosity of the logger to keep the output clearly represented.
 
+```{r mlr3fselect-basic-004}
+set.seed(7832)
+lgr::get_logger("mlr3")$set_threshold("warn")
+lgr::get_logger("bbotk")$set_threshold("warn")
+```
 
 ## Thresholds: A short intro
 
@@ -97,10 +104,7 @@ This threshold value can now be adjusted optimally for a given measure, such as 
 
 ## Adjusting thresholds: Two strategies
 
-```{r 2020-10-14-threshold-tuning-007}
-set.seed(20201014)
-```
-Currently `mlr3pipelines` offers two main strategies towards adjusting `classification thresholds`.
+Currently `r mlr_pkg("mlr3pipelines")`  offers two main strategies towards adjusting `classification thresholds`.
 We can either expose the thresholds as a `hyperparameter` of the Learner by using `r ref("PipeOpThreshold")`.
 This allows us to tune the `thresholds` via an outside optimizer from `r mlr_pkg("mlr3tuning")`.
 
@@ -123,8 +127,14 @@ Note, that `predict_type` = "prob" is required for `po("threshold")` to have any
 
 The `thresholds` are now exposed as a `hyperparameter` of the `r ref("GraphLearner")` we created:
 
-```{r 2020-10-14-threshold-tuning-009}
+```{r 2020-10-14-threshold-tuning-009, eval = FALSE}
 l$param_set
+```
+
+```{r mlr3fselect-basic-02743, echo = FALSE}
+as.data.table(l$param_set)[, .(id, class, lower, upper, nlevels)] %>%
+  kable(format = "html") %>%
+  kable_styling(full_width = TRUE)
 ```
 
 We can now tune those thresholds from the outside as follows:
@@ -136,22 +146,21 @@ you can easily imagine, that we can also jointly tune over additional hyperparam
 As the `r ref("Task")` we aim to optimize for is a binary task, we can simply specify the threshold parameter:
 
 ```{r 2020-10-14-threshold-tuning-010}
-library(paradox)
-ps = ParamSet$new(list(
-  ParamDbl$new("threshold.thresholds", lower = 0, upper = 1)
-))
+search_space = ps(
+  threshold.thresholds = p_dbl(lower = 0, upper = 1)
+)
 ```
 
 We now create a `r ref("AutoTuner")`, which automatically tunes the supplied learner over the `r ref("ParamSet")` we supplied above.
 
 ```{r 2020-10-14-threshold-tuning-011}
-at = AutoTuner$new(
+at = auto_tuner(
+  method = "random_search",
   learner = l,
   resampling = rsmp("cv", folds = 3L),
   measure = msr("classif.ce"),
-  search_space = ps,
-  terminator = trm("evals", n_evals = 5L),
-  tuner = TunerRandomSearch$new()
+  search_space = search_space,
+  term_evals = 5L,
 )
 
 at$train(tsk("german_credit"))
@@ -163,30 +172,31 @@ A named numeric vector containing the thresholds.
 This can be easily achieved via a `trafo` function:
 
 ```{r 2020-10-14-threshold-tuning-012}
-ps = ParamSet$new(list(
-  ParamDbl$new("versicolor", lower = 0, upper = 1),
-  ParamDbl$new("setosa", lower = 0, upper = 1),
-  ParamDbl$new("virginica", lower = 0, upper = 1)
-))
-ps$trafo = function(x, param_set) {
-  list(threshold.thresholds = mlr3misc::map_dbl(x, identity))
-}
+search_space = ps(
+  versicolor = p_dbl(lower = 0, upper = 1),
+  setosa = p_dbl(lower = 0, upper = 1),
+  virginica = p_dbl(lower = 0, upper = 1),
+  .extra_trafo = function(x, param_set) {
+    list(threshold.thresholds = mlr3misc::map_dbl(x, identity))
+  }
+)
 ```
 
-Inside the `trafo`, we simply collect all set params into a named vector via `map_dbl` and store it
+Inside the `.exta_trafo`, we simply collect all set params into a named vector via `map_dbl` and store it
 in the `threshold.thresholds` slot expected by the learner.
 
 Again, we create a `r ref("AutoTuner")`, which automatically tunes the supplied learner over the `r ref("ParamSet")` we supplied above.
 
 ```{r 2020-10-14-threshold-tuning-013}
-at2 = AutoTuner$new(
+at = auto_tuner(
+  method = "random_search",
   learner = l,
   resampling = rsmp("cv", folds = 3L),
   measure = msr("classif.ce"),
-  search_space = ps,
-  terminator = trm("evals", n_evals = 5L),
-  tuner = TunerRandomSearch$new()
+  search_space = search_space,
+  term_evals = 5L,
 )
+
 at2$train(tsk("iris"))
 ```
 
@@ -203,15 +213,22 @@ It directly optimizes the `cross-validated` predictions made by this `r ref("Pip
 A simple example would be:
 
 ```{r 2020-10-14-threshold-tuning-014}
-gr = po("learner_cv", lrn("classif.rpart", predict_type = "prob")) %>>% po("tunethreshold")
+gr = po("learner_cv", lrn("classif.rpart", predict_type = "prob")) %>>% 
+  po("tunethreshold")
 l2 = GraphLearner$new(gr)
 ```
 
 Note, that `predict_type` = "prob" is required for `po("tunethreshold")` to have any effect.
 Additionally, note that this time no `threshold` parameter is exposed, it is automatically tuned internally.
 
-```{r 2020-10-14-threshold-tuning-015}
+```{r 2020-10-14-threshold-tuning-015, eval = FALSE}
 l2$param_set
+```
+
+```{r mlr3fselect-basic-02sd743, echo = FALSE}
+as.data.table(l2$param_set)[, .(id, class, lower, upper, nlevels)] %>%
+  kable(format = "html") %>%
+  kable_styling(full_width = TRUE)
 ```
 
 If we now use the `r ref("GraphLearner")`, it automatically adjusts the `thresholds` during prediction.
@@ -226,14 +243,18 @@ Finally, we can compare no threshold tuning to the `tunethreshold` approach:
 
 ```{r 2020-10-14-threshold-tuning-016}
 bmr = benchmark(benchmark_grid(
-  learners = list(
-    no_tuning = lrn("classif.rpart"),
-    internal = l2
-  ),
+  learners = list(no_tuning = lrn("classif.rpart"), internal = l2),
   tasks = tsk("german_credit"),
   rsmp("cv", folds = 3L)
 ))
+```
+
+```{r 2020-10-14-threshold-tuning-01sd6, eval = FALSE}
 bmr$aggregate(list(msr("classif.ce"), msr("classif.fnr")))
 ```
 
-We obtained a slightly better classification error and false negatives rate!
+```{r mlr3fselect-basic-0274sdf3, echo = FALSE}
+bmr$aggregate(list(msr("classif.ce"), msr("classif.fnr")))[,.SD, .SDcols = !c("resample_result")] %>%
+  kable(format = "html") %>%
+  kable_styling(full_width = TRUE)
+```
