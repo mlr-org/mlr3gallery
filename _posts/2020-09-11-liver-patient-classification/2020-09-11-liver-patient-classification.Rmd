@@ -16,6 +16,7 @@ date: 09-11-2020
 output:
   distill::distill_article:
     self_contained: false
+    highlight_downlit: true
     css: ../../custom.css
 bibliography: bibliography.bib
 params:
@@ -30,8 +31,6 @@ params:
 
 library(mlr3book)
 library(kableExtra)
-
-set.seed(7832)
 
 ggplot2::theme_set(ggplot2::theme_light())
 ```
@@ -125,7 +124,7 @@ Lastly, one should note that some of the measurements are part of more than one 
 
 Next, we looked into the univariate distribution of each of the variables. We began with the target and the only discrete feature, gender, which are both binary.
 
-```{r 2020-09-11-liver-patient-classification-006, echo=FALSE, out.width='80%', fig.align='center', fig.asp=.4}
+```{r 2020-09-11-liver-patient-classification-006, echo=FALSE, fig.width = 8, fig.height = 4}
 # Barplots for discrete variables (target, gender)
 bar_target = ggplot(ilpd, aes(x = diseased)) +
   geom_bar() +
@@ -150,7 +149,7 @@ Furthermore, we applied stratified sampling to ensure the proportion of the clas
 The only discrete feature gender is quite imbalanced, too.
 As one can see in the next section, this proportion is also observed within each target class. Prior to that, we looked into the distributions of the metric features.
 
-```{r 2020-09-11-liver-patient-classification-007, echo=FALSE, out.width='80%', fig.align='center'}
+```{r 2020-09-11-liver-patient-classification-007, echo=FALSE, fig.width = 10, fig.height = 10}
 # Metric variables
 plot_histogram(ilpd, nrow = 3, ncol = 3, ggtheme = theme_minimal())
 ```
@@ -163,7 +162,7 @@ To reduce the impact of outliers and since some models assume normality of featu
 To picture the relationship between the target and the features, we analysed the distributions of the features by class.
 First, we examined the discrete feature gender.
 
-```{r 2020-09-11-liver-patient-classification-008, echo=FALSE, warning=FALSE, out.width='60%', fig.align='center'}
+```{r 2020-09-11-liver-patient-classification-008, echo=FALSE, warning=FALSE, fig.width = 8, fig.height = 4}
 # Discrete feature by class (gender, stacked barplot)
 count_class_gender = ilpd %>%
   group_by(gender) %>%
@@ -173,18 +172,17 @@ ggplot(count_class_gender, aes(x = diseased, y = n, fill = gender)) +
   geom_bar(position = "fill", stat = "identity") +
   ylab("Percentage") +
   scale_fill_grey(start = 0.8, end = 0.2) +
-  theme_minimal() +
-  theme(text = element_text(size = 15))
+  theme_minimal()
 ```
 
 The percentage of males in the "disease" class is slightly higher, but overall the difference is small.
 Besides that, the gender imbalance can be observed in both classes, as we mentioned before.
 To see the differences in metric features, we compare the following boxplots, where right-skewed features are not log-transformed yet.
 
-```{r 2020-09-11-liver-patient-classification-009, echo=FALSE, warning=FALSE, fig.width=10, fig.asp=.6, fig.align='center', out.width='82%'}
+```{r 2020-09-11-liver-patient-classification-009, echo=FALSE, warning=FALSE, fig.width=10, fig.height=10}
 # Class by metric features before log-transforming right-skewed features
 plot_boxplot(ilpd, by = "diseased", nrow = 3, ncol = 3,
-             ggtheme = theme_minimal(base_size = 14))
+  ggtheme = theme_minimal(base_size = 14))
 ```
 
 Except for the total amount of protein, for each feature we obtain differences between the median values of the two classes.
@@ -193,7 +191,7 @@ This effect is weakened by log-transforming such features, as can be seen in the
 Moreover, the dispersion in the class "disease" is greater for these features, as the length of the boxes indicates.
 Overall, the features seem to be correlated to the target, so it makes sense to use them for this task and model their relationship with the target.
 
-```{r 2020-09-11-liver-patient-classification-010, echo=FALSE, warning=FALSE, fig.width=10, fig.asp=.6, fig.align='center', out.width='82%'}
+```{r 2020-09-11-liver-patient-classification-010, echo=FALSE, warning=FALSE, fig.width = 10, fig.height = 10}
 # Metric features by class after log-transforming right-skewed features
 ilpd_log = ilpd %>%
   mutate( # Log for features with skewed distributions
@@ -218,7 +216,7 @@ This suggests that they are highly correlated.
 Some of the models we want to compare assume independent features or have problems with multicollinearity.
 Therefore, we checked for correlations between features.
 
-```{r 2020-09-11-liver-patient-classification-011, echo=FALSE, out.width='88%', fig.align='center'}
+```{r 2020-09-11-liver-patient-classification-011, echo=FALSE, fig.width = 12, fig.height = 12}
 # Correlation heatmap
 # Remove missing values and change factor variables to numeric ones (no impact on calculated correlations)
 ilpd_numeric = ilpd %>%
@@ -410,7 +408,7 @@ As mentioned in section 2.2, we opted for perfectly balancing the classes. By us
 ```{r 2020-09-11-liver-patient-classification-017}
 # Oversampling minority class to get perfectly balanced classes
 po_over = po("classbalancing", id = "oversample", adjust = "minor",
-              reference = "minor", shuffle = FALSE, ratio = 416/167)
+  reference = "minor", shuffle = FALSE, ratio = 416/167)
 table(po_over$train(list(task_liver))$output$truth()) # Check class balance
 ```
 
@@ -481,7 +479,7 @@ Furthermore, oversampling leaves AUC performance almost untouched for all learne
 
 The boxplots below graphically summarize AUC performance of all learners, with the blue dots indicating mean AUC performance.
 
-```{r 2020-09-11-liver-patient-classification-024, echo=FALSE, fig.height = 6, fig.width = 12, out.width='95%', fig.align="center"}
+```{r 2020-09-11-liver-patient-classification-024, echo=FALSE, fig.height = 6, fig.width = 12, layout="l-body-outset"}
 # Boxplots to compare learners by AUC
 compare_df = as.data.frame(bmr$score(list(
   msr("classif.auc"),
@@ -544,7 +542,7 @@ By definition, high sensitivity (specificity) results from a low false negative 
 
 With oversampling, specificity increases at the cost of sensitivity for all learners (even for those which already had high specificity), as can be seen in the two graphs below.
 
-```{r 2020-09-11-liver-patient-classification-027, echo=FALSE, out.width='90%', fig.align="center"}
+```{r 2020-09-11-liver-patient-classification-027, echo=FALSE, fig.width = 10, fig.height = 10}
 # Creating dataframe with the performance measures for the barplots
 compare_df2 = as.data.frame(bmr$aggregate(list(
   msr("classif.auc"),
@@ -601,7 +599,7 @@ grid.arrange(arrangeGrob(plot1 + theme(legend.position = "none"),
 
 For a given learner, say random forest, the different performance metrics and their dependence upon target variable balance are shown in the following graph.
 
-```{r 2020-09-11-liver-patient-classification-028, echo=FALSE, out.width='75%', fig.align="center"}
+```{r 2020-09-11-liver-patient-classification-028, echo=FALSE, fig.width = 10, fig.height = 10}
 compare_df3 = gather(compare_df2, "measure", "value", 2:6)
 
 # Plotting all measures for random forest, comparing original and oversampled dataset
