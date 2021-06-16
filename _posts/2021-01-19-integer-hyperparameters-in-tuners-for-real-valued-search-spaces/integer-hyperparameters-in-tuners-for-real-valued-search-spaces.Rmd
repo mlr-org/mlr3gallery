@@ -14,6 +14,7 @@ date: 01-19-2021
 output:
   distill::distill_article:
     self_contained: false
+    highlight_downlit: true
     css: ../../custom.css
 ---
 
@@ -104,8 +105,14 @@ instance$result_x_domain
 
 The archive shows us that for all real-valued `k` proposed by `r cran_pkg("GenSA")`, an integer-valued `k` in the learner hyperparameter space (`x_domain_k`) was created.
 
-```{r integer-hyperparameters-in-tuners-for-real-valued-search-spaces-010}
-as.data.table(instance$archive)[, c("k", "classif.ce", "x_domain_k")]
+```{r integer-hyperparameters-in-tuners-for-real-valued-search-spaces-010, eval = FALSE}
+as.data.table(instance$archive)
+```
+
+```{r mlr3fselect-basic-0273453, echo = FALSE}
+as.data.table(instance$archive)[, .(k, classif.ce, x_domain_k)] %>%
+  kable(format = "html") %>%
+  kable_styling(full_width = TRUE)
 ```
 
 Internally, `r ref("TunerGenSA")` was given the parameter types of the search space and therefore suggested real numbers for `k`.
