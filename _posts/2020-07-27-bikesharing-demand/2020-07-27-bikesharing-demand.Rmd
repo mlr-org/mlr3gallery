@@ -22,6 +22,7 @@ bibliography: bibliography.bib
 output:
   distill::distill_article:
     self_contained: false
+    highlight_downlit: true
     css: ../../custom.css
 params:
   eval_all: FALSE
@@ -444,7 +445,7 @@ autoplot(bike_task,
 
 ## Model training
 
-In our modeling process, we consider three learners: `r ref("mlr_learners_classif.kknn", "kknn")`, `r ref("mlr_learners_classif.rpart", "rpart")`, `r ref("mlr_learners_classif.ranger", "ranger learner")`.
+In our modeling process, we consider three learners: `r ref("mlr_learners_classif.kknn", "kknn")`, `r ref("mlr_learners_classif.rpart", "rpart")`, `r ref("mlr_learners_classif.ranger", "ranger")`.
 For parameter optimization, we use the so-called `r ref("AutoTuner")`.
 An `r ref("AutoTuner")` is a learner, that tunes its hyperparameters during training.
 The technical implementation is provided by `r mlr_pkg("mlr3tuning")`.
@@ -943,17 +944,25 @@ For this purpose we add *dependencies* to the parameter.
 
 ```{r 2020-07-27-bikesharing-demand-062, message = FALSE, results = 'hide'}
 search_space = ps(
-  branch.selection = p_int(lower = 1L, upper = 3L),
-  glrn.regr.kknn.regr.kknn.k = p_int(lower = 1L, upper = 50L, depends = branch.selection == 1),
-  glrn.regr.kknn.regr.kknn.distance = p_int(lower = 1L, upper = 3L, depends = branch.selection == 1),
-  glrn.regr.rpart.regr.rpart.minsplit = p_int(lower = 1L, upper = 30L, depends = branch.selection == 2),
-  glrn.regr.rpart.regr.rpart.cp = p_dbl(lower = 0.001, upper = 0.1, depends = branch.selection == 2),
-  importance.filter.nfeat = p_fct(levels = c("6", "9", "11"), depends = branch.selection == 3),
-  importance.mtry = p_int(lower = 7L, upper = 11L, depends = branch.selection == 3),
+  branch.selection = 
+    p_int(1L, 3L),
+  glrn.regr.kknn.regr.kknn.k = 
+    p_int(1L, 50L, depends = branch.selection == 1),
+  glrn.regr.kknn.regr.kknn.distance = 
+    p_int(1L, 3L, depends = branch.selection == 1),
+  glrn.regr.rpart.regr.rpart.minsplit = 
+    p_int(1L, 30L, depends = branch.selection == 2),
+  glrn.regr.rpart.regr.rpart.cp = 
+    p_dbl(0.001, 0.1, depends = branch.selection == 2),
+  importance.filter.nfeat = 
+    p_fct(c("6", "9", "11"), depends = branch.selection == 3),
+  importance.mtry = 
+    p_int(7L, 11L, depends = branch.selection == 3),
   .extra_trafo = function(x, param_set) {
     if (x$branch.selection == 3L) {
         x$importance.filter.nfeat = as.integer(x$importance.filter.nfeat)
-        x$importance.mtry = ceiling(x$importance.mtry/11 * x$importance.filter.nfeat)
+        x$importance.mtry = 
+          ceiling(x$importance.mtry/11 * x$importance.filter.nfeat)
     }
     x
   }
@@ -999,7 +1008,7 @@ kable(multi_at_archive , "html", booktabs = TRUE,  caption = "nested resampling 
   pack_rows("Outer CV-1", 1, 21) %>%
   pack_rows("Outer CV-2", 22,42) %>%
   pack_rows("Outer CV-3", 43, 63) %>%
-  scroll_box(width = "100%", height = "200px")
+  scroll_box(height = "400px", extra_css = "border: 0px !important;")
 ```
 
 The table shows the results on the first of three outer resampling results.
