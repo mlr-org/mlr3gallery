@@ -159,7 +159,7 @@ It is important to note that in this case here the vast majority of information 
 In this case, imputation is performed to not throw away the existing information of the features.
 
 `mlr3` has some solutions for that within the `mlr3pipelines` package.
-We start with an easy `PipeOp` which only performs numeric imputation.
+We start with an easy `r ref("PipeOp")` which only performs numeric imputation.
 
 ```{r 2020-05-04-moneyball-008}
 imp_num = po("imputehist", param_vals = list(affect_columns = selector_type(c("integer", "numeric"))))
@@ -208,7 +208,7 @@ As it is not listed here, the random forest cannot deal with missing values.
 As we aim to use imputation beforehand, we incorporate it into the learner.
 Our selected learner is going to be a random forest from the `ranger` package.
 One can allow the embedding of the preprocessing (imputation) into a learner by creating `new` (method) `PipeOpLearner` (R6 class).
-This special `learner` can be put into a graph together with the `imputer` via the `new` method of the `GraphLearner` class.
+This special `r ref("Learner")` can be put into a graph together with the `imputer` via the `new` method of the `GraphLearner` class.
 
 ```{r 2020-05-04-moneyball-012}
 # creates a normal learner however allows further embedding of PipeOp's.
@@ -227,7 +227,7 @@ plot(graph %>>% polrn)
 
 ## Train and predict
 
-To get a feeling of how our model performs we simply train the `learner` on a subset of the data and predict the hold-out data.
+To get a feeling of how our model performs we simply train the `r ref("Learner")` on a subset of the data and predict the hold-out data.
 
 ```{r 2020-05-04-moneyball-014}
 # defines the training and testing data; 95% is used for training
@@ -294,7 +294,7 @@ imp_fct = po("imputeoor", param_vals = list(affect_columns = selector_type("fact
 graph2 = as_graph(imp_fct)
 ```
 
-Subsequently, we add the `PipeOpSelect` `PipeOp` to the pipeline.
+Subsequently, we add the `PipeOpSelect` `r ref("PipeOp")` to the pipeline.
 
 ```{r 2020-05-04-moneyball-021}
 feature_names = colnames(moneyball)[!sapply(moneyball, anyNA)]
@@ -333,7 +333,7 @@ We can access very cool data straight away with the `OpenML` package.
 (We are working on a better direct implementation into `mlr3` at the moment.)
 We can work with missing data very well in `mlr3`.
 Nevertheless, we discovered that sometimes imputation does not lead to the intended goals.
-We also learned how to use some `PipeOp`s from the `mlr3pipelines` package.
+We also learned how to use some `r ref("PipeOp")`s from the `mlr3pipelines` package.
 
 But most importantly, we found a way to predict the runs scored of MLB teams.
 

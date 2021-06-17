@@ -85,7 +85,7 @@ In the following subsections, we show two approaches to implement this.
 
 ### 1. Consider all features and apply the preprocessing step only to certain features
 
-Using the `affect_columns` argument of a `PipeOp` to define the variables on which a `PipeOp` will operate with an appropriate [`selector`](https://mlr3pipelines.mlr-org.com/reference/Selector.html) function:
+Using the `affect_columns` argument of a `r ref("PipeOp")` to define the variables on which a `r ref("PipeOp")` will operate with an appropriate [`selector`](https://mlr3pipelines.mlr-org.com/reference/Selector.html) function:
 
 ```{r 2020-04-23-pipelines-selectors-branches-005}
 # imputes values based on histogram
@@ -98,7 +98,7 @@ median_imp = po("imputemedian",
 miss_ind = po("missind")
 ```
 
-When `PipeOp`s are constructed this way, they will perform the specified preprocessing step on the appropriate features and pass all the input features to the subsequent steps:
+When `r ref("PipeOp")`s are constructed this way, they will perform the specified preprocessing step on the appropriate features and pass all the input features to the subsequent steps:
 
 ```{r 2020-04-23-pipelines-selectors-branches-006}
 # no missings in "glucose", "mass" and "pressure"
@@ -139,7 +139,7 @@ impute_missind$train(pima_tsk)[[1]]$data()
 
 ### 2. Select the features for each preprocessing step and apply the preprocessing steps to this subset
 
-We can use the [`select`](https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_select.html) `PipeOp` to select the appropriate features and then apply the desired impute `PipeOp` on them:
+We can use the [`select`](https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_select.html) `r ref("PipeOp")` to select the appropriate features and then apply the desired impute `r ref("PipeOp")` on them:
 
 ```{r 2020-04-23-pipelines-selectors-branches-010, fig.height = 6, fig.width = 6}
 hist_imp2 = po("select",
@@ -176,7 +176,7 @@ impute_missind2$plot(html = FALSE)
 impute_missind2$train(pima_tsk)[[1]]$data()
 ```
 
-Note that when there is one input channel, it is automatically copied as many times as needed for the downstream `PipeOp`s.
+Note that when there is one input channel, it is automatically copied as many times as needed for the downstream `r ref("PipeOp")`s.
 In other words, the code above works also without `po("copy", 4)`:
 
 ```{r 2020-04-23-pipelines-selectors-branches-012}
@@ -196,7 +196,7 @@ Usually, `po("copy")` is required when there are more than one input channels an
 We can not know if the combination of a learner with this preprocessing graph will benefit from the imputation steps and the added missing value indicators.
 Maybe it would have been better to just use [`imputemedian`](https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_imputemedian.html) on all the variables.
 We could investigate this assumption by adding an alternative path to the graph with the mentioned `imputemedian`.
-This is possible using the ["branch"](https://mlr3pipelines.mlr-org.com/reference/branch.html) `PipeOp`:
+This is possible using the ["branch"](https://mlr3pipelines.mlr-org.com/reference/branch.html) `r ref("PipeOp")`:
 
 ```{r 2020-04-23-pipelines-selectors-branches-013, fig.height = 7, fig.width = 7}
 median_imp3 = po("imputemedian", id = "simple_median") # add the id so it does not clash with `median_imp`
@@ -274,4 +274,4 @@ instance$result
 
 ## Conclusion
 
-This post shows ways on how to specify features on which preprocessing steps are to be performed. In addition it shows how to create alternative paths in the learner graph. The preprocessing steps that can be used are not limited to imputation. Check the list of available [`PipeOp`s](https://mlr3pipelines.mlr-org.com/reference/index.html).
+This post shows ways on how to specify features on which preprocessing steps are to be performed. In addition it shows how to create alternative paths in the learner graph. The preprocessing steps that can be used are not limited to imputation. Check the list of available [`r ref("PipeOp")`s](https://mlr3pipelines.mlr-org.com/reference/index.html).

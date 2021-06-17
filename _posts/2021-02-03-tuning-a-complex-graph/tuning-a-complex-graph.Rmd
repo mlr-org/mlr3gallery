@@ -165,7 +165,7 @@ The `id`'s are prefixed by the respective `r ref("PipeOp", "PipeOp")` they belon
 
 Our graph either fits a `LDA` after applying `PCA` or `ICA`, or alternatively a `ranger` with no preprocessing.
 These two **options** each define selection parameters that we can tune.
-Moreover, within the respective `PipeOp`'s we want to tune the following parameters:
+Moreover, within the respective `r ref("PipeOp")`'s we want to tune the following parameters:
 `pca.rank.`, `ica.n.comp`, `classif.lda.method`, `classif.ranger.mtry`, and `classif.ranger.num.trees`.
 The first two parameters are integers that in-principal could range from 1 to the number of features.
 However, for `ICA`, the upper bound must not exceed the number of observations and as we will later use `3-fold` `r ref("mlr_resamplings_cv", "cross-validation")` as the resampling method for the tuning, we just set the upper bound to 30 (and do the same for `PCA`).
@@ -279,9 +279,9 @@ Note that we also could have wrapped our graph in a `r ref("GraphLearner", "Grap
 ## Proxy
 
 Instead of using branches to split our graph with respect to the learner and preprocessing options, we can also use `r ref("PipeOpProxy", "PipeOpProxy")`.
-`PipeOpProxy` accepts a single `content` parameter that can contain any other `PipeOp` or `Graph`.
+`PipeOpProxy` accepts a single `content` parameter that can contain any other `r ref("PipeOp")` or `r ref("Graph")`.
 This is extremely flexible in the sense that we do not have to specify our options during construction.
-However, the parameters of the contained `PipeOp` or `Graph` are no longer directly contained in the `ParamSet` of the resulting graph.
+However, the parameters of the contained `r ref("PipeOp")` or `r ref("Graph")` are no longer directly contained in the `ParamSet` of the resulting graph.
 Therefore, when tuning the graph, we do have to make use of a `trafo` function.
 
 ```{r tuning-a-complex-graph-021}
@@ -297,7 +297,7 @@ This graph now looks like the following:
 graph2$plot()
 ```
 
-At first, this may look like a linear graph. However, as the `content` parameter of `PipeOpProxy` can be tuned and set to contain any other `PipeOp` or `Graph`, this will allow for a similar non-linear graph as when doing branching.
+At first, this may look like a linear graph. However, as the `content` parameter of `PipeOpProxy` can be tuned and set to contain any other `r ref("PipeOp")` or `r ref("Graph")`, this will allow for a similar non-linear graph as when doing branching.
 
 ```{r tuning-a-complex-graph-023}
 graph2$param_set$ids()
@@ -309,7 +309,7 @@ We can tune the graph by using the same search space as before. However, here th
 tune_ps2 = tune_ps1$clone(deep = TRUE)
 ```
 
-The `trafo` function does all the work, i.e., selecting either the `PCA` / `ICA`-`LDA` or `ranger` as the `proxy.content` as well as setting the parameters of the respective preprocessing `PipeOp`s and `Learner`s.
+The `trafo` function does all the work, i.e., selecting either the `PCA` / `ICA`-`LDA` or `ranger` as the `proxy.content` as well as setting the parameters of the respective preprocessing `r ref("PipeOp")`s and `r ref("Learner")`s.
 
 ```{r tuning-a-complex-graph-025}
 proxy_options = list(

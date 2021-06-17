@@ -205,16 +205,16 @@ Thus, you actually don't need to construct it yourself, just call `tsk("german_c
 
 After having decided *what* should be modeled, we need to decide on *how*.
 This means we need to decide which learning algorithms, or `r ref("Learner", text = "Learners")` are appropriate.
-Using prior knowledge (e.g. knowing that it is a classification task or assuming that the classes are linearly separable) one ends up with one or more suitable `Learner`s.
+Using prior knowledge (e.g. knowing that it is a classification task or assuming that the classes are linearly separable) one ends up with one or more suitable `r ref("Learner")`s.
 
 Many learners can be obtained via the `r mlr_pkg("mlr3learners")` package.
 Additionally, many learners are provided via the `r mlr_pkg("mlr3extralearners")` package, from GitHub.
 These two resources combined account for a large fraction of standard learning algorithms.
-As `mlr3` usually only wraps learners from packages, it is even easy to create a formal `Learner` by yourself.
+As `mlr3` usually only wraps learners from packages, it is even easy to create a formal `r ref("Learner")` by yourself.
 You may find the section about [extending mlr3](https://mlr3book.mlr-org.com/extending.html) in the `r mlr_pkg("mlr3book")` very helpful.
 If you happen to write your own `r ref("Learner")` in `mlr3`, we would be happy if you share it with the `mlr3` community.
 
-All available `Learner`s (i.e. all which you have installed from `mlr3`, `mlr3learners`, `mlr3extralearners`, or self-written ones) are registered in the dictionary `r ref("mlr_learners")`:
+All available `r ref("Learner")`s (i.e. all which you have installed from `mlr3`, `mlr3learners`, `mlr3extralearners`, or self-written ones) are registered in the dictionary `r ref("mlr_learners")`:
 
 ```{r 2020-03-11-mlr3-basics-german-credit-012}
 mlr_learners
@@ -345,7 +345,7 @@ pred_rf
 ```
 
 The `$predict()` method returns  a `r ref("Prediction")` object.
-It can be converted to a `data.table` if one wants to use it downstream.
+It can be converted to a `r ref("data.table")` if one wants to use it downstream.
 
 We can also display the prediction results aggregated in a confusion matrix:
 
@@ -357,7 +357,7 @@ pred_rf$confusion
 #### Predict Probabilities
 
 Most learners may not only predict a class variable ("response"), but also their degree of "belief" / "uncertainty" in a given response.
-Typically, we achieve this by setting the `$predict_type` slot of a `Learner` to `"prob"`.
+Typically, we achieve this by setting the `$predict_type` slot of a `r ref("Learner")` to `"prob"`.
 Sometimes this needs to be done *before* the learner is trained.
 Alternatively, we can directly create the learner with this option:
 `lrn("classif.log_reg", predict_type = "prob")`.

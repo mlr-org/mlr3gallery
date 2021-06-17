@@ -49,13 +49,13 @@ The other parts of this series can be found here:
 - [Part II - Tuning](https://mlr3gallery.mlr-org.com/posts/2020-03-11-mlr3tuning-tutorial-german-credit/)
 
 In this tutorial, we continue working with the German credit dataset.
-We already used different `Learner`s on it and tried to optimize their hyperparameters.
+We already used different `r ref("Learner")`s on it and tried to optimize their hyperparameters.
 Now we will do four additional things:
 
 1) We preprocess the data as an integrated step of the model fitting process
 2) We tune the associated preprocessing parameters
-3) We stack multiple `Learner`s in an *ensemble* model
-4) We discuss some techniques that make `Learner`s able to tackle *challenging* datasets that they could not handle otherwise (we are going to outline what challenging means in particular later on)
+3) We stack multiple `r ref("Learner")`s in an *ensemble* model
+4) We discuss some techniques that make `r ref("Learner")`s able to tackle *challenging* datasets that they could not handle otherwise (we are going to outline what challenging means in particular later on)
 
 ## Prerequisites
 
@@ -91,7 +91,7 @@ credit$credit_risk = credit_full$credit_risk
 task = TaskClassif$new("GermanCredit", credit, "credit_risk")
 ```
 
-We instantiate a `Resampling` instance for this `Task` to be able to compare resampling performance:
+We instantiate a `Resampling` instance for this `r ref("Task")` to be able to compare resampling performance:
 
 ```{r 2020-03-11-mlr3pipelines-tutorial-german-credit-006}
 set.seed(20191101)
@@ -106,11 +106,11 @@ You can uncomment the following line if you are running this locally:
 
 ## Intro
 
-In this use case, we will take a look at composite machine learning algorithms that may incorporate data preprocessing or the combination of multiple `Learner`s ("ensemble methods").
+In this use case, we will take a look at composite machine learning algorithms that may incorporate data preprocessing or the combination of multiple `r ref("Learner")`s ("ensemble methods").
 
 We use the `r mlr_pkg("mlr3pipelines")` package that enables us to chain `r ref("PipeOp", "PipeOps")` into data flow `r ref("Graph", "Graphs")`.
 
-Available `PipeOp`s are listed in the `mlr_pipeops` dictionary:
+Available `r ref("PipeOp")`s are listed in the `mlr_pipeops` dictionary:
 
 ```{r 2020-03-11-mlr3pipelines-tutorial-german-credit-008}
 mlr_pipeops
@@ -119,7 +119,7 @@ mlr_pipeops
 ## Missing Value Imputation
 
 We have just introduced missing values into our data.
-While some `Learner`s can deal with missing value, many cannot.
+While some `r ref("Learner")`s can deal with missing value, many cannot.
 Trying to train a random forest fails because of this:
 
 ```{r 2020-03-11-mlr3pipelines-tutorial-german-credit-009, error=TRUE}
@@ -127,16 +127,16 @@ ranger = lrn("classif.ranger")
 ranger$train(task)
 ```
 
-We can perform imputation of missing values using a `PipeOp`.
-To find out which imputation `PipeOp`s are available, we do the following:
+We can perform imputation of missing values using a `r ref("PipeOp")`.
+To find out which imputation `r ref("PipeOp")`s are available, we do the following:
 
 ```{r 2020-03-11-mlr3pipelines-tutorial-german-credit-010}
 mlr_pipeops$keys("^impute")
 ```
 
 We choose to impute factorial features using a new level (via `r ref("PipeOpImputeOOR")`).
-Let's use the `PipeOp` itself to create an imputed `Task`.
-This shows us how the `PipeOp` actually works:
+Let's use the `r ref("PipeOp")` itself to create an imputed `r ref("Task")`.
+This shows us how the `r ref("PipeOp")` actually works:
 
 ```{r 2020-03-11-mlr3pipelines-tutorial-german-credit-011}
 imputer = po("imputeoor")
@@ -149,8 +149,8 @@ We do not only need complete data during training but also during prediction.
 Using the same imputation heuristic for both is the most consistent strategy.
 This way the imputation strategy can, in fact, be seen as a part of the complete learner (which could be tuned).
 
-If we used the imputed `Task` for Resampling, we would *leak* information from the test set into the training set.
-Therefore, it is mandatory to attach the imputation operator to the `Learner` itself, creating a `r ref("GraphLearner")`:
+If we used the imputed `r ref("Task")` for Resampling, we would *leak* information from the test set into the training set.
+Therefore, it is mandatory to attach the imputation operator to the `r ref("Learner")` itself, creating a `r ref("GraphLearner")`:
 
 ```{r 2020-03-11-mlr3pipelines-tutorial-german-credit-012}
 imp_ranger = GraphLearner$new(po("imputeoor") %>>% ranger)
@@ -158,7 +158,7 @@ imp_ranger = GraphLearner$new(po("imputeoor") %>>% ranger)
 imp_ranger$train(task)
 ```
 
-This `GraphLearner` can be used for resampling -- like an ordinary `Learner`:
+This `GraphLearner` can be used for resampling -- like an ordinary `r ref("Learner")`:
 
 ```{r 2020-03-11-mlr3pipelines-tutorial-german-credit-013}
 rr = resample(task, learner = imp_ranger, resampling = cv10_instance)
@@ -243,7 +243,7 @@ ggplot(arx, aes(x = mim.filter.nfeat, y = classif.ce)) + geom_line()
 
 ## Stacking
 
-We want to build a model that is based on the predictions of other `Learner`s.
+We want to build a model that is based on the predictions of other `r ref("Learner")`s.
 This means that we are in the state that we need predictions already during training.
 This is a very specific case that is luckily handled by `r ref("PipeOpLearnerCV")`.
 `PipeOpLearnerCV` performs cross-validation during the training phase and returns the cross-validated predictions.
@@ -264,7 +264,7 @@ Therefore, we plot it:
 stackgraph$plot()
 ```
 
-We now compare the performance of the stacked learner to the performance of the individual `Learner`s:
+We now compare the performance of the stacked learner to the performance of the individual `r ref("Learner")`s:
 
 ```{r 2020-03-11-mlr3pipelines-tutorial-german-credit-025, warning=FALSE, eval = params$eval_all}
 bmr = benchmark(data.table(
@@ -289,7 +289,7 @@ bmr = readRDS("data/bmr.rda")
 bmr$aggregate()[, c("learner_id", "classif.ce")]
 ```
 
-If we train the stacked learner and look into the final `Learner` (the logistic regression), we can see how "important" each `Learner` of the stacked learner is:
+If we train the stacked learner and look into the final `r ref("Learner")` (the logistic regression), we can see how "important" each `r ref("Learner")` of the stacked learner is:
 
 ```{r 2020-03-11-mlr3pipelines-tutorial-german-credit-029}
 stackgraph$train(task)
@@ -308,9 +308,9 @@ task = tsk("german_credit")
 ```
 
 There is a potential practical problem for both, small data sets and data sets with covariates having many factor levels:
-It may occur that not all possible factor levels have been used by the `Learner` during training.
+It may occur that not all possible factor levels have been used by the `r ref("Learner")` during training.
 This happens because these rare instances are simply not sampled.
-The prediction then may fail because the `Learner` does not know how to handle unseen factor levels:
+The prediction then may fail because the `r ref("Learner")` does not know how to handle unseen factor levels:
 
 ```{r 2020-03-11-mlr3pipelines-tutorial-german-credit-031, error=TRUE, warning=FALSE}
 task_unseen = task$clone()$filter(1:30)
@@ -319,7 +319,7 @@ logreg$train(task_unseen)
 logreg$predict(task)
 ```
 
-Not only logistic regression but also many other `Learner`s cannot handle new levels during prediction.
+Not only logistic regression but also many other `r ref("Learner")`s cannot handle new levels during prediction.
 Thus, we use `r ref("PipeOpFixFactors")` to prevent that.
 `PipeOpFixFactors` introduces `NA` values for unseen levels.
 This means that we may need to impute afterwards.
@@ -335,7 +335,7 @@ logreg$train(task_constant)
 
 This can be fixed using `r ref("PipeOpRemoveConstants")`.
 
-Both, handling unseen levels and all-constant features can be handled simultaneously using the following `Graph`:
+Both, handling unseen levels and all-constant features can be handled simultaneously using the following `r ref("Graph")`:
 
 ```{r 2020-03-11-mlr3pipelines-tutorial-german-credit-033}
 robustify = po("fixfactors") %>>%
@@ -356,15 +356,15 @@ roblogreg$predict(task)
 
 ## Your Ideas
 
-There are various possibilities for preprocessing with `PipeOp`s.
+There are various possibilities for preprocessing with `r ref("PipeOp")`s.
 You can try different methods for preprocessing and training.
 Feel free to discover this variety by yourself!
-Here are only a few hints that help when working with `PipeOp`s:
+Here are only a few hints that help when working with `r ref("PipeOp")`s:
 
-- It is not allowed to have two `PipeOp`s with the same `ID` in a `Graph`
-  - Initialize a `PipeOp` with `po("...", id = "xyz")` to change its ID on construction
-- If you build large `Graph`s involving complicated optimizations, like many `"learner_cv"`, they may need a long time to train
-- Use the `affect_columns` parameter if you want a `PipeOp` to only operate on part of the data
+- It is not allowed to have two `r ref("PipeOp")`s with the same `ID` in a `r ref("Graph")`
+  - Initialize a `r ref("PipeOp")` with `po("...", id = "xyz")` to change its ID on construction
+- If you build large `r ref("Graph")`s involving complicated optimizations, like many `"learner_cv"`, they may need a long time to train
+- Use the `affect_columns` parameter if you want a `r ref("PipeOp")` to only operate on part of the data
 - Use `po("select")` if you want to remove certain columns (possibly only along a single branch of multiple parallel branches). Both take `selector_xxx()` arguments, e.g. `selector_type("integer")`
 - You may get the best performance if you actually inspect the features and see what kind of transformations work best for them (know your data!)
-- See what `PipeOp`s are available by inspecting `mlr_pipeops$keys()`, and get help about them using `?mlr_pipeops_xxx`
+- See what `r ref("PipeOp")`s are available by inspecting `mlr_pipeops$keys()`, and get help about them using `?mlr_pipeops_xxx`

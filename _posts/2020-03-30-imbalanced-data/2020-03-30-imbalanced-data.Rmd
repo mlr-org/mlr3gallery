@@ -52,9 +52,9 @@ You can find most of the content here also in the [mlr3book](https://mlr3book.ml
 These steps are performed:
 
 * Retrieve data sets from `OpenML`
-* Define imbalance correction pipeline [`Graph`](https://mlr3pipelines.mlr-org.com/reference/Graph.html)s (undersampling, oversampling and SMOTE) with `mlr3pipelines`
-* Autotune the `Graph` together with a learner using `mlr3tuning`
-* Benchmark the autotuned `Graph` and visualize the results using `mlr3viz`
+* Define imbalance correction pipeline [`r ref("Graph")`](https://mlr3pipelines.mlr-org.com/reference/Graph.html)s (undersampling, oversampling and SMOTE) with `mlr3pipelines`
+* Autotune the `r ref("Graph")` together with a learner using `mlr3tuning`
+* Benchmark the autotuned `r ref("Graph")` and visualize the results using `mlr3viz`
 
 # Prerequisites
 
@@ -123,9 +123,9 @@ skimr::skim(task$data())
 ## Imbalance correction
 
 In `mlr3pipelines`, there is a [`classbalancing`](https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_classbalancing.html) and a [`smote`](https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_smote.html) pipe operator that can be combined with any learner.
-Below, we define the undersampling, oversampling and SMOTE `PipeOp`s/`Graph`.
+Below, we define the undersampling, oversampling and SMOTE `r ref("PipeOp")`s/`r ref("Graph")`.
 All three imbalance correction methods have hyperparameters to control the degree of class imbalance.
-We apply the `PipeOp`s/`Graph` to the current `task` with specific hyperparameter values to see how the class balance changes:
+We apply the `r ref("PipeOp")`s/`r ref("Graph")` to the current `task` with specific hyperparameter values to see how the class balance changes:
 
 ```{r 2020-03-30-imbalanced-data-008}
 # check original class balance
@@ -163,7 +163,7 @@ table(gr_smote$train(task)[[1L]]$truth())
 
 ## Construct `AutoTuner`
 
-We combine the `PipeOp`s/`Graph` with a learner (here `ranger`) to make each pipeline graph behave like a learner:
+We combine the `r ref("PipeOp")`s/`r ref("Graph")` with a learner (here `ranger`) to make each pipeline graph behave like a learner:
 
 ```{r 2020-03-30-imbalanced-data-010}
 # create random forest learner

@@ -71,7 +71,7 @@ g = po("imputemedian") %>>%
   lrn("regr.rpart")
 ```
 
-We wrap this `r ref("Graph")` in a `r ref("GraphLearner")` and can train on the `Task`:
+We wrap this `r ref("Graph")` in a `r ref("GraphLearner")` and can train on the `r ref("Task")`:
 
 ```{r a-production-example-using-plumber-and-docker-006}
 gl = GraphLearner$new(g)
@@ -123,7 +123,7 @@ As an endpoint for predicting the `medv`, we will use a `POST` request. This wil
 
 When a `POST` request containing the data (in JSON format) is received our code must then:
 
-1. convert the input (in JSON format) to a `data.table` with all feature columns matching their feature type
+1. convert the input (in JSON format) to a `r ref("data.table")` with all feature columns matching their feature type
 
 2. predict the `medv` based on the input using our trained pipeline and provide an output that can be understood by the client
 
@@ -132,10 +132,10 @@ To make sure that all features match their feature type, we will later use the f
 ```{r a-production-example-using-plumber-and-docker-012, eval=FALSE,code=readLines("mlr3_api/fix_feature_types.R")}
 ```
 
-`fix_feature_types()` can later be applied to the `newdata`, and will make sure, that all incoming features are converted to their expected feature type as in the original `Task` we used for training our pipeline (and this is the reason, why we stored the information about the features earlier).
+`fix_feature_types()` can later be applied to the `newdata`, and will make sure, that all incoming features are converted to their expected feature type as in the original `r ref("Task")` we used for training our pipeline (and this is the reason, why we stored the information about the features earlier).
 Note that in our tutorial we only have `factor`, `integer`, and `numeric` features, but `fix_feature_types()` should also work for all other supported `feature_types` listed in `mlr_reflections$task_feature_types`. However, it may need some customization depending on your own production environment to make the conversions meaningful.
 
-The following R file, `predict_gl.R` loads our trained pipepline and feature information and provides an endpoint for a `POST` request, `"/predict_medv"`. The incoming data then is converted using `jsonlite::fromJSON`. We expect the incoming data to either be JSON objects in an array or nested JSON objects and therefore we bind the converted vectors row-wise to a `data.table` using  `data.table::rbindlist`. We then convert all features to their expected `feature_types` (using the `fix_feature_types()` function as defined above) and can finally predict the `medv` using our trained pipeline. As no default serialization from `R6` objects to JSON objects exists (yet), we wrap the `r ref("Prediction", "Prediction")` in a `data.table` (of course we could also only return the numeric prediction values):
+The following R file, `predict_gl.R` loads our trained pipepline and feature information and provides an endpoint for a `POST` request, `"/predict_medv"`. The incoming data then is converted using `jsonlite::fromJSON`. We expect the incoming data to either be JSON objects in an array or nested JSON objects and therefore we bind the converted vectors row-wise to a `r ref("data.table")` using  `data.table::rbindlist`. We then convert all features to their expected `feature_types` (using the `fix_feature_types()` function as defined above) and can finally predict the `medv` using our trained pipeline. As no default serialization from `R6` objects to JSON objects exists (yet), we wrap the `r ref("Prediction", "Prediction")` in a `r ref("data.table")` (of course we could also only return the numeric prediction values):
 
 ```{r a-production-example-using-plumber-and-docker-013, eval=FALSE,code=readLines("mlr3_api/predict_gl.R")}
 ```

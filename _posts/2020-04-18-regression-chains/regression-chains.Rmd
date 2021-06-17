@@ -41,7 +41,7 @@ For more details, see e.g. @spyromitros2016.
 
 The following sections describe an approach towards working with `r ref("Task", "Tasks")` that have multiple targets.
 E.g., in the example below, we have three target variables $y_{1}$ to $y_{3}$.
-This type of `Task` can be created via the [mlr3multioutput](https://github.com/mlr-org/mlr3multioutput/) package (currently under development) in the future.
+This type of `r ref("Task")` can be created via the [mlr3multioutput](https://github.com/mlr-org/mlr3multioutput/) package (currently under development) in the future.
 `mlr3multioutput` will also offer simple chaining approaches as pre-built pipelines (so called `r ref("ppl", "ppls")`).
 The current goal of this post is to show how such modeling steps can be written as a relatively small amount of pipeline steps and how such steps can be put together.
 Writing pipelines with such steps allows for great flexibility in modeling more complicated scenarios such as the ones described below.
@@ -120,7 +120,7 @@ plot3d(dat$y1, dat$y2, dat$y3,
 ## Building the Pipeline
 
 In our regression chain, the first model will predict $y_{1}$.
-Therefore, we initialize our `Task` with respect to this target:
+Therefore, we initialize our `r ref("Task")` with respect to this target:
 
 ```{r regression-chains-010}
 library(mlr3)
@@ -136,7 +136,7 @@ Our pipeline building the regression chain then has to do the following:
 * Combine the input with the prediction of $y_{1}$, $\hat{y_{1}}$ and use this to predict $y_{2}$ within the second learner (i.e., $y_{2} \sim x_{1} + x_{2} + \hat{y_{1}}$).
 * Combine the input with the prediction of $y_{2}$ and use this to predict $y_{3}$ within the final third learner (i.e., $y_{3} \sim x_{1} + x_{2} + \hat{y_{1}} + \hat{y_{2}}$).
 
-To combine predictions of a `Learner` with the previous input, we rely on `r ref("PipeOpLearnerCV")` and `r ref("PipeOpNOP")` arranged in parallel via `r ref("gunion")` combined via `r ref("PipeOpFeatureUnion")`.
+To combine predictions of a `r ref("Learner")` with the previous input, we rely on `r ref("PipeOpLearnerCV")` and `r ref("PipeOpNOP")` arranged in parallel via `r ref("gunion")` combined via `r ref("PipeOpFeatureUnion")`.
 To drop the respective remaining target variables as features, we rely on `r ref("PipeOpColRoles")`.
 The first step of predicting $y_{1}$ looks like the following:
 
@@ -152,7 +152,7 @@ step1 = po("copy", outnum = 2, id = "copy1") %>>%
 step1$plot()
 ```
 
-Training using the input `Task`, shows us how the output and the `$state` look like:
+Training using the input `r ref("Task")`, shows us how the output and the `$state` look like:
 
 ```{r regression-chains-012}
 step1_out = step1$train(task)[[1]]
@@ -214,7 +214,7 @@ graph$plot()
 
 ## Evaluating the Pipeline
 
-By wrapping our `Graph` in a `r ref("GraphLearner")`, we can perform `r ref("ResamplingCV", "3-fold cross-validation")` and get an estimated average of the root-mean-square error (of course, in a real world setting splitting the data in a training and test set should have been done):
+By wrapping our `r ref("Graph")` in a `r ref("GraphLearner")`, we can perform `r ref("ResamplingCV", "3-fold cross-validation")` and get an estimated average of the root-mean-square error (of course, in a real world setting splitting the data in a training and test set should have been done):
 
 ```{r regression-chains-019}
 learner = GraphLearner$new(graph)
@@ -232,4 +232,4 @@ learner$train(task)
 learner$predict_newdata(dat_predict)
 ```
 
-Note that we have to initialize the `Task` with $y_{1}$ as the target but the pipeline will automatically predict $y_{3}$ in the final step as our final target, which was our ultimate goal here.
+Note that we have to initialize the `r ref("Task")` with $y_{1}$ as the target but the pipeline will automatically predict $y_{3}$ in the final step as our final target, which was our ultimate goal here.

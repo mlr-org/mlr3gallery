@@ -70,7 +70,7 @@ library("paradox")
 theme_set(theme_light())
 ```
 
-We use the same `Task` as in Part I:
+We use the same `r ref("Task")` as in Part I:
 
 ```{r 2020-03-11-mlr3tuning-tutorial-german-credit-005, message=FALSE}
 task = tsk("german_credit")
@@ -311,7 +311,7 @@ The more we search, the more optimistically biased the associated performance me
 
 There is a solution to this problem, namely **Nested Resampling**.
 
-The `mlr3tuning` package provides an `r ref("AutoTuner")` that acts like our tuning method but is actually a `Learner`.
+The `mlr3tuning` package provides an `r ref("AutoTuner")` that acts like our tuning method but is actually a `r ref("Learner")`.
 The `$train()` method facilitates tuning of hyperparameters on the training data, using a resampling strategy (below we use 5-fold cross-validation).
 Then, we actually train a model with optimal hyperparameters on the whole training data.
 
@@ -328,7 +328,7 @@ grid_auto = AutoTuner$new(
 )
 ```
 
-The `AutoTuner` behaves just like a regular `Learner`.
+The `AutoTuner` behaves just like a regular `r ref("Learner")`.
 It can be used to combine the steps of hyperparameter tuning and model fitting but is especially useful for resampling and *fair* comparison of performance through benchmarking:
 
 ```{r 2020-03-11-mlr3tuning-tutorial-german-credit-030, eval = params$eval_all}
