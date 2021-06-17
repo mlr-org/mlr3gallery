@@ -48,11 +48,13 @@ You will:
 
 As a prerequisite, you should be quite familiar with `r mlr_pkg("mlr3pipelines")`, i.e, know about the `$state` field of `r ref("PipeOp")`s, input and output channels, as well as `r ref("Graph", "Graphs")`. We will start with a `r ref("PipeOp")` for simple target transformations, `r ref("PipeOpTargetMutate")`.
 
-We load the `r mlr_pkg("mlr3verse")` package which pulls in the most important packages for this example.
-The `r mlr_pkg("mlr3learners")`  package provides additional `r ref("Learner", "learners")`.
+We load the most important packages for this example.
 
 ```{r mlr3fselect-basic-003}
-library(mlr3verse)
+library(mlr3)
+library(mlr3learners)
+library(mlr3pipelines)
+library(paradox)
 ```
 
 We initialize the random number generator with a fixed seed for reproducibility, and decrease the verbosity of the logger to keep the output clearly represented.
@@ -374,7 +376,7 @@ g_bc = ppl("targettrafo", graph = learner_lm,
 
 The following plot should already look quite familiar:
 
-```{r target-transformations-via-pipelines-025}
+```{r target-transformations-via-pipelines-025, fig.width=10, fig.height=10}
 g_bc$plot()
 ```
 
