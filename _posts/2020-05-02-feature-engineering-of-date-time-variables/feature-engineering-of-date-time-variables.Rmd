@@ -32,7 +32,7 @@ ggplot2::theme_set(ggplot2::theme_light())
 ```
 
 In this tutorial, we demonstrate how `r mlr_pkg("mlr3pipelines")` can be used to easily engineer features based on date-time variables.
-Relying on the [Bike Sharing Dataset](https://archive.ics.uci.edu/ml/datasets/bike+sharing+dataset) and the `r ref("mlr_learners_regr.ranger", "ranger learner")` we compare the RMSE of a random forest using the original features (baseline), to the RMSE of a random forest using newly engineered features on top of the original ones.
+Relying on the [Bike Sharing Dataset](https://archive.ics.uci.edu/ml/datasets/bike+sharing+dataset) and the `r ref("mlr_learners_regr.ranger", "ranger learner")` we compare the root mean square error (RMSE) of a random forest using the original features (baseline), to the RMSE of a random forest using newly engineered features on top of the original ones.
 
 ## Motivation
 A single date-time variable (i.e., a `POSIXct` column) contains plenty of information ranging from year, month, day, hour, minute and second to other features such as week of the year, or day of the week.
@@ -42,7 +42,7 @@ Not respecting this cyclical nature results in treating hours on a linear contin
 
 This results in a two-dimensional representation of the feature:
 
-```{r feature-engineering-of-date-time-variables-002, echo=FALSE, fig.height=5.5, fig.width=10, fig.align = "center"}
+```{r feature-engineering-of-date-time-variables-002, echo=FALSE, fig.height=5.5, fig.width=10}
 hours = 0:23
 hours_scaled = (2 * pi * hours) / 24
 hours_sin = sin(hours_scaled)
@@ -58,9 +58,26 @@ plot(hours_sin, hours_cos,
 text(hours_sin, hours_cos, col = cols, labels = as.character(hours))
 ```
 
-`r mlr_pkg("mlr3pipelines")` provides the `PipeOpDateFeatures` pipeline which can be used to automatically engineer features based on `POSIXct` columns, including handling of cyclical features.
+`r mlr_pkg("mlr3pipelines")` provides the `r ref("PipeOpDateFeatures")` pipeline which can be used to automatically engineer features based on `POSIXct` columns, including handling of cyclical features.
 
 This is useful as most learners naturally cannot handle dates and `POSIXct` variables and therefore require conversion prior to training.
+
+## Prerequisites
+
+We load the `r mlr_pkg("mlr3verse")` package which pulls in the most important packages for this example.
+The `r mlr_pkg("mlr3learners")` package loads additional `r ref("Learner", "learners")`.
+
+```{r mlr3fselect-basic-003}
+library(mlr3verse)
+library(mlr3learners)
+```
+
+We initialize the random number generator with a fixed seed for reproducibility, and decrease the verbosity of the logger to keep the output clearly represented.
+
+```{r mlr3fselect-basic-004}
+set.seed(7832)
+lgr::get_logger("mlr3")$set_threshold("warn")
+```
 
 ## Bike Sharing
 
@@ -84,7 +101,7 @@ bikes$weathersit = as.factor(bikes$weathersit)
 Our goal will be to predict the total number of rented bikes on a given day: `cnt`.
 
 ```{r feature-engineering-of-date-time-variables-004}
-str(bikes)
+skimr::skim(bikes)
 ```
 
 The original dataset does not contain a `POSIXct` column, but we can easily generate one based on the other variables available (note that as no information regarding minutes and seconds is available, we set them to `:00:00`):
@@ -97,25 +114,18 @@ summary(bikes$date)
 
 ## Baseline Random Forest
 
-We construct a new regression task and create a vector of train and test indices:
+We construct a new regression task and create a vector of train and test indices.
 
 ```{r feature-engineering-of-date-time-variables-006}
-library(mlr3)
-library(mlr3learners)
-set.seed(2906)
-tsk = TaskRegr$new("bikes", backend = bikes, target = "cnt")
-train.idx = sample(seq_len(tsk$nrow), size = 0.7 * tsk$nrow)
-test.idx = setdiff(seq_len(tsk$nrow), train.idx)
+task = as_task_regr(bikes, target = "cnt")
+
+train_set = sample(seq_len(task$nrow), size = 0.7 * task$nrow)
+test_set = setdiff(seq_len(task$nrow), train_set)
 ```
 
-This allows us to construct a train and test task:
+validation
 
-```{r feature-engineering-of-date-time-variables-007}
-tsk_train = tsk$clone()$filter(train.idx)
-tsk_test = tsk$clone()$filter(test.idx)
-```
-
-To estimate the performance on unseen data, we will use a `3-fold cross-validation`.
+To estimate the performance on unseen data, we will use a 3-fold cross-validation.
 
 Note that this involves validating on past data, which is usually bad practice but should suffice for this example:
 
@@ -130,117 +140,115 @@ For the baseline, we only use the original features that are sensible and drop `
 We also do not use `casual` (count of casual users) and `registered` (count of registered users) as features as they together add up to `cnt` and could be used as different target variables if we were interested in only the casual or registered users.
 
 ```{r feature-engineering-of-date-time-variables-009}
-lrn_rf = lrn("regr.ranger")
-tsk_train_rf = tsk_train$clone()$select(setdiff(
-  tsk$feature_names,
-  c("instant", "dteday", "date", "casual", "registered")
-  )
-)
+learner_ranger = lrn("regr.ranger")
+task_ranger = task$clone()
+task_train_ranger$select(setdiff(task$feature_names, 
+  c("instant", "dteday", "date", "casual", "registered")))
 ```
 
-We can then use `resample` with `3-fold cross-validation`:
+We can then use `r ref("resample()")` with 3-fold cross-validation:
 
-```{r feature-engineering-of-date-time-variables-010}
-res_rf = resample(tsk_train_rf, learner = lrn_rf, resampling = cv3)
-res_rf$score(msr("regr.mse"))
+```{r feature-engineering-of-date-time-variables-010, results = 'hide'}
+rr_ranger = resample(task_train_ranger, learner = learner_ranger, resampling = cv3)
+
+rr_ranger$score(msr("regr.mse"))
 ```
 
-The average RMSE is given by:
+```{r mlr3fselect-basic-02729, echo = FALSE}
+rr_ranger$score(msr("regr.mse"))[, .(iteration, task_id, learner_id, resampling_id, regr.mse)] %>%
+  kable(format = "html") %>%
+  kable_styling(full_width = TRUE)
+```
+
+We calculate the average RMSE.
 
 ```{r feature-engineering-of-date-time-variables-011}
-sprintf("RMSE ranger original features: %s", round(sqrt(res_rf$aggregate()),
-  digits = 2))
+rr_ranger$aggregate()
 ```
 
 We now want to improve our baseline model by using newly engineered features based on the `date` `POSIXct` column.
 
 ## PipeOpDateFeatures
-To engineer new features we use `PipeOpDateFeatures`.
+
+To engineer new features we use `r ref("PipeOpDateFeatures")`.
 This pipeline automatically dispatches on `POSIXct` columns of the data and by default adds plenty of new date-time related features.
 Here, we want to add all except for `minute` and `second`, because this information is not available. As we additionally want to use cyclical versions of the features we set `cyclic = TRUE`:
 
 ```{r feature-engineering-of-date-time-variables-012}
-library(mlr3pipelines)
-pop = po("datefeatures", param_vals = list(
-  cyclic = TRUE, minute = FALSE, second = FALSE)
-)
+pipeop_date = po("datefeatures", cyclic = TRUE, minute = FALSE, second = FALSE)
 ```
 
 Training this pipeline will result in simply adding the new features (and removing the original `POSIXct` feature(s) used for the feature engineering, see also the `keep_date_var` parameter).
 In our training task, we can now drop the features, `yr`, `mnth`, `hr`, and `weekday`, because our pipeline will generate these anyways:
 
 ```{r feature-engineering-of-date-time-variables-013}
-tsk_train_ex = tsk_train$clone()$select(setdiff(
-  tsk$feature_names,
-  c("instant", "dteday", "yr", "mnth", "hr", "weekday", "casual", "registered")
-  )
-)
-pop$train(list(tsk_train_ex))
+task_train_ex = task_train$clone()
+task_train_ex$select(setdiff(task$feature_names,
+  c("instant", "dteday", "yr", "mnth", "hr", "weekday", "casual", "registered")))
+
+pipeop_date$train(list(task_train_ex))
 ```
 
-Note that it may be useful to familiarize yourself with `PipeOpRemoveConstants` which can be used after the feature engineering to remove features that are constant.
-`PipeOpDateFeatures` does not do this step automatically.
+Note that it may be useful to familiarize yourself with `r ref("PipeOpRemoveConstants")` which can be used after the feature engineering to remove features that are constant.
+`r ref("PipeOpDateFeatures")` does not do this step automatically.
 
-To combine this feature engineering step with a random forest, ranger learner, we now construct a `GraphLearner`.
+To combine this feature engineering step with a random forest, ranger learner, we now construct a `r ref("GraphLearner")`.
 
 ## Using the New Features in a GraphLearner
-We create a `r ref("GraphLearner")` consisting of the `PipeOpDateFeatures` pipeline and a ranger learner.
-This `GraphLearner` then behaves like any other `r ref("Learner")`:
+We create a `r ref("GraphLearner")` consisting of the `r ref("PipeOpDateFeatures")` pipeline and a ranger learner.
+This `r ref("GraphLearner")` then behaves like any other `r ref("Learner")`:
 
-```{r feature-engineering-of-date-time-variables-014}
-grl = GraphLearner$new(
-  po("datefeatures", param_vals = list(
-    cyclic = TRUE, minute = FALSE, second = FALSE)
-  ) %>>%
+```{r feature-engineering-of-date-time-variables-014, fig.width=8, fig.height=10}
+graph = po("datefeatures", cyclic = TRUE, minute = FALSE, second = FALSE) %>>%
   lrn("regr.ranger")
-)
+
+graph_learner = as_learner(graph)
+
+plot(graph)
 ```
 
-Using `resample` with `3-fold cross-validation` on the training task yields:
+Using `r ref("resample()")` with 3-fold cross-validation on the training task yields:
 
-```{r feature-engineering-of-date-time-variables-015}
-tsk_train_grl = tsk_train$clone()$select(setdiff(
-  tsk$feature_names,
-  c("instant", "dteday", "yr", "mnth", "hr", "weekday", "casual", "registered")
-  )
-)
-res_grl = resample(tsk_train_grl, learner = grl, resampling = cv3)
-res_grl$score(msr("regr.mse"))
+```{r feature-engineering-of-date-time-variables-015, results = 'hide'}
+task_train_graph_learner = task_train$clone()
+task_train_graph_learner$select(setdiff(task$feature_names,
+  c("instant", "dteday", "yr", "mnth", "hr", "weekday", "casual", "registered")))
+
+rr_graph_learner = resample(task_train_graph_learner, learner = graph_learner, resampling = cv3)
+
+rr_graph_learner$score(msr("regr.mse"))
 ```
 
-The average RMSE is given by
+```{r mlr3fselect-basic-02729, echo = FALSE}
+rr_graph_learner$score(msr("regr.mse"))[, .(iteration, task_id, learner_id, resampling_id, regr.mse)] %>%
+  kable(format = "html") %>%
+  kable_styling(full_width = TRUE)
+```
+
+We calculate the average RMSE.
 
 ```{r feature-engineering-of-date-time-variables-016}
-sprintf("RMSE graph learner date features: %s", round(sqrt(res_grl$aggregate()),
-  digits = 2))
+rr_graph_learner$aggregate()
 ```
 
 and therefore improved by almost 30%!
 
-Finally, we fit our `GraphLearner` on the complete training task and predict on the test task:
+Finally, we fit our `r ref("GraphLearner")` on the complete training task and predict on the test task:
 
 ```{r feature-engineering-of-date-time-variables-017}
-tsk_train$select(setdiff(
-  tsk$feature_names,
-  c("instant", "dteday", "yr", "mnth", "hr", "weekday", "casual", "registered")
-  )
-)
-grl$train(tsk_train)
+task_train$select(setdiff(task$feature_names,
+  c("instant", "dteday", "yr", "mnth", "hr", "weekday", "casual", "registered")))
+
+graph_learner$train(task_train)
 ```
+
+Where we can obtain the RMSE on the held-out test data
 
 ```{r feature-engineering-of-date-time-variables-018}
-tsk_test$select(setdiff(
-  tsk$feature_names,
-  c("instant", "dteday", "yr", "mnth", "hr", "weekday", "casual", "registered")
-  )
-)
-pred = grl$predict(tsk_test)
-pred$score(msr("regr.mse"))
-```
+task_test$select(setdiff(task$feature_names,
+  c("instant", "dteday", "yr", "mnth", "hr", "weekday", "casual", "registered")))
 
-Where we can obtain the RMSE on the held-out test data:
+prediction = graph_learner$predict(task_test)
 
-```{r feature-engineering-of-date-time-variables-019}
-sprintf("RMSE graph learner date features: %s", round(sqrt(pred$score(msr("regr.mse"))),
-  digits = 2))
+prediction$score(msr("regr.mse"))
 ```

@@ -304,8 +304,14 @@ extract_inner_fselect_results(rr) %>%
 Next, we want to compare the predictive performances estimated on the outer resampling to the inner resampling.
 Significantly lower predictive performances on the outer resampling indicate that the models with the optimized feature sets overfit the data.
 
-```{r mlr3fselect-basic-028}
-rr$score()[, .(iteration, task_id, learner_id, resampling_id, classif.ce)]
+```{r mlr3fselect-basic-028, eval = FALSE}
+rr$score()
+```
+
+```{r mlr3fselect-basic-02729, echo = FALSE}
+rr$score()[, .(iteration, task_id, learner_id, resampling_id, classif.ce)] %>%
+  kable(format = "html") %>%
+  kable_styling(full_width = TRUE)
 ```
 
 The archives of the `r ref("AutoFSelector")`s gives us all evaluated feature sets with the associated predictive performances.
