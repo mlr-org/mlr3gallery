@@ -174,19 +174,19 @@ Moreover, we set the lower bound of `classif.ranger.mtry` to 200 (which is aroun
 
 ```{r tuning-a-complex-graph-011}
 tune_ps1 = ps(
-  branch_learner.selection = 
+  branch_learner.selection =
     p_fct(c("pca_ica_lda", "ranger")),
-  branch_preproc_lda.selection = 
+  branch_preproc_lda.selection =
     p_fct(c("pca", "ica"), depends = branch_learner.selection == "pca_ica_lda"),
-  pca.rank. = 
+  pca.rank. =
     p_int(1, 30, depends = branch_preproc_lda.selection == "pca"),
-  ica.n.comp = 
+  ica.n.comp =
     p_int(1, 30, depends = branch_preproc_lda.selection == "ica"),
-  classif.lda.method = 
+  classif.lda.method =
     p_fct(c("moment", "mve"), depends = branch_preproc_lda.selection == "ica"),
-  classif.ranger.mtry = 
+  classif.ranger.mtry =
     p_int(200, 1000, depends = branch_learner.selection == "ranger"),
-  classif.ranger.num.trees = 
+  classif.ranger.num.trees =
     p_int(500, 2000, depends = branch_learner.selection == "ranger"))
 ```
 

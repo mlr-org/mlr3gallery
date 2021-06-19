@@ -40,7 +40,7 @@ ggplot2::theme_set(ggplot2::theme_light())
 Predicting probabilities in classification tasks allows us to adjust the probability thresholds required for assigning an observation to a certain class.
 This can lead to improved classification performance, especially for cases where we e.g. aim to balance off metrics such as false positive and false negative rates.
 
-This is for example often done in ROC Analysis. The mlr3book also has a chapter on [ROC Analysis](https://mlr3book.mlr-org.com/binary-classification.html#binary-roc)) for the interested reader. 
+This is for example often done in ROC Analysis. The mlr3book also has a chapter on [ROC Analysis](https://mlr3book.mlr-org.com/binary-classification.html#binary-roc)) for the interested reader.
 This post does not focus on ROC analysis, but instead focusses on the general problem of adjusting classification thresholds for arbitrary metrics.
 
 This post assumes some familiarity with the `r mlr_pkg("mlr3")`, and also the `r mlr_pkg("mlr3pipelines")` and `r mlr_pkg("mlr3tuning")` packages, as both are used during the post.
@@ -52,13 +52,13 @@ This post is a more in-depth version of the [article on threshold tuning in the 
 
 We load the `r mlr_pkg("mlr3verse")` package which pulls in the most important packages for this example.
 
-```{r mlr3fselect-basic-003}
+```{r 2020-10-14-threshold-tuning-002}
 library(mlr3verse)
 ```
 
 We initialize the random number generator with a fixed seed for reproducibility, and decrease the verbosity of the logger to keep the output clearly represented.
 
-```{r mlr3fselect-basic-004}
+```{r 2020-10-14-threshold-tuning-003}
 set.seed(7832)
 lgr::get_logger("mlr3")$set_threshold("warn")
 lgr::get_logger("bbotk")$set_threshold("warn")
@@ -70,7 +70,7 @@ In order to understand thresholds, we will quickly showcase the effect of settin
 
 First we create a learner that predicts probabilities and use it to predict on holdout data, storing the prediction.
 
-```{r 2020-10-14-threshold-tuning-003}
+```{r 2020-10-14-threshold-tuning-004}
 learner = lrn("classif.rpart", predict_type = "prob")
 rr = resample(tsk("pima"), learner, rsmp("holdout"))
 prd = rr$prediction()
@@ -80,7 +80,7 @@ prd
 If we now look at the confusion matrix, the off-diagonal elements are errors made by our model (*false positives* and *false negatives*) while on-diagol ements are where our model predicted correctly.
 
 
-```{r 2020-10-14-threshold-tuning-004}
+```{r 2020-10-14-threshold-tuning-005}
 # Print confusion matrix
 prd$confusion
 # Print False Positives and False Negatives
@@ -90,12 +90,12 @@ prd$score(list(msr("classif.fp"), msr("classif.fn")))
 By adjusting the **classification threshold**, in this case the probability required to predict the positive class, we can now trade off predicting more positive cases (first row)
 against predicting fewer negative cases (second row) or vice versa.
 
-```{r 2020-10-14-threshold-tuning-005}
+```{r 2020-10-14-threshold-tuning-006}
 # Lower threshold: More positives
 prd$set_threshold(0.25)$confusion
 ```
 
-```{r 2020-10-14-threshold-tuning-006}
+```{r 2020-10-14-threshold-tuning-007}
 # Higher threshold: Fewer positives
 prd$set_threshold(0.75)$confusion
 ```
@@ -131,7 +131,7 @@ The `thresholds` are now exposed as a `hyperparameter` of the `r ref("GraphLearn
 l$param_set
 ```
 
-```{r mlr3fselect-basic-02743, echo = FALSE}
+```{r 2020-10-14-threshold-tuning-010, echo = FALSE}
 as.data.table(l$param_set)[, .(id, class, lower, upper, nlevels)] %>%
   kable(format = "html") %>%
   kable_styling(full_width = TRUE)
@@ -145,7 +145,7 @@ you can easily imagine, that we can also jointly tune over additional hyperparam
 
 As the `r ref("Task")` we aim to optimize for is a binary task, we can simply specify the threshold parameter:
 
-```{r 2020-10-14-threshold-tuning-010}
+```{r 2020-10-14-threshold-tuning-011}
 search_space = ps(
   threshold.thresholds = p_dbl(lower = 0, upper = 1)
 )
@@ -153,7 +153,7 @@ search_space = ps(
 
 We now create a `r ref("AutoTuner")`, which automatically tunes the supplied learner over the `r ref("ParamSet")` we supplied above.
 
-```{r 2020-10-14-threshold-tuning-011}
+```{r 2020-10-14-threshold-tuning-012}
 at = auto_tuner(
   method = "random_search",
   learner = l,
@@ -171,7 +171,7 @@ We have to use a `trafo` to transform a set of `ParamDbl` into the desired forma
 A named numeric vector containing the thresholds.
 This can be easily achieved via a `trafo` function:
 
-```{r 2020-10-14-threshold-tuning-012}
+```{r 2020-10-14-threshold-tuning-013}
 search_space = ps(
   versicolor = p_dbl(lower = 0, upper = 1),
   setosa = p_dbl(lower = 0, upper = 1),
@@ -187,7 +187,7 @@ in the `threshold.thresholds` slot expected by the learner.
 
 Again, we create a `r ref("AutoTuner")`, which automatically tunes the supplied learner over the `r ref("ParamSet")` we supplied above.
 
-```{r 2020-10-14-threshold-tuning-013}
+```{r 2020-10-14-threshold-tuning-014}
 at = auto_tuner(
   method = "random_search",
   learner = l,
@@ -212,8 +212,8 @@ It directly optimizes the `cross-validated` predictions made by this `r ref("Pip
 
 A simple example would be:
 
-```{r 2020-10-14-threshold-tuning-014}
-gr = po("learner_cv", lrn("classif.rpart", predict_type = "prob")) %>>% 
+```{r 2020-10-14-threshold-tuning-015}
+gr = po("learner_cv", lrn("classif.rpart", predict_type = "prob")) %>>%
   po("tunethreshold")
 l2 = GraphLearner$new(gr)
 ```
@@ -221,11 +221,11 @@ l2 = GraphLearner$new(gr)
 Note, that `predict_type` = "prob" is required for `po("tunethreshold")` to have any effect.
 Additionally, note that this time no `threshold` parameter is exposed, it is automatically tuned internally.
 
-```{r 2020-10-14-threshold-tuning-015, eval = FALSE}
+```{r 2020-10-14-threshold-tuning-016, eval = FALSE}
 l2$param_set
 ```
 
-```{r mlr3fselect-basic-02sd743, echo = FALSE}
+```{r 2020-10-14-threshold-tuning-017, echo = FALSE}
 as.data.table(l2$param_set)[, .(id, class, lower, upper, nlevels)] %>%
   kable(format = "html") %>%
   kable_styling(full_width = TRUE)
@@ -241,7 +241,7 @@ Finally, we can compare no threshold tuning to the `tunethreshold` approach:
 
 ### Comparison of the approaches
 
-```{r 2020-10-14-threshold-tuning-016}
+```{r 2020-10-14-threshold-tuning-018}
 bmr = benchmark(benchmark_grid(
   learners = list(no_tuning = lrn("classif.rpart"), internal = l2),
   tasks = tsk("german_credit"),
@@ -249,11 +249,11 @@ bmr = benchmark(benchmark_grid(
 ))
 ```
 
-```{r 2020-10-14-threshold-tuning-01sd6, eval = FALSE}
+```{r 2020-10-14-threshold-tuning-019, eval = FALSE}
 bmr$aggregate(list(msr("classif.ce"), msr("classif.fnr")))
 ```
 
-```{r mlr3fselect-basic-0274sdf3, echo = FALSE}
+```{r 2020-10-14-threshold-tuning-020, echo = FALSE}
 bmr$aggregate(list(msr("classif.ce"), msr("classif.fnr")))[,.SD, .SDcols = !c("resample_result")] %>%
   kable(format = "html") %>%
   kable_styling(full_width = TRUE)

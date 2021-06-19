@@ -944,24 +944,24 @@ For this purpose we add *dependencies* to the parameter.
 
 ```{r 2020-07-27-bikesharing-demand-062, message = FALSE, results = 'hide'}
 search_space = ps(
-  branch.selection = 
+  branch.selection =
     p_int(1L, 3L),
-  glrn.regr.kknn.regr.kknn.k = 
+  glrn.regr.kknn.regr.kknn.k =
     p_int(1L, 50L, depends = branch.selection == 1),
-  glrn.regr.kknn.regr.kknn.distance = 
+  glrn.regr.kknn.regr.kknn.distance =
     p_int(1L, 3L, depends = branch.selection == 1),
-  glrn.regr.rpart.regr.rpart.minsplit = 
+  glrn.regr.rpart.regr.rpart.minsplit =
     p_int(1L, 30L, depends = branch.selection == 2),
-  glrn.regr.rpart.regr.rpart.cp = 
+  glrn.regr.rpart.regr.rpart.cp =
     p_dbl(0.001, 0.1, depends = branch.selection == 2),
-  importance.filter.nfeat = 
+  importance.filter.nfeat =
     p_fct(c("6", "9", "11"), depends = branch.selection == 3),
-  importance.mtry = 
+  importance.mtry =
     p_int(7L, 11L, depends = branch.selection == 3),
   .extra_trafo = function(x, param_set) {
     if (x$branch.selection == 3L) {
         x$importance.filter.nfeat = as.integer(x$importance.filter.nfeat)
-        x$importance.mtry = 
+        x$importance.mtry =
           ceiling(x$importance.mtry/11 * x$importance.filter.nfeat)
     }
     x
