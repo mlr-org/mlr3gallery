@@ -46,13 +46,13 @@ future::plan(list("sequential", "multisession"))
 This use case compares different approaches to handle class imbalance for the [`optdigits`](https://www.openml.org/d/980) binary classification data set using the mlr3 package.
 We mainly focus on undersampling the majority class, oversampling the minority class, and the SMOTE imbalance correction [@smote] that enriches the minority class with synthetic data.
 The use case requires prior knowledge in basic ML concepts (issues imbalanced data, hyperparameter tuning, nested cross-validation).
-The R packages `mlr3`, `mlr3pipelines` and `mlr3tuning` will be used.
+The R packages `mlr3`, `r mlr_pkg("mlr3pipelines")`  and `mlr3tuning` will be used.
 You can find most of the content here also in the [mlr3book](https://mlr3book.mlr-org.com/) explained in a more detailed way.
 
 These steps are performed:
 
 * Retrieve data sets from `OpenML`
-* Define imbalance correction pipeline [`r ref("Graph")`](https://mlr3pipelines.mlr-org.com/reference/Graph.html)s (undersampling, oversampling and SMOTE) with `mlr3pipelines`
+* Define imbalance correction pipeline [`r ref("Graph")`](https://mlr3pipelines.mlr-org.com/reference/Graph.html)s (undersampling, oversampling and SMOTE) with `r mlr_pkg("mlr3pipelines")` 
 * Autotune the `r ref("Graph")` together with a learner using `mlr3tuning`
 * Benchmark the autotuned `r ref("Graph")` and visualize the results using `mlr3viz`
 
@@ -107,7 +107,7 @@ task = TaskClassif$new(
 task
 ```
 
-Please note that the `optdigits` dataset is also included in the `mlr3data` package where you can get the preprocessed (integers properly encoded as such, etc.) data via:
+Please note that the `optdigits` dataset is also included in the `r mlr_pkg("mlr3data")`  package where you can get the preprocessed (integers properly encoded as such, etc.) data via:
 
 ```{r 2020-03-30-imbalanced-data-006}
 data("optdigits", package = "mlr3data")
@@ -122,7 +122,7 @@ skimr::skim(task$data())
 
 ## Imbalance correction
 
-In `mlr3pipelines`, there is a [`classbalancing`](https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_classbalancing.html) and a [`smote`](https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_smote.html) pipe operator that can be combined with any learner.
+In `r mlr_pkg("mlr3pipelines")` , there is a [`classbalancing`](https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_classbalancing.html) and a [`smote`](https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_smote.html) pipe operator that can be combined with any learner.
 Below, we define the undersampling, oversampling and SMOTE `r ref("PipeOp")`s/`r ref("Graph")`.
 All three imbalance correction methods have hyperparameters to control the degree of class imbalance.
 We apply the `r ref("PipeOp")`s/`r ref("Graph")` to the current `task` with specific hyperparameter values to see how the class balance changes:
