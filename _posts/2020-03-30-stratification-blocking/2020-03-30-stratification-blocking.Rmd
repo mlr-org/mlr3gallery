@@ -4,6 +4,7 @@ categories:
   - resampling
   - stratification
   - german credit data set
+  - breast cancer data set
   - classification
 tags: ['stratified resampling', 'block resampling', 'predefined folds', 'custom resampling']
 author:
@@ -15,6 +16,7 @@ description: |
 output:
   distill::distill_article:
     self_contained: false
+    highlight_downlit: true
     css: ../../custom.css
 ---
 
@@ -27,12 +29,10 @@ output:
 library(mlr3book)
 library(kableExtra)
 
-set.seed(7832)
-
 ggplot2::theme_set(ggplot2::theme_light())
 ```
 
-## Intro
+# Intro
 
 When evaluating machine learning algorithms through resampling, it is preferable that each train/test partition will be a representative subset of the whole data set.
 This post covers three ways to achieve such reliable resampling procedures:
@@ -41,58 +41,65 @@ This post covers three ways to achieve such reliable resampling procedures:
   2. [Block resampling](https://mlr3.mlr-org.com/reference/Resampling.html#grouping-blocking) where a grouping factor determines which observations should be together in train/test splits.
   3. [Custom resampling](https://mlr3.mlr-org.com/reference/mlr_resamplings_custom.html) using predefined and manually created folds for the train/test splits.
 
-## Prerequisites
+# Prerequisites
+
+We load the most important packages for this post.
 
 ```{r 2020-03-30-stratification-blocking-002}
-library(mlr3)
+library(mlr3verse)
 library(mlbench)
 library(data.table)
 ```
 
-## Stratified resampling
+We initialize the random number generator with a fixed seed for reproducibility.
+
+```{r mlr3fselect-basic-004}
+set.seed(7832)
+```
+
+# Stratified resampling
 
 In classification tasks, the ratio of the target class distribution should be similar in each train/test split, which is achieved by [stratification](https://mlr.mlr-org.com/articles/tutorial/resample.html#stratification-with-respect-to-the-target-variables). This is particularly useful in the case of imbalanced classes and small data sets.
 
 Stratification can also be performed with respect to explanatory categorical variables to ensure that all subgroups are represented in all training and test sets.
 
-In `mlr3`, each [task](https://mlr3.mlr-org.com/reference/Task.html) has a slot [`col_roles`](https://mlr3.mlr-org.com/reference/Task.html#active-bindings).
+In `r mlr_pkg("mlr3")`, each `r ref("Task")` has a slot [`$col_roles`](https://mlr3.mlr-org.com/reference/Task.html#active-bindings).
 This slot shows general roles certain features will have throughout different stages of the machine learning process.
-At least, the `col_roles` slot shows which variables will be used as `feature`s and as the `target`.
-Hoever, the `col_roles` slot can be more diverse and some variables might even serve multiple roles.
+At least, the `$col_roles` slot shows which variables will be used as `feature`s and as the `target`.
+However, the `$col_roles` slot can be more diverse and some variables might even serve multiple roles.
 We can specify the variable used for stratification in `task$col_roles$stratum`.
-This will be illustrated in the following example using the `german_credit` data:
+This will be illustrated in the following example using the `r ref("mlr_tasks_german_credit", "german_credit")` data:
 
 ```{r 2020-03-30-stratification-blocking-003}
-gc_tsk = tsk("german_credit")
-gc_tsk$col_roles
+task_gc = tsk("german_credit")
+task_gc$col_roles
 ```
 
 We use the target feature called `credit_risk` to specify stratification with respect to the target variable:
 
 ```{r 2020-03-30-stratification-blocking-004_roles_startum}
-gc_tsk$col_roles$stratum = "credit_risk"
-# alternatively gc_tsk$col_roles$stratum = gc_tsk$col_roles$target
+task_gc$col_roles$stratum = "credit_risk"
+# alternatively task_gc$col_roles$stratum = task_gc$col_roles$target
 ```
 
 After the specification of `task$col_roles$stratum`, the active binding [`task$strata`](https://mlr3.mlr-org.com/reference/Task.html#active-bindings) will show the number of observations in each group and the corresponding row id's:
 
 ```{r 2020-03-30-stratification-blocking-005}
-gc_tsk$strata
+task_gc$strata
 ```
 
 Specify 3-fold cross validation and instantiate the resampling on the task:
 
 ```{r 2020-03-30-stratification-blocking-006}
 cv3 = rsmp("cv", folds = 3)
-set.seed(123)
-cv3$instantiate(gc_tsk)
+cv3$instantiate(task_gc)
 cv3$instance
 ```
 
 Check if the target class distribution is similar in each fold:
 
 ```{r 2020-03-30-stratification-blocking-007}
-dt = merge(cv3$instance, gc_tsk$data()[, row_id := .I], by = "row_id")
+dt = merge(cv3$instance, task_gc$data()[, row_id := .I], by = "row_id")
 dt[, .(class_ratio = sum(credit_risk == "bad") /
   sum(credit_risk == "good")), by = fold]
 ```
@@ -107,22 +114,21 @@ Note that the variable used for stratification does not necessarily have to be t
 In fact, multiple categorical features can be used for stratification to maintain their frequency distribution in each fold:
 
 ```{r 2020-03-30-stratification-blocking-009}
-gc_tsk$col_roles$stratum = c("housing", "telephone")
-gc_tsk$strata
+task_gc$col_roles$stratum = c("housing", "telephone")
+task_gc$strata
 ```
 
 To illustrate if stratification based on multiple categorical features works, we need to instantiate the CV folds again as we changed the features used for stratification:
 
 ```{r 2020-03-30-stratification-blocking-010}
-set.seed(123)
-cv3$instantiate(gc_tsk)
+cv3$instantiate(task_gc)
 cv3$instance
 ```
 
 Again, we check the relative frequency of observations in each group (combination of `housing` and `telephone`) across all folds:
 
 ```{r 2020-03-30-stratification-blocking-011}
-dt = merge(cv3$instance, gc_tsk$data()[, row_id := .I], by = "row_id")
+dt = merge(cv3$instance, task_gc$data()[, row_id := .I], by = "row_id")
 dt = dt[, .(freq = .N), by = list(fold, housing, telephone)]
 dt = dcast(dt, housing + telephone ~ fold)
 dt[, c(3:5) := lapply(.SD, function(x) x / sum(x)), .SDcols = 3:5]
@@ -132,26 +138,22 @@ dt
 And compare it with the relative frequency from the whole data set:
 
 ```{r 2020-03-30-stratification-blocking-012}
-gc_tsk$data()[, .(freq = .N / max(.I)),
+task_gc$data()[, .(freq = .N / max(.I)),
   by = list(housing, telephone)][order(housing, telephone), ]
 ```
 
 It is evident that in each fold, the combination of `housing` and `telephone` have similar frequencies that also coincide with the frequencies from the whole data set.
 
-## <a id="block"></a>Block resampling
+# <a id="block"></a>Block resampling
 
 An additional concern when specifying resampling is respecting the natural grouping of the data.
 Blocking refers to the situation where subsets of observations belong together and must not be separated during resampling. Hence, for one train/test set pair the entire block is either in the training set or in the test set.
 
-The following example is based on the [BreastCancer](https://www.rdocumentation.org/packages/mlbench/versions/2.1-1/topics/BreastCancer) data set from the `mlbench` package:
+The following example is based on the [BreastCancer](https://www.rdocumentation.org/packages/mlbench/versions/2.1-1/topics/BreastCancer) data set from the `r cran_pkg("mlbench")` package:
 
 ```{r 2020-03-30-stratification-blocking-013}
 data(BreastCancer, package = "mlbench")
-bc_tsk = TaskClassif$new(
-  id = "BreastCancer",
-  backend = BreastCancer,
-  target = "Class",
-  positive = "malignant")
+task_bc = as_task_classif(BreastCancer, target = "Class", positive = "malignant")
 ```
 
 In the [BreastCancer](https://www.rdocumentation.org/packages/mlbench/versions/2.1-1/topics/BreastCancer) data set, for example, several observations have the same "Id" (Sample code number) which implies these are samples taken from the same patient at different times.
@@ -170,12 +172,12 @@ The following example will illustrate block cross validation which can be achiev
 
 ```{r 2020-03-30-stratification-blocking-015_ blocked}
 # Use Id column as block factor
-bc_tsk$col_roles$group = "Id"
+task_bc$col_roles$group = "Id"
 # Remove Id from feature
-# bc_tsk$col_roles$feature = setdiff(bc_tsk$col_roles$feature, "Id")
+# task_bc$col_roles$feature = setdiff(task_bc$col_roles$feature, "Id")
 cv5 = rsmp("cv", folds = 5)
 set.seed(123)
-cv5$instantiate(bc_tsk)
+cv5$instantiate(task_bc)
 cv5$instance
 ```
 
@@ -190,20 +192,19 @@ nrow(cv5$instance) == length(unique(BreastCancer$Id))
 If the specified blocking groups are respected, each `Id` appears only in exactly one fold. To inspect if blocking was successful when generating the folds we count how often each `Id` appears in a specific fold and print the `Id`s that appear in more than one fold:
 
 ```{r 2020-03-30-stratification-blocking-017_folds1}
-dt = merge(bc_tsk$data(), cv5$instance, by.x = "Id", by.y = "row_id")
+dt = merge(task_bc$data(), cv5$instance, by.x = "Id", by.y = "row_id")
 dt = dt[, .(unique_folds = length(unique(fold))), by = Id]
 dt[unique_folds > 1, ]
 ```
 
 As expected, the table is empty as there are no Id's present in more than one fold.
 
-## Resampling with predefined folds
+# Resampling with predefined folds
 
 In some use cases, it might be necessary to use predefined folds. When using k-fold cross validation without repetition this can be achieved by manually creating a feature used to denote folds and assigning it to the [`task$col_roles$group`](https://mlr3.mlr-org.com/reference/Task.html#active-bindings) slot.
 First, we create a vector that contains 5 predefined folds:
 
 ```{r 2020-03-30-stratification-blocking-018_folds1}
-set.seed(1)
 folds = sample(rep(1:5, length.out = nrow(BreastCancer)),
   size = nrow(BreastCancer),
   replace = F)
@@ -214,22 +215,21 @@ table(folds)
 This vector is now added to the data set and will be used as grouping factor just as when defining [block resampling](#block):
 
 ```{r 2020-03-30-stratification-blocking-019_folds2}
-bc_tsk = TaskClassif$new(
+task_bc = TaskClassif$new(
   id = "BreastCancer",
   backend = data.frame(BreastCancer, foldIds = as.factor(folds)),
   target = "Class",
   positive = "malignant")
-bc_tsk$col_roles$group = "foldIds"
+task_bc$col_roles$group = "foldIds"
 # Remove "foldIds" from features
-# bc_tsk$col_roles$feature = setdiff(bc_tsk$col_roles$feature, "foldIds")
+# task_bc$col_roles$feature = setdiff(task_bc$col_roles$feature, "foldIds")
 ```
 
 We now instantiate a 5-fold CV that will respect the predefined folds:
 
 ```{r 2020-03-30-stratification-blocking-020}
 cv5 = rsmp("cv", folds = 5)
-set.seed(123)
-cv5$instantiate(bc_tsk)
+cv5$instantiate(task_bc)
 cv5$instance
 ```
 
@@ -237,7 +237,7 @@ Since we have only five predefined folds, the `cv5$instance` data table has five
 To check if the predefined groups are respected, we count how often each `foldIds` appears in a specific fold:
 
 ```{r 2020-03-30-stratification-blocking-021_folds3}
-dt = merge(bc_tsk$data(), cv5$instance, by.x = "foldIds", by.y = "row_id")
+dt = merge(task_bc$data(), cv5$instance, by.x = "foldIds", by.y = "row_id")
 dt[, .(unique_folds = length(unique(fold))), by = foldIds]
 ```
 
@@ -245,15 +245,15 @@ There are five groups and each `foldIds` appears only in exactly one fold.
 This means that each instantiated fold corresponds to one of the predefined folds.
 
 The previous example does not cover how to perform repeated k-fold CV or time series CV with predefined indices.
-This is possible via the [`mlr_resamplings_custom()`](https://mlr3.mlr-org.com/reference/mlr_resamplings_custom.html) to which a list of predefined train and test indices can be assigned.
-In the following example, a custom resampling is created using indices created by [`caret::createMultiFolds()`](https://www.rdocumentation.org/packages/caret/versions/6.0-85/topics/createDataPartition):
+This is possible via the `r ref("mlr_resamplings_custom")` to which a list of predefined train and test indices can be assigned.
+In the following example, a custom resampling is created using indices created by `r ref("caret::createMultiFolds()")`:
 
 ```{r 2020-03-30-stratification-blocking-022_folds4}
-gc_tsk = tsk("german_credit")
-train_ind = caret::createMultiFolds(gc_tsk$truth(), k = 5, times = 10)
-test_ind = lapply(train_ind, function(x) setdiff(1:gc_tsk$nrow, x))
+task_gc = tsk("german_credit")
+train_ind = caret::createMultiFolds(task_gc$truth(), k = 5, times = 10)
+test_ind = lapply(train_ind, function(x) setdiff(1:task_gc$nrow, x))
 rc = rsmp("custom")
-rc$instantiate(gc_tsk, train_ind, test_ind)
+rc$instantiate(task_gc, train_ind, test_ind)
 ```
 
 We now check if the instantiated custom resampling contains the intended folds:
@@ -265,6 +265,6 @@ all.equal(train_ind[[1]], rc$train_set(1))
 unlist(lapply(1:rc$iters, function(i) all.equal(train_ind[[i]], rc$train_set(i))))
 ```
 
-## Conclusions
+# Conclusions
 
-This post shows how to control the resampling process when using [mlr3](https://mlr3.mlr-org.com/index.html) in order to account for data specificities.
+This post shows how to control the resampling process when using `r mlr_pkg("mlr3")` in order to account for data specificities.
