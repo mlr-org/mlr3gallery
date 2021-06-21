@@ -42,14 +42,14 @@ We load the `r mlr_pkg("mlr3verse")` package which pulls in the most important p
 The `r mlr_pkg("mlr3learners")` package loads additional `r ref("Learner", "learners")`.
 The data is part of the `r mlr_pkg("mlr3data")`  package.
 
-```{r 2020-04-27-tuning-stacking-002}
+```{r 2020-04-27-mlr3pipelines-titanic-advanced-002}
 library(mlr3verse)
 library(mlr3learners)
 ```
 
 We initialize the random number generator with a fixed seed for reproducibility, and decrease the verbosity of the logger to keep the output clearly represented.
 
-```{r 2020-04-27-tuning-stacking-003}
+```{r 2020-04-27-mlr3pipelines-titanic-advanced-003}
 set.seed(7832)
 lgr::get_logger("mlr3")$set_threshold("warn")
 lgr::get_logger("bbotk")$set_threshold("warn")
@@ -58,7 +58,7 @@ lgr::get_logger("bbotk")$set_threshold("warn")
 As in the basics chapter, we use the titanic data set.
 To recap we have undertaken the following steps:
 
-```{r 2020-04-27-mlr3pipelines-titanic-advanced-003}
+```{r 2020-04-27-mlr3pipelines-titanic-advanced-004}
 data("titanic", package = "mlr3data")
 
 # setting up the task
@@ -97,14 +97,14 @@ Remember that we are trying to optimize our predictive power by using a random f
 Now, random forest models do not naturally handle missing values which is the reason why we need imputation.
 Before imputation, our data looks as follows:
 
-```{r 2020-04-27-mlr3pipelines-titanic-advanced-004}
+```{r 2020-04-27-mlr3pipelines-titanic-advanced-005}
 task$missings()
 ```
 
 
 Let's first deal with the categorical variables:
 
-```{r 2020-04-27-mlr3pipelines-titanic-advanced-005}
+```{r 2020-04-27-mlr3pipelines-titanic-advanced-006}
 po_newlvl = po("imputeoor")
 task_newlvl = po_newlvl$train(list(task))[[1]]
 ```
@@ -114,7 +114,7 @@ We'll learn how to use a full graph below.
 
 First, let's look at the result:
 
-```{r 2020-04-27-mlr3pipelines-titanic-advanced-006}
+```{r 2020-04-27-mlr3pipelines-titanic-advanced-007}
 task_newlvl$missings()
 ```
 
@@ -127,15 +127,15 @@ In order to do this, we need a more complicated structure, a `r ref("Graph")`.
 Our `po_indicator` creates the indicator column.
 We tell it to only do this for `numeric` and `integer` columns via its `param_vals`, and additionally tell it to create a numeric column (0 = "not missing", 1 = "missing").
 
-```{r 2020-04-27-mlr3pipelines-titanic-advanced-007}
-po_indicator = po("missind", 
+```{r 2020-04-27-mlr3pipelines-titanic-advanced-008}
+po_indicator = po("missind",
   affect_columns = selector_type(c("numeric", "integer")), type = "numeric")
 ```
 
 Now we can simultaneously impute features from the histogram and create indicator columns.
 This can be achieved using the `r ref("gunion")` function, which puts two operations in parallel:
 
-```{r 2020-04-27-mlr3pipelines-titanic-advanced-008}
+```{r 2020-04-27-mlr3pipelines-titanic-advanced-009}
 graph = gunion(list(po_indicator, po("imputehist")))
 graph = graph %>>% po("featureunion")
 ```
@@ -143,20 +143,20 @@ graph = graph %>>% po("featureunion")
 Afterwards, we `cbind` the resulting data using `po("featureunion")`, connecting the different operations using our **graph connector**: `%>>%`.
 We can now also connect the newlvl imputation:
 
-```{r 2020-04-27-mlr3pipelines-titanic-advanced-009}
+```{r 2020-04-27-mlr3pipelines-titanic-advanced-010}
 graph = graph %>>% po("imputeoor")
 ```
 
 and see what happens when we now train the whole **Graph**:
 
-```{r 2020-04-27-mlr3pipelines-titanic-advanced-010}
+```{r 2020-04-27-mlr3pipelines-titanic-advanced-011}
 task_imputed = graph$clone()$train(task)[[1]]
 task_imputed$missings()
 ```
 
 Awesome, now we do not have any missing values!
 
-```{r 2020-04-27-mlr3pipelines-titanic-advanced-011}
+```{r 2020-04-27-mlr3pipelines-titanic-advanced-012}
 autoplot(task_imputed)
 ```
 
@@ -168,7 +168,7 @@ Luckily, this is automatically handled in our `r ref("Graph")`, if we use it thr
 
 We can simply append a `r ref("mlr_learners_classif.ranger", "ranger learner")` to the Graph and create a `r ref("GraphLearner")` from this.
 
-```{r 2020-04-27-mlr3pipelines-titanic-advanced-012}
+```{r 2020-04-27-mlr3pipelines-titanic-advanced-013}
 graph_learner = as_learner(graph$clone() %>>%
   po("imputesample") %>>%
   po("fixfactors") %>>%
@@ -179,7 +179,7 @@ We needed to use the following commands for the Graph:
 * `r ref("PipeOpFixFactors")`: Removes empty factor levels and removes factor levels that do not exist during training.
 * `r ref("PipeOpImputeSample")`: In some cases, if missing factor levels do not occur during training but only while predicting, `r ref("PipeOpImputeOOR")` does not create a new level. For those, we sample a random value.
 
-```{r 2020-04-27-mlr3pipelines-titanic-advanced-013}
+```{r 2020-04-27-mlr3pipelines-titanic-advanced-014}
 rr = resample(task, graph_learner, resampling, store_models = TRUE)
 rr$aggregate(msr("classif.acc"))
 ```
@@ -192,11 +192,11 @@ We will do this using `r ref("PipeOpMutate")` in order to showcase the power of 
 Additionally, we will make use of the `character` columns.
 Hence, we will re-select them:
 
-```{r 2020-04-27-mlr3pipelines-titanic-advanced-014}
+```{r 2020-04-27-mlr3pipelines-titanic-advanced-015}
 task$col_roles$feature = c(task$feature_names, c("cabin", "name", "ticket"))
 ```
 
-```{r 2020-04-27-mlr3pipelines-titanic-advanced-015}
+```{r 2020-04-27-mlr3pipelines-titanic-advanced-016}
 library("stringi")
 po_ftextract = po("mutate", mutation = list(
   fare_per_person = ~ fare / (parch + sib_sp + 1),
@@ -209,12 +209,12 @@ po_ftextract = po("mutate", mutation = list(
 
 Quickly checking what happens:
 
-```{r 2020-04-27-mlr3pipelines-titanic-advanced-016}
+```{r 2020-04-27-mlr3pipelines-titanic-advanced-017}
 task_eng = po_ftextract$clone()$train(list(task))[[1]]
 task_eng$data()
 ```
 
-```{r 2020-04-27-mlr3pipelines-titanic-advanced-017}
+```{r 2020-04-27-mlr3pipelines-titanic-advanced-018}
 autoplot(task_eng$clone()$select(c("sex", "age")), type = "pairs")
 ```
 
@@ -237,11 +237,11 @@ In summary, we do the following:
 
 The full graph we created is the following:
 
-```{r 2020-04-27-mlr3pipelines-titanic-advanced-018}
+```{r 2020-04-27-mlr3pipelines-titanic-advanced-019}
 learner = lrn("classif.ranger", num.trees = 500, min.node.size = 4)
 ```
 
-```{r 2020-04-27-mlr3pipelines-titanic-advanced-019}
+```{r 2020-04-27-mlr3pipelines-titanic-advanced-020}
 graph_final = po_ftextract %>>%
   po("collapsefactors", param_vals = list(no_collapse_above_prevalence = 0.03)) %>>%
   po("select", param_vals = list(selector = selector_invert(selector_type("character")))) %>>%
@@ -257,7 +257,7 @@ graph_final = po_ftextract %>>%
 
 Let us see if things have improved:
 
-```{r 2020-04-27-mlr3pipelines-titanic-advanced-020}
+```{r 2020-04-27-mlr3pipelines-titanic-advanced-021}
 graph_learner = as_learner(graph_final)
 
 rr = resample(task, graph_learner, resampling, store_models = TRUE)
@@ -272,7 +272,7 @@ We have improved even more!
 To undertake benchmarking, we need to set up a benchmarking design.
 The first step is creating a list with the learners we used, namely the learners form the first and second part of this use case.
 
-```{r 2020-04-27-mlr3pipelines-titanic-advanced-021}
+```{r 2020-04-27-mlr3pipelines-titanic-advanced-022}
 learners = list(
   lrn("classif.rpart", predict_type = "prob"),
   lrn("classif.ranger", predict_type = "prob")
@@ -283,7 +283,7 @@ Now we can define our benchmark design.
 This is done to ensure exhaustive and consistent resampling for all learners.
 This step is needed to execute over the same train/test split for each task.
 
-```{r 2020-04-27-mlr3pipelines-titanic-advanced-022}
+```{r 2020-04-27-mlr3pipelines-titanic-advanced-023}
 bm_design = benchmark_grid(task_imputed, learners, rsmp("cv", folds = 10))
 bmr = benchmark(bm_design, store_models = TRUE)
 print(bmr)
@@ -292,20 +292,20 @@ print(bmr)
 So, where do we go from here?
 We could for instance use a boxplot:
 
-```{r 2020-04-27-mlr3pipelines-titanic-advanced-023}
+```{r 2020-04-27-mlr3pipelines-titanic-advanced-024}
 autoplot(bmr)
 ```
 
 Further we are able to compare sensitivity and specificity.
 Here we need to ensure that the benchmark results only contain a single Task:
 
-```{r 2020-04-27-mlr3pipelines-titanic-advanced-024}
+```{r 2020-04-27-mlr3pipelines-titanic-advanced-025}
 autoplot(bmr$clone()$filter(task_id = "titanic"), type = "roc")
 ```
 
 Moreover, one can compare the precision-recall:
 
-```{r 2020-04-27-mlr3pipelines-titanic-advanced-025}
+```{r 2020-04-27-mlr3pipelines-titanic-advanced-026}
 # Precision vs Recall
 ggplot2::autoplot(bmr, type = "prc")
 ```
