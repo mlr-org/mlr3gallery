@@ -10,7 +10,7 @@ author:
   - name: Michel Lang
 date: 01-31-2020
 description: |
-  The package "xgboost" unfortunately does not support handling of categorical features. Therefore, it is required to manually convert factor columns to numerical dummy features. We show how to use "mlr3pipelines" to augment the "mlr_learners_classif.xgboost" learner with an automatic factor encoding.
+  We show how to encode factor levels for the xgboost learner with mlr3pipelines.
 output:
   distill::distill_article:
     self_contained: false
@@ -25,8 +25,6 @@ output:
 
 library(mlr3book)
 library(kableExtra)
-
-set.seed(7832)
 
 ggplot2::theme_set(ggplot2::theme_light())
 ```
@@ -112,20 +110,20 @@ Finally, we construct a linear pipeline consisting of
 3. the xgboost base learner.
 
 ```{r 2020-01-31-encode-factors-for-xgboost-010}
-pipe = fencoder %>>% ord_to_int %>>% learner
-print(pipe)
+graph = fencoder %>>% ord_to_int %>>% learner
+print(graph)
 ```
 
 The pipeline is wrapped in a `r ref("GraphLearner")` so that it behaves like a regular learner:
 
 ```{r 2020-01-31-encode-factors-for-xgboost-011}
-glearner = GraphLearner$new(pipe)
+graph_learner = as_learner(graph)
 ```
 
 We can now apply the new learner on the task, here with a 3-fold cross validation:
 
 ```{r 2020-01-31-encode-factors-for-xgboost-012}
-rr = resample(task, glearner, rsmp("cv", folds = 3))
+rr = resample(task, graph_learner, rsmp("cv", folds = 3))
 rr$aggregate()
 ```
 
