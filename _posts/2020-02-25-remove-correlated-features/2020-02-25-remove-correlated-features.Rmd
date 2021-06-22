@@ -18,6 +18,7 @@ description: |
 output:
   distill::distill_article:
     self_contained: false
+    highlight_downlit: true
     css: ../../custom.css
 ---
 
@@ -29,8 +30,6 @@ output:
 
 library(mlr3book)
 library(kableExtra)
-
-set.seed(7832)
 
 ggplot2::theme_set(ggplot2::theme_light())
 ```
@@ -68,7 +67,7 @@ The basic pipeline looks as follows:
 We use `r ref("PipeOpSelect")` to select a set of variables followed by a `r ref("mlr_learners_classif.rpart", "rpart learner")`.
 
 ```{r 2020-02-25-remove-correlated-features-004}
-pipeline = po("select") %>>% lrn("classif.rpart")
+graph_learner = po("select") %>>% lrn("classif.rpart")
 ```
 
 Now we get to the magic:
@@ -78,7 +77,7 @@ This function has a `cutoff` parameter, that specifies the maximum correlation a
 In order to expose this variable as a `numeric` parameter we can tune over we specify the following `r ref("ParamSet")`:
 
 ```{r 2020-02-25-remove-correlated-features-005}
-ps = ps(cutoff = p_dbl(0, 1))
+search_space = ps(cutoff = p_dbl(0, 1))
 ```
 
 We define a function `select_cutoff` that takes as input a `r ref("Task")` and returns a list of features we aim to keep.
@@ -87,7 +86,7 @@ Now we use a `trafo` to transform the `cutoff` into a set of variables, which is
 Note that we use `x$cutoff = NULL` in order to remove the temporary parameter we introduced, as `r ref("PipeOpSelect")` does not know what to do with it.
 
 ```{r 2020-02-25-remove-correlated-features-006}
-ps$trafo = function(x, param_set) {
+search_space$trafo = function(x, param_set) {
   cutoff = x$cutoff
   x$select.selector = function(task) {
     fn = task$feature_names
@@ -106,13 +105,13 @@ It has a section on the `trafo` concept.
 Now we tune over different values for `cutoff`.
 
 ```{r 2020-02-25-remove-correlated-features-007}
-inst = tune(
+instance = tune(
   method = "grid_search",
   task = tsk("iris"),
-  learner = pipeline,
+  learner = graph_learner,
   resampling = rsmp("cv", folds = 3L),
   measure = msr("classif.ce"),
-  search_space = ps,
+  search_space = search_space,
   # don't need the following line for optimization, this is for
   # demonstration that different features were selected
   store_models = TRUE)
@@ -123,11 +122,11 @@ Note this inspects only the trained models of the first CV fold of each evaluate
 The features being excluded depends on the training data seen by the pipeline and may be different in different folds, even at the same cutoff value.
 
 ```{r 2020-02-25-remove-correlated-features-008, echo=FALSE}
-resample_result = inst$archive$benchmark_result$resample_results$resample_result
+resample_result = instance$archive$benchmark_result$resample_results$resample_result
 ```
 
 ```{r 2020-02-25-remove-correlated-features-009}
-as.data.table(inst$archive)[
+as.data.table(instance$archive)[
   order(cutoff),
   list(cutoff, classif.ce,
     featurenames = lapply(resample_result, function(x) {
