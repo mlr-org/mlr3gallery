@@ -5,6 +5,7 @@ categories:
   - imputation
   - mlr3pipelines
   - pima data set
+  - boston housing data set
   - classification
 author:
   - name: Florian Pfisterer
@@ -14,6 +15,7 @@ description: |
 output:
   distill::distill_article:
     self_contained: false
+    highlight_downlit: true
     css: ../../custom.css
 ---
 
@@ -120,7 +122,7 @@ We also have to make sure to apply the pipe operators in the correct order!
 
 ```{r 2020-01-30-impute-missing-levels-010}
 imp_missind = po("missind")
-imp_num = po("imputehist", param_vals = list(affect_columns = selector_type("numeric")))
+imp_num = po("imputehist", affect_columns = selector_type("numeric"))
 ```
 
 In order to better understand we can look at the results of every `r ref("PipeOp")` separately.
@@ -128,21 +130,21 @@ In order to better understand we can look at the results of every `r ref("PipeOp
 We can manually trigger the `r ref("PipeOp")` to test the operator on our task:
 
 ```{r 2020-01-30-impute-missing-levels-011}
-ext_task = imp_missind$train(list(task))[[1]]
-ext_task$data()
+task_ext = imp_missind$train(list(task))[[1]]
+task_ext$data()
 ```
 
 For `r ref("mlr_pipeops_imputehist", "imputehist")`, we can do the same:
 
 ```{r 2020-01-30-impute-missing-levels-012}
-ext_task = imp_num$train(list(task))[[1]]
-ext_task$data()
+task_ext = imp_num$train(list(task))[[1]]
+task_ext$data()
 ```
 
 This time we obtain the imputed data set without `missing` values.
 
 ```{r 2020-01-30-impute-missing-levels-013}
-ext_task$missings()
+task_ext$missings()
 ```
 
 ## Putting everything together
@@ -156,7 +158,9 @@ For this we need the following two `r ref("PipeOp")`s :
 
 
 ```{r 2020-01-30-impute-missing-levels-014}
-graph = po("copy", 2) %>>% gunion(list(imp_missind, imp_num)) %>>% po("featureunion")
+graph = po("copy", 2) %>>% 
+  gunion(list(imp_missind, imp_num)) %>>%
+  po("featureunion")
 ```
 
 as a last step we append the learner we planned on using:
@@ -167,7 +171,7 @@ graph = graph %>>% po(learner)
 
 We can now visualize the resulting graph:
 
-```{r 2020-01-30-impute-missing-levels-016, fig.width=10, fig.height=8}
+```{r 2020-01-30-impute-missing-levels-016, fig.width=6, fig.height=8}
 graph$plot()
 ```
 
@@ -180,8 +184,8 @@ If applied incorrectly, imputation could leak info from the test set, which pote
 By wrapping this graph into a  `r ref("GraphLearner")`, we can now train resample the full graph, here with a 3-fold cross validation:
 
 ```{r 2020-01-30-impute-missing-levels-017}
-glearner = GraphLearner$new(graph)
-rr = resample(task, glearner, rsmp("cv", folds = 3))
+graph_learner = as_learner(graph)
+rr = resample(task, graph_learner, rsmp("cv", folds = 3))
 rr$aggregate()
 ```
 
@@ -194,14 +198,14 @@ In order to showcase this, we create a copy of the task with several more missin
 dt = task$data()
 dt[1:10, "age"] = NA
 dt[30:70, "pedigree"] = NA
-task2 = TaskClassif$new("pima2", dt, target = "diabetes")
+task_2 = as_task_classif(dt, id = "pima2", target = "diabetes")
 ```
 
-And now we learn on `task`, while trying to predict on `task2`.
+And now we learn on `task`, while trying to predict on `task_2`.
 
 ```{r 2020-01-30-impute-missing-levels-019}
-glearner$train(task)
-glearner$predict(task2)
+graph_learner$train(task)
+graph_learner$predict(task_2)
 ```
 
 ## Missing factor features
@@ -213,9 +217,8 @@ This will simply replace every `NA` in each factor variable with a new value `mi
 A full graph might the look like this:
 
 ```{r 2020-01-30-impute-missing-levels-020}
-imp_missind = po("missind", param_vals = list(affect_columns = NULL, which = "all"))
-imp_fct = po("imputeoor",
-  param_vals = list(affect_columns = selector_type("factor")))
+imp_missind = po("missind", affect_columns = NULL, which = "all")
+imp_fct = po("imputeoor", affect_columns = selector_type("factor"))
 graph = po("copy", 2) %>>%
   gunion(list(imp_missind, imp_num %>>% imp_fct)) %>>%
   po("featureunion")
@@ -230,21 +233,21 @@ As the (`r ref("mlr_tasks_pima", "pima")`) task does not have any factor levels,
 famous (`r ref("mlr_tasks_boston_housing", "boston_housing")`) task.
 
 ```{r 2020-01-30-impute-missing-levels-021}
-# t1 is the training data without missings
-t1 = tsk("boston_housing")
+# task_bh_1 is the training data without missings
+task_bh_1 = tsk("boston_housing")
 
-# t2 is the prediction data with missings
-dt = t1$data()
+# task_bh_2 is the prediction data with missings
+dt = task_bh_1$data()
 dt[1:10, chas := NA][20:30, rm := NA]
-t2 = TaskRegr$new("bh", dt, target = "medv")
+task_bh_2 = as_task_regr(dt, id = "bh", target = "medv")
 ```
 
-Now we train on `t1` and predict on `t2`:
+Now we train on `task_bh_1` and predict on `task_bh_2`:
 
 ```{r 2020-01-30-impute-missing-levels-022}
-gl = GraphLearner$new(graph %>>% po(lrn("regr.ranger")))
-gl$train(t1)
-gl$predict(t2)
+graph_learner = as_learner(graph %>>% po(lrn("regr.ranger")))
+graph_learner$train(task_bh_1)
+graph_learner$predict(task_bh_2)
 ```
 
 Success! We learned how to deal with missing values in less than 10 minutes.
