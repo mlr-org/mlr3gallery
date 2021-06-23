@@ -57,14 +57,14 @@ We will consider 2 cases: (a) Running the learners in their default, so without 
 We load the `r mlr_pkg("mlr3verse")` package which pulls in the most important packages for this example.
 The `r mlr_pkg("mlr3learners")` package loads additional `r ref("Learner", "learners")`.
 
-```{r mlr3fselect-basic-003}
+```{r 2020-02-01-tuning-multiplexer-002}
 library(mlr3verse)
 library(mlr3learners)
 ```
 
 We initialize the random number generator with a fixed seed for reproducibility, and decrease the verbosity of the logger to keep the output clearly represented.
 
-```{r 2020-04-27-tuning-stacking-003}
+```{r 2020-02-01-tuning-multiplexer-003}
 set.seed(7832)
 lgr::get_logger("mlr3")$set_threshold("warn")
 lgr::get_logger("bbotk")$set_threshold("warn")
@@ -72,7 +72,7 @@ lgr::get_logger("bbotk")$set_threshold("warn")
 
 Let's define our learners.
 
-```{r 2020-02-01-tuning-multiplexer-002}
+```{r 2020-02-01-tuning-multiplexer-004}
 learners = list(
   lrn("classif.xgboost", id = "xgb", eval_metric = "logloss"),
   lrn("classif.ranger", id = "rf")
@@ -90,7 +90,7 @@ outer_cv5 = rsmp("cv", folds = 5) # outer loop for nested CV
 Assume we don't want to perform tuning and or with running all learner in their respective defaults.
 Simply run benchmark on the learners and the tasks. That tabulates our results nicely and shows us what works best.
 
-```{r 2020-02-01-tuning-multiplexer-003}
+```{r 2020-02-01-tuning-multiplexer-005}
 grid = benchmark_grid(task, learners, outer_cv5)
 bmr = benchmark(grid)
 bmr$aggregate(measures = msr("classif.ce"))
@@ -122,7 +122,7 @@ The pipe consists of three elements:
 * our learners (combined with `r ref("gunion()")`)
 * `r ref("mlr_pipeops_unbranch", text = "unbranch")` combines the forked paths at the end.
 
-```{r 2020-02-01-tuning-multiplexer-004, fig.width = 10, fig.height = 8}
+```{r 2020-02-01-tuning-multiplexer-006, fig.width = 10, fig.height = 8}
 graph =
   po("branch", options = learners_ids) %>>%
   gunion(lapply(learners, po)) %>>%
@@ -136,7 +136,7 @@ But as we don't tune them here (yet), we don't care (yet).
 But the first hyperparameter is special.
 `branch.selection` controls over which (named) branching channel our data flows.
 
-```{r 2020-02-01-tuning-multiplexer-005}
+```{r 2020-02-01-tuning-multiplexer-007}
 graph$param_set$ids()
 graph$param_set$params$branch.selection
 ```
@@ -145,7 +145,7 @@ We can now tune over this pipeline, and probably running grid search seems a goo
 available learner.
 NB: We have now written down in (much more complicated code) what we did before with `benchmark`.
 
-```{r 2020-02-01-tuning-multiplexer-006, results = "hide"}
+```{r 2020-02-01-tuning-multiplexer-008, results = "hide"}
 graph_learner = as_learner(graph)
 graph_learner$id = "g"
 graph_learner$param_set$values$branch.selection = to_tune(levels = c("rf", "xgb"))
@@ -160,7 +160,7 @@ instance = tune(
 as.data.table(instance$archive)
 ```
 
-```{r 2020-02-01-tuning-multiplexer-007, echo = FALSE}
+```{r 2020-02-01-tuning-multiplexer-009, echo = FALSE}
 as.data.table(instance$archive, exclude_columns = c("uhash",  "resample_result")) %>%
   kable(format = "html") %>%
   kable_styling(full_width = TRUE)
@@ -168,7 +168,7 @@ as.data.table(instance$archive, exclude_columns = c("uhash",  "resample_result")
 
 But: Via this approach we can now get unbiased performance results via nested resampling and using the `r ref("AutoTuner")` (which would make much more sense if we would select from 100 models and not 2).
 
-```{r 2020-02-01-tuning-multiplexer-008, eval = params$eval_all}
+```{r 2020-02-01-tuning-multiplexer-010, eval = params$eval_all}
 at = auto_tuner(
   method = "grid_search",
   learner = graph_learner,
@@ -182,26 +182,26 @@ rr = resample(task, at, outer_cv5, store_models = TRUE)
 extract_inner_tuning_results(rr)
 ```
 
-```{r mlr3fselect-basic-02322, echo = FALSE, eval = params$eval_all}
+```{r 2020-02-01-tuning-multiplexer-011, echo = FALSE, eval = params$eval_all}
 saveRDS(rr, "data/rr.rda")
 ```
 
-```{r mlr3fselect-basic-02422, echo = FALSE}
+```{r 2020-02-01-tuning-multiplexer-012, echo = FALSE}
 rr = readRDS("data/rr.rda")
 ```
 
-```{r 2020-02-01-tuning-multiplexer-009, echo = FALSE}
+```{r 2020-02-01-tuning-multiplexer-013, echo = FALSE}
 extract_inner_tuning_results(rr)[, .(iteration, branch.selection, classif.ce, task_id, learner_id, resampling_id )] %>%
   kable(format = "html") %>%
   kable_styling()
 ```
 
-```{r 2020-02-01-tuning-multiplexer-010, results = 'hide'}
+```{r 2020-02-01-tuning-multiplexer-014, results = 'hide'}
 # access inner tuning archives
 extract_inner_tuning_archives(rr)
 ```
 
-```{r 2020-02-01-tuning-multiplexer-011, echo = FALSE, layout="l-page"}
+```{r 2020-02-01-tuning-multiplexer-015, echo = FALSE, layout="l-page"}
 extract_inner_tuning_archives(rr, exclude_columns = c("uhash",  "resample_result")) %>%
   kable(format = "html") %>%
   kable_styling()
@@ -220,11 +220,11 @@ NB: Many AutoML systems work in a very similar way.
 Remember, that the pipeline contains a joint set of all contained hyperparameters.
 Prefixed with the respective PipeOp ID, to make names unique.
 
-```{r 2020-02-01-tuning-multiplexer-012, eval = FALSE}
+```{r 2020-02-01-tuning-multiplexer-016, eval = FALSE}
 as.data.table(graph$param_set)
 ```
 
-```{r 2020-04-23-pipelines-selectors-branches-027, echo = FALSE}
+```{r 2020-02-01-tuning-multiplexer-017, echo = FALSE}
 as.data.table(graph$param_set)[, .(id, class, lower, upper, nlevels)] %>%
   kable(format = "html") %>%
   kable_styling(full_width = TRUE) %>%
@@ -238,7 +238,7 @@ We also have to reflect the hierarchical order of the parameter sets (admittedly
 We can only set the `mtry` value if the pipe is configured to use the random forest (`r ref("mlr_learners_classif.ranger", "ranger")`).
 The same applies for the xgboost parameter.
 
-```{r 2020-02-01-tuning-multiplexer-013}
+```{r 2020-02-01-tuning-multiplexer-018}
 search_space = ps(
   branch.selection = p_fct(c("rf", "xgb")),
   rf.mtry = p_int(1L, 20L, depends = branch.selection == "rf"),
@@ -250,7 +250,7 @@ search_space = ps(
 Very similar code as before, we just swap out the search space.
 And now use random search.
 
-```{r 2020-02-01-tuning-multiplexer-014, eval = params$eval_all}
+```{r 2020-02-01-tuning-multiplexer-019, eval = params$eval_all}
 graph_learner = as_learner(graph)
 graph_learner$id = "g"
 
@@ -267,15 +267,15 @@ instance = tune(
 as.data.table(instance$archive)
 ```
 
-```{r mlr3fselect-basic-0232552, echo = FALSE, eval = params$eval_all}
+```{r 2020-02-01-tuning-multiplexer-020, echo = FALSE, eval = params$eval_all}
 saveRDS(instance, "data/instance.rda")
 ```
 
-```{r mlr3fselect-basic-0245522, echo = FALSE}
+```{r 2020-02-01-tuning-multiplexer-021, echo = FALSE}
 instance = readRDS("data/instance.rda")
 ```
 
-```{r 2020-02-01-tuning-multiplexer-015, echo = FALSE, layout="l-page"}
+```{r 2020-02-01-tuning-multiplexer-022, echo = FALSE, layout="l-page"}
 as.data.table(instance$archive, exclude_columns = c("uhash",  "resample_result")) %>%
   kable(format = "html") %>%
   kable_styling()
@@ -283,13 +283,13 @@ as.data.table(instance$archive, exclude_columns = c("uhash",  "resample_result")
 
 The following shows a quick way to visualize the tuning results.
 
-```{r 2020-02-01-tuning-multiplexer-016, fig.width=10, fig.height=5}
-autoplot(instance, cols_x = c("xgb.nrounds","rf.mtry")) 
+```{r 2020-02-01-tuning-multiplexer-023, fig.width=10, fig.height=5}
+autoplot(instance, cols_x = c("xgb.nrounds","rf.mtry"))
 ```
 
 Nested resampling, now really needed:
 
-```{r 2020-02-01-tuning-multiplexer-017, eval = params$eval_all}
+```{r 2020-02-01-tuning-multiplexer-024, eval = params$eval_all}
 rr = tune_nested(
   method = "grid_search",
   task = task,
@@ -301,20 +301,20 @@ rr = tune_nested(
   term_evals = 10L)
 ```
 
-```{r mlr3fselect-basic-023, echo = FALSE, eval = params$eval_all}
+```{r 2020-02-01-tuning-multiplexer-025, echo = FALSE, eval = params$eval_all}
 saveRDS(rr, "data/rr_2.rda")
 ```
 
-```{r mlr3fselect-basic-024, echo = FALSE}
+```{r 2020-02-01-tuning-multiplexer-026, echo = FALSE}
 rr = readRDS("data/rr_2.rda")
 ```
 
-```{r mlr3fselect-basic-02444, eval = FALSE}
+```{r 2020-02-01-tuning-multiplexer-027, eval = FALSE}
 # access inner tuning result
 extract_inner_tuning_results(rr)
 ```
 
-```{r 2020-02-01-tuning-multiplexer-018, echo = FALSE}
+```{r 2020-02-01-tuning-multiplexer-028, echo = FALSE}
 extract_inner_tuning_results(rr) %>%
   kable(format = "html") %>%
   kable_styling()
