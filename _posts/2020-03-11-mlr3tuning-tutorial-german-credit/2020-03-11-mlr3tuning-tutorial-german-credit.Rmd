@@ -366,11 +366,11 @@ This means that the selected hyperparameters should not vary too much.
 We might observe unstable models in this example because the small data set and the low number of resampling iterations might introduce too much randomness.
 Usually, we aim for the selection of stable hyperparameters for all outer training sets.
 
-```{r practical-tuning-series-tune-a-support-vector-machine-043, eval = FALSE}
+```{r 2020-03-11-mlr3tuning-tutorial-german-credit-036, eval = FALSE}
 extract_inner_tuning_results(rr)
 ```
 
-```{r practical-tuning-series-tune-a-support-vector-machine-044, echo = FALSE, layout="l-body-outset"}
+```{r 2020-03-11-mlr3tuning-tutorial-german-credit-037, echo = FALSE, layout="l-body-outset"}
 extract_inner_tuning_results(rr)[, .SD, .SDcols = !c("learner_param_vals", "x_domain")] %>%
   kable(format = "html") %>%
   kable_styling(full_width = TRUE)
@@ -379,11 +379,11 @@ extract_inner_tuning_results(rr)[, .SD, .SDcols = !c("learner_param_vals", "x_do
 Next, we want to compare the predictive performances estimated on the outer resampling to the inner resampling (`extract_inner_tuning_results(rr)`).
 Significantly lower predictive performances on the outer resampling indicate that the models with the optimized hyperparameters overfit the data.
 
-```{r practical-tuning-series-tune-a-support-vector-machine-045, eval = FALSE}
+```{r 2020-03-11-mlr3tuning-tutorial-german-credit-038, eval = FALSE}
 rr$score()
 ```
 
-```{r practical-tuning-series-tune-a-support-vector-machine-046, echo = FALSE}
+```{r 2020-03-11-mlr3tuning-tutorial-german-credit-039, echo = FALSE}
 rr$score()[, .(iteration, task_id, learner_id, resampling_id, classif.ce)] %>%
   kable(format = "html") %>%
   kable_styling(full_width = TRUE)
@@ -391,11 +391,11 @@ rr$score()[, .(iteration, task_id, learner_id, resampling_id, classif.ce)] %>%
 
 The archives of the `r ref("AutoTuner")`s allows us to inspect all evaluated hyperparameters configurations with the associated predictive performances.
 
-```{r practical-tuning-series-tune-a-support-vector-machine-047, eval = FALSE}
+```{r 2020-03-11-mlr3tuning-tutorial-german-credit-040, eval = FALSE}
 extract_inner_tuning_archives(rr)
 ```
 
-```{r practical-tuning-series-tune-a-support-vector-machine-048, echo = FALSE, layout="l-page"}
+```{r 2020-03-11-mlr3tuning-tutorial-german-credit-041, echo = FALSE, layout="l-page"}
 extract_inner_tuning_archives(rr, exclude_columns = c("uhash", "resample_result")) %>%
   kable(format = "html") %>%
   kable_styling(full_width = TRUE) %>%
@@ -404,7 +404,7 @@ extract_inner_tuning_archives(rr, exclude_columns = c("uhash", "resample_result"
 
 We aggregate the performances of all resampling iterations:
 
-```{r 2020-03-11-mlr3tuning-tutorial-german-credit-036}
+```{r 2020-03-11-mlr3tuning-tutorial-german-credit-042}
 rr$aggregate()
 ```
 
@@ -412,7 +412,7 @@ Essentially, this is the performance of a "knn with optimal hyperparameters foun
 
 The trained `r ref("AutoTuner")` objects can be accessed by using
 
-```{r 2020-03-11-mlr3tuning-tutorial-german-credit-037}
+```{r 2020-03-11-mlr3tuning-tutorial-german-credit-043}
 rr$learners[[1]]
 rr$learners[[1]]$tuning_result
 ```
@@ -423,7 +423,7 @@ rr$learners[[1]]$tuning_result
 
 It is always interesting to look at what could have been. The following dataset contains an optimization run result with 3600 evaluations -- more than above by a factor of 100:
 
-```{r 2020-03-11-mlr3tuning-tutorial-german-credit-038, echo=FALSE, eval=FALSE}
+```{r 2020-03-11-mlr3tuning-tutorial-german-credit-044, echo=FALSE, eval=FALSE}
 set.seed(2409)
 instance_random = TuningInstanceSingleCrit$new(
   task = task,
@@ -439,7 +439,7 @@ perfdata = as.data.table(instance_random$archive)
 perfdata
 ```
 
-```{r 2020-03-11-mlr3tuning-tutorial-german-credit-039, echo=FALSE, layout="l-page"}
+```{r 2020-03-11-mlr3tuning-tutorial-german-credit-045, echo=FALSE, layout="l-page"}
 perfdata = readRDS("data/randomsearch_3600.rds")
 perfdata %>%
   kable(format = "html") %>%
@@ -449,21 +449,21 @@ perfdata %>%
 
 The scale effect is just as visible as before with fewer data:
 
-```{r 2020-03-11-mlr3tuning-tutorial-german-credit-040}
+```{r 2020-03-11-mlr3tuning-tutorial-german-credit-046}
 ggplot(perfdata, aes(x = x_domain_k, y = classif.ce, color = scale)) +
   geom_point(size = 2, alpha = 0.3)
 ```
 
 Now, there seems to be a visible pattern by kernel as well:
 
-```{r 2020-03-11-mlr3tuning-tutorial-german-credit-041}
+```{r 2020-03-11-mlr3tuning-tutorial-german-credit-047}
 ggplot(perfdata, aes(x = x_domain_k, y = classif.ce, color = kernel)) +
   geom_point(size = 2, alpha = 0.3)
 ```
 
 In fact, if we zoom in to `(5, 40)` $\times$ `(0.23, 0.28)` and do decrease smoothing we see that different kernels have their optimum at different values of `k`:
 
-```{r 2020-03-11-mlr3tuning-tutorial-german-credit-042, warning=FALSE}
+```{r 2020-03-11-mlr3tuning-tutorial-german-credit-048, warning=FALSE}
 ggplot(perfdata, aes(x = x_domain_k, y = classif.ce, color = kernel,
   group = interaction(kernel, scale))) +
   geom_point(size = 2, alpha = 0.3) + geom_smooth() +
@@ -473,7 +473,7 @@ ggplot(perfdata, aes(x = x_domain_k, y = classif.ce, color = kernel,
 What about the `distance` parameter?
 If we select all results with `k` between 10 and 20 and plot distance and kernel we see an approximate relationship:
 
-```{r 2020-03-11-mlr3tuning-tutorial-german-credit-043, warning=FALSE}
+```{r 2020-03-11-mlr3tuning-tutorial-german-credit-049, warning=FALSE}
 ggplot(perfdata[x_domain_k > 10 & x_domain_k < 20 & scale == TRUE],
   aes(x = distance, y = classif.ce, color = kernel)) +
   geom_point(size = 2) + geom_smooth()

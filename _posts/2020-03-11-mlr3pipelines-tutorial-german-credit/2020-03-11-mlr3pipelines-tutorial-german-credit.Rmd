@@ -60,7 +60,7 @@ Now we will do four additional things:
 
 First, load the packages we are going to use:
 
-```{r 2020-03-11-mlr3tuning-tutorial-german-credit-003, message=FALSE, warning=FALSE}
+```{r 2020-03-11-mlr3pipelines-tutorial-german-credit-003, message=FALSE, warning=FALSE}
 library("mlr3verse")
 library("data.table")
 library("ggplot2")
@@ -68,7 +68,7 @@ library("ggplot2")
 
 We initialize the random number generator with a fixed seed for reproducibility, and decrease the verbosity of the logger to keep the output clearly represented.
 
-```{r 2020-03-11-mlr3tuning-tutorial-german-credit-004}
+```{r 2020-03-11-mlr3pipelines-tutorial-german-credit-004}
 set.seed(7832)
 lgr::get_logger("mlr3")$set_threshold("warn")
 lgr::get_logger("bbotk")$set_threshold("warn")
@@ -143,7 +143,7 @@ task_imputed$missings()
 head(task_imputed$data())
 ```
 
-```{r chunk-name, echo = FALSE, layout="l-page"}
+```{r 2020-03-11-mlr3pipelines-tutorial-german-credit-012, echo = FALSE, layout="l-page"}
 head(task_imputed$data()) %>%
   kable(format = "html") %>%
   kable_styling(full_width = TRUE) %>%
@@ -157,7 +157,7 @@ This way the imputation strategy can, in fact, be seen as a part of the complete
 If we used the imputed `r ref("Task")` for Resampling, we would *leak* information from the test set into the training set.
 Therefore, it is mandatory to attach the imputation operator to the `r ref("Learner")` itself, creating a `r ref("GraphLearner")`:
 
-```{r 2020-03-11-mlr3pipelines-tutorial-german-credit-012}
+```{r 2020-03-11-mlr3pipelines-tutorial-german-credit-013}
 graph_learner_ranger = as_learner(po("imputeoor") %>>% ranger)
 
 graph_learner_ranger$train(task)
@@ -165,7 +165,7 @@ graph_learner_ranger$train(task)
 
 This `r ref("GraphLearner")` can be used for resampling -- like an ordinary `r ref("Learner")`:
 
-```{r 2020-03-11-mlr3pipelines-tutorial-german-credit-013}
+```{r 2020-03-11-mlr3pipelines-tutorial-german-credit-014}
 rr = resample(task, learner = graph_learner_ranger, resampling = cv10)
 rr$aggregate()
 ```
@@ -177,13 +177,13 @@ This is due to a variety of reasons, e.g., enhanced interpretability or decrease
 Furthermore, sparse models may actually be associated with increased performance (especially if overfitting is anticipated).
 We can use *feature filter* to only keep features with the highest *information*. Filters are implemented in the `r mlr_pkg("mlr3filters")` package and listed in the following dictionary:
 
-```{r 2020-03-11-mlr3pipelines-tutorial-german-credit-014}
+```{r 2020-03-11-mlr3pipelines-tutorial-german-credit-015}
 mlr_filters
 ```
 
 We apply the `r ref("FilterMIM")` (mutual information maximization) `Filter` as implemented in the `r cran_pkg("praznik")` package. This `Filter` allows for the selection of the top-`k` features of best mutual information.
 
-```{r 2020-03-11-mlr3pipelines-tutorial-german-credit-015}
+```{r 2020-03-11-mlr3pipelines-tutorial-german-credit-016}
 filter = flt("mim")
 filter$calculate(task_imputed)$scores
 ```
@@ -193,7 +193,7 @@ We can investigate the trade-off between features and performance by tuning.
 We incorporate our filtering strategy into the pipeline using `r ref("PipeOpFilter")`.
 Like before, we need to perform imputation as the `Filter` also relies on complete data:
 
-```{r 2020-03-11-mlr3pipelines-tutorial-german-credit-016}
+```{r 2020-03-11-mlr3pipelines-tutorial-german-credit-017}
 fpipe = po("imputeoor") %>>% po("filter", flt("mim"), filter.nfeat = 3)
 fpipe$train(task)[[1]]$head()
 ```
@@ -201,7 +201,7 @@ fpipe$train(task)[[1]]$head()
 We can now tune over the `mim.filter.nfeat` parameter.
 It steers how many features are kept by the `Filter` and eventually used by the learner:
 
-```{r 2020-03-11-mlr3pipelines-tutorial-german-credit-017}
+```{r 2020-03-11-mlr3pipelines-tutorial-german-credit-018}
 search_space = ps(
   mim.filter.nfeat = p_int(lower = 1, upper = length(task$feature_names))
 )
@@ -212,7 +212,7 @@ Thus, we make use of a grid search.
 For higher dimensions, strategies like random search are more appropriate.
 The tuning procedure may take some time:
 
-```{r 2020-03-11-mlr3pipelines-tutorial-german-credit-018, eval = params$eval_all}
+```{r 2020-03-11-mlr3pipelines-tutorial-german-credit-019, eval = params$eval_all}
 instance = tune(
   method = "grid_search",
   task,
