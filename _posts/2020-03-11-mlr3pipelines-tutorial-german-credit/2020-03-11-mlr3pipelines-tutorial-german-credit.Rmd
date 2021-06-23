@@ -16,6 +16,7 @@ description: |
 output:
   distill::distill_article:
     self_contained: false
+    highlight_downlit: true
     css: ../../custom.css
 params:
   eval_all: FALSE
@@ -30,8 +31,6 @@ params:
 
 library(mlr3book)
 library(kableExtra)
-
-set.seed(7832)
 
 ggplot2::theme_set(ggplot2::theme_light())
 ```
@@ -59,19 +58,20 @@ Now we will do four additional things:
 
 ## Prerequisites
 
-```{r 2020-03-11-mlr3pipelines-tutorial-german-credit-003, message=FALSE, warning=FALSE}
+First, load the packages we are going to use:
+
+```{r 2020-03-11-mlr3tuning-tutorial-german-credit-003, message=FALSE, warning=FALSE}
+library("mlr3verse")
 library("data.table")
 library("ggplot2")
-library("mlr3")
-library("mlr3learners")
-library("mlr3filters")
-library("mlr3pipelines")
-library("mlr3tuning")
-library("paradox")
 ```
 
-```{r 2020-03-11-mlr3pipelines-tutorial-german-credit-004, include=FALSE}
-theme_set(theme_light())
+We initialize the random number generator with a fixed seed for reproducibility, and decrease the verbosity of the logger to keep the output clearly represented.
+
+```{r 2020-03-11-mlr3tuning-tutorial-german-credit-004}
+set.seed(7832)
+lgr::get_logger("mlr3")$set_threshold("warn")
+lgr::get_logger("bbotk")$set_threshold("warn")
 ```
 
 We again use the German credit dataset, but will restrict ourselves to the *factorial features*.
@@ -82,7 +82,6 @@ task = tsk("german_credit")
 credit_full = task$data()
 credit = credit_full[, sapply(credit_full, FUN = is.factor), with = FALSE]
 
-set.seed(20191101)
 # sample values to NA
 credit = credit[, lapply(.SD, function(x) {
   x[sample(c(TRUE, NA), length(x), replace = TRUE, prob = c(.9, .1))]
@@ -91,24 +90,23 @@ credit$credit_risk = credit_full$credit_risk
 task = TaskClassif$new("GermanCredit", credit, "credit_risk")
 ```
 
-We instantiate a `Resampling` instance for this `r ref("Task")` to be able to compare resampling performance:
+We instantiate a `r ref("Resampling")` instance for this `r ref("Task")` to be able to compare resampling performance:
 
 ```{r 2020-03-11-mlr3pipelines-tutorial-german-credit-006}
-set.seed(20191101)
-cv10_instance = rsmp("cv")$instantiate(task)
+cv10 = rsmp("cv")$instantiate(task)
 ```
 
-You can uncomment the following line if you are running this locally:
+We also might want to use multiple cores to reduce long run times of tuning runs.
 
-```{r 2020-03-11-mlr3pipelines-tutorial-german-credit-007, warning=FALSE}
-# future::plan("multiprocess") # uncomment for parallelization
+```{r 2020-03-11-mlr3pipelines-tutorial-german-credit-007, eval = FALSE}
+future::plan("multiprocess")
 ```
 
 ## Intro
 
 In this use case, we will take a look at composite machine learning algorithms that may incorporate data preprocessing or the combination of multiple `r ref("Learner")`s ("ensemble methods").
 
-We use the `r mlr_pkg("mlr3pipelines")` package that enables us to chain `r ref("PipeOp", "PipeOps")` into data flow `r ref("Graph", "Graphs")`.
+We use the `r mlr_pkg("mlr3pipelines")` package that enables us to chain `r ref("PipeOp")`s into data flow `r ref("Graph")`s.
 
 Available `r ref("PipeOp")`s are listed in the `mlr_pipeops` dictionary:
 
@@ -138,11 +136,18 @@ We choose to impute factorial features using a new level (via `r ref("PipeOpImpu
 Let's use the `r ref("PipeOp")` itself to create an imputed `r ref("Task")`.
 This shows us how the `r ref("PipeOp")` actually works:
 
-```{r 2020-03-11-mlr3pipelines-tutorial-german-credit-011}
+```{r 2020-03-11-mlr3pipelines-tutorial-german-credit-011, results = 'hide'}
 imputer = po("imputeoor")
 task_imputed = imputer$train(list(task))[[1]]
 task_imputed$missings()
 head(task_imputed$data())
+```
+
+```{r chunk-name, echo = FALSE, layout="l-page"}
+head(task_imputed$data()) %>%
+  kable(format = "html") %>%
+  kable_styling(full_width = TRUE) %>%
+  scroll_box(height = "400px", extra_css = "border: 0px !important;")
 ```
 
 We do not only need complete data during training but also during prediction.
@@ -153,15 +158,15 @@ If we used the imputed `r ref("Task")` for Resampling, we would *leak* informati
 Therefore, it is mandatory to attach the imputation operator to the `r ref("Learner")` itself, creating a `r ref("GraphLearner")`:
 
 ```{r 2020-03-11-mlr3pipelines-tutorial-german-credit-012}
-imp_ranger = GraphLearner$new(po("imputeoor") %>>% ranger)
+graph_learner_ranger = as_learner(po("imputeoor") %>>% ranger)
 
-imp_ranger$train(task)
+graph_learner_ranger$train(task)
 ```
 
 This `r ref("GraphLearner")` can be used for resampling -- like an ordinary `r ref("Learner")`:
 
 ```{r 2020-03-11-mlr3pipelines-tutorial-german-credit-013}
-rr = resample(task, learner = imp_ranger, resampling = cv10_instance)
+rr = resample(task, learner = graph_learner_ranger, resampling = cv10)
 rr$aggregate()
 ```
 
@@ -197,48 +202,39 @@ We can now tune over the `mim.filter.nfeat` parameter.
 It steers how many features are kept by the `Filter` and eventually used by the learner:
 
 ```{r 2020-03-11-mlr3pipelines-tutorial-german-credit-017}
-searchspace = ParamSet$new(list(
-  ParamInt$new("mim.filter.nfeat", lower = 1, upper = length(task$feature_names))
-))
+search_space = ps(
+  mim.filter.nfeat = p_int(lower = 1, upper = length(task$feature_names))
+)
 ```
 
 The problem is one-dimensional (i.e. only one parameter is tuned).
 Thus, we make use of a grid search.
-For higher dimensions, strategies like random search are more appropriate:
-
-```{r 2020-03-11-mlr3pipelines-tutorial-german-credit-018}
-inst = TuningInstanceSingleCrit$new(
-  task,
-  learner = fpipe %>>% lrn("classif.ranger"),
-  resampling = cv10_instance,
-  measure = msr("classif.ce"),
-  terminator = trm("none"),
-  search_space = searchspace
-)
-tuner = tnr("grid_search")
-```
-
+For higher dimensions, strategies like random search are more appropriate.
 The tuning procedure may take some time:
 
-```{r 2020-03-11-mlr3pipelines-tutorial-german-credit-019, warning=FALSE, eval = params$eval_all}
-tuner$optimize(inst)
+```{r 2020-03-11-mlr3pipelines-tutorial-german-credit-018, eval = params$eval_all}
+instance = tune(
+  method = "grid_search",
+  task,
+  learner = fpipe %>>% lrn("classif.ranger"),
+  resampling = cv10,
+  measure = msr("classif.ce"),
+  search_space = search_space)
 ```
 
 ```{r 2020-03-11-mlr3pipelines-tutorial-german-credit-020, echo = FALSE, eval = params$eval_all}
-saveRDS(inst, "data/inst.rda")
+saveRDS(instance, "data/instance.rda")
 ```
 
 ```{r 2020-03-11-mlr3pipelines-tutorial-german-credit-021, echo = FALSE}
-inst = readRDS("data/inst.rda")
+instance = readRDS("data/instance.rda")
 ```
-
 
 We can plot the performance against the number of features.
 If we do so, we see the possible trade-off between sparsity and predictive performance:
 
 ```{r 2020-03-11-mlr3pipelines-tutorial-german-credit-022}
-arx = as.data.table(inst$archive)
-ggplot(arx, aes(x = mim.filter.nfeat, y = classif.ce)) + geom_line()
+autoplot(instance, type =  "marginal")
 ```
 
 ## Stacking
@@ -246,11 +242,11 @@ ggplot(arx, aes(x = mim.filter.nfeat, y = classif.ce)) + geom_line()
 We want to build a model that is based on the predictions of other `r ref("Learner")`s.
 This means that we are in the state that we need predictions already during training.
 This is a very specific case that is luckily handled by `r ref("PipeOpLearnerCV")`.
-`PipeOpLearnerCV` performs cross-validation during the training phase and returns the cross-validated predictions.
+`r ref("PipeOpLearnerCV")` performs cross-validation during the training phase and returns the cross-validated predictions.
 We use `"prob"` predictions because they carry more information than response prediction:
 
 ```{r 2020-03-11-mlr3pipelines-tutorial-german-credit-023}
-stackgraph = po("imputeoor") %>>%
+graph_stack = po("imputeoor") %>>%
   gunion(list(
     po("learner_cv", lrn("classif.ranger", predict_type = "prob")),
     po("learner_cv", lrn("classif.kknn", predict_type = "prob")))) %>>%
@@ -260,21 +256,23 @@ stackgraph = po("imputeoor") %>>%
 We built a pretty complex `r ref("Graph")` already.
 Therefore, we plot it:
 
-```{r 2020-03-11-mlr3pipelines-tutorial-german-credit-024}
-stackgraph$plot()
+```{r 2020-03-11-mlr3pipelines-tutorial-german-credit-024, fig.width=10, fig.height=10}
+graph_stack$plot()
 ```
 
 We now compare the performance of the stacked learner to the performance of the individual `r ref("Learner")`s:
 
 ```{r 2020-03-11-mlr3pipelines-tutorial-german-credit-025, warning=FALSE, eval = params$eval_all}
-bmr = benchmark(data.table(
-  task = list(task),
+grid = benchmark_grid(
+  task = task,
   learner = list(
-    stackgraph,
-    GraphLearner$new(po("imputeoor") %>>% lrn("classif.ranger")),
-    GraphLearner$new(po("imputeoor") %>>% lrn("classif.kknn")),
-    GraphLearner$new(po("imputeoor") %>>% lrn("classif.log_reg"))),
-  resampling = list(cv10_instance)))
+    graph_stack,
+    as_learner(po("imputeoor") %>>% lrn("classif.ranger")),
+    as_learner(po("imputeoor") %>>% lrn("classif.kknn")),
+    as_learner(po("imputeoor") %>>% lrn("classif.log_reg"))),
+  resampling = cv10)
+
+bmr = benchmark(grid)
 ```
 
 ```{r 2020-03-11-mlr3pipelines-tutorial-german-credit-026, echo = FALSE, eval = params$eval_all}
@@ -292,9 +290,9 @@ bmr$aggregate()[, c("learner_id", "classif.ce")]
 If we train the stacked learner and look into the final `r ref("Learner")` (the logistic regression), we can see how "important" each `r ref("Learner")` of the stacked learner is:
 
 ```{r 2020-03-11-mlr3pipelines-tutorial-german-credit-029}
-stackgraph$train(task)
+graph_stack$train(task)
 
-summary(stackgraph$pipeops$classif.log_reg$state$model)
+summary(graph_stack$pipeops$classif.log_reg$state$model)
 ```
 
 The random forest has a higher contribution.
@@ -314,14 +312,14 @@ The prediction then may fail because the `r ref("Learner")` does not know how to
 
 ```{r 2020-03-11-mlr3pipelines-tutorial-german-credit-031, error=TRUE, warning=FALSE}
 task_unseen = task$clone()$filter(1:30)
-logreg = lrn("classif.log_reg")
-logreg$train(task_unseen)
-logreg$predict(task)
+learner_logreg = lrn("classif.log_reg")
+learner_logreg$train(task_unseen)
+learner_logreg$predict(task)
 ```
 
 Not only logistic regression but also many other `r ref("Learner")`s cannot handle new levels during prediction.
 Thus, we use `r ref("PipeOpFixFactors")` to prevent that.
-`PipeOpFixFactors` introduces `NA` values for unseen levels.
+`r ref("PipeOpFixFactors")` introduces `NA` values for unseen levels.
 This means that we may need to impute afterwards.
 To solve this issue we can use `r ref("PipeOpImputeSample")`, but with `affect_columns` set to only *factorial* features.
 
@@ -329,8 +327,8 @@ Another observation is that all-constant features may also be a problem:
 
 ```{r 2020-03-11-mlr3pipelines-tutorial-german-credit-032, error=TRUE, warning=FALSE}
 task_constant = task$clone()$filter(1:2)
-logreg = lrn("classif.log_reg")
-logreg$train(task_constant)
+learner_logreg = lrn("classif.log_reg")
+learner_logreg$train(task_constant)
 ```
 
 This can be fixed using `r ref("PipeOpRemoveConstants")`.
@@ -348,10 +346,10 @@ robustify$plot()
 This robust learner works even in very pathological conditions:
 
 ```{r 2020-03-11-mlr3pipelines-tutorial-german-credit-034, warning=FALSE}
-roblogreg = GraphLearner$new(robustify %>>% logreg)
+graph_learner_robustify = as_learner(robustify %>>% learner_logreg)
 
-roblogreg$train(task_constant)
-roblogreg$predict(task)
+graph_learner_robustify$train(task_constant)
+graph_learner_robustify$predict(task)
 ```
 
 ## Your Ideas
