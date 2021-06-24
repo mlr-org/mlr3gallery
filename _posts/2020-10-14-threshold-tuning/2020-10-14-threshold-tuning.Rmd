@@ -188,7 +188,7 @@ in the `threshold.thresholds` slot expected by the learner.
 Again, we create a `r ref("AutoTuner")`, which automatically tunes the supplied learner over the `r ref("ParamSet")` we supplied above.
 
 ```{r 2020-10-14-threshold-tuning-014}
-at = auto_tuner(
+at_2 = auto_tuner(
   method = "random_search",
   learner = l,
   resampling = rsmp("cv", folds = 3L),
@@ -197,7 +197,7 @@ at = auto_tuner(
   term_evals = 5L,
 )
 
-at2$train(tsk("iris"))
+at_2$train(tsk("iris"))
 ```
 
 One drawback of this strategy is, that this requires us to fit a new model for each new threshold setting.
