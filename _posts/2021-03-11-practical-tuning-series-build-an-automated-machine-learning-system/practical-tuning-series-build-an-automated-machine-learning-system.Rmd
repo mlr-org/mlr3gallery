@@ -150,10 +150,10 @@ gunion(list(po("imputehist"),
 
 # Graph Learner
 
-We create a `r ref("GraphLearner")` which encapsulates the pipeline and can be used like a learner.
+We use `r ref("as_learner()")` to create a `r ref("GraphLearner")` which encapsulates the pipeline and can be used like a learner.
 
 ```{r practical-tuning-series-build-an-automated-machine-learning-system-011}
-graph_learner = GraphLearner$new(graph)
+graph_learner = as_learner(graph)
 ```
 
 The parameter set of the graph learner includes all hyperparameters from all contained learners.
@@ -231,7 +231,7 @@ autoplot(instance, type = "marginal",
 We add the optimized hyperparameters to the graph learner and train the learner on the full dataset.
 
 ```{r practical-tuning-series-build-an-automated-machine-learning-system-019}
-learner = GraphLearner$new(graph)
+learner = as_learner(graph)
 learner$param_set$values = instance$result_learner_param_vals
 learner$train(task)
 ```
@@ -245,7 +245,7 @@ Instead we have to use nested resampling to get an unbiased performance estimate
 We use nested resampling to get an unbiased estimate of the predictive performance of our graph learner.
 
 ```{r practical-tuning-series-build-an-automated-machine-learning-system-020, eval = params$eval_all}
-graph_learner = GraphLearner$new(graph)
+graph_learner = as_learner(graph)
 graph_learner$param_set$values$branch.selection =
   to_tune(c("kknn", "svm", "ranger"))
 graph_learner$param_set$values$kknn.k =
@@ -315,7 +315,7 @@ rr$aggregate()
 Applying nested resampling can be shortened by using the `r ref("tune_nested()")`-shortcut.
 
 ```{r practical-tuning-series-build-an-automated-machine-learning-system-028, eval = FALSE}
-graph_learner = GraphLearner$new(graph)
+graph_learner = as_learner(graph)
 graph_learner$param_set$values$branch.selection =
   to_tune(c("kknn", "svm", "ranger"))
 graph_learner$param_set$values$kknn.k =

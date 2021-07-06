@@ -168,10 +168,16 @@ fselector$optimize(instance)
 
 The `r ref("ArchiveFSelect")` stores a `data.table::data.table()` which consists of the evaluated feature sets and the corresponding estimated predictive performances.
 
-```{r mlr3fselect-basic-013}
-as.data.table(instance$archive, exclude_columns = c("runtime_learners", "timestamp", "batch_nr", "resample_result", "uhash"))
+```{r mlr3fselect-basic-013, eval = FALSE}
+as.data.table(instance$archive)
 ```
 
+```{r chunk-name-2, echo = FALSE}
+as.data.table(instance$archive, exclude_columns = c("runtime_learners", "resample_result", "uhash")) %>%
+  kable(format = "html") %>%
+  kable_styling(full_width = TRUE)
+```
+ 
 The associated resampling iterations can be accessed in the `r ref("BenchmarkResult")` by calling
 
 ```{r mlr3fselect-basic-014}
