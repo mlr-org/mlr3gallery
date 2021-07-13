@@ -2313,14 +2313,14 @@ Keys: anova, auc, carscore, cmim, correlation, disr, find_correlation, importanc
 <span class='va'>filter</span><span class='op'>$</span><span class='fu'>calculate</span><span class='op'>(</span><span class='va'>task_imputed</span><span class='op'>)</span><span class='op'>$</span><span class='va'>scores</span>
 </code></pre>
 </div>
-<pre><code>                 status          credit_history                 savings     personal_status_sex        installment_rate 
-                    1.0                     0.5                     0.0                      NA                      NA 
-other_installment_plans                 purpose                property          foreign_worker                     job 
-                     NA                      NA                      NA                      NA                      NA 
-      present_residence               telephone           people_liable     employment_duration                 housing 
-                     NA                      NA                      NA                      NA                      NA 
-          other_debtors          number_credits 
-                     NA                      NA </code></pre>
+<pre><code>                 status          credit_history                 savings                 purpose                property 
+                 1.0000                  0.9375                  0.8750                  0.8125                  0.7500 
+                housing     employment_duration     personal_status_sex other_installment_plans           other_debtors 
+                 0.6875                  0.6250                  0.5625                  0.5000                  0.4375 
+         foreign_worker       present_residence        installment_rate           people_liable          number_credits 
+                 0.3750                  0.3125                  0.2500                  0.1875                  0.1250 
+              telephone                     job 
+                 0.0625                  0.0000 </code></pre>
 </div>
 <p>Making use of this <code>Filter</code>, you may wonder at which costs the reduction of the feature space comes. We can investigate the trade-off between features and performance by tuning. We incorporate our filtering strategy into the pipeline using <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_filter.html"><code>PipeOpFilter</code></a>. Like before, we need to perform imputation as the <code>Filter</code> also relies on complete data:</p>
 <div class="layout-chunk" data-layout="l-body">
