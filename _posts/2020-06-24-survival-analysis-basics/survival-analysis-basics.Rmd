@@ -14,22 +14,9 @@ bibliography: biblio.bib
 
 ```{r, include = FALSE, warning = FALSE, message = FALSE}
 # Just some preparation
-all_times <- list()  # store the time for each chunk
-knitr::knit_hooks$set(time_it = {
-  now <- NULL
-  function(before, options) {
-    if (before) {
-      now <<- Sys.time()
-    } else {
-      res <- difftime(Sys.time(), now)
-      all_times[[options$label]] <<- res
-    }
-  }
-})
 knitr::opts_chunk$set(
   echo = TRUE,
-  R.options = list(width = 100),
-  time_it = TRUE
+  R.options = list(width = 100)
 )
 if (require("data.table")) data.table::setDTthreads(1)
 lgr::get_logger("mlr3")$set_threshold("warn")
@@ -148,10 +135,10 @@ Below we define the inner resampling and tuning scheme for the `AutoTuners`, i.e
 ```{r}
 # Set up  GLMnet and ranger Auto Tuners
 # resampling and tuning will have the same settings for both learners
-rsmp_ho = rsmp("holdout")
+rsmp_4 = rsmp("cv", folds = 4)
 msr_graf = msr("surv.graf", proper = TRUE)
 tnr_rs   = tnr("random_search")
-trm_e10  = trm("evals", n_evals = 2)# increase for better exploration of search space
+trm_e10  = trm("evals", n_evals = 10)# increase for better exploration of search space
 ```
 
 In the chunk below, we set up the parameter space for the random search when tuning the algorithm within each outer resampling iteration (defined later). Both baseline models, Kaplan-Meier and Cox PH will be used as is without modifications. For the `glmnet` model, we tune the $\alpha$ and $\lambda$ parameters. Note, that for `glmnet`, we prefix the parameter names with `surv.glmnet`. This is because we will use a so called `GraphLearner` using the `r mlr_pkg("mlr3pipelines")` package^[see [here](https://mlr3book.mlr-org.com/pipelines.html) for details], rather than the learner directly. This `GraphLearner` is a learner defined by a pipeline, where we use a distribution composition to transform the `glmnet` predictions, that only return a continuous rank (`crank`), into a distribution, such that we can also predict survival probabilities^[in more technical terms, we are interested in $\hat{S}(t|\mathbf{x})=\hat{S}_0(t)\exp(\mathbf{x}^\top\hat{\boldsymbol{\beta}})$, whereas `glmnet` predictions only return $\exp(\mathbf{x}^\top\hat{\boldsymbol{\beta}})$]. This is necessary, because we want to use the so-called *Integrated Brier Score* (also Graf Score) as an evaluation measure, which requires the estimation of survival probabilities at different time points.
@@ -178,13 +165,14 @@ Using `surv.glmnet` and `surv.ranger` learners and the respective parameter sear
 graph_glmnet = GraphLearner$new(
   id = "GLMnet",
   ppl("distrcompositor",
-      po("encode") %>>% lrn("surv.cv_glmnet")))
+      po("encode") %>>% lrn("surv.glmnet"),
+      form = "ph"))
 
 # auto tuner glmnet
 lrn_glmnet_auto  = AutoTuner$new(
   learner      = graph_glmnet,
   search_space = params_glmnet,
-  resampling   = rsmp_ho,
+  resampling   = rsmp_4,
   measure      = msr_graf,
   tuner        = tnr_rs,
   terminator   = trm_e10)
@@ -192,7 +180,7 @@ lrn_glmnet_auto  = AutoTuner$new(
 lrn_ranger  = AutoTuner$new(
   learner      = lrn("surv.ranger", num.trees = 100L),
   search_space = params_ranger,
-  resampling   = rsmp_ho,
+  resampling   = rsmp_4,
   measure      = msr_graf,
   tuner        = tnr_rs,
   terminator   = trm_e10)
@@ -206,7 +194,7 @@ In a final step, we define the benchmark design and perform the benchmark experi
 design <- benchmark_grid(
   tasks = churn_tsk,
   learners = list(lrn_km, lrn_cph, graph_glmnet),
-  resamplings = rsmp("cv", folds = 3) # outer resampling
+  resamplings = rsmp("repeated_cv", folds = 5, repeats = 2) # outer resampling
 )
 print(design)
 bmr = benchmark(design)
@@ -214,12 +202,7 @@ bmr = benchmark(design)
 
 The benchmark results are given below:
 
-```{r, eval = FALSE}
+```{r}
 bmr$aggregate(msrs(c("surv.graf", "surv.cindex")))
 ```
 
-
-```{r}
-all_times
-sum(unlist(all_times))
-```
