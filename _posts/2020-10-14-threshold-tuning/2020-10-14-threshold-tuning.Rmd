@@ -198,7 +198,7 @@ It directly optimizes the `cross-validated` predictions made by this `r ref("Pip
 A simple example would be:
 
 ```{r}
-gr = po("learner_cv", lrn("classif.rpart", predict_type = "prob")) %>>% po("tunethreshold")
+gr = po("learner_cv", lrn("classif.rpart", predict_type = "prob", cp = 0.01)) %>>% po("tunethreshold")
 l2 = GraphLearner$new(gr)
 ```
 
@@ -220,15 +220,34 @@ Finally, we can compare no threshold tuning to the `tunethreshold` approach:
 ### Comparison of the approaches
 
 ```{r}
+set.seed(4321L)
 bmr = benchmark(benchmark_grid(
   learners = list(
     no_tuning = lrn("classif.rpart"),
     internal = l2
   ),
-  tasks = tsk("german_credit"),
+  tasks = tsk("sonar"),
   rsmp("cv", folds = 3L)
 ))
 bmr$aggregate(list(msr("classif.ce"), msr("classif.fnr")))
 ```
 
 We obtained a slightly better classification error and false negatives rate!
+
+*Note:* In practice, threshold tuning does not always improve over _untuned_ thresholds, since 1) models are trained in a cross-validatied fashion on only 2/3 of the data.
+
+We can also *choose a  measure* to optimize. Depending on the measure we choose we sometimes have to trade improvement in one metric against worsening another:
+
+```{r}
+set.seed(4321L)
+l2$param_set$values$tunethreshold.measure = "classif.fpr"
+bmr = benchmark(benchmark_grid(
+  learners = list(
+    no_tuning = lrn("classif.rpart"),
+    internal = l2
+  ),
+  tasks = tsk("sonar"),
+  rsmp("cv", folds = 3L)
+))
+bmr$aggregate(list(msr("classif.fpr"), msr("classif.ce")))
+```
