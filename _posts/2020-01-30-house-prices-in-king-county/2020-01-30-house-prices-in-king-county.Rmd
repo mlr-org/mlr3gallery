@@ -347,14 +347,6 @@ at = AutoTuner$new(
 res = resample(tsk_nozip, at, cv3, store_models = TRUE)
 ```
 
-```{r 2020-01-30-house-prices-in-king-county-027, echo = FALSE, eval = params$eval_all}
-saveRDS(res, here::here("_posts/2020-01-30-house-prices-in-king-county/data/res.rda"))
-```
-
-```{r 2020-01-30-house-prices-in-king-county-028, echo = FALSE}
-res = readRDS(here::here("_posts/2020-01-30-house-prices-in-king-county/data/res.rda"))
-```
-
 ```{r 2020-01-30-house-prices-in-king-county-029}
 res$score(msr("regr.rmse"))
 sprintf("RMSE of the tuned xgboost: %s", round(sqrt(res$aggregate()), 2))
@@ -402,18 +394,6 @@ lrn_impact = po("encodeimpact", affect_columns = selector_name("zipcode")) %>>% 
 
 Again, we run `r ref("resample()")` and compute the **RMSE**.
 
-```{r 2020-01-30-house-prices-in-king-county-032, eval = params$eval_all}
-res = resample(task = task_train, lrn_impact, cv3)
-```
-
-```{r 2020-01-30-house-prices-in-king-county-033, echo = FALSE, eval = params$eval_all}
-saveRDS(res, here::here("_posts/2020-01-30-house-prices-in-king-county/data/res2.rda"))
-```
-
-```{r 2020-01-30-house-prices-in-king-county-034, echo = FALSE}
-res = readRDS(here::here("_posts/2020-01-30-house-prices-in-king-county/data/res2.rda"))
-```
-
 ```{r 2020-01-30-house-prices-in-king-county-035}
 res$score(msr("regr.rmse"))
 sprintf("RMSE of ranger with med_price: %s", round(sqrt(res$aggregate()), 2))
@@ -440,14 +420,6 @@ The resulting **RMSE** is slightly higher, and at the same time we only use $12$
 graph = po("filter", filter, param_vals = list(filter.nfeat = 12)) %>>% po("learner", lrn("regr.ranger"))
 lrn_filter = as_learner(graph)
 res = resample(task = task_train, lrn_filter, cv3)
-```
-
-```{r 2020-01-30-house-prices-in-king-county-038, echo = FALSE, eval = params$eval_all}
-saveRDS(res, here::here("_posts/2020-01-30-house-prices-in-king-county/data/res3.rda"))
-```
-
-```{r 2020-01-30-house-prices-in-king-county-039, echo = FALSE}
-res = readRDS(here::here("_posts/2020-01-30-house-prices-in-king-county/data/res3.rda"))
 ```
 
 ```{r 2020-01-30-house-prices-in-king-county-040}
