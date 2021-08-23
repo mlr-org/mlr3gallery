@@ -355,7 +355,7 @@ sprintf("RMSE of the tuned xgboost: %s", round(sqrt(res$aggregate()), 2))
 We can obtain the resulting parameters in the respective splits by accessing the `r ref("ResampleResult")`.
 
 ```{r 2020-01-30-house-prices-in-king-county-030}
-sapply(res$learners, function(x) x$learner$param_set$values)[-2,]
+sapply(res$learners, function(x) x$param_set$values)[-2,]
 ```
 
 **NOTE:** To keep runtime low, we only tune parts of the hyperparameter space of `r cran_pkg("xgboost")` in this example.
