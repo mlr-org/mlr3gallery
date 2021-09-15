@@ -88,7 +88,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
   <!--radix_placeholder_meta_tags-->
 <title>mlr3gallery: Encode Factor Levels for xgboost</title>
 
-<meta property="description" itemprop="description" content="The package &quot;xgboost&quot; unfortunately does not support handling of categorical features. Therefore, it is required to manually convert factor columns to numerical dummy features. We show how to use &quot;mlr3pipelines&quot; to augment the &quot;mlr_learners_classif.xgboost&quot; learner with an automatic factor encoding."/>
+<meta property="description" itemprop="description" content="We show how to encode factor levels for the xgboost learner with mlr3pipelines."/>
 
 <link rel="canonical" href="https://mlr3gallery.mlr-org.com/posts/2020-01-31-encode-factors-for-xgboost/"/>
 
@@ -100,7 +100,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 <!--  https://developers.facebook.com/docs/sharing/webmasters#markup -->
 <meta property="og:title" content="mlr3gallery: Encode Factor Levels for xgboost"/>
 <meta property="og:type" content="article"/>
-<meta property="og:description" content="The package &quot;xgboost&quot; unfortunately does not support handling of categorical features. Therefore, it is required to manually convert factor columns to numerical dummy features. We show how to use &quot;mlr3pipelines&quot; to augment the &quot;mlr_learners_classif.xgboost&quot; learner with an automatic factor encoding."/>
+<meta property="og:description" content="We show how to encode factor levels for the xgboost learner with mlr3pipelines."/>
 <meta property="og:url" content="https://mlr3gallery.mlr-org.com/posts/2020-01-31-encode-factors-for-xgboost/"/>
 <meta property="og:locale" content="en_US"/>
 <meta property="og:site_name" content="mlr3gallery"/>
@@ -108,7 +108,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 <!--  https://dev.twitter.com/cards/types/summary -->
 <meta property="twitter:card" content="summary"/>
 <meta property="twitter:title" content="mlr3gallery: Encode Factor Levels for xgboost"/>
-<meta property="twitter:description" content="The package &quot;xgboost&quot; unfortunately does not support handling of categorical features. Therefore, it is required to manually convert factor columns to numerical dummy features. We show how to use &quot;mlr3pipelines&quot; to augment the &quot;mlr_learners_classif.xgboost&quot; learner with an automatic factor encoding."/>
+<meta property="twitter:description" content="We show how to encode factor levels for the xgboost learner with mlr3pipelines."/>
 <meta property="twitter:url" content="https://mlr3gallery.mlr-org.com/posts/2020-01-31-encode-factors-for-xgboost/"/>
 
 <!--  https://scholar.google.com/intl/en/scholar/inclusion.html#indexing -->
@@ -121,7 +121,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
   <!--radix_placeholder_rmarkdown_metadata-->
 
 <script type="text/json" id="radix-rmarkdown-metadata">
-{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["title","categories","author","date","description","output","citation_url","canonical_url"]}},"value":[{"type":"character","attributes":{},"value":["Encode Factor Levels for xgboost"]},{"type":"character","attributes":{},"value":["classification","mlr3pipelines","factor encoding","german credit data set","classification"]},{"type":"list","attributes":{},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name"]}},"value":[{"type":"character","attributes":{},"value":["Michel Lang"]}]}]},{"type":"character","attributes":{},"value":["01-31-2020"]},{"type":"character","attributes":{},"value":["The package \"xgboost\" unfortunately does not support handling of categorical features. Therefore, it is required to manually convert factor columns to numerical dummy features. We show how to use \"mlr3pipelines\" to augment the \"mlr_learners_classif.xgboost\" learner with an automatic factor encoding."]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["distill::distill_article"]}},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["self_contained","css"]}},"value":[{"type":"logical","attributes":{},"value":[false]},{"type":"character","attributes":{},"value":["../../custom.css"]}]}]},{"type":"character","attributes":{},"value":["https://mlr3gallery.mlr-org.com/posts/2020-01-31-encode-factors-for-xgboost/"]},{"type":"character","attributes":{},"value":["https://mlr3gallery.mlr-org.com/posts/2020-01-31-encode-factors-for-xgboost/"]}]}
+{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["title","categories","author","date","description","output","citation_url","canonical_url"]}},"value":[{"type":"character","attributes":{},"value":["Encode Factor Levels for xgboost"]},{"type":"character","attributes":{},"value":["classification","mlr3pipelines","factor encoding","german credit data set","classification"]},{"type":"list","attributes":{},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name"]}},"value":[{"type":"character","attributes":{},"value":["Michel Lang"]}]}]},{"type":"character","attributes":{},"value":["01-31-2020"]},{"type":"character","attributes":{},"value":["We show how to encode factor levels for the xgboost learner with mlr3pipelines."]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["distill::distill_article"]}},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["self_contained","highlight_downlit","css"]}},"value":[{"type":"logical","attributes":{},"value":[false]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["../../custom.css"]}]}]},{"type":"character","attributes":{},"value":["https://mlr3gallery.mlr-org.com/posts/2020-01-31-encode-factors-for-xgboost/"]},{"type":"character","attributes":{},"value":["https://mlr3gallery.mlr-org.com/posts/2020-01-31-encode-factors-for-xgboost/"]}]}
 </script>
 <!--/radix_placeholder_rmarkdown_metadata-->
   
@@ -472,7 +472,7 @@ d-title {
 
 </style>
 
-<script src="../../site_libs/jquery-1.11.3/jquery.min.js"></script>
+<script src="../../site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <link href="../../site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet"/>
 <link href="../../site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet"/>
 <script src="../../site_libs/headroom-0.9.4/headroom.min.js"></script>
@@ -2050,7 +2050,7 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 <!--/radix_placeholder_distill-->
-  <script src="../../site_libs/jquery-1.11.3/jquery.min.js"></script>
+  <script src="../../site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
   <script src="../../site_libs/popper-2.6.0/popper.min.js"></script>
   <link href="../../site_libs/tippy-6.2.7/tippy.css" rel="stylesheet" />
   <link href="../../site_libs/tippy-6.2.7/tippy-light-border.css" rel="stylesheet" />
@@ -2071,7 +2071,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <!--radix_placeholder_front_matter-->
 
 <script id="distill-front-matter" type="text/json">
-{"title":"Encode Factor Levels for xgboost","description":"The package \"xgboost\" unfortunately does not support handling of categorical features. Therefore, it is required to manually convert factor columns to numerical dummy features. We show how to use \"mlr3pipelines\" to augment the \"mlr_learners_classif.xgboost\" learner with an automatic factor encoding.","authors":[{"author":"Michel Lang","authorURL":"#","affiliation":"&nbsp;","affiliationURL":"#","orcidID":""}],"publishedDate":"2020-01-31T00:00:00.000+00:00","citationText":"Lang, 2020"}
+{"title":"Encode Factor Levels for xgboost","description":"We show how to encode factor levels for the xgboost learner with mlr3pipelines.","authors":[{"author":"Michel Lang","authorURL":"#","affiliation":"&nbsp;","affiliationURL":"#","orcidID":""}],"publishedDate":"2020-01-31T00:00:00.000+00:00","citationText":"Lang, 2020"}
 </script>
 
 <!--/radix_placeholder_front_matter-->
@@ -2108,7 +2108,7 @@ document.addEventListener('DOMContentLoaded', function() {
   <a href="../../index.html#category:classification" class="dt-tag">classification</a>
 </div>
 <!--/radix_placeholder_categories-->
-<p><p>The package “xgboost” unfortunately does not support handling of categorical features. Therefore, it is required to manually convert factor columns to numerical dummy features. We show how to use “mlr3pipelines” to augment the “mlr_learners_classif.xgboost” learner with an automatic factor encoding.</p></p>
+<p><p>We show how to encode factor levels for the xgboost learner with mlr3pipelines.</p></p>
 </div>
 
 <div class="d-byline">
@@ -2119,14 +2119,28 @@ document.addEventListener('DOMContentLoaded', function() {
 
 <div class="d-article">
 <p>The package <a href="https://cran.r-project.org/package=xgboost">xgboost</a> unfortunately does not support handling of categorical features. Therefore, it is required to manually convert factor columns to numerical dummy features. We show how to use <a href="https://mlr3pipelines.mlr-org.com">mlr3pipelines</a> to augment the <a href="https://mlr3learners.mlr-org.com/reference/mlr_learners_classif.xgboost.html"><code>xgboost learner</code></a> with an automatic factor encoding.</p>
+<p>We load the <a href="https://mlr3verse.mlr-org.com">mlr3verse</a> package which pulls in the most important packages for this example.</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://mlr3verse.mlr-org.com'>mlr3verse</a></span><span class='op'>)</span>
+</code></pre>
+</div>
+</div>
+<p>We initialize the random number generator with a fixed seed for reproducibility, and decrease the verbosity of the logger to keep the output clearly represented.</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/Random.html'>set.seed</a></span><span class='op'>(</span><span class='fl'>7832</span><span class='op'>)</span>
+<span class='fu'>lgr</span><span class='fu'>::</span><span class='fu'><a href='https://s-fleck.github.io/lgr/reference/get_logger.html'>get_logger</a></span><span class='op'>(</span><span class='st'>"mlr3"</span><span class='op'>)</span><span class='op'>$</span><span class='fu'>set_threshold</span><span class='op'>(</span><span class='st'>"warn"</span><span class='op'>)</span>
+</code></pre>
+</div>
+</div>
 <h2 id="construct-the-base-objects">Construct the Base Objects</h2>
 <p>First, we take an example task with factors (<a href="https://mlr3.mlr-org.com/reference/mlr_tasks_german_credit.html"><code>german_credit</code></a>) and create the <a href="https://mlr3learners.mlr-org.com/reference/mlr_learners_classif.xgboost.html"><code>xgboost learner</code></a>:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://mlr3.mlr-org.com'>mlr3</a></span><span class='op'>)</span>
-<span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://mlr3learners.mlr-org.com'>mlr3learners</a></span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://mlr3learners.mlr-org.com'>mlr3learners</a></span><span class='op'>)</span>
 
-<span class='va'>task</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>tsk</a></span><span class='op'>(</span><span class='st'>"german_credit"</span><span class='op'>)</span>
+<span class='va'>task</span> <span class='op'>=</span> <span class='fu'>tsk</span><span class='op'>(</span><span class='st'>"german_credit"</span><span class='op'>)</span>
 <span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span><span class='op'>(</span><span class='va'>task</span><span class='op'>)</span>
 </code></pre>
 </div>
@@ -2140,7 +2154,7 @@ document.addEventListener('DOMContentLoaded', function() {
   - int (3): age, amount, duration
   - ord (3): installment_rate, number_credits, present_residence</code></pre>
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>learner</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>lrn</a></span><span class='op'>(</span><span class='st'>"classif.xgboost"</span>, nrounds <span class='op'>=</span> <span class='fl'>100</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>learner</span> <span class='op'>=</span> <span class='fu'>lrn</span><span class='op'>(</span><span class='st'>"classif.xgboost"</span>, nrounds <span class='op'>=</span> <span class='fl'>100</span><span class='op'>)</span>
 <span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span><span class='op'>(</span><span class='va'>learner</span><span class='op'>)</span>
 </code></pre>
 </div>
@@ -2175,9 +2189,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>The factor encoder’s man page can be found under <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_encode.html"><code>mlr_pipeops_encode</code></a>. Here, we decide to use “treatment” encoding (first factor level serves as baseline, and there will be a new binary column for each additional level). We restrict the operator to factor columns using the respective <a href="https://mlr3pipelines.mlr-org.com/reference/Selector.html"><code>Selector</code></a> <code>selector_type()</code>:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://mlr3pipelines.mlr-org.com'>mlr3pipelines</a></span><span class='op'>)</span>
-<span class='va'>fencoder</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"encode"</span>, method <span class='op'>=</span> <span class='st'>"treatment"</span>,
-  affect_columns <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/Selector.html'>selector_type</a></span><span class='op'>(</span><span class='st'>"factor"</span><span class='op'>)</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>fencoder</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"encode"</span>, method <span class='op'>=</span> <span class='st'>"treatment"</span>, affect_columns <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/Selector.html'>selector_type</a></span><span class='op'>(</span><span class='st'>"factor"</span><span class='op'>)</span><span class='op'>)</span>
 </code></pre>
 </div>
 </div>
@@ -2215,8 +2227,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>The ordered factor remained untouched, all other factors have been converted to numeric columns. To also convert the ordered variables <code>installment_rate</code>, <code>number_credits</code>, and <code>present_residence</code>, we construct the <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_colapply.html"><code>colapply</code></a> operator with the converter <code>as.integer()</code>:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>ord_to_int</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"colapply"</span>, applicator <span class='op'>=</span> <span class='va'>as.integer</span>,
-  affect_columns <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/Selector.html'>selector_type</a></span><span class='op'>(</span><span class='st'>"ordered"</span><span class='op'>)</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>ord_to_int</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"colapply"</span>, applicator <span class='op'>=</span> <span class='va'>as.integer</span>, affect_columns <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/Selector.html'>selector_type</a></span><span class='op'>(</span><span class='st'>"ordered"</span><span class='op'>)</span><span class='op'>)</span>
 </code></pre>
 </div>
 </div>
@@ -2245,8 +2256,8 @@ document.addEventListener('DOMContentLoaded', function() {
 </ol>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>pipe</span> <span class='op'>=</span> <span class='va'>fencoder</span> <span class='op'>%&gt;&gt;%</span> <span class='va'>ord_to_int</span> <span class='op'>%&gt;&gt;%</span> <span class='va'>learner</span>
-<span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span><span class='op'>(</span><span class='va'>pipe</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>graph</span> <span class='op'>=</span> <span class='va'>fencoder</span> <span class='op'>%&gt;&gt;%</span> <span class='va'>ord_to_int</span> <span class='op'>%&gt;&gt;%</span> <span class='va'>learner</span>
+<span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span><span class='op'>(</span><span class='va'>graph</span><span class='op'>)</span>
 </code></pre>
 </div>
 <pre><code>Graph with 3 PipeOps:
@@ -2258,25 +2269,25 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>The pipeline is wrapped in a <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_learners_graph.html"><code>GraphLearner</code></a> so that it behaves like a regular learner:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>glearner</span> <span class='op'>=</span> <span class='va'><a href='https://mlr3pipelines.mlr-org.com//reference/mlr_learners_graph.html'>GraphLearner</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='va'>pipe</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>graph_learner</span> <span class='op'>=</span> <span class='fu'>as_learner</span><span class='op'>(</span><span class='va'>graph</span><span class='op'>)</span>
 </code></pre>
 </div>
 </div>
 <p>We can now apply the new learner on the task, here with a 3-fold cross validation:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>rr</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/resample.html'>resample</a></span><span class='op'>(</span><span class='va'>task</span>, <span class='va'>glearner</span>, <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>rsmp</a></span><span class='op'>(</span><span class='st'>"cv"</span>, folds <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>rr</span> <span class='op'>=</span> <span class='fu'>resample</span><span class='op'>(</span><span class='va'>task</span>, <span class='va'>graph_learner</span>, <span class='fu'>rsmp</span><span class='op'>(</span><span class='st'>"cv"</span>, folds <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span><span class='op'>)</span>
 </code></pre>
 </div>
-<pre><code>[04:45:07] WARNING: amalgamation/../src/learner.cc:1095: Starting in XGBoost 1.3.0, the default evaluation metric used with the objective &#39;binary:logistic&#39; was changed from &#39;error&#39; to &#39;logloss&#39;. Explicitly set eval_metric if you&#39;d like to restore the old behavior.
-[04:45:07] WARNING: amalgamation/../src/learner.cc:1095: Starting in XGBoost 1.3.0, the default evaluation metric used with the objective &#39;binary:logistic&#39; was changed from &#39;error&#39; to &#39;logloss&#39;. Explicitly set eval_metric if you&#39;d like to restore the old behavior.
-[04:45:08] WARNING: amalgamation/../src/learner.cc:1095: Starting in XGBoost 1.3.0, the default evaluation metric used with the objective &#39;binary:logistic&#39; was changed from &#39;error&#39; to &#39;logloss&#39;. Explicitly set eval_metric if you&#39;d like to restore the old behavior.</code></pre>
+<pre><code>[10:11:26] WARNING: amalgamation/../src/learner.cc:1095: Starting in XGBoost 1.3.0, the default evaluation metric used with the objective &#39;binary:logistic&#39; was changed from &#39;error&#39; to &#39;logloss&#39;. Explicitly set eval_metric if you&#39;d like to restore the old behavior.
+[10:11:26] WARNING: amalgamation/../src/learner.cc:1095: Starting in XGBoost 1.3.0, the default evaluation metric used with the objective &#39;binary:logistic&#39; was changed from &#39;error&#39; to &#39;logloss&#39;. Explicitly set eval_metric if you&#39;d like to restore the old behavior.
+[10:11:27] WARNING: amalgamation/../src/learner.cc:1095: Starting in XGBoost 1.3.0, the default evaluation metric used with the objective &#39;binary:logistic&#39; was changed from &#39;error&#39; to &#39;logloss&#39;. Explicitly set eval_metric if you&#39;d like to restore the old behavior.</code></pre>
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='va'>rr</span><span class='op'>$</span><span class='fu'>aggregate</span><span class='op'>(</span><span class='op'>)</span>
 </code></pre>
 </div>
 <pre><code>classif.ce 
- 0.2740165 </code></pre>
+ 0.2620435 </code></pre>
 </div>
 <p>Success! We augmented xgboost with handling of factors and ordered factors. If we combine this learner with a tuner from <a href="https://mlr3tuning.mlr-org.com">mlr3tuning</a>, we get a universal and competitive learner.</p>
 <div class="sourceCode" id="cb11"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>

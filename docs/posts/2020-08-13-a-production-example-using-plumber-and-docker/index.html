@@ -472,7 +472,7 @@ d-title {
 
 </style>
 
-<script src="../../site_libs/jquery-1.11.3/jquery.min.js"></script>
+<script src="../../site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <link href="../../site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet"/>
 <link href="../../site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet"/>
 <script src="../../site_libs/headroom-0.9.4/headroom.min.js"></script>
@@ -2050,7 +2050,7 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 <!--/radix_placeholder_distill-->
-  <script src="../../site_libs/jquery-1.11.3/jquery.min.js"></script>
+  <script src="../../site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
   <script src="../../site_libs/popper-2.6.0/popper.min.js"></script>
   <link href="../../site_libs/tippy-6.2.7/tippy.css" rel="stylesheet" />
   <link href="../../site_libs/tippy-6.2.7/tippy-light-border.css" rel="stylesheet" />
@@ -2121,7 +2121,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <ul>
 <li><a href="https://medium.com/tmobile-tech/r-can-api-c184951a24a3">R can API and So Can You!</a></li>
 <li><a href="https://medium.com/tmobile-tech/using-docker-to-deploy-an-r-plumber-api-863ccf91516d">Using docker to deploy an R plumber API</a></li>
-<li><code>AzureContainer</code>’s vignette: <code>vignette("vig01_plumber_deploy", package = "AzureContainers")</code></li>
+<li><code>AzureContainer</code>’s <a href="https://cran.r-project.org/web/packages/AzureContainers/vignettes/vig01_plumber_deploy.html">vignette</a></li>
 </ul>
 <p>All files presented in this tutorial are available <a href="https://github.com/mlr-org/mlr3gallery/tree/master/_posts/2020-08-13-a-production-example-using-plumber-and-docker/mlr3_api">here</a>.</p>
 <h3 id="modeling-background">Modeling Background</h3>
@@ -2158,7 +2158,7 @@ document.addEventListener('DOMContentLoaded', function() {
 </code></pre>
 </div>
 </div>
-<p>We wrap this <a href="https://mlr3pipelines.mlr-org.com/reference/Graph.html"><code>Graph</code></a> in a <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_learners_graph.html"><code>GraphLearner</code></a> and can train on the <code>Task</code>:</p>
+<p>We wrap this <a href="https://mlr3pipelines.mlr-org.com/reference/Graph.html"><code>Graph</code></a> in a <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_learners_graph.html"><code>GraphLearner</code></a> and can train on the <a href="https://mlr3.mlr-org.com/reference/Task.html"><code>Task</code></a>:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='va'>gl</span> <span class='op'>=</span> <span class='va'><a href='https://mlr3pipelines.mlr-org.com//reference/mlr_learners_graph.html'>GraphLearner</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='va'>g</span><span class='op'>)</span>
@@ -2242,7 +2242,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>As an endpoint for predicting the <code>medv</code>, we will use a <code>POST</code> request. This will allow us to enclose data in the body of the request message. More precisely, we assume that the data will be provided in the JSON format.</p>
 <p>When a <code>POST</code> request containing the data (in JSON format) is received our code must then:</p>
 <ol type="1">
-<li><p>convert the input (in JSON format) to a <code>data.table</code> with all feature columns matching their feature type</p></li>
+<li><p>convert the input (in JSON format) to a <a href="https://www.rdocumentation.org/packages/data.table/topics/data.table-package"><code>data.table</code></a> with all feature columns matching their feature type</p></li>
 <li><p>predict the <code>medv</code> based on the input using our trained pipeline and provide an output that can be understood by the client</p></li>
 </ol>
 <p>To make sure that all features match their feature type, we will later use the following function stored in the R file <code>fix_feature_types.R</code>:</p>
@@ -2268,8 +2268,8 @@ document.addEventListener('DOMContentLoaded', function() {
 </code></pre>
 </div>
 </div>
-<p><code>fix_feature_types()</code> can later be applied to the <code>newdata</code>, and will make sure, that all incoming features are converted to their expected feature type as in the original <code>Task</code> we used for training our pipeline (and this is the reason, why we stored the information about the features earlier). Note that in our tutorial we only have <code>factor</code>, <code>integer</code>, and <code>numeric</code> features, but <code>fix_feature_types()</code> should also work for all other supported <code>feature_types</code> listed in <code>mlr_reflections$task_feature_types</code>. However, it may need some customization depending on your own production environment to make the conversions meaningful.</p>
-<p>The following R file, <code>predict_gl.R</code> loads our trained pipepline and feature information and provides an endpoint for a <code>POST</code> request, <code>"/predict_medv"</code>. The incoming data then is converted using <code>jsonlite::fromJSON</code>. We expect the incoming data to either be JSON objects in an array or nested JSON objects and therefore we bind the converted vectors row-wise to a <code>data.table</code> using <code>data.table::rbindlist</code>. We then convert all features to their expected <code>feature_types</code> (using the <code>fix_feature_types()</code> function as defined above) and can finally predict the <code>medv</code> using our trained pipeline. As no default serialization from <code>R6</code> objects to JSON objects exists (yet), we wrap the <a href="https://mlr3.mlr-org.com/reference/Prediction.html"><code>Prediction</code></a> in a <code>data.table</code> (of course we could also only return the numeric prediction values):</p>
+<p><code>fix_feature_types()</code> can later be applied to the <code>newdata</code>, and will make sure, that all incoming features are converted to their expected feature type as in the original <a href="https://mlr3.mlr-org.com/reference/Task.html"><code>Task</code></a> we used for training our pipeline (and this is the reason, why we stored the information about the features earlier). Note that in our tutorial we only have <code>factor</code>, <code>integer</code>, and <code>numeric</code> features, but <code>fix_feature_types()</code> should also work for all other supported <code>feature_types</code> listed in <code>mlr_reflections$task_feature_types</code>. However, it may need some customization depending on your own production environment to make the conversions meaningful.</p>
+<p>The following R file, <code>predict_gl.R</code> loads our trained pipepline and feature information and provides an endpoint for a <code>POST</code> request, <code>"/predict_medv"</code>. The incoming data then is converted using <code>jsonlite::fromJSON</code>. We expect the incoming data to either be JSON objects in an array or nested JSON objects and therefore we bind the converted vectors row-wise to a <a href="https://www.rdocumentation.org/packages/data.table/topics/data.table-package"><code>data.table</code></a> using <code>data.table::rbindlist</code>. We then convert all features to their expected <code>feature_types</code> (using the <code>fix_feature_types()</code> function as defined above) and can finally predict the <code>medv</code> using our trained pipeline. As no default serialization from <code>R6</code> objects to JSON objects exists (yet), we wrap the <a href="https://mlr3.mlr-org.com/reference/Prediction.html"><code>Prediction</code></a> in a <a href="https://www.rdocumentation.org/packages/data.table/topics/data.table-package"><code>data.table</code></a> (of course we could also only return the numeric prediction values):</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='co'># predict_gl.R</span>

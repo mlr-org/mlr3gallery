@@ -123,7 +123,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
   <!--radix_placeholder_rmarkdown_metadata-->
 
 <script type="text/json" id="radix-rmarkdown-metadata">
-{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["title","categories","author","date","description","output","citation_url","canonical_url"]}},"value":[{"type":"character","attributes":{},"value":["Select Uncorrelated Features"]},{"type":"character","attributes":{},"value":["mlr3tuning","tuning","optimization","tuning","mlr3pipelines","filtering","iris data set","classification"]},{"type":"list","attributes":{},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name"]}},"value":[{"type":"character","attributes":{},"value":["Martin Binder"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name"]}},"value":[{"type":"character","attributes":{},"value":["Florian Pfisterer"]}]}]},{"type":"character","attributes":{},"value":["02-25-2020"]},{"type":"character","attributes":{},"value":["The following example describes a situation where we aim to remove correlated features. This in essence means, that we drop features until no features have a correlation higher then a given `cutoff`. This is often useful when we for example want to use linear models."]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["distill::distill_article"]}},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["self_contained","css"]}},"value":[{"type":"logical","attributes":{},"value":[false]},{"type":"character","attributes":{},"value":["../../custom.css"]}]}]},{"type":"character","attributes":{},"value":["https://mlr3gallery.mlr-org.com/posts/2020-02-25-remove-correlated-features/"]},{"type":"character","attributes":{},"value":["https://mlr3gallery.mlr-org.com/posts/2020-02-25-remove-correlated-features/"]}]}
+{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["title","categories","author","date","description","output","citation_url","canonical_url"]}},"value":[{"type":"character","attributes":{},"value":["Select Uncorrelated Features"]},{"type":"character","attributes":{},"value":["mlr3tuning","tuning","optimization","tuning","mlr3pipelines","filtering","iris data set","classification"]},{"type":"list","attributes":{},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name"]}},"value":[{"type":"character","attributes":{},"value":["Martin Binder"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name"]}},"value":[{"type":"character","attributes":{},"value":["Florian Pfisterer"]}]}]},{"type":"character","attributes":{},"value":["02-25-2020"]},{"type":"character","attributes":{},"value":["The following example describes a situation where we aim to remove correlated features. This in essence means, that we drop features until no features have a correlation higher then a given `cutoff`. This is often useful when we for example want to use linear models."]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["distill::distill_article"]}},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["self_contained","highlight_downlit","css"]}},"value":[{"type":"logical","attributes":{},"value":[false]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["../../custom.css"]}]}]},{"type":"character","attributes":{},"value":["https://mlr3gallery.mlr-org.com/posts/2020-02-25-remove-correlated-features/"]},{"type":"character","attributes":{},"value":["https://mlr3gallery.mlr-org.com/posts/2020-02-25-remove-correlated-features/"]}]}
 </script>
 <!--/radix_placeholder_rmarkdown_metadata-->
   
@@ -474,7 +474,7 @@ d-title {
 
 </style>
 
-<script src="../../site_libs/jquery-1.11.3/jquery.min.js"></script>
+<script src="../../site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <link href="../../site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet"/>
 <link href="../../site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet"/>
 <script src="../../site_libs/headroom-0.9.4/headroom.min.js"></script>
@@ -2052,7 +2052,7 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 <!--/radix_placeholder_distill-->
-  <script src="../../site_libs/jquery-1.11.3/jquery.min.js"></script>
+  <script src="../../site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
   <script src="../../site_libs/popper-2.6.0/popper.min.js"></script>
   <link href="../../site_libs/tippy-6.2.7/tippy.css" rel="stylesheet" />
   <link href="../../site_libs/tippy-6.2.7/tippy-light-border.css" rel="stylesheet" />
@@ -2130,19 +2130,26 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>This tutorial assumes familiarity with the basics of <a href="https://mlr3pipelines.mlr-org.com">mlr3pipelines</a>. Consult the <a href="https://mlr3book.mlr-org.com/pipelines.html">mlr3book</a> if some aspects are not fully understandable. Additionally, we compare different cutoff values via tuning using the <a href="https://mlr3tuning.mlr-org.com">mlr3tuning</a> package. Again, the <a href="https://mlr3book.mlr-org.com/paradox.html">mlr3book</a> has an intro to <a href="https://mlr3tuning.mlr-org.com">mlr3tuning</a> and <a href="https://paradox.mlr-org.com">paradox</a>.</p>
 <p>The example describes a very involved use-case, where the behavior of <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_select.html"><code>PipeOpSelect</code></a> is manipulated via a <strong>trafo</strong> on it’s <a href="https://paradox.mlr-org.com/reference/ParamSet.html"><code>ParamSet</code></a></p>
 <h2 id="getting-started">Getting started</h2>
+<p>We load the <a href="https://mlr3verse.mlr-org.com">mlr3verse</a> package which pulls in the most important packages for this example.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='st'><a href='https://mlr3.mlr-org.com'>"mlr3"</a></span><span class='op'>)</span>
-<span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='st'><a href='https://mlr3pipelines.mlr-org.com'>"mlr3pipelines"</a></span><span class='op'>)</span>
-<span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='st'><a href='https://paradox.mlr-org.com'>"paradox"</a></span><span class='op'>)</span>
-<span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='st'><a href='https://mlr3tuning.mlr-org.com'>"mlr3tuning"</a></span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://mlr3verse.mlr-org.com'>mlr3verse</a></span><span class='op'>)</span>
+</code></pre>
+</div>
+</div>
+<p>We initialize the random number generator with a fixed seed for reproducibility, and decrease the verbosity of the logger to keep the output clearly represented.</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/Random.html'>set.seed</a></span><span class='op'>(</span><span class='fl'>7832</span><span class='op'>)</span>
+<span class='fu'>lgr</span><span class='fu'>::</span><span class='fu'><a href='https://s-fleck.github.io/lgr/reference/get_logger.html'>get_logger</a></span><span class='op'>(</span><span class='st'>"mlr3"</span><span class='op'>)</span><span class='op'>$</span><span class='fu'>set_threshold</span><span class='op'>(</span><span class='st'>"warn"</span><span class='op'>)</span>
+<span class='fu'>lgr</span><span class='fu'>::</span><span class='fu'><a href='https://s-fleck.github.io/lgr/reference/get_logger.html'>get_logger</a></span><span class='op'>(</span><span class='st'>"bbotk"</span><span class='op'>)</span><span class='op'>$</span><span class='fu'>set_threshold</span><span class='op'>(</span><span class='st'>"warn"</span><span class='op'>)</span>
 </code></pre>
 </div>
 </div>
 <p>The basic pipeline looks as follows: We use <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_select.html"><code>PipeOpSelect</code></a> to select a set of variables followed by a <a href="https://mlr3.mlr-org.com/reference/mlr_learners_classif.rpart.html"><code>rpart learner</code></a>.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>pipeline</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"select"</span><span class='op'>)</span> <span class='op'>%&gt;&gt;%</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>lrn</a></span><span class='op'>(</span><span class='st'>"classif.rpart"</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>graph_learner</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"select"</span><span class='op'>)</span> <span class='op'>%&gt;&gt;%</span> <span class='fu'>lrn</span><span class='op'>(</span><span class='st'>"classif.rpart"</span><span class='op'>)</span>
 </code></pre>
 </div>
 </div>
@@ -2150,7 +2157,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>We want to use the function <a href="https://www.rdocumentation.org/packages/caret/topics/findCorrelation"><code>caret::findCorrelation()</code></a> from the <a href="https://cran.r-project.org/package=caret">caret</a> package in order to select uncorrelated variables. This function has a <code>cutoff</code> parameter, that specifies the maximum correlation allowed between variables. In order to expose this variable as a <code>numeric</code> parameter we can tune over we specify the following <a href="https://paradox.mlr-org.com/reference/ParamSet.html"><code>ParamSet</code></a>:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>ps</span> <span class='op'>=</span> <span class='va'><a href='https://paradox.mlr-org.com/reference/ParamSet.html'>ParamSet</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='va'><a href='https://paradox.mlr-org.com/reference/ParamDbl.html'>ParamDbl</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='st'>"cutoff"</span>, <span class='fl'>0</span>, <span class='fl'>1</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>search_space</span> <span class='op'>=</span> <span class='fu'><a href='https://paradox.mlr-org.com/reference/ps.html'>ps</a></span><span class='op'>(</span>cutoff <span class='op'>=</span> <span class='fu'><a href='https://paradox.mlr-org.com/reference/Domain.html'>p_dbl</a></span><span class='op'>(</span><span class='fl'>0</span>, <span class='fl'>1</span><span class='op'>)</span><span class='op'>)</span>
 </code></pre>
 </div>
 </div>
@@ -2158,7 +2165,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>Now we use a <code>trafo</code> to transform the <code>cutoff</code> into a set of variables, which is what <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_select.html"><code>PipeOpSelect</code></a> can work with. Note that we use <code>x$cutoff = NULL</code> in order to remove the temporary parameter we introduced, as <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_select.html"><code>PipeOpSelect</code></a> does not know what to do with it.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>ps</span><span class='op'>$</span><span class='va'>trafo</span> <span class='op'>=</span> <span class='kw'>function</span><span class='op'>(</span><span class='va'>x</span>, <span class='va'>param_set</span><span class='op'>)</span> <span class='op'>{</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>search_space</span><span class='op'>$</span><span class='va'>trafo</span> <span class='op'>=</span> <span class='kw'>function</span><span class='op'>(</span><span class='va'>x</span>, <span class='va'>param_set</span><span class='op'>)</span> <span class='op'>{</span>
   <span class='va'>cutoff</span> <span class='op'>=</span> <span class='va'>x</span><span class='op'>$</span><span class='va'>cutoff</span>
   <span class='va'>x</span><span class='op'>$</span><span class='va'>select.selector</span> <span class='op'>=</span> <span class='kw'>function</span><span class='op'>(</span><span class='va'>task</span><span class='op'>)</span> <span class='op'>{</span>
     <span class='va'>fn</span> <span class='op'>=</span> <span class='va'>task</span><span class='op'>$</span><span class='va'>feature_names</span>
@@ -2173,31 +2180,21 @@ document.addEventListener('DOMContentLoaded', function() {
 </div>
 </div>
 <p>If you are not sure, you understand the <code>trafo</code> concept, consult the <a href="https://mlr3book.mlr-org.com/paradox.html">mlr3book</a>. It has a section on the <code>trafo</code> concept.</p>
-<p>To now tune over different values for <code>cutoff</code>, we first create a <a href="https://mlr3tuning.mlr-org.com/reference/TuningInstanceSingleCrit.html"><code>TuningInstanceSingleCrit</code></a>.</p>
+<p>Now we tune over different values for <code>cutoff</code>.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>inst</span> <span class='op'>=</span> <span class='va'><a href='https://mlr3tuning.mlr-org.com/reference/TuningInstanceSingleCrit.html'>TuningInstanceSingleCrit</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span>
-  task <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>tsk</a></span><span class='op'>(</span><span class='st'>"iris"</span><span class='op'>)</span>,
-  learner <span class='op'>=</span> <span class='va'>pipeline</span>,
-  resampling <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>rsmp</a></span><span class='op'>(</span><span class='st'>"cv"</span>, folds <span class='op'>=</span> <span class='fl'>3L</span><span class='op'>)</span>,
-  measure <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>msr</a></span><span class='op'>(</span><span class='st'>"classif.ce"</span><span class='op'>)</span>,
-  search_space <span class='op'>=</span> <span class='va'>ps</span>,
-  terminator <span class='op'>=</span> <span class='fu'><a href='https://bbotk.mlr-org.com/reference/trm.html'>trm</a></span><span class='op'>(</span><span class='st'>"none"</span><span class='op'>)</span>,
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>instance</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3tuning.mlr-org.com/reference/tune.html'>tune</a></span><span class='op'>(</span>
+  method <span class='op'>=</span> <span class='st'>"grid_search"</span>,
+  task <span class='op'>=</span> <span class='fu'>tsk</span><span class='op'>(</span><span class='st'>"iris"</span><span class='op'>)</span>,
+  learner <span class='op'>=</span> <span class='va'>graph_learner</span>,
+  resampling <span class='op'>=</span> <span class='fu'>rsmp</span><span class='op'>(</span><span class='st'>"cv"</span>, folds <span class='op'>=</span> <span class='fl'>3L</span><span class='op'>)</span>,
+  measure <span class='op'>=</span> <span class='fu'>msr</span><span class='op'>(</span><span class='st'>"classif.ce"</span><span class='op'>)</span>,
+  search_space <span class='op'>=</span> <span class='va'>search_space</span>,
   <span class='co'># don't need the following line for optimization, this is for</span>
   <span class='co'># demonstration that different features were selected</span>
-  store_models <span class='op'>=</span> <span class='cn'>TRUE</span>
-<span class='op'>)</span>
+  store_models <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>
 </code></pre>
 </div>
-</div>
-<p>Then we run the tuning:</p>
-<div class="layout-chunk" data-layout="l-body">
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://mlr3tuning.mlr-org.com/reference/tnr.html'>tnr</a></span><span class='op'>(</span><span class='st'>"grid_search"</span><span class='op'>)</span><span class='op'>$</span><span class='fu'>optimize</span><span class='op'>(</span><span class='va'>inst</span><span class='op'>)</span>
-</code></pre>
-</div>
-<pre><code>      cutoff learner_param_vals  x_domain classif.ce
-1: 0.8888889          &lt;list[2]&gt; &lt;list[1]&gt; 0.04666667</code></pre>
 </div>
 <p>In order to demonstrate that different cutoff values result in different features being selected, we can run the following to inspect the trained models. Note this inspects only the trained models of the first CV fold of each evaluated model. The features being excluded depends on the training data seen by the pipeline and may be different in different folds, even at the same cutoff value.</p>
 <div class="layout-chunk" data-layout="l-body">
@@ -2205,7 +2202,7 @@ document.addEventListener('DOMContentLoaded', function() {
 </div>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/as.data.table.html'>as.data.table</a></span><span class='op'>(</span><span class='va'>inst</span><span class='op'>$</span><span class='va'>archive</span><span class='op'>)</span><span class='op'>[</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/as.data.table.html'>as.data.table</a></span><span class='op'>(</span><span class='va'>instance</span><span class='op'>$</span><span class='va'>archive</span><span class='op'>)</span><span class='op'>[</span>
   <span class='fu'><a href='https://rdrr.io/r/base/order.html'>order</a></span><span class='op'>(</span><span class='va'>cutoff</span><span class='op'>)</span>,
   <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='va'>cutoff</span>, <span class='va'>classif.ce</span>,
     featurenames <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/lapply.html'>lapply</a></span><span class='op'>(</span><span class='va'>resample_result</span>, <span class='kw'>function</span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span> <span class='op'>{</span>
@@ -2215,19 +2212,19 @@ document.addEventListener('DOMContentLoaded', function() {
 </code></pre>
 </div>
 <pre><code>       cutoff classif.ce                                      featurenames
- 1: 0.0000000 0.29333333                          Sepal.Length,Sepal.Width
- 2: 0.1111111 0.29333333                          Sepal.Length,Sepal.Width
+ 1: 0.0000000 0.28666667                                      Sepal.Length
+ 2: 0.1111111 0.28666667                                      Sepal.Length
  3: 0.2222222 0.28666667                                      Sepal.Length
- 4: 0.3333333 0.28666667                          Sepal.Length,Sepal.Width
- 5: 0.4444444 0.28666667              Petal.Width,Sepal.Length,Sepal.Width
- 6: 0.5555556 0.28666667                          Sepal.Length,Sepal.Width
- 7: 0.6666667 0.28666667                          Sepal.Length,Sepal.Width
- 8: 0.7777778 0.28666667                                      Sepal.Length
- 9: 0.8888889 0.04666667 Petal.Length,Petal.Width,Sepal.Length,Sepal.Width
-10: 1.0000000 0.06666667                          Sepal.Length,Sepal.Width</code></pre>
+ 4: 0.3333333 0.27333333                          Sepal.Length,Sepal.Width
+ 5: 0.4444444 0.27333333                          Sepal.Length,Sepal.Width
+ 6: 0.5555556 0.27333333                          Sepal.Length,Sepal.Width
+ 7: 0.6666667 0.27333333                          Sepal.Length,Sepal.Width
+ 8: 0.7777778 0.27333333                          Sepal.Length,Sepal.Width
+ 9: 0.8888889 0.04000000              Petal.Width,Sepal.Length,Sepal.Width
+10: 1.0000000 0.06666667 Petal.Length,Petal.Width,Sepal.Length,Sepal.Width</code></pre>
 </div>
 <p>Voila, we created our own <a href="https://mlr3pipelines.mlr-org.com/reference/PipeOp.html"><code>PipeOp</code></a>, that uses very advanced knowledge of <a href="https://mlr3pipelines.mlr-org.com">mlr3pipelines</a> and <a href="https://paradox.mlr-org.com">paradox</a> in only few lines of code.</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
 <!--radix_placeholder_article_footer-->
 <!--/radix_placeholder_article_footer-->
 </div>
