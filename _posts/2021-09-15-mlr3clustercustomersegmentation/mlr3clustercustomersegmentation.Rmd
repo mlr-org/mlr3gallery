@@ -1,52 +1,49 @@
 ---
-title: "customer_segmentation"
+title: "mlr3cluster_customer_segmentation"
 description: |
-  Customer Segmentation based on RFM scores
+  We teach how to perform customer segmentation with mlr3cluster based on RFM scores.
+categories:
+  - mlr3cluster
+  - customer segmentation
+  - clustering
 author:
   - name: Giuseppe Casalicchio
   - name: Henri Funk
-date: 01-14-2021
+date: 09-15-2021
 output:
   distill::distill_article:
     self_contained: false
-    css: ../../custom.css
-    toc: yes
-    toc_depth: 4
 ---
 
-```{r setup, include = FALSE}
-library("mlr3book")
+
+```{r mlr3clustercustomersegmentation-001, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  R.options = list(width = 120)
+)
+# knitr::opts_chunk$set(warning = FALSE, message = FALSE, fig.align = "center", dev = "png", fig.retina = 1, R.options = list(width = 100))
+library(mlr3book)
 ```
 
-
-```{r, echo=FALSE, cache=FALSE, message=FALSE, warning=FALSE}
+```{r mlr3clustercustomersegmentation-002, echo=FALSE, cache=FALSE, message=FALSE, warning=FALSE}
 set.seed(1)
 library(knitr)
 library(ggplot2)
 theme_set(theme_bw() + theme(legend.position = "bottom"))
-knitr::opts_chunk$set(warning = FALSE, message = FALSE, fig.align = "center", dev = "png", fig.retina = 1, R.options = list(width = 100))
 gg_color_hue = function(n) {
   hues = seq(15, 375, length = n + 1)
   grDevices::hcl(h = hues, l = 65, c = 100)[1:n]
 }
-# load packages
-library(gridExtra)
-library(factoextra)
-library(DataExplorer)
-library(cluster)
-library(dplyr)
-#library(scales)
-#library(R6)
-
 library(mlr3verse)
 ```
+
 
 
 # Steel Wheels Data
 
 ### Data Description
 
-The provided data contains purchase information of a fictional store named Steel Wheels (available at https://www.kaggle.com/kyanyoga/sample-sales-data). 
+The provided data contains purchase information of a fictional store named Steel Wheels (available at https://www.kaggle.com/kyanyoga/sample-sales-data).
 Each line refers to a specific product that was sold to a customer in a specific order.
 In our analysis, we will focus on the following columns:
 
@@ -57,7 +54,7 @@ In our analysis, we will focus on the following columns:
 - `SALES`: Total price of the product item included in the considered order
 - `CUSTOMERNAME`: Name of the customer of the considered order
 
-```{r}
+```{r mlr3clustercustomersegmentation-003}
 # import data
 df = read.csv("archive/sales_data_sample.csv")
 
@@ -93,9 +90,9 @@ The so-called RFM (Recency, Frequency, Monetary Value) approach offers a nice wa
 
 To perform customer segmentation, we need to aggregate the purchase data on customer level and calculate the aforementioned RFM scores for each customer:
 
-```{r}
-df_RFM = df %>% 
-  group_by(CUSTOMERNAME) %>% 
+```{r mlr3clustercustomersegmentation-004}
+df_RFM = df %>%
+  group_by(CUSTOMERNAME) %>%
   summarise(
     recency = as.numeric(max(ORDERDATE) - as.Date("2005-06-01")),
     frequency = min(c(n_distinct(ORDERNUMBER), 6)),
@@ -113,10 +110,10 @@ DataExplorer::plot_correlation(df_RFM)
 
 ### mlr3 Task
 
-With the resulting dataframe, we first scale it and then create a `Clustering Task` for the scaled data which we later use for learning the cluster assignments. 
+With the resulting dataframe, we first scale it and then create a `Clustering Task` for the scaled data which we later use for learning the cluster assignments.
 This is an mlr3 object that can be used to fit unsupervised learners on.
 
-```{r}
+```{r mlr3clustercustomersegmentation-005}
 df_scaled = as.data.frame(scale(df_RFM[,c("frequency", "monetary", "recency")]))
 task_RFM = TaskClust$new(id = "customer_segment", df_scaled)
 ```
@@ -127,12 +124,12 @@ task_RFM = TaskClust$new(id = "customer_segment", df_scaled)
 
 - The idea behind the elbow method is to determine the value of $k$ where the within cluster variance begins to decrease most quickly.
 - If $k$ increases, the within cluster variance will always decrease, as the points are getting closer to the centroids they are assigned to.
-- However, at some point, the decrease in variability will usually slow down, which can be visualized by an elbow (a smaller angle). 
+- However, at some point, the decrease in variability will usually slow down, which can be visualized by an elbow (a smaller angle).
 - The optimal number of clusters is chosen at exactly this point. Note, however, that the "elbow" is not always clearly identifiable.
 
 We use the normalized data to perform $k$-means with different number of clusters $k$ and select the optimal number for $k$ according to the Elbow method:
 
-```{r}
+```{r mlr3clustercustomersegmentation-006}
 # specify a vector of values for k
 k_clusters = 1:10
 # loop for each value in k_clusters
@@ -150,7 +147,7 @@ plot(x = k_clusters, y = km_wss, type = "b", main = "Elbow Plot")
 From the elbow method, we might chose $k=4$ as optimal number of clusters.
 Hence, we perform $k$-means with $k=4$ and augment the original RFM data with a new column called `km_partition` containing the cluster assignments:
 
-```{r, message=FALSE}
+```{r mlr3clustercustomersegmentation-007, message=FALSE}
 km_best = lrn("clust.kmeans", nstart = 100L,  centers = 4L)
 km_best$train(task_RFM)
 prediction = km_best$predict(task_RFM)
@@ -166,16 +163,16 @@ We start with looking at **conditional (or stratified) density plots** for the c
 They illustrate how the **frequency distribution** of the clusters change with increasing values for the considered RFM scores.
 As in this use case, the **frequency score** consists of only few distinct values, we will use a **stratified bar chart** to show the frequency distribution stratified by each cluster.
 
-```{r, fig.height=4, fig.width=10, echo=FALSE}
+```{r mlr3clustercustomersegmentation-008, fig.height=4, fig.width=10, echo=FALSE}
 # conditional density (and frequency) plots
-p_rec = ggplot(df_RFM, aes(x = recency, fill = km_partition)) + 
-  geom_density(position = "fill") + 
+p_rec = ggplot(df_RFM, aes(x = recency, fill = km_partition)) +
+  geom_density(position = "fill") +
   ggtitle("Recency")
-p_fre = ggplot(df_RFM, aes(x = as.factor(frequency), fill = km_partition)) + 
+p_fre = ggplot(df_RFM, aes(x = as.factor(frequency), fill = km_partition)) +
   geom_bar(position = "fill") +
   ggtitle("Frequency")
-p_mon = ggplot(df_RFM, aes(x = monetary, fill = km_partition)) + 
-  geom_density(position = "fill") + 
+p_mon = ggplot(df_RFM, aes(x = monetary, fill = km_partition)) +
+  geom_density(position = "fill") +
   ggtitle("Monetary Value")
 gridExtra::grid.arrange(p_rec, p_fre, p_mon, ncol = 3)
 ```
@@ -186,25 +183,25 @@ From this, we can observe that clusters of customers refer to specific ranges of
 
 We can visualize the clusters in an interactive 3D scatter plot using different colors for the clusters:
 
-```{r}
+```{r mlr3clustercustomersegmentation-009}
 plotly::plot_ly(df_RFM, x = ~recency, y = ~monetary, z = ~frequency, color =  ~km_partition)
 ```
 
 We can use the `fviz_cluster` function from the `factoextra` package, as it offers a unified interface also for other clustering algorithms.
 By default, if more than two features are chosen, the function visualizes a scatter plot on the first two **principal components**:
 
-```{r, fig.height=4, fig.width=10}
-scatter_km1 = factoextra::fviz_cluster(km_best$model, df_RFM, 
+```{r mlr3clustercustomersegmentation-010, fig.height=4, fig.width=10}
+scatter_km1 = factoextra::fviz_cluster(km_best$model, df_RFM,
   choose.vars = c("frequency", "monetary", "recency"))
 # scatterplot for 'recency' vs. 'monetary' (on non-scaled data)
-scatter_km2 = factoextra::fviz_cluster(km_best$model, df_RFM, 
+scatter_km2 = factoextra::fviz_cluster(km_best$model, df_RFM,
   choose.vars = c("recency", "monetary"), stand = FALSE)
 gridExtra::grid.arrange(scatter_km1, scatter_km2, nrow = 1)
 ```
 
 #### Pairs Plot
 
-A pairs plot gives even more insights at one glance if we use the cluster belongings as color aesthetics. 
+A pairs plot gives even more insights at one glance if we use the cluster belongings as color aesthetics.
 It shows
 
 - size of clusters in bar charts (first row, first column)
@@ -214,9 +211,9 @@ It shows
 - pairwise scatter plots of the RFM scores with different colors for their cluster belongings (lower diagonal)
 - pairwise correlations of the RFM scores, stratified by each cluster (upper diagonal)
 
-```{r,fig.height=7, fig.width=7}
+```{r mlr3clustercustomersegmentation-011,fig.height=7, fig.width=7}
 # pairs plot from the GGally package
-GGally::ggpairs(df_RFM, mapping = aes(col = km_partition, alpha = 0.9), 
+GGally::ggpairs(df_RFM, mapping = aes(col = km_partition, alpha = 0.9),
   columns = c("km_partition", "frequency", "monetary", "recency"))
 ```
 
@@ -224,8 +221,8 @@ GGally::ggpairs(df_RFM, mapping = aes(col = km_partition, alpha = 0.9),
 
 Now, we look at the cluster centers of the original data to derive a description for the customer segments
 
-```{r}
-df_RFM %>% 
+```{r mlr3clustercustomersegmentation-012}
+df_RFM %>%
   group_by(km_partition) %>% # define column used for grouping
   summarize_if(is.numeric, mean) # aggregate all numeric columns by the mean
 ```
@@ -248,7 +245,7 @@ $\Rightarrow$ These are rather **new** customers that are pretty active. Let us 
 
 # Hierarchical Clustering
 
-```{r, echo = FALSE}
+```{r mlr3clustercustomersegmentation-013, echo = FALSE}
 theme_set(theme_bw())
 ```
 
@@ -259,7 +256,7 @@ A good customer segmentation process usually includes exploring different cluste
 
 To compute a dendogram and visualize the cluster assignments, we need to do the following steps:
 
-```{r mlr3implementationII}
+```{r mlr3clustercustomersegmentation-014}
 hclust = lrn("clust.hclust", method = "complete", distmethod = "euclidean", k = 4L)
 hclust$train(task_RFM)
 factoextra::fviz_dend(hclust$model, k = hclust$param_set$values$k)
