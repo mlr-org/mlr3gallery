@@ -22,8 +22,6 @@ date: 03-10-2021
 output:
   distill::distill_article:
     self_contained: false
-    highlight_downlit: true
-    css: ../../custom.css
 params:
   eval_all: FALSE
 ---
@@ -33,12 +31,9 @@ params:
   echo = TRUE,
   R.options = list(width = 120)
 )
-
 library(mlr3book)
-library(kableExtra)
-
-ggplot2::theme_set(ggplot2::theme_light())
 ```
+
 
 # Scope
 
@@ -170,17 +165,17 @@ However, if we do this before resampling, information from the test can leak int
 To avoid this, we add the preprocessing steps to the `r ref("Learner")` itself, creating a `r ref("GraphLearner")`.
 For this, we create a `r ref("Graph")` first.
 
-```{r practical-tuning-series-tune-a-preprocessing-pipeline-013, fig.width=10, fig.height=10}
+```{r practical-tuning-series-tune-a-preprocessing-pipeline-013}
 graph = po("encode") %>>%
   po("imputeoor") %>>%
   learner
 plot(graph)
 ```
 
-We use `r ref("as_learner()")` to  wrap the `r ref("Graph")` into a `r ref("GraphLearner")` with which allows us to use the graph like a normal learner.
+We wrap the `r ref("Graph")` into `r ref("GraphLearner")` which allows us to use the graph like a normal learner.
 
 ```{r practical-tuning-series-tune-a-preprocessing-pipeline-014}
-graph_learner = as_learner(graph)
+graph_learner = GraphLearner$new(graph)
 
 # short learner id for printing
 graph_learner$id = "graph_learner"
@@ -316,36 +311,6 @@ autoplot(bmr)
 
 Note that in practice, it is required to tune preprocessing hyperparameters jointly with the hyperparameters of the learner.
 Otherwise, comparing preprocessing steps is not feasible and can lead to wrong conclusions.
-
-Applying nested resampling can be shortened by using the `r ref("auto_tuner()")`-shortcut.
-
-```{r practical-tuning-series-build-an-automated-machine-learning-system-028, eval = FALSE}
-graph_1 = po("encode") %>>% learner
-graph_learner_1 = as_learner(graph_1)
-graph_learner_1$param_set$values$encode.method = to_tune(c("one-hot", "treatment"))
-
-at_1 = auto_tuner(
-  method = "grid_search",
-  learner = graph_learner_1,
-  resampling = resampling,
-  measure = msr("classif.ce"),
-  store_models = TRUE)
-
-graph_2 = po("encode") %>>% po("imputeoor") %>>% learner
-graph_learner_2 = as_learner(graph_2)
-graph_learner_2$param_set$values$encode.method = to_tune(c("one-hot", "treatment"))
-
-at_2 = auto_tuner(
-  method = "grid_search",
-  learner = graph_learner_2,
-  resampling = resampling,
-  measure = msr("classif.ce"),
-  store_models = TRUE)
-
-design = benchmark_grid(task, list(at_1, at_2), rsmp("cv", folds = 3))
-
-bmr = benchmark(design, store_models = TRUE)
-```
 
 # Final Model
 

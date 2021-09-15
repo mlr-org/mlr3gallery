@@ -5,7 +5,6 @@ categories:
   - regression
   - feature importance
   - moneyball data set
-  - mlr3pipelines
 author:
   - name: Philipp Kopper
 date: 05-04-2020
@@ -17,19 +16,17 @@ output:
     css: ../../custom.css
 ---
 
-```{r 2020-05-04-moneyball-001, include=FALSE}
- knitr::opts_chunk$set(
+```{r 2020-05-04-moneyball-001, include = FALSE}
+knitr::opts_chunk$set(
   echo = TRUE,
   R.options = list(width = 120)
 )
-
 library(mlr3book)
-library(kableExtra)
-
-ggplot2::theme_set(ggplot2::theme_light())
+library(mlr3)
+lgr::get_logger("mlr3")$set_threshold("warn")
 ```
 
-This use case shows how to easily work with datasets available via [OpenML](https://www.openml.org/) into an `r mlr_pkg("mlr3")` workflow.
+This use case shows how to easily work with datasets available via [OpenML](https://www.openml.org/) into an mlr3 workflow.
 
 The following operations are illustrated:
 
@@ -38,51 +35,45 @@ The following operations are illustrated:
 * Training and predicting
 * Resampling / Cross-validation
 
-## Prerequisites
+## Loading basic packages
 
 ```{r 2020-05-04-moneyball-002}
-# various functions of the mlr3 ecosystem
-library("mlr3verse")
+# tasks, train, predict, resample, benchmark
+library("mlr3")
 # about a dozen reasonable learners
 library("mlr3learners")
-# retrieving the data
+# Pipelines
+library("mlr3pipelines")
+# lots of measures for evaluation
+requireNamespace("mlr3measures")
+# Retrieving the data
 library("OpenML")
-```
-
-We initialize the random number generator with a fixed seed for reproducibility, and decrease the verbosity of the logger to keep the output clearly represented.
-
-```{r 2020-05-04-moneyball-003}
-set.seed(7832)
-lgr::get_logger("mlr3")$set_threshold("warn")
+# Another way to obtain the data
+library("mlr3data")
 ```
 
 ## Retrieving the data from OpenML
 
 We can use the `r cran_pkg("OpenML")` package to retrieve data (and more) straight away.
-`r cran_pkg("OpenML")` is is an inclusive movement to build an open, organized, online ecosystem for machine learning.
-Typically, you can retrieve the data with an `data.id`.
-The id can be found on [OpenML](https://www.openml.org/).
-We choose the data set `41021`.
+`OpenML` is is an inclusive movement to build an open, organized, online ecosystem for machine learning.
+Typically, you can retrieve the data with an `id`.
+The `id` can be found on [OpenML](https://www.openml.org/).
+We choose the `41021`as our `oml_id`.
 The related web page can be accessed [here](https://www.openml.org/d/41021).
 This data set was uploaded by [Joaquin Vanschoren](https://www.openml.org/u/2).
 
-```{r 2020-05-04-moneyball-004}
-oml_data = getOMLDataSet(data.id = 41021)
+```{r 2020-05-04-moneyball-003, eval = FALSE}
+oml_id = 41021
+oml_dat = getOMLDataSet(data.id = oml_id)
 ```
 
 The description indicates that the data set is associated with baseball or more precisely the story of [Moneyball](https://www.imdb.com/title/tt1210166/).
 
-```{r 2020-05-04-moneyball-005, eval = FALSE}
-head(as.data.table(oml_data))
+```{r 2020-05-04-moneyball-004, eval = FALSE}
+oml_dat
 ```
 
-```{r 2020-05-04-moneyball-006, layout="l-page", echo = FALSE}
-head(as.data.table(oml_data)) %>%
-  kable(format = "html") %>%
-  kable_styling(full_width = TRUE)
-```
-
-However, the description within the `r cran_pkg("OpenML")` object is not very detailed.
+However, the description within the `OpenML` object is not very detailed.
 The previously referenced [page](https://www.openml.org/d/41021) however states the following:
 
 In the early 2000s, Billy Beane and Paul DePodesta worked for the Oakland Athletics.
@@ -119,32 +110,28 @@ While Beane and DePodesta defined most of these statistics and measures for indi
 These statistics seem very informative if you are into baseball.
 If baseball of rather obscure to you, simply take these features as given or give this [article](https://en.wikipedia.org/wiki/Baseball_statistics) a quick read.
 
-Finally, note that the `moneyball` dataset is also included in the `r mlr_pkg("mlr3data")`  package where you can get the preprocessed (integers properly encoded as such, etc.) data via:
+Finally, note that the `moneyball` dataset is also included in the `mlr3data` package where you can get the preprocessed (integers properly encoded as such, etc.) data via:
 
-```{r 2020-05-04-moneyball-007}
+```{r 2020-05-04-moneyball-005}
 data("moneyball", package = "mlr3data")
-skimr::skim(moneyball)
+summary(moneyball)
 ```
 
 The summary shows how this data we are dealing with looks like:
 Some data is missing, however, this has structural reasons.
-There are 39 teams with each maximally 47 years (1962 - 2012).
-For 988 cases the information on `rankseason` and `rankplayoffs` is missing.
+There are $39$ teams with each maximally $47$ years ($1962$ - $2012$).
+For $988$ cases the information on `rankseason` and `rankplayoffs` is missing.
 This is since these simply did not reach the playoffs and hence have no reported rank.
 
-```{r 2020-05-04-moneyball-008}
-summary(moneyball[moneyball$playoffs == 0, c("rankseason", "rankplayoffs")])
+```{r 2020-05-04-moneyball-006}
+summary(moneyball[moneyball$Playoffs == 0, c("rankseason", "rankplayoffs")])
 ```
 
 On the other hand, `oobp` and `oslg` have $812$ missing values.
 It seems as if these measures were not available before $1998$.
 
-```{r 2020-05-04-moneyball-009}
-library(ggplot2)
-library(naniar)
-
-ggplot(moneyball, aes(x = year, y = oobp)) +
-  geom_miss_point()
+```{r 2020-05-04-moneyball-007}
+summary(moneyball[is.na(moneyball$oobp), "year"])
 ```
 
 We seem to have a missing data problem.
@@ -167,103 +154,86 @@ For the other missing (categorical) features, we simply add a new level which in
 It is important to note that in this case here the vast majority of information on the features is missing.
 In this case, imputation is performed to not throw away the existing information of the features.
 
-`r mlr_pkg("mlr3")` has some solutions for that within the `r mlr_pkg("mlr3pipelines")`  package.
-We start with an easy `r ref("PipeOp")` which only performs numeric imputation.
+`mlr3` has some solutions for that within the `mlr3pipelines` package.
+We start with an easy `PipeOp` which only performs numeric imputation.
 
-```{r 2020-05-04-moneyball-010}
-imp_num = po("imputehist", affect_columns = selector_type(c("integer", "numeric")))
+```{r 2020-05-04-moneyball-008}
+imp_num = po("imputehist", param_vals = list(affect_columns = selector_type(c("integer", "numeric"))))
 ```
 
 Next, we append the second imputation job for factors.
 
-```{r 2020-05-04-moneyball-011, fig.width=10, fig.height=10}
-imp_fct = po("imputeoor", affect_columns = selector_type("factor"))
+```{r 2020-05-04-moneyball-009}
+imp_fct = po("imputeoor", param_vals = list(affect_columns = selector_type("factor")))
 graph = imp_num %>>% imp_fct
 graph$plot()
 ```
 
 ## Creating tasks and learners
 
-The fact that there is missing data does not affect the `r ref("Task", "task")` definition.
-The `r ref("Task", "task")` determines what is the problem to be solved by machine learning.
+The fact that there is missing data does not affect the `task` definition.
+The `task` determines what is the problem to be solved by machine learning.
 We want to explain the runs scored (`rs`).
 `rs` is an important measure as a run is equivalent to a 'point' scored in other sports.
 Naturally, the aim of a coach should be to maximise runs scored and minimise runs allowed.
 As runs scored and runs allowed are both legitimate targets we ignore the runs allowed here.
 The task is defined by:
 
-```{r 2020-05-04-moneyball-012, results = 'hide'}
+```{r 2020-05-04-moneyball-010}
 # creates a `mlr3` task from scratch, from a data.frame
 # 'target' names the column in the dataset we want to learn to predict
-task = as_task_regr(moneyball, target = "rs")
+task = TaskRegr$new(id = "moneyball", backend = moneyball, target = "rs")
 task$missings()
 ```
 
-```{r 2020-05-04-moneyball-013, echo = FALSE}
-t(task$missings()) %>%
-  kable(format = "html") %>%
-  kable_styling(full_width = TRUE)
-```
-
-The `$missings()` method indicates what we already knew: our missing values.
+The `missings` method indicates what we already knew: our missing values.
 Missing values are not always a problem.
 Some learners can deal with them pretty well.
 However, we want to use a random forest for our task.
 
-```{r 2020-05-04-moneyball-014}
+```{r 2020-05-04-moneyball-011}
 # creates a learner
-test_learner = lrn("regr.ranger")
-
+test_lrn = LearnerRegrRanger$new()
 # displays the properties
-test_learner$properties
+test_lrn$properties
 ```
 
-Typically, in `r mlr_pkg("mlr3")` the `$properties` field would tell us whether missing values are a problem to this learner or not.
+Typically, in `mlr3` the `properties` method would tell us whether missing values are a problem to this learner or not.
 As it is not listed here, the random forest cannot deal with missing values.
 
 As we aim to use imputation beforehand, we incorporate it into the learner.
-Our selected learner is going to be a random forest from the `r cran_pkg("ranger")` package.
+Our selected learner is going to be a random forest from the `ranger` package.
+One can allow the embedding of the preprocessing (imputation) into a learner by creating `new` (method) `PipeOpLearner` (R6 class).
+This special `learner` can be put into a graph together with the `imputer` via the `new` method of the `GraphLearner` class.
 
-One can allow the embedding of the preprocessing (imputation) into a learner by creating a `r ref("PipeOpLearner")`.
-This special `r ref("Learner")` can be put into a graph together with the `imputer`.
-
-```{r 2020-05-04-moneyball-015}
-# convert learner to pipeop learner and set hyperparameter
-pipeop_learner = po(lrn("regr.ranger"), num.trees = 1000, importance = "permutation")
-
-# add pipeop learner to graph and create graph learner
-graph_learner = as_learner(graph %>>% pipeop_learner)
-
+```{r 2020-05-04-moneyball-012}
+# creates a normal learner however allows further embedding of PipeOp's.
+polrn = PipeOpLearner$new(mlr_learners$get("regr.ranger"))
+# sets number of trees to 1000, importance is for later
+polrn$param_set$values = list(num.trees = 1000, importance = "permutation")
+# the final learner is a graph consisting of the imputer and the normal learner.
+lrn = GraphLearner$new(graph = graph %>>% polrn)
 ```
 
 The final graph looks like the following:
 
-```{r 2020-05-04-moneyball-016, fig.width=10, fig.height=10}
-graph_learner$graph$plot()
+```{r 2020-05-04-moneyball-013}
+plot(graph %>>% polrn)
 ```
 
 ## Train and predict
 
-To get a feeling of how our model performs we simply train the `r ref("Learner")` on a subset of the data and predict the hold-out data.
+To get a feeling of how our model performs we simply train the `learner` on a subset of the data and predict the hold-out data.
 
-```{r 2020-05-04-moneyball-017, results = 'hide'}
+```{r 2020-05-04-moneyball-014}
 # defines the training and testing data; 95% is used for training
 train_set = sample(task$nrow, 0.95 * task$nrow)
 test_set = setdiff(seq_len(task$nrow), train_set)
-
 # train learner on subset of task
-graph_learner$train(task, row_ids = train_set)
-
+lrn$train(task, row_ids = train_set)
 # predict using held out observations
-prediction = graph_learner$predict(task, row_ids = test_set)
-
-head(as.data.table(prediction))
-```
-
-```{r 2020-05-04-moneyball-018, echo = FALSE}
-head(as.data.table(prediction)) %>%
-  kable(format = "html") %>%
-  kable_styling(full_width = TRUE)
+preds = lrn$predict(task, row_ids = test_set)
+print(preds)
 ```
 
 Viewing the predicted values it seems like the model predicts reasonable values that are fairly close to the truth.
@@ -273,48 +243,36 @@ Viewing the predicted values it seems like the model predicts reasonable values 
 While the prediction indicated that the model is doing what it is supposed to, we want to have a more systematic understanding of the model performance.
 That means we want to know by how much our model is away from the truth on average.
 Cross-validation investigates this question.
-In `r mlr_pkg("mlr3")` 10-fold cross-validation is constructed as follows:
+In `mlr3` ten-fold cross-validation is constructed as follows:
 
-```{r 2020-05-04-moneyball-019}
+```{r 2020-05-04-moneyball-015, size = "tiny"}
 cv10 = rsmp("cv", folds = 10)
-rr = resample(task, graph_learner, cv10)
+r = resample(task, lrn, cv10)
 ```
 
 We choose some of the performance measures provided by:
 
-```{r 2020-05-04-moneyball-020, eval = FALSE}
-as.data.table(mlr_measures)
+```{r 2020-05-04-moneyball-016, size = "tiny"}
+mlr_measures
 ```
 
-```{r 2020-05-04-moneyball-021, echo = FALSE}
-as.data.table(mlr_measures) %>%
-  kable(format = "html") %>%
-  kable_styling(full_width = TRUE) %>%
-  kableExtra::scroll_box(height = "400px", extra_css = "border: 0px !important;")
-```
+We choose the mean absolute error (`regr.mae`) and the mean squared error (`regr.mse`).
 
-We choose the `r ref("mlr_measures_regr.mae", "mean absolute error")` and the `r ref("mlr_measures_regr.mse", "mean squared error ")`.
-
-```{r 2020-05-04-moneyball-022, eval = FALSE}
-rr$score(msrs(c("regr.mae", "regr.mse")))
-```
-
-```{r 2020-05-04-moneyball-023, echo = FALSE, layout="l-body-outset"}
-rr$score(msrs(c("regr.mae", "regr.mse")))[, .(iteration, task_id, learner_id, resampling_id, regr.mae, regr.mse)] %>%
-  kable(format = "html") %>%
-  kable_styling(full_width = TRUE)
+```{r 2020-05-04-moneyball-017}
+scores = r$score(msrs(c("regr.mae", "regr.mse")))
+scores
 ```
 
 We can also compute now by how much our model was on average wrong when predicting the runs scored.
 
-```{r 2020-05-04-moneyball-024}
-rr$aggregate(msr("regr.mae"))
+```{r 2020-05-04-moneyball-018}
+r$aggregate(msr("regr.mae"))
 ```
 
 That seems not too bad.
 Considering that on average approximately 715 runs per team per season have been scored.
 
-```{r 2020-05-04-moneyball-025}
+```{r 2020-05-04-moneyball-019}
 mean(moneyball$rs)
 ```
 
@@ -323,47 +281,42 @@ mean(moneyball$rs)
 To assess if imputation was beneficial, we can compare our current learner with a learner which ignores the missing features.
 Normally, one would set up a benchmark for this.
 However, we want to keep things short in this use case.
-Thus, we only set up the alternative learner (with identical hyperparameters) and compare the 10-fold cross-validated mean absolute error.
+Thus, we only set up the alternative learner (with identical hyperparameters) and compare the 10-fold-cross-validated mean absolute error.
 
 As we are mostly interested in the numeric imputation we leave the remaining graph as it is.
 
-```{r 2020-05-04-moneyball-026}
-impute_oor = po("imputeoor", affect_columns = selector_type("factor"))
+```{r 2020-05-04-moneyball-020}
+imp_fct = po("imputeoor", param_vals = list(affect_columns = selector_type("factor")))
+graph2 = as_graph(imp_fct)
 ```
 
-Subsequently, we create a pipeline with `r ref("PipeOpSelect")`.
+Subsequently, we add the `PipeOpSelect` `PipeOp` to the pipeline.
 
-```{r 2020-05-04-moneyball-027, fig.width=10, fig.height=10}
+```{r 2020-05-04-moneyball-021}
 feature_names = colnames(moneyball)[!sapply(moneyball, anyNA)]
-feature_names = c(feature_names[feature_names %in% task$feature_names],
+feature_names = c(
+  feature_names[feature_names %in% task$feature_names],
   "rankseason", "rankplayoffs")
-select_na = po("select", selector = selector_name(feature_names))
-
-graph_2 = impute_oor %>>% select_na
-graph_2$plot()
+na_select = po("select")
+na_select$param_set$values$selector = selector_name(feature_names)
+graph2 = graph2 %>>% na_select
+graph2$plot()
 ```
 
 Now we complete the learner and apply resampling as before.
 
-```{r 2020-05-04-moneyball-028}
-graph_learner_2 = as_learner(graph_2 %>>% pipeop_learner)
-rr_2 = resample(task, graph_learner_2, cv10)
-rr_2$aggregate(msr("regr.mae"))
+```{r 2020-05-04-moneyball-022}
+lrn2 = GraphLearner$new(graph = graph2 %>>% polrn)
+r2 = resample(task, lrn2, cv10)
+r2$aggregate(msr("regr.mae"))
 ```
 
 Surprisingly, the performance seems to be approximately the same.
 That means that the imputed features seem not very helpful.
 We can use the `variable.importance` of the random forest.
 
-```{r 2020-05-04-moneyball-029, eval = FALSE}
-sort(graph_learner$model$regr.ranger$model$variable.importance, decreasing = TRUE)
-```
-
-
-```{r 2020-05-04-moneyball-030, echo = FALSE, layout="l-body-outset"}
-data.table(t(sort(graph_learner$model$regr.ranger$model$variable.importance, decreasing = TRUE))) %>%
-  kable(format = "html") %>%
-  kable_styling(full_width = TRUE)
+```{r 2020-05-04-moneyball-023}
+sort(lrn$model$regr.ranger$model$variable.importance, decreasing = TRUE)
 ```
 
 We see that according to this the left out `oobp` and `oslg` seem to have solely rudimentary explanatory power.
@@ -372,11 +325,11 @@ This may be because there were simply too many instances or because the features
 ## Conclusion
 
 So, to sum up, what we have learned:
-We can access very cool data straight away with the `r cran_pkg("OpenML")` package.
-(We are working on a better direct implementation into `r mlr_pkg("mlr3")` at the moment.)
-We can work with missing data very well in `r mlr_pkg("mlr3")`.
+We can access very cool data straight away with the `OpenML` package.
+(We are working on a better direct implementation into `mlr3` at the moment.)
+We can work with missing data very well in `mlr3`.
 Nevertheless, we discovered that sometimes imputation does not lead to the intended goals.
-We also learned how to use some `r ref("PipeOp")`s from the `r mlr_pkg("mlr3pipelines")`  package.
+We also learned how to use some `PipeOp`s from the `mlr3pipelines` package.
 
 But most importantly, we found a way to predict the runs scored of MLB teams.
 

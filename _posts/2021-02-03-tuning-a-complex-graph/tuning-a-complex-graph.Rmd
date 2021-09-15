@@ -15,7 +15,6 @@ description: |
 output:
   distill::distill_article:
     self_contained: false
-    highlight_downlit: true
     css: ../../custom.css
 bibliography: bibliography.bib
 params:
@@ -23,15 +22,12 @@ params:
 ---
 
 ```{r tuning-a-complex-graph-001, include=FALSE}
- knitr::opts_chunk$set(
+knitr::opts_chunk$set(
   echo = TRUE,
   R.options = list(width = 120)
 )
-
 library(mlr3book)
 library(kableExtra)
-
-ggplot2::theme_set(ggplot2::theme_light())
 ```
 
 ```{r tuning-a-complex-graph-002, include=FALSE, eval = params$eval_all}
@@ -50,18 +46,11 @@ Ideally you already had a look at how to tune over [multiple learners](https://m
 First, we load the packages we will need:
 
 ```{r tuning-a-complex-graph-003}
-library(mlr3verse)
+library(mlr3)
+library(mlr3tuning)
+library(mlr3pipelines)
 library(mlr3learners)
-```
-
-We initialize the random number generator with a fixed seed for reproducibility, and decrease the verbosity of the logger to keep the output clearly represented.
-The [`lgr`](https://mlr3book.mlr-org.com/logging.html) package is used for logging in all `r mlr_pkg("mlr3")` packages.
-The `r mlr_pkg("mlr3")` logger prints the logging messages from the base package, whereas the `r mlr_pkg("bbotk")`  logger is responsible for logging messages from the optimization packages (e.g. `r mlr_pkg("mlr3tuning")` ).
-
-```{r tuning-a-complex-graph-004}
-set.seed(7832)
-lgr::get_logger("mlr3")$set_threshold("warn")
-lgr::get_logger("bbotk")$set_threshold("warn")
+library(paradox)
 ```
 
 ## Data and Task
@@ -70,7 +59,7 @@ We are going to work with some gene expression data included as a supplement in 
 The data consists of 2308 gene profiles in 63 training and 20 test samples.
 The following data preprocessing steps are done analogously as in `vignette("khan", package = "bst")`:
 
-```{r tuning-a-complex-graph-005}
+```{r tuning-a-complex-graph-004}
 datafile = system.file("extdata", "supplemental_data", package = "bst")
 dat0 = read.delim(datafile, header = TRUE, skip = 1)[, -(1:2)]
 dat0 = t(dat0)
@@ -86,8 +75,8 @@ dat$class = as.factor(
 
 We then construct our training and test `r ref("Task", "Task")` :
 
-```{r tuning-a-complex-graph-006}
-task = as_task_classif(dat, target = "class", id = "SRBCT")
+```{r tuning-a-complex-graph-005}
+task = TaskClassif$new("SRBCT", backend = dat, target = "class")
 task_train = task$clone(deep = TRUE)
 task_train$filter(1:63)
 task_test = task$clone(deep = TRUE)
@@ -109,9 +98,9 @@ We will first cover branching in detail and later show how the same can be done 
 
 First, we have a look at the baseline `r ref("mlr_measures_classif.acc", "classification accuracy")` of the `LDA` and `ranger` on the training task:
 
-```{r tuning-a-complex-graph-007}
-base = benchmark(benchmark_grid(
-  task_train,
+```{r tuning-a-complex-graph-006}
+set.seed(1290)
+base = benchmark(benchmark_grid(task_train,
   learners = list(lrn("classif.lda"), lrn("classif.ranger")),
   resamplings = rsmp("cv", folds = 3)))
 base$aggregate(measures = msr("classif.acc"))
@@ -127,7 +116,7 @@ Let's see if we can get some better performance, at least for the `LDA`.
 Our graph starts with log transforming the features (we explicitly use base 10 only for better interpretability when inspecting the model later), using `r ref("PipeOpColApply", "PipeOpColApply")`, followed by scaling the features using `r ref("PipeOpScale", "PipeOpScale")`.
 Then, the first branch allows for switching between the `PCA` / `ICA`-`LDA` and `ranger`, and within `PCA` / `ICA`-`LDA`, the second branch allows for switching between `PCA` and `ICA`:
 
-```{r tuning-a-complex-graph-008}
+```{r tuning-a-complex-graph-007}
 graph1 =
   po("colapply", applicator = function(x) log(x, base = 10)) %>>%
   po("scale") %>>%
@@ -150,12 +139,12 @@ Therefore we go with `"pca_ica_lda"` / `"ranger`" and `"pca"` / `"ica"`.
 Finally, we also could have used the `branch` `r ref("ppl", "ppl")` to make branching easier (we will come back to this in the [Proxy](#Proxy) section).
 The graph looks like the following:
 
-```{r tuning-a-complex-graph-009, fig.width=10, fig.height=10}
+```{r tuning-a-complex-graph-008, graph1}
 graph1$plot()
 ```
 We can inspect the parameters of the `r ref("ParamSet", "ParamSet")` of the graph to see which parameters can be set:
 
-```{r tuning-a-complex-graph-010}
+```{r tuning-a-complex-graph-009}
 graph1$param_set$ids()
 ```
 
@@ -165,36 +154,68 @@ The `id`'s are prefixed by the respective `r ref("PipeOp", "PipeOp")` they belon
 
 Our graph either fits a `LDA` after applying `PCA` or `ICA`, or alternatively a `ranger` with no preprocessing.
 These two **options** each define selection parameters that we can tune.
-Moreover, within the respective `r ref("PipeOp")`'s we want to tune the following parameters:
+Moreover, within the respective `PipeOp`'s we want to tune the following parameters:
 `pca.rank.`, `ica.n.comp`, `classif.lda.method`, `classif.ranger.mtry`, and `classif.ranger.num.trees`.
 The first two parameters are integers that in-principal could range from 1 to the number of features.
 However, for `ICA`, the upper bound must not exceed the number of observations and as we will later use `3-fold` `r ref("mlr_resamplings_cv", "cross-validation")` as the resampling method for the tuning, we just set the upper bound to 30 (and do the same for `PCA`).
 Regarding the `classif.lda.method` we will only be interested in `"moment"` estimation vs. minimum volume ellipsoid covariance estimation (`"mve"`).
 Moreover, we set the lower bound of `classif.ranger.mtry` to 200 (which is around the number of features divided by 10) and the upper bound to 1000.
 
-```{r tuning-a-complex-graph-011}
-tune_ps1 = ps(
-  branch_learner.selection =
-    p_fct(c("pca_ica_lda", "ranger")),
-  branch_preproc_lda.selection =
-    p_fct(c("pca", "ica"), depends = branch_learner.selection == "pca_ica_lda"),
-  pca.rank. =
-    p_int(1, 30, depends = branch_preproc_lda.selection == "pca"),
-  ica.n.comp =
-    p_int(1, 30, depends = branch_preproc_lda.selection == "ica"),
-  classif.lda.method =
-    p_fct(c("moment", "mve"), depends = branch_preproc_lda.selection == "ica"),
-  classif.ranger.mtry =
-    p_int(200, 1000, depends = branch_learner.selection == "ranger"),
-  classif.ranger.num.trees =
-    p_int(500, 2000, depends = branch_learner.selection == "ranger"))
+```{r tuning-a-complex-graph-010}
+tune_ps1 = ParamSet$new(list(
+  ParamFct$new("branch_learner.selection", levels = c("pca_ica_lda", "ranger")),
+  ParamFct$new("branch_preproc_lda.selection", levels = c("pca", "ica")),
+  ParamInt$new("pca.rank.", lower = 1, upper = 30),
+  ParamInt$new("ica.n.comp", lower = 1, upper = 30),
+  ParamFct$new("classif.lda.method", levels = c("moment", "mve")),
+  ParamInt$new("classif.ranger.mtry", lower = 200, upper = 1000),
+  ParamInt$new("classif.ranger.num.trees", lower = 500, upper = 2000))
+)
 ```
 
 The parameter `branch_learner.selection` defines whether we go down the left (`PCA` / `ICA` followed by `LDA`) or the right branch (`ranger`).
 The parameter `branch_preproc_lda.selection` defines whether a `PCA` or `ICA` will be applied prior to the `LDA`.
 The other parameters directly belong to the `ParamSet` of the `PCA` / `ICA` / `LDA` / `ranger`.
 Note that it only makes sense to switch between `PCA` / `ICA` if the `"pca_ica_lda"` branch was selected beforehand.
-We have to specify this via the `depends` parameter.
+We have to specify this via:
+
+```{r tuning-a-complex-graph-011}
+tune_ps1$add_dep("branch_preproc_lda.selection",
+  on = "branch_learner.selection",
+  cond = CondEqual$new("pca_ica_lda"))
+```
+Again, regarding the `pca.rank.` parameter, there is a dependency on that `"pca"` must have been selected in `branch_preproc_lda.selection` beforehand, which we have to explicitly specify:
+
+```{r tuning-a-complex-graph-012}
+tune_ps1$add_dep("pca.rank.",
+  on = "branch_preproc_lda.selection",
+  cond = CondEqual$new("pca"))
+```
+The same holds for the following parameters analogously:
+
+```{r tuning-a-complex-graph-013}
+tune_ps1$add_dep("ica.n.comp",
+  on = "branch_preproc_lda.selection",
+  cond = CondEqual$new("ica"))
+```
+
+```{r tuning-a-complex-graph-014}
+tune_ps1$add_dep("classif.lda.method",
+  on = "branch_preproc_lda.selection",
+  cond = CondEqual$new("ica"))
+```
+
+```{r tuning-a-complex-graph-015}
+tune_ps1$add_dep("classif.ranger.mtry",
+  on = "branch_learner.selection",
+  cond = CondEqual$new("ranger"))
+```
+
+```{r tuning-a-complex-graph-016}
+tune_ps1$add_dep("classif.ranger.num.trees",
+  on = "branch_learner.selection",
+  cond = CondEqual$new("ranger"))
+```
 
 Finally, we also could have proceeded to tune the numeric parameters on a log scale.
 I.e., looking at `pca.rank.` the performance difference between rank 1 and 2 is probably much larger than between rank 29 and rank 30.
@@ -207,7 +228,8 @@ We will use the `r ref("mlr_measures_classif.acc", "classification accuracy")`.
 As a resampling method we use `r ref("mlr_resamplings_cv", "3-fold cross-validation")`.
 We will use the `r ref("TerminatorNone", "TerminatorNone")` (i.e., no early termination) for terminating the tuning because we will apply a `r ref("TunerGridSearch", "grid search")` (we use a `grid search` because it gives nicely plottable and understandable results but if there were much more parameters, `r ref("TunerRandomSearch", "random search")` or more intelligent optimization methods would be preferred to a `grid search`:
 
-```{r tuning-a-complex-graph-012}
+```{r tuning-a-complex-graph-017}
+set.seed(2409)
 tune1 = TuningInstanceSingleCrit$new(
   task_train,
   learner = graph1,
@@ -221,43 +243,50 @@ tune1 = TuningInstanceSingleCrit$new(
 We then perform a `grid search` using a resolution of 4 for the numeric parameters.
 The grid being used will look like the following (note that the dependencies we specified above are handled automatically):
 
-```{r tuning-a-complex-graph-013, eval = FALSE}
+```{r tuning-a-complex-graph-018, eval = FALSE}
 generate_design_grid(tune_ps1, resolution = 4)
 ```
 
-```{r tuning-a-complex-graph-014, echo = FALSE, layout="l-body-outset"}
+```{r tuning-a-complex-graph-019, echo = FALSE}
 generate_design_grid(tune_ps1, resolution = 4)$data %>%
   kable(format = "html") %>%
-  kable_styling(full_width = TRUE) %>%
-  kableExtra::scroll_box(height = "400px", extra_css = "border: 0px !important;")
+  kable_styling() %>%
+  kableExtra::scroll_box(height = "400px")
 ```
 
-We trigger the tuning.
+Before starting the tuning we set some logging thresholds (i.e., only print warnings on the console):
 
-```{r tuning-a-complex-graph-015, eval = params$eval_all}
+```{r tuning-a-complex-graph-020}
+lgr::get_logger("mlr3")$set_threshold("warn")
+lgr::get_logger("bbotk")$set_threshold("warn")
+```
+
+```{r tuning-a-complex-graph-021, eval = params$eval_all}
 tuner_gs = tnr("grid_search", resolution = 4, batch_size = 10)
 tuner_gs$optimize(tune1)
 ```
 
-```{r tuning-a-complex-graph-016, echo = FALSE, eval = params$eval_all}
+```{r tuning-a-complex-graph-022, echo = FALSE, eval = params$eval_all}
 saveRDS(tune1, "data/tune1.rda")
 ```
 
-```{r tuning-a-complex-graph-017, echo = FALSE}
+```{r tuning-a-complex-graph-023, echo = FALSE}
 tune1 = readRDS("data/tune1.rda")
 ```
 
 Now, we can inspect the results ordered by the `classification accuracy`:
 
-```{r tuning-a-complex-graph-018, eval = FALSE}
-as.data.table(tune1$archive)[order(classif.acc), ]
+```{r tuning-a-complex-graph-024, eval = FALSE}
+tune1_results = tune1$archive$data
+tune1_results[order(classif.acc), ]
 ```
 
-```{r tuning-a-complex-graph-019, echo = FALSE, layout="l-page"}
-as.data.table(tune1$archive, unnest = NULL, exclude_columns = c("x_domain", "uhash", "resample_result"))[order(classif.acc), ] %>%
+```{r tuning-a-complex-graph-025, echo = FALSE, layout="l-page"}
+tune1_results = tune1$archive$data
+tune1_results[order(classif.acc), ] %>%
   kable(format = "html") %>%
-  kable_styling(full_width = TRUE) %>%
-  kableExtra::scroll_box(height = "400px", extra_css = "border: 0px !important;")
+  kable_styling() %>%
+  kableExtra::scroll_box(width = "100%", height = "400px")
 ```
 
 We achieve very good accuracy using `ranger`, more or less regardless how `mtry` and `num.trees` are set. However, the `LDA` also shows very good accuracy when combined with `PCA` or `ICA` retaining 30 components.
@@ -266,7 +295,7 @@ For now, we decide to use `ranger` with `mtry` set to 200 and `num.trees` set to
 
 Setting these parameters manually in our graph, then training on the training task and predicting on the test task yields an accuracy of:
 
-```{r tuning-a-complex-graph-020}
+```{r tuning-a-complex-graph-026}
 graph1$param_set$values$branch_learner.selection = "ranger"
 graph1$param_set$values$classif.ranger.mtry = 200
 graph1$param_set$values$classif.ranger.num.trees = 1000
@@ -279,12 +308,12 @@ Note that we also could have wrapped our graph in a `r ref("GraphLearner", "Grap
 ## Proxy
 
 Instead of using branches to split our graph with respect to the learner and preprocessing options, we can also use `r ref("PipeOpProxy", "PipeOpProxy")`.
-`PipeOpProxy` accepts a single `content` parameter that can contain any other `r ref("PipeOp")` or `r ref("Graph")`.
+`PipeOpProxy` accepts a single `content` parameter that can contain any other `PipeOp` or `Graph`.
 This is extremely flexible in the sense that we do not have to specify our options during construction.
-However, the parameters of the contained `r ref("PipeOp")` or `r ref("Graph")` are no longer directly contained in the `ParamSet` of the resulting graph.
+However, the parameters of the contained `PipeOp` or `Graph` are no longer directly contained in the `ParamSet` of the resulting graph.
 Therefore, when tuning the graph, we do have to make use of a `trafo` function.
 
-```{r tuning-a-complex-graph-021}
+```{r tuning-a-complex-graph-027}
 graph2 =
   po("colapply", applicator = function(x) log(x, base = 10)) %>>%
   po("scale") %>>%
@@ -293,25 +322,25 @@ graph2 =
 
 This graph now looks like the following:
 
-```{r tuning-a-complex-graph-022, graph2, fig.width=10, fig.height=8}
+```{r tuning-a-complex-graph-028, graph2}
 graph2$plot()
 ```
 
-At first, this may look like a linear graph. However, as the `content` parameter of `PipeOpProxy` can be tuned and set to contain any other `r ref("PipeOp")` or `r ref("Graph")`, this will allow for a similar non-linear graph as when doing branching.
+At first, this may look like a linear graph. However, as the `content` parameter of `PipeOpProxy` can be tuned and set to contain any other `PipeOp` or `Graph`, this will allow for a similar non-linear graph as when doing branching.
 
-```{r tuning-a-complex-graph-023}
+```{r tuning-a-complex-graph-029}
 graph2$param_set$ids()
 ```
 
 We can tune the graph by using the same search space as before. However, here the `trafo` function is of central importance to actually set our options and parameters:
 
-```{r tuning-a-complex-graph-024}
+```{r tuning-a-complex-graph-030}
 tune_ps2 = tune_ps1$clone(deep = TRUE)
 ```
 
-The `trafo` function does all the work, i.e., selecting either the `PCA` / `ICA`-`LDA` or `ranger` as the `proxy.content` as well as setting the parameters of the respective preprocessing `r ref("PipeOp")`s and `r ref("Learner")`s.
+The `trafo` function does all the work, i.e., selecting either the `PCA` / `ICA`-`LDA` or `ranger` as the `proxy.content` as well as setting the parameters of the respective preprocessing `PipeOp`s and `Learner`s.
 
-```{r tuning-a-complex-graph-025}
+```{r tuning-a-complex-graph-031}
 proxy_options = list(
   pca_ica_lda =
     ppl("branch", graphs = list(pca = po("pca"), ica = po("ica"))) %>>%
@@ -327,7 +356,7 @@ Here, the argument `x` is a list which will contain sampled / selected parameter
 The return value is a list only including the appropriate `proxy.content` parameter.
 In each tuning iteration, the `proxy.content` parameter of our graph will be set to this value.
 
-```{r tuning-a-complex-graph-026}
+```{r tuning-a-complex-graph-032}
 tune_ps2$trafo = function(x, param_set) {
   proxy.content = proxy_options[[x$branch_learner.selection]]
   if (x$branch_learner.selection == "pca_ica_lda") {
@@ -350,7 +379,7 @@ tune_ps2$trafo = function(x, param_set) {
 
 I.e., suppose that the following parameters will be selected from our `ParamSet`:
 
-```{r tuning-a-complex-graph-027}
+```{r tuning-a-complex-graph-033}
 x = list(
   branch_learner.selection = "ranger",
   classif.ranger.mtry = 200,
@@ -359,13 +388,14 @@ x = list(
 
 The `trafo` function will then return:
 
-```{r tuning-a-complex-graph-028}
+```{r tuning-a-complex-graph-034}
 tune_ps2$trafo(x)
 ```
 
 Tuning can be carried out analogously as done above:
 
-```{r tuning-a-complex-graph-029, eval = FALSE}
+```{r tuning-a-complex-graph-035, eval = FALSE}
+set.seed(2409)
 tune2 = TuningInstanceSingleCrit$new(
   task_train,
   learner = graph2,
@@ -377,6 +407,7 @@ tune2 = TuningInstanceSingleCrit$new(
 tuner_gs$optimize(tune2)
 ```
 
-```{r tuning-a-complex-graph-030, eval = FALSE}
-as.data.table(tune2$archive)[order(classif.acc), ]
+```{r tuning-a-complex-graph-036, eval = FALSE}
+tune2_results = tune2$archive$data
+tune2_results[order(classif.acc), ]
 ```
