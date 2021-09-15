@@ -1,5 +1,5 @@
 ---
-title: "Regression chains"
+title: Regression Chains
 categories:
   - regression
   - mlr3pipelines
@@ -15,10 +15,10 @@ output:
 bibliography: biblio.bib
 ---
 
-```{r setup, include=FALSE}
+```{r regression-chains-001, include=FALSE}
 knitr::opts_chunk$set(
   echo = TRUE,
-  R.options = list(width = 80)
+  R.options = list(width = 120)
 )
 library(mlr3book)
 lgr::get_logger("mlr3")$set_threshold("warn")
@@ -46,7 +46,7 @@ Writing pipelines with such steps allows for great flexibility in modeling more 
 In the following, we rely on some toy data.
 We simulate 100 responses to three target variables, $y_{1}$, $y_{2}$, and $y_{3}$ following a multivariate normal distribution with a mean and covariance matrix of:
 
-```{r}
+```{r regression-chains-002}
 library(data.table)
 library(mvtnorm)
 set.seed(2409)
@@ -59,14 +59,14 @@ Y = rmvnorm(n, mean = mean, sigma = sigma)
 
 The feature variables $x_{1}$, and $x_{2}$ are simulated as follows: $x_{1}$ is simply given by $y_{1}$ and an independent normally distributed error term and $x_{2}$ is given by $y_{2}$ and an independent normally distributed error term.
 
-```{r}
+```{r regression-chains-003}
 x1 = Y[, 1] + rnorm(n, sd = 0.1)
 x2 = Y[, 2] + rnorm(n, sd = 0.1)
 ```
 
 The final data is given as:
 
-```{r}
+```{r regression-chains-004}
 dat = as.data.table(cbind(Y, x1, x2))
 str(dat)
 ```
@@ -79,33 +79,33 @@ As a real-world example for such a situation, consider e.g. hospital data, where
 If you feel confident to already have a good feeling of the data, feel free to skip this section.
 If not, you can use the `r cran_pkg("rgl")` package to play around with the following four 3D plots with either the feature variables or $y_{1}$ and $y_{2}$ on the x- and y-axis and the target variables on the respective z-axes:
 
-```{r, eval = FALSE}
+```{r regression-chains-005, eval = FALSE}
 library(rgl)
 colfun = colorRampPalette(c("#161B1D", "#ADD8E6"))
 ```
 
-```{r, eval = FALSE}
+```{r regression-chains-006, eval = FALSE}
 setorder(dat, y1)
 plot3d(dat$x1, dat$x2, dat$y1,
   xlab = "x1", ylab = "x2", zlab = "y1",
   type = "s", radius = 0.1, col = colfun(n))
 ```
 
-```{r, eval = FALSE}
+```{r regression-chains-007, eval = FALSE}
 setorder(dat, y2)
 plot3d(dat$x1, dat$x2, dat$y2,
   xlab = "x1", ylab = "x2", zlab = "y2",
   type = "s", radius = 0.1, col = colfun(n))
 ```
 
-```{r, eval = FALSE}
+```{r regression-chains-008, eval = FALSE}
 setorder(dat, y3)
 plot3d(dat$x1, dat$x2, dat$y3,
   xlab = "x1", ylab = "x2", zlab = "y3",
   type = "s", radius = 0.1, col = colfun(n))
 ```
 
-```{r, eval = FALSE}
+```{r regression-chains-009, eval = FALSE}
 setorder(dat, y3)
 plot3d(dat$y1, dat$y2, dat$y3,
   xlab = "y1", ylab = "y2", zlab = "y3",
@@ -117,7 +117,7 @@ plot3d(dat$y1, dat$y2, dat$y3,
 In our regression chain, the first model will predict $y_{1}$.
 Therefore, we initialize our `Task` with respect to this target:
 
-```{r}
+```{r regression-chains-010}
 library(mlr3)
 library(mlr3learners)
 library(mlr3pipelines)
@@ -135,7 +135,7 @@ To combine predictions of a `Learner` with the previous input, we rely on `r ref
 To drop the respective remaining target variables as features, we rely on `r ref("PipeOpColRoles")`.
 The first step of predicting $y_{1}$ looks like the following:
 
-```{r}
+```{r regression-chains-011}
 step1 = po("copy", outnum = 2, id = "copy1") %>>%
   gunion(list(
     po("colroles", id = "drop_y2_y3",
@@ -149,7 +149,7 @@ step1$plot()
 
 Training using the input `Task`, shows us how the output and the `$state` look like:
 
-```{r}
+```{r regression-chains-012}
 step1_out = step1$train(task)[[1]]
 step1_out
 step1$state
@@ -159,11 +159,11 @@ Within the second step we then have to define $y_{2}$ as the new target.
 This can be done using `r ref("PipeOpUpdateTarget")` (note that `PipeOpUpdateTarget` currently is not exported but will be in a future version).
 By default, `PipeOpUpdateTarget` drops the original target from the feature set, here $y_{1}$.
 
-```{r}
+```{r regression-chains-013}
 mlr_pipeops$add("update_target", mlr3pipelines:::PipeOpUpdateTarget)
 ```
 
-```{r}
+```{r regression-chains-014}
 step2 = po("update_target", id = "y2_target",
     param_vals = list(new_target_name = "y2")) %>>%
   po("copy", outnum = 2, id = "copy2") %>>%
@@ -178,7 +178,7 @@ step2 = po("update_target", id = "y2_target",
 
 Again, we can train to see how the output and `$state` look like, but now using the output of `step1` as the input:
 
-```{r}
+```{r regression-chains-015}
 step2_out = step2$train(step1_out)[[1]]
 step2_out
 step2$state
@@ -186,7 +186,7 @@ step2$state
 
 In the final third step we define $y_{3}$ as the new target (again, `PipeOpUpdateTarget` drops the previous original target from the feature set, here $y_{2}$):
 
-```{r}
+```{r regression-chains-016}
 step3 = po("update_target", id = "y3_target",
     param_vals = list(new_target_name = "y3")) %>>%
   po("learner", learner = lrn("regr.lm"), id = "y3_learner")
@@ -194,7 +194,7 @@ step3 = po("update_target", id = "y3_target",
 
 Using the output of `step2` as input:
 
-```{r}
+```{r regression-chains-017}
 step3_out = step3$train(step2_out)[[1]]
 step3_out
 step3$state
@@ -202,7 +202,7 @@ step3$state
 
 The complete pipeline, more precisely `r ref("Graph")`, looks like the following:
 
-```{r}
+```{r regression-chains-018}
 graph = step1 %>>% step2 %>>% step3
 graph$plot()
 ```
@@ -211,7 +211,7 @@ graph$plot()
 
 By wrapping our `Graph` in a `r ref("GraphLearner")`, we can perform `r ref("ResamplingCV", "3-fold cross-validation")` and get an estimated average of the root-mean-square error (of course, in a real world setting splitting the data in a training and test set should have been done):
 
-```{r}
+```{r regression-chains-019}
 learner = GraphLearner$new(graph)
 rr = resample(task, learner = learner, resampling = rsmp("cv", folds = 3))
 rr$aggregate(msr("regr.mse"))
@@ -221,7 +221,7 @@ rr$aggregate(msr("regr.mse"))
 
 For completeness, we also show how a prediction step without having any target variable data available would look like:
 
-```{r}
+```{r regression-chains-020}
 dat_predict = as.data.table(cbind(x1, x2, y1 = NA, y2 = NA, y3 = NA))
 learner$train(task)
 learner$predict_newdata(dat_predict)

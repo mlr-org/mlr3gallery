@@ -1,9 +1,14 @@
 ---
-title: "Tuning a stacked learner"
+title: Tuning a Stacked Learner
 categories:
   - mlr3pipelines
   - mlr3tuning
+  - tuning
+  - optimization
+  - nested resampling
   - stacking
+  - sonar data set
+  - classification
 author:
   - name: Milan Dragicevic
   - name: Giuseppe Casalicchio
@@ -18,14 +23,14 @@ output:
 
 ## Intro
 
-```{r, echo = FALSE}
+```{r 2020-04-27-tuning-stacking-001, echo = FALSE}
 library(knitr)
 opts_chunk$set(R.options = list(width = 100))
 lgr::get_logger("mlr3")$set_threshold("warn")
 lgr::get_logger("bbotk")$set_threshold("warn")
 ```
 
-```{r setup, include=FALSE}
+```{r 2020-04-27-tuning-stacking-002, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE)
 library(mlr3)
 library(mlr3learners)
@@ -55,7 +60,7 @@ The test set predictions of the level 1 learners are attached to input data used
 
 ## Prerequisites
 
-```{r packages}
+```{r 2020-04-27-tuning-stacking-003}
 library(mlr3)
 library(mlr3learners)
 library(mlr3pipelines)
@@ -67,7 +72,7 @@ library(glmnet)
 
 For the stacking example, we use the [sonar classification task](https://mlr3.mlr-org.com/reference/mlr_tasks_sonar.html):
 
-```{r task}
+```{r 2020-04-27-tuning-stacking-004}
 sonar_task = tsk("sonar")
 sonar_task$col_roles$stratum = sonar_task$target_names #stratification
 ```
@@ -78,7 +83,7 @@ sonar_task$col_roles$stratum = sonar_task$target_names #stratification
 
 As mentioned, the level 0 learners are `rpart`, `glmnet` and `lda`:
 
-```{r lrn1}
+```{r 2020-04-27-tuning-stacking-005}
 rprt_lrn  = lrn("classif.rpart", predict_type = "prob")
 glmnet_lrn =  lrn("classif.glmnet", predict_type = "prob")
 lda_lrn = lrn("classif.lda", predict_type = "prob")
@@ -86,7 +91,7 @@ lda_lrn = lrn("classif.lda", predict_type = "prob")
 
 To create the learner out-of-bag predictions, we use [PipeOpLearnerCV()](https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_learner_cv.html):
 
-```{r lrn2}
+```{r 2020-04-27-tuning-stacking-006}
 rprt_cv1 = po("learner_cv", rprt_lrn, id = "rprt_1")
 glmnet_cv1 = po("learner_cv", glmnet_lrn, id = "glmnet_1")
 lda_cv1 = po("learner_cv", lda_lrn, id = "lda_1")
@@ -94,7 +99,7 @@ lda_cv1 = po("learner_cv", lda_lrn, id = "lda_1")
 
 A sparser representation of the input data in level 0 is obtained using the following filters:
 
-```{r filt}
+```{r 2020-04-27-tuning-stacking-007}
 anova = po("filter", flt("anova"), id = "filt1")
 mrmr = po("filter", flt("mrmr"), id = "filt2")
 find_cor = po("filter", flt("find_correlation"), id = "filt3")
@@ -103,7 +108,7 @@ find_cor = po("filter", flt("find_correlation"), id = "filt3")
 To summarize these steps into level 0, we use the [gunion](https://mlr3pipelines.mlr-org.com/reference/gunion.html) function.
 The out-of-bag predictions of all level 0 learners is attached using [PipeOpFeatureUnion](https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_featureunion.html) along with the original data passed via [PipeOpNOP()](https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_nop.html):
 
-```{r lrn3}
+```{r 2020-04-27-tuning-stacking-008}
 level0 = gunion(list(
   anova %>>% rprt_cv1,
   mrmr %>>% glmnet_cv1,
@@ -114,7 +119,7 @@ level0 = gunion(list(
 
 We can have a look at the graph from level 0:
 
-```{r lrn4, fig.width=6, fig.height = 6}
+```{r 2020-04-27-tuning-stacking-009, fig.width=6, fig.height = 6}
 level0$plot(html = FALSE)
 ```
 
@@ -122,7 +127,7 @@ level0$plot(html = FALSE)
 
 Now, we create the level 1 learners:
 
-```{r lrn5}
+```{r 2020-04-27-tuning-stacking-010}
 rprt_cv2 = po("learner_cv", rprt_lrn , id = "rprt_2")
 glmnet_cv2 = po("learner_cv", glmnet_lrn, id = "glmnet_2")
 lda_cv2 = po("learner_cv", lda_lrn, id = "lda_2")
@@ -130,7 +135,7 @@ lda_cv2 = po("learner_cv", lda_lrn, id = "lda_2")
 
 All level 1 learners will use [PCA](https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_pca.html) transformed data as input:
 
-```{r lrn6}
+```{r 2020-04-27-tuning-stacking-011}
 level1 = level0 %>>%
   po("copy", 4) %>>%
   gunion(list(
@@ -144,13 +149,13 @@ level1 = level0 %>>%
 
 We can have a look at the graph from level 1:
 
-```{r lrn7, fig.width=6, fig.height = 7}
+```{r 2020-04-27-tuning-stacking-012, fig.width=6, fig.height = 7}
 level1$plot(html = FALSE)
 ```
 
 The out-of-bag predictions of the level 1 learners are attached to the input data from level 1 and a final ranger learner will be trained:
 
-```{r lrn8, fig.width=6, fig.height = 7}
+```{r 2020-04-27-tuning-stacking-013, fig.width=6, fig.height = 7}
 ranger_lrn = lrn("classif.ranger", predict_type = "prob")
 
 ensemble = level1 %>>% ranger_lrn
@@ -161,7 +166,7 @@ ensemble$plot(html = FALSE)
 
 In order to tune the ensemble's hyperparameter jointly, we define the search space using [`ParamSet`](https://paradox.mlr-org.com/reference/ParamSet.html) from the [paradox](https://paradox.mlr-org.com/) package:
 
-```{r ps1}
+```{r 2020-04-27-tuning-stacking-014}
 ps_ens = ParamSet$new(
   list(
     ParamInt$new("filt1.filter.nfeat", 5, 50),
@@ -189,14 +194,14 @@ We compare the performance of the ensemble with a simple tuned ranger learner.
 
 To proceed, we convert the `ensemble` pipeline as a [GraphLearner](https://mlr3pipelines.mlr-org.com/reference/mlr_learners_graph.html):
 
-```{r compare1}
+```{r 2020-04-27-tuning-stacking-015}
 ens_lrn = GraphLearner$new(ensemble)
 ens_lrn$predict_type = "prob"
 ```
 
 We define the search space for the simple ranger learner:
 
-```{r compare2}
+```{r 2020-04-27-tuning-stacking-016}
 ps_ranger = ParamSet$new(
   list(
     ParamInt$new("mtry", lower = 1L, upper = 10L),
@@ -210,7 +215,7 @@ Here, we have two learners (the simple ranger learner and the ensemble) and one 
 Since we want to tune the simple ranger learner as well as the whole ensemble learner, we need to create an [AutoTuner](https://mlr3tuning.mlr-org.com/reference/AutoTuner.html) for each learner to be compared.
 To do so, we need to define a resampling strategy for the tuning in the inner loop (we use `cv3`) and for the final evaluation use use `outer_hold`:
 
-```{r compare3}
+```{r 2020-04-27-tuning-stacking-017}
 cv3 = rsmp("cv", folds = 3)
 
 # AutoTuner for the ensemble learner

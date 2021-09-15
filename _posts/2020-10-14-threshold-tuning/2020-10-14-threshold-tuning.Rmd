@@ -1,0 +1,239 @@
+---
+title: Threshold Tuning for Classification Tasks
+categories:
+  - mlr3tuning
+  - tuning
+  - optimization
+  - nested resampling
+  - mlr3pipelines
+  - pima data set
+  - classification
+author:
+  - name: Florian Pfisterer
+date: 10-14-2020
+description: |
+  Predicting probabilities in classification tasks allows us to adjust the probability thresholds required for
+  assigning an observation to a certain class. This can lead to improved predictive performance.
+output:
+  distill::distill_article:
+    self_contained: false
+    css: ../../custom.css
+---
+
+```{r 2020-10-14-threshold-tuning-001, include = FALSE}
+## Just some preparation
+knitr::opts_chunk$set(
+  echo = TRUE,
+  R.options = list(width = 120)
+)
+data.table::setDTthreads(1)
+set.seed(20191101)
+lgr::get_logger("mlr3")$set_threshold("warn")
+library(mlr3book)
+```
+
+## Intro
+
+Predicting probabilities in classification tasks allows us to adjust the probability thresholds required for assigning an observation to a certain class.
+This can lead to improved classification performance, especially for cases where we e.g. aim to balance off metrics such as false positive and false negative rates.
+
+This is for example often done in ROC Analysis. The mlr3book also has a chapter on [ROC Analysis](https://mlr3book.mlr-org.com/binary-classification.html#binary-roc)) for the interested reader. This post does not focus on ROC analysis, but instead focusses on the general problem of adjusting classification thresholds for arbitrary metrics.
+
+
+This post assumes some familiarity with the `r mlr_pkg("mlr3")`, and also the `r mlr_pkg("mlr3pipelines")` and `r mlr_pkg("mlr3tuning")` packages, as both are used during the post.
+The [mlr3book](https://mlr3book.mlr-org.com/) contains more details on those two packages.
+This post is a more in-depth version of the [article on threshold tuning in the mlr3book](https://mlr3book.mlr-org.com/cost-sens.html#threshold-tuning-1).
+
+
+## Prerequisites
+
+Before we start, we have load all required packages:
+
+```{r 2020-10-14-threshold-tuning-002}
+library(mlr3)
+library(mlr3pipelines)
+library(mlr3tuning)
+```
+
+
+
+## Thresholds: A short intro
+
+In order to understand thresholds, we will quickly showcase the effect of setting different thresholds:
+
+First we create a learner that predicts probabilities and use it to predict on holdout data, storing the prediction.
+
+```{r 2020-10-14-threshold-tuning-003}
+learner = lrn("classif.rpart", predict_type = "prob")
+rr = resample(tsk("pima"), learner, rsmp("holdout"))
+prd = rr$prediction()
+prd
+```
+
+If we now look at the confusion matrix, the off-diagonal elements are errors made by our model (*false positives* and *false negatives*) while on-diagol ements are where our model predicted correctly.
+
+
+```{r 2020-10-14-threshold-tuning-004}
+# Print confusion matrix
+prd$confusion
+# Print False Positives and False Negatives
+prd$score(list(msr("classif.fp"), msr("classif.fn")))
+```
+
+By adjusting the **classification threshold**, in this case the probability required to predict the positive class, we can now trade off predicting more positive cases (first row)
+against predicting fewer negative cases (second row) or vice versa.
+
+```{r 2020-10-14-threshold-tuning-005}
+# Lower threshold: More positives
+prd$set_threshold(0.25)$confusion
+```
+
+```{r 2020-10-14-threshold-tuning-006}
+# Higher threshold: Fewer positives
+prd$set_threshold(0.75)$confusion
+```
+
+This threshold value can now be adjusted optimally for a given measure, such as accuracy. How this can be done is discussed in the following section.
+
+## Adjusting thresholds: Two strategies
+
+```{r 2020-10-14-threshold-tuning-007}
+set.seed(20201014)
+```
+Currently `mlr3pipelines` offers two main strategies towards adjusting `classification thresholds`.
+We can either expose the thresholds as a `hyperparameter` of the Learner by using `r ref("PipeOpThreshold")`.
+This allows us to tune the `thresholds` via an outside optimizer from `r mlr_pkg("mlr3tuning")`.
+
+Alternatively, we can also use `r ref("PipeOpTuneThreshold")` which automatically tunes the threshold after each learner fit.
+
+In this blog-post, we'll go through both strategies.
+
+## PipeOpThreshold
+
+`r ref("PipeOpThreshold")` can be put directly after a `r ref("Learner")`.
+
+A simple example would be:
+
+```{r 2020-10-14-threshold-tuning-008}
+gr = lrn("classif.rpart", predict_type = "prob") %>>% po("threshold")
+l = GraphLearner$new(gr)
+```
+
+Note, that `predict_type` = "prob" is required for `po("threshold")` to have any effect.
+
+The `thresholds` are now exposed as a `hyperparameter` of the `r ref("GraphLearner")` we created:
+
+```{r 2020-10-14-threshold-tuning-009}
+l$param_set
+```
+
+We can now tune those thresholds from the outside as follows:
+
+Before `tuning`, we have to define which hyperparameters we want to tune over.
+In this example, we only tune over the `thresholds` parameter of the `threshold` `PipeOp`.
+you can easily imagine, that we can also jointly tune over additional hyperparameters, i.e. rpart's `cp` parameter.
+
+As the `r ref("Task")` we aim to optimize for is a binary task, we can simply specify the threshold parameter:
+
+```{r 2020-10-14-threshold-tuning-010}
+library(paradox)
+ps = ParamSet$new(list(
+  ParamDbl$new("threshold.thresholds", lower = 0, upper = 1)
+))
+```
+
+We now create a `r ref("AutoTuner")`, which automatically tunes the supplied learner over the `r ref("ParamSet")` we supplied above.
+
+```{r 2020-10-14-threshold-tuning-011}
+at = AutoTuner$new(
+  learner = l,
+  resampling = rsmp("cv", folds = 3L),
+  measure = msr("classif.ce"),
+  search_space = ps,
+  terminator = trm("evals", n_evals = 5L),
+  tuner = TunerRandomSearch$new()
+)
+
+at$train(tsk("german_credit"))
+```
+
+For multi-class `r ref("Task", "Tasks")`, this is a little more complicated.
+We have to use a `trafo` to transform a set of `ParamDbl` into the desired format for `threshold.thresholds`:
+A named numeric vector containing the thresholds.
+This can be easily achieved via a `trafo` function:
+
+```{r 2020-10-14-threshold-tuning-012}
+ps = ParamSet$new(list(
+  ParamDbl$new("versicolor", lower = 0, upper = 1),
+  ParamDbl$new("setosa", lower = 0, upper = 1),
+  ParamDbl$new("virginica", lower = 0, upper = 1)
+))
+ps$trafo = function(x, param_set) {
+  list(threshold.thresholds = mlr3misc::map_dbl(x, identity))
+}
+```
+
+Inside the `trafo`, we simply collect all set params into a named vector via `map_dbl` and store it
+in the `threshold.thresholds` slot expected by the learner.
+
+Again, we create a `r ref("AutoTuner")`, which automatically tunes the supplied learner over the `r ref("ParamSet")` we supplied above.
+
+```{r 2020-10-14-threshold-tuning-013}
+at2 = AutoTuner$new(
+  learner = l,
+  resampling = rsmp("cv", folds = 3L),
+  measure = msr("classif.ce"),
+  search_space = ps,
+  terminator = trm("evals", n_evals = 5L),
+  tuner = TunerRandomSearch$new()
+)
+at2$train(tsk("iris"))
+```
+
+One drawback of this strategy is, that this requires us to fit a new model for each new threshold setting.
+While setting a threshold and computing performance is relatively cheap, fitting the learner is often
+more computationally demanding.
+A better strategy is therefore often to optimize the thresholds separately after each model fit.
+
+## PipeOpTuneThreshold
+
+`r ref("PipeOpTuneThreshold")` on the other hand works together with `r ref("PipeOpLearnerCV")`.
+It directly optimizes the `cross-validated` predictions made by this `r ref("PipeOp")`.
+
+A simple example would be:
+
+```{r 2020-10-14-threshold-tuning-014}
+gr = po("learner_cv", lrn("classif.rpart", predict_type = "prob")) %>>% po("tunethreshold")
+l2 = GraphLearner$new(gr)
+```
+
+Note, that `predict_type` = "prob" is required for `po("tunethreshold")` to have any effect.
+Additionally, note that this time no `threshold` parameter is exposed, it is automatically tuned internally.
+
+```{r 2020-10-14-threshold-tuning-015}
+l2$param_set
+```
+
+If we now use the `r ref("GraphLearner")`, it automatically adjusts the `thresholds` during prediction.
+
+Note that we can set `r ref("ResamplingInsample")` as a resampling strategy for `r ref("PipeOpLearnerCV")` in order to evaluate
+predictions on the "training" data. This is generally not advised, as it might lead to over-fitting
+on the thresholds but can significantly reduce runtime.
+
+Finally, we can compare no threshold tuning to the `tunethreshold` approach:
+
+### Comparison of the approaches
+
+```{r 2020-10-14-threshold-tuning-016}
+bmr = benchmark(benchmark_grid(
+  learners = list(
+    no_tuning = lrn("classif.rpart"),
+    internal = l2
+  ),
+  tasks = tsk("german_credit"),
+  rsmp("cv", folds = 3L)
+))
+bmr$aggregate(list(msr("classif.ce"), msr("classif.fnr")))
+```
+
+We obtained a slightly better classification error and false negatives rate!

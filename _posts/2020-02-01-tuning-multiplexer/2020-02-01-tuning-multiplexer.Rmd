@@ -1,7 +1,12 @@
 ---
 title: Tuning Over Multiple Learners
 categories:
- - tuning
+  - mlr3tuning
+  - tuning
+  - optimization
+  - nested resampling
+  - sonar credit data set
+  - classification
 author:
   - name: Jakob Richter
   - name: Bernd Bischl
@@ -13,7 +18,7 @@ output:
     self_contained: false
     css: ../../custom.css
 ---
-```{r setup, include = FALSE}
+```{r 2020-02-01-tuning-multiplexer-001, include = FALSE}
 library("mlr3book")
 ```
 
@@ -41,15 +46,15 @@ We will consider 2 cases: (a) Running the learners in their default, so without 
 
 Let's load some packages and define our learners.
 
-```{r}
+```{r 2020-02-01-tuning-multiplexer-002}
 knitr::opts_chunk$set(
   echo = TRUE,
-  R.options = list(width = 80)
+  R.options = list(width = 120)
 )
 ```
 
 
-```{r}
+```{r 2020-02-01-tuning-multiplexer-003}
 set.seed(1)
 library(mlr3)
 library(mlr3tuning)
@@ -77,7 +82,7 @@ Assume we don't want to perform tuning and or with running all learner in their 
 Simply run benchmark on the learners and the tasks. That tabulates our results nicely and shows us what works best.
 
 
-```{r}
+```{r 2020-02-01-tuning-multiplexer-004}
 bg = benchmark_grid(task, learns, cv2)
 b = benchmark(bg)
 b$aggregate(measures = msr("classif.ce"))
@@ -109,7 +114,7 @@ The pipe consists of three elements:
 * our learners (combined with `r ref("gunion")`)
 * `r ref("mlr_pipeops_unbranch", text = "unbranch")` combines the forked paths at the end.
 
-```{r}
+```{r 2020-02-01-tuning-multiplexer-005}
 pipe =
   po("branch", options = learns_ids) %>>%
   gunion(lapply(learns, po)) %>>%
@@ -123,7 +128,7 @@ But as we don't tune them here (yet), we don't care (yet).
 But the first hyperparameter is special.
 `branch.selection` controls over which (named) branching channel our data flows.
 
-```{r}
+```{r 2020-02-01-tuning-multiplexer-006}
 pipe$param_set$ids()
 pipe$param_set$params$branch.selection
 ```
@@ -132,7 +137,7 @@ We can now tune over this pipeline, and probably running grid search seems a goo
 available learner.
 NB: We have now written down in (much more complicated code) what we did before with `benchmark`.
 
-```{r}
+```{r 2020-02-01-tuning-multiplexer-007}
 glrn = GraphLearner$new(pipe, id = "g") # connect pipe to mlr3
 ps = ParamSet$new(list(
   ParamFct$new("branch.selection", levels = c("rf", "xgb"))
@@ -142,17 +147,17 @@ instance = TuningInstanceSingleCrit$new(
   learner = glrn,
   resampling = cv1,
   measure = msr("classif.ce"),
-  search_space = ps,
-  terminator = trm("none")
+  terminator = trm("none"),
+  search_space = ps
 )
 tuner = tnr("grid_search")
 tuner$optimize(instance)
-instance$archive$data("x_domain")
+as.data.table(instance$archive)
 ```
 
 But: Via this approach we can now get unbiased performance results via nested resampling and using the `r ref("AutoTuner")` (which would make much more sense if we would select from 100 models and not 2).
 
-```{r}
+```{r 2020-02-01-tuning-multiplexer-008}
 at = AutoTuner$new(
   learner = glrn,
   resampling = cv1,
@@ -165,7 +170,7 @@ rr = resample(task, at, cv2, store_models = TRUE)
 # access 1st inner tuning result
 ll = rr$learners[[1]]$model$tuning_instance
 ll$result
-ll$archive$data()
+ll$archive$data
 ```
 
 ## Model-Selection and Tuning with Pipelines
@@ -181,7 +186,7 @@ NB: Many AutoML systems work in a very similar way.
 Remember, that the pipeline contains a joint set of all contained hyperparameters.
 Prefixed with the respective PipeOp ID, to make names unique.
 
-```{r}
+```{r 2020-02-01-tuning-multiplexer-009}
 as.data.table(pipe$param_set)[,1:4]
 ```
 
@@ -192,7 +197,7 @@ We also have to reflect the hierarchical order of the parameter sets (admittedly
 We can only set the `mtry` value if the pipe is configured to use the random forest (`ranger`).
 The same applies for the xgboost parameter.
 
-```{r}
+```{r 2020-02-01-tuning-multiplexer-010}
 ps = ParamSet$new(list(
   ParamFct$new("branch.selection", levels = c("rf", "xgb")),
   # more complicated, but programmtic way for the above:
@@ -211,7 +216,7 @@ ps$add_dep("xgb.nrounds", "branch.selection", CondEqual$new("xgb"))
 Very similar code as before, we just swap out the search space.
 And now use random search.
 
-```{r}
+```{r 2020-02-01-tuning-multiplexer-011}
 instance = TuningInstanceSingleCrit$new(
   task = task,
   learner = glrn,
@@ -222,13 +227,13 @@ instance = TuningInstanceSingleCrit$new(
 )
 tuner = tnr("random_search")
 tuner$optimize(instance)
-instance$archive$data(unnest = "x_domain")
+as.data.table(instance$archive)
 ```
 
 The following shows a quick way to visualize the tuning results.
 
-```{r}
-resdf = instance$archive$data(unnest = "x_domain")
+```{r 2020-02-01-tuning-multiplexer-012}
+resdf = as.data.table(instance$archive)
 resdf = reshape(resdf,
   varying = c("xgb.nrounds","rf.mtry"),
   v.name = "param_value",
@@ -244,7 +249,7 @@ g
 
 Nested resampling, now really needed:
 
-```{r}
+```{r 2020-02-01-tuning-multiplexer-013}
 at = AutoTuner$new(
   learner = glrn,
   resampling = cv1,
@@ -257,5 +262,5 @@ rr = resample(task, at, cv2, store_models = TRUE)
 # access 1st inner tuning result
 ll = rr$learners[[1]]$model$tuning_instance
 ll$result
-ll$archive$data()
+as.data.table(instance$archive)
 ```

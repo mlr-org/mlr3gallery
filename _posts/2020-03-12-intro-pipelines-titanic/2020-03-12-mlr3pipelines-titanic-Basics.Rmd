@@ -1,10 +1,12 @@
 ---
-title: A pipeline for the titanic data set - Basics
+title: A Pipeline for the Titanic Data Set - Basics
 categories:
   - imputation
   - classification
   - mlr3pipelines
   - feature engineering
+  - titanic data set
+  - classification
 author:
   - name: Florian Pfisterer
 description: |
@@ -16,11 +18,11 @@ output:
     css: ../../custom.css
 ---
 
-```{r, include = FALSE, warning = FALSE, message = FALSE}
+```{r 2020-03-12-mlr3pipelines-titanic-Basics-001, include = FALSE, warning = FALSE, message = FALSE}
 # Just some preparation
 knitr::opts_chunk$set(
   echo = TRUE,
-  R.options = list(width = 80)
+  R.options = list(width = 120)
 )
 if (require("data.table")) data.table::setDTthreads(1)
 options(width = 90)
@@ -34,7 +36,7 @@ library(skimr)
 First of all we are going to load required packages and the data.
 The data is part of the `mlr3data` package.
 
-```{r}
+```{r 2020-03-12-mlr3pipelines-titanic-Basics-002}
 library("mlr3")
 library("mlr3learners")
 library("mlr3pipelines")
@@ -59,7 +61,7 @@ Following features are illustrated in this use case section:
 In order to obtain solutions comparable to official leaderboards, such as the ones available from kaggle, we split the data into train and test set before doing any further analysis.
 Here we are using the predefined split used by Kaggle.
 
-```{r}
+```{r 2020-03-12-mlr3pipelines-titanic-Basics-003}
 titanic_train <- titanic[1:891, ]
 titanic_test <- titanic[892:1309, ]
 ```
@@ -87,7 +89,7 @@ embarked        Port of Embarkation
 
 We can use the `skimr` package in order to get a first overview of the data:
 
-```{r, R.options=list(width = 120)}
+```{r 2020-03-12-mlr3pipelines-titanic-Basics-004, R.options=list(width = 120)}
 skimr::skim(titanic_train)
 skimr::skim(titanic_test)
 ```
@@ -96,11 +98,11 @@ skimr::skim(titanic_test)
 Here we can also inspect the data for differences in the train and test set.
 This might be important, as shifts in the data distribution often make our models unreliable.
 
-```{r, out.width="100%", fig.height=7}
+```{r 2020-03-12-mlr3pipelines-titanic-Basics-005, out.width="100%", fig.height=7}
 #DataExplorer::plot_bar(titanic_train, nrow = 5, ncol = 3)
 ```
 
-```{r, out.width="100%", fig.height=4, warning=FALSE}
+```{r 2020-03-12-mlr3pipelines-titanic-Basics-006, out.width="100%", fig.height=4, warning=FALSE}
 #DataExplorer::plot_histogram(titanic_train, nrow = 2, ncol = 3)
 #DataExplorer::plot_boxplot(titanic_train, by = "survived", nrow = 2, ncol = 3)
 ```
@@ -111,7 +113,7 @@ As we want to classify whether the person survived or not, we will create a
 
 ## A first model
 
-```{r}
+```{r 2020-03-12-mlr3pipelines-titanic-Basics-007}
 task <- TaskClassif$new("titanic", titanic_train, target = "survived", positive = "yes")
 task
 ```
@@ -122,19 +124,19 @@ Additionally, from our `skim` of the data, we have seen, that they have many uni
 
 We'll drop them for now and see how we can deal with them later on.
 
-```{r}
+```{r 2020-03-12-mlr3pipelines-titanic-Basics-008}
 task$select(cols = setdiff(task$feature_names, c("cabin", "name", "ticket")))
 ```
 
 Additionally, we create a resampling instance that allows to compare data.
 
-```{r}
+```{r 2020-03-12-mlr3pipelines-titanic-Basics-009}
 rdesc <- rsmp("cv", folds = 3L)$instantiate(task)
 ```
 
 To get a first impression of what performance we can fit a simple decision tree:
 
-```{r}
+```{r 2020-03-12-mlr3pipelines-titanic-Basics-010}
 learner <- mlr_learners$get("classif.rpart")
 # or shorter:
 learner <- lrn("classif.rpart")
@@ -152,7 +154,7 @@ In order to improve more, we might need to do some feature engineering.
 If we now try to fit a 'ranger' random forest model, we will get an error,
 as 'ranger' models can not naturally handle missing values.
 
-```{r, error = TRUE}
+```{r 2020-03-12-mlr3pipelines-titanic-Basics-011, error = TRUE}
 learner <- lrn("classif.ranger")
 learner$param_set$values <- list(num.trees = 250, min.node.size = 4)
 res <- resample(task, learner, rdesc, store_models = TRUE)

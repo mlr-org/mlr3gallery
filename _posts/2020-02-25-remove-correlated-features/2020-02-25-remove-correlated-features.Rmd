@@ -1,9 +1,14 @@
 ---
-title: Select uncorrelated features
+title: Select Uncorrelated Features
 categories:
+  - mlr3tuning
+  - tuning
+  - optimization
   - tuning
   - mlr3pipelines
   - filtering
+  - iris data set
+  - classification
 author:
   - name: Martin Binder
   - name: Florian Pfisterer
@@ -16,10 +21,10 @@ output:
     css: ../../custom.css
 ---
 
-```{r, include = FALSE}
+```{r 2020-02-25-remove-correlated-features-001, include = FALSE}
 knitr::opts_chunk$set(
   echo = TRUE,
-  R.options = list(width = 80)
+  R.options = list(width = 120)
 )
 library(mlr3book)
 ```
@@ -39,14 +44,14 @@ The example describes a very involved use-case, where the behavior of `r ref("Pi
 
 ## Getting started
 
-```{r}
+```{r 2020-02-25-remove-correlated-features-002}
 library("mlr3")
 library("mlr3pipelines")
 library("paradox")
 library("mlr3tuning")
 ```
 
-```{r, include = FALSE}
+```{r 2020-02-25-remove-correlated-features-003, include = FALSE}
 lgr::get_logger("mlr3")$set_threshold("warn")
 lgr::get_logger("bbotk")$set_threshold("warn")
 ```
@@ -54,7 +59,7 @@ lgr::get_logger("bbotk")$set_threshold("warn")
 The basic pipeline looks as follows:
 We use `r ref("PipeOpSelect")` to select a set of variables followed by a `r ref("mlr_learners_classif.rpart", "rpart learner")`.
 
-```{r}
+```{r 2020-02-25-remove-correlated-features-004}
 pipeline = po("select") %>>% lrn("classif.rpart")
 ```
 
@@ -64,7 +69,7 @@ We want to use the function `r ref("caret::findCorrelation()")` from the `r cran
 This function has a `cutoff` parameter, that specifies the maximum correlation allowed between variables.
 In order to expose this variable as a `numeric` parameter we can tune over we specify the following `r ref("ParamSet")`:
 
-```{r}
+```{r 2020-02-25-remove-correlated-features-005}
 ps = ParamSet$new(list(ParamDbl$new("cutoff", 0, 1)))
 ```
 
@@ -73,7 +78,7 @@ We define a function `select_cutoff` that takes as input a `r ref("Task")` and r
 Now we use a `trafo` to transform the `cutoff` into a set of variables, which is what `r ref("PipeOpSelect")` can work with.
 Note that we use `x$cutoff = NULL` in order to remove the temporary parameter we introduced, as `r ref("PipeOpSelect")` does not know what to do with it.
 
-```{r}
+```{r 2020-02-25-remove-correlated-features-006}
 ps$trafo = function(x, param_set) {
   cutoff = x$cutoff
   x$select.selector = function(task) {
@@ -92,7 +97,7 @@ It has a section on the `trafo` concept.
 
 To now tune over different values for `cutoff`, we first create a `r ref("TuningInstanceSingleCrit")`.
 
-```{r}
+```{r 2020-02-25-remove-correlated-features-007}
 inst = TuningInstanceSingleCrit$new(
   task = tsk("iris"),
   learner = pipeline,
@@ -108,7 +113,7 @@ inst = TuningInstanceSingleCrit$new(
 
 Then we run the tuning:
 
-```{r}
+```{r 2020-02-25-remove-correlated-features-008}
 tnr("grid_search")$optimize(inst)
 ```
 
@@ -116,12 +121,12 @@ In order to demonstrate that different cutoff values result in different feature
 Note this inspects only the trained models of the first CV fold of each evaluated model.
 The features being excluded depends on the training data seen by the pipeline and may be different in different folds, even at the same cutoff value.
 
-```{r, echo=FALSE}
-resample_result = inst$archive$data("x_domain")$resample_result
+```{r 2020-02-25-remove-correlated-features-009, echo=FALSE}
+resample_result = inst$archive$benchmark_result$resample_results$resample_result
 ```
 
-```{r}
-inst$archive$data("x_domain")[
+```{r 2020-02-25-remove-correlated-features-010}
+as.data.table(inst$archive)[
   order(cutoff),
   list(cutoff, classif.ce,
     featurenames = lapply(resample_result, function(x) {
