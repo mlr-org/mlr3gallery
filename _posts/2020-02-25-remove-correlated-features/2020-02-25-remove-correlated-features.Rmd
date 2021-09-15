@@ -18,20 +18,15 @@ description: |
 output:
   distill::distill_article:
     self_contained: false
-    highlight_downlit: true
     css: ../../custom.css
 ---
 
-```{r 2020-02-25-remove-correlated-features-001, include=FALSE}
- knitr::opts_chunk$set(
+```{r 2020-02-25-remove-correlated-features-001, include = FALSE}
+knitr::opts_chunk$set(
   echo = TRUE,
   R.options = list(width = 120)
 )
-
 library(mlr3book)
-library(kableExtra)
-
-ggplot2::theme_set(ggplot2::theme_light())
 ```
 
 The following example describes a situation where we aim to remove **correlated features**.
@@ -49,16 +44,14 @@ The example describes a very involved use-case, where the behavior of `r ref("Pi
 
 ## Getting started
 
-We load the `r mlr_pkg("mlr3verse")` package which pulls in the most important packages for this example.
-
 ```{r 2020-02-25-remove-correlated-features-002}
-library(mlr3verse)
+library("mlr3")
+library("mlr3pipelines")
+library("paradox")
+library("mlr3tuning")
 ```
 
-We initialize the random number generator with a fixed seed for reproducibility, and decrease the verbosity of the logger to keep the output clearly represented.
-
-```{r 2020-02-25-remove-correlated-features-003}
-set.seed(7832)
+```{r 2020-02-25-remove-correlated-features-003, include = FALSE}
 lgr::get_logger("mlr3")$set_threshold("warn")
 lgr::get_logger("bbotk")$set_threshold("warn")
 ```
@@ -67,7 +60,7 @@ The basic pipeline looks as follows:
 We use `r ref("PipeOpSelect")` to select a set of variables followed by a `r ref("mlr_learners_classif.rpart", "rpart learner")`.
 
 ```{r 2020-02-25-remove-correlated-features-004}
-graph_learner = po("select") %>>% lrn("classif.rpart")
+pipeline = po("select") %>>% lrn("classif.rpart")
 ```
 
 Now we get to the magic:
@@ -77,7 +70,7 @@ This function has a `cutoff` parameter, that specifies the maximum correlation a
 In order to expose this variable as a `numeric` parameter we can tune over we specify the following `r ref("ParamSet")`:
 
 ```{r 2020-02-25-remove-correlated-features-005}
-search_space = ps(cutoff = p_dbl(0, 1))
+ps = ParamSet$new(list(ParamDbl$new("cutoff", 0, 1)))
 ```
 
 We define a function `select_cutoff` that takes as input a `r ref("Task")` and returns a list of features we aim to keep.
@@ -86,7 +79,7 @@ Now we use a `trafo` to transform the `cutoff` into a set of variables, which is
 Note that we use `x$cutoff = NULL` in order to remove the temporary parameter we introduced, as `r ref("PipeOpSelect")` does not know what to do with it.
 
 ```{r 2020-02-25-remove-correlated-features-006}
-search_space$trafo = function(x, param_set) {
+ps$trafo = function(x, param_set) {
   cutoff = x$cutoff
   x$select.selector = function(task) {
     fn = task$feature_names
@@ -102,31 +95,38 @@ search_space$trafo = function(x, param_set) {
 If you are not sure, you understand the `trafo` concept, consult the [mlr3book](https://mlr3book.mlr-org.com/paradox.html).
 It has a section on the `trafo` concept.
 
-Now we tune over different values for `cutoff`.
+To now tune over different values for `cutoff`, we first create a `r ref("TuningInstanceSingleCrit")`.
 
 ```{r 2020-02-25-remove-correlated-features-007}
-instance = tune(
-  method = "grid_search",
+inst = TuningInstanceSingleCrit$new(
   task = tsk("iris"),
-  learner = graph_learner,
+  learner = pipeline,
   resampling = rsmp("cv", folds = 3L),
   measure = msr("classif.ce"),
-  search_space = search_space,
+  search_space = ps,
+  terminator = trm("none"),
   # don't need the following line for optimization, this is for
   # demonstration that different features were selected
-  store_models = TRUE)
+  store_models = TRUE
+)
+```
+
+Then we run the tuning:
+
+```{r 2020-02-25-remove-correlated-features-008}
+tnr("grid_search")$optimize(inst)
 ```
 
 In order to demonstrate that different cutoff values result in different features being selected, we can run the following to inspect the trained models.
 Note this inspects only the trained models of the first CV fold of each evaluated model.
 The features being excluded depends on the training data seen by the pipeline and may be different in different folds, even at the same cutoff value.
 
-```{r 2020-02-25-remove-correlated-features-008, echo=FALSE}
-resample_result = instance$archive$benchmark_result$resample_results$resample_result
+```{r 2020-02-25-remove-correlated-features-009, echo=FALSE}
+resample_result = inst$archive$benchmark_result$resample_results$resample_result
 ```
 
-```{r 2020-02-25-remove-correlated-features-009}
-as.data.table(instance$archive)[
+```{r 2020-02-25-remove-correlated-features-010}
+as.data.table(inst$archive)[
   order(cutoff),
   list(cutoff, classif.ce,
     featurenames = lapply(resample_result, function(x) {
