@@ -14,7 +14,6 @@ output:
     toc_depth: 4
 ---
 
-
 ```{r setup, include = FALSE}
 library("mlr3book")
 ```
@@ -24,7 +23,6 @@ library("mlr3book")
 set.seed(1)
 library(knitr)
 library(ggplot2)
-library(mlr3book)
 theme_set(theme_bw() + theme(legend.position = "bottom"))
 knitr::opts_chunk$set(warning = FALSE, message = FALSE, fig.align = "center", dev = "png", fig.retina = 1, R.options = list(width = 100))
 gg_color_hue = function(n) {
@@ -32,23 +30,15 @@ gg_color_hue = function(n) {
   grDevices::hcl(h = hues, l = 65, c = 100)[1:n]
 }
 # load packages
-library(ggplot2)
 library(gridExtra)
 library(factoextra)
 library(DataExplorer)
 library(cluster)
 library(dplyr)
-library(scales)
-library(R6)
+#library(scales)
+#library(R6)
 
-library(mlr3)
-library(mlr3pipelines)
-library(mlr3cluster)
-library(mlr3measures)
-library(mlr3misc)
-library(mlr3viz)
-library(paradox)
-library(checkmate)
+library(mlr3verse)
 ```
 
 
@@ -68,7 +58,6 @@ In our analysis, we will focus on the following columns:
 - `CUSTOMERNAME`: Name of the customer of the considered order
 
 ```{r}
-
 # import data
 df = read.csv("archive/sales_data_sample.csv")
 
@@ -108,7 +97,7 @@ To perform customer segmentation, we need to aggregate the purchase data on cust
 df_RFM = df %>% 
   group_by(CUSTOMERNAME) %>% 
   summarise(
-    recency = as.numeric(as.Date("2005-06-01") - max(ORDERDATE)),
+    recency = as.numeric(max(ORDERDATE) - as.Date("2005-06-01")),
     frequency = min(c(n_distinct(ORDERNUMBER), 6)),
     monetary = sum(SALES)/n_distinct(ORDERNUMBER)
   )
@@ -124,14 +113,13 @@ DataExplorer::plot_correlation(df_RFM)
 
 ### mlr3 Task
 
-With the resulting dataframe we create a `Clustering Task`. 
+With the resulting dataframe, we first scale it and then create a `Clustering Task` for the scaled data which we later use for learning the cluster assignments. 
 This is an mlr3 object that can be used to fit unsupervised learners on.
 
 ```{r}
-task_RFM <- TaskClust$new(id = "customer_segment", df_RFM)
-task_RFM$select(cols = c("frequency", "monetary", "recency"))
+df_scaled = as.data.frame(scale(df_RFM[,c("frequency", "monetary", "recency")]))
+task_RFM = TaskClust$new(id = "customer_segment", df_scaled)
 ```
-
 
 # Clustering with $k$-means
 
@@ -144,35 +132,30 @@ task_RFM$select(cols = c("frequency", "monetary", "recency"))
 
 We use the normalized data to perform $k$-means with different number of clusters $k$ and select the optimal number for $k$ according to the Elbow method:
 
-*Note:* We normalize the RFM data so that each dimension lies on a comparable scale with mean 0 and standard deviation 1.
-For smooth implementation we use `r ref("PipeOpScale")`.
-
-
-
-
 ```{r}
-wss = msr("clust.wss")
-km_wss <- sapply(1:10, function(x) {
-  glrn <- GraphLearner$new(po("scale") %>>% lrn("clust.kmeans", centers = x, nstart = 100L))
-  glrn$graph$keep_results = TRUE
-  glrn$train(task_RFM)
-  pred = glrn$predict(task_RFM)
-  pred$score(wss, glrn$graph$pipeops$scale$.result$output)
+# specify a vector of values for k
+k_clusters = 1:10
+# loop for each value in k_clusters
+km_wss = sapply(k_clusters, function(k) {
+  lrn = lrn("clust.kmeans", centers = k, nstart = 100L)
+  lrn$train(task_RFM)
+  pred = lrn$predict(task_RFM)
+  pred$score(msr("clust.wss"), task = task_RFM)
 })
-plot(x = 1:10, y = km_wss, type = "b", main = "Elbow Plot")
+plot(x = k_clusters, y = km_wss, type = "b", main = "Elbow Plot")
 ```
 
 ### Cluster Insights
 
 From the elbow method, we might chose $k=4$ as optimal number of clusters.
-Hence, we perform $k$-means with $k=4$ and augment the original RFM data with a new column called `km_clusters` containing the cluster assignments:
+Hence, we perform $k$-means with $k=4$ and augment the original RFM data with a new column called `km_partition` containing the cluster assignments:
 
 ```{r, message=FALSE}
-km_best = po("scale") %>>% lrn("clust.kmeans", nstart = 100L,  centers = 4L)
+km_best = lrn("clust.kmeans", nstart = 100L,  centers = 4L)
 km_best$train(task_RFM)
-prediction = km_best$predict(task_RFM)$clust.kmeans.output
+prediction = km_best$predict(task_RFM)
 partition = as.factor(prediction$data$partition)
-df_RFM$km_clusters = partition
+df_RFM$km_partition = partition
 ```
 
 We can now use exploratory data analysis (EDA) to gain insights from the cluster assignment.
@@ -185,13 +168,13 @@ As in this use case, the **frequency score** consists of only few distinct value
 
 ```{r, fig.height=4, fig.width=10, echo=FALSE}
 # conditional density (and frequency) plots
-p_rec = ggplot(df_RFM, aes(x = recency, fill = km_clusters)) + 
+p_rec = ggplot(df_RFM, aes(x = recency, fill = km_partition)) + 
   geom_density(position = "fill") + 
   ggtitle("Recency")
-p_fre = ggplot(df_RFM, aes(x = as.factor(frequency), fill = km_clusters)) + 
+p_fre = ggplot(df_RFM, aes(x = as.factor(frequency), fill = km_partition)) + 
   geom_bar(position = "fill") +
   ggtitle("Frequency")
-p_mon = ggplot(df_RFM, aes(x = monetary, fill = km_clusters)) + 
+p_mon = ggplot(df_RFM, aes(x = monetary, fill = km_partition)) + 
   geom_density(position = "fill") + 
   ggtitle("Monetary Value")
 gridExtra::grid.arrange(p_rec, p_fre, p_mon, ncol = 3)
@@ -203,44 +186,21 @@ From this, we can observe that clusters of customers refer to specific ranges of
 
 We can visualize the clusters in an interactive 3D scatter plot using different colors for the clusters:
 
-
-
 ```{r}
-plotly::plot_ly(df_RFM, x = ~recency, y = ~monetary, z = ~frequency, color =  ~km_clusters)
+plotly::plot_ly(df_RFM, x = ~recency, y = ~monetary, z = ~frequency, color =  ~km_partition)
 ```
 
+We can use the `fviz_cluster` function from the `factoextra` package, as it offers a unified interface also for other clustering algorithms.
+By default, if more than two features are chosen, the function visualizes a scatter plot on the first two **principal components**:
 
-We can use the `autoplot` function from the `mlr3viz` package, as it offers a unified interface also for other clustering algorithms.
-By default, the function visualizes a scatter plot on the first two **principal components**:
-
-```{r, fig.height=5, fig.width=5}
-# scatterplot using fviz_cluster on principal components
-autoplot(prediction, task = task_RFM, type = "pca", frame = TRUE, lable = TRUE)
-```
-
-This PCA seems to squash most of the information in the first component.
-If you want to implement your own plotting method in the style of `mlr3viz` you can simply embed it in via `autoplot` method.
-
-```{r}
-autoplot.LearnerClustKMeans = function(object, task = NULL, ...) {
-  if (is.null(object$model)) {
-    stopf("Learner '%s' must be trained first", object$id)
-  }
-  data = if(is.null(task)) NULL else task$data()
-  require_namespaces("factoextra")
-  factoextra::fviz_cluster(object = object$model, data, ...)
-}
-```
-
-To acces the trained learner in our pipeline use the following syntax.
-
-```{r, fig.height=4, fig.width=8}
-km_best_model = km_best$pipeops$clust.kmeans$learner_model
-scatter_km1 = autoplot(km_best_model, task = task_RFM)
-scatter_km2 = autoplot(km_best_model, task = task_RFM, choose.vars = c("recency", "monetary"), stand = FALSE)
+```{r, fig.height=4, fig.width=10}
+scatter_km1 = factoextra::fviz_cluster(km_best$model, df_RFM, 
+  choose.vars = c("frequency", "monetary", "recency"))
+# scatterplot for 'recency' vs. 'monetary' (on non-scaled data)
+scatter_km2 = factoextra::fviz_cluster(km_best$model, df_RFM, 
+  choose.vars = c("recency", "monetary"), stand = FALSE)
 gridExtra::grid.arrange(scatter_km1, scatter_km2, nrow = 1)
 ```
-
 
 #### Pairs Plot
 
@@ -255,7 +215,9 @@ It shows
 - pairwise correlations of the RFM scores, stratified by each cluster (upper diagonal)
 
 ```{r,fig.height=7, fig.width=7}
-autoplot(prediction, task_RFM)
+# pairs plot from the GGally package
+GGally::ggpairs(df_RFM, mapping = aes(col = km_partition, alpha = 0.9), 
+  columns = c("km_partition", "frequency", "monetary", "recency"))
 ```
 
 #### Summarize Cluster Centers
@@ -264,7 +226,7 @@ Now, we look at the cluster centers of the original data to derive a description
 
 ```{r}
 df_RFM %>% 
-  group_by(km_clusters) %>% # define column used for grouping
+  group_by(km_partition) %>% # define column used for grouping
   summarize_if(is.numeric, mean) # aggregate all numeric columns by the mean
 ```
 
@@ -295,61 +257,48 @@ A good customer segmentation process usually includes exploring different cluste
 
 ### Hierarchical Clustering with `hclust`
 
-For plotting we need to relate this learner to our desired `autoplot method`
-
-```{r}
-autoplot.LearnerClustHclust = mlr3viz:::autoplot.LearnerClustHierarchical
-```
-
 To compute a dendogram and visualize the cluster assignments, we need to do the following steps:
 
 ```{r mlr3implementationII}
-hclust <- po("scale") %>>% lrn("clust.hclust", method = "complete", distmethod = "euclidean", k = 4L)
+hclust = lrn("clust.hclust", method = "complete", distmethod = "euclidean", k = 4L)
 hclust$train(task_RFM)
-hclust_trained = hclust$pipeops$clust.hclust
-
-autoplot(hclust_trained$learner_model,
-  k = hclust_trained$param_set$values$k, rect_fill = TRUE,
-  rect = TRUE, rect_border = c("red", "cyan"))
+factoextra::fviz_dend(hclust$model, k = hclust$param_set$values$k)
 ```
 
-### Compare Hierarchical Clustering and $k$-means
+<!-- ### Compare Hierarchical Clustering and $k$-means -->
 
-If we want to compare the performance of different cluster algorithms, we can look at the **total within sum of square** measure for a specific value of $k$.
-To do so, we store all information from the elbow plot for optimal number of clusters of different linkage methods:
+<!-- If we want to compare the performance of different cluster algorithms, we can look at the **total within sum of square** measure for a specific value of $k$. -->
+<!-- To do so, we store all information from the elbow plot for optimal number of clusters of different linkage methods: -->
 
-```{r fun, warning=FALSE}
-ellbow_data <- function(method = "average", measure_id = "clust.wss", task = task_RFM) {
-  glrn <- GraphLearner$new(po("scale") %>>% lrn("clust.hclust", method = method))
-  glrn$graph$keep_results = TRUE
-  measure <- msr(measure_id)
-  sapply(1:10, function(x) {
-    glrn$param_set$values$clust.hclust.k = x
-    glrn$train(task)
-    pred = glrn$predict(task)
-    pred$score(measure, glrn$graph$pipeops$scale$.result$output)
-})
-}
+<!-- ```{r fun, warning=FALSE} -->
+<!-- ellbow_data = function(method = "average", task = task_RFM, k_clusters = 1:10) { -->
+<!--   sapply(k_clusters, function(k) { -->
+<!--     lrn = lrn("clust.hclust", method = method, k = k) -->
+<!--     lrn$train(task) -->
+<!--     pred = lrn$predict(task) -->
+<!--     pred$score(msr("clust.wss"), task = task) -->
+<!--   }) -->
+<!-- } -->
 
-compare = rbind(
-cbind.data.frame("y" = as.numeric(km_wss),"clusters" =  1:10, "method"= "kmeans"),
-cbind.data.frame("y" = as.numeric(ellbow_data()), "clusters" = 1:10, "method"= "hclust average"),
-cbind.data.frame("y" = as.numeric(ellbow_data("centroid")), "clusters" = 1:10, "method"= "hclust centroid"),
-cbind.data.frame("y" = as.numeric(ellbow_data("single")), "clusters" = 1:10, "method"= "hclust single")
-)
-```
+<!-- compare = rbind( -->
+<!-- cbind.data.frame("y" = as.numeric(km_wss),"clusters" =  1:10, "method"= "kmeans"), -->
+<!-- cbind.data.frame("y" = as.numeric(ellbow_data()), "clusters" = 1:10, "method"= "hclust average"), -->
+<!-- cbind.data.frame("y" = as.numeric(ellbow_data("centroid")), "clusters" = 1:10, "method"= "hclust centroid"), -->
+<!-- cbind.data.frame("y" = as.numeric(ellbow_data("single")), "clusters" = 1:10, "method"= "hclust single") -->
+<!-- ) -->
+<!-- ``` -->
 
-To compare $k$-means and different hierarchical clustering algorithms, we combine all relevant elbow plot information in one `data.frame` and visualize the results:
+<!-- To compare $k$-means and different hierarchical clustering algorithms, we combine all relevant elbow plot information in one `data.frame` and visualize the results: -->
 
-```{r}
-ggplot(compare, aes(x = clusters, y = as.integer(y), col = method)) + 
-  geom_point() +
-  geom_line(aes(group = method)) + 
-  ylab("Total Within Sum of Square")
-```
+<!-- ```{r} -->
+<!-- ggplot(compare, aes(x = clusters, y = as.integer(y), col = method)) +  -->
+<!--   geom_point() + -->
+<!--   geom_line(aes(group = method)) +  -->
+<!--   ylab("Total Within Sum of Square") -->
+<!-- ``` -->
 
-Obviously, $k$-means outperforms all other hierarchical clustering algorithms as it directly aims at minimizing the within sum of square measure `wss`.
-Many other metrics and indices to evaluate the clusters exist.
+<!-- Obviously, $k$-means outperforms all other hierarchical clustering algorithms as it directly aims at minimizing the within sum of square measure `wss`. -->
+<!-- Many other metrics and indices to evaluate the clusters exist. -->
 
 # Next Steps
 
