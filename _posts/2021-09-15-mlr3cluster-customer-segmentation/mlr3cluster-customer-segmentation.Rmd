@@ -63,7 +63,7 @@ feats = c("ORDERNUMBER", "ORDERDATE", "PRODUCTLINE", "QUANTITYORDERED", "SALES",
 df = df[, feats]
 
 # encode date and category columns properly
-df$ORDERDATE = as.Date(df$ORDERDATE, '%m/%d/%Y %H:%M')
+df$ORDERDATE = as.Date(df$ORDERDATE, "%m/%d/%Y %H:%M")
 df$ORDERNUMBER = as.factor(df$ORDERNUMBER)
 df$PRODUCTLINE = as.factor(df$PRODUCTLINE)
 df$CUSTOMERNAME = as.factor(df$CUSTOMERNAME)
@@ -91,12 +91,13 @@ The so-called RFM (Recency, Frequency, Monetary Value) approach offers a nice wa
 To perform customer segmentation, we need to aggregate the purchase data on customer level and calculate the aforementioned RFM scores for each customer:
 
 ```{r mlr3cluster-customer-segmentation-004}
+library(dplyr)
 df_RFM = df %>%
   group_by(CUSTOMERNAME) %>%
   summarise(
     recency = as.numeric(max(ORDERDATE) - as.Date("2005-06-01")),
     frequency = min(c(n_distinct(ORDERNUMBER), 6)),
-    monetary = sum(SALES)/n_distinct(ORDERNUMBER)
+    monetary = sum(SALES) / n_distinct(ORDERNUMBER)
   )
 
 # look at the aggregated data
@@ -114,7 +115,7 @@ With the resulting dataframe, we first scale it and then create a `Clustering Ta
 This is an mlr3 object that can be used to fit unsupervised learners on.
 
 ```{r mlr3cluster-customer-segmentation-005}
-df_scaled = as.data.frame(scale(df_RFM[,c("frequency", "monetary", "recency")]))
+df_scaled = as.data.frame(scale(df_RFM[, c("frequency", "monetary", "recency")]))
 task_RFM = TaskClust$new(id = "customer_segment", df_scaled)
 ```
 
@@ -148,7 +149,7 @@ From the elbow method, we might chose $k=4$ as optimal number of clusters.
 Hence, we perform $k$-means with $k=4$ and augment the original RFM data with a new column called `km_partition` containing the cluster assignments:
 
 ```{r mlr3cluster-customer-segmentation-007, message=FALSE}
-km_best = lrn("clust.kmeans", nstart = 100L,  centers = 4L)
+km_best = lrn("clust.kmeans", nstart = 100L, centers = 4L)
 km_best$train(task_RFM)
 prediction = km_best$predict(task_RFM)
 partition = as.factor(prediction$data$partition)
@@ -184,7 +185,7 @@ From this, we can observe that clusters of customers refer to specific ranges of
 We can visualize the clusters in an interactive 3D scatter plot using different colors for the clusters:
 
 ```{r mlr3cluster-customer-segmentation-009}
-plotly::plot_ly(df_RFM, x = ~recency, y = ~monetary, z = ~frequency, color =  ~km_partition)
+plotly::plot_ly(df_RFM, x = ~recency, y = ~monetary, z = ~frequency, color = ~km_partition)
 ```
 
 We can use the `fviz_cluster` function from the `factoextra` package, as it offers a unified interface also for other clustering algorithms.
