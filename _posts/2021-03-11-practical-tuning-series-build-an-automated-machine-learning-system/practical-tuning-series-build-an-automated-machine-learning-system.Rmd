@@ -23,6 +23,8 @@ date: 03-11-2021
 output:
   distill::distill_article:
     self_contained: false
+    highlight_downlit: true
+    css: ../../custom.css
 params:
   eval_all: FALSE
 ---
@@ -32,7 +34,11 @@ params:
   echo = TRUE,
   R.options = list(width = 120)
 )
+
 library(mlr3book)
+library(kableExtra)
+
+ggplot2::theme_set(ggplot2::theme_light())
 ```
 
 # Scope
@@ -91,7 +97,7 @@ The `selection` hyperparameter controls which path is executed i.e., which learn
 It is important to use the `r ref("PipeOpBranch")` after the branching so that the outputs are merged into one result object.
 We visualize the graph with branching below.
 
-```{r practical-tuning-series-build-an-automated-machine-learning-system-006}
+```{r practical-tuning-series-build-an-automated-machine-learning-system-006, fig.width=10, fig.height=10}
 graph =
   po("branch", options = c("kknn", "svm", "ranger")) %>>%
   gunion(lapply(learners, po)) %>>%
@@ -126,7 +132,7 @@ Internally, this creates two paths and the results are combined with `r ref("Pip
 In contrast to `r ref("PipeOpBranch")`, both paths are executed.
 Additionally, `"robustify"` adds `r ref("PipeOpEncode")` to encode factor columns and `r ref("PipeOpRemoveConstants")` to remove features with a constant value.
 
-```{r practical-tuning-series-build-an-automated-machine-learning-system-009}
+```{r practical-tuning-series-build-an-automated-machine-learning-system-009, fig.width=10, fig.height=10}
 graph = ppl("robustify", task = task, factors_to_numeric = TRUE) %>>%
   graph
 plot(graph)
@@ -135,7 +141,8 @@ plot(graph)
 We could also create the preprocessing pipeline manually.
 
 ```{r practical-tuning-series-build-an-automated-machine-learning-system-010}
-gunion(list(po("imputehist"), po("missind", affect_columns = selector_type(c("numeric", "integer"))))) %>>%
+gunion(list(po("imputehist"),
+  po("missind", affect_columns = selector_type(c("numeric", "integer"))))) %>>%
   po("featureunion") %>>%
   po("encode") %>>%
   po("removeconstants")
@@ -143,18 +150,25 @@ gunion(list(po("imputehist"), po("missind", affect_columns = selector_type(c("nu
 
 # Graph Learner
 
-We create a `r ref("GraphLearner")` which encapsulates the pipeline and can be used like a learner.
+We use `r ref("as_learner()")` to create a `r ref("GraphLearner")` which encapsulates the pipeline and can be used like a learner.
 
 ```{r practical-tuning-series-build-an-automated-machine-learning-system-011}
-graph_learner = GraphLearner$new(graph)
+graph_learner = as_learner(graph)
 ```
 
 The parameter set of the graph learner includes all hyperparameters from all contained learners.
 The hyperparameter ids are prefixed with the corresponding learner ids.
 The hyperparameter `branch.selection` controls which learner is used.
 
-```{r practical-tuning-series-build-an-automated-machine-learning-system-012}
-as.data.table(graph_learner$param_set)[, .(id, class, lower, upper, nlevels)]
+```{r practical-tuning-series-build-an-automated-machine-learning-system-012, eval = FALSE}
+as.data.table(graph_learner$param_set)
+```
+
+```{r practical-tuning-series-build-an-automated-machine-learning-system-013, echo = FALSE}
+as.data.table(graph_learner$param_set)[, .(id, class, lower, upper, nlevels)] %>%
+  kable(format = "html") %>%
+  kable_styling(full_width = TRUE) %>%
+  kableExtra::scroll_box(height = "400px", extra_css = "border: 0px !important;")
 ```
 
 # Tune the pipeline
@@ -163,18 +177,22 @@ We will only tune one hyperparameter for each learner in this example.
 Additionally, we tune the branching parameter which selects one of the three learners.
 We have to specify that a hyperparameter is only valid for a certain learner by using `depends = branch.selection == <learner_id>`.
 
-```{r practical-tuning-series-build-an-automated-machine-learning-system-013}
+```{r practical-tuning-series-build-an-automated-machine-learning-system-014}
 # branch
-graph_learner$param_set$values$branch.selection = to_tune(c("kknn", "svm", "ranger"))
+graph_learner$param_set$values$branch.selection =
+  to_tune(c("kknn", "svm", "ranger"))
 
 # kknn
-graph_learner$param_set$values$kknn.k = to_tune(p_int(3, 50, logscale = TRUE, depends = branch.selection == "kknn"))
+graph_learner$param_set$values$kknn.k =
+  to_tune(p_int(3, 50, logscale = TRUE, depends = branch.selection == "kknn"))
 
 # svm
-graph_learner$param_set$values$svm.cost = to_tune(p_dbl(-1, 1, trafo = function(x) 10^x, depends = branch.selection == "svm"))
+graph_learner$param_set$values$svm.cost =
+  to_tune(p_dbl(-1, 1, trafo = function(x) 10^x, depends = branch.selection == "svm"))
 
 # ranger
-graph_learner$param_set$values$ranger.mtry = to_tune(p_int(1, 8, depends = branch.selection == "ranger"))
+graph_learner$param_set$values$ranger.mtry =
+  to_tune(p_int(1, 8, depends = branch.selection == "ranger"))
 
 # short learner id for printing
 graph_learner$id = "graph_learner"
@@ -182,7 +200,7 @@ graph_learner$id = "graph_learner"
 
 We define a tuning instance and select a random search which is stopped after 20 evaluated configurations.
 
-```{r practical-tuning-series-build-an-automated-machine-learning-system-014, eval = params$eval_all}
+```{r practical-tuning-series-build-an-automated-machine-learning-system-015, eval = params$eval_all}
 instance = tune(
   method = "random_search",
   task = task,
@@ -193,26 +211,27 @@ instance = tune(
 )
 ```
 
-```{r practical-tuning-series-build-an-automated-machine-learning-system-015, echo = FALSE, eval = params$eval_all}
+```{r practical-tuning-series-build-an-automated-machine-learning-system-016, echo = FALSE, eval = params$eval_all}
 saveRDS(instance, "data/instance_1.rda")
 ```
 
-```{r practical-tuning-series-build-an-automated-machine-learning-system-016, echo = FALSE}
+```{r practical-tuning-series-build-an-automated-machine-learning-system-017, echo = FALSE}
 instance = readRDS("data/instance_1.rda")
 ```
 
 The following shows a quick way to visualize the tuning results.
 
-```{r practical-tuning-series-build-an-automated-machine-learning-system-017, fig.width=10}
-autoplot(instance, type = "marginal", cols_x = c("x_domain_kknn.k","x_domain_svm.cost", "ranger.mtry"))
+```{r practical-tuning-series-build-an-automated-machine-learning-system-018, fig.width=12, fig.height=4, layout="l-page"}
+autoplot(instance, type = "marginal",
+  cols_x = c("x_domain_kknn.k","x_domain_svm.cost", "ranger.mtry"))
 ```
 
 # Final Model
 
 We add the optimized hyperparameters to the graph learner and train the learner on the full dataset.
 
-```{r practical-tuning-series-build-an-automated-machine-learning-system-018}
-learner = GraphLearner$new(graph)
+```{r practical-tuning-series-build-an-automated-machine-learning-system-019}
+learner = as_learner(graph)
 learner$param_set$values = instance$result_learner_param_vals
 learner$train(task)
 ```
@@ -225,12 +244,16 @@ Instead we have to use nested resampling to get an unbiased performance estimate
 
 We use nested resampling to get an unbiased estimate of the predictive performance of our graph learner.
 
-```{r practical-tuning-series-build-an-automated-machine-learning-system-019, eval = params$eval_all}
-graph_learner = GraphLearner$new(graph)
-graph_learner$param_set$values$branch.selection = to_tune(c("kknn", "svm", "ranger"))
-graph_learner$param_set$values$kknn.k = to_tune(p_int(3, 50, logscale = TRUE, depends = branch.selection == "kknn"))
-graph_learner$param_set$values$svm.cost = to_tune(p_dbl(-1, 1, trafo = function(x) 10^x, depends = branch.selection == "svm"))
-graph_learner$param_set$values$ranger.mtry = to_tune(p_int(1, 8, depends = branch.selection == "ranger"))
+```{r practical-tuning-series-build-an-automated-machine-learning-system-020, eval = params$eval_all}
+graph_learner = as_learner(graph)
+graph_learner$param_set$values$branch.selection =
+  to_tune(c("kknn", "svm", "ranger"))
+graph_learner$param_set$values$kknn.k =
+  to_tune(p_int(3, 50, logscale = TRUE, depends = branch.selection == "kknn"))
+graph_learner$param_set$values$svm.cost =
+  to_tune(p_dbl(-1, 1, trafo = function(x) 10^x, depends = branch.selection == "svm"))
+graph_learner$param_set$values$ranger.mtry =
+  to_tune(p_int(1, 8, depends = branch.selection == "ranger"))
 graph_learner$id = "graph_learner"
 
 inner_resampling = rsmp("cv", folds = 3)
@@ -246,12 +269,12 @@ outer_resampling = rsmp("cv", folds = 3)
 rr = resample(task, at, outer_resampling, store_models = TRUE)
 ```
 
-```{r practical-tuning-series-build-an-automated-machine-learning-system-020, echo = FALSE, eval = params$eval_all}
+```{r practical-tuning-series-build-an-automated-machine-learning-system-021, echo = FALSE, eval = params$eval_all}
 saveRDS(rr, "data/rr_1.rda")
 ```
 
 
-```{r practical-tuning-series-build-an-automated-machine-learning-system-021, echo = FALSE}
+```{r practical-tuning-series-build-an-automated-machine-learning-system-022, echo = FALSE}
 rr = readRDS("data/rr_1.rda")
 ```
 
@@ -260,31 +283,47 @@ This means that the selected hyperparameters should not vary too much.
 We might observe unstable models in this example because the small data set and the low number of resampling iterations might introduce too much randomness.
 Usually, we aim for the selection of stable hyperparameters for all outer training sets.
 
-```{r practical-tuning-series-build-an-automated-machine-learning-system-022}
+```{r practical-tuning-series-build-an-automated-machine-learning-system-023, eval = FALSE}
 extract_inner_tuning_results(rr)
+```
+
+```{r practical-tuning-series-build-an-automated-machine-learning-system-024, echo = FALSE, layout="l-body-outset"}
+extract_inner_tuning_results(rr)[, .SD, .SDcols = !c("learner_param_vals", "x_domain")] %>%
+  kable(format = "html") %>%
+  kable_styling(full_width = TRUE)
 ```
 
 Next, we want to compare the predictive performances estimated on the outer resampling to the inner resampling.
 Significantly lower predictive performances on the outer resampling indicate that the models with the optimized hyperparameters overfit the data.
 
-```{r practical-tuning-series-build-an-automated-machine-learning-system-023}
-rr$score()[, .(iteration, task_id, learner_id, resampling_id, classif.ce)]
+```{r practical-tuning-series-build-an-automated-machine-learning-system-025, eval = FALSE}
+rr$score()
+```
+
+```{r practical-tuning-series-build-an-automated-machine-learning-system-026, echo = FALSE}
+rr$score()[, .(iteration, task_id, learner_id, resampling_id, classif.ce)] %>%
+  kable(format = "html") %>%
+  kable_styling(full_width = TRUE)
 ```
 
 The aggregated performance of all outer resampling iterations is essentially the unbiased performance of the graph learner with optimal hyperparameter found by random search.
 
-```{r practical-tuning-series-build-an-automated-machine-learning-system-024}
+```{r practical-tuning-series-build-an-automated-machine-learning-system-027}
 rr$aggregate()
 ```
 
 Applying nested resampling can be shortened by using the `r ref("tune_nested()")`-shortcut.
 
-```{r practical-tuning-series-build-an-automated-machine-learning-system-025, eval = FALSE}
-graph_learner = GraphLearner$new(graph)
-graph_learner$param_set$values$branch.selection = to_tune(c("kknn", "svm", "ranger"))
-graph_learner$param_set$values$kknn.k = to_tune(p_int(3, 50, logscale = TRUE, depends = branch.selection == "kknn"))
-graph_learner$param_set$values$svm.cost = to_tune(p_dbl(-1, 1, trafo = function(x) 10^x, depends = branch.selection == "svm"))
-graph_learner$param_set$values$ranger.mtry = to_tune(p_int(1, 8, depends = branch.selection == "ranger"))
+```{r practical-tuning-series-build-an-automated-machine-learning-system-028, eval = FALSE}
+graph_learner = as_learner(graph)
+graph_learner$param_set$values$branch.selection =
+  to_tune(c("kknn", "svm", "ranger"))
+graph_learner$param_set$values$kknn.k =
+  to_tune(p_int(3, 50, logscale = TRUE, depends = branch.selection == "kknn"))
+graph_learner$param_set$values$svm.cost =
+  to_tune(p_dbl(-1, 1, trafo = function(x) 10^x, depends = branch.selection == "svm"))
+graph_learner$param_set$values$ranger.mtry =
+  to_tune(p_int(1, 8, depends = branch.selection == "ranger"))
 graph_learner$id = "graph_learner"
 
 rr = tune_nested(
