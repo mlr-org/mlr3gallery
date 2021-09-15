@@ -123,7 +123,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
   <!--radix_placeholder_rmarkdown_metadata-->
 
 <script type="text/json" id="radix-rmarkdown-metadata">
-{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["title","categories","tags","author","date","description","output","citation_url","canonical_url"]}},"value":[{"type":"character","attributes":{},"value":["Resampling - Stratified, Blocked and Predefined"]},{"type":"character","attributes":{},"value":["resampling","stratification","german credit data set","breast cancer data set","classification"]},{"type":"character","attributes":{},"value":["stratified resampling","block resampling","predefined folds","custom resampling"]},{"type":"list","attributes":{},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name"]}},"value":[{"type":"character","attributes":{},"value":["Milan Dragicevic"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name"]}},"value":[{"type":"character","attributes":{},"value":["Giuseppe Casalicchio"]}]}]},{"type":"character","attributes":{},"value":["03-30-2020"]},{"type":"character","attributes":{},"value":["When evaluating machine learning algorithms through resampling, it is preferable that each train/test partition will be a representative subset of the whole data set. This post covers three ways to achieve such reliable resampling procedures."]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["distill::distill_article"]}},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["self_contained","highlight_downlit","css"]}},"value":[{"type":"logical","attributes":{},"value":[false]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["../../custom.css"]}]}]},{"type":"character","attributes":{},"value":["https://mlr3gallery.mlr-org.com/posts/2020-03-30-stratification-blocking/"]},{"type":"character","attributes":{},"value":["https://mlr3gallery.mlr-org.com/posts/2020-03-30-stratification-blocking/"]}]}
+{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["title","categories","tags","author","date","description","output","citation_url","canonical_url"]}},"value":[{"type":"character","attributes":{},"value":["Resampling - Stratified, Blocked and Predefined"]},{"type":"character","attributes":{},"value":["resampling","stratification","german credit data set","classification"]},{"type":"character","attributes":{},"value":["stratified resampling","block resampling","predefined folds","custom resampling"]},{"type":"list","attributes":{},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name"]}},"value":[{"type":"character","attributes":{},"value":["Milan Dragicevic"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name"]}},"value":[{"type":"character","attributes":{},"value":["Giuseppe Casalicchio"]}]}]},{"type":"character","attributes":{},"value":["03-30-2020"]},{"type":"character","attributes":{},"value":["When evaluating machine learning algorithms through resampling, it is preferable that each train/test partition will be a representative subset of the whole data set. This post covers three ways to achieve such reliable resampling procedures."]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["distill::distill_article"]}},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["self_contained","css"]}},"value":[{"type":"logical","attributes":{},"value":[false]},{"type":"character","attributes":{},"value":["../../custom.css"]}]}]},{"type":"character","attributes":{},"value":["https://mlr3gallery.mlr-org.com/posts/2020-03-30-stratification-blocking/"]},{"type":"character","attributes":{},"value":["https://mlr3gallery.mlr-org.com/posts/2020-03-30-stratification-blocking/"]}]}
 </script>
 <!--/radix_placeholder_rmarkdown_metadata-->
   
@@ -474,7 +474,7 @@ d-title {
 
 </style>
 
-<script src="../../site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<script src="../../site_libs/jquery-1.11.3/jquery.min.js"></script>
 <link href="../../site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet"/>
 <link href="../../site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet"/>
 <script src="../../site_libs/headroom-0.9.4/headroom.min.js"></script>
@@ -2052,7 +2052,7 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 <!--/radix_placeholder_distill-->
-  <script src="../../site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+  <script src="../../site_libs/jquery-1.11.3/jquery.min.js"></script>
   <script src="../../site_libs/popper-2.6.0/popper.min.js"></script>
   <link href="../../site_libs/tippy-6.2.7/tippy.css" rel="stylesheet" />
   <link href="../../site_libs/tippy-6.2.7/tippy-light-border.css" rel="stylesheet" />
@@ -2106,7 +2106,6 @@ document.addEventListener('DOMContentLoaded', function() {
   <a href="../../index.html#category:resampling" class="dt-tag">resampling</a>
   <a href="../../index.html#category:stratification" class="dt-tag">stratification</a>
   <a href="../../index.html#category:german_credit_data_set" class="dt-tag">german credit data set</a>
-  <a href="../../index.html#category:breast_cancer_data_set" class="dt-tag">breast cancer data set</a>
   <a href="../../index.html#category:classification" class="dt-tag">classification</a>
 </div>
 <!--/radix_placeholder_categories-->
@@ -2122,38 +2121,30 @@ document.addEventListener('DOMContentLoaded', function() {
 </div>
 
 <div class="d-article">
-<h1 id="intro">Intro</h1>
+<h2 id="intro">Intro</h2>
 <p>When evaluating machine learning algorithms through resampling, it is preferable that each train/test partition will be a representative subset of the whole data set. This post covers three ways to achieve such reliable resampling procedures:</p>
 <ol type="1">
 <li><a href="https://mlr3.mlr-org.com/reference/Resampling.html#stratification">Stratified resampling</a> for classification problems where each train/test split maintains the target class distribution of the original data set.</li>
 <li><a href="https://mlr3.mlr-org.com/reference/Resampling.html#grouping-blocking">Block resampling</a> where a grouping factor determines which observations should be together in train/test splits.</li>
 <li><a href="https://mlr3.mlr-org.com/reference/mlr_resamplings_custom.html">Custom resampling</a> using predefined and manually created folds for the train/test splits.</li>
 </ol>
-<h1 id="prerequisites">Prerequisites</h1>
-<p>We load the most important packages for this post.</p>
+<h2 id="prerequisites">Prerequisites</h2>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://mlr3verse.mlr-org.com'>mlr3verse</a></span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://mlr3.mlr-org.com'>mlr3</a></span><span class='op'>)</span>
 <span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'>mlbench</span><span class='op'>)</span>
 <span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://r-datatable.com'>data.table</a></span><span class='op'>)</span>
 </code></pre>
 </div>
 </div>
-<p>We initialize the random number generator with a fixed seed for reproducibility.</p>
-<div class="layout-chunk" data-layout="l-body">
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/Random.html'>set.seed</a></span><span class='op'>(</span><span class='fl'>7832</span><span class='op'>)</span>
-</code></pre>
-</div>
-</div>
-<h1 id="stratified-resampling">Stratified resampling</h1>
+<h2 id="stratified-resampling">Stratified resampling</h2>
 <p>In classification tasks, the ratio of the target class distribution should be similar in each train/test split, which is achieved by <a href="https://mlr.mlr-org.com/articles/tutorial/resample.html#stratification-with-respect-to-the-target-variables">stratification</a>. This is particularly useful in the case of imbalanced classes and small data sets.</p>
 <p>Stratification can also be performed with respect to explanatory categorical variables to ensure that all subgroups are represented in all training and test sets.</p>
-<p>In <a href="https://mlr3.mlr-org.com">mlr3</a>, each <a href="https://mlr3.mlr-org.com/reference/Task.html"><code>Task</code></a> has a slot <a href="https://mlr3.mlr-org.com/reference/Task.html#active-bindings"><code>$col_roles</code></a>. This slot shows general roles certain features will have throughout different stages of the machine learning process. At least, the <code>$col_roles</code> slot shows which variables will be used as <code>feature</code>s and as the <code>target</code>. However, the <code>$col_roles</code> slot can be more diverse and some variables might even serve multiple roles. We can specify the variable used for stratification in <code>task$col_roles$stratum</code>. This will be illustrated in the following example using the <a href="https://mlr3.mlr-org.com/reference/mlr_tasks_german_credit.html"><code>german_credit</code></a> data:</p>
+<p>In <code>mlr3</code>, each <a href="https://mlr3.mlr-org.com/reference/Task.html">task</a> has a slot <a href="https://mlr3.mlr-org.com/reference/Task.html#active-bindings"><code>col_roles</code></a>. This slot shows general roles certain features will have throughout different stages of the machine learning process. At least, the <code>col_roles</code> slot shows which variables will be used as <code>feature</code>s and as the <code>target</code>. Hoever, the <code>col_roles</code> slot can be more diverse and some variables might even serve multiple roles. We can specify the variable used for stratification in <code>task$col_roles$stratum</code>. This will be illustrated in the following example using the <code>german_credit</code> data:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>task_gc</span> <span class='op'>=</span> <span class='fu'>tsk</span><span class='op'>(</span><span class='st'>"german_credit"</span><span class='op'>)</span>
-<span class='va'>task_gc</span><span class='op'>$</span><span class='va'>col_roles</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>gc_tsk</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>tsk</a></span><span class='op'>(</span><span class='st'>"german_credit"</span><span class='op'>)</span>
+<span class='va'>gc_tsk</span><span class='op'>$</span><span class='va'>col_roles</span>
 </code></pre>
 </div>
 <pre><code>$feature
@@ -2179,20 +2170,23 @@ $group
 character(0)
 
 $weight
+character(0)
+
+$uri
 character(0)</code></pre>
 </div>
 <p>We use the target feature called <code>credit_risk</code> to specify stratification with respect to the target variable:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>task_gc</span><span class='op'>$</span><span class='va'>col_roles</span><span class='op'>$</span><span class='va'>stratum</span> <span class='op'>=</span> <span class='st'>"credit_risk"</span>
-<span class='co'># alternatively task_gc$col_roles$stratum = task_gc$col_roles$target</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>gc_tsk</span><span class='op'>$</span><span class='va'>col_roles</span><span class='op'>$</span><span class='va'>stratum</span> <span class='op'>=</span> <span class='st'>"credit_risk"</span>
+<span class='co'># alternatively gc_tsk$col_roles$stratum = gc_tsk$col_roles$target</span>
 </code></pre>
 </div>
 </div>
 <p>After the specification of <code>task$col_roles$stratum</code>, the active binding <a href="https://mlr3.mlr-org.com/reference/Task.html#active-bindings"><code>task$strata</code></a> will show the number of observations in each group and the corresponding row id’s:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>task_gc</span><span class='op'>$</span><span class='va'>strata</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>gc_tsk</span><span class='op'>$</span><span class='va'>strata</span>
 </code></pre>
 </div>
 <pre><code>     N                row_id
@@ -2202,36 +2196,37 @@ character(0)</code></pre>
 <p>Specify 3-fold cross validation and instantiate the resampling on the task:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>cv3</span> <span class='op'>=</span> <span class='fu'>rsmp</span><span class='op'>(</span><span class='st'>"cv"</span>, folds <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span>
-<span class='va'>cv3</span><span class='op'>$</span><span class='fu'>instantiate</span><span class='op'>(</span><span class='va'>task_gc</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>cv3</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>rsmp</a></span><span class='op'>(</span><span class='st'>"cv"</span>, folds <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span>
+<span class='fu'><a href='https://rdrr.io/r/base/Random.html'>set.seed</a></span><span class='op'>(</span><span class='fl'>123</span><span class='op'>)</span>
+<span class='va'>cv3</span><span class='op'>$</span><span class='fu'>instantiate</span><span class='op'>(</span><span class='va'>gc_tsk</span><span class='op'>)</span>
 <span class='va'>cv3</span><span class='op'>$</span><span class='va'>instance</span>
 </code></pre>
 </div>
 <pre><code>      row_id fold
-   1:      7    1
-   2:      8    1
-   3:      9    1
-   4:     17    1
-   5:     22    1
+   1:      1    1
+   2:      3    1
+   3:      6    1
+   4:      8    1
+   5:     13    1
   ---            
- 996:    959    3
- 997:    967    3
- 998:    980    3
- 999:    984    3
-1000:    999    3</code></pre>
+ 996:    952    3
+ 997:    953    3
+ 998:    974    3
+ 999:    980    3
+1000:    981    3</code></pre>
 </div>
 <p>Check if the target class distribution is similar in each fold:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>dt</span> <span class='op'>=</span> <span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/merge.html'>merge</a></span><span class='op'>(</span><span class='va'>cv3</span><span class='op'>$</span><span class='va'>instance</span>, <span class='va'>task_gc</span><span class='op'>$</span><span class='fu'>data</span><span class='op'>(</span><span class='op'>)</span><span class='op'>[</span>, <span class='va'>row_id</span> <span class='op'>:=</span> <span class='va'>.I</span><span class='op'>]</span>, by <span class='op'>=</span> <span class='st'>"row_id"</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>dt</span> <span class='op'>=</span> <span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/merge.html'>merge</a></span><span class='op'>(</span><span class='va'>cv3</span><span class='op'>$</span><span class='va'>instance</span>, <span class='va'>gc_tsk</span><span class='op'>$</span><span class='fu'>data</span><span class='op'>(</span><span class='op'>)</span><span class='op'>[</span>, <span class='va'>row_id</span> <span class='op'>:=</span> <span class='va'>.I</span><span class='op'>]</span>, by <span class='op'>=</span> <span class='st'>"row_id"</span><span class='op'>)</span>
 <span class='va'>dt</span><span class='op'>[</span>, <span class='fu'>.</span><span class='op'>(</span>class_ratio <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/sum.html'>sum</a></span><span class='op'>(</span><span class='va'>credit_risk</span> <span class='op'>==</span> <span class='st'>"bad"</span><span class='op'>)</span> <span class='op'>/</span>
   <span class='fu'><a href='https://rdrr.io/r/base/sum.html'>sum</a></span><span class='op'>(</span><span class='va'>credit_risk</span> <span class='op'>==</span> <span class='st'>"good"</span><span class='op'>)</span><span class='op'>)</span>, by <span class='op'>=</span> <span class='va'>fold</span><span class='op'>]</span>
 </code></pre>
 </div>
 <pre><code>   fold class_ratio
-1:    2   0.4291845
+1:    1   0.4273504
 2:    3   0.4291845
-3:    1   0.4273504</code></pre>
+3:    2   0.4291845</code></pre>
 </div>
 <p>And compare it with the target class distribution from the whole data set:</p>
 <div class="layout-chunk" data-layout="l-body">
@@ -2245,8 +2240,8 @@ character(0)</code></pre>
 <p>Note that the variable used for stratification does not necessarily have to be the target class. In fact, multiple categorical features can be used for stratification to maintain their frequency distribution in each fold:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>task_gc</span><span class='op'>$</span><span class='va'>col_roles</span><span class='op'>$</span><span class='va'>stratum</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"housing"</span>, <span class='st'>"telephone"</span><span class='op'>)</span>
-<span class='va'>task_gc</span><span class='op'>$</span><span class='va'>strata</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>gc_tsk</span><span class='op'>$</span><span class='va'>col_roles</span><span class='op'>$</span><span class='va'>stratum</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"housing"</span>, <span class='st'>"telephone"</span><span class='op'>)</span>
+<span class='va'>gc_tsk</span><span class='op'>$</span><span class='va'>strata</span>
 </code></pre>
 </div>
 <pre><code>     N                      row_id
@@ -2260,27 +2255,28 @@ character(0)</code></pre>
 <p>To illustrate if stratification based on multiple categorical features works, we need to instantiate the CV folds again as we changed the features used for stratification:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>cv3</span><span class='op'>$</span><span class='fu'>instantiate</span><span class='op'>(</span><span class='va'>task_gc</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/Random.html'>set.seed</a></span><span class='op'>(</span><span class='fl'>123</span><span class='op'>)</span>
+<span class='va'>cv3</span><span class='op'>$</span><span class='fu'>instantiate</span><span class='op'>(</span><span class='va'>gc_tsk</span><span class='op'>)</span>
 <span class='va'>cv3</span><span class='op'>$</span><span class='va'>instance</span>
 </code></pre>
 </div>
 <pre><code>      row_id fold
-   1:     13    1
-   2:     21    1
-   3:     31    1
-   4:     33    1
-   5:     43    1
+   1:     21    1
+   2:     26    1
+   3:     30    1
+   4:     39    1
+   5:     42    1
   ---            
- 996:    945    3
- 997:    973    3
- 998:    974    3
- 999:    986    3
-1000:    993    3</code></pre>
+ 996:    747    3
+ 997:    860    3
+ 998:    866    3
+ 999:    953    3
+1000:    973    3</code></pre>
 </div>
 <p>Again, we check the relative frequency of observations in each group (combination of <code>housing</code> and <code>telephone</code>) across all folds:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>dt</span> <span class='op'>=</span> <span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/merge.html'>merge</a></span><span class='op'>(</span><span class='va'>cv3</span><span class='op'>$</span><span class='va'>instance</span>, <span class='va'>task_gc</span><span class='op'>$</span><span class='fu'>data</span><span class='op'>(</span><span class='op'>)</span><span class='op'>[</span>, <span class='va'>row_id</span> <span class='op'>:=</span> <span class='va'>.I</span><span class='op'>]</span>, by <span class='op'>=</span> <span class='st'>"row_id"</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>dt</span> <span class='op'>=</span> <span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/merge.html'>merge</a></span><span class='op'>(</span><span class='va'>cv3</span><span class='op'>$</span><span class='va'>instance</span>, <span class='va'>gc_tsk</span><span class='op'>$</span><span class='fu'>data</span><span class='op'>(</span><span class='op'>)</span><span class='op'>[</span>, <span class='va'>row_id</span> <span class='op'>:=</span> <span class='va'>.I</span><span class='op'>]</span>, by <span class='op'>=</span> <span class='st'>"row_id"</span><span class='op'>)</span>
 <span class='va'>dt</span> <span class='op'>=</span> <span class='va'>dt</span><span class='op'>[</span>, <span class='fu'>.</span><span class='op'>(</span>freq <span class='op'>=</span> <span class='va'>.N</span><span class='op'>)</span>, by <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='va'>fold</span>, <span class='va'>housing</span>, <span class='va'>telephone</span><span class='op'>)</span><span class='op'>]</span>
 <span class='va'>dt</span> <span class='op'>=</span> <span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/dcast.data.table.html'>dcast</a></span><span class='op'>(</span><span class='va'>dt</span>, <span class='va'>housing</span> <span class='op'>+</span> <span class='va'>telephone</span> <span class='op'>~</span> <span class='va'>fold</span><span class='op'>)</span>
 <span class='va'>dt</span><span class='op'>[</span>, <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>3</span><span class='op'>:</span><span class='fl'>5</span><span class='op'>)</span> <span class='op'>:=</span> <span class='fu'><a href='https://rdrr.io/r/base/lapply.html'>lapply</a></span><span class='op'>(</span><span class='va'>.SD</span>, <span class='kw'>function</span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span> <span class='va'>x</span> <span class='op'>/</span> <span class='fu'><a href='https://rdrr.io/r/base/sum.html'>sum</a></span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span><span class='op'>)</span>, .SDcols <span class='op'>=</span> <span class='fl'>3</span><span class='op'>:</span><span class='fl'>5</span><span class='op'>]</span>
@@ -2298,7 +2294,7 @@ character(0)</code></pre>
 <p>And compare it with the relative frequency from the whole data set:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>task_gc</span><span class='op'>$</span><span class='fu'>data</span><span class='op'>(</span><span class='op'>)</span><span class='op'>[</span>, <span class='fu'>.</span><span class='op'>(</span>freq <span class='op'>=</span> <span class='va'>.N</span> <span class='op'>/</span> <span class='fu'><a href='https://rdrr.io/r/base/Extremes.html'>max</a></span><span class='op'>(</span><span class='va'>.I</span><span class='op'>)</span><span class='op'>)</span>,
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>gc_tsk</span><span class='op'>$</span><span class='fu'>data</span><span class='op'>(</span><span class='op'>)</span><span class='op'>[</span>, <span class='fu'>.</span><span class='op'>(</span>freq <span class='op'>=</span> <span class='va'>.N</span> <span class='op'>/</span> <span class='fu'><a href='https://rdrr.io/r/base/Extremes.html'>max</a></span><span class='op'>(</span><span class='va'>.I</span><span class='op'>)</span><span class='op'>)</span>,
   by <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='va'>housing</span>, <span class='va'>telephone</span><span class='op'>)</span><span class='op'>]</span><span class='op'>[</span><span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/setorder.html'>order</a></span><span class='op'>(</span><span class='va'>housing</span>, <span class='va'>telephone</span><span class='op'>)</span>, <span class='op'>]</span>
 </code></pre>
 </div>
@@ -2311,13 +2307,17 @@ character(0)</code></pre>
 6:      own yes (under customer name) 0.06106106</code></pre>
 </div>
 <p>It is evident that in each fold, the combination of <code>housing</code> and <code>telephone</code> have similar frequencies that also coincide with the frequencies from the whole data set.</p>
-<h1 id="block-resampling"><a id="block"></a>Block resampling</h1>
+<h2 id="block-resampling"><a id="block"></a>Block resampling</h2>
 <p>An additional concern when specifying resampling is respecting the natural grouping of the data. Blocking refers to the situation where subsets of observations belong together and must not be separated during resampling. Hence, for one train/test set pair the entire block is either in the training set or in the test set.</p>
-<p>The following example is based on the <a href="https://www.rdocumentation.org/packages/mlbench/versions/2.1-1/topics/BreastCancer">BreastCancer</a> data set from the <a href="https://cran.r-project.org/package=mlbench">mlbench</a> package:</p>
+<p>The following example is based on the <a href="https://www.rdocumentation.org/packages/mlbench/versions/2.1-1/topics/BreastCancer">BreastCancer</a> data set from the <code>mlbench</code> package:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span><span class='op'>(</span><span class='va'>BreastCancer</span>, package <span class='op'>=</span> <span class='st'>"mlbench"</span><span class='op'>)</span>
-<span class='va'>task_bc</span> <span class='op'>=</span> <span class='fu'>as_task_classif</span><span class='op'>(</span><span class='va'>BreastCancer</span>, target <span class='op'>=</span> <span class='st'>"Class"</span>, positive <span class='op'>=</span> <span class='st'>"malignant"</span><span class='op'>)</span>
+<span class='va'>bc_tsk</span> <span class='op'>=</span> <span class='va'><a href='https://mlr3.mlr-org.com/reference/TaskClassif.html'>TaskClassif</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span>
+  id <span class='op'>=</span> <span class='st'>"BreastCancer"</span>,
+  backend <span class='op'>=</span> <span class='va'>BreastCancer</span>,
+  target <span class='op'>=</span> <span class='st'>"Class"</span>,
+  positive <span class='op'>=</span> <span class='st'>"malignant"</span><span class='op'>)</span>
 </code></pre>
 </div>
 </div>
@@ -2335,12 +2335,12 @@ character(0)</code></pre>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='co'># Use Id column as block factor</span>
-<span class='va'>task_bc</span><span class='op'>$</span><span class='va'>col_roles</span><span class='op'>$</span><span class='va'>group</span> <span class='op'>=</span> <span class='st'>"Id"</span>
+<span class='va'>bc_tsk</span><span class='op'>$</span><span class='va'>col_roles</span><span class='op'>$</span><span class='va'>group</span> <span class='op'>=</span> <span class='st'>"Id"</span>
 <span class='co'># Remove Id from feature</span>
-<span class='co'># task_bc$col_roles$feature = setdiff(task_bc$col_roles$feature, "Id")</span>
-<span class='va'>cv5</span> <span class='op'>=</span> <span class='fu'>rsmp</span><span class='op'>(</span><span class='st'>"cv"</span>, folds <span class='op'>=</span> <span class='fl'>5</span><span class='op'>)</span>
+<span class='co'># bc_tsk$col_roles$feature = setdiff(bc_tsk$col_roles$feature, "Id")</span>
+<span class='va'>cv5</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>rsmp</a></span><span class='op'>(</span><span class='st'>"cv"</span>, folds <span class='op'>=</span> <span class='fl'>5</span><span class='op'>)</span>
 <span class='fu'><a href='https://rdrr.io/r/base/Random.html'>set.seed</a></span><span class='op'>(</span><span class='fl'>123</span><span class='op'>)</span>
-<span class='va'>cv5</span><span class='op'>$</span><span class='fu'>instantiate</span><span class='op'>(</span><span class='va'>task_bc</span><span class='op'>)</span>
+<span class='va'>cv5</span><span class='op'>$</span><span class='fu'>instantiate</span><span class='op'>(</span><span class='va'>bc_tsk</span><span class='op'>)</span>
 <span class='va'>cv5</span><span class='op'>$</span><span class='va'>instance</span>
 </code></pre>
 </div>
@@ -2373,7 +2373,7 @@ character(0)</code></pre>
 <p>If the specified blocking groups are respected, each <code>Id</code> appears only in exactly one fold. To inspect if blocking was successful when generating the folds we count how often each <code>Id</code> appears in a specific fold and print the <code>Id</code>s that appear in more than one fold:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>dt</span> <span class='op'>=</span> <span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/merge.html'>merge</a></span><span class='op'>(</span><span class='va'>task_bc</span><span class='op'>$</span><span class='fu'>data</span><span class='op'>(</span><span class='op'>)</span>, <span class='va'>cv5</span><span class='op'>$</span><span class='va'>instance</span>, by.x <span class='op'>=</span> <span class='st'>"Id"</span>, by.y <span class='op'>=</span> <span class='st'>"row_id"</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>dt</span> <span class='op'>=</span> <span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/merge.html'>merge</a></span><span class='op'>(</span><span class='va'>bc_tsk</span><span class='op'>$</span><span class='fu'>data</span><span class='op'>(</span><span class='op'>)</span>, <span class='va'>cv5</span><span class='op'>$</span><span class='va'>instance</span>, by.x <span class='op'>=</span> <span class='st'>"Id"</span>, by.y <span class='op'>=</span> <span class='st'>"row_id"</span><span class='op'>)</span>
 <span class='va'>dt</span> <span class='op'>=</span> <span class='va'>dt</span><span class='op'>[</span>, <span class='fu'>.</span><span class='op'>(</span>unique_folds <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/length.html'>length</a></span><span class='op'>(</span><span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/duplicated.html'>unique</a></span><span class='op'>(</span><span class='va'>fold</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>, by <span class='op'>=</span> <span class='va'>Id</span><span class='op'>]</span>
 <span class='va'>dt</span><span class='op'>[</span><span class='va'>unique_folds</span> <span class='op'>&gt;</span> <span class='fl'>1</span>, <span class='op'>]</span>
 </code></pre>
@@ -2381,17 +2381,18 @@ character(0)</code></pre>
 <pre><code>Empty data.table (0 rows and 2 cols): Id,unique_folds</code></pre>
 </div>
 <p>As expected, the table is empty as there are no Id’s present in more than one fold.</p>
-<h1 id="resampling-with-predefined-folds">Resampling with predefined folds</h1>
+<h2 id="resampling-with-predefined-folds">Resampling with predefined folds</h2>
 <p>In some use cases, it might be necessary to use predefined folds. When using k-fold cross validation without repetition this can be achieved by manually creating a feature used to denote folds and assigning it to the <a href="https://mlr3.mlr-org.com/reference/Task.html#active-bindings"><code>task$col_roles$group</code></a> slot. First, we create a vector that contains 5 predefined folds:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>folds</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/sample.html'>sample</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span><span class='op'>(</span><span class='fl'>1</span><span class='op'>:</span><span class='fl'>5</span>, length.out <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/nrow.html'>nrow</a></span><span class='op'>(</span><span class='va'>BreastCancer</span><span class='op'>)</span><span class='op'>)</span>,
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/Random.html'>set.seed</a></span><span class='op'>(</span><span class='fl'>1</span><span class='op'>)</span>
+<span class='va'>folds</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/sample.html'>sample</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span><span class='op'>(</span><span class='fl'>1</span><span class='op'>:</span><span class='fl'>5</span>, length.out <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/nrow.html'>nrow</a></span><span class='op'>(</span><span class='va'>BreastCancer</span><span class='op'>)</span><span class='op'>)</span>,
   size <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/nrow.html'>nrow</a></span><span class='op'>(</span><span class='va'>BreastCancer</span><span class='op'>)</span>,
   replace <span class='op'>=</span> <span class='cn'>F</span><span class='op'>)</span>
 <span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span><span class='op'>(</span><span class='va'>folds</span>, <span class='fl'>20</span><span class='op'>)</span>
 </code></pre>
 </div>
-<pre><code> [1] 2 2 4 1 5 2 5 3 1 5 4 3 3 4 5 3 3 5 2 4</code></pre>
+<pre><code> [1] 4 4 4 1 4 5 2 2 2 2 4 5 1 2 5 5 2 2 1 1</code></pre>
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='va'>folds</span><span class='op'>)</span>
 </code></pre>
@@ -2403,36 +2404,37 @@ character(0)</code></pre>
 <p>This vector is now added to the data set and will be used as grouping factor just as when defining <a href="#block">block resampling</a>:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>task_bc</span> <span class='op'>=</span> <span class='va'>TaskClassif</span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>bc_tsk</span> <span class='op'>=</span> <span class='va'><a href='https://mlr3.mlr-org.com/reference/TaskClassif.html'>TaskClassif</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span>
   id <span class='op'>=</span> <span class='st'>"BreastCancer"</span>,
   backend <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/data.frame.html'>data.frame</a></span><span class='op'>(</span><span class='va'>BreastCancer</span>, foldIds <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/factor.html'>as.factor</a></span><span class='op'>(</span><span class='va'>folds</span><span class='op'>)</span><span class='op'>)</span>,
   target <span class='op'>=</span> <span class='st'>"Class"</span>,
   positive <span class='op'>=</span> <span class='st'>"malignant"</span><span class='op'>)</span>
-<span class='va'>task_bc</span><span class='op'>$</span><span class='va'>col_roles</span><span class='op'>$</span><span class='va'>group</span> <span class='op'>=</span> <span class='st'>"foldIds"</span>
+<span class='va'>bc_tsk</span><span class='op'>$</span><span class='va'>col_roles</span><span class='op'>$</span><span class='va'>group</span> <span class='op'>=</span> <span class='st'>"foldIds"</span>
 <span class='co'># Remove "foldIds" from features</span>
-<span class='co'># task_bc$col_roles$feature = setdiff(task_bc$col_roles$feature, "foldIds")</span>
+<span class='co'># bc_tsk$col_roles$feature = setdiff(bc_tsk$col_roles$feature, "foldIds")</span>
 </code></pre>
 </div>
 </div>
 <p>We now instantiate a 5-fold CV that will respect the predefined folds:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>cv5</span> <span class='op'>=</span> <span class='fu'>rsmp</span><span class='op'>(</span><span class='st'>"cv"</span>, folds <span class='op'>=</span> <span class='fl'>5</span><span class='op'>)</span>
-<span class='va'>cv5</span><span class='op'>$</span><span class='fu'>instantiate</span><span class='op'>(</span><span class='va'>task_bc</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>cv5</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>rsmp</a></span><span class='op'>(</span><span class='st'>"cv"</span>, folds <span class='op'>=</span> <span class='fl'>5</span><span class='op'>)</span>
+<span class='fu'><a href='https://rdrr.io/r/base/Random.html'>set.seed</a></span><span class='op'>(</span><span class='fl'>123</span><span class='op'>)</span>
+<span class='va'>cv5</span><span class='op'>$</span><span class='fu'>instantiate</span><span class='op'>(</span><span class='va'>bc_tsk</span><span class='op'>)</span>
 <span class='va'>cv5</span><span class='op'>$</span><span class='va'>instance</span>
 </code></pre>
 </div>
 <pre><code>   row_id fold
-1:      1    1
-2:      2    2
-3:      3    3
-4:      4    4
+1:      3    1
+2:      1    2
+3:      4    3
+4:      2    4
 5:      5    5</code></pre>
 </div>
 <p>Since we have only five predefined folds, the <code>cv5$instance</code> data table has five rows and shows which of our <code>foldIds</code> values (contained in the <code>row_id</code> column) will belong to which instantiated fold. To check if the predefined groups are respected, we count how often each <code>foldIds</code> appears in a specific fold:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>dt</span> <span class='op'>=</span> <span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/merge.html'>merge</a></span><span class='op'>(</span><span class='va'>task_bc</span><span class='op'>$</span><span class='fu'>data</span><span class='op'>(</span><span class='op'>)</span>, <span class='va'>cv5</span><span class='op'>$</span><span class='va'>instance</span>, by.x <span class='op'>=</span> <span class='st'>"foldIds"</span>, by.y <span class='op'>=</span> <span class='st'>"row_id"</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>dt</span> <span class='op'>=</span> <span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/merge.html'>merge</a></span><span class='op'>(</span><span class='va'>bc_tsk</span><span class='op'>$</span><span class='fu'>data</span><span class='op'>(</span><span class='op'>)</span>, <span class='va'>cv5</span><span class='op'>$</span><span class='va'>instance</span>, by.x <span class='op'>=</span> <span class='st'>"foldIds"</span>, by.y <span class='op'>=</span> <span class='st'>"row_id"</span><span class='op'>)</span>
 <span class='va'>dt</span><span class='op'>[</span>, <span class='fu'>.</span><span class='op'>(</span>unique_folds <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/length.html'>length</a></span><span class='op'>(</span><span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/duplicated.html'>unique</a></span><span class='op'>(</span><span class='va'>fold</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>, by <span class='op'>=</span> <span class='va'>foldIds</span><span class='op'>]</span>
 </code></pre>
 </div>
@@ -2444,14 +2446,14 @@ character(0)</code></pre>
 5:       5            1</code></pre>
 </div>
 <p>There are five groups and each <code>foldIds</code> appears only in exactly one fold. This means that each instantiated fold corresponds to one of the predefined folds.</p>
-<p>The previous example does not cover how to perform repeated k-fold CV or time series CV with predefined indices. This is possible via the <a href="https://mlr3.mlr-org.com/reference/mlr_resamplings_custom.html"><code>mlr_resamplings_custom</code></a> to which a list of predefined train and test indices can be assigned. In the following example, a custom resampling is created using indices created by <a href="https://www.rdocumentation.org/packages/caret/topics/createMultiFolds"><code>caret::createMultiFolds()</code></a>:</p>
+<p>The previous example does not cover how to perform repeated k-fold CV or time series CV with predefined indices. This is possible via the <a href="https://mlr3.mlr-org.com/reference/mlr_resamplings_custom.html"><code>mlr_resamplings_custom()</code></a> to which a list of predefined train and test indices can be assigned. In the following example, a custom resampling is created using indices created by <a href="https://www.rdocumentation.org/packages/caret/versions/6.0-85/topics/createDataPartition"><code>caret::createMultiFolds()</code></a>:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>task_gc</span> <span class='op'>=</span> <span class='fu'>tsk</span><span class='op'>(</span><span class='st'>"german_credit"</span><span class='op'>)</span>
-<span class='va'>train_ind</span> <span class='op'>=</span> <span class='fu'>caret</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/caret/man/createDataPartition.html'>createMultiFolds</a></span><span class='op'>(</span><span class='va'>task_gc</span><span class='op'>$</span><span class='fu'>truth</span><span class='op'>(</span><span class='op'>)</span>, k <span class='op'>=</span> <span class='fl'>5</span>, times <span class='op'>=</span> <span class='fl'>10</span><span class='op'>)</span>
-<span class='va'>test_ind</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/lapply.html'>lapply</a></span><span class='op'>(</span><span class='va'>train_ind</span>, <span class='kw'>function</span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span> <span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/setops.html'>setdiff</a></span><span class='op'>(</span><span class='fl'>1</span><span class='op'>:</span><span class='va'>task_gc</span><span class='op'>$</span><span class='va'>nrow</span>, <span class='va'>x</span><span class='op'>)</span><span class='op'>)</span>
-<span class='va'>rc</span> <span class='op'>=</span> <span class='fu'>rsmp</span><span class='op'>(</span><span class='st'>"custom"</span><span class='op'>)</span>
-<span class='va'>rc</span><span class='op'>$</span><span class='fu'>instantiate</span><span class='op'>(</span><span class='va'>task_gc</span>, <span class='va'>train_ind</span>, <span class='va'>test_ind</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>gc_tsk</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>tsk</a></span><span class='op'>(</span><span class='st'>"german_credit"</span><span class='op'>)</span>
+<span class='va'>train_ind</span> <span class='op'>=</span> <span class='fu'>caret</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/caret/man/createDataPartition.html'>createMultiFolds</a></span><span class='op'>(</span><span class='va'>gc_tsk</span><span class='op'>$</span><span class='fu'>truth</span><span class='op'>(</span><span class='op'>)</span>, k <span class='op'>=</span> <span class='fl'>5</span>, times <span class='op'>=</span> <span class='fl'>10</span><span class='op'>)</span>
+<span class='va'>test_ind</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/lapply.html'>lapply</a></span><span class='op'>(</span><span class='va'>train_ind</span>, <span class='kw'>function</span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span> <span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/setops.html'>setdiff</a></span><span class='op'>(</span><span class='fl'>1</span><span class='op'>:</span><span class='va'>gc_tsk</span><span class='op'>$</span><span class='va'>nrow</span>, <span class='va'>x</span><span class='op'>)</span><span class='op'>)</span>
+<span class='va'>rc</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>rsmp</a></span><span class='op'>(</span><span class='st'>"custom"</span><span class='op'>)</span>
+<span class='va'>rc</span><span class='op'>$</span><span class='fu'>instantiate</span><span class='op'>(</span><span class='va'>gc_tsk</span>, <span class='va'>train_ind</span>, <span class='va'>test_ind</span><span class='op'>)</span>
 </code></pre>
 </div>
 </div>
@@ -2472,8 +2474,8 @@ character(0)</code></pre>
 [24] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
 [47] TRUE TRUE TRUE TRUE</code></pre>
 </div>
-<h1 id="conclusions">Conclusions</h1>
-<p>This post shows how to control the resampling process when using <a href="https://mlr3.mlr-org.com">mlr3</a> in order to account for data specificities.</p>
+<h2 id="conclusions">Conclusions</h2>
+<p>This post shows how to control the resampling process when using <a href="https://mlr3.mlr-org.com/index.html">mlr3</a> in order to account for data specificities.</p>
 <div class="sourceCode" id="cb21"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
 <!--radix_placeholder_article_footer-->
 <!--/radix_placeholder_article_footer-->
