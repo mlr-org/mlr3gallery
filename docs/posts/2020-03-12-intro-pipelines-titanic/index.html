@@ -121,7 +121,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
   <!--radix_placeholder_rmarkdown_metadata-->
 
 <script type="text/json" id="radix-rmarkdown-metadata">
-{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["title","categories","author","description","date","output","citation_url","canonical_url"]}},"value":[{"type":"character","attributes":{},"value":["A Pipeline for the Titanic Data Set - Basics"]},{"type":"character","attributes":{},"value":["imputation","classification","mlr3pipelines","feature engineering","titanic data set","classification"]},{"type":"list","attributes":{},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name"]}},"value":[{"type":"character","attributes":{},"value":["Florian Pfisterer"]}]}]},{"type":"character","attributes":{},"value":["This post shows how to build a Graph using the mlr3pipelines package on the \"titanic\" dataset."]},{"type":"character","attributes":{},"value":["03-12-2020"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["distill::distill_article"]}},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["self_contained","css"]}},"value":[{"type":"logical","attributes":{},"value":[false]},{"type":"character","attributes":{},"value":["../../custom.css"]}]}]},{"type":"character","attributes":{},"value":["https://mlr3gallery.mlr-org.com/posts/2020-03-12-intro-pipelines-titanic/"]},{"type":"character","attributes":{},"value":["https://mlr3gallery.mlr-org.com/posts/2020-03-12-intro-pipelines-titanic/"]}]}
+{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["title","categories","author","description","date","output","citation_url","canonical_url"]}},"value":[{"type":"character","attributes":{},"value":["A Pipeline for the Titanic Data Set - Basics"]},{"type":"character","attributes":{},"value":["imputation","classification","mlr3pipelines","feature engineering","titanic data set","classification"]},{"type":"list","attributes":{},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name"]}},"value":[{"type":"character","attributes":{},"value":["Florian Pfisterer"]}]}]},{"type":"character","attributes":{},"value":["This post shows how to build a Graph using the mlr3pipelines package on the \"titanic\" dataset."]},{"type":"character","attributes":{},"value":["03-12-2020"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["distill::distill_article"]}},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["self_contained","highlight_downlit","css"]}},"value":[{"type":"logical","attributes":{},"value":[false]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["../../custom.css"]}]}]},{"type":"character","attributes":{},"value":["https://mlr3gallery.mlr-org.com/posts/2020-03-12-intro-pipelines-titanic/"]},{"type":"character","attributes":{},"value":["https://mlr3gallery.mlr-org.com/posts/2020-03-12-intro-pipelines-titanic/"]}]}
 </script>
 <!--/radix_placeholder_rmarkdown_metadata-->
   
@@ -2120,16 +2120,19 @@ document.addEventListener('DOMContentLoaded', function() {
 
 <div class="d-article">
 <h2 id="intro">Intro</h2>
-<p>First of all we are going to load required packages and the data. The data is part of the <code>mlr3data</code> package.</p>
+<p>We load the <a href="https://mlr3verse.mlr-org.com">mlr3verse</a> package which pulls in the most important packages for this example. The <a href="https://mlr3learners.mlr-org.com">mlr3learners</a> package loads additional <a href="https://mlr3.mlr-org.com/reference/Learner.html"><code>learners</code></a>. The data is part of the <a href="https://mlr3data.mlr-org.com">mlr3data</a> package.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='st'><a href='https://mlr3.mlr-org.com'>"mlr3"</a></span><span class='op'>)</span>
-<span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='st'><a href='https://mlr3learners.mlr-org.com'>"mlr3learners"</a></span><span class='op'>)</span>
-<span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='st'><a href='https://mlr3pipelines.mlr-org.com'>"mlr3pipelines"</a></span><span class='op'>)</span>
-<span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='st'><a href='https://github.com/mlr-org/mlr3data'>"mlr3data"</a></span><span class='op'>)</span>
-<span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='st'><a href='https://mlr3misc.mlr-org.com'>"mlr3misc"</a></span><span class='op'>)</span>
-<span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='st'><a href='https://mlr3viz.mlr-org.com'>"mlr3viz"</a></span><span class='op'>)</span>
-<span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span><span class='op'>(</span><span class='st'>"titanic"</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://mlr3verse.mlr-org.com'>mlr3verse</a></span><span class='op'>)</span>
+<span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://mlr3learners.mlr-org.com'>mlr3learners</a></span><span class='op'>)</span>
+</code></pre>
+</div>
+</div>
+<p>We initialize the random number generator with a fixed seed for reproducibility, and decrease the verbosity of the logger to keep the output clearly represented.</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/Random.html'>set.seed</a></span><span class='op'>(</span><span class='fl'>7832</span><span class='op'>)</span>
+<span class='fu'>lgr</span><span class='fu'>::</span><span class='fu'><a href='https://s-fleck.github.io/lgr/reference/get_logger.html'>get_logger</a></span><span class='op'>(</span><span class='st'>"mlr3"</span><span class='op'>)</span><span class='op'>$</span><span class='fu'>set_threshold</span><span class='op'>(</span><span class='st'>"warn"</span><span class='op'>)</span>
 </code></pre>
 </div>
 </div>
@@ -2141,487 +2144,571 @@ document.addEventListener('DOMContentLoaded', function() {
 <li>Splitting data into train and test data sets</li>
 <li>Defining a task and a learner</li>
 </ul>
-<p>In order to obtain solutions comparable to official leaderboards, such as the ones available from kaggle, we split the data into train and test set before doing any further analysis. Here we are using the predefined split used by Kaggle.</p>
-<div class="layout-chunk" data-layout="l-body">
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>titanic_train</span> <span class='op'>&lt;-</span> <span class='va'>titanic</span><span class='op'>[</span><span class='fl'>1</span><span class='op'>:</span><span class='fl'>891</span>, <span class='op'>]</span>
-<span class='va'>titanic_test</span> <span class='op'>&lt;-</span> <span class='va'>titanic</span><span class='op'>[</span><span class='fl'>892</span><span class='op'>:</span><span class='fl'>1309</span>, <span class='op'>]</span>
-</code></pre>
-</div>
-</div>
 <h2 id="exploratory-data-analysis">Exploratory Data Analysis</h2>
 <p>With the dataset, we get an explanation of the meanings of the different variables:</p>
-<pre><code>survived        Survival
-                (0 = No; 1 = Yes)
-pclass          Passenger Class
-                (1 = 1st; 2 = 2nd; 3 = 3rd)
-name            Name
-sex             Sex
-age             Age
-sibsp           Number of Siblings/Spouses Aboard
-parch           Number of Parents/Children Aboard
-ticket          Ticket Number
-fare            Passenger Fare
-cabin           Cabin
-embarked        Port of Embarkation
-                (C = Cherbourg; Q = Queenstown; S = Southampton)</code></pre>
-<p>We can use the <code>skimr</code> package in order to get a first overview of the data:</p>
-<div class="layout-chunk" data-layout="l-body">
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'>skimr</span><span class='fu'>::</span><span class='fu'><a href='https://docs.ropensci.org/skimr/reference/skim.html'>skim</a></span><span class='op'>(</span><span class='va'>titanic_train</span><span class='op'>)</span>
-</code></pre>
-</div>
 <table>
-<caption><span id="tab:2020-03-12-mlr3pipelines-titanic-Basics-004">Table 1: </span>Data summary</caption>
+<thead>
+<tr class="header">
+<th>Variables</th>
+<th>Description</th>
+</tr>
+</thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: left;">Name</td>
-<td style="text-align: left;">titanic_train</td>
+<td><code>survived</code></td>
+<td>Survival</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">Number of rows</td>
-<td style="text-align: left;">891</td>
+<td><code>name</code></td>
+<td>Name</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">Number of columns</td>
-<td style="text-align: left;">11</td>
+<td><code>age</code></td>
+<td>Age</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">_______________________</td>
-<td style="text-align: left;"></td>
+<td><code>sex</code></td>
+<td>Sex</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">Column type frequency:</td>
-<td style="text-align: left;"></td>
+<td><code>sib_sp</code></td>
+<td>Number of siblings / spouses aboard</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">character</td>
-<td style="text-align: left;">3</td>
+<td><code>parch</code></td>
+<td>Number of parents / children aboard</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">factor</td>
-<td style="text-align: left;">4</td>
+<td><code>fare</code></td>
+<td>Amount paid for the ticket</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">numeric</td>
-<td style="text-align: left;">4</td>
+<td><code>pc_class</code></td>
+<td>Passenger class</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">________________________</td>
-<td style="text-align: left;"></td>
+<td><code>embarked</code></td>
+<td>Port of embarkation</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">Group variables</td>
-<td style="text-align: left;">None</td>
+<td><code>ticket</code></td>
+<td>Ticket number</td>
+</tr>
+<tr class="odd">
+<td><code>cabin</code></td>
+<td>Cabin</td>
+</tr>
+</tbody>
+</table>
+<p>We can use the <a href="https://cran.r-project.org/package=skimr">skimr</a> package in order to get a first overview of the data:</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span><span class='op'>(</span><span class='st'>"titanic"</span>, package <span class='op'>=</span> <span class='st'>"mlr3data"</span><span class='op'>)</span>
+
+<span class='fu'>skimr</span><span class='fu'>::</span><span class='fu'><a href='https://docs.ropensci.org/skimr/reference/skim.html'>skim</a></span><span class='op'>(</span><span class='va'>titanic</span><span class='op'>)</span>
+</code></pre>
+</div>
+<table style='width: auto;'
+        class='table table-condensed'>
+<caption>
+<span id="tab:2020-03-12-mlr3pipelines-titanic-Basics-004">Table 1: </span>Data summary
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:left;">
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Name
+</td>
+<td style="text-align:left;">
+titanic
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Number of rows
+</td>
+<td style="text-align:left;">
+1309
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Number of columns
+</td>
+<td style="text-align:left;">
+11
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+_______________________
+</td>
+<td style="text-align:left;">
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Column type frequency:
+</td>
+<td style="text-align:left;">
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+character
+</td>
+<td style="text-align:left;">
+3
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+factor
+</td>
+<td style="text-align:left;">
+4
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+numeric
+</td>
+<td style="text-align:left;">
+4
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+________________________
+</td>
+<td style="text-align:left;">
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Group variables
+</td>
+<td style="text-align:left;">
+None
+</td>
 </tr>
 </tbody>
 </table>
 <p><strong>Variable type: character</strong></p>
 <table>
 <thead>
-<tr class="header">
-<th style="text-align: left;">skim_variable</th>
-<th style="text-align: right;">n_missing</th>
-<th style="text-align: right;">complete_rate</th>
-<th style="text-align: right;">min</th>
-<th style="text-align: right;">max</th>
-<th style="text-align: right;">empty</th>
-<th style="text-align: right;">n_unique</th>
-<th style="text-align: right;">whitespace</th>
+<tr>
+<th style="text-align:left;">
+skim_variable
+</th>
+<th style="text-align:right;">
+n_missing
+</th>
+<th style="text-align:right;">
+complete_rate
+</th>
+<th style="text-align:right;">
+min
+</th>
+<th style="text-align:right;">
+max
+</th>
+<th style="text-align:right;">
+empty
+</th>
+<th style="text-align:right;">
+n_unique
+</th>
+<th style="text-align:right;">
+whitespace
+</th>
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
-<td style="text-align: left;">name</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">1.00</td>
-<td style="text-align: right;">12</td>
-<td style="text-align: right;">82</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">891</td>
-<td style="text-align: right;">0</td>
+<tr>
+<td style="text-align:left;">
+name
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1.00
+</td>
+<td style="text-align:right;">
+12
+</td>
+<td style="text-align:right;">
+82
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1307
+</td>
+<td style="text-align:right;">
+0
+</td>
 </tr>
-<tr class="even">
-<td style="text-align: left;">ticket</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">1.00</td>
-<td style="text-align: right;">3</td>
-<td style="text-align: right;">18</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">681</td>
-<td style="text-align: right;">0</td>
+<tr>
+<td style="text-align:left;">
+ticket
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1.00
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+18
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+929
+</td>
+<td style="text-align:right;">
+0
+</td>
 </tr>
-<tr class="odd">
-<td style="text-align: left;">cabin</td>
-<td style="text-align: right;">687</td>
-<td style="text-align: right;">0.23</td>
-<td style="text-align: right;">1</td>
-<td style="text-align: right;">15</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">147</td>
-<td style="text-align: right;">0</td>
+<tr>
+<td style="text-align:left;">
+cabin
+</td>
+<td style="text-align:right;">
+1014
+</td>
+<td style="text-align:right;">
+0.23
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+15
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+186
+</td>
+<td style="text-align:right;">
+0
+</td>
 </tr>
 </tbody>
 </table>
 <p><strong>Variable type: factor</strong></p>
 <table>
 <thead>
-<tr class="header">
-<th style="text-align: left;">skim_variable</th>
-<th style="text-align: right;">n_missing</th>
-<th style="text-align: right;">complete_rate</th>
-<th style="text-align: left;">ordered</th>
-<th style="text-align: right;">n_unique</th>
-<th style="text-align: left;">top_counts</th>
+<tr>
+<th style="text-align:left;">
+skim_variable
+</th>
+<th style="text-align:right;">
+n_missing
+</th>
+<th style="text-align:right;">
+complete_rate
+</th>
+<th style="text-align:left;">
+ordered
+</th>
+<th style="text-align:right;">
+n_unique
+</th>
+<th style="text-align:left;">
+top_counts
+</th>
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
-<td style="text-align: left;">survived</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">1</td>
-<td style="text-align: left;">FALSE</td>
-<td style="text-align: right;">2</td>
-<td style="text-align: left;">no: 549, yes: 342</td>
+<tr>
+<td style="text-align:left;">
+survived
+</td>
+<td style="text-align:right;">
+418
+</td>
+<td style="text-align:right;">
+0.68
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:left;">
+no: 549, yes: 342
+</td>
 </tr>
-<tr class="even">
-<td style="text-align: left;">pclass</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">1</td>
-<td style="text-align: left;">TRUE</td>
-<td style="text-align: right;">3</td>
-<td style="text-align: left;">3: 491, 1: 216, 2: 184</td>
+<tr>
+<td style="text-align:left;">
+pclass
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1.00
+</td>
+<td style="text-align:left;">
+TRUE
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:left;">
+3: 709, 1: 323, 2: 277
+</td>
 </tr>
-<tr class="odd">
-<td style="text-align: left;">sex</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">1</td>
-<td style="text-align: left;">FALSE</td>
-<td style="text-align: right;">2</td>
-<td style="text-align: left;">mal: 577, fem: 314</td>
+<tr>
+<td style="text-align:left;">
+sex
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1.00
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:left;">
+mal: 843, fem: 466
+</td>
 </tr>
-<tr class="even">
-<td style="text-align: left;">embarked</td>
-<td style="text-align: right;">2</td>
-<td style="text-align: right;">1</td>
-<td style="text-align: left;">FALSE</td>
-<td style="text-align: right;">3</td>
-<td style="text-align: left;">S: 644, C: 168, Q: 77</td>
+<tr>
+<td style="text-align:left;">
+embarked
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+1.00
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:left;">
+S: 914, C: 270, Q: 123
+</td>
 </tr>
 </tbody>
 </table>
 <p><strong>Variable type: numeric</strong></p>
 <table>
 <thead>
-<tr class="header">
-<th style="text-align: left;">skim_variable</th>
-<th style="text-align: right;">n_missing</th>
-<th style="text-align: right;">complete_rate</th>
-<th style="text-align: right;">mean</th>
-<th style="text-align: right;">sd</th>
-<th style="text-align: right;">p0</th>
-<th style="text-align: right;">p25</th>
-<th style="text-align: right;">p50</th>
-<th style="text-align: right;">p75</th>
-<th style="text-align: right;">p100</th>
-<th style="text-align: left;">hist</th>
+<tr>
+<th style="text-align:left;">
+skim_variable
+</th>
+<th style="text-align:right;">
+n_missing
+</th>
+<th style="text-align:right;">
+complete_rate
+</th>
+<th style="text-align:right;">
+mean
+</th>
+<th style="text-align:right;">
+sd
+</th>
+<th style="text-align:right;">
+p0
+</th>
+<th style="text-align:right;">
+p25
+</th>
+<th style="text-align:right;">
+p50
+</th>
+<th style="text-align:right;">
+p75
+</th>
+<th style="text-align:right;">
+p100
+</th>
+<th style="text-align:left;">
+hist
+</th>
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
-<td style="text-align: left;">age</td>
-<td style="text-align: right;">177</td>
-<td style="text-align: right;">0.8</td>
-<td style="text-align: right;">29.70</td>
-<td style="text-align: right;">14.53</td>
-<td style="text-align: right;">0.42</td>
-<td style="text-align: right;">20.12</td>
-<td style="text-align: right;">28.00</td>
-<td style="text-align: right;">38</td>
-<td style="text-align: right;">80.00</td>
-<td style="text-align: left;">▂▇▅▂▁</td>
+<tr>
+<td style="text-align:left;">
+age
+</td>
+<td style="text-align:right;">
+263
+</td>
+<td style="text-align:right;">
+0.8
+</td>
+<td style="text-align:right;">
+29.88
+</td>
+<td style="text-align:right;">
+14.41
+</td>
+<td style="text-align:right;">
+0.17
+</td>
+<td style="text-align:right;">
+21.0
+</td>
+<td style="text-align:right;">
+28.00
+</td>
+<td style="text-align:right;">
+39.00
+</td>
+<td style="text-align:right;">
+80.00
+</td>
+<td style="text-align:left;">
+▂▇▅▂▁
+</td>
 </tr>
-<tr class="even">
-<td style="text-align: left;">sib_sp</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">1.0</td>
-<td style="text-align: right;">0.52</td>
-<td style="text-align: right;">1.10</td>
-<td style="text-align: right;">0.00</td>
-<td style="text-align: right;">0.00</td>
-<td style="text-align: right;">0.00</td>
-<td style="text-align: right;">1</td>
-<td style="text-align: right;">8.00</td>
-<td style="text-align: left;">▇▁▁▁▁</td>
+<tr>
+<td style="text-align:left;">
+sib_sp
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1.0
+</td>
+<td style="text-align:right;">
+0.50
+</td>
+<td style="text-align:right;">
+1.04
+</td>
+<td style="text-align:right;">
+0.00
+</td>
+<td style="text-align:right;">
+0.0
+</td>
+<td style="text-align:right;">
+0.00
+</td>
+<td style="text-align:right;">
+1.00
+</td>
+<td style="text-align:right;">
+8.00
+</td>
+<td style="text-align:left;">
+▇▁▁▁▁
+</td>
 </tr>
-<tr class="odd">
-<td style="text-align: left;">parch</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">1.0</td>
-<td style="text-align: right;">0.38</td>
-<td style="text-align: right;">0.81</td>
-<td style="text-align: right;">0.00</td>
-<td style="text-align: right;">0.00</td>
-<td style="text-align: right;">0.00</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">6.00</td>
-<td style="text-align: left;">▇▁▁▁▁</td>
+<tr>
+<td style="text-align:left;">
+parch
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1.0
+</td>
+<td style="text-align:right;">
+0.39
+</td>
+<td style="text-align:right;">
+0.87
+</td>
+<td style="text-align:right;">
+0.00
+</td>
+<td style="text-align:right;">
+0.0
+</td>
+<td style="text-align:right;">
+0.00
+</td>
+<td style="text-align:right;">
+0.00
+</td>
+<td style="text-align:right;">
+9.00
+</td>
+<td style="text-align:left;">
+▇▁▁▁▁
+</td>
 </tr>
-<tr class="even">
-<td style="text-align: left;">fare</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">1.0</td>
-<td style="text-align: right;">32.20</td>
-<td style="text-align: right;">49.69</td>
-<td style="text-align: right;">0.00</td>
-<td style="text-align: right;">7.91</td>
-<td style="text-align: right;">14.45</td>
-<td style="text-align: right;">31</td>
-<td style="text-align: right;">512.33</td>
-<td style="text-align: left;">▇▁▁▁▁</td>
-</tr>
-</tbody>
-</table>
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'>skimr</span><span class='fu'>::</span><span class='fu'><a href='https://docs.ropensci.org/skimr/reference/skim.html'>skim</a></span><span class='op'>(</span><span class='va'>titanic_test</span><span class='op'>)</span>
-</code></pre>
-</div>
-<table>
-<caption><span id="tab:2020-03-12-mlr3pipelines-titanic-Basics-004">Table 1: </span>Data summary</caption>
-<tbody>
-<tr class="odd">
-<td style="text-align: left;">Name</td>
-<td style="text-align: left;">titanic_test</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">Number of rows</td>
-<td style="text-align: left;">418</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">Number of columns</td>
-<td style="text-align: left;">11</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">_______________________</td>
-<td style="text-align: left;"></td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">Column type frequency:</td>
-<td style="text-align: left;"></td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">character</td>
-<td style="text-align: left;">3</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">factor</td>
-<td style="text-align: left;">4</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">numeric</td>
-<td style="text-align: left;">4</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">________________________</td>
-<td style="text-align: left;"></td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">Group variables</td>
-<td style="text-align: left;">None</td>
-</tr>
-</tbody>
-</table>
-<p><strong>Variable type: character</strong></p>
-<table>
-<thead>
-<tr class="header">
-<th style="text-align: left;">skim_variable</th>
-<th style="text-align: right;">n_missing</th>
-<th style="text-align: right;">complete_rate</th>
-<th style="text-align: right;">min</th>
-<th style="text-align: right;">max</th>
-<th style="text-align: right;">empty</th>
-<th style="text-align: right;">n_unique</th>
-<th style="text-align: right;">whitespace</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td style="text-align: left;">name</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">1.00</td>
-<td style="text-align: right;">13</td>
-<td style="text-align: right;">63</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">418</td>
-<td style="text-align: right;">0</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">ticket</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">1.00</td>
-<td style="text-align: right;">3</td>
-<td style="text-align: right;">18</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">363</td>
-<td style="text-align: right;">0</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">cabin</td>
-<td style="text-align: right;">327</td>
-<td style="text-align: right;">0.22</td>
-<td style="text-align: right;">1</td>
-<td style="text-align: right;">15</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">76</td>
-<td style="text-align: right;">0</td>
-</tr>
-</tbody>
-</table>
-<p><strong>Variable type: factor</strong></p>
-<table>
-<thead>
-<tr class="header">
-<th style="text-align: left;">skim_variable</th>
-<th style="text-align: right;">n_missing</th>
-<th style="text-align: right;">complete_rate</th>
-<th style="text-align: left;">ordered</th>
-<th style="text-align: right;">n_unique</th>
-<th style="text-align: left;">top_counts</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td style="text-align: left;">survived</td>
-<td style="text-align: right;">418</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: left;">FALSE</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: left;">yes: 0, no: 0</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">pclass</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">1</td>
-<td style="text-align: left;">TRUE</td>
-<td style="text-align: right;">3</td>
-<td style="text-align: left;">3: 218, 1: 107, 2: 93</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">sex</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">1</td>
-<td style="text-align: left;">FALSE</td>
-<td style="text-align: right;">2</td>
-<td style="text-align: left;">mal: 266, fem: 152</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">embarked</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">1</td>
-<td style="text-align: left;">FALSE</td>
-<td style="text-align: right;">3</td>
-<td style="text-align: left;">S: 270, C: 102, Q: 46</td>
-</tr>
-</tbody>
-</table>
-<p><strong>Variable type: numeric</strong></p>
-<table>
-<thead>
-<tr class="header">
-<th style="text-align: left;">skim_variable</th>
-<th style="text-align: right;">n_missing</th>
-<th style="text-align: right;">complete_rate</th>
-<th style="text-align: right;">mean</th>
-<th style="text-align: right;">sd</th>
-<th style="text-align: right;">p0</th>
-<th style="text-align: right;">p25</th>
-<th style="text-align: right;">p50</th>
-<th style="text-align: right;">p75</th>
-<th style="text-align: right;">p100</th>
-<th style="text-align: left;">hist</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td style="text-align: left;">age</td>
-<td style="text-align: right;">86</td>
-<td style="text-align: right;">0.79</td>
-<td style="text-align: right;">30.27</td>
-<td style="text-align: right;">14.18</td>
-<td style="text-align: right;">0.17</td>
-<td style="text-align: right;">21.0</td>
-<td style="text-align: right;">27.00</td>
-<td style="text-align: right;">39.0</td>
-<td style="text-align: right;">76.00</td>
-<td style="text-align: left;">▂▇▃▂▁</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">sib_sp</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">1.00</td>
-<td style="text-align: right;">0.45</td>
-<td style="text-align: right;">0.90</td>
-<td style="text-align: right;">0.00</td>
-<td style="text-align: right;">0.0</td>
-<td style="text-align: right;">0.00</td>
-<td style="text-align: right;">1.0</td>
-<td style="text-align: right;">8.00</td>
-<td style="text-align: left;">▇▁▁▁▁</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">parch</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">1.00</td>
-<td style="text-align: right;">0.39</td>
-<td style="text-align: right;">0.98</td>
-<td style="text-align: right;">0.00</td>
-<td style="text-align: right;">0.0</td>
-<td style="text-align: right;">0.00</td>
-<td style="text-align: right;">0.0</td>
-<td style="text-align: right;">9.00</td>
-<td style="text-align: left;">▇▁▁▁▁</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">fare</td>
-<td style="text-align: right;">1</td>
-<td style="text-align: right;">1.00</td>
-<td style="text-align: right;">35.63</td>
-<td style="text-align: right;">55.91</td>
-<td style="text-align: right;">0.00</td>
-<td style="text-align: right;">7.9</td>
-<td style="text-align: right;">14.45</td>
-<td style="text-align: right;">31.5</td>
-<td style="text-align: right;">512.33</td>
-<td style="text-align: left;">▇▁▁▁▁</td>
+<tr>
+<td style="text-align:left;">
+fare
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1.0
+</td>
+<td style="text-align:right;">
+33.30
+</td>
+<td style="text-align:right;">
+51.76
+</td>
+<td style="text-align:right;">
+0.00
+</td>
+<td style="text-align:right;">
+7.9
+</td>
+<td style="text-align:right;">
+14.45
+</td>
+<td style="text-align:right;">
+31.27
+</td>
+<td style="text-align:right;">
+512.33
+</td>
+<td style="text-align:left;">
+▇▁▁▁▁
+</td>
 </tr>
 </tbody>
 </table>
 </div>
-<!--
-Here we can also inspect the data for differences in the train and test set.
-This might be important, as shifts in the data distribution often make our models unreliable.
-
-<div class="layout-chunk" data-layout="l-body">
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class='co'>#DataExplorer::plot_bar(titanic_train, nrow = 5, ncol = 3)</span>
-</code></pre></div>
-
-</div>
-
-
-<div class="layout-chunk" data-layout="l-body">
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class='co'>#DataExplorer::plot_histogram(titanic_train, nrow = 2, ncol = 3)</span>
-<span class='co'>#DataExplorer::plot_boxplot(titanic_train, by = "survived", nrow = 2, ncol = 3)</span>
-</code></pre></div>
-
-</div>
-
--->
-<p>We can now create a <code>Task</code> from our data. As we want to classify whether the person survived or not, we will create a <code>TaskClassif</code>. We’ll ignore the ‘titanic_test’ data for now and come back to it later.</p>
+<p>We can now create a <a href="https://mlr3.mlr-org.com/reference/Task.html"><code>Task</code></a> from our data. As we want to classify whether the person survived or not, we will create a <a href="https://mlr3.mlr-org.com/reference/TaskClassif.html"><code>TaskClassif</code></a>. We’ll ignore the ‘titanic_test’ data for now and come back to it later.</p>
 <h2 id="a-first-model">A first model</h2>
+<p>In order to obtain solutions comparable to official leaderboards, such as the ones available from kaggle, we split the data into train and validation set before doing any further analysis. Here we are using the predefined split used by Kaggle.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>task</span> <span class='op'>&lt;-</span> <span class='va'><a href='https://mlr3.mlr-org.com/reference/TaskClassif.html'>TaskClassif</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='st'>"titanic"</span>, <span class='va'>titanic_train</span>, target <span class='op'>=</span> <span class='st'>"survived"</span>, positive <span class='op'>=</span> <span class='st'>"yes"</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>task</span> <span class='op'>=</span> <span class='fu'>as_task_classif</span><span class='op'>(</span><span class='va'>titanic</span>, target <span class='op'>=</span> <span class='st'>"survived"</span>, positive <span class='op'>=</span> <span class='st'>"yes"</span><span class='op'>)</span>
+<span class='va'>task</span><span class='op'>$</span><span class='fu'>set_row_roles</span><span class='op'>(</span><span class='fl'>892</span><span class='op'>:</span><span class='fl'>1309</span>, <span class='st'>"validation"</span><span class='op'>)</span>
 <span class='va'>task</span>
 </code></pre>
 </div>
@@ -2635,7 +2722,7 @@ This might be important, as shifts in the data distribution often make our model
   - int (2): parch, sib_sp
   - ord (1): pclass</code></pre>
 </div>
-<p>Our <code>Task</code> currently has <span class="math inline">\(3\)</span> features of type <code>character</code>, which we don’t really know how to handle: “Cabin”, “Name”, “Ticket” and “PassengerId”. Additionally, from our <code>skim</code> of the data, we have seen, that they have many unique values (up to 891).</p>
+<p>Our <a href="https://mlr3.mlr-org.com/reference/Task.html"><code>Task</code></a> currently has <span class="math inline">\(3\)</span> features of type <code>character</code>, which we don’t really know how to handle: “Cabin”, “Name”, “Ticket” and “PassengerId”. Additionally, from our <a href="https://www.rdocumentation.org/packages/skimr/topics/skim"><code>skimr::skim()</code></a> of the data, we have seen, that they have many unique values (up to 891).</p>
 <p>We’ll drop them for now and see how we can deal with them later on.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
@@ -2646,42 +2733,42 @@ This might be important, as shifts in the data distribution often make our model
 <p>Additionally, we create a resampling instance that allows to compare data.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>rdesc</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>rsmp</a></span><span class='op'>(</span><span class='st'>"cv"</span>, folds <span class='op'>=</span> <span class='fl'>3L</span><span class='op'>)</span><span class='op'>$</span><span class='fu'>instantiate</span><span class='op'>(</span><span class='va'>task</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>cv3</span> <span class='op'>=</span> <span class='fu'>rsmp</span><span class='op'>(</span><span class='st'>"cv"</span>, folds <span class='op'>=</span> <span class='fl'>3L</span><span class='op'>)</span><span class='op'>$</span><span class='fu'>instantiate</span><span class='op'>(</span><span class='va'>task</span><span class='op'>)</span>
 </code></pre>
 </div>
 </div>
 <p>To get a first impression of what performance we can fit a simple decision tree:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>learner</span> <span class='op'>&lt;-</span> <span class='va'>mlr_learners</span><span class='op'>$</span><span class='fu'>get</span><span class='op'>(</span><span class='st'>"classif.rpart"</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>learner</span> <span class='op'>=</span> <span class='va'>mlr_learners</span><span class='op'>$</span><span class='fu'>get</span><span class='op'>(</span><span class='st'>"classif.rpart"</span><span class='op'>)</span>
 <span class='co'># or shorter:</span>
-<span class='va'>learner</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>lrn</a></span><span class='op'>(</span><span class='st'>"classif.rpart"</span><span class='op'>)</span>
+<span class='va'>learner</span> <span class='op'>=</span> <span class='fu'>lrn</span><span class='op'>(</span><span class='st'>"classif.rpart"</span><span class='op'>)</span>
 
-<span class='va'>res</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/resample.html'>resample</a></span><span class='op'>(</span><span class='va'>task</span>, <span class='va'>learner</span>, <span class='va'>rdesc</span>, store_models <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>
-<span class='va'>agg</span> <span class='op'>&lt;-</span> <span class='va'>res</span><span class='op'>$</span><span class='fu'>aggregate</span><span class='op'>(</span><span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>msr</a></span><span class='op'>(</span><span class='st'>"classif.acc"</span><span class='op'>)</span><span class='op'>)</span>
-<span class='va'>agg</span>
+<span class='va'>rr</span> <span class='op'>=</span> <span class='fu'>resample</span><span class='op'>(</span><span class='va'>task</span>, <span class='va'>learner</span>, <span class='va'>cv3</span>, store_models <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>
+
+<span class='va'>rr</span><span class='op'>$</span><span class='fu'>aggregate</span><span class='op'>(</span><span class='fu'>msr</span><span class='op'>(</span><span class='st'>"classif.acc"</span><span class='op'>)</span><span class='op'>)</span>
 </code></pre>
 </div>
 <pre><code>classif.acc 
-  0.8080808 </code></pre>
+  0.8013468 </code></pre>
 </div>
-<p>So our model should have a minimal accuracy of 0.808 in order to improve over the simple decision tree. In order to improve more, we might need to do some feature engineering.</p>
+<p>So our model should have a minimal accuracy of <code>0.80</code> in order to improve over the simple decision tree. In order to improve more, we might need to do some feature engineering.</p>
 <h1 id="optimizing-the-model">Optimizing the model</h1>
 <p>If we now try to fit a ‘ranger’ random forest model, we will get an error, as ‘ranger’ models can not naturally handle missing values.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>learner</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>lrn</a></span><span class='op'>(</span><span class='st'>"classif.ranger"</span><span class='op'>)</span>
-<span class='va'>learner</span><span class='op'>$</span><span class='va'>param_set</span><span class='op'>$</span><span class='va'>values</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>num.trees <span class='op'>=</span> <span class='fl'>250</span>, min.node.size <span class='op'>=</span> <span class='fl'>4</span><span class='op'>)</span>
-<span class='va'>res</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/resample.html'>resample</a></span><span class='op'>(</span><span class='va'>task</span>, <span class='va'>learner</span>, <span class='va'>rdesc</span>, store_models <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>learner</span> <span class='op'>=</span> <span class='fu'>lrn</span><span class='op'>(</span><span class='st'>"classif.ranger"</span>, num.trees <span class='op'>=</span> <span class='fl'>250</span>, min.node.size <span class='op'>=</span> <span class='fl'>4</span><span class='op'>)</span>
+
+<span class='va'>rr</span> <span class='op'>=</span> <span class='fu'>resample</span><span class='op'>(</span><span class='va'>task</span>, <span class='va'>learner</span>, <span class='va'>cv3</span>, store_models <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>
 </code></pre>
 </div>
-<pre><code>Error: Missing data in columns: age, embarked.</code></pre>
+<pre><code>Error: Task &#39;titanic&#39; has missing values in column(s) &#39;age&#39;, &#39;embarked&#39;, but learner &#39;classif.ranger&#39; does not support this</code></pre>
 </div>
 <p>This means we have to find a way to impute the missing values. To learn how to use more advanced commands of the mlr3pipelines package see:</p>
 <ul>
 <li><a href="https://mlr3gallery.mlr-org.com/posts/2020-04-27-mlr3pipelines-Imputation-titanic/">Part II - Pipelines</a></li>
 </ul>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
 <!--radix_placeholder_article_footer-->
 <!--/radix_placeholder_article_footer-->
 </div>
