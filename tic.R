@@ -5,7 +5,6 @@ get_stage("install") %>%
 if (ci_get_env("WEEKLY") == "true") {
   get_stage("script") %>%
     add_code_step({
-      remotes::install_version("rmarkdown", version = "2.10", repos = "http://cran.us.r-project.org") # 2.11 breaks distill
       files = list.files("_posts/", pattern = ".Rmd", full.names = TRUE, recursive = TRUE)
       for (f in files) {
         rmarkdown::render(f, encoding = "UTF-8", params = list(eval_all = TRUE))
@@ -15,7 +14,6 @@ if (ci_get_env("WEEKLY") == "true") {
 
   get_stage("script") %>%
     add_code_step({
-      remotes::install_version("rmarkdown", version = "2.10", repos = "http://cran.us.r-project.org") # 2.11 breaks distill
       files = list.files("_posts/", pattern = ".Rmd", full.names = TRUE, recursive = TRUE)
       for (f in files) {
         rmarkdown::render(f)
