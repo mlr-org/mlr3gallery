@@ -3,14 +3,11 @@
 # [Custom header]
 on:
   workflow_dispatch:
-  push:
-  pull_request:
-  # for now, CRON jobs only run on the default branch of the repo (i.e. usually on master)
   schedule:
     # * is a special character in YAML so you have to quote this string
-    - cron: "0 4 7 * *"
+    - cron: "0 4 * * *"
 
-name: tic
+name: eval-all-weekly
 
 jobs:
   all:
@@ -44,6 +41,7 @@ jobs:
       SDKROOT: /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk
       # use GITHUB_TOKEN from GitHub to workaround rate limits in {remotes}
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      WEEKLY: true
 
     steps:
       - uses: actions/checkout@v2
