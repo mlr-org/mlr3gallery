@@ -56,7 +56,7 @@ code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 code span.al { color: #ad0000; } /* Alert */
 code span.an { color: #5e5e5e; } /* Annotation */
-code span.at { color: #20794d; } /* Attribute */
+code span.at { } /* Attribute */
 code span.bn { color: #ad0000; } /* BaseN */
 code span.bu { } /* BuiltIn */
 code span.cf { color: #007ba5; } /* ControlFlow */
@@ -77,13 +77,14 @@ code span.kw { color: #007ba5; } /* Keyword */
 code span.op { color: #5e5e5e; } /* Operator */
 code span.ot { color: #007ba5; } /* Other */
 code span.pp { color: #ad0000; } /* Preprocessor */
-code span.sc { color: #20794d; } /* SpecialChar */
+code span.sc { color: #5e5e5e; } /* SpecialChar */
 code span.ss { color: #20794d; } /* SpecialString */
 code span.st { color: #20794d; } /* String */
 code span.va { color: #111111; } /* Variable */
 code span.vs { color: #20794d; } /* VerbatimString */
 code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 </style>
+
 
   <!--radix_placeholder_meta_tags-->
 <title>mlr3gallery: Regression Chains</title>
@@ -479,7 +480,7 @@ d-title {
 
 </style>
 
-<script src="../../site_libs/jquery-1.11.3/jquery.min.js"></script>
+<script src="../../site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <link href="../../site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet"/>
 <link href="../../site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet"/>
 <script src="../../site_libs/headroom-0.9.4/headroom.min.js"></script>
@@ -1886,7 +1887,10 @@ function init_distill() {
 
     // hoverable references
     $('span.citation[data-cites]').each(function() {
-      var refHtml = $('#ref-' + $(this).attr('data-cites')).html();
+      var refs = $(this).attr('data-cites').split(" ");
+      var refHtml = refs.map(function(ref) {
+        return "<p>" + $('#ref-' + ref).html() + "</p>";
+      }).join("\n");
       window.tippy(this, {
         allowHTML: true,
         content: refHtml,
@@ -2057,7 +2061,7 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 <!--/radix_placeholder_distill-->
-  <script src="../../site_libs/jquery-1.11.3/jquery.min.js"></script>
+  <script src="../../site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
   <script src="../../site_libs/popper-2.6.0/popper.min.js"></script>
   <link href="../../site_libs/tippy-6.2.7/tippy.css" rel="stylesheet" />
   <link href="../../site_libs/tippy-6.2.7/tippy-light-border.css" rel="stylesheet" />
@@ -2198,7 +2202,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>If you feel confident to already have a good feeling of the data, feel free to skip this section. If not, you can use the <a href="https://cran.r-project.org/package=rgl">rgl</a> package to play around with the following four 3D plots with either the feature variables or <span class="math inline">\(y_{1}\)</span> and <span class="math inline">\(y_{2}\)</span> on the x- and y-axis and the target variables on the respective z-axes:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'>rgl</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://github.com/dmurdoch/rgl'>rgl</a></span><span class='op'>)</span>
 <span class='va'>colfun</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/grDevices/colorRamp.html'>colorRampPalette</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"#161B1D"</span>, <span class='st'>"#ADD8E6"</span><span class='op'>)</span><span class='op'>)</span>
 </code></pre>
 </div>
@@ -2243,7 +2247,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>In our regression chain, the first model will predict <span class="math inline">\(y_{1}\)</span>. Therefore, we initialize our <a href="https://mlr3.mlr-org.com/reference/Task.html"><code>Task</code></a> with respect to this target:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>task</span> <span class='op'>=</span> <span class='fu'>as_task_regr</span><span class='op'>(</span><span class='va'>data</span>, id <span class='op'>=</span> <span class='st'>"multiregression"</span>, target <span class='op'>=</span> <span class='st'>"y1"</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>task</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/as_task_regr.html'>as_task_regr</a></span><span class='op'>(</span><span class='va'>data</span>, id <span class='op'>=</span> <span class='st'>"multiregression"</span>, target <span class='op'>=</span> <span class='st'>"y1"</span><span class='op'>)</span>
 </code></pre>
 </div>
 </div>
@@ -2256,13 +2260,13 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>To combine predictions of a <a href="https://mlr3.mlr-org.com/reference/Learner.html"><code>Learner</code></a> with the previous input, we rely on <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_learner_cv.html"><code>PipeOpLearnerCV</code></a> and <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_nop.html"><code>PipeOpNOP</code></a> arranged in parallel via <a href="https://mlr3pipelines.mlr-org.com/reference/gunion.html"><code>gunion()</code></a> combined via <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_featureunion.html"><code>PipeOpFeatureUnion</code></a>. To drop the respective remaining target variables as features, we rely on <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_colroles.html"><code>PipeOpColRoles</code></a>. The first step of predicting <span class="math inline">\(y_{1}\)</span> looks like the following:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>step1</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"copy"</span>, outnum <span class='op'>=</span> <span class='fl'>2</span>, id <span class='op'>=</span> <span class='st'>"copy1"</span><span class='op'>)</span> <span class='op'>%&gt;&gt;%</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>step1</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"copy"</span>, outnum <span class='op'>=</span> <span class='fl'>2</span>, id <span class='op'>=</span> <span class='st'>"copy1"</span><span class='op'>)</span> <span class='op'><a href='https://mlr3pipelines.mlr-org.com//reference/grapes-greater-than-greater-than-grapes.html'>%&gt;&gt;%</a></span>
   <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/gunion.html'>gunion</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>
     <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"colroles"</span>, id <span class='op'>=</span> <span class='st'>"drop_y2_y3"</span>,
-      new_role <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>y2 <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/character.html'>character</a></span><span class='op'>(</span><span class='op'>)</span>, y3 <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/character.html'>character</a></span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>%&gt;&gt;%</span>
-    <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"learner_cv"</span>, learner <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/pkg/mlr3extralearners/man/lrn.html'>lrn</a></span><span class='op'>(</span><span class='st'>"regr.lm"</span><span class='op'>)</span>, id <span class='op'>=</span> <span class='st'>"y1_learner"</span><span class='op'>)</span>,
+      new_role <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>y2 <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/character.html'>character</a></span><span class='op'>(</span><span class='op'>)</span>, y3 <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/character.html'>character</a></span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span> <span class='op'><a href='https://mlr3pipelines.mlr-org.com//reference/grapes-greater-than-greater-than-grapes.html'>%&gt;&gt;%</a></span>
+    <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"learner_cv"</span>, learner <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>lrn</a></span><span class='op'>(</span><span class='st'>"regr.lm"</span><span class='op'>)</span>, id <span class='op'>=</span> <span class='st'>"y1_learner"</span><span class='op'>)</span>,
     <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"nop"</span>, id <span class='op'>=</span> <span class='st'>"nop1"</span><span class='op'>)</span>
-  <span class='op'>)</span><span class='op'>)</span> <span class='op'>%&gt;&gt;%</span>
+  <span class='op'>)</span><span class='op'>)</span> <span class='op'><a href='https://mlr3pipelines.mlr-org.com//reference/grapes-greater-than-greater-than-grapes.html'>%&gt;&gt;%</a></span>
   <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"featureunion"</span>, id <span class='op'>=</span> <span class='st'>"union1"</span><span class='op'>)</span>
 <span class='va'>step1</span><span class='op'>$</span><span class='fu'>plot</span><span class='op'>(</span><span class='op'>)</span>
 </code></pre>
@@ -2326,7 +2330,16 @@ $y1_learner$log
 Empty data.table (0 rows and 3 cols): stage,class,msg
 
 $y1_learner$train_time
-[1] 0.003
+[1] 0.004
+
+$y1_learner$param_vals
+named list()
+
+$y1_learner$task_hash
+[1] &quot;05676d8fc6c820e6&quot;
+
+$y1_learner$task_prototype
+Empty data.table (0 rows and 3 cols): y1,x1,x2
 
 $y1_learner$train_task
 &lt;TaskRegr:multiregression&gt; (100 x 3)
@@ -2367,14 +2380,14 @@ list()</code></pre>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='va'>step2</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"update_target"</span>, id <span class='op'>=</span> <span class='st'>"y2_target"</span>,
-    new_target_name <span class='op'>=</span> <span class='st'>"y2"</span><span class='op'>)</span> <span class='op'>%&gt;&gt;%</span>
-  <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"copy"</span>, outnum <span class='op'>=</span> <span class='fl'>2</span>, id <span class='op'>=</span> <span class='st'>"copy2"</span><span class='op'>)</span> <span class='op'>%&gt;&gt;%</span>
+    new_target_name <span class='op'>=</span> <span class='st'>"y2"</span><span class='op'>)</span> <span class='op'><a href='https://mlr3pipelines.mlr-org.com//reference/grapes-greater-than-greater-than-grapes.html'>%&gt;&gt;%</a></span>
+  <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"copy"</span>, outnum <span class='op'>=</span> <span class='fl'>2</span>, id <span class='op'>=</span> <span class='st'>"copy2"</span><span class='op'>)</span> <span class='op'><a href='https://mlr3pipelines.mlr-org.com//reference/grapes-greater-than-greater-than-grapes.html'>%&gt;&gt;%</a></span>
   <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/gunion.html'>gunion</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>
     <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"colroles"</span>, id <span class='op'>=</span> <span class='st'>"drop_y3"</span>,
-      new_role <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>y3 <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/character.html'>character</a></span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>%&gt;&gt;%</span>
-    <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"learner_cv"</span>, learner <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/pkg/mlr3extralearners/man/lrn.html'>lrn</a></span><span class='op'>(</span><span class='st'>"regr.lm"</span><span class='op'>)</span>, id <span class='op'>=</span> <span class='st'>"y2_learner"</span><span class='op'>)</span>,
+      new_role <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>y3 <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/character.html'>character</a></span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span> <span class='op'><a href='https://mlr3pipelines.mlr-org.com//reference/grapes-greater-than-greater-than-grapes.html'>%&gt;&gt;%</a></span>
+    <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"learner_cv"</span>, learner <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>lrn</a></span><span class='op'>(</span><span class='st'>"regr.lm"</span><span class='op'>)</span>, id <span class='op'>=</span> <span class='st'>"y2_learner"</span><span class='op'>)</span>,
     <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"nop"</span>, id <span class='op'>=</span> <span class='st'>"nop2"</span><span class='op'>)</span>
-  <span class='op'>)</span><span class='op'>)</span> <span class='op'>%&gt;&gt;%</span>
+  <span class='op'>)</span><span class='op'>)</span> <span class='op'><a href='https://mlr3pipelines.mlr-org.com//reference/grapes-greater-than-greater-than-grapes.html'>%&gt;&gt;%</a></span>
   <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"featureunion"</span>, id <span class='op'>=</span> <span class='st'>"union2"</span><span class='op'>)</span>
 </code></pre>
 </div>
@@ -2440,7 +2453,16 @@ $y2_learner$log
 Empty data.table (0 rows and 3 cols): stage,class,msg
 
 $y2_learner$train_time
-[1] 0.008
+[1] 0.012
+
+$y2_learner$param_vals
+named list()
+
+$y2_learner$task_hash
+[1] &quot;d3d7ec59c525ad08&quot;
+
+$y2_learner$task_prototype
+Empty data.table (0 rows and 4 cols): y2,y1_learner.response,x1,x2
 
 $y2_learner$train_task
 &lt;TaskRegr:multiregression&gt; (100 x 4)
@@ -2476,8 +2498,8 @@ list()</code></pre>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='va'>step3</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"update_target"</span>, id <span class='op'>=</span> <span class='st'>"y3_target"</span>,
-    new_target_name <span class='op'>=</span> <span class='st'>"y3"</span><span class='op'>)</span> <span class='op'>%&gt;&gt;%</span>
-  <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"learner"</span>, learner <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/pkg/mlr3extralearners/man/lrn.html'>lrn</a></span><span class='op'>(</span><span class='st'>"regr.lm"</span><span class='op'>)</span>, id <span class='op'>=</span> <span class='st'>"y3_learner"</span><span class='op'>)</span>
+    new_target_name <span class='op'>=</span> <span class='st'>"y3"</span><span class='op'>)</span> <span class='op'><a href='https://mlr3pipelines.mlr-org.com//reference/grapes-greater-than-greater-than-grapes.html'>%&gt;&gt;%</a></span>
+  <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"learner"</span>, learner <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>lrn</a></span><span class='op'>(</span><span class='st'>"regr.lm"</span><span class='op'>)</span>, id <span class='op'>=</span> <span class='st'>"y3_learner"</span><span class='op'>)</span>
 </code></pre>
 </div>
 </div>
@@ -2511,7 +2533,16 @@ $y3_learner$log
 Empty data.table (0 rows and 3 cols): stage,class,msg
 
 $y3_learner$train_time
-[1] 0.009
+[1] 0.011
+
+$y3_learner$param_vals
+named list()
+
+$y3_learner$task_hash
+[1] &quot;e48e36feb4ec9d66&quot;
+
+$y3_learner$task_prototype
+Empty data.table (0 rows and 5 cols): y3,y2_learner.response,y1_learner.response,x1,x2
 
 $y3_learner$train_task
 &lt;TaskRegr:multiregression&gt; (100 x 5)
@@ -2523,7 +2554,7 @@ $y3_learner$train_task
 <p>The complete pipeline, more precisely <a href="https://mlr3pipelines.mlr-org.com/reference/Graph.html"><code>Graph</code></a>, looks like the following:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>graph</span> <span class='op'>=</span> <span class='va'>step1</span> <span class='op'>%&gt;&gt;%</span> <span class='va'>step2</span> <span class='op'>%&gt;&gt;%</span> <span class='va'>step3</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>graph</span> <span class='op'>=</span> <span class='va'>step1</span> <span class='op'><a href='https://mlr3pipelines.mlr-org.com//reference/grapes-greater-than-greater-than-grapes.html'>%&gt;&gt;%</a></span> <span class='va'>step2</span> <span class='op'><a href='https://mlr3pipelines.mlr-org.com//reference/grapes-greater-than-greater-than-grapes.html'>%&gt;&gt;%</a></span> <span class='va'>step3</span>
 <span class='va'>graph</span><span class='op'>$</span><span class='fu'>plot</span><span class='op'>(</span><span class='op'>)</span>
 </code></pre>
 </div>
@@ -2533,9 +2564,9 @@ $y3_learner$train_task
 <p>By wrapping our <a href="https://mlr3pipelines.mlr-org.com/reference/Graph.html"><code>Graph</code></a> in a <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_learners_graph.html"><code>GraphLearner</code></a>, we can perform <a href="https://mlr3.mlr-org.com/reference/mlr_resamplings_cv.html"><code>3-fold cross-validation</code></a> and get an estimated average of the root-mean-square error (of course, in a real world setting splitting the data in a training and test set should have been done):</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>learner</span> <span class='op'>=</span> <span class='fu'>as_learner</span><span class='op'>(</span><span class='va'>graph</span><span class='op'>)</span>
-<span class='va'>rr</span> <span class='op'>=</span> <span class='fu'>resample</span><span class='op'>(</span><span class='va'>task</span>, <span class='va'>learner</span>, <span class='fu'>rsmp</span><span class='op'>(</span><span class='st'>"cv"</span>, folds <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span><span class='op'>)</span>
-<span class='va'>rr</span><span class='op'>$</span><span class='fu'>aggregate</span><span class='op'>(</span><span class='fu'>msr</span><span class='op'>(</span><span class='st'>"regr.mse"</span><span class='op'>)</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>learner</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/as_learner.html'>as_learner</a></span><span class='op'>(</span><span class='va'>graph</span><span class='op'>)</span>
+<span class='va'>rr</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/resample.html'>resample</a></span><span class='op'>(</span><span class='va'>task</span>, <span class='va'>learner</span>, <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>rsmp</a></span><span class='op'>(</span><span class='st'>"cv"</span>, folds <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span><span class='op'>)</span>
+<span class='va'>rr</span><span class='op'>$</span><span class='fu'>aggregate</span><span class='op'>(</span><span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>msr</a></span><span class='op'>(</span><span class='st'>"regr.mse"</span><span class='op'>)</span><span class='op'>)</span>
 </code></pre>
 </div>
 <pre><code> regr.mse 

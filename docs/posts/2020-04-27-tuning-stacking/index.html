@@ -56,7 +56,7 @@ code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 code span.al { color: #ad0000; } /* Alert */
 code span.an { color: #5e5e5e; } /* Annotation */
-code span.at { color: #20794d; } /* Attribute */
+code span.at { } /* Attribute */
 code span.bn { color: #ad0000; } /* BaseN */
 code span.bu { } /* BuiltIn */
 code span.cf { color: #007ba5; } /* ControlFlow */
@@ -77,13 +77,14 @@ code span.kw { color: #007ba5; } /* Keyword */
 code span.op { color: #5e5e5e; } /* Operator */
 code span.ot { color: #007ba5; } /* Other */
 code span.pp { color: #ad0000; } /* Preprocessor */
-code span.sc { color: #20794d; } /* SpecialChar */
+code span.sc { color: #5e5e5e; } /* SpecialChar */
 code span.ss { color: #20794d; } /* SpecialString */
 code span.st { color: #20794d; } /* String */
 code span.va { color: #111111; } /* Variable */
 code span.vs { color: #20794d; } /* VerbatimString */
 code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 </style>
+
 
   <!--radix_placeholder_meta_tags-->
 <title>mlr3gallery: Tuning a Stacked Learner</title>
@@ -480,7 +481,7 @@ d-title {
 
 </style>
 
-<script src="../../site_libs/jquery-1.11.3/jquery.min.js"></script>
+<script src="../../site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <link href="../../site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet"/>
 <link href="../../site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet"/>
 <script src="../../site_libs/headroom-0.9.4/headroom.min.js"></script>
@@ -1887,7 +1888,10 @@ function init_distill() {
 
     // hoverable references
     $('span.citation[data-cites]').each(function() {
-      var refHtml = $('#ref-' + $(this).attr('data-cites')).html();
+      var refs = $(this).attr('data-cites').split(" ");
+      var refHtml = refs.map(function(ref) {
+        return "<p>" + $('#ref-' + ref).html() + "</p>";
+      }).join("\n");
       window.tippy(this, {
         allowHTML: true,
         content: refHtml,
@@ -2060,7 +2064,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <!--/radix_placeholder_distill-->
   <script src="../../site_libs/kePrint-0.0.1/kePrint.js"></script>
   <link href="../../site_libs/lightable-0.0.1/lightable.css" rel="stylesheet" />
-  <script src="../../site_libs/jquery-1.11.3/jquery.min.js"></script>
+  <script src="../../site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
   <script src="../../site_libs/popper-2.6.0/popper.min.js"></script>
   <link href="../../site_libs/tippy-6.2.7/tippy.css" rel="stylesheet" />
   <link href="../../site_libs/tippy-6.2.7/tippy-light-border.css" rel="stylesheet" />
@@ -2163,7 +2167,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>For the stacking example, we use the <a href="https://mlr3.mlr-org.com/reference/mlr_tasks_sonar.html">sonar classification task</a>:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>task_sonar</span> <span class='op'>=</span> <span class='fu'>tsk</span><span class='op'>(</span><span class='st'>"sonar"</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>task_sonar</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>tsk</a></span><span class='op'>(</span><span class='st'>"sonar"</span><span class='op'>)</span>
 <span class='va'>task_sonar</span><span class='op'>$</span><span class='va'>col_roles</span><span class='op'>$</span><span class='va'>stratum</span> <span class='op'>=</span> <span class='va'>task_sonar</span><span class='op'>$</span><span class='va'>target_names</span> <span class='co'>#stratification</span>
 </code></pre>
 </div>
@@ -2173,9 +2177,9 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>As mentioned, the level 0 learners are <a href="https://mlr3.mlr-org.com/reference/mlr_learners_classif.rpart.html"><code>rpart</code></a>, <a href="https://mlr3learners.mlr-org.com/reference/mlr_learners_classif.glmnet.html"><code>glmnet</code></a> and <a href="https://mlr3learners.mlr-org.com/reference/mlr_learners_classif.lda.html"><code>lda</code></a>:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>learner_rpart</span>  <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/pkg/mlr3extralearners/man/lrn.html'>lrn</a></span><span class='op'>(</span><span class='st'>"classif.rpart"</span>, predict_type <span class='op'>=</span> <span class='st'>"prob"</span><span class='op'>)</span>
-<span class='va'>learner_glmnet</span> <span class='op'>=</span>  <span class='fu'><a href='https://rdrr.io/pkg/mlr3extralearners/man/lrn.html'>lrn</a></span><span class='op'>(</span><span class='st'>"classif.glmnet"</span>, predict_type <span class='op'>=</span> <span class='st'>"prob"</span><span class='op'>)</span>
-<span class='va'>learner_lda</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/pkg/mlr3extralearners/man/lrn.html'>lrn</a></span><span class='op'>(</span><span class='st'>"classif.lda"</span>, predict_type <span class='op'>=</span> <span class='st'>"prob"</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>learner_rpart</span>  <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>lrn</a></span><span class='op'>(</span><span class='st'>"classif.rpart"</span>, predict_type <span class='op'>=</span> <span class='st'>"prob"</span><span class='op'>)</span>
+<span class='va'>learner_glmnet</span> <span class='op'>=</span>  <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>lrn</a></span><span class='op'>(</span><span class='st'>"classif.glmnet"</span>, predict_type <span class='op'>=</span> <span class='st'>"prob"</span><span class='op'>)</span>
+<span class='va'>learner_lda</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>lrn</a></span><span class='op'>(</span><span class='st'>"classif.lda"</span>, predict_type <span class='op'>=</span> <span class='st'>"prob"</span><span class='op'>)</span>
 </code></pre>
 </div>
 </div>
@@ -2201,10 +2205,10 @@ document.addEventListener('DOMContentLoaded', function() {
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='va'>level0</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/gunion.html'>gunion</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>
-  <span class='va'>anova</span> <span class='op'>%&gt;&gt;%</span> <span class='va'>cv1_rpart</span>,
-  <span class='va'>mrmr</span> <span class='op'>%&gt;&gt;%</span> <span class='va'>cv1_glmnet</span>,
-  <span class='va'>find_cor</span> <span class='op'>%&gt;&gt;%</span> <span class='va'>cv1_lda</span>,
-  <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"nop"</span>, id <span class='op'>=</span> <span class='st'>"nop1"</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>  <span class='op'>%&gt;&gt;%</span>
+  <span class='va'>anova</span> <span class='op'><a href='https://mlr3pipelines.mlr-org.com//reference/grapes-greater-than-greater-than-grapes.html'>%&gt;&gt;%</a></span> <span class='va'>cv1_rpart</span>,
+  <span class='va'>mrmr</span> <span class='op'><a href='https://mlr3pipelines.mlr-org.com//reference/grapes-greater-than-greater-than-grapes.html'>%&gt;&gt;%</a></span> <span class='va'>cv1_glmnet</span>,
+  <span class='va'>find_cor</span> <span class='op'><a href='https://mlr3pipelines.mlr-org.com//reference/grapes-greater-than-greater-than-grapes.html'>%&gt;&gt;%</a></span> <span class='va'>cv1_lda</span>,
+  <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"nop"</span>, id <span class='op'>=</span> <span class='st'>"nop1"</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>  <span class='op'><a href='https://mlr3pipelines.mlr-org.com//reference/grapes-greater-than-greater-than-grapes.html'>%&gt;&gt;%</a></span>
   <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"featureunion"</span>, id <span class='op'>=</span> <span class='st'>"union1"</span><span class='op'>)</span>
 </code></pre>
 </div>
@@ -2230,14 +2234,14 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>All level 1 learners will use <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_pca.html"><code>PipeOpPCA</code></a> transformed data as input:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>level1</span> <span class='op'>=</span> <span class='va'>level0</span> <span class='op'>%&gt;&gt;%</span>
-  <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"copy"</span>, <span class='fl'>4</span><span class='op'>)</span> <span class='op'>%&gt;&gt;%</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>level1</span> <span class='op'>=</span> <span class='va'>level0</span> <span class='op'><a href='https://mlr3pipelines.mlr-org.com//reference/grapes-greater-than-greater-than-grapes.html'>%&gt;&gt;%</a></span>
+  <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"copy"</span>, <span class='fl'>4</span><span class='op'>)</span> <span class='op'><a href='https://mlr3pipelines.mlr-org.com//reference/grapes-greater-than-greater-than-grapes.html'>%&gt;&gt;%</a></span>
   <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/gunion.html'>gunion</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>
-    <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"pca"</span>, id <span class='op'>=</span> <span class='st'>"pca2_1"</span>, param_vals <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>scale. <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>%&gt;&gt;%</span> <span class='va'>cv2_rpart</span>,
-    <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"pca"</span>, id <span class='op'>=</span> <span class='st'>"pca2_2"</span>, param_vals <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>scale. <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>%&gt;&gt;%</span> <span class='va'>cv2_glmnet</span>,
-    <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"pca"</span>, id <span class='op'>=</span> <span class='st'>"pca2_3"</span>, param_vals <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>scale. <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>%&gt;&gt;%</span> <span class='va'>cv2_lda</span>,
+    <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"pca"</span>, id <span class='op'>=</span> <span class='st'>"pca2_1"</span>, param_vals <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>scale. <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span><span class='op'>)</span> <span class='op'><a href='https://mlr3pipelines.mlr-org.com//reference/grapes-greater-than-greater-than-grapes.html'>%&gt;&gt;%</a></span> <span class='va'>cv2_rpart</span>,
+    <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"pca"</span>, id <span class='op'>=</span> <span class='st'>"pca2_2"</span>, param_vals <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>scale. <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span><span class='op'>)</span> <span class='op'><a href='https://mlr3pipelines.mlr-org.com//reference/grapes-greater-than-greater-than-grapes.html'>%&gt;&gt;%</a></span> <span class='va'>cv2_glmnet</span>,
+    <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"pca"</span>, id <span class='op'>=</span> <span class='st'>"pca2_3"</span>, param_vals <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>scale. <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span><span class='op'>)</span> <span class='op'><a href='https://mlr3pipelines.mlr-org.com//reference/grapes-greater-than-greater-than-grapes.html'>%&gt;&gt;%</a></span> <span class='va'>cv2_lda</span>,
     <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"nop"</span>, id <span class='op'>=</span> <span class='st'>"nop2"</span><span class='op'>)</span><span class='op'>)</span>
-  <span class='op'>)</span>  <span class='op'>%&gt;&gt;%</span>
+  <span class='op'>)</span>  <span class='op'><a href='https://mlr3pipelines.mlr-org.com//reference/grapes-greater-than-greater-than-grapes.html'>%&gt;&gt;%</a></span>
   <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"featureunion"</span>, id <span class='op'>=</span> <span class='st'>"union2"</span><span class='op'>)</span>
 </code></pre>
 </div>
@@ -2253,9 +2257,9 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>The out-of-bag predictions of the level 1 learners are attached to the input data from level 1 and a final ranger learner will be trained:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>ranger_lrn</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/pkg/mlr3extralearners/man/lrn.html'>lrn</a></span><span class='op'>(</span><span class='st'>"classif.ranger"</span>, predict_type <span class='op'>=</span> <span class='st'>"prob"</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>ranger_lrn</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>lrn</a></span><span class='op'>(</span><span class='st'>"classif.ranger"</span>, predict_type <span class='op'>=</span> <span class='st'>"prob"</span><span class='op'>)</span>
 
-<span class='va'>ensemble</span> <span class='op'>=</span> <span class='va'>level1</span> <span class='op'>%&gt;&gt;%</span> <span class='va'>ranger_lrn</span>
+<span class='va'>ensemble</span> <span class='op'>=</span> <span class='va'>level1</span> <span class='op'><a href='https://mlr3pipelines.mlr-org.com//reference/grapes-greater-than-greater-than-grapes.html'>%&gt;&gt;%</a></span> <span class='va'>ranger_lrn</span>
 <span class='va'>ensemble</span><span class='op'>$</span><span class='fu'>plot</span><span class='op'>(</span><span class='op'>)</span>
 </code></pre>
 </div>
@@ -2289,7 +2293,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>To proceed, we convert the <code>ensemble</code> pipeline as a <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_learners_graph.html"><code>GraphLearner</code></a>:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>learner_ensemble</span> <span class='op'>=</span> <span class='fu'>as_learner</span><span class='op'>(</span><span class='va'>ensemble</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>learner_ensemble</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/as_learner.html'>as_learner</a></span><span class='op'>(</span><span class='va'>ensemble</span><span class='op'>)</span>
 <span class='va'>learner_ensemble</span><span class='op'>$</span><span class='va'>id</span> <span class='op'>=</span> <span class='st'>"ensemble"</span>
 <span class='va'>learner_ensemble</span><span class='op'>$</span><span class='va'>predict_type</span> <span class='op'>=</span> <span class='st'>"prob"</span>
 </code></pre>
@@ -2308,14 +2312,14 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>For performance comparison, we use the <a href="https://mlr3.mlr-org.com/reference/benchmark.html"><code>benchmark()</code></a> function that requires a design incorporating a list of learners and a list of tasks. Here, we have two learners (the simple ranger learner and the ensemble) and one task. Since we want to tune the simple ranger learner as well as the whole ensemble learner, we need to create an <a href="https://mlr3tuning.mlr-org.com/reference/AutoTuner.html"><code>AutoTuner</code></a> for each learner to be compared. To do so, we need to define a resampling strategy for the tuning in the inner loop (we use 3-fold cross-validation) and for the final evaluation (outer loop) use use holdout validation:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>inner_resampling</span> <span class='op'>=</span> <span class='fu'>rsmp</span><span class='op'>(</span><span class='st'>"cv"</span>, folds <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>inner_resampling</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>rsmp</a></span><span class='op'>(</span><span class='st'>"cv"</span>, folds <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span>
 
 <span class='co'># AutoTuner for the ensemble learner</span>
 <span class='va'>at_1</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3tuning.mlr-org.com/reference/auto_tuner.html'>auto_tuner</a></span><span class='op'>(</span>
   method <span class='op'>=</span> <span class='st'>"random_search"</span>,
   learner <span class='op'>=</span> <span class='va'>learner_ensemble</span>,
   resampling <span class='op'>=</span> <span class='va'>inner_resampling</span>,
-  measure <span class='op'>=</span> <span class='fu'>msr</span><span class='op'>(</span><span class='st'>"classif.auc"</span><span class='op'>)</span>,
+  measure <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>msr</a></span><span class='op'>(</span><span class='st'>"classif.auc"</span><span class='op'>)</span>,
   search_space <span class='op'>=</span> <span class='va'>search_space_ensemble</span>,
   term_evals <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span> <span class='co'># to limit running time</span>
 
@@ -2324,7 +2328,7 @@ document.addEventListener('DOMContentLoaded', function() {
   method <span class='op'>=</span> <span class='st'>"random_search"</span>,
   learner <span class='op'>=</span> <span class='va'>ranger_lrn</span>,
   resampling <span class='op'>=</span> <span class='va'>inner_resampling</span>,
-  measure <span class='op'>=</span> <span class='fu'>msr</span><span class='op'>(</span><span class='st'>"classif.auc"</span><span class='op'>)</span>,
+  measure <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>msr</a></span><span class='op'>(</span><span class='st'>"classif.auc"</span><span class='op'>)</span>,
   search_space <span class='op'>=</span> <span class='va'>search_space_ranger</span>,
   term_evals <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span> <span class='co'># to limit running time</span>
 
@@ -2332,10 +2336,10 @@ document.addEventListener('DOMContentLoaded', function() {
 <span class='va'>learners</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='va'>at_1</span>, <span class='va'>at_2</span><span class='op'>)</span>
 
 <span class='co'># For benchmarking, we use a simple holdout</span>
-<span class='va'>outer_resampling</span> <span class='op'>=</span> <span class='fu'>rsmp</span><span class='op'>(</span><span class='st'>"holdout"</span><span class='op'>)</span>
+<span class='va'>outer_resampling</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>rsmp</a></span><span class='op'>(</span><span class='st'>"holdout"</span><span class='op'>)</span>
 <span class='va'>outer_resampling</span><span class='op'>$</span><span class='fu'>instantiate</span><span class='op'>(</span><span class='va'>task_sonar</span><span class='op'>)</span>
 
-<span class='va'>design</span> <span class='op'>=</span> <span class='fu'>benchmark_grid</span><span class='op'>(</span>
+<span class='va'>design</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/benchmark_grid.html'>benchmark_grid</a></span><span class='op'>(</span>
   tasks <span class='op'>=</span> <span class='va'>task_sonar</span>,
   learners <span class='op'>=</span> <span class='va'>learners</span>,
   resamplings <span class='op'>=</span> <span class='va'>outer_resampling</span>
@@ -2345,7 +2349,7 @@ document.addEventListener('DOMContentLoaded', function() {
 </div>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>bmr</span> <span class='op'>=</span> <span class='fu'>benchmark</span><span class='op'>(</span><span class='va'>design</span>, store_models <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>bmr</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/benchmark.html'>benchmark</a></span><span class='op'>(</span><span class='va'>design</span>, store_models <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>
 </code></pre>
 </div>
 </div>
@@ -2357,7 +2361,7 @@ document.addEventListener('DOMContentLoaded', function() {
 </div>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>bmr</span><span class='op'>$</span><span class='fu'>aggregate</span><span class='op'>(</span><span class='fu'>msr</span><span class='op'>(</span><span class='st'>"classif.auc"</span><span class='op'>)</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>bmr</span><span class='op'>$</span><span class='fu'>aggregate</span><span class='op'>(</span><span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>msr</a></span><span class='op'>(</span><span class='st'>"classif.auc"</span><span class='op'>)</span><span class='op'>)</span>
 </code></pre>
 </div>
 </div>
