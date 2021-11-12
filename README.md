@@ -37,6 +37,7 @@ All posts are rendered on every push to ensure that all posts can be run without
 ```r
 output:
   distill::distill_article:
+    toc: true
     self_contained: false
     css: ../../custom.css
 ```
@@ -115,11 +116,11 @@ plot()
 ## Code
 
 1. Try to stick to the 80 characters limit.
-1. Code output can use up to 120 characters. 
+1. Code output can use up to 120 characters.
 
 ## Static posts
 
-If it is not feasible to render your posts on the CI, the post can be added to the `_static` folder. 
+If it is not feasible to render your posts on the CI, the post can be added to the `_static` folder.
 
 1. Render the post locally using `rmarkdown::render()` and create a new folder in `_static`.
 1. Copy the generated `index.html` and `_files` auxiliary folder to the newly created folder in `_static`.
