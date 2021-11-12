@@ -130,7 +130,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
   <!--radix_placeholder_rmarkdown_metadata-->
 
 <script type="text/json" id="radix-rmarkdown-metadata">
-{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["title","categories","author","date","description","output","params","citation_url","canonical_url"]}},"value":[{"type":"character","attributes":{},"value":["Tuning a Stacked Learner"]},{"type":"character","attributes":{},"value":["mlr3pipelines","mlr3tuning","tuning","optimization","nested resampling","stacking","sonar data set","classification"]},{"type":"list","attributes":{},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name"]}},"value":[{"type":"character","attributes":{},"value":["Milan Dragicevic"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name"]}},"value":[{"type":"character","attributes":{},"value":["Giuseppe Casalicchio"]}]}]},{"type":"character","attributes":{},"value":["04-27-2020"]},{"type":"character","attributes":{},"value":["How to create and tune a multilevel stacking model using the mlr3pipelines package."]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["distill::distill_article"]}},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["self_contained","highlight_downlit","css"]}},"value":[{"type":"logical","attributes":{},"value":[false]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["../../custom.css"]}]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["eval_all"]}},"value":[{"type":"logical","attributes":{},"value":[false]}]},{"type":"character","attributes":{},"value":["https://mlr3gallery.mlr-org.com/posts/2020-04-27-tuning-stacking/"]},{"type":"character","attributes":{},"value":["https://mlr3gallery.mlr-org.com/posts/2020-04-27-tuning-stacking/"]}]}
+{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["title","categories","author","date","description","output","params","citation_url","canonical_url"]}},"value":[{"type":"character","attributes":{},"value":["Tuning a Stacked Learner"]},{"type":"character","attributes":{},"value":["mlr3pipelines","mlr3tuning","tuning","optimization","nested resampling","stacking","sonar data set","classification"]},{"type":"list","attributes":{},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name"]}},"value":[{"type":"character","attributes":{},"value":["Milan Dragicevic"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name"]}},"value":[{"type":"character","attributes":{},"value":["Giuseppe Casalicchio"]}]}]},{"type":"character","attributes":{},"value":["04-27-2020"]},{"type":"character","attributes":{},"value":["How to create and tune a multilevel stacking model using the mlr3pipelines package."]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["distill::distill_article"]}},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["toc","self_contained","highlight_downlit","css"]}},"value":[{"type":"logical","attributes":{},"value":[true]},{"type":"logical","attributes":{},"value":[false]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["../../custom.css"]}]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["eval_all"]}},"value":[{"type":"logical","attributes":{},"value":[false]}]},{"type":"character","attributes":{},"value":["https://mlr3gallery.mlr-org.com/posts/2020-04-27-tuning-stacking/"]},{"type":"character","attributes":{},"value":["https://mlr3gallery.mlr-org.com/posts/2020-04-27-tuning-stacking/"]}]}
 </script>
 <!--/radix_placeholder_rmarkdown_metadata-->
   
@@ -2137,6 +2137,22 @@ document.addEventListener('DOMContentLoaded', function() {
 </div>
 
 <div class="d-article">
+<div class="d-contents d-contents-float">
+<nav class="l-text toc figcaption" id="TOC">
+<h3>Contents</h3>
+<ul>
+<li><a href="#intro">Intro</a></li>
+<li><a href="#prerequisites">Prerequisites</a></li>
+<li><a href="#pipeline-creation">Pipeline creation</a><ul>
+<li><a href="#level-0">Level 0</a></li>
+<li><a href="#level-1">Level 1</a></li>
+<li><a href="#defining-the-tuning-space">Defining the tuning space</a></li>
+<li><a href="#performance-comparison">Performance comparison</a></li>
+</ul></li>
+<li><a href="#conclusion">Conclusion</a></li>
+</ul>
+</nav>
+</div>
 <h2 id="intro">Intro</h2>
 <p>Multilevel stacking is an ensemble technique, where predictions of several learners are added as new features to extend the orginal data on different levels. On each level, the extended data is used to train a new level of learners. This can be repeated for several iterations until a final learner is trained. To avoid overfitting, it is advisable to use test set (out-of-bag) predictions in each level.</p>
 <p>In this post, a multilevel stacking example will be created using <a href="https://mlr3pipelines.mlr-org.com">mlr3pipelines</a> and tuned using <a href="https://mlr3tuning.mlr-org.com">mlr3tuning</a> . A similar example is available in the <a href="https://mlr3book.mlr-org.com/pipe-nonlinear.html#multilevel-stacking">mlr3book</a>. However, we additionally explain how to tune the hyperparameters of the whole ensemble and each underlying learner jointly.</p>

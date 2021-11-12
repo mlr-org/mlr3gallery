@@ -142,7 +142,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
   <!--radix_placeholder_rmarkdown_metadata-->
 
 <script type="text/json" id="radix-rmarkdown-metadata">
-{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["title","categories","author","description","date","output","bibliography","params","citation_url","canonical_url"]}},"value":[{"type":"character","attributes":{},"value":["Liver Patient Classification Based on Diagnostic Measures"]},{"type":"character","attributes":{},"value":["tuning","oversampling","classification"]},{"type":"list","attributes":{},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name"]}},"value":[{"type":"character","attributes":{},"value":["Julian Lange"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name"]}},"value":[{"type":"character","attributes":{},"value":["Jae-Eun Nam"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name"]}},"value":[{"type":"character","attributes":{},"value":["Viet Tran"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name"]}},"value":[{"type":"character","attributes":{},"value":["Simon Wiegrebe"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name"]}},"value":[{"type":"character","attributes":{},"value":["Henri Funk (Editor)"]}]}]},{"type":"character","attributes":{},"value":["This use case provides an example on tuning and benchmarking in mlr3verse using data from the Indian Liver Patient Dataset."]},{"type":"character","attributes":{},"value":["09-11-2020"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["distill::distill_article"]}},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["self_contained","highlight_downlit","css"]}},"value":[{"type":"logical","attributes":{},"value":[false]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["../../custom.css"]}]}]},{"type":"character","attributes":{},"value":["bibliography.bib"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["eval_all"]}},"value":[{"type":"logical","attributes":{},"value":[false]}]},{"type":"character","attributes":{},"value":["https://mlr3gallery.mlr-org.com/posts/2020-09-11-liver-patient-classification/"]},{"type":"character","attributes":{},"value":["https://mlr3gallery.mlr-org.com/posts/2020-09-11-liver-patient-classification/"]}]}
+{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["title","categories","author","description","date","output","bibliography","params","citation_url","canonical_url"]}},"value":[{"type":"character","attributes":{},"value":["Liver Patient Classification Based on Diagnostic Measures"]},{"type":"character","attributes":{},"value":["tuning","oversampling","classification"]},{"type":"list","attributes":{},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name"]}},"value":[{"type":"character","attributes":{},"value":["Julian Lange"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name"]}},"value":[{"type":"character","attributes":{},"value":["Jae-Eun Nam"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name"]}},"value":[{"type":"character","attributes":{},"value":["Viet Tran"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name"]}},"value":[{"type":"character","attributes":{},"value":["Simon Wiegrebe"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name"]}},"value":[{"type":"character","attributes":{},"value":["Henri Funk (Editor)"]}]}]},{"type":"character","attributes":{},"value":["This use case provides an example on tuning and benchmarking in mlr3verse using data from the Indian Liver Patient Dataset."]},{"type":"character","attributes":{},"value":["09-11-2020"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["distill::distill_article"]}},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["toc","self_contained","highlight_downlit","css"]}},"value":[{"type":"logical","attributes":{},"value":[true]},{"type":"logical","attributes":{},"value":[false]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["../../custom.css"]}]}]},{"type":"character","attributes":{},"value":["bibliography.bib"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["eval_all"]}},"value":[{"type":"logical","attributes":{},"value":[false]}]},{"type":"character","attributes":{},"value":["https://mlr3gallery.mlr-org.com/posts/2020-09-11-liver-patient-classification/"]},{"type":"character","attributes":{},"value":["https://mlr3gallery.mlr-org.com/posts/2020-09-11-liver-patient-classification/"]}]}
 </script>
 <!--/radix_placeholder_rmarkdown_metadata-->
   
@@ -2150,6 +2150,25 @@ document.addEventListener('DOMContentLoaded', function() {
 </div>
 
 <div class="d-article">
+<div class="d-contents d-contents-float">
+<nav class="l-text toc figcaption" id="TOC">
+<h3>Contents</h3>
+<ul>
+<li><a href="#preamble">Preamble</a><ul>
+<li><a href="#prerequisites">Prerequisites</a></li>
+</ul></li>
+<li><a href="#indian-liver-patient-dataset">Indian Liver Patient Dataset</a></li>
+<li><a href="#data-exporation">Data exporation</a><ul>
+<li><a href="#univariate-distribution">Univariate distribution</a></li>
+<li><a href="#features-by-class">Features by class</a></li>
+<li><a href="#correlation">Correlation</a></li>
+<li><a href="#final-dataset">Final Dataset</a></li>
+</ul></li>
+<li><a href="#learners-and-tuning">Learners and tuning</a></li>
+<li><a href="#model-fitting-and-benchmarking">Model fitting and benchmarking</a></li>
+</ul>
+</nav>
+</div>
 <h1 id="preamble">Preamble</h1>
 <p>The following examples were created as part of the Introduction to Machine Learning Lecture at LMU Munich. The goal of the project was to create and compare one or several machine learning pipelines for the problem at hand together with exploratory analysis and an exposition of results. The posts were contributed to the mlr3gallery by the authors and edited for better legibility by the editor. We want to thank the authors for allowing us to publish their results. Note, that correctness of the results can not be guaranteed.</p>
 <h2 id="prerequisites">Prerequisites</h2>

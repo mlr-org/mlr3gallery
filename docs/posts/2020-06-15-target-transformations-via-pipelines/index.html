@@ -128,7 +128,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
   <!--radix_placeholder_rmarkdown_metadata-->
 
 <script type="text/json" id="radix-rmarkdown-metadata">
-{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["title","categories","author","date","description","header-includes","output","citation_url","canonical_url"]}},"value":[{"type":"character","attributes":{},"value":["Target Transformations via Pipelines"]},{"type":"character","attributes":{},"value":["mlr3pipelines","target transformation","mtcars data set","classification"]},{"type":"list","attributes":{},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name"]}},"value":[{"type":"character","attributes":{},"value":["Lennart Schneider"]}]}]},{"type":"character","attributes":{},"value":["06-15-2020"]},{"type":"character","attributes":{},"value":["We show how to do various kinds of target transformations using pipelines."]},{"type":"character","attributes":{},"value":["\\usepackage{amsmath}"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["distill::distill_article"]}},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["self_contained","css"]}},"value":[{"type":"logical","attributes":{},"value":[false]},{"type":"character","attributes":{},"value":["../../custom.css"]}]}]},{"type":"character","attributes":{},"value":["https://mlr3gallery.mlr-org.com/posts/2020-06-15-target-transformations-via-pipelines/"]},{"type":"character","attributes":{},"value":["https://mlr3gallery.mlr-org.com/posts/2020-06-15-target-transformations-via-pipelines/"]}]}
+{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["title","categories","author","date","description","header-includes","output","citation_url","canonical_url"]}},"value":[{"type":"character","attributes":{},"value":["Target Transformations via Pipelines"]},{"type":"character","attributes":{},"value":["mlr3pipelines","target transformation","mtcars data set","classification"]},{"type":"list","attributes":{},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name"]}},"value":[{"type":"character","attributes":{},"value":["Lennart Schneider"]}]}]},{"type":"character","attributes":{},"value":["06-15-2020"]},{"type":"character","attributes":{},"value":["We show how to do various kinds of target transformations using pipelines."]},{"type":"character","attributes":{},"value":["\\usepackage{amsmath}"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["distill::distill_article"]}},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["toc","self_contained","css"]}},"value":[{"type":"logical","attributes":{},"value":[true]},{"type":"logical","attributes":{},"value":[false]},{"type":"character","attributes":{},"value":["../../custom.css"]}]}]},{"type":"character","attributes":{},"value":["https://mlr3gallery.mlr-org.com/posts/2020-06-15-target-transformations-via-pipelines/"]},{"type":"character","attributes":{},"value":["https://mlr3gallery.mlr-org.com/posts/2020-06-15-target-transformations-via-pipelines/"]}]}
 </script>
 <!--/radix_placeholder_rmarkdown_metadata-->
   
@@ -2127,6 +2127,16 @@ document.addEventListener('DOMContentLoaded', function() {
 </div>
 
 <div class="d-article">
+<div class="d-contents d-contents-float">
+<nav class="l-text toc figcaption" id="TOC">
+<h3>Contents</h3>
+<ul>
+<li><a href="#simple-target-transformations">Simple Target Transformations</a></li>
+<li><a href="#abstract-base-class-pipeoptargettrafo">Abstract Base Class: PipeOpTargetTrafo</a></li>
+<li><a href="#hands-on-pipeoptargettrafoboxcox">Hands on: PipeOpTargetTrafoBoxCox</a></li>
+</ul>
+</nav>
+</div>
 <p>Transforming the target variable often can lead to predictive improvement and is a widely used tool. Typical transformations are for example the <span class="math inline">\(\log\)</span> transformation of the target aiming at minimizing (right) skewness, or the Box Cox and Yeo-Johnson transformations being more flexible but having a similar goal.</p>
 <p>One option to perform, e.g., a <span class="math inline">\(\log\)</span> transformation would be to manually transform the target prior to training a <a href="https://mlr3.mlr-org.com/reference/Learner.html"><code>Learner</code></a> (and also predicting from it) and then manually invert this transformation via <span class="math inline">\(\exp\)</span> after predicting from the <a href="https://mlr3.mlr-org.com/reference/Learner.html"><code>Learner</code></a>. This is quite cumbersome, especially if a transformation and inverse transformation require information about both the training and prediction data.</p>
 <p>In this post, we show how to do various kinds of target transformations using <a href="https://mlr3pipelines.mlr-org.com">mlr3pipelines</a> and explain the design of the target transformation and inversion <a href="https://mlr3pipelines.mlr-org.com/reference/PipeOp.html"><code>PipeOps</code></a>.</p>
@@ -2266,8 +2276,8 @@ function (inputs)
     assert_list(inputs, len = 1L, types = &quot;Prediction&quot;)
     list(private$.invert(inputs[[1L]], predict_phase_state))
 }
-&lt;bytecode: 0x55864fb0f378&gt;
-&lt;environment: 0x55864fb0eab8&gt;
+&lt;bytecode: 0x55914b1c8858&gt;
+&lt;environment: 0x55914b1c9150&gt;
 
 $output
 &lt;TaskRegr:mtcars&gt; (32 x 11)
@@ -2347,7 +2357,7 @@ $model$regr.lm$log
 Empty data.table (0 rows and 3 cols): stage,class,msg
 
 $model$regr.lm$train_time
-[1] 0.009
+[1] 0.011
 
 $model$regr.lm$param_vals
 named list()
@@ -2374,12 +2384,12 @@ $log
 Empty data.table (0 rows and 3 cols): stage,class,msg
 
 $train_time
-[1] 0.075
+[1] 0.08
 
 $param_vals
 $param_vals$targetmutate.trafo
 function(x) log(x)
-&lt;bytecode: 0x55864a2614e0&gt;
+&lt;bytecode: 0x559147fc2d30&gt;
 
 $param_vals$targetmutate.inverter
 function(x) list(response = exp(x$response))
@@ -2434,7 +2444,7 @@ $log
 Empty data.table (0 rows and 3 cols): stage,class,msg
 
 $train_time
-[1] 0.004
+[1] 0.003
 
 $param_vals
 named list()
@@ -2626,7 +2636,7 @@ $model$regr.lm$log
 Empty data.table (0 rows and 3 cols): stage,class,msg
 
 $model$regr.lm$train_time
-[1] 0.009
+[1] 0.01
 
 $model$regr.lm$param_vals
 named list()
@@ -2662,7 +2672,7 @@ $log
 Empty data.table (0 rows and 3 cols): stage,class,msg
 
 $train_time
-[1] 0.079
+[1] 0.096
 
 $param_vals
 named list()

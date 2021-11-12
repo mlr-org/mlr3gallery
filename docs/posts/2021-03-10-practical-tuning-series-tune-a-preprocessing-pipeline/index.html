@@ -138,7 +138,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
   <!--radix_placeholder_rmarkdown_metadata-->
 
 <script type="text/json" id="radix-rmarkdown-metadata">
-{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["title","description","categories","author","date","output","params","citation_url","canonical_url"]}},"value":[{"type":"character","attributes":{},"value":["Practical Tuning Series - Tune a Preprocessing Pipeline"]},{"type":"character","attributes":{},"value":["We build a simple preprocessing pipeline and tune it."]},{"type":"character","attributes":{},"value":["mlr3tuning","tuning","optimization","nested resampling","mlr3pipelines","pima data set","classification","practical tuning series"]},{"type":"list","attributes":{},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name"]}},"value":[{"type":"character","attributes":{},"value":["Marc Becker"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name"]}},"value":[{"type":"character","attributes":{},"value":["Theresa Ullmann"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name"]}},"value":[{"type":"character","attributes":{},"value":["Michel Lang"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name"]}},"value":[{"type":"character","attributes":{},"value":["Bernd Bischl"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name"]}},"value":[{"type":"character","attributes":{},"value":["Jakob Richter"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name"]}},"value":[{"type":"character","attributes":{},"value":["Martin Binder"]}]}]},{"type":"character","attributes":{},"value":["03-10-2021"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["distill::distill_article"]}},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["self_contained","highlight_downlit","css"]}},"value":[{"type":"logical","attributes":{},"value":[false]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["../../custom.css"]}]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["eval_all"]}},"value":[{"type":"logical","attributes":{},"value":[false]}]},{"type":"character","attributes":{},"value":["https://mlr3gallery.mlr-org.com/posts/2021-03-10-practical-tuning-series-tune-a-preprocessing-pipeline/"]},{"type":"character","attributes":{},"value":["https://mlr3gallery.mlr-org.com/posts/2021-03-10-practical-tuning-series-tune-a-preprocessing-pipeline/"]}]}
+{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["title","description","categories","author","date","output","params","citation_url","canonical_url"]}},"value":[{"type":"character","attributes":{},"value":["Practical Tuning Series - Tune a Preprocessing Pipeline"]},{"type":"character","attributes":{},"value":["We build a simple preprocessing pipeline and tune it."]},{"type":"character","attributes":{},"value":["mlr3tuning","tuning","optimization","nested resampling","mlr3pipelines","pima data set","classification","practical tuning series"]},{"type":"list","attributes":{},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name"]}},"value":[{"type":"character","attributes":{},"value":["Marc Becker"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name"]}},"value":[{"type":"character","attributes":{},"value":["Theresa Ullmann"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name"]}},"value":[{"type":"character","attributes":{},"value":["Michel Lang"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name"]}},"value":[{"type":"character","attributes":{},"value":["Bernd Bischl"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name"]}},"value":[{"type":"character","attributes":{},"value":["Jakob Richter"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name"]}},"value":[{"type":"character","attributes":{},"value":["Martin Binder"]}]}]},{"type":"character","attributes":{},"value":["03-10-2021"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["distill::distill_article"]}},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["toc","self_contained","highlight_downlit","css"]}},"value":[{"type":"logical","attributes":{},"value":[true]},{"type":"logical","attributes":{},"value":[false]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["../../custom.css"]}]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["eval_all"]}},"value":[{"type":"logical","attributes":{},"value":[false]}]},{"type":"character","attributes":{},"value":["https://mlr3gallery.mlr-org.com/posts/2021-03-10-practical-tuning-series-tune-a-preprocessing-pipeline/"]},{"type":"character","attributes":{},"value":["https://mlr3gallery.mlr-org.com/posts/2021-03-10-practical-tuning-series-tune-a-preprocessing-pipeline/"]}]}
 </script>
 <!--/radix_placeholder_rmarkdown_metadata-->
   
@@ -2151,6 +2151,22 @@ document.addEventListener('DOMContentLoaded', function() {
 </div>
 
 <div class="d-article">
+<div class="d-contents d-contents-float">
+<nav class="l-text toc figcaption" id="TOC">
+<h3>Contents</h3>
+<ul>
+<li><a href="#scope">Scope</a></li>
+<li><a href="#prerequisites">Prerequisites</a></li>
+<li><a href="#missing-values">Missing Values</a></li>
+<li><a href="#factor-encoding">Factor Encoding</a></li>
+<li><a href="#constructing-the-pipeline">Constructing the Pipeline</a></li>
+<li><a href="#tuning-the-pipeline">Tuning the Pipeline</a></li>
+<li><a href="#nested-resampling">Nested Resampling</a></li>
+<li><a href="#final-model">Final Model</a></li>
+<li><a href="#resources">Resources</a></li>
+</ul>
+</nav>
+</div>
 <h1 id="scope">Scope</h1>
 <p>This is the second part of the practical tuning series. The other parts can be found here:</p>
 <ul>
@@ -2887,8 +2903,8 @@ Output channels &lt;name [train type, predict type]&gt;:
 </div>
 <pre><code>&lt;ArchiveTuning&gt;
    encode.method classif.ce runtime_learners           timestamp batch_nr      resample_result
-1:       one-hot       0.27              1.5 2021-11-12 05:01:42        1 &lt;ResampleResult[22]&gt;
-2:     treatment       0.27              1.5 2021-11-12 05:01:44        2 &lt;ResampleResult[22]&gt;</code></pre>
+1:       one-hot       0.27              1.3 2021-11-12 09:00:41        1 &lt;ResampleResult[22]&gt;
+2:     treatment       0.27              1.4 2021-11-12 09:00:42        2 &lt;ResampleResult[22]&gt;</code></pre>
 </div>
 <h1 id="nested-resampling">Nested Resampling</h1>
 <p>We create one <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_learners_graph.html"><code>GraphLearner</code></a> with <code>imputeoor</code> and test it against a <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_learners_graph.html"><code>GraphLearner</code></a> that uses the internal imputation method of <code>xgboost</code>. Applying nested resampling ensures a fair comparison of the predictive performances.</p>

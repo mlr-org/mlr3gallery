@@ -122,7 +122,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
   <!--radix_placeholder_rmarkdown_metadata-->
 
 <script type="text/json" id="radix-rmarkdown-metadata">
-{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["title","categories","author","description","date","output","citation_url","canonical_url"]}},"value":[{"type":"character","attributes":{},"value":["Integer Hyperparameters in Tuners for Real-valued Search Spaces"]},{"type":"character","attributes":{},"value":["mlr3tuning","tuning","optimization","iris data set","classification"]},{"type":"list","attributes":{},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name"]}},"value":[{"type":"character","attributes":{},"value":["Marc Becker"]}]}]},{"type":"character","attributes":{},"value":["How to tune integer hyperparameters with tuners that can only propose real numbers."]},{"type":"character","attributes":{},"value":["01-19-2021"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["distill::distill_article"]}},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["self_contained","highlight_downlit","css"]}},"value":[{"type":"logical","attributes":{},"value":[false]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["../../custom.css"]}]}]},{"type":"character","attributes":{},"value":["https://mlr3gallery.mlr-org.com/posts/2021-01-19-integer-hyperparameters-in-tuners-for-real-valued-search-spaces/"]},{"type":"character","attributes":{},"value":["https://mlr3gallery.mlr-org.com/posts/2021-01-19-integer-hyperparameters-in-tuners-for-real-valued-search-spaces/"]}]}
+{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["title","categories","author","description","date","output","citation_url","canonical_url"]}},"value":[{"type":"character","attributes":{},"value":["Integer Hyperparameters in Tuners for Real-valued Search Spaces"]},{"type":"character","attributes":{},"value":["mlr3tuning","tuning","optimization","iris data set","classification"]},{"type":"list","attributes":{},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name"]}},"value":[{"type":"character","attributes":{},"value":["Marc Becker"]}]}]},{"type":"character","attributes":{},"value":["How to tune integer hyperparameters with tuners that can only propose real numbers."]},{"type":"character","attributes":{},"value":["01-19-2021"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["distill::distill_article"]}},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["toc","self_contained","highlight_downlit","css"]}},"value":[{"type":"logical","attributes":{},"value":[true]},{"type":"logical","attributes":{},"value":[false]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["../../custom.css"]}]}]},{"type":"character","attributes":{},"value":["https://mlr3gallery.mlr-org.com/posts/2021-01-19-integer-hyperparameters-in-tuners-for-real-valued-search-spaces/"]},{"type":"character","attributes":{},"value":["https://mlr3gallery.mlr-org.com/posts/2021-01-19-integer-hyperparameters-in-tuners-for-real-valued-search-spaces/"]}]}
 </script>
 <!--/radix_placeholder_rmarkdown_metadata-->
   
@@ -2124,6 +2124,16 @@ document.addEventListener('DOMContentLoaded', function() {
 </div>
 
 <div class="d-article">
+<div class="d-contents d-contents-float">
+<nav class="l-text toc figcaption" id="TOC">
+<h3>Contents</h3>
+<ul>
+<li><a href="#introduction">Introduction</a></li>
+<li><a href="#task-and-learner">Task and Learner</a></li>
+<li><a href="#tuning">Tuning</a></li>
+</ul>
+</nav>
+</div>
 <h2 id="introduction">Introduction</h2>
 <p><a href="https://mlr3tuning.mlr-org.com/reference/Tuner.html"><code>Tuner</code></a> for real-valued search spaces are not able to tune on integer hyperparameters. However, it is possible to round the real values proposed by a <a href="https://mlr3tuning.mlr-org.com/reference/Tuner.html"><code>Tuner</code></a> to integers before passing them to the learner in the evaluation. We show how to apply a parameter transformation to a <a href="https://paradox.mlr-org.com/reference/ParamSet.html"><code>ParamSet</code></a> and use this set in the tuning process.</p>
 <p>We load the <a href="https://mlr3verse.mlr-org.com">mlr3verse</a> package which pulls in the most important packages for this example.</p>

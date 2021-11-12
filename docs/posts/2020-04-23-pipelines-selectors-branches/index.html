@@ -130,7 +130,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
   <!--radix_placeholder_rmarkdown_metadata-->
 
 <script type="text/json" id="radix-rmarkdown-metadata">
-{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["title","categories","author","date","description","output","citation_url","canonical_url"]}},"value":[{"type":"character","attributes":{},"value":["Pipelines, Selectors, Branches"]},{"type":"character","attributes":{},"value":["mlr3pipelines","mlr3tuning","tuning","optimization","pima data set","classification"]},{"type":"list","attributes":{},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name"]}},"value":[{"type":"character","attributes":{},"value":["Milan Dragicevic"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name"]}},"value":[{"type":"character","attributes":{},"value":["Giuseppe Casalicchio"]}]}]},{"type":"character","attributes":{},"value":["04-23-2020"]},{"type":"character","attributes":{},"value":["This tutorial explains how applying different preprocessing steps on different features and branching of preprocessing steps can be achieved using the mlr3pipelines package."]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["distill::distill_article"]}},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["self_contained","highlight_downlit","css"]}},"value":[{"type":"logical","attributes":{},"value":[false]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["../../custom.css"]}]}]},{"type":"character","attributes":{},"value":["https://mlr3gallery.mlr-org.com/posts/2020-04-23-pipelines-selectors-branches/"]},{"type":"character","attributes":{},"value":["https://mlr3gallery.mlr-org.com/posts/2020-04-23-pipelines-selectors-branches/"]}]}
+{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["title","categories","author","date","description","output","citation_url","canonical_url"]}},"value":[{"type":"character","attributes":{},"value":["Pipelines, Selectors, Branches"]},{"type":"character","attributes":{},"value":["mlr3pipelines","mlr3tuning","tuning","optimization","pima data set","classification"]},{"type":"list","attributes":{},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name"]}},"value":[{"type":"character","attributes":{},"value":["Milan Dragicevic"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name"]}},"value":[{"type":"character","attributes":{},"value":["Giuseppe Casalicchio"]}]}]},{"type":"character","attributes":{},"value":["04-23-2020"]},{"type":"character","attributes":{},"value":["This tutorial explains how applying different preprocessing steps on different features and branching of preprocessing steps can be achieved using the mlr3pipelines package."]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["distill::distill_article"]}},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["toc","self_contained","highlight_downlit","css"]}},"value":[{"type":"logical","attributes":{},"value":[true]},{"type":"logical","attributes":{},"value":[false]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["../../custom.css"]}]}]},{"type":"character","attributes":{},"value":["https://mlr3gallery.mlr-org.com/posts/2020-04-23-pipelines-selectors-branches/"]},{"type":"character","attributes":{},"value":["https://mlr3gallery.mlr-org.com/posts/2020-04-23-pipelines-selectors-branches/"]}]}
 </script>
 <!--/radix_placeholder_rmarkdown_metadata-->
   
@@ -2135,6 +2135,22 @@ document.addEventListener('DOMContentLoaded', function() {
 </div>
 
 <div class="d-article">
+<div class="d-contents d-contents-float">
+<nav class="l-text toc figcaption" id="TOC">
+<h3>Contents</h3>
+<ul>
+<li><a href="#intro">Intro</a></li>
+<li><a href="#prerequisites">Prerequisites</a></li>
+<li><a href="#selection-of-features-for-preprocessing-steps">Selection of features for preprocessing steps</a><ul>
+<li><a href="#consider-all-features-and-apply-the-preprocessing-step-only-to-certain-features">1. Consider all features and apply the preprocessing step only to certain features</a></li>
+<li><a href="#select-the-features-for-each-preprocessing-step-and-apply-the-preprocessing-steps-to-this-subset">2. Select the features for each preprocessing step and apply the preprocessing steps to this subset</a></li>
+</ul></li>
+<li><a href="#branching">Branching</a></li>
+<li><a href="#tuning-the-pipeline">Tuning the pipeline</a></li>
+<li><a href="#conclusion">Conclusion</a></li>
+</ul>
+</nav>
+</div>
 <h2 id="intro">Intro</h2>
 <p><a href="https://mlr3pipelines.mlr-org.com">mlr3pipelines</a> offers a very flexible way to create data preprocessing steps. This is achieved by a modular approach using <a href="https://mlr3pipelines.mlr-org.com/reference/PipeOp.html"><code>PipeOp</code></a>s. For detailed overview check the <a href="https://mlr3book.mlr-org.com/pipelines.html">mlr3book</a>.</p>
 <p>Recommended prior readings:</p>
@@ -4501,10 +4517,10 @@ impute_missind
 0.2460938
 </td>
 <td style="text-align:right;">
-1.443
+1.420
 </td>
 <td style="text-align:left;">
-2021-11-12 04:56:41
+2021-11-12 08:56:09
 </td>
 <td style="text-align:right;">
 1
@@ -4524,10 +4540,10 @@ simple_median
 0.2539062
 </td>
 <td style="text-align:right;">
-0.905
+0.863
 </td>
 <td style="text-align:left;">
-2021-11-12 04:56:43
+2021-11-12 08:56:10
 </td>
 <td style="text-align:right;">
 2
@@ -4547,10 +4563,10 @@ impute_missind
 0.2460938
 </td>
 <td style="text-align:right;">
-1.511
+1.424
 </td>
 <td style="text-align:left;">
-2021-11-12 04:56:44
+2021-11-12 08:56:11
 </td>
 <td style="text-align:right;">
 3
@@ -4570,10 +4586,10 @@ impute_missind
 0.2473958
 </td>
 <td style="text-align:right;">
-1.484
+1.452
 </td>
 <td style="text-align:left;">
-2021-11-12 04:56:46
+2021-11-12 08:56:13
 </td>
 <td style="text-align:right;">
 4
@@ -4593,10 +4609,10 @@ impute_missind
 0.2539062
 </td>
 <td style="text-align:right;">
-1.499
+1.412
 </td>
 <td style="text-align:left;">
-2021-11-12 04:56:48
+2021-11-12 08:56:15
 </td>
 <td style="text-align:right;">
 5
