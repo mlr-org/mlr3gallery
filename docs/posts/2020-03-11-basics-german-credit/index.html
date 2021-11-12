@@ -56,7 +56,7 @@ code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 code span.al { color: #ad0000; } /* Alert */
 code span.an { color: #5e5e5e; } /* Annotation */
-code span.at { color: #20794d; } /* Attribute */
+code span.at { } /* Attribute */
 code span.bn { color: #ad0000; } /* BaseN */
 code span.bu { } /* BuiltIn */
 code span.cf { color: #007ba5; } /* ControlFlow */
@@ -77,13 +77,14 @@ code span.kw { color: #007ba5; } /* Keyword */
 code span.op { color: #5e5e5e; } /* Operator */
 code span.ot { color: #007ba5; } /* Other */
 code span.pp { color: #ad0000; } /* Preprocessor */
-code span.sc { color: #20794d; } /* SpecialChar */
+code span.sc { color: #5e5e5e; } /* SpecialChar */
 code span.ss { color: #20794d; } /* SpecialString */
 code span.st { color: #20794d; } /* String */
 code span.va { color: #111111; } /* Variable */
 code span.vs { color: #20794d; } /* VerbatimString */
 code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 </style>
+
 
   <!--radix_placeholder_meta_tags-->
 <title>mlr3gallery: mlr3 Basics - German Credit</title>
@@ -482,7 +483,7 @@ d-title {
 
 </style>
 
-<script src="../../site_libs/jquery-1.11.3/jquery.min.js"></script>
+<script src="../../site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <link href="../../site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet"/>
 <link href="../../site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet"/>
 <script src="../../site_libs/headroom-0.9.4/headroom.min.js"></script>
@@ -1889,7 +1890,10 @@ function init_distill() {
 
     // hoverable references
     $('span.citation[data-cites]').each(function() {
-      var refHtml = $('#ref-' + $(this).attr('data-cites')).html();
+      var refs = $(this).attr('data-cites').split(" ");
+      var refHtml = refs.map(function(ref) {
+        return "<p>" + $('#ref-' + ref).html() + "</p>";
+      }).join("\n");
       window.tippy(this, {
         allowHTML: true,
         content: refHtml,
@@ -2060,7 +2064,7 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 <!--/radix_placeholder_distill-->
-  <script src="../../site_libs/jquery-1.11.3/jquery.min.js"></script>
+  <script src="../../site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
   <script src="../../site_libs/popper-2.6.0/popper.min.js"></script>
   <link href="../../site_libs/tippy-6.2.7/tippy.css" rel="stylesheet" />
   <link href="../../site_libs/tippy-6.2.7/tippy-light-border.css" rel="stylesheet" />
@@ -2944,7 +2948,7 @@ age
 <p>In our case it is clearly our objective to model or predict the binary <code>factor</code> variable <code>credit_risk</code>. Thus, we define a <a href="https://mlr3.mlr-org.com/reference/TaskClassif.html"><code>TaskClassif</code></a>:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>task</span> <span class='op'>=</span> <span class='fu'>as_task_classif</span><span class='op'>(</span><span class='va'>german</span>, id <span class='op'>=</span> <span class='st'>"GermanCredit"</span>, target <span class='op'>=</span> <span class='st'>"credit_risk"</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>task</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/as_task_classif.html'>as_task_classif</a></span><span class='op'>(</span><span class='va'>german</span>, id <span class='op'>=</span> <span class='st'>"GermanCredit"</span>, target <span class='op'>=</span> <span class='st'>"credit_risk"</span><span class='op'>)</span>
 </code></pre>
 </div>
 </div>
@@ -2986,14 +2990,14 @@ Keys: classif.AdaBoostM1, classif.bart, classif.C50, classif.catboost, classif.c
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='st'><a href='https://mlr3learners.mlr-org.com'>"mlr3learners"</a></span><span class='op'>)</span>
-<span class='va'>learner_logreg</span> <span class='op'>=</span> <span class='fu'>lrn</span><span class='op'>(</span><span class='st'>"classif.log_reg"</span><span class='op'>)</span>
+<span class='va'>learner_logreg</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>lrn</a></span><span class='op'>(</span><span class='st'>"classif.log_reg"</span><span class='op'>)</span>
 <span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span><span class='op'>(</span><span class='va'>learner_logreg</span><span class='op'>)</span>
 </code></pre>
 </div>
 <pre><code>&lt;LearnerClassifLogReg:classif.log_reg&gt;
 * Model: -
 * Parameters: list()
-* Packages: stats
+* Packages: mlr3, stats
 * Predict Type: response
 * Feature types: logical, integer, numeric, character, factor, ordered
 * Properties: loglik, twoclass, weights</code></pre>
@@ -3198,7 +3202,7 @@ Number of Fisher Scoring iterations: 5</code></pre>
 <p>We now additionally supply the importance argument (<code>importance = "permutation"</code>). Doing so, we override the default and let the learner do feature importance determination based on permutation feature importance:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>learner_rf</span> <span class='op'>=</span> <span class='fu'>lrn</span><span class='op'>(</span><span class='st'>"classif.ranger"</span>, importance <span class='op'>=</span> <span class='st'>"permutation"</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>learner_rf</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>lrn</a></span><span class='op'>(</span><span class='st'>"classif.ranger"</span>, importance <span class='op'>=</span> <span class='st'>"permutation"</span><span class='op'>)</span>
 <span class='va'>learner_rf</span><span class='op'>$</span><span class='fu'>train</span><span class='op'>(</span><span class='va'>task</span>, row_ids <span class='op'>=</span> <span class='va'>train_set</span><span class='op'>)</span>
 </code></pre>
 </div>
@@ -3321,7 +3325,7 @@ response bad good
 <p>Within <a href="https://mlr3.mlr-org.com">mlr3</a>, we need to specify the resampling strategy using the <a href="https://mlr3.mlr-org.com/reference/mlr_sugar.html"><code>rsmp()</code></a> function:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>resampling</span> <span class='op'>=</span> <span class='fu'>rsmp</span><span class='op'>(</span><span class='st'>"holdout"</span>, ratio <span class='op'>=</span> <span class='fl'>2</span><span class='op'>/</span><span class='fl'>3</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>resampling</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>rsmp</a></span><span class='op'>(</span><span class='st'>"holdout"</span>, ratio <span class='op'>=</span> <span class='fl'>2</span><span class='op'>/</span><span class='fl'>3</span><span class='op'>)</span>
 <span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span><span class='op'>(</span><span class='va'>resampling</span><span class='op'>)</span>
 </code></pre>
 </div>
@@ -3332,7 +3336,7 @@ response bad good
 <p>Here, we use “holdout”, a simple train-test split (with just one iteration). We use the <a href="https://mlr3.mlr-org.com/reference/resample.html"><code>resample()</code></a> function to undertake the resampling calculation:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>res</span> <span class='op'>=</span> <span class='fu'>resample</span><span class='op'>(</span><span class='va'>task</span>, learner <span class='op'>=</span> <span class='va'>learner_logreg</span>, resampling <span class='op'>=</span> <span class='va'>resampling</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>res</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/resample.html'>resample</a></span><span class='op'>(</span><span class='va'>task</span>, learner <span class='op'>=</span> <span class='va'>learner_logreg</span>, resampling <span class='op'>=</span> <span class='va'>resampling</span><span class='op'>)</span>
 <span class='va'>res</span>
 </code></pre>
 </div>
@@ -3355,8 +3359,8 @@ response bad good
 <p>We can easily run different resampling strategies, e.g. repeated holdout (<code>"subsampling"</code>), or cross validation. Most methods perform repeated train/predict cycles on different data subsets and aggregate the result (usually as the mean). Doing this manually would require us to write loops. <a href="https://mlr3.mlr-org.com">mlr3</a> does the job for us:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>resampling</span> <span class='op'>=</span> <span class='fu'>rsmp</span><span class='op'>(</span><span class='st'>"subsampling"</span>, repeats <span class='op'>=</span> <span class='fl'>10</span><span class='op'>)</span>
-<span class='va'>rr</span> <span class='op'>=</span> <span class='fu'>resample</span><span class='op'>(</span><span class='va'>task</span>, learner <span class='op'>=</span> <span class='va'>learner_logreg</span>, resampling <span class='op'>=</span> <span class='va'>resampling</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>resampling</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>rsmp</a></span><span class='op'>(</span><span class='st'>"subsampling"</span>, repeats <span class='op'>=</span> <span class='fl'>10</span><span class='op'>)</span>
+<span class='va'>rr</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/resample.html'>resample</a></span><span class='op'>(</span><span class='va'>task</span>, learner <span class='op'>=</span> <span class='va'>learner_logreg</span>, resampling <span class='op'>=</span> <span class='va'>resampling</span><span class='op'>)</span>
 <span class='va'>rr</span><span class='op'>$</span><span class='fu'>aggregate</span><span class='op'>(</span><span class='op'>)</span>
 </code></pre>
 </div>
@@ -3366,8 +3370,8 @@ response bad good
 <p>Instead, we could also run cross-validation:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>resampling</span> <span class='op'>=</span> <span class='va'>resampling</span> <span class='op'>=</span> <span class='fu'>rsmp</span><span class='op'>(</span><span class='st'>"cv"</span>, folds <span class='op'>=</span> <span class='fl'>10</span><span class='op'>)</span>
-<span class='va'>rr</span> <span class='op'>=</span> <span class='fu'>resample</span><span class='op'>(</span><span class='va'>task</span>, learner <span class='op'>=</span> <span class='va'>learner_logreg</span>, resampling <span class='op'>=</span> <span class='va'>resampling</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>resampling</span> <span class='op'>=</span> <span class='va'>resampling</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>rsmp</a></span><span class='op'>(</span><span class='st'>"cv"</span>, folds <span class='op'>=</span> <span class='fl'>10</span><span class='op'>)</span>
+<span class='va'>rr</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/resample.html'>resample</a></span><span class='op'>(</span><span class='va'>task</span>, learner <span class='op'>=</span> <span class='va'>learner_logreg</span>, resampling <span class='op'>=</span> <span class='va'>resampling</span><span class='op'>)</span>
 <span class='va'>rr</span><span class='op'>$</span><span class='fu'>aggregate</span><span class='op'>(</span><span class='op'>)</span>
 </code></pre>
 </div>
@@ -3378,14 +3382,14 @@ response bad good
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='co'># false positive rate</span>
-<span class='va'>rr</span><span class='op'>$</span><span class='fu'>aggregate</span><span class='op'>(</span><span class='fu'>msr</span><span class='op'>(</span><span class='st'>"classif.fpr"</span><span class='op'>)</span><span class='op'>)</span>
+<span class='va'>rr</span><span class='op'>$</span><span class='fu'>aggregate</span><span class='op'>(</span><span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>msr</a></span><span class='op'>(</span><span class='st'>"classif.fpr"</span><span class='op'>)</span><span class='op'>)</span>
 </code></pre>
 </div>
 <pre><code>classif.fpr 
   0.1340364 </code></pre>
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='co'># false positive rate and false negative</span>
-<span class='va'>measures</span> <span class='op'>=</span> <span class='fu'>msrs</span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"classif.fpr"</span>, <span class='st'>"classif.fnr"</span><span class='op'>)</span><span class='op'>)</span>
+<span class='va'>measures</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>msrs</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"classif.fpr"</span>, <span class='st'>"classif.fnr"</span><span class='op'>)</span><span class='op'>)</span>
 <span class='va'>rr</span><span class='op'>$</span><span class='fu'>aggregate</span><span class='op'>(</span><span class='va'>measures</span><span class='op'>)</span>
 </code></pre>
 </div>
@@ -3404,7 +3408,7 @@ Keys: bootstrap, custom, custom_cv, cv, holdout, insample, loo, repeated_cv, sub
 <pre class="sourceCode r"><code class="sourceCode r"><span class='va'>mlr_measures</span>
 </code></pre>
 </div>
-<pre><code>&lt;DictionaryMeasure&gt; with 85 stored values
+<pre><code>&lt;DictionaryMeasure&gt; with 87 stored values
 Keys: aic, bic, classif.acc, classif.auc, classif.bacc, classif.bbrier, classif.ce, classif.costs,
   classif.dor, classif.fbeta, classif.fdr, classif.fn, classif.fnr, classif.fomr, classif.fp, classif.fpr,
   classif.logloss, classif.mbrier, classif.mcc, classif.npv, classif.ppv, classif.prauc, classif.precision,
@@ -3412,11 +3416,11 @@ Keys: aic, bic, classif.acc, classif.auc, classif.bacc, classif.bbrier, classif.
   classif.tpr, clust.ch, clust.db, clust.dunn, clust.silhouette, clust.wss, debug, dens.logloss, oob_error,
   regr.bias, regr.ktau, regr.mae, regr.mape, regr.maxae, regr.medae, regr.medse, regr.mse, regr.msle,
   regr.pbias, regr.rae, regr.rmse, regr.rmsle, regr.rrse, regr.rse, regr.rsq, regr.sae, regr.smape,
-  regr.srho, regr.sse, selected_features, surv.brier, surv.calib_alpha, surv.calib_beta,
-  surv.chambless_auc, surv.cindex, surv.dcalib, surv.graf, surv.hung_auc, surv.intlogloss, surv.logloss,
-  surv.mae, surv.mse, surv.nagelk_r2, surv.oquigley_r2, surv.rmse, surv.schmid, surv.song_auc,
-  surv.song_tnr, surv.song_tpr, surv.uno_auc, surv.uno_tnr, surv.uno_tpr, surv.xu_r2, time_both,
-  time_predict, time_train</code></pre>
+  regr.srho, regr.sse, selected_features, sim.jaccard, sim.phi, surv.brier, surv.calib_alpha,
+  surv.calib_beta, surv.chambless_auc, surv.cindex, surv.dcalib, surv.graf, surv.hung_auc, surv.intlogloss,
+  surv.logloss, surv.mae, surv.mse, surv.nagelk_r2, surv.oquigley_r2, surv.rmse, surv.schmid,
+  surv.song_auc, surv.song_tnr, surv.song_tpr, surv.uno_auc, surv.uno_tnr, surv.uno_tpr, surv.xu_r2,
+  time_both, time_predict, time_train</code></pre>
 </div>
 <p>To get help on a resampling method, use <code>?mlr_resamplings_xxx</code>, for a measure do <code>?mlr_measures_xxx</code>. You can also browse the <a href="https://mlr3.mlr-org.com/reference/index.html">mlr3 reference</a> online.</p>
 <p>Note that some measures, for example <a href="https://mlr3.mlr-org.com/reference/mlr_measures_classif.auc.html"><code>AUC</code></a>, require the prediction of probabilities.</p>
@@ -3424,13 +3428,13 @@ Keys: aic, bic, classif.acc, classif.auc, classif.bacc, classif.bbrier, classif.
 <p>We could compare <a href="https://mlr3.mlr-org.com/reference/Learner.html"><code>Learners</code></a> by evaluating <a href="https://mlr3.mlr-org.com/reference/resample.html"><code>resample()</code></a> for each of them manually. However, <a href="https://mlr3.mlr-org.com/reference/benchmark.html"><code>benchmark()</code></a> automatically performs resampling evaluations for multiple learners and tasks. <a href="https://mlr3.mlr-org.com/reference/benchmark_grid.html"><code>benchmark_grid()</code></a> creates fully crossed designs: Multiple <a href="https://mlr3.mlr-org.com/reference/Learner.html"><code>Learners</code></a> for multiple <a href="https://mlr3.mlr-org.com/reference/Task.html"><code>Tasks</code></a> are compared w.r.t. multiple <a href="https://mlr3.mlr-org.com/reference/Resampling.html"><code>Resamplings</code></a>.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>learners</span> <span class='op'>=</span> <span class='fu'>lrns</span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"classif.log_reg"</span>, <span class='st'>"classif.ranger"</span><span class='op'>)</span>, predict_type <span class='op'>=</span> <span class='st'>"prob"</span><span class='op'>)</span>
-<span class='va'>grid</span> <span class='op'>=</span> <span class='fu'>benchmark_grid</span><span class='op'>(</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>learners</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>lrns</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"classif.log_reg"</span>, <span class='st'>"classif.ranger"</span><span class='op'>)</span>, predict_type <span class='op'>=</span> <span class='st'>"prob"</span><span class='op'>)</span>
+<span class='va'>grid</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/benchmark_grid.html'>benchmark_grid</a></span><span class='op'>(</span>
   tasks <span class='op'>=</span> <span class='va'>task</span>,
   learners <span class='op'>=</span> <span class='va'>learners</span>,
-  resamplings <span class='op'>=</span> <span class='fu'>rsmp</span><span class='op'>(</span><span class='st'>"cv"</span>, folds <span class='op'>=</span> <span class='fl'>10</span><span class='op'>)</span>
+  resamplings <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>rsmp</a></span><span class='op'>(</span><span class='st'>"cv"</span>, folds <span class='op'>=</span> <span class='fl'>10</span><span class='op'>)</span>
 <span class='op'>)</span>
-<span class='va'>bmr</span> <span class='op'>=</span> <span class='fu'>benchmark</span><span class='op'>(</span><span class='va'>grid</span><span class='op'>)</span>
+<span class='va'>bmr</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/benchmark.html'>benchmark</a></span><span class='op'>(</span><span class='va'>grid</span><span class='op'>)</span>
 </code></pre>
 </div>
 </div>
@@ -3444,7 +3448,7 @@ Keys: aic, bic, classif.acc, classif.auc, classif.bacc, classif.bbrier, classif.
 <p>In the benchmark we can compare different measures. Here, we look at the <a href="https://mlr3.mlr-org.com/reference/mlr_measures_classif.ce.html"><code>misclassification rate</code></a> and the <a href="https://mlr3.mlr-org.com/reference/mlr_measures_classif.auc.html"><code>AUC</code></a>:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>measures</span> <span class='op'>=</span> <span class='fu'>msrs</span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"classif.ce"</span>, <span class='st'>"classif.auc"</span><span class='op'>)</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>measures</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>msrs</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"classif.ce"</span>, <span class='st'>"classif.auc"</span><span class='op'>)</span><span class='op'>)</span>
 <span class='va'>performances</span> <span class='op'>=</span> <span class='va'>bmr</span><span class='op'>$</span><span class='fu'>aggregate</span><span class='op'>(</span><span class='va'>measures</span><span class='op'>)</span>
 <span class='va'>performances</span><span class='op'>[</span>, <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"learner_id"</span>, <span class='st'>"classif.ce"</span>, <span class='st'>"classif.auc"</span><span class='op'>)</span><span class='op'>]</span>
 </code></pre>
@@ -3548,12 +3552,12 @@ Keys: aic, bic, classif.acc, classif.auc, classif.bacc, classif.bbrier, classif.
 <p>We will benchmark their performance on the German credit dataset. For this we construct the three learners and set the parameters accordingly:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>rf_med</span> <span class='op'>=</span> <span class='fu'>lrn</span><span class='op'>(</span><span class='st'>"classif.ranger"</span>, id <span class='op'>=</span> <span class='st'>"med"</span>, predict_type <span class='op'>=</span> <span class='st'>"prob"</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>rf_med</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>lrn</a></span><span class='op'>(</span><span class='st'>"classif.ranger"</span>, id <span class='op'>=</span> <span class='st'>"med"</span>, predict_type <span class='op'>=</span> <span class='st'>"prob"</span><span class='op'>)</span>
 
-<span class='va'>rf_low</span> <span class='op'>=</span> <span class='fu'>lrn</span><span class='op'>(</span><span class='st'>"classif.ranger"</span>, id <span class='op'>=</span> <span class='st'>"low"</span>, predict_type <span class='op'>=</span> <span class='st'>"prob"</span>,
+<span class='va'>rf_low</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>lrn</a></span><span class='op'>(</span><span class='st'>"classif.ranger"</span>, id <span class='op'>=</span> <span class='st'>"low"</span>, predict_type <span class='op'>=</span> <span class='st'>"prob"</span>,
   num.trees <span class='op'>=</span> <span class='fl'>5</span>, mtry <span class='op'>=</span> <span class='fl'>2</span><span class='op'>)</span>
 
-<span class='va'>rf_high</span> <span class='op'>=</span> <span class='fu'>lrn</span><span class='op'>(</span><span class='st'>"classif.ranger"</span>, id <span class='op'>=</span> <span class='st'>"high"</span>, predict_type <span class='op'>=</span> <span class='st'>"prob"</span>,
+<span class='va'>rf_high</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>lrn</a></span><span class='op'>(</span><span class='st'>"classif.ranger"</span>, id <span class='op'>=</span> <span class='st'>"high"</span>, predict_type <span class='op'>=</span> <span class='st'>"prob"</span>,
   num.trees <span class='op'>=</span> <span class='fl'>1000</span>, mtry <span class='op'>=</span> <span class='fl'>11</span><span class='op'>)</span>
 </code></pre>
 </div>
@@ -3562,17 +3566,17 @@ Keys: aic, bic, classif.acc, classif.auc, classif.bacc, classif.bbrier, classif.
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='va'>learners</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='va'>rf_low</span>, <span class='va'>rf_med</span>, <span class='va'>rf_high</span><span class='op'>)</span>
-<span class='va'>grid</span> <span class='op'>=</span> <span class='fu'>benchmark_grid</span><span class='op'>(</span>
+<span class='va'>grid</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/benchmark_grid.html'>benchmark_grid</a></span><span class='op'>(</span>
   tasks <span class='op'>=</span> <span class='va'>task</span>,
   learners <span class='op'>=</span> <span class='va'>learners</span>,
-  resamplings <span class='op'>=</span> <span class='fu'>rsmp</span><span class='op'>(</span><span class='st'>"cv"</span>, folds <span class='op'>=</span> <span class='fl'>10</span><span class='op'>)</span>
+  resamplings <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>rsmp</a></span><span class='op'>(</span><span class='st'>"cv"</span>, folds <span class='op'>=</span> <span class='fl'>10</span><span class='op'>)</span>
 <span class='op'>)</span>
 </code></pre>
 </div>
 </div>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>bmr</span> <span class='op'>=</span> <span class='fu'>benchmark</span><span class='op'>(</span><span class='va'>grid</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>bmr</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/benchmark.html'>benchmark</a></span><span class='op'>(</span><span class='va'>grid</span><span class='op'>)</span>
 <span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span><span class='op'>(</span><span class='va'>bmr</span><span class='op'>)</span>
 </code></pre>
 </div>
@@ -3585,7 +3589,7 @@ Keys: aic, bic, classif.acc, classif.auc, classif.bacc, classif.bbrier, classif.
 <p>We compare misclassification rate and AUC again:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>measures</span> <span class='op'>=</span> <span class='fu'>msrs</span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"classif.ce"</span>, <span class='st'>"classif.auc"</span><span class='op'>)</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>measures</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>msrs</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"classif.ce"</span>, <span class='st'>"classif.auc"</span><span class='op'>)</span><span class='op'>)</span>
 <span class='va'>performances</span> <span class='op'>=</span> <span class='va'>bmr</span><span class='op'>$</span><span class='fu'>aggregate</span><span class='op'>(</span><span class='va'>measures</span><span class='op'>)</span>
 <span class='va'>performances</span><span class='op'>[</span>, <span class='fu'>.</span><span class='op'>(</span><span class='va'>learner_id</span>, <span class='va'>classif.ce</span>, <span class='va'>classif.auc</span><span class='op'>)</span><span class='op'>]</span>
 </code></pre>
@@ -3657,7 +3661,7 @@ Keys: bootstrap, custom, custom_cv, cv, holdout, insample, loo, repeated_cv, sub
 <pre class="sourceCode r"><code class="sourceCode r"><span class='va'>mlr_measures</span>
 </code></pre>
 </div>
-<pre><code>&lt;DictionaryMeasure&gt; with 85 stored values
+<pre><code>&lt;DictionaryMeasure&gt; with 87 stored values
 Keys: aic, bic, classif.acc, classif.auc, classif.bacc, classif.bbrier, classif.ce, classif.costs,
   classif.dor, classif.fbeta, classif.fdr, classif.fn, classif.fnr, classif.fomr, classif.fp, classif.fpr,
   classif.logloss, classif.mbrier, classif.mcc, classif.npv, classif.ppv, classif.prauc, classif.precision,
@@ -3665,11 +3669,11 @@ Keys: aic, bic, classif.acc, classif.auc, classif.bacc, classif.bbrier, classif.
   classif.tpr, clust.ch, clust.db, clust.dunn, clust.silhouette, clust.wss, debug, dens.logloss, oob_error,
   regr.bias, regr.ktau, regr.mae, regr.mape, regr.maxae, regr.medae, regr.medse, regr.mse, regr.msle,
   regr.pbias, regr.rae, regr.rmse, regr.rmsle, regr.rrse, regr.rse, regr.rsq, regr.sae, regr.smape,
-  regr.srho, regr.sse, selected_features, surv.brier, surv.calib_alpha, surv.calib_beta,
-  surv.chambless_auc, surv.cindex, surv.dcalib, surv.graf, surv.hung_auc, surv.intlogloss, surv.logloss,
-  surv.mae, surv.mse, surv.nagelk_r2, surv.oquigley_r2, surv.rmse, surv.schmid, surv.song_auc,
-  surv.song_tnr, surv.song_tpr, surv.uno_auc, surv.uno_tnr, surv.uno_tpr, surv.xu_r2, time_both,
-  time_predict, time_train</code></pre>
+  regr.srho, regr.sse, selected_features, sim.jaccard, sim.phi, surv.brier, surv.calib_alpha,
+  surv.calib_beta, surv.chambless_auc, surv.cindex, surv.dcalib, surv.graf, surv.hung_auc, surv.intlogloss,
+  surv.logloss, surv.mae, surv.mse, surv.nagelk_r2, surv.oquigley_r2, surv.rmse, surv.schmid,
+  surv.song_auc, surv.song_tnr, surv.song_tpr, surv.uno_auc, surv.uno_tnr, surv.uno_tpr, surv.xu_r2,
+  time_both, time_predict, time_train</code></pre>
 </div>
 <ul>
 <li>What are the arguments of a <code>$new()</code> constructor?

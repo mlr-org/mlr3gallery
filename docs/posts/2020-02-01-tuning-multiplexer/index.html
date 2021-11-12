@@ -56,7 +56,7 @@ code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 code span.al { color: #ad0000; } /* Alert */
 code span.an { color: #5e5e5e; } /* Annotation */
-code span.at { color: #20794d; } /* Attribute */
+code span.at { } /* Attribute */
 code span.bn { color: #ad0000; } /* BaseN */
 code span.bu { } /* BuiltIn */
 code span.cf { color: #007ba5; } /* ControlFlow */
@@ -77,13 +77,14 @@ code span.kw { color: #007ba5; } /* Keyword */
 code span.op { color: #5e5e5e; } /* Operator */
 code span.ot { color: #007ba5; } /* Other */
 code span.pp { color: #ad0000; } /* Preprocessor */
-code span.sc { color: #20794d; } /* SpecialChar */
+code span.sc { color: #5e5e5e; } /* SpecialChar */
 code span.ss { color: #20794d; } /* SpecialString */
 code span.st { color: #20794d; } /* String */
 code span.va { color: #111111; } /* Variable */
 code span.vs { color: #20794d; } /* VerbatimString */
 code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 </style>
+
 
   <!--radix_placeholder_meta_tags-->
 <title>mlr3gallery: Tuning Over Multiple Learners</title>
@@ -480,7 +481,7 @@ d-title {
 
 </style>
 
-<script src="../../site_libs/jquery-1.11.3/jquery.min.js"></script>
+<script src="../../site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <link href="../../site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet"/>
 <link href="../../site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet"/>
 <script src="../../site_libs/headroom-0.9.4/headroom.min.js"></script>
@@ -1887,7 +1888,10 @@ function init_distill() {
 
     // hoverable references
     $('span.citation[data-cites]').each(function() {
-      var refHtml = $('#ref-' + $(this).attr('data-cites')).html();
+      var refs = $(this).attr('data-cites').split(" ");
+      var refHtml = refs.map(function(ref) {
+        return "<p>" + $('#ref-' + ref).html() + "</p>";
+      }).join("\n");
       window.tippy(this, {
         allowHTML: true,
         content: refHtml,
@@ -2060,7 +2064,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <!--/radix_placeholder_distill-->
   <script src="../../site_libs/kePrint-0.0.1/kePrint.js"></script>
   <link href="../../site_libs/lightable-0.0.1/lightable.css" rel="stylesheet" />
-  <script src="../../site_libs/jquery-1.11.3/jquery.min.js"></script>
+  <script src="../../site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
   <script src="../../site_libs/popper-2.6.0/popper.min.js"></script>
   <link href="../../site_libs/tippy-6.2.7/tippy.css" rel="stylesheet" />
   <link href="../../site_libs/tippy-6.2.7/tippy-light-border.css" rel="stylesheet" />
@@ -2167,14 +2171,14 @@ document.addEventListener('DOMContentLoaded', function() {
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='va'>learners</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>
-  <span class='fu'>lrn</span><span class='op'>(</span><span class='st'>"classif.xgboost"</span>, id <span class='op'>=</span> <span class='st'>"xgb"</span>, eval_metric <span class='op'>=</span> <span class='st'>"logloss"</span><span class='op'>)</span>,
-  <span class='fu'>lrn</span><span class='op'>(</span><span class='st'>"classif.ranger"</span>, id <span class='op'>=</span> <span class='st'>"rf"</span><span class='op'>)</span>
+  <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>lrn</a></span><span class='op'>(</span><span class='st'>"classif.xgboost"</span>, id <span class='op'>=</span> <span class='st'>"xgb"</span>, eval_metric <span class='op'>=</span> <span class='st'>"logloss"</span><span class='op'>)</span>,
+  <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>lrn</a></span><span class='op'>(</span><span class='st'>"classif.ranger"</span>, id <span class='op'>=</span> <span class='st'>"rf"</span><span class='op'>)</span>
 <span class='op'>)</span>
 <span class='va'>learners_ids</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/lapply.html'>sapply</a></span><span class='op'>(</span><span class='va'>learners</span>, <span class='kw'>function</span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span> <span class='va'>x</span><span class='op'>$</span><span class='va'>id</span><span class='op'>)</span>
 
-<span class='va'>task</span> <span class='op'>=</span> <span class='fu'>tsk</span><span class='op'>(</span><span class='st'>"sonar"</span><span class='op'>)</span> <span class='co'># some random data for this demo</span>
-<span class='va'>inner_cv2</span> <span class='op'>=</span> <span class='fu'>rsmp</span><span class='op'>(</span><span class='st'>"cv"</span>, folds <span class='op'>=</span> <span class='fl'>2</span><span class='op'>)</span> <span class='co'># inner loop for nested CV</span>
-<span class='va'>outer_cv5</span> <span class='op'>=</span> <span class='fu'>rsmp</span><span class='op'>(</span><span class='st'>"cv"</span>, folds <span class='op'>=</span> <span class='fl'>5</span><span class='op'>)</span> <span class='co'># outer loop for nested CV</span>
+<span class='va'>task</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>tsk</a></span><span class='op'>(</span><span class='st'>"sonar"</span><span class='op'>)</span> <span class='co'># some random data for this demo</span>
+<span class='va'>inner_cv2</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>rsmp</a></span><span class='op'>(</span><span class='st'>"cv"</span>, folds <span class='op'>=</span> <span class='fl'>2</span><span class='op'>)</span> <span class='co'># inner loop for nested CV</span>
+<span class='va'>outer_cv5</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>rsmp</a></span><span class='op'>(</span><span class='st'>"cv"</span>, folds <span class='op'>=</span> <span class='fl'>5</span><span class='op'>)</span> <span class='co'># outer loop for nested CV</span>
 </code></pre>
 </div>
 </div>
@@ -2183,14 +2187,14 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>Assume we don’t want to perform tuning and or with running all learner in their respective defaults. Simply run benchmark on the learners and the tasks. That tabulates our results nicely and shows us what works best.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>grid</span> <span class='op'>=</span> <span class='fu'>benchmark_grid</span><span class='op'>(</span><span class='va'>task</span>, <span class='va'>learners</span>, <span class='va'>outer_cv5</span><span class='op'>)</span>
-<span class='va'>bmr</span> <span class='op'>=</span> <span class='fu'>benchmark</span><span class='op'>(</span><span class='va'>grid</span><span class='op'>)</span>
-<span class='va'>bmr</span><span class='op'>$</span><span class='fu'>aggregate</span><span class='op'>(</span>measures <span class='op'>=</span> <span class='fu'>msr</span><span class='op'>(</span><span class='st'>"classif.ce"</span><span class='op'>)</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>grid</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/benchmark_grid.html'>benchmark_grid</a></span><span class='op'>(</span><span class='va'>task</span>, <span class='va'>learners</span>, <span class='va'>outer_cv5</span><span class='op'>)</span>
+<span class='va'>bmr</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/benchmark.html'>benchmark</a></span><span class='op'>(</span><span class='va'>grid</span><span class='op'>)</span>
+<span class='va'>bmr</span><span class='op'>$</span><span class='fu'>aggregate</span><span class='op'>(</span>measures <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>msr</a></span><span class='op'>(</span><span class='st'>"classif.ce"</span><span class='op'>)</span><span class='op'>)</span>
 </code></pre>
 </div>
 <pre><code>   nr      resample_result task_id learner_id resampling_id iters classif.ce
-1:  1 &lt;ResampleResult[21]&gt;   sonar        xgb            cv     5  0.2736353
-2:  2 &lt;ResampleResult[21]&gt;   sonar         rf            cv     5  0.1973287</code></pre>
+1:  1 &lt;ResampleResult[22]&gt;   sonar        xgb            cv     5  0.2736353
+2:  2 &lt;ResampleResult[22]&gt;   sonar         rf            cv     5  0.1973287</code></pre>
 </div>
 <h1 id="the-pipelines-approach">The Pipelines Approach</h1>
 <p>Ok, why would we ever want to change the simple approach above - and use pipelines / tuning for this? Three reasons:</p>
@@ -2208,8 +2212,8 @@ document.addEventListener('DOMContentLoaded', function() {
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='va'>graph</span> <span class='op'>=</span>
-  <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"branch"</span>, options <span class='op'>=</span> <span class='va'>learners_ids</span><span class='op'>)</span> <span class='op'>%&gt;&gt;%</span>
-  <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/gunion.html'>gunion</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/lapply.html'>lapply</a></span><span class='op'>(</span><span class='va'>learners</span>, <span class='va'>po</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>%&gt;&gt;%</span>
+  <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"branch"</span>, options <span class='op'>=</span> <span class='va'>learners_ids</span><span class='op'>)</span> <span class='op'><a href='https://mlr3pipelines.mlr-org.com//reference/grapes-greater-than-greater-than-grapes.html'>%&gt;&gt;%</a></span>
+  <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/gunion.html'>gunion</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/lapply.html'>lapply</a></span><span class='op'>(</span><span class='va'>learners</span>, <span class='va'>po</span><span class='op'>)</span><span class='op'>)</span> <span class='op'><a href='https://mlr3pipelines.mlr-org.com//reference/grapes-greater-than-greater-than-grapes.html'>%&gt;&gt;%</a></span>
   <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"unbranch"</span><span class='op'>)</span>
 <span class='va'>graph</span><span class='op'>$</span><span class='fu'>plot</span><span class='op'>(</span><span class='op'>)</span>
 </code></pre>
@@ -2261,7 +2265,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>We can now tune over this pipeline, and probably running grid search seems a good idea to “touch” every available learner. NB: We have now written down in (much more complicated code) what we did before with <code>benchmark</code>.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>graph_learner</span> <span class='op'>=</span> <span class='fu'>as_learner</span><span class='op'>(</span><span class='va'>graph</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>graph_learner</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/as_learner.html'>as_learner</a></span><span class='op'>(</span><span class='va'>graph</span><span class='op'>)</span>
 <span class='va'>graph_learner</span><span class='op'>$</span><span class='va'>id</span> <span class='op'>=</span> <span class='st'>"g"</span>
 <span class='va'>graph_learner</span><span class='op'>$</span><span class='va'>param_set</span><span class='op'>$</span><span class='va'>values</span><span class='op'>$</span><span class='va'>branch.selection</span> <span class='op'>=</span> <span class='fu'><a href='https://paradox.mlr-org.com/reference/to_tune.html'>to_tune</a></span><span class='op'>(</span>levels <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"rf"</span>, <span class='st'>"xgb"</span><span class='op'>)</span><span class='op'>)</span>
 
@@ -2270,7 +2274,7 @@ document.addEventListener('DOMContentLoaded', function() {
   task <span class='op'>=</span> <span class='va'>task</span>,
   learner <span class='op'>=</span> <span class='va'>graph_learner</span>,
   resampling <span class='op'>=</span> <span class='va'>inner_cv2</span>,
-  measure <span class='op'>=</span> <span class='fu'>msr</span><span class='op'>(</span><span class='st'>"classif.ce"</span><span class='op'>)</span><span class='op'>)</span>
+  measure <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>msr</a></span><span class='op'>(</span><span class='st'>"classif.ce"</span><span class='op'>)</span><span class='op'>)</span>
 
 <span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/as.data.table.html'>as.data.table</a></span><span class='op'>(</span><span class='va'>instance</span><span class='op'>$</span><span class='va'>archive</span><span class='op'>)</span>
 </code></pre>
@@ -2312,10 +2316,10 @@ rf
 rf
 </td>
 <td style="text-align:right;">
-0.390
+0.386
 </td>
 <td style="text-align:left;">
-2021-10-01 04:51:10
+2021-11-12 04:54:02
 </td>
 <td style="text-align:right;">
 1
@@ -2332,10 +2336,10 @@ xgb
 xgb
 </td>
 <td style="text-align:right;">
-0.196
+0.229
 </td>
 <td style="text-align:left;">
-2021-10-01 04:51:11
+2021-11-12 04:54:03
 </td>
 <td style="text-align:right;">
 2
@@ -2351,10 +2355,10 @@ xgb
   method <span class='op'>=</span> <span class='st'>"grid_search"</span>,
   learner <span class='op'>=</span> <span class='va'>graph_learner</span>,
   resampling <span class='op'>=</span> <span class='va'>inner_cv2</span>,
-  measure <span class='op'>=</span> <span class='fu'>msr</span><span class='op'>(</span><span class='st'>"classif.ce"</span><span class='op'>)</span>,
+  measure <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>msr</a></span><span class='op'>(</span><span class='st'>"classif.ce"</span><span class='op'>)</span>,
 <span class='op'>)</span>
 
-<span class='va'>rr</span> <span class='op'>=</span> <span class='fu'>resample</span><span class='op'>(</span><span class='va'>task</span>, <span class='va'>at</span>, <span class='va'>outer_cv5</span>, store_models <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>
+<span class='va'>rr</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/resample.html'>resample</a></span><span class='op'>(</span><span class='va'>task</span>, <span class='va'>at</span>, <span class='va'>outer_cv5</span>, store_models <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>
 
 <span class='co'># access inner tuning result</span>
 <span class='fu'><a href='https://mlr3tuning.mlr-org.com/reference/extract_inner_tuning_results.html'>extract_inner_tuning_results</a></span><span class='op'>(</span><span class='va'>rr</span><span class='op'>)</span>
@@ -4393,7 +4397,7 @@ NA
 <p>Very similar code as before, we just swap out the search space. And now use random search.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>graph_learner</span> <span class='op'>=</span> <span class='fu'>as_learner</span><span class='op'>(</span><span class='va'>graph</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>graph_learner</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/as_learner.html'>as_learner</a></span><span class='op'>(</span><span class='va'>graph</span><span class='op'>)</span>
 <span class='va'>graph_learner</span><span class='op'>$</span><span class='va'>id</span> <span class='op'>=</span> <span class='st'>"g"</span>
 
 <span class='va'>instance</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3tuning.mlr-org.com/reference/tune.html'>tune</a></span><span class='op'>(</span>
@@ -4401,7 +4405,7 @@ NA
   task <span class='op'>=</span> <span class='va'>task</span>,
   learner <span class='op'>=</span> <span class='va'>graph_learner</span>,
   resampling <span class='op'>=</span> <span class='va'>inner_cv2</span>,
-  measure <span class='op'>=</span> <span class='fu'>msr</span><span class='op'>(</span><span class='st'>"classif.ce"</span><span class='op'>)</span>,
+  measure <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>msr</a></span><span class='op'>(</span><span class='st'>"classif.ce"</span><span class='op'>)</span>,
   search_space <span class='op'>=</span> <span class='va'>search_space</span>,
   term_evals <span class='op'>=</span> <span class='fl'>10</span>
 <span class='op'>)</span>
@@ -4793,7 +4797,7 @@ NA
   learner <span class='op'>=</span> <span class='va'>graph_learner</span>,
   inner_resampling <span class='op'>=</span> <span class='va'>inner_cv2</span>,
   outer_resampling <span class='op'>=</span> <span class='va'>outer_cv5</span>,
-  measure <span class='op'>=</span> <span class='fu'>msr</span><span class='op'>(</span><span class='st'>"classif.ce"</span><span class='op'>)</span>,
+  measure <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>msr</a></span><span class='op'>(</span><span class='st'>"classif.ce"</span><span class='op'>)</span>,
   search_space <span class='op'>=</span> <span class='va'>search_space</span>,
   term_evals <span class='op'>=</span> <span class='fl'>10L</span><span class='op'>)</span>
 </code></pre>

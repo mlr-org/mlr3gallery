@@ -56,7 +56,7 @@ code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 code span.al { color: #ad0000; } /* Alert */
 code span.an { color: #5e5e5e; } /* Annotation */
-code span.at { color: #20794d; } /* Attribute */
+code span.at { } /* Attribute */
 code span.bn { color: #ad0000; } /* BaseN */
 code span.bu { } /* BuiltIn */
 code span.cf { color: #007ba5; } /* ControlFlow */
@@ -77,13 +77,14 @@ code span.kw { color: #007ba5; } /* Keyword */
 code span.op { color: #5e5e5e; } /* Operator */
 code span.ot { color: #007ba5; } /* Other */
 code span.pp { color: #ad0000; } /* Preprocessor */
-code span.sc { color: #20794d; } /* SpecialChar */
+code span.sc { color: #5e5e5e; } /* SpecialChar */
 code span.ss { color: #20794d; } /* SpecialString */
 code span.st { color: #20794d; } /* String */
 code span.va { color: #111111; } /* Variable */
 code span.vs { color: #20794d; } /* VerbatimString */
 code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 </style>
+
 
   <!--radix_placeholder_meta_tags-->
 <title>mlr3gallery: mlr3pipelines Tutorial - German Credit</title>
@@ -480,7 +481,7 @@ d-title {
 
 </style>
 
-<script src="../../site_libs/jquery-1.11.3/jquery.min.js"></script>
+<script src="../../site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <link href="../../site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet"/>
 <link href="../../site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet"/>
 <script src="../../site_libs/headroom-0.9.4/headroom.min.js"></script>
@@ -1887,7 +1888,10 @@ function init_distill() {
 
     // hoverable references
     $('span.citation[data-cites]').each(function() {
-      var refHtml = $('#ref-' + $(this).attr('data-cites')).html();
+      var refs = $(this).attr('data-cites').split(" ");
+      var refHtml = refs.map(function(ref) {
+        return "<p>" + $('#ref-' + ref).html() + "</p>";
+      }).join("\n");
       window.tippy(this, {
         allowHTML: true,
         content: refHtml,
@@ -2060,7 +2064,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <!--/radix_placeholder_distill-->
   <script src="../../site_libs/kePrint-0.0.1/kePrint.js"></script>
   <link href="../../site_libs/lightable-0.0.1/lightable.css" rel="stylesheet" />
-  <script src="../../site_libs/jquery-1.11.3/jquery.min.js"></script>
+  <script src="../../site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
   <script src="../../site_libs/popper-2.6.0/popper.min.js"></script>
   <link href="../../site_libs/tippy-6.2.7/tippy.css" rel="stylesheet" />
   <link href="../../site_libs/tippy-6.2.7/tippy-light-border.css" rel="stylesheet" />
@@ -2166,7 +2170,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>We again use the German credit dataset, but will restrict ourselves to the <em>factorial features</em>. To make things interesting or to make it a bit harder for our <a href="https://mlr3.mlr-org.com/reference/Learner.html"><code>Learners</code></a>, we introduce <em>missing values</em> in the dataset:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>task</span> <span class='op'>=</span> <span class='fu'>tsk</span><span class='op'>(</span><span class='st'>"german_credit"</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>task</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>tsk</a></span><span class='op'>(</span><span class='st'>"german_credit"</span><span class='op'>)</span>
 <span class='va'>credit_full</span> <span class='op'>=</span> <span class='va'>task</span><span class='op'>$</span><span class='fu'>data</span><span class='op'>(</span><span class='op'>)</span>
 <span class='va'>credit</span> <span class='op'>=</span> <span class='va'>credit_full</span><span class='op'>[</span>, <span class='fu'><a href='https://rdrr.io/r/base/lapply.html'>sapply</a></span><span class='op'>(</span><span class='va'>credit_full</span>, FUN <span class='op'>=</span> <span class='va'>is.factor</span><span class='op'>)</span>, with <span class='op'>=</span> <span class='cn'>FALSE</span><span class='op'>]</span>
 
@@ -2175,14 +2179,14 @@ document.addEventListener('DOMContentLoaded', function() {
   <span class='va'>x</span><span class='op'>[</span><span class='fu'><a href='https://rdrr.io/r/base/sample.html'>sample</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='cn'>TRUE</span>, <span class='cn'>NA</span><span class='op'>)</span>, <span class='fu'><a href='https://rdrr.io/r/base/length.html'>length</a></span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span>, replace <span class='op'>=</span> <span class='cn'>TRUE</span>, prob <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>.9</span>, <span class='fl'>.1</span><span class='op'>)</span><span class='op'>)</span><span class='op'>]</span>
 <span class='op'>}</span><span class='op'>)</span><span class='op'>]</span>
 <span class='va'>credit</span><span class='op'>$</span><span class='va'>credit_risk</span> <span class='op'>=</span> <span class='va'>credit_full</span><span class='op'>$</span><span class='va'>credit_risk</span>
-<span class='va'>task</span> <span class='op'>=</span> <span class='va'>TaskClassif</span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='st'>"GermanCredit"</span>, <span class='va'>credit</span>, <span class='st'>"credit_risk"</span><span class='op'>)</span>
+<span class='va'>task</span> <span class='op'>=</span> <span class='va'><a href='https://mlr3.mlr-org.com/reference/TaskClassif.html'>TaskClassif</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='st'>"GermanCredit"</span>, <span class='va'>credit</span>, <span class='st'>"credit_risk"</span><span class='op'>)</span>
 </code></pre>
 </div>
 </div>
 <p>We instantiate a <a href="https://mlr3.mlr-org.com/reference/Resampling.html"><code>Resampling</code></a> instance for this <a href="https://mlr3.mlr-org.com/reference/Task.html"><code>Task</code></a> to be able to compare resampling performance:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>cv10</span> <span class='op'>=</span> <span class='fu'>rsmp</span><span class='op'>(</span><span class='st'>"cv"</span><span class='op'>)</span><span class='op'>$</span><span class='fu'>instantiate</span><span class='op'>(</span><span class='va'>task</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>cv10</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>rsmp</a></span><span class='op'>(</span><span class='st'>"cv"</span><span class='op'>)</span><span class='op'>$</span><span class='fu'>instantiate</span><span class='op'>(</span><span class='va'>task</span><span class='op'>)</span>
 </code></pre>
 </div>
 </div>
@@ -2217,7 +2221,7 @@ Keys: boxcox, branch, chunk, classbalancing, classifavg, classweights, colapply,
 <p>We have just introduced missing values into our data. While some <a href="https://mlr3.mlr-org.com/reference/Learner.html"><code>Learner</code></a>s can deal with missing value, many cannot. Trying to train a random forest fails because of this:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>ranger</span> <span class='op'>=</span> <span class='fu'>lrn</span><span class='op'>(</span><span class='st'>"classif.ranger"</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>ranger</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>lrn</a></span><span class='op'>(</span><span class='st'>"classif.ranger"</span><span class='op'>)</span>
 <span class='va'>ranger</span><span class='op'>$</span><span class='fu'>train</span><span class='op'>(</span><span class='va'>task</span><span class='op'>)</span>
 </code></pre>
 </div>
@@ -2648,7 +2652,7 @@ yes (under customer name)
 <p>If we used the imputed <a href="https://mlr3.mlr-org.com/reference/Task.html"><code>Task</code></a> for Resampling, we would <em>leak</em> information from the test set into the training set. Therefore, it is mandatory to attach the imputation operator to the <a href="https://mlr3.mlr-org.com/reference/Learner.html"><code>Learner</code></a> itself, creating a <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_learners_graph.html"><code>GraphLearner</code></a>:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>graph_learner_ranger</span> <span class='op'>=</span> <span class='fu'>as_learner</span><span class='op'>(</span><span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"imputeoor"</span><span class='op'>)</span> <span class='op'>%&gt;&gt;%</span> <span class='va'>ranger</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>graph_learner_ranger</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/as_learner.html'>as_learner</a></span><span class='op'>(</span><span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"imputeoor"</span><span class='op'>)</span> <span class='op'><a href='https://mlr3pipelines.mlr-org.com//reference/grapes-greater-than-greater-than-grapes.html'>%&gt;&gt;%</a></span> <span class='va'>ranger</span><span class='op'>)</span>
 
 <span class='va'>graph_learner_ranger</span><span class='op'>$</span><span class='fu'>train</span><span class='op'>(</span><span class='va'>task</span><span class='op'>)</span>
 </code></pre>
@@ -2657,7 +2661,7 @@ yes (under customer name)
 <p>This <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_learners_graph.html"><code>GraphLearner</code></a> can be used for resampling – like an ordinary <a href="https://mlr3.mlr-org.com/reference/Learner.html"><code>Learner</code></a>:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>rr</span> <span class='op'>=</span> <span class='fu'>resample</span><span class='op'>(</span><span class='va'>task</span>, learner <span class='op'>=</span> <span class='va'>graph_learner_ranger</span>, resampling <span class='op'>=</span> <span class='va'>cv10</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>rr</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/resample.html'>resample</a></span><span class='op'>(</span><span class='va'>task</span>, learner <span class='op'>=</span> <span class='va'>graph_learner_ranger</span>, resampling <span class='op'>=</span> <span class='va'>cv10</span><span class='op'>)</span>
 <span class='va'>rr</span><span class='op'>$</span><span class='fu'>aggregate</span><span class='op'>(</span><span class='op'>)</span>
 </code></pre>
 </div>
@@ -2694,7 +2698,7 @@ Keys: anova, auc, carscore, cmim, correlation, disr, find_correlation, importanc
 <p>Making use of this <code>Filter</code>, you may wonder at which costs the reduction of the feature space comes. We can investigate the trade-off between features and performance by tuning. We incorporate our filtering strategy into the pipeline using <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_filter.html"><code>PipeOpFilter</code></a>. Like before, we need to perform imputation as the <code>Filter</code> also relies on complete data:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>fpipe</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"imputeoor"</span><span class='op'>)</span> <span class='op'>%&gt;&gt;%</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"filter"</span>, <span class='fu'><a href='https://mlr3filters.mlr-org.com/reference/flt.html'>flt</a></span><span class='op'>(</span><span class='st'>"mim"</span><span class='op'>)</span>, filter.nfeat <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>fpipe</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"imputeoor"</span><span class='op'>)</span> <span class='op'><a href='https://mlr3pipelines.mlr-org.com//reference/grapes-greater-than-greater-than-grapes.html'>%&gt;&gt;%</a></span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"filter"</span>, <span class='fu'><a href='https://mlr3filters.mlr-org.com/reference/flt.html'>flt</a></span><span class='op'>(</span><span class='st'>"mim"</span><span class='op'>)</span>, filter.nfeat <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span>
 <span class='va'>fpipe</span><span class='op'>$</span><span class='fu'>train</span><span class='op'>(</span><span class='va'>task</span><span class='op'>)</span><span class='op'>[[</span><span class='fl'>1</span><span class='op'>]</span><span class='op'>]</span><span class='op'>$</span><span class='fu'>head</span><span class='op'>(</span><span class='op'>)</span>
 </code></pre>
 </div>
@@ -2728,9 +2732,9 @@ Keys: anova, auc, carscore, cmim, correlation, disr, find_correlation, importanc
 <pre class="sourceCode r"><code class="sourceCode r"><span class='va'>instance</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3tuning.mlr-org.com/reference/tune.html'>tune</a></span><span class='op'>(</span>
   method <span class='op'>=</span> <span class='st'>"grid_search"</span>,
   <span class='va'>task</span>,
-  learner <span class='op'>=</span> <span class='va'>fpipe</span> <span class='op'>%&gt;&gt;%</span> <span class='fu'>lrn</span><span class='op'>(</span><span class='st'>"classif.ranger"</span><span class='op'>)</span>,
+  learner <span class='op'>=</span> <span class='va'>fpipe</span> <span class='op'><a href='https://mlr3pipelines.mlr-org.com//reference/grapes-greater-than-greater-than-grapes.html'>%&gt;&gt;%</a></span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>lrn</a></span><span class='op'>(</span><span class='st'>"classif.ranger"</span><span class='op'>)</span>,
   resampling <span class='op'>=</span> <span class='va'>cv10</span>,
-  measure <span class='op'>=</span> <span class='fu'>msr</span><span class='op'>(</span><span class='st'>"classif.ce"</span><span class='op'>)</span>,
+  measure <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>msr</a></span><span class='op'>(</span><span class='st'>"classif.ce"</span><span class='op'>)</span>,
   search_space <span class='op'>=</span> <span class='va'>search_space</span><span class='op'>)</span>
 </code></pre>
 </div>
@@ -2753,11 +2757,11 @@ Keys: anova, auc, carscore, cmim, correlation, disr, find_correlation, importanc
 <p>We want to build a model that is based on the predictions of other <a href="https://mlr3.mlr-org.com/reference/Learner.html"><code>Learner</code></a>s. This means that we are in the state that we need predictions already during training. This is a very specific case that is luckily handled by <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_learner_cv.html"><code>PipeOpLearnerCV</code></a>. <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_learner_cv.html"><code>PipeOpLearnerCV</code></a> performs cross-validation during the training phase and returns the cross-validated predictions. We use <code>"prob"</code> predictions because they carry more information than response prediction:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>graph_stack</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"imputeoor"</span><span class='op'>)</span> <span class='op'>%&gt;&gt;%</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>graph_stack</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"imputeoor"</span><span class='op'>)</span> <span class='op'><a href='https://mlr3pipelines.mlr-org.com//reference/grapes-greater-than-greater-than-grapes.html'>%&gt;&gt;%</a></span>
   <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/gunion.html'>gunion</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>
-    <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"learner_cv"</span>, <span class='fu'>lrn</span><span class='op'>(</span><span class='st'>"classif.ranger"</span>, predict_type <span class='op'>=</span> <span class='st'>"prob"</span><span class='op'>)</span><span class='op'>)</span>,
-    <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"learner_cv"</span>, <span class='fu'>lrn</span><span class='op'>(</span><span class='st'>"classif.kknn"</span>, predict_type <span class='op'>=</span> <span class='st'>"prob"</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>%&gt;&gt;%</span>
-  <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"featureunion"</span><span class='op'>)</span> <span class='op'>%&gt;&gt;%</span> <span class='fu'>lrn</span><span class='op'>(</span><span class='st'>"classif.log_reg"</span><span class='op'>)</span>
+    <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"learner_cv"</span>, <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>lrn</a></span><span class='op'>(</span><span class='st'>"classif.ranger"</span>, predict_type <span class='op'>=</span> <span class='st'>"prob"</span><span class='op'>)</span><span class='op'>)</span>,
+    <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"learner_cv"</span>, <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>lrn</a></span><span class='op'>(</span><span class='st'>"classif.kknn"</span>, predict_type <span class='op'>=</span> <span class='st'>"prob"</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span> <span class='op'><a href='https://mlr3pipelines.mlr-org.com//reference/grapes-greater-than-greater-than-grapes.html'>%&gt;&gt;%</a></span>
+  <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"featureunion"</span><span class='op'>)</span> <span class='op'><a href='https://mlr3pipelines.mlr-org.com//reference/grapes-greater-than-greater-than-grapes.html'>%&gt;&gt;%</a></span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>lrn</a></span><span class='op'>(</span><span class='st'>"classif.log_reg"</span><span class='op'>)</span>
 </code></pre>
 </div>
 </div>
@@ -2772,16 +2776,16 @@ Keys: anova, auc, carscore, cmim, correlation, disr, find_correlation, importanc
 <p>We now compare the performance of the stacked learner to the performance of the individual <a href="https://mlr3.mlr-org.com/reference/Learner.html"><code>Learner</code></a>s:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>grid</span> <span class='op'>=</span> <span class='fu'>benchmark_grid</span><span class='op'>(</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>grid</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/benchmark_grid.html'>benchmark_grid</a></span><span class='op'>(</span>
   task <span class='op'>=</span> <span class='va'>task</span>,
   learner <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>
     <span class='va'>graph_stack</span>,
-    <span class='fu'>as_learner</span><span class='op'>(</span><span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"imputeoor"</span><span class='op'>)</span> <span class='op'>%&gt;&gt;%</span> <span class='fu'>lrn</span><span class='op'>(</span><span class='st'>"classif.ranger"</span><span class='op'>)</span><span class='op'>)</span>,
-    <span class='fu'>as_learner</span><span class='op'>(</span><span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"imputeoor"</span><span class='op'>)</span> <span class='op'>%&gt;&gt;%</span> <span class='fu'>lrn</span><span class='op'>(</span><span class='st'>"classif.kknn"</span><span class='op'>)</span><span class='op'>)</span>,
-    <span class='fu'>as_learner</span><span class='op'>(</span><span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"imputeoor"</span><span class='op'>)</span> <span class='op'>%&gt;&gt;%</span> <span class='fu'>lrn</span><span class='op'>(</span><span class='st'>"classif.log_reg"</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>,
+    <span class='fu'><a href='https://mlr3.mlr-org.com/reference/as_learner.html'>as_learner</a></span><span class='op'>(</span><span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"imputeoor"</span><span class='op'>)</span> <span class='op'><a href='https://mlr3pipelines.mlr-org.com//reference/grapes-greater-than-greater-than-grapes.html'>%&gt;&gt;%</a></span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>lrn</a></span><span class='op'>(</span><span class='st'>"classif.ranger"</span><span class='op'>)</span><span class='op'>)</span>,
+    <span class='fu'><a href='https://mlr3.mlr-org.com/reference/as_learner.html'>as_learner</a></span><span class='op'>(</span><span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"imputeoor"</span><span class='op'>)</span> <span class='op'><a href='https://mlr3pipelines.mlr-org.com//reference/grapes-greater-than-greater-than-grapes.html'>%&gt;&gt;%</a></span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>lrn</a></span><span class='op'>(</span><span class='st'>"classif.kknn"</span><span class='op'>)</span><span class='op'>)</span>,
+    <span class='fu'><a href='https://mlr3.mlr-org.com/reference/as_learner.html'>as_learner</a></span><span class='op'>(</span><span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"imputeoor"</span><span class='op'>)</span> <span class='op'><a href='https://mlr3pipelines.mlr-org.com//reference/grapes-greater-than-greater-than-grapes.html'>%&gt;&gt;%</a></span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>lrn</a></span><span class='op'>(</span><span class='st'>"classif.log_reg"</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>,
   resampling <span class='op'>=</span> <span class='va'>cv10</span><span class='op'>)</span>
 
-<span class='va'>bmr</span> <span class='op'>=</span> <span class='fu'>benchmark</span><span class='op'>(</span><span class='va'>grid</span><span class='op'>)</span>
+<span class='va'>bmr</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/benchmark.html'>benchmark</a></span><span class='op'>(</span><span class='va'>grid</span><span class='op'>)</span>
 </code></pre>
 </div>
 </div>
@@ -2842,7 +2846,7 @@ Number of Fisher Scoring iterations: 4</code></pre>
 <p>We now shift the context, using the complete German credit dataset:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>task</span> <span class='op'>=</span> <span class='fu'>tsk</span><span class='op'>(</span><span class='st'>"german_credit"</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>task</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>tsk</a></span><span class='op'>(</span><span class='st'>"german_credit"</span><span class='op'>)</span>
 </code></pre>
 </div>
 </div>
@@ -2850,7 +2854,7 @@ Number of Fisher Scoring iterations: 4</code></pre>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='va'>task_unseen</span> <span class='op'>=</span> <span class='va'>task</span><span class='op'>$</span><span class='fu'>clone</span><span class='op'>(</span><span class='op'>)</span><span class='op'>$</span><span class='fu'>filter</span><span class='op'>(</span><span class='fl'>1</span><span class='op'>:</span><span class='fl'>30</span><span class='op'>)</span>
-<span class='va'>learner_logreg</span> <span class='op'>=</span> <span class='fu'>lrn</span><span class='op'>(</span><span class='st'>"classif.log_reg"</span><span class='op'>)</span>
+<span class='va'>learner_logreg</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>lrn</a></span><span class='op'>(</span><span class='st'>"classif.log_reg"</span><span class='op'>)</span>
 <span class='va'>learner_logreg</span><span class='op'>$</span><span class='fu'>train</span><span class='op'>(</span><span class='va'>task_unseen</span><span class='op'>)</span>
 <span class='va'>learner_logreg</span><span class='op'>$</span><span class='fu'>predict</span><span class='op'>(</span><span class='va'>task</span><span class='op'>)</span>
 </code></pre>
@@ -2862,7 +2866,7 @@ Number of Fisher Scoring iterations: 4</code></pre>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='va'>task_constant</span> <span class='op'>=</span> <span class='va'>task</span><span class='op'>$</span><span class='fu'>clone</span><span class='op'>(</span><span class='op'>)</span><span class='op'>$</span><span class='fu'>filter</span><span class='op'>(</span><span class='fl'>1</span><span class='op'>:</span><span class='fl'>2</span><span class='op'>)</span>
-<span class='va'>learner_logreg</span> <span class='op'>=</span> <span class='fu'>lrn</span><span class='op'>(</span><span class='st'>"classif.log_reg"</span><span class='op'>)</span>
+<span class='va'>learner_logreg</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>lrn</a></span><span class='op'>(</span><span class='st'>"classif.log_reg"</span><span class='op'>)</span>
 <span class='va'>learner_logreg</span><span class='op'>$</span><span class='fu'>train</span><span class='op'>(</span><span class='va'>task_constant</span><span class='op'>)</span>
 </code></pre>
 </div>
@@ -2872,8 +2876,8 @@ Number of Fisher Scoring iterations: 4</code></pre>
 <p>Both, handling unseen levels and all-constant features can be handled simultaneously using the following <a href="https://mlr3pipelines.mlr-org.com/reference/Graph.html"><code>Graph</code></a>:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>robustify</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"fixfactors"</span><span class='op'>)</span> <span class='op'>%&gt;&gt;%</span>
-  <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"removeconstants"</span><span class='op'>)</span> <span class='op'>%&gt;&gt;%</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>robustify</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"fixfactors"</span><span class='op'>)</span> <span class='op'><a href='https://mlr3pipelines.mlr-org.com//reference/grapes-greater-than-greater-than-grapes.html'>%&gt;&gt;%</a></span>
+  <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"removeconstants"</span><span class='op'>)</span> <span class='op'><a href='https://mlr3pipelines.mlr-org.com//reference/grapes-greater-than-greater-than-grapes.html'>%&gt;&gt;%</a></span>
   <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"imputesample"</span>, affect_columns <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/Selector.html'>selector_type</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"ordered"</span>, <span class='st'>"factor"</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>
 
 <span class='va'>robustify</span><span class='op'>$</span><span class='fu'>plot</span><span class='op'>(</span><span class='op'>)</span>
@@ -2884,7 +2888,7 @@ Number of Fisher Scoring iterations: 4</code></pre>
 <p>This robust learner works even in very pathological conditions:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>graph_learner_robustify</span> <span class='op'>=</span> <span class='fu'>as_learner</span><span class='op'>(</span><span class='va'>robustify</span> <span class='op'>%&gt;&gt;%</span> <span class='va'>learner_logreg</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>graph_learner_robustify</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/as_learner.html'>as_learner</a></span><span class='op'>(</span><span class='va'>robustify</span> <span class='op'><a href='https://mlr3pipelines.mlr-org.com//reference/grapes-greater-than-greater-than-grapes.html'>%&gt;&gt;%</a></span> <span class='va'>learner_logreg</span><span class='op'>)</span>
 
 <span class='va'>graph_learner_robustify</span><span class='op'>$</span><span class='fu'>train</span><span class='op'>(</span><span class='va'>task_constant</span><span class='op'>)</span>
 <span class='va'>graph_learner_robustify</span><span class='op'>$</span><span class='fu'>predict</span><span class='op'>(</span><span class='va'>task</span><span class='op'>)</span>

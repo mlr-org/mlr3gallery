@@ -56,7 +56,7 @@ code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 code span.al { color: #ad0000; } /* Alert */
 code span.an { color: #5e5e5e; } /* Annotation */
-code span.at { color: #20794d; } /* Attribute */
+code span.at { } /* Attribute */
 code span.bn { color: #ad0000; } /* BaseN */
 code span.bu { } /* BuiltIn */
 code span.cf { color: #007ba5; } /* ControlFlow */
@@ -77,13 +77,14 @@ code span.kw { color: #007ba5; } /* Keyword */
 code span.op { color: #5e5e5e; } /* Operator */
 code span.ot { color: #007ba5; } /* Other */
 code span.pp { color: #ad0000; } /* Preprocessor */
-code span.sc { color: #20794d; } /* SpecialChar */
+code span.sc { color: #5e5e5e; } /* SpecialChar */
 code span.ss { color: #20794d; } /* SpecialString */
 code span.st { color: #20794d; } /* String */
 code span.va { color: #111111; } /* Variable */
 code span.vs { color: #20794d; } /* VerbatimString */
 code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 </style>
+
 
   <!--radix_placeholder_meta_tags-->
 <title>mlr3gallery: Feature Engineering of Date-Time Variables</title>
@@ -478,7 +479,7 @@ d-title {
 
 </style>
 
-<script src="../../site_libs/jquery-1.11.3/jquery.min.js"></script>
+<script src="../../site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <link href="../../site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet"/>
 <link href="../../site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet"/>
 <script src="../../site_libs/headroom-0.9.4/headroom.min.js"></script>
@@ -1885,7 +1886,10 @@ function init_distill() {
 
     // hoverable references
     $('span.citation[data-cites]').each(function() {
-      var refHtml = $('#ref-' + $(this).attr('data-cites')).html();
+      var refs = $(this).attr('data-cites').split(" ");
+      var refHtml = refs.map(function(ref) {
+        return "<p>" + $('#ref-' + ref).html() + "</p>";
+      }).join("\n");
       window.tippy(this, {
         allowHTML: true,
         content: refHtml,
@@ -2058,7 +2062,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <!--/radix_placeholder_distill-->
   <script src="../../site_libs/kePrint-0.0.1/kePrint.js"></script>
   <link href="../../site_libs/lightable-0.0.1/lightable.css" rel="stylesheet" />
-  <script src="../../site_libs/jquery-1.11.3/jquery.min.js"></script>
+  <script src="../../site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
   <script src="../../site_libs/popper-2.6.0/popper.min.js"></script>
   <link href="../../site_libs/tippy-6.2.7/tippy.css" rel="stylesheet" />
   <link href="../../site_libs/tippy-6.2.7/tippy-light-border.css" rel="stylesheet" />
@@ -2834,7 +2838,7 @@ count
 <p>We construct a new regression task and keep a <a href="https://mlr3book.mlr-org.com/tasks.html#tasks-roles">validation set</a>.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>task</span> <span class='op'>=</span> <span class='fu'>as_task_regr</span><span class='op'>(</span><span class='va'>bike_sharing</span>, target <span class='op'>=</span> <span class='st'>"count"</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>task</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/as_task_regr.html'>as_task_regr</a></span><span class='op'>(</span><span class='va'>bike_sharing</span>, target <span class='op'>=</span> <span class='st'>"count"</span><span class='op'>)</span>
 
 <span class='va'>validation_set</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/sample.html'>sample</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/seq.html'>seq_len</a></span><span class='op'>(</span><span class='va'>task</span><span class='op'>$</span><span class='va'>nrow</span><span class='op'>)</span>, size <span class='op'>=</span> <span class='fl'>0.3</span> <span class='op'>*</span> <span class='va'>task</span><span class='op'>$</span><span class='va'>nrow</span><span class='op'>)</span>
 
@@ -2845,7 +2849,7 @@ count
 <p>To estimate the performance on unseen data, we will use a 3-fold cross-validation. Note that this involves validating on past data, which is usually bad practice but should suffice for this example:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>cv3</span> <span class='op'>=</span> <span class='fu'>rsmp</span><span class='op'>(</span><span class='st'>"cv"</span>, folds <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>cv3</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>rsmp</a></span><span class='op'>(</span><span class='st'>"cv"</span>, folds <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span>
 </code></pre>
 </div>
 </div>
@@ -2853,7 +2857,7 @@ count
 <p>As our baseline model, we use a random forest, <a href="https://mlr3learners.mlr-org.com/reference/mlr_learners_classif.ranger.html"><code>ranger learner</code></a>. For the baseline, we drop<code>date</code>, our new <code>POSIXct</code> variable which we will only use later.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>learner_ranger</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/pkg/mlr3extralearners/man/lrn.html'>lrn</a></span><span class='op'>(</span><span class='st'>"regr.ranger"</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>learner_ranger</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>lrn</a></span><span class='op'>(</span><span class='st'>"regr.ranger"</span><span class='op'>)</span>
 <span class='va'>task_ranger</span> <span class='op'>=</span> <span class='va'>task</span><span class='op'>$</span><span class='fu'>clone</span><span class='op'>(</span><span class='op'>)</span>
 <span class='va'>task_ranger</span><span class='op'>$</span><span class='fu'>select</span><span class='op'>(</span><span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/setops.html'>setdiff</a></span><span class='op'>(</span><span class='va'>task</span><span class='op'>$</span><span class='va'>feature_names</span>, <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"date"</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>
 </code></pre>
@@ -2862,9 +2866,9 @@ count
 <p>We can then use <a href="https://mlr3.mlr-org.com/reference/resample.html"><code>resample()</code></a> with 3-fold cross-validation:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>rr_ranger</span> <span class='op'>=</span> <span class='fu'>resample</span><span class='op'>(</span><span class='va'>task_ranger</span>, learner <span class='op'>=</span> <span class='va'>learner_ranger</span>, resampling <span class='op'>=</span> <span class='va'>cv3</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>rr_ranger</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/resample.html'>resample</a></span><span class='op'>(</span><span class='va'>task_ranger</span>, learner <span class='op'>=</span> <span class='va'>learner_ranger</span>, resampling <span class='op'>=</span> <span class='va'>cv3</span><span class='op'>)</span>
 
-<span class='va'>rr_ranger</span><span class='op'>$</span><span class='fu'>score</span><span class='op'>(</span><span class='fu'>msr</span><span class='op'>(</span><span class='st'>"regr.mse"</span><span class='op'>)</span><span class='op'>)</span>
+<span class='va'>rr_ranger</span><span class='op'>$</span><span class='fu'>score</span><span class='op'>(</span><span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>msr</a></span><span class='op'>(</span><span class='st'>"regr.mse"</span><span class='op'>)</span><span class='op'>)</span>
 </code></pre>
 </div>
 </div>
@@ -2998,10 +3002,10 @@ cv
 <p>We create a <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_learners_graph.html"><code>GraphLearner</code></a> consisting of the <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_datefeatures.html"><code>PipeOpDateFeatures</code></a> pipeline and a ranger learner. This <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_learners_graph.html"><code>GraphLearner</code></a> then behaves like any other <a href="https://mlr3.mlr-org.com/reference/Learner.html"><code>Learner</code></a>:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>graph</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"datefeatures"</span>, cyclic <span class='op'>=</span> <span class='cn'>TRUE</span>, minute <span class='op'>=</span> <span class='cn'>FALSE</span>, second <span class='op'>=</span> <span class='cn'>FALSE</span><span class='op'>)</span> <span class='op'>%&gt;&gt;%</span>
-  <span class='fu'><a href='https://rdrr.io/pkg/mlr3extralearners/man/lrn.html'>lrn</a></span><span class='op'>(</span><span class='st'>"regr.ranger"</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>graph</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"datefeatures"</span>, cyclic <span class='op'>=</span> <span class='cn'>TRUE</span>, minute <span class='op'>=</span> <span class='cn'>FALSE</span>, second <span class='op'>=</span> <span class='cn'>FALSE</span><span class='op'>)</span> <span class='op'><a href='https://mlr3pipelines.mlr-org.com//reference/grapes-greater-than-greater-than-grapes.html'>%&gt;&gt;%</a></span>
+  <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>lrn</a></span><span class='op'>(</span><span class='st'>"regr.ranger"</span><span class='op'>)</span>
 
-<span class='va'>graph_learner</span> <span class='op'>=</span> <span class='fu'>as_learner</span><span class='op'>(</span><span class='va'>graph</span><span class='op'>)</span>
+<span class='va'>graph_learner</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/as_learner.html'>as_learner</a></span><span class='op'>(</span><span class='va'>graph</span><span class='op'>)</span>
 
 <span class='fu'><a href='https://rdrr.io/r/graphics/plot.default.html'>plot</a></span><span class='op'>(</span><span class='va'>graph</span><span class='op'>)</span>
 </code></pre>
@@ -3015,9 +3019,9 @@ cv
 <span class='va'>task_graph_learner</span><span class='op'>$</span><span class='fu'>select</span><span class='op'>(</span><span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/setops.html'>setdiff</a></span><span class='op'>(</span><span class='va'>task</span><span class='op'>$</span><span class='va'>feature_names</span>,
   <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"instant"</span>, <span class='st'>"dteday"</span>, <span class='st'>"yr"</span>, <span class='st'>"mnth"</span>, <span class='st'>"hr"</span>, <span class='st'>"weekday"</span>, <span class='st'>"casual"</span>, <span class='st'>"registered"</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>
 
-<span class='va'>rr_graph_learner</span> <span class='op'>=</span> <span class='fu'>resample</span><span class='op'>(</span><span class='va'>task_graph_learner</span>, learner <span class='op'>=</span> <span class='va'>graph_learner</span>, resampling <span class='op'>=</span> <span class='va'>cv3</span><span class='op'>)</span>
+<span class='va'>rr_graph_learner</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/resample.html'>resample</a></span><span class='op'>(</span><span class='va'>task_graph_learner</span>, learner <span class='op'>=</span> <span class='va'>graph_learner</span>, resampling <span class='op'>=</span> <span class='va'>cv3</span><span class='op'>)</span>
 
-<span class='va'>rr_graph_learner</span><span class='op'>$</span><span class='fu'>score</span><span class='op'>(</span><span class='fu'>msr</span><span class='op'>(</span><span class='st'>"regr.mse"</span><span class='op'>)</span><span class='op'>)</span>
+<span class='va'>rr_graph_learner</span><span class='op'>$</span><span class='fu'>score</span><span class='op'>(</span><span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>msr</a></span><span class='op'>(</span><span class='st'>"regr.mse"</span><span class='op'>)</span><span class='op'>)</span>
 </code></pre>
 </div>
 </div>
@@ -3127,7 +3131,7 @@ cv
 <p>Where we can obtain the RMSE on the held-out validation data.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>prediction</span><span class='op'>$</span><span class='fu'>score</span><span class='op'>(</span><span class='fu'>msr</span><span class='op'>(</span><span class='st'>"regr.mse"</span><span class='op'>)</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>prediction</span><span class='op'>$</span><span class='fu'>score</span><span class='op'>(</span><span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>msr</a></span><span class='op'>(</span><span class='st'>"regr.mse"</span><span class='op'>)</span><span class='op'>)</span>
 </code></pre>
 </div>
 <pre><code>regr.mse 

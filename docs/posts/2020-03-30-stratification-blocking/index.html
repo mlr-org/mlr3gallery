@@ -56,7 +56,7 @@ code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 code span.al { color: #ad0000; } /* Alert */
 code span.an { color: #5e5e5e; } /* Annotation */
-code span.at { color: #20794d; } /* Attribute */
+code span.at { } /* Attribute */
 code span.bn { color: #ad0000; } /* BaseN */
 code span.bu { } /* BuiltIn */
 code span.cf { color: #007ba5; } /* ControlFlow */
@@ -77,13 +77,14 @@ code span.kw { color: #007ba5; } /* Keyword */
 code span.op { color: #5e5e5e; } /* Operator */
 code span.ot { color: #007ba5; } /* Other */
 code span.pp { color: #ad0000; } /* Preprocessor */
-code span.sc { color: #20794d; } /* SpecialChar */
+code span.sc { color: #5e5e5e; } /* SpecialChar */
 code span.ss { color: #20794d; } /* SpecialString */
 code span.st { color: #20794d; } /* String */
 code span.va { color: #111111; } /* Variable */
 code span.vs { color: #20794d; } /* VerbatimString */
 code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 </style>
+
 
   <!--radix_placeholder_meta_tags-->
 <title>mlr3gallery: Resampling - Stratified, Blocked and Predefined</title>
@@ -474,7 +475,7 @@ d-title {
 
 </style>
 
-<script src="../../site_libs/jquery-1.11.3/jquery.min.js"></script>
+<script src="../../site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <link href="../../site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet"/>
 <link href="../../site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet"/>
 <script src="../../site_libs/headroom-0.9.4/headroom.min.js"></script>
@@ -1881,7 +1882,10 @@ function init_distill() {
 
     // hoverable references
     $('span.citation[data-cites]').each(function() {
-      var refHtml = $('#ref-' + $(this).attr('data-cites')).html();
+      var refs = $(this).attr('data-cites').split(" ");
+      var refHtml = refs.map(function(ref) {
+        return "<p>" + $('#ref-' + ref).html() + "</p>";
+      }).join("\n");
       window.tippy(this, {
         allowHTML: true,
         content: refHtml,
@@ -2052,7 +2056,7 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 <!--/radix_placeholder_distill-->
-  <script src="../../site_libs/jquery-1.11.3/jquery.min.js"></script>
+  <script src="../../site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
   <script src="../../site_libs/popper-2.6.0/popper.min.js"></script>
   <link href="../../site_libs/tippy-6.2.7/tippy.css" rel="stylesheet" />
   <link href="../../site_libs/tippy-6.2.7/tippy-light-border.css" rel="stylesheet" />
@@ -2152,7 +2156,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>In <a href="https://mlr3.mlr-org.com">mlr3</a>, each <a href="https://mlr3.mlr-org.com/reference/Task.html"><code>Task</code></a> has a slot <a href="https://mlr3.mlr-org.com/reference/Task.html#active-bindings"><code>$col_roles</code></a>. This slot shows general roles certain features will have throughout different stages of the machine learning process. At least, the <code>$col_roles</code> slot shows which variables will be used as <code>feature</code>s and as the <code>target</code>. However, the <code>$col_roles</code> slot can be more diverse and some variables might even serve multiple roles. We can specify the variable used for stratification in <code>task$col_roles$stratum</code>. This will be illustrated in the following example using the <a href="https://mlr3.mlr-org.com/reference/mlr_tasks_german_credit.html"><code>german_credit</code></a> data:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>task_gc</span> <span class='op'>=</span> <span class='fu'>tsk</span><span class='op'>(</span><span class='st'>"german_credit"</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>task_gc</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>tsk</a></span><span class='op'>(</span><span class='st'>"german_credit"</span><span class='op'>)</span>
 <span class='va'>task_gc</span><span class='op'>$</span><span class='va'>col_roles</span>
 </code></pre>
 </div>
@@ -2202,7 +2206,7 @@ character(0)</code></pre>
 <p>Specify 3-fold cross validation and instantiate the resampling on the task:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>cv3</span> <span class='op'>=</span> <span class='fu'>rsmp</span><span class='op'>(</span><span class='st'>"cv"</span>, folds <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>cv3</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>rsmp</a></span><span class='op'>(</span><span class='st'>"cv"</span>, folds <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span>
 <span class='va'>cv3</span><span class='op'>$</span><span class='fu'>instantiate</span><span class='op'>(</span><span class='va'>task_gc</span><span class='op'>)</span>
 <span class='va'>cv3</span><span class='op'>$</span><span class='va'>instance</span>
 </code></pre>
@@ -2317,7 +2321,7 @@ character(0)</code></pre>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span><span class='op'>(</span><span class='va'>BreastCancer</span>, package <span class='op'>=</span> <span class='st'>"mlbench"</span><span class='op'>)</span>
-<span class='va'>task_bc</span> <span class='op'>=</span> <span class='fu'>as_task_classif</span><span class='op'>(</span><span class='va'>BreastCancer</span>, target <span class='op'>=</span> <span class='st'>"Class"</span>, positive <span class='op'>=</span> <span class='st'>"malignant"</span><span class='op'>)</span>
+<span class='va'>task_bc</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/as_task_classif.html'>as_task_classif</a></span><span class='op'>(</span><span class='va'>BreastCancer</span>, target <span class='op'>=</span> <span class='st'>"Class"</span>, positive <span class='op'>=</span> <span class='st'>"malignant"</span><span class='op'>)</span>
 </code></pre>
 </div>
 </div>
@@ -2338,7 +2342,7 @@ character(0)</code></pre>
 <span class='va'>task_bc</span><span class='op'>$</span><span class='va'>col_roles</span><span class='op'>$</span><span class='va'>group</span> <span class='op'>=</span> <span class='st'>"Id"</span>
 <span class='co'># Remove Id from feature</span>
 <span class='co'># task_bc$col_roles$feature = setdiff(task_bc$col_roles$feature, "Id")</span>
-<span class='va'>cv5</span> <span class='op'>=</span> <span class='fu'>rsmp</span><span class='op'>(</span><span class='st'>"cv"</span>, folds <span class='op'>=</span> <span class='fl'>5</span><span class='op'>)</span>
+<span class='va'>cv5</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>rsmp</a></span><span class='op'>(</span><span class='st'>"cv"</span>, folds <span class='op'>=</span> <span class='fl'>5</span><span class='op'>)</span>
 <span class='fu'><a href='https://rdrr.io/r/base/Random.html'>set.seed</a></span><span class='op'>(</span><span class='fl'>123</span><span class='op'>)</span>
 <span class='va'>cv5</span><span class='op'>$</span><span class='fu'>instantiate</span><span class='op'>(</span><span class='va'>task_bc</span><span class='op'>)</span>
 <span class='va'>cv5</span><span class='op'>$</span><span class='va'>instance</span>
@@ -2360,7 +2364,7 @@ character(0)</code></pre>
 <p>In this case, the <code>row_id</code> column of the <code>cv5$instance</code> slot refers to values of the grouping variable “Id”. Additionally, the number of rows of the <code>cv5$instance</code> is the same as the number of unique groups:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/all.html'>all</a></span><span class='op'>(</span><span class='va'>cv5</span><span class='op'>$</span><span class='va'>instance</span><span class='op'>$</span><span class='va'>row_id</span> <span class='op'>%in%</span> <span class='va'>BreastCancer</span><span class='op'>$</span><span class='va'>Id</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/all.html'>all</a></span><span class='op'>(</span><span class='va'>cv5</span><span class='op'>$</span><span class='va'>instance</span><span class='op'>$</span><span class='va'>row_id</span> <span class='op'><a href='https://rdrr.io/r/base/match.html'>%in%</a></span> <span class='va'>BreastCancer</span><span class='op'>$</span><span class='va'>Id</span><span class='op'>)</span>
 </code></pre>
 </div>
 <pre><code>[1] TRUE</code></pre>
@@ -2403,7 +2407,7 @@ character(0)</code></pre>
 <p>This vector is now added to the data set and will be used as grouping factor just as when defining <a href="#block">block resampling</a>:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>task_bc</span> <span class='op'>=</span> <span class='va'>TaskClassif</span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>task_bc</span> <span class='op'>=</span> <span class='va'><a href='https://mlr3.mlr-org.com/reference/TaskClassif.html'>TaskClassif</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span>
   id <span class='op'>=</span> <span class='st'>"BreastCancer"</span>,
   backend <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/data.frame.html'>data.frame</a></span><span class='op'>(</span><span class='va'>BreastCancer</span>, foldIds <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/factor.html'>as.factor</a></span><span class='op'>(</span><span class='va'>folds</span><span class='op'>)</span><span class='op'>)</span>,
   target <span class='op'>=</span> <span class='st'>"Class"</span>,
@@ -2417,7 +2421,7 @@ character(0)</code></pre>
 <p>We now instantiate a 5-fold CV that will respect the predefined folds:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>cv5</span> <span class='op'>=</span> <span class='fu'>rsmp</span><span class='op'>(</span><span class='st'>"cv"</span>, folds <span class='op'>=</span> <span class='fl'>5</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>cv5</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>rsmp</a></span><span class='op'>(</span><span class='st'>"cv"</span>, folds <span class='op'>=</span> <span class='fl'>5</span><span class='op'>)</span>
 <span class='va'>cv5</span><span class='op'>$</span><span class='fu'>instantiate</span><span class='op'>(</span><span class='va'>task_bc</span><span class='op'>)</span>
 <span class='va'>cv5</span><span class='op'>$</span><span class='va'>instance</span>
 </code></pre>
@@ -2447,10 +2451,10 @@ character(0)</code></pre>
 <p>The previous example does not cover how to perform repeated k-fold CV or time series CV with predefined indices. This is possible via the <a href="https://mlr3.mlr-org.com/reference/mlr_resamplings_custom.html"><code>mlr_resamplings_custom</code></a> to which a list of predefined train and test indices can be assigned. In the following example, a custom resampling is created using indices created by <a href="https://www.rdocumentation.org/packages/caret/topics/createMultiFolds"><code>caret::createMultiFolds()</code></a>:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>task_gc</span> <span class='op'>=</span> <span class='fu'>tsk</span><span class='op'>(</span><span class='st'>"german_credit"</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>task_gc</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>tsk</a></span><span class='op'>(</span><span class='st'>"german_credit"</span><span class='op'>)</span>
 <span class='va'>train_ind</span> <span class='op'>=</span> <span class='fu'>caret</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/caret/man/createDataPartition.html'>createMultiFolds</a></span><span class='op'>(</span><span class='va'>task_gc</span><span class='op'>$</span><span class='fu'>truth</span><span class='op'>(</span><span class='op'>)</span>, k <span class='op'>=</span> <span class='fl'>5</span>, times <span class='op'>=</span> <span class='fl'>10</span><span class='op'>)</span>
 <span class='va'>test_ind</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/lapply.html'>lapply</a></span><span class='op'>(</span><span class='va'>train_ind</span>, <span class='kw'>function</span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span> <span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/setops.html'>setdiff</a></span><span class='op'>(</span><span class='fl'>1</span><span class='op'>:</span><span class='va'>task_gc</span><span class='op'>$</span><span class='va'>nrow</span>, <span class='va'>x</span><span class='op'>)</span><span class='op'>)</span>
-<span class='va'>rc</span> <span class='op'>=</span> <span class='fu'>rsmp</span><span class='op'>(</span><span class='st'>"custom"</span><span class='op'>)</span>
+<span class='va'>rc</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>rsmp</a></span><span class='op'>(</span><span class='st'>"custom"</span><span class='op'>)</span>
 <span class='va'>rc</span><span class='op'>$</span><span class='fu'>instantiate</span><span class='op'>(</span><span class='va'>task_gc</span>, <span class='va'>train_ind</span>, <span class='va'>test_ind</span><span class='op'>)</span>
 </code></pre>
 </div>

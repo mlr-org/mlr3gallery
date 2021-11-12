@@ -56,7 +56,7 @@ code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 code span.al { color: #ad0000; } /* Alert */
 code span.an { color: #5e5e5e; } /* Annotation */
-code span.at { color: #20794d; } /* Attribute */
+code span.at { } /* Attribute */
 code span.bn { color: #ad0000; } /* BaseN */
 code span.bu { } /* BuiltIn */
 code span.cf { color: #007ba5; } /* ControlFlow */
@@ -77,13 +77,14 @@ code span.kw { color: #007ba5; } /* Keyword */
 code span.op { color: #5e5e5e; } /* Operator */
 code span.ot { color: #007ba5; } /* Other */
 code span.pp { color: #ad0000; } /* Preprocessor */
-code span.sc { color: #20794d; } /* SpecialChar */
+code span.sc { color: #5e5e5e; } /* SpecialChar */
 code span.ss { color: #20794d; } /* SpecialString */
 code span.st { color: #20794d; } /* String */
 code span.va { color: #111111; } /* Variable */
 code span.vs { color: #20794d; } /* VerbatimString */
 code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 </style>
+
 
   <!--radix_placeholder_meta_tags-->
 <title>mlr3gallery: Bike Sharing Demand</title>
@@ -486,7 +487,7 @@ d-title {
 
 </style>
 
-<script src="../../site_libs/jquery-1.11.3/jquery.min.js"></script>
+<script src="../../site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <link href="../../site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet"/>
 <link href="../../site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet"/>
 <script src="../../site_libs/headroom-0.9.4/headroom.min.js"></script>
@@ -1893,7 +1894,10 @@ function init_distill() {
 
     // hoverable references
     $('span.citation[data-cites]').each(function() {
-      var refHtml = $('#ref-' + $(this).attr('data-cites')).html();
+      var refs = $(this).attr('data-cites').split(" ");
+      var refHtml = refs.map(function(ref) {
+        return "<p>" + $('#ref-' + ref).html() + "</p>";
+      }).join("\n");
       window.tippy(this, {
         allowHTML: true,
         content: refHtml,
@@ -2066,7 +2070,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <!--/radix_placeholder_distill-->
   <script src="../../site_libs/kePrint-0.0.1/kePrint.js"></script>
   <link href="../../site_libs/lightable-0.0.1/lightable.css" rel="stylesheet" />
-  <script src="../../site_libs/jquery-1.11.3/jquery.min.js"></script>
+  <script src="../../site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
   <script src="../../site_libs/popper-2.6.0/popper.min.js"></script>
   <link href="../../site_libs/tippy-6.2.7/tippy.css" rel="stylesheet" />
   <link href="../../site_libs/tippy-6.2.7/tippy-light-border.css" rel="stylesheet" />
@@ -3082,7 +3086,7 @@ Inf
 NULL
 </td>
 <td style="text-align:left;">
-&lt;environment: 0x563a04ecccb0&gt;
+&lt;environment: 0x5586373d5188&gt;
 </td>
 </tr>
 <tr>
@@ -3313,7 +3317,7 @@ Figure 10: Feature importance in ranger learner
 <p>Setting up the Ranger Pipe enables us to compare models with different feature combinations. Therefore we use the <a href="https://mlr3.mlr-org.com">mlr3</a> packages <a href="https://mlr3pipelines.mlr-org.com">mlr3pipelines</a> and <a href="https://mlr3filters.mlr-org.com">mlr3filters</a> and create a new learner <code>ranger_feature</code>. This learner is now able to select the most important features from the impurity filtering.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>po_flt</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"filter"</span>, <span class='va'>filter_ranger</span>, param_vals <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>filter.nfeat <span class='op'>=</span> <span class='fl'>11L</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>%&gt;&gt;%</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>po_flt</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"filter"</span>, <span class='va'>filter_ranger</span>, param_vals <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>filter.nfeat <span class='op'>=</span> <span class='fl'>11L</span><span class='op'>)</span><span class='op'>)</span> <span class='op'><a href='https://mlr3pipelines.mlr-org.com//reference/grapes-greater-than-greater-than-grapes.html'>%&gt;&gt;%</a></span>
   <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"learner"</span>, <span class='va'>ranger_learner</span><span class='op'>$</span><span class='fu'>clone</span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span>
 </code></pre>
 </div>
@@ -3339,7 +3343,7 @@ Figure 10: Feature importance in ranger learner
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='va'>grid</span> <span class='op'>=</span> <span class='fu'><a href='https://paradox.mlr-org.com/reference/generate_design_grid.html'>generate_design_grid</a></span><span class='op'>(</span><span class='va'>search_space_ranger</span>, resolution <span class='op'>=</span> <span class='fl'>11</span><span class='op'>)</span>
 <span class='va'>grid</span><span class='op'>$</span><span class='va'>data</span> <span class='op'>=</span> <span class='va'>grid</span><span class='op'>$</span><span class='va'>data</span><span class='op'>[</span><span class='va'>regr.ranger.mtry</span> <span class='op'>&lt;=</span> <span class='va'>importance.filter.nfeat</span><span class='op'>]</span>
-<span class='va'>grid</span><span class='op'>$</span><span class='va'>data</span> <span class='op'>=</span> <span class='va'>grid</span><span class='op'>$</span><span class='va'>data</span><span class='op'>[</span><span class='va'>importance.filter.nfeat</span> <span class='op'>%in%</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>1</span>, <span class='fl'>6</span>, <span class='fl'>10</span>, <span class='fl'>11</span><span class='op'>)</span><span class='op'>]</span>
+<span class='va'>grid</span><span class='op'>$</span><span class='va'>data</span> <span class='op'>=</span> <span class='va'>grid</span><span class='op'>$</span><span class='va'>data</span><span class='op'>[</span><span class='va'>importance.filter.nfeat</span> <span class='op'><a href='https://rdrr.io/r/base/match.html'>%in%</a></span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>1</span>, <span class='fl'>6</span>, <span class='fl'>10</span>, <span class='fl'>11</span><span class='op'>)</span><span class='op'>]</span>
 </code></pre>
 </div>
 </div>
@@ -3532,7 +3536,7 @@ cv
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='va'>list</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/lapply.html'>sapply</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='va'>kknn_learner</span><span class='op'>)</span>, <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='va'>rpart_learner</span><span class='op'>)</span>, <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='va'>ranger_learner</span><span class='op'>)</span><span class='op'>)</span>, <span class='va'>log1p_target_trafo</span><span class='op'>)</span>
-<span class='va'>list</span><span class='op'>[[</span><span class='fl'>3</span><span class='op'>]</span><span class='op'>]</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"filter"</span>, <span class='va'>filter_ranger</span>, param_vals <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>filter.nfeat <span class='op'>=</span> <span class='fl'>11L</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>%&gt;&gt;%</span>
+<span class='va'>list</span><span class='op'>[[</span><span class='fl'>3</span><span class='op'>]</span><span class='op'>]</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"filter"</span>, <span class='va'>filter_ranger</span>, param_vals <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>filter.nfeat <span class='op'>=</span> <span class='fl'>11L</span><span class='op'>)</span><span class='op'>)</span> <span class='op'><a href='https://mlr3pipelines.mlr-org.com//reference/grapes-greater-than-greater-than-grapes.html'>%&gt;&gt;%</a></span>
   <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"learner"</span>, <span class='va'>list</span><span class='op'>[[</span><span class='fl'>3</span><span class='op'>]</span><span class='op'>]</span><span class='op'>$</span><span class='fu'>clone</span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span>
 <span class='va'>pipe</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/ppl.html'>ppl</a></span><span class='op'>(</span><span class='st'>"branch"</span>, <span class='va'>list</span><span class='op'>)</span>
 <span class='va'>pipe</span><span class='op'>$</span><span class='fu'>plot</span><span class='op'>(</span><span class='op'>)</span>

@@ -56,7 +56,7 @@ code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 code span.al { color: #ad0000; } /* Alert */
 code span.an { color: #5e5e5e; } /* Annotation */
-code span.at { color: #20794d; } /* Attribute */
+code span.at { } /* Attribute */
 code span.bn { color: #ad0000; } /* BaseN */
 code span.bu { } /* BuiltIn */
 code span.cf { color: #007ba5; } /* ControlFlow */
@@ -77,13 +77,14 @@ code span.kw { color: #007ba5; } /* Keyword */
 code span.op { color: #5e5e5e; } /* Operator */
 code span.ot { color: #007ba5; } /* Other */
 code span.pp { color: #ad0000; } /* Preprocessor */
-code span.sc { color: #20794d; } /* SpecialChar */
+code span.sc { color: #5e5e5e; } /* SpecialChar */
 code span.ss { color: #20794d; } /* SpecialString */
 code span.st { color: #20794d; } /* String */
 code span.va { color: #111111; } /* Variable */
 code span.vs { color: #20794d; } /* VerbatimString */
 code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 </style>
+
 
   <!--radix_placeholder_meta_tags-->
 <title>mlr3gallery: mlr3 and OpenML - Moneyball Use Case</title>
@@ -478,7 +479,7 @@ d-title {
 
 </style>
 
-<script src="../../site_libs/jquery-1.11.3/jquery.min.js"></script>
+<script src="../../site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <link href="../../site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet"/>
 <link href="../../site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet"/>
 <script src="../../site_libs/headroom-0.9.4/headroom.min.js"></script>
@@ -1885,7 +1886,10 @@ function init_distill() {
 
     // hoverable references
     $('span.citation[data-cites]').each(function() {
-      var refHtml = $('#ref-' + $(this).attr('data-cites')).html();
+      var refs = $(this).attr('data-cites').split(" ");
+      var refHtml = refs.map(function(ref) {
+        return "<p>" + $('#ref-' + ref).html() + "</p>";
+      }).join("\n");
       window.tippy(this, {
         allowHTML: true,
         content: refHtml,
@@ -2058,7 +2062,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <!--/radix_placeholder_distill-->
   <script src="../../site_libs/kePrint-0.0.1/kePrint.js"></script>
   <link href="../../site_libs/lightable-0.0.1/lightable.css" rel="stylesheet" />
-  <script src="../../site_libs/jquery-1.11.3/jquery.min.js"></script>
+  <script src="../../site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
   <script src="../../site_libs/popper-2.6.0/popper.min.js"></script>
   <link href="../../site_libs/tippy-6.2.7/tippy.css" rel="stylesheet" />
   <link href="../../site_libs/tippy-6.2.7/tippy-light-border.css" rel="stylesheet" />
@@ -3171,7 +3175,7 @@ oslg
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='va'>imp_fct</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"imputeoor"</span>, affect_columns <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/Selector.html'>selector_type</a></span><span class='op'>(</span><span class='st'>"factor"</span><span class='op'>)</span><span class='op'>)</span>
-<span class='va'>graph</span> <span class='op'>=</span> <span class='va'>imp_num</span> <span class='op'>%&gt;&gt;%</span> <span class='va'>imp_fct</span>
+<span class='va'>graph</span> <span class='op'>=</span> <span class='va'>imp_num</span> <span class='op'><a href='https://mlr3pipelines.mlr-org.com//reference/grapes-greater-than-greater-than-grapes.html'>%&gt;&gt;%</a></span> <span class='va'>imp_fct</span>
 <span class='va'>graph</span><span class='op'>$</span><span class='fu'>plot</span><span class='op'>(</span><span class='op'>)</span>
 </code></pre>
 </div>
@@ -3183,7 +3187,7 @@ oslg
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='co'># creates a `mlr3` task from scratch, from a data.frame</span>
 <span class='co'># 'target' names the column in the dataset we want to learn to predict</span>
-<span class='va'>task</span> <span class='op'>=</span> <span class='fu'>as_task_regr</span><span class='op'>(</span><span class='va'>moneyball</span>, target <span class='op'>=</span> <span class='st'>"rs"</span><span class='op'>)</span>
+<span class='va'>task</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/as_task_regr.html'>as_task_regr</a></span><span class='op'>(</span><span class='va'>moneyball</span>, target <span class='op'>=</span> <span class='st'>"rs"</span><span class='op'>)</span>
 <span class='va'>task</span><span class='op'>$</span><span class='fu'>missings</span><span class='op'>(</span><span class='op'>)</span>
 </code></pre>
 </div>
@@ -3294,7 +3298,7 @@ year
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='co'># creates a learner</span>
-<span class='va'>test_learner</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/pkg/mlr3extralearners/man/lrn.html'>lrn</a></span><span class='op'>(</span><span class='st'>"regr.ranger"</span><span class='op'>)</span>
+<span class='va'>test_learner</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>lrn</a></span><span class='op'>(</span><span class='st'>"regr.ranger"</span><span class='op'>)</span>
 
 <span class='co'># displays the properties</span>
 <span class='va'>test_learner</span><span class='op'>$</span><span class='va'>properties</span>
@@ -3308,10 +3312,10 @@ year
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='co'># convert learner to pipeop learner and set hyperparameter</span>
-<span class='va'>pipeop_learner</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/pkg/mlr3extralearners/man/lrn.html'>lrn</a></span><span class='op'>(</span><span class='st'>"regr.ranger"</span><span class='op'>)</span>, num.trees <span class='op'>=</span> <span class='fl'>1000</span>, importance <span class='op'>=</span> <span class='st'>"permutation"</span><span class='op'>)</span>
+<span class='va'>pipeop_learner</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>lrn</a></span><span class='op'>(</span><span class='st'>"regr.ranger"</span><span class='op'>)</span>, num.trees <span class='op'>=</span> <span class='fl'>1000</span>, importance <span class='op'>=</span> <span class='st'>"permutation"</span><span class='op'>)</span>
 
 <span class='co'># add pipeop learner to graph and create graph learner</span>
-<span class='va'>graph_learner</span> <span class='op'>=</span> <span class='fu'>as_learner</span><span class='op'>(</span><span class='va'>graph</span> <span class='op'>%&gt;&gt;%</span> <span class='va'>pipeop_learner</span><span class='op'>)</span>
+<span class='va'>graph_learner</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/as_learner.html'>as_learner</a></span><span class='op'>(</span><span class='va'>graph</span> <span class='op'><a href='https://mlr3pipelines.mlr-org.com//reference/grapes-greater-than-greater-than-grapes.html'>%&gt;&gt;%</a></span> <span class='va'>pipeop_learner</span><span class='op'>)</span>
 </code></pre>
 </div>
 </div>
@@ -3431,8 +3435,8 @@ response
 <p>While the prediction indicated that the model is doing what it is supposed to, we want to have a more systematic understanding of the model performance. That means we want to know by how much our model is away from the truth on average. Cross-validation investigates this question. In <a href="https://mlr3.mlr-org.com">mlr3</a> 10-fold cross-validation is constructed as follows:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>cv10</span> <span class='op'>=</span> <span class='fu'>rsmp</span><span class='op'>(</span><span class='st'>"cv"</span>, folds <span class='op'>=</span> <span class='fl'>10</span><span class='op'>)</span>
-<span class='va'>rr</span> <span class='op'>=</span> <span class='fu'>resample</span><span class='op'>(</span><span class='va'>task</span>, <span class='va'>graph_learner</span>, <span class='va'>cv10</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>cv10</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>rsmp</a></span><span class='op'>(</span><span class='st'>"cv"</span>, folds <span class='op'>=</span> <span class='fl'>10</span><span class='op'>)</span>
+<span class='va'>rr</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/resample.html'>resample</a></span><span class='op'>(</span><span class='va'>task</span>, <span class='va'>graph_learner</span>, <span class='va'>cv10</span><span class='op'>)</span>
 </code></pre>
 </div>
 </div>
@@ -3474,6 +3478,7 @@ aic
 NA
 </td>
 <td style="text-align:left;">
+mlr3
 </td>
 <td style="text-align:left;">
 response
@@ -3489,6 +3494,7 @@ bic
 NA
 </td>
 <td style="text-align:left;">
+mlr3
 </td>
 <td style="text-align:left;">
 response
@@ -3504,7 +3510,7 @@ classif.acc
 classif
 </td>
 <td style="text-align:left;">
-mlr3measures
+mlr3 , mlr3measures
 </td>
 <td style="text-align:left;">
 response
@@ -3520,7 +3526,7 @@ classif.auc
 classif
 </td>
 <td style="text-align:left;">
-mlr3measures
+mlr3 , mlr3measures
 </td>
 <td style="text-align:left;">
 prob
@@ -3537,7 +3543,7 @@ classif.bacc
 classif
 </td>
 <td style="text-align:left;">
-mlr3measures
+mlr3 , mlr3measures
 </td>
 <td style="text-align:left;">
 response
@@ -3553,7 +3559,7 @@ classif.bbrier
 classif
 </td>
 <td style="text-align:left;">
-mlr3measures
+mlr3 , mlr3measures
 </td>
 <td style="text-align:left;">
 prob
@@ -3570,7 +3576,7 @@ classif.ce
 classif
 </td>
 <td style="text-align:left;">
-mlr3measures
+mlr3 , mlr3measures
 </td>
 <td style="text-align:left;">
 response
@@ -3586,6 +3592,7 @@ classif.costs
 classif
 </td>
 <td style="text-align:left;">
+mlr3
 </td>
 <td style="text-align:left;">
 response
@@ -3601,7 +3608,7 @@ classif.dor
 classif
 </td>
 <td style="text-align:left;">
-mlr3measures
+mlr3 , mlr3measures
 </td>
 <td style="text-align:left;">
 response
@@ -3618,7 +3625,7 @@ classif.fbeta
 classif
 </td>
 <td style="text-align:left;">
-mlr3measures
+mlr3 , mlr3measures
 </td>
 <td style="text-align:left;">
 response
@@ -3635,7 +3642,7 @@ classif.fdr
 classif
 </td>
 <td style="text-align:left;">
-mlr3measures
+mlr3 , mlr3measures
 </td>
 <td style="text-align:left;">
 response
@@ -3652,7 +3659,7 @@ classif.fn
 classif
 </td>
 <td style="text-align:left;">
-mlr3measures
+mlr3 , mlr3measures
 </td>
 <td style="text-align:left;">
 response
@@ -3669,7 +3676,7 @@ classif.fnr
 classif
 </td>
 <td style="text-align:left;">
-mlr3measures
+mlr3 , mlr3measures
 </td>
 <td style="text-align:left;">
 response
@@ -3686,7 +3693,7 @@ classif.fomr
 classif
 </td>
 <td style="text-align:left;">
-mlr3measures
+mlr3 , mlr3measures
 </td>
 <td style="text-align:left;">
 response
@@ -3703,7 +3710,7 @@ classif.fp
 classif
 </td>
 <td style="text-align:left;">
-mlr3measures
+mlr3 , mlr3measures
 </td>
 <td style="text-align:left;">
 response
@@ -3720,7 +3727,7 @@ classif.fpr
 classif
 </td>
 <td style="text-align:left;">
-mlr3measures
+mlr3 , mlr3measures
 </td>
 <td style="text-align:left;">
 response
@@ -3737,7 +3744,7 @@ classif.logloss
 classif
 </td>
 <td style="text-align:left;">
-mlr3measures
+mlr3 , mlr3measures
 </td>
 <td style="text-align:left;">
 prob
@@ -3753,7 +3760,7 @@ classif.mbrier
 classif
 </td>
 <td style="text-align:left;">
-mlr3measures
+mlr3 , mlr3measures
 </td>
 <td style="text-align:left;">
 prob
@@ -3769,7 +3776,7 @@ classif.mcc
 classif
 </td>
 <td style="text-align:left;">
-mlr3measures
+mlr3 , mlr3measures
 </td>
 <td style="text-align:left;">
 response
@@ -3786,7 +3793,7 @@ classif.npv
 classif
 </td>
 <td style="text-align:left;">
-mlr3measures
+mlr3 , mlr3measures
 </td>
 <td style="text-align:left;">
 response
@@ -3803,7 +3810,7 @@ classif.ppv
 classif
 </td>
 <td style="text-align:left;">
-mlr3measures
+mlr3 , mlr3measures
 </td>
 <td style="text-align:left;">
 response
@@ -3820,7 +3827,7 @@ classif.prauc
 classif
 </td>
 <td style="text-align:left;">
-mlr3measures
+mlr3 , mlr3measures
 </td>
 <td style="text-align:left;">
 prob
@@ -3837,7 +3844,7 @@ classif.precision
 classif
 </td>
 <td style="text-align:left;">
-mlr3measures
+mlr3 , mlr3measures
 </td>
 <td style="text-align:left;">
 response
@@ -3854,7 +3861,7 @@ classif.recall
 classif
 </td>
 <td style="text-align:left;">
-mlr3measures
+mlr3 , mlr3measures
 </td>
 <td style="text-align:left;">
 response
@@ -3871,7 +3878,7 @@ classif.sensitivity
 classif
 </td>
 <td style="text-align:left;">
-mlr3measures
+mlr3 , mlr3measures
 </td>
 <td style="text-align:left;">
 response
@@ -3888,7 +3895,7 @@ classif.specificity
 classif
 </td>
 <td style="text-align:left;">
-mlr3measures
+mlr3 , mlr3measures
 </td>
 <td style="text-align:left;">
 response
@@ -3905,7 +3912,7 @@ classif.tn
 classif
 </td>
 <td style="text-align:left;">
-mlr3measures
+mlr3 , mlr3measures
 </td>
 <td style="text-align:left;">
 response
@@ -3922,7 +3929,7 @@ classif.tnr
 classif
 </td>
 <td style="text-align:left;">
-mlr3measures
+mlr3 , mlr3measures
 </td>
 <td style="text-align:left;">
 response
@@ -3939,7 +3946,7 @@ classif.tp
 classif
 </td>
 <td style="text-align:left;">
-mlr3measures
+mlr3 , mlr3measures
 </td>
 <td style="text-align:left;">
 response
@@ -3956,7 +3963,7 @@ classif.tpr
 classif
 </td>
 <td style="text-align:left;">
-mlr3measures
+mlr3 , mlr3measures
 </td>
 <td style="text-align:left;">
 response
@@ -3973,7 +3980,7 @@ clust.ch
 clust
 </td>
 <td style="text-align:left;">
-clusterCrit
+mlr3 , clusterCrit
 </td>
 <td style="text-align:left;">
 partition
@@ -3989,7 +3996,7 @@ clust.db
 clust
 </td>
 <td style="text-align:left;">
-clusterCrit
+mlr3 , clusterCrit
 </td>
 <td style="text-align:left;">
 partition
@@ -4005,7 +4012,7 @@ clust.dunn
 clust
 </td>
 <td style="text-align:left;">
-clusterCrit
+mlr3 , clusterCrit
 </td>
 <td style="text-align:left;">
 partition
@@ -4021,7 +4028,7 @@ clust.silhouette
 clust
 </td>
 <td style="text-align:left;">
-clusterCrit
+mlr3 , clusterCrit
 </td>
 <td style="text-align:left;">
 partition
@@ -4037,7 +4044,7 @@ clust.wss
 clust
 </td>
 <td style="text-align:left;">
-clusterCrit
+mlr3 , clusterCrit
 </td>
 <td style="text-align:left;">
 partition
@@ -4053,6 +4060,7 @@ debug
 NA
 </td>
 <td style="text-align:left;">
+mlr3
 </td>
 <td style="text-align:left;">
 response
@@ -4068,6 +4076,7 @@ dens.logloss
 dens
 </td>
 <td style="text-align:left;">
+mlr3
 </td>
 <td style="text-align:left;">
 pdf
@@ -4083,6 +4092,7 @@ oob_error
 NA
 </td>
 <td style="text-align:left;">
+mlr3
 </td>
 <td style="text-align:left;">
 response
@@ -4098,7 +4108,7 @@ regr.bias
 regr
 </td>
 <td style="text-align:left;">
-mlr3measures
+mlr3 , mlr3measures
 </td>
 <td style="text-align:left;">
 response
@@ -4114,7 +4124,7 @@ regr.ktau
 regr
 </td>
 <td style="text-align:left;">
-mlr3measures
+mlr3 , mlr3measures
 </td>
 <td style="text-align:left;">
 response
@@ -4130,7 +4140,7 @@ regr.mae
 regr
 </td>
 <td style="text-align:left;">
-mlr3measures
+mlr3 , mlr3measures
 </td>
 <td style="text-align:left;">
 response
@@ -4146,7 +4156,7 @@ regr.mape
 regr
 </td>
 <td style="text-align:left;">
-mlr3measures
+mlr3 , mlr3measures
 </td>
 <td style="text-align:left;">
 response
@@ -4162,7 +4172,7 @@ regr.maxae
 regr
 </td>
 <td style="text-align:left;">
-mlr3measures
+mlr3 , mlr3measures
 </td>
 <td style="text-align:left;">
 response
@@ -4178,7 +4188,7 @@ regr.medae
 regr
 </td>
 <td style="text-align:left;">
-mlr3measures
+mlr3 , mlr3measures
 </td>
 <td style="text-align:left;">
 response
@@ -4194,7 +4204,7 @@ regr.medse
 regr
 </td>
 <td style="text-align:left;">
-mlr3measures
+mlr3 , mlr3measures
 </td>
 <td style="text-align:left;">
 response
@@ -4210,7 +4220,7 @@ regr.mse
 regr
 </td>
 <td style="text-align:left;">
-mlr3measures
+mlr3 , mlr3measures
 </td>
 <td style="text-align:left;">
 response
@@ -4226,7 +4236,7 @@ regr.msle
 regr
 </td>
 <td style="text-align:left;">
-mlr3measures
+mlr3 , mlr3measures
 </td>
 <td style="text-align:left;">
 response
@@ -4242,7 +4252,7 @@ regr.pbias
 regr
 </td>
 <td style="text-align:left;">
-mlr3measures
+mlr3 , mlr3measures
 </td>
 <td style="text-align:left;">
 response
@@ -4258,7 +4268,7 @@ regr.rae
 regr
 </td>
 <td style="text-align:left;">
-mlr3measures
+mlr3 , mlr3measures
 </td>
 <td style="text-align:left;">
 response
@@ -4274,7 +4284,7 @@ regr.rmse
 regr
 </td>
 <td style="text-align:left;">
-mlr3measures
+mlr3 , mlr3measures
 </td>
 <td style="text-align:left;">
 response
@@ -4290,7 +4300,7 @@ regr.rmsle
 regr
 </td>
 <td style="text-align:left;">
-mlr3measures
+mlr3 , mlr3measures
 </td>
 <td style="text-align:left;">
 response
@@ -4306,7 +4316,7 @@ regr.rrse
 regr
 </td>
 <td style="text-align:left;">
-mlr3measures
+mlr3 , mlr3measures
 </td>
 <td style="text-align:left;">
 response
@@ -4322,7 +4332,7 @@ regr.rse
 regr
 </td>
 <td style="text-align:left;">
-mlr3measures
+mlr3 , mlr3measures
 </td>
 <td style="text-align:left;">
 response
@@ -4338,7 +4348,7 @@ regr.rsq
 regr
 </td>
 <td style="text-align:left;">
-mlr3measures
+mlr3 , mlr3measures
 </td>
 <td style="text-align:left;">
 response
@@ -4354,7 +4364,7 @@ regr.sae
 regr
 </td>
 <td style="text-align:left;">
-mlr3measures
+mlr3 , mlr3measures
 </td>
 <td style="text-align:left;">
 response
@@ -4370,7 +4380,7 @@ regr.smape
 regr
 </td>
 <td style="text-align:left;">
-mlr3measures
+mlr3 , mlr3measures
 </td>
 <td style="text-align:left;">
 response
@@ -4386,7 +4396,7 @@ regr.srho
 regr
 </td>
 <td style="text-align:left;">
-mlr3measures
+mlr3 , mlr3measures
 </td>
 <td style="text-align:left;">
 response
@@ -4402,7 +4412,7 @@ regr.sse
 regr
 </td>
 <td style="text-align:left;">
-mlr3measures
+mlr3 , mlr3measures
 </td>
 <td style="text-align:left;">
 response
@@ -4418,6 +4428,39 @@ selected_features
 NA
 </td>
 <td style="text-align:left;">
+mlr3
+</td>
+<td style="text-align:left;">
+response
+</td>
+<td style="text-align:left;">
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+sim.jaccard
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+mlr3 , mlr3measures
+</td>
+<td style="text-align:left;">
+response
+</td>
+<td style="text-align:left;">
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+sim.phi
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+mlr3 , mlr3measures
 </td>
 <td style="text-align:left;">
 response
@@ -4433,6 +4476,7 @@ surv.brier
 surv
 </td>
 <td style="text-align:left;">
+mlr3
 </td>
 <td style="text-align:left;">
 distr
@@ -4448,6 +4492,7 @@ surv.calib_alpha
 surv
 </td>
 <td style="text-align:left;">
+mlr3
 </td>
 <td style="text-align:left;">
 distr
@@ -4463,6 +4508,7 @@ surv.calib_beta
 surv
 </td>
 <td style="text-align:left;">
+mlr3
 </td>
 <td style="text-align:left;">
 lp
@@ -4478,7 +4524,7 @@ surv.chambless_auc
 surv
 </td>
 <td style="text-align:left;">
-survAUC
+mlr3 , survAUC
 </td>
 <td style="text-align:left;">
 lp
@@ -4494,6 +4540,7 @@ surv.cindex
 surv
 </td>
 <td style="text-align:left;">
+mlr3
 </td>
 <td style="text-align:left;">
 crank
@@ -4509,6 +4556,7 @@ surv.dcalib
 surv
 </td>
 <td style="text-align:left;">
+mlr3
 </td>
 <td style="text-align:left;">
 distr
@@ -4524,6 +4572,7 @@ surv.graf
 surv
 </td>
 <td style="text-align:left;">
+mlr3
 </td>
 <td style="text-align:left;">
 distr
@@ -4539,7 +4588,7 @@ surv.hung_auc
 surv
 </td>
 <td style="text-align:left;">
-survAUC
+mlr3 , survAUC
 </td>
 <td style="text-align:left;">
 lp
@@ -4555,7 +4604,7 @@ surv.intlogloss
 surv
 </td>
 <td style="text-align:left;">
-distr6
+mlr3 , distr6
 </td>
 <td style="text-align:left;">
 distr
@@ -4571,7 +4620,7 @@ surv.logloss
 surv
 </td>
 <td style="text-align:left;">
-distr6
+mlr3 , distr6
 </td>
 <td style="text-align:left;">
 distr
@@ -4587,6 +4636,7 @@ surv.mae
 surv
 </td>
 <td style="text-align:left;">
+mlr3
 </td>
 <td style="text-align:left;">
 response
@@ -4602,6 +4652,7 @@ surv.mse
 surv
 </td>
 <td style="text-align:left;">
+mlr3
 </td>
 <td style="text-align:left;">
 response
@@ -4617,7 +4668,7 @@ surv.nagelk_r2
 surv
 </td>
 <td style="text-align:left;">
-survAUC
+mlr3 , survAUC
 </td>
 <td style="text-align:left;">
 lp
@@ -4633,7 +4684,7 @@ surv.oquigley_r2
 surv
 </td>
 <td style="text-align:left;">
-survAUC
+mlr3 , survAUC
 </td>
 <td style="text-align:left;">
 lp
@@ -4649,6 +4700,7 @@ surv.rmse
 surv
 </td>
 <td style="text-align:left;">
+mlr3
 </td>
 <td style="text-align:left;">
 response
@@ -4664,7 +4716,7 @@ surv.schmid
 surv
 </td>
 <td style="text-align:left;">
-distr6
+mlr3 , distr6
 </td>
 <td style="text-align:left;">
 distr
@@ -4680,7 +4732,7 @@ surv.song_auc
 surv
 </td>
 <td style="text-align:left;">
-survAUC
+mlr3 , survAUC
 </td>
 <td style="text-align:left;">
 lp
@@ -4696,7 +4748,7 @@ surv.song_tnr
 surv
 </td>
 <td style="text-align:left;">
-survAUC
+mlr3 , survAUC
 </td>
 <td style="text-align:left;">
 lp
@@ -4712,7 +4764,7 @@ surv.song_tpr
 surv
 </td>
 <td style="text-align:left;">
-survAUC
+mlr3 , survAUC
 </td>
 <td style="text-align:left;">
 lp
@@ -4728,7 +4780,7 @@ surv.uno_auc
 surv
 </td>
 <td style="text-align:left;">
-survAUC
+mlr3 , survAUC
 </td>
 <td style="text-align:left;">
 lp
@@ -4744,7 +4796,7 @@ surv.uno_tnr
 surv
 </td>
 <td style="text-align:left;">
-survAUC
+mlr3 , survAUC
 </td>
 <td style="text-align:left;">
 lp
@@ -4760,7 +4812,7 @@ surv.uno_tpr
 surv
 </td>
 <td style="text-align:left;">
-survAUC
+mlr3 , survAUC
 </td>
 <td style="text-align:left;">
 lp
@@ -4776,7 +4828,7 @@ surv.xu_r2
 surv
 </td>
 <td style="text-align:left;">
-survAUC
+mlr3 , survAUC
 </td>
 <td style="text-align:left;">
 lp
@@ -4792,6 +4844,7 @@ time_both
 NA
 </td>
 <td style="text-align:left;">
+mlr3
 </td>
 <td style="text-align:left;">
 response
@@ -4807,6 +4860,7 @@ time_predict
 NA
 </td>
 <td style="text-align:left;">
+mlr3
 </td>
 <td style="text-align:left;">
 response
@@ -4822,6 +4876,7 @@ time_train
 NA
 </td>
 <td style="text-align:left;">
+mlr3
 </td>
 <td style="text-align:left;">
 response
@@ -4836,7 +4891,7 @@ response
 <p>We choose the <a href="https://mlr3.mlr-org.com/reference/mlr_measures_regr.mae.html"><code>mean absolute error</code></a> and the <a href="https://mlr3.mlr-org.com/reference/mlr_measures_regr.mse.html"><code>mean squared error</code></a>.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>rr</span><span class='op'>$</span><span class='fu'>score</span><span class='op'>(</span><span class='fu'>msrs</span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"regr.mae"</span>, <span class='st'>"regr.mse"</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>rr</span><span class='op'>$</span><span class='fu'>score</span><span class='op'>(</span><span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>msrs</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"regr.mae"</span>, <span class='st'>"regr.mse"</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>
 </code></pre>
 </div>
 </div>
@@ -5071,7 +5126,7 @@ cv
 <p>We can also compute now by how much our model was on average wrong when predicting the runs scored.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>rr</span><span class='op'>$</span><span class='fu'>aggregate</span><span class='op'>(</span><span class='fu'>msr</span><span class='op'>(</span><span class='st'>"regr.mae"</span><span class='op'>)</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>rr</span><span class='op'>$</span><span class='fu'>aggregate</span><span class='op'>(</span><span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>msr</a></span><span class='op'>(</span><span class='st'>"regr.mae"</span><span class='op'>)</span><span class='op'>)</span>
 </code></pre>
 </div>
 <pre><code>regr.mae 
@@ -5098,11 +5153,11 @@ cv
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='va'>feature_names</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/colnames.html'>colnames</a></span><span class='op'>(</span><span class='va'>moneyball</span><span class='op'>)</span><span class='op'>[</span><span class='op'>!</span><span class='fu'><a href='https://rdrr.io/r/base/lapply.html'>sapply</a></span><span class='op'>(</span><span class='va'>moneyball</span>, <span class='va'>anyNA</span><span class='op'>)</span><span class='op'>]</span>
-<span class='va'>feature_names</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='va'>feature_names</span><span class='op'>[</span><span class='va'>feature_names</span> <span class='op'>%in%</span> <span class='va'>task</span><span class='op'>$</span><span class='va'>feature_names</span><span class='op'>]</span>,
+<span class='va'>feature_names</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='va'>feature_names</span><span class='op'>[</span><span class='va'>feature_names</span> <span class='op'><a href='https://rdrr.io/r/base/match.html'>%in%</a></span> <span class='va'>task</span><span class='op'>$</span><span class='va'>feature_names</span><span class='op'>]</span>,
   <span class='st'>"rankseason"</span>, <span class='st'>"rankplayoffs"</span><span class='op'>)</span>
 <span class='va'>select_na</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"select"</span>, selector <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/Selector.html'>selector_name</a></span><span class='op'>(</span><span class='va'>feature_names</span><span class='op'>)</span><span class='op'>)</span>
 
-<span class='va'>graph_2</span> <span class='op'>=</span> <span class='va'>impute_oor</span> <span class='op'>%&gt;&gt;%</span> <span class='va'>select_na</span>
+<span class='va'>graph_2</span> <span class='op'>=</span> <span class='va'>impute_oor</span> <span class='op'><a href='https://mlr3pipelines.mlr-org.com//reference/grapes-greater-than-greater-than-grapes.html'>%&gt;&gt;%</a></span> <span class='va'>select_na</span>
 <span class='va'>graph_2</span><span class='op'>$</span><span class='fu'>plot</span><span class='op'>(</span><span class='op'>)</span>
 </code></pre>
 </div>
@@ -5111,9 +5166,9 @@ cv
 <p>Now we complete the learner and apply resampling as before.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>graph_learner_2</span> <span class='op'>=</span> <span class='fu'>as_learner</span><span class='op'>(</span><span class='va'>graph_2</span> <span class='op'>%&gt;&gt;%</span> <span class='va'>pipeop_learner</span><span class='op'>)</span>
-<span class='va'>rr_2</span> <span class='op'>=</span> <span class='fu'>resample</span><span class='op'>(</span><span class='va'>task</span>, <span class='va'>graph_learner_2</span>, <span class='va'>cv10</span><span class='op'>)</span>
-<span class='va'>rr_2</span><span class='op'>$</span><span class='fu'>aggregate</span><span class='op'>(</span><span class='fu'>msr</span><span class='op'>(</span><span class='st'>"regr.mae"</span><span class='op'>)</span><span class='op'>)</span>
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>graph_learner_2</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/as_learner.html'>as_learner</a></span><span class='op'>(</span><span class='va'>graph_2</span> <span class='op'><a href='https://mlr3pipelines.mlr-org.com//reference/grapes-greater-than-greater-than-grapes.html'>%&gt;&gt;%</a></span> <span class='va'>pipeop_learner</span><span class='op'>)</span>
+<span class='va'>rr_2</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/resample.html'>resample</a></span><span class='op'>(</span><span class='va'>task</span>, <span class='va'>graph_learner_2</span>, <span class='va'>cv10</span><span class='op'>)</span>
+<span class='va'>rr_2</span><span class='op'>$</span><span class='fu'>aggregate</span><span class='op'>(</span><span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>msr</a></span><span class='op'>(</span><span class='st'>"regr.mae"</span><span class='op'>)</span><span class='op'>)</span>
 </code></pre>
 </div>
 <pre><code>regr.mae 
