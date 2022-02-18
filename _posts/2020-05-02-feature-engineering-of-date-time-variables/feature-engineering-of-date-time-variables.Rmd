@@ -119,14 +119,14 @@ ggplot(bike_sharing, aes(x = date, y = count)) +
 
 ## Baseline Random Forest
 
-We construct a new regression task and keep a [validation set](https://mlr3book.mlr-org.com/tasks.html#tasks-roles).
+We construct a new regression task and keep a [holdout set](https://mlr3book.mlr-org.com/tasks.html#tasks-roles).
 
 ```{r feature-engineering-of-date-time-variables-009}
 task = as_task_regr(bike_sharing, target = "count")
 
 validation_set = sample(seq_len(task$nrow), size = 0.3 * task$nrow)
 
-task$set_row_roles(validation_set, roles = "validation")
+task$set_row_roles(validation_set, roles = "holdout")
 ```
 
 To estimate the performance on unseen data, we will use a 3-fold cross-validation.

@@ -20,19 +20,19 @@
 
 <style type="text/css">code{white-space: pre;}</style>
 <style type="text/css" data-origin="pandoc">
-code.sourceCode > span { display: inline-block; line-height: 1.25; }
-code.sourceCode > span { color: inherit; text-decoration: inherit; }
-code.sourceCode > span:empty { height: 1.2em; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
-code.sourceCode { white-space: pre; position: relative; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
 div.sourceCode { margin: 1em 0; }
 pre.sourceCode { margin: 0; }
 @media screen {
 div.sourceCode { overflow: auto; }
 }
 @media print {
-code.sourceCode { white-space: pre-wrap; }
-code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
   { counter-reset: source-line 0; }
@@ -52,7 +52,7 @@ pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-le
 div.sourceCode
   {   }
 @media screen {
-code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 code span.al { color: #ad0000; } /* Alert */
 code span.an { color: #5e5e5e; } /* Annotation */
@@ -2060,6 +2060,7 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 <!--/radix_placeholder_distill-->
+  <script src="../../site_libs/header-attrs-2.11/header-attrs.js"></script>
   <script src="../../site_libs/kePrint-0.0.1/kePrint.js"></script>
   <link href="../../site_libs/lightable-0.0.1/lightable.css" rel="stylesheet" />
   <script src="../../site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
@@ -2185,8 +2186,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <pre class="sourceCode r"><code class="sourceCode r"><span class='fu'>skimr</span><span class='fu'>::</span><span class='fu'><a href='https://docs.ropensci.org/skimr/reference/skim.html'>skim</a></span><span class='op'>(</span><span class='va'>bike_sharing</span><span class='op'>)</span>
 </code></pre>
 </div>
-<table style='width: auto;'
-        class='table table-condensed'>
+<table style="width: auto;" class="table table-condensed">
 <caption>
 <span id="tab:feature-engineering-of-date-time-variables-006">Table 1: </span>Data summary
 </caption>
@@ -2848,14 +2848,14 @@ count
 <p><img src="feature-engineering-of-date-time-variables_files/figure-html5/feature-engineering-of-date-time-variables-008-1.png" width="624" /></p>
 </div>
 <h2 id="baseline-random-forest">Baseline Random Forest</h2>
-<p>We construct a new regression task and keep a <a href="https://mlr3book.mlr-org.com/tasks.html#tasks-roles">validation set</a>.</p>
+<p>We construct a new regression task and keep a <a href="https://mlr3book.mlr-org.com/tasks.html#tasks-roles">holdout set</a>.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='va'>task</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/as_task_regr.html'>as_task_regr</a></span><span class='op'>(</span><span class='va'>bike_sharing</span>, target <span class='op'>=</span> <span class='st'>"count"</span><span class='op'>)</span>
 
 <span class='va'>validation_set</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/sample.html'>sample</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/seq.html'>seq_len</a></span><span class='op'>(</span><span class='va'>task</span><span class='op'>$</span><span class='va'>nrow</span><span class='op'>)</span>, size <span class='op'>=</span> <span class='fl'>0.3</span> <span class='op'>*</span> <span class='va'>task</span><span class='op'>$</span><span class='va'>nrow</span><span class='op'>)</span>
 
-<span class='va'>task</span><span class='op'>$</span><span class='fu'>set_row_roles</span><span class='op'>(</span><span class='va'>validation_set</span>, roles <span class='op'>=</span> <span class='st'>"validation"</span><span class='op'>)</span>
+<span class='va'>task</span><span class='op'>$</span><span class='fu'>set_row_roles</span><span class='op'>(</span><span class='va'>validation_set</span>, roles <span class='op'>=</span> <span class='st'>"holdout"</span><span class='op'>)</span>
 </code></pre>
 </div>
 </div>
@@ -2884,6 +2884,14 @@ count
 <span class='va'>rr_ranger</span><span class='op'>$</span><span class='fu'>score</span><span class='op'>(</span><span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>msr</a></span><span class='op'>(</span><span class='st'>"regr.mse"</span><span class='op'>)</span><span class='op'>)</span>
 </code></pre>
 </div>
+<pre><code>             task      task_id                 learner  learner_id         resampling resampling_id iteration
+1: &lt;TaskRegr[46]&gt; bike_sharing &lt;LearnerRegrRanger[37]&gt; regr.ranger &lt;ResamplingCV[19]&gt;            cv         1
+2: &lt;TaskRegr[46]&gt; bike_sharing &lt;LearnerRegrRanger[37]&gt; regr.ranger &lt;ResamplingCV[19]&gt;            cv         2
+3: &lt;TaskRegr[46]&gt; bike_sharing &lt;LearnerRegrRanger[37]&gt; regr.ranger &lt;ResamplingCV[19]&gt;            cv         3
+             prediction regr.mse
+1: &lt;PredictionRegr[19]&gt; 4543.904
+2: &lt;PredictionRegr[19]&gt; 4276.996
+3: &lt;PredictionRegr[19]&gt; 4767.763</code></pre>
 </div>
 <div class="layout-chunk" data-layout="l-body">
 
@@ -3037,6 +3045,14 @@ cv
 <span class='va'>rr_graph_learner</span><span class='op'>$</span><span class='fu'>score</span><span class='op'>(</span><span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>msr</a></span><span class='op'>(</span><span class='st'>"regr.mse"</span><span class='op'>)</span><span class='op'>)</span>
 </code></pre>
 </div>
+<pre><code>             task      task_id            learner               learner_id         resampling resampling_id iteration
+1: &lt;TaskRegr[46]&gt; bike_sharing &lt;GraphLearner[37]&gt; datefeatures.regr.ranger &lt;ResamplingCV[19]&gt;            cv         1
+2: &lt;TaskRegr[46]&gt; bike_sharing &lt;GraphLearner[37]&gt; datefeatures.regr.ranger &lt;ResamplingCV[19]&gt;            cv         2
+3: &lt;TaskRegr[46]&gt; bike_sharing &lt;GraphLearner[37]&gt; datefeatures.regr.ranger &lt;ResamplingCV[19]&gt;            cv         3
+             prediction regr.mse
+1: &lt;PredictionRegr[19]&gt; 2521.642
+2: &lt;PredictionRegr[19]&gt; 2229.746
+3: &lt;PredictionRegr[19]&gt; 2254.390</code></pre>
 </div>
 <div class="layout-chunk" data-layout="l-body">
 
@@ -3148,9 +3164,9 @@ cv
 </code></pre>
 </div>
 <pre><code>regr.mse 
- 1853.12 </code></pre>
+460.0281 </code></pre>
 </div>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
 <!--radix_placeholder_article_footer-->
 <!--/radix_placeholder_article_footer-->
 </div>

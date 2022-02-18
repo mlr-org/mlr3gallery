@@ -20,19 +20,19 @@
 
 <style type="text/css">code{white-space: pre;}</style>
 <style type="text/css" data-origin="pandoc">
-code.sourceCode > span { display: inline-block; line-height: 1.25; }
-code.sourceCode > span { color: inherit; text-decoration: inherit; }
-code.sourceCode > span:empty { height: 1.2em; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
-code.sourceCode { white-space: pre; position: relative; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
 div.sourceCode { margin: 1em 0; }
 pre.sourceCode { margin: 0; }
 @media screen {
 div.sourceCode { overflow: auto; }
 }
 @media print {
-code.sourceCode { white-space: pre-wrap; }
-code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
   { counter-reset: source-line 0; }
@@ -52,7 +52,7 @@ pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-le
 div.sourceCode
   {   }
 @media screen {
-code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 code span.al { color: #ad0000; } /* Alert */
 code span.an { color: #5e5e5e; } /* Annotation */
@@ -2054,6 +2054,7 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 <!--/radix_placeholder_distill-->
+  <script src="../../site_libs/header-attrs-2.11/header-attrs.js"></script>
   <script src="../../site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
   <script src="../../site_libs/popper-2.6.0/popper.min.js"></script>
   <link href="../../site_libs/tippy-6.2.7/tippy.css" rel="stylesheet" />
@@ -2337,11 +2338,11 @@ document.addEventListener('DOMContentLoaded', function() {
 </div>
 <p>Congratulations, your first REST API is running on your local machine. We can test it by providing some data, using <code>curl</code> via the command line:</p>
 <div class="layout-chunk" data-layout="l-body">
-<div class="sourceCode" id="cb2"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1"></a><span class="ex">curl</span> --data <span class="st">&#39;[{&quot;crim&quot;:3.14, &quot;tax&quot;:691, &quot;town&quot;:&quot;Newton&quot;}]&#39;</span> <span class="st">&quot;http://127.0.0.1:1030/predict_medv&quot;</span></span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">--data</span> <span class="st">&#39;[{&quot;crim&quot;:3.14, &quot;tax&quot;:691, &quot;town&quot;:&quot;Newton&quot;}]&#39;</span> <span class="st">&quot;http://127.0.0.1:1030/predict_medv&quot;</span></span></code></pre></div>
 </div>
 <p>This should return the predicted <code>medv</code>:</p>
 <div class="layout-chunk" data-layout="l-body">
-<div class="sourceCode" id="cb3"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1"></a>[<span class="dt">{&quot;row_id&quot;:1,&quot;response&quot;:&quot;32.2329&quot;}</span>]</span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">[</span><span class="dt">{</span><span class="st">&quot;row_id&quot;</span><span class="dt">:1</span><span class="op">,</span><span class="st">&quot;response&quot;</span><span class="dt">:</span><span class="st">&quot;32.2329&quot;</span><span class="dt">}</span><span class="ex">]</span></span></code></pre></div>
 </div>
 <p>Alternatively, we can also use the <code>httr::POST</code> function within R:</p>
 <div class="layout-chunk" data-layout="l-body">
@@ -2374,57 +2375,57 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>We are going to need two things: An image and a container. An image defines the OS and software while the container is the actual running instance of the image. To build a <code>Docker</code> image we have to specify a <code>Dockerfile</code>. Note that it is sensible to set up the whole project in its own directory, e.g., <code>~/mlr3_api</code>.</p>
 <p>Every <code>Dockerfile</code> starts with a <code>FROM</code> statement describing the image we are building our image from. In our case we want an R based image that ideally already has <code>plumber</code> and its dependencies installed. Luckily, the <code>trestletech/plumber</code> image exists:</p>
 <div class="layout-chunk" data-layout="l-body">
-<div class="sourceCode" id="cb4"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1"></a><span class="ex">FROM</span> trestletech/plumber</span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">FROM</span> trestletech/plumber</span></code></pre></div>
 </div>
 <p>We then install the R packages needed to set up our REST API (note that we can skip <code>jsonlite</code>, because <code>plumber</code> already depends on it):</p>
 <div class="layout-chunk" data-layout="l-body">
-<div class="sourceCode" id="cb5"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1"></a><span class="ex">RUN</span> R -e <span class="st">&#39;install.packages(c(&quot;data.table&quot;, &quot;mlr3&quot;, &quot;mlr3pipelines&quot;))&#39;</span></span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">RUN</span> R <span class="at">-e</span> <span class="st">&#39;install.packages(c(&quot;data.table&quot;, &quot;mlr3&quot;, &quot;mlr3pipelines&quot;))&#39;</span></span></code></pre></div>
 </div>
 <p>Next, we copy our trained pipeline (<code>gl.rds</code>), our stored feature information (<code>feature_info.rds</code>), our R file to convert features, (<code>fix_feature_types.R</code>) and our R file to predict (<code>predict_gl.R</code>) to a new directory <code>/data</code> and set this as the working directory:</p>
 <div class="layout-chunk" data-layout="l-body">
-<div class="sourceCode" id="cb6"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1"></a><span class="ex">RUN</span> mkdir /data</span>
-<span id="cb6-2"><a href="#cb6-2"></a><span class="ex">COPY</span> gl.rds /data</span>
-<span id="cb6-3"><a href="#cb6-3"></a><span class="ex">COPY</span> feature_info.rds /data</span>
-<span id="cb6-4"><a href="#cb6-4"></a><span class="ex">COPY</span> fix_feature_types.R /data</span>
-<span id="cb6-5"><a href="#cb6-5"></a><span class="ex">COPY</span> predict_gl.R /data</span>
-<span id="cb6-6"><a href="#cb6-6"></a><span class="ex">WORKDIR</span> /data</span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">RUN</span> mkdir /data</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="ex">COPY</span> gl.rds /data</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="ex">COPY</span> feature_info.rds /data</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="ex">COPY</span> fix_feature_types.R /data</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="ex">COPY</span> predict_gl.R /data</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="ex">WORKDIR</span> /data</span></code></pre></div>
 </div>
 <p>Finally, we listen on port 1030 and start the server (this is analogously done as manually calling <code>plumber::plumb</code> on the <code>predict_gl.R</code> file and running it):</p>
 <div class="layout-chunk" data-layout="l-body">
-<div class="sourceCode" id="cb7"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1"></a><span class="ex">EXPOSE</span> 1030</span>
-<span id="cb7-2"><a href="#cb7-2"></a><span class="ex">ENTRYPOINT</span> [<span class="st">&quot;R&quot;</span>, <span class="st">&quot;-e&quot;</span>, \</span>
-<span id="cb7-3"><a href="#cb7-3"></a>    <span class="st">&quot;r = plumber::plumb(&#39;/data/predict_gl.R&#39;); r</span><span class="va">$run</span><span class="st">(port = 1030, host = &#39;0.0.0.0&#39;)&quot;</span>]</span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="ex">EXPOSE</span> 1030</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="ex">ENTRYPOINT</span> [<span class="st">&quot;R&quot;</span>, <span class="st">&quot;-e&quot;</span>, <span class="dt">\</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;r = plumber::plumb(&#39;/data/predict_gl.R&#39;); r</span><span class="va">$run</span><span class="st">(port = 1030, host = &#39;0.0.0.0&#39;)&quot;</span>]</span></code></pre></div>
 </div>
 <p>The complete <code>Dockerfile</code> looks like the following:</p>
 <div class="layout-chunk" data-layout="l-body">
-<div class="sourceCode" id="cb8"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1"></a><span class="ex">FROM</span> trestletech/plumber</span>
-<span id="cb8-2"><a href="#cb8-2"></a></span>
-<span id="cb8-3"><a href="#cb8-3"></a><span class="ex">RUN</span> R -e <span class="st">&#39;install.packages(c(&quot;data.table&quot;, &quot;mlr3&quot;, &quot;mlr3misc&quot;, &quot;mlr3pipelines&quot;))&#39;</span></span>
-<span id="cb8-4"><a href="#cb8-4"></a></span>
-<span id="cb8-5"><a href="#cb8-5"></a><span class="ex">RUN</span> mkdir /data</span>
-<span id="cb8-6"><a href="#cb8-6"></a><span class="ex">COPY</span> gl.rds /data</span>
-<span id="cb8-7"><a href="#cb8-7"></a><span class="ex">COPY</span> feature_info.rds /data</span>
-<span id="cb8-8"><a href="#cb8-8"></a><span class="ex">COPY</span> fix_feature_types.R /data</span>
-<span id="cb8-9"><a href="#cb8-9"></a><span class="ex">COPY</span> predict_gl.R /data</span>
-<span id="cb8-10"><a href="#cb8-10"></a><span class="ex">WORKDIR</span> /data</span>
-<span id="cb8-11"><a href="#cb8-11"></a></span>
-<span id="cb8-12"><a href="#cb8-12"></a><span class="ex">EXPOSE</span> 1030</span>
-<span id="cb8-13"><a href="#cb8-13"></a><span class="ex">ENTRYPOINT</span> [<span class="st">&quot;R&quot;</span>, <span class="st">&quot;-e&quot;</span>, \</span>
-<span id="cb8-14"><a href="#cb8-14"></a>    <span class="st">&quot;r = plumber::plumb(&#39;/data/predict_gl.R&#39;); r</span><span class="va">$run</span><span class="st">(port = 1030, host = &#39;0.0.0.0&#39;)&quot;</span>]</span></code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="ex">FROM</span> trestletech/plumber</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="ex">RUN</span> R <span class="at">-e</span> <span class="st">&#39;install.packages(c(&quot;data.table&quot;, &quot;mlr3&quot;, &quot;mlr3misc&quot;, &quot;mlr3pipelines&quot;))&#39;</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="ex">RUN</span> mkdir /data</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="ex">COPY</span> gl.rds /data</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="ex">COPY</span> feature_info.rds /data</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="ex">COPY</span> fix_feature_types.R /data</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="ex">COPY</span> predict_gl.R /data</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="ex">WORKDIR</span> /data</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="ex">EXPOSE</span> 1030</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="ex">ENTRYPOINT</span> [<span class="st">&quot;R&quot;</span>, <span class="st">&quot;-e&quot;</span>, <span class="dt">\</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;r = plumber::plumb(&#39;/data/predict_gl.R&#39;); r</span><span class="va">$run</span><span class="st">(port = 1030, host = &#39;0.0.0.0&#39;)&quot;</span>]</span></code></pre></div>
 </div>
 <p>To build the image we open a terminal in the <code>mlr3_api</code> directory and run:</p>
 <div class="layout-chunk" data-layout="l-body">
-<div class="sourceCode" id="cb9"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1"></a><span class="ex">docker</span> build -t mlr3-plumber-demo .</span></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> build <span class="at">-t</span> mlr3-plumber-demo .</span></code></pre></div>
 </div>
 <p>This may take quite some time.</p>
 <p>To finally run the container, simply use:</p>
 <div class="layout-chunk" data-layout="l-body">
-<div class="sourceCode" id="cb10"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1"></a><span class="ex">docker</span> run --rm -p 1030:1030 mlr3-plumber-demo</span></code></pre></div>
+<div class="sourceCode" id="cb10"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> run <span class="at">--rm</span> <span class="at">-p</span> 1030:1030 mlr3-plumber-demo</span></code></pre></div>
 </div>
 <p>You can then proceed to provide some data via <code>curl</code> or <code>httr::POST</code> (to the same local address, because the <code>Docker</code> container is still running on your local machine).</p>
 <p>To stop all running containers use:</p>
 <div class="layout-chunk" data-layout="l-body">
-<div class="sourceCode" id="cb11"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1"></a><span class="ex">docker</span> stop <span class="va">$(</span><span class="ex">docker</span> ps -a -q<span class="va">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb11"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> stop <span class="va">$(</span><span class="ex">docker</span> ps <span class="at">-a</span> <span class="at">-q</span><span class="va">)</span></span></code></pre></div>
 </div>
 <p>Finally, you can proceed to deploy your container to an Amazon Web Service or an Azure Cloud. For the latter, the package <a href="https://cran.r-project.org/package=AzureContainers">AzureContainers</a> is especially helpful. If you do plan to do this note that the <code>plumber</code> service above is exposed over HTTP, and there is no authentication layer making it insecure. You may think about adding a layer of authentification and restricting the service to HTTPS.</p>
 <div class="sourceCode" id="cb12"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>

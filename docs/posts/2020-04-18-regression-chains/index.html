@@ -20,19 +20,19 @@
 
 <style type="text/css">code{white-space: pre;}</style>
 <style type="text/css" data-origin="pandoc">
-code.sourceCode > span { display: inline-block; line-height: 1.25; }
-code.sourceCode > span { color: inherit; text-decoration: inherit; }
-code.sourceCode > span:empty { height: 1.2em; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
-code.sourceCode { white-space: pre; position: relative; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
 div.sourceCode { margin: 1em 0; }
 pre.sourceCode { margin: 0; }
 @media screen {
 div.sourceCode { overflow: auto; }
 }
 @media print {
-code.sourceCode { white-space: pre-wrap; }
-code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
   { counter-reset: source-line 0; }
@@ -52,7 +52,7 @@ pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-le
 div.sourceCode
   {   }
 @media screen {
-code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 code span.al { color: #ad0000; } /* Alert */
 code span.an { color: #5e5e5e; } /* Annotation */
@@ -85,6 +85,27 @@ code span.vs { color: #20794d; } /* VerbatimString */
 code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 </style>
 
+<style>
+  div.csl-bib-body { }
+  div.csl-entry {
+    clear: both;
+    }
+  .hanging div.csl-entry {
+    margin-left:2em;
+    text-indent:-2em;
+  }
+  div.csl-left-margin {
+    min-width:2em;
+    float:left;
+  }
+  div.csl-right-inline {
+    margin-left:2em;
+    padding-left:1em;
+  }
+  div.csl-indent {
+    margin-left: 2em;
+  }
+</style>
 
   <!--radix_placeholder_meta_tags-->
 <title>mlr3gallery: Regression Chains</title>
@@ -2061,6 +2082,7 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 <!--/radix_placeholder_distill-->
+  <script src="../../site_libs/header-attrs-2.11/header-attrs.js"></script>
   <script src="../../site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
   <script src="../../site_libs/popper-2.6.0/popper.min.js"></script>
   <link href="../../site_libs/tippy-6.2.7/tippy.css" rel="stylesheet" />
@@ -2143,7 +2165,7 @@ document.addEventListener('DOMContentLoaded', function() {
 </div>
 <p>In this tutorial we demonstrate how to use <a href="https://mlr3pipelines.mlr-org.com">mlr3pipelines</a> to handle multi-target regression by arranging regression models as a chain, i.e., creating a linear sequence of regression models.</p>
 <h1 id="regression-chains">Regression Chains</h1>
-<p>In a simple regression chain, regression models are arranged in a linear sequence. Here, the first model will use the input to predict a single output and the second model will use the input and the prediction output of the first model to make its own prediction and so on. For more details, see e.g. <span class="citation" data-cites="spyromitros2016">Spyromitros-Xioufis et al. (<a href="#ref-spyromitros2016" role="doc-biblioref">2016</a>)</span>.</p>
+<p>In a simple regression chain, regression models are arranged in a linear sequence. Here, the first model will use the input to predict a single output and the second model will use the input and the prediction output of the first model to make its own prediction and so on. For more details, see e.g. <span class="citation" data-cites="spyromitros2016"><a href="#ref-spyromitros2016" role="doc-biblioref">Spyromitros-Xioufis et al.</a> (<a href="#ref-spyromitros2016" role="doc-biblioref">2016</a>)</span>.</p>
 <h1 id="before-you-start">Before you start</h1>
 <p>The following sections describe an approach towards working with <a href="https://mlr3.mlr-org.com/reference/Task.html"><code>tasks</code></a> that have multiple targets. E.g., in the example below, we have three target variables <span class="math inline">\(y_{1}\)</span> to <span class="math inline">\(y_{3}\)</span>. This type of <a href="https://mlr3.mlr-org.com/reference/Task.html"><code>Task</code></a> can be created via the <a href="https://github.com/mlr-org/mlr3multioutput/">mlr3multioutput</a> package (currently under development) in the future. <code>mlr3multioutput</code> will also offer simple chaining approaches as pre-built pipelines (so called <a href="https://mlr3pipelines.mlr-org.com/reference/ppl.html"><code>ppl</code></a>s). The current goal of this post is to show how such modeling steps can be written as a relatively small amount of pipeline steps and how such steps can be put together. Writing pipelines with such steps allows for great flexibility in modeling more complicated scenarios such as the ones described below.</p>
 <h1 id="prerequisites">Prerequisites</h1>
@@ -2351,13 +2373,16 @@ $y1_learner$param_vals
 named list()
 
 $y1_learner$task_hash
-[1] &quot;05676d8fc6c820e6&quot;
+[1] &quot;13a7e0fadbb6a33a&quot;
 
 $y1_learner$data_prototype
 Empty data.table (0 rows and 3 cols): y1,x1,x2
 
+$y1_learner$task_prototype
+Empty data.table (0 rows and 3 cols): y1,x1,x2
+
 $y1_learner$mlr3_version
-[1] &#39;0.13.0.9000&#39;
+[1] &#39;0.13.2&#39;
 
 $y1_learner$train_task
 &lt;TaskRegr:multiregression&gt; (100 x 3)
@@ -2477,13 +2502,16 @@ $y2_learner$param_vals
 named list()
 
 $y2_learner$task_hash
-[1] &quot;d3d7ec59c525ad08&quot;
+[1] &quot;1b0d9fcd76a3420d&quot;
 
 $y2_learner$data_prototype
 Empty data.table (0 rows and 4 cols): y2,y1_learner.response,x1,x2
 
+$y2_learner$task_prototype
+Empty data.table (0 rows and 4 cols): y2,y1_learner.response,x1,x2
+
 $y2_learner$mlr3_version
-[1] &#39;0.13.0.9000&#39;
+[1] &#39;0.13.2&#39;
 
 $y2_learner$train_task
 &lt;TaskRegr:multiregression&gt; (100 x 4)
@@ -2554,19 +2582,22 @@ $y3_learner$log
 Empty data.table (0 rows and 3 cols): stage,class,msg
 
 $y3_learner$train_time
-[1] 0.01
+[1] 0.009
 
 $y3_learner$param_vals
 named list()
 
 $y3_learner$task_hash
-[1] &quot;e48e36feb4ec9d66&quot;
+[1] &quot;24dbd64658d33d6d&quot;
 
 $y3_learner$data_prototype
 Empty data.table (0 rows and 5 cols): y3,y2_learner.response,y1_learner.response,x1,x2
 
+$y3_learner$task_prototype
+Empty data.table (0 rows and 5 cols): y3,y2_learner.response,y1_learner.response,x1,x2
+
 $y3_learner$mlr3_version
-[1] &#39;0.13.0.9000&#39;
+[1] &#39;0.13.2&#39;
 
 $y3_learner$train_task
 &lt;TaskRegr:multiregression&gt; (100 x 5)
@@ -2617,9 +2648,9 @@ $y3_learner$train_task
 </div>
 <p>Note that we have to initialize the <a href="https://mlr3.mlr-org.com/reference/Task.html"><code>Task</code></a> with <span class="math inline">\(y_{1}\)</span> as the target but the pipeline will automatically predict <span class="math inline">\(y_{3}\)</span> in the final step as our final target, which was our ultimate goal here.</p>
 <div class="sourceCode" id="cb12"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
-<div id="refs" class="references" role="doc-bibliography">
-<div id="ref-spyromitros2016">
-<p>Spyromitros-Xioufis, Eleftherios, Grigorios Tsoumakas, William Groves, and Ioannis Vlahavas. 2016. “Multi-Target Regression via Input Space Expansion: Treating Targets as Inputs.” <em>Machine Learning</em> 104 (1): 55–98. <a href="https://doi.org/10.1007/s10994-016-5546-z">https://doi.org/10.1007/s10994-016-5546-z</a>.</p>
+<div id="refs" class="references csl-bib-body hanging-indent" role="doc-bibliography">
+<div id="ref-spyromitros2016" class="csl-entry" role="doc-biblioentry">
+Spyromitros-Xioufis, Eleftherios, Grigorios Tsoumakas, William Groves, and Ioannis Vlahavas. 2016. <span>“Multi-Target Regression via Input Space Expansion: Treating Targets as Inputs.”</span> <em>Machine Learning</em> 104 (1): 55–98. <a href="https://doi.org/10.1007/s10994-016-5546-z">https://doi.org/10.1007/s10994-016-5546-z</a>.
 </div>
 </div>
 <!--radix_placeholder_article_footer-->

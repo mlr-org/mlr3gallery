@@ -20,19 +20,19 @@
 
 <style type="text/css">code{white-space: pre;}</style>
 <style type="text/css" data-origin="pandoc">
-code.sourceCode > span { display: inline-block; line-height: 1.25; }
-code.sourceCode > span { color: inherit; text-decoration: inherit; }
-code.sourceCode > span:empty { height: 1.2em; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
-code.sourceCode { white-space: pre; position: relative; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
 div.sourceCode { margin: 1em 0; }
 pre.sourceCode { margin: 0; }
 @media screen {
 div.sourceCode { overflow: auto; }
 }
 @media print {
-code.sourceCode { white-space: pre-wrap; }
-code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
   { counter-reset: source-line 0; }
@@ -52,7 +52,7 @@ pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-le
 div.sourceCode
   {   }
 @media screen {
-code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 code span.al { color: #ad0000; } /* Alert */
 code span.an { color: #5e5e5e; } /* Annotation */
@@ -2060,6 +2060,7 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 <!--/radix_placeholder_distill-->
+  <script src="../../site_libs/header-attrs-2.11/header-attrs.js"></script>
   <script src="../../site_libs/kePrint-0.0.1/kePrint.js"></script>
   <link href="../../site_libs/lightable-0.0.1/lightable.css" rel="stylesheet" />
   <script src="../../site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
@@ -2553,8 +2554,7 @@ NA
 <span class='fu'>skimr</span><span class='fu'>::</span><span class='fu'><a href='https://docs.ropensci.org/skimr/reference/skim.html'>skim</a></span><span class='op'>(</span><span class='va'>moneyball</span><span class='op'>)</span>
 </code></pre>
 </div>
-<table style='width: auto;'
-        class='table table-condensed'>
+<table style="width: auto;" class="table table-condensed">
 <caption>
 <span id="tab:2020-05-04-moneyball-007">Table 1: </span>Data summary
 </caption>
@@ -4090,7 +4090,7 @@ dens.logloss
 dens
 </td>
 <td style="text-align:left;">
-mlr3
+mlr3 , mlr3proba
 </td>
 <td style="text-align:left;">
 pdf
@@ -4490,7 +4490,7 @@ surv.brier
 surv
 </td>
 <td style="text-align:left;">
-mlr3
+mlr3 , mlr3proba
 </td>
 <td style="text-align:left;">
 distr
@@ -4506,7 +4506,7 @@ surv.calib_alpha
 surv
 </td>
 <td style="text-align:left;">
-mlr3
+mlr3 , mlr3proba
 </td>
 <td style="text-align:left;">
 distr
@@ -4522,7 +4522,7 @@ surv.calib_beta
 surv
 </td>
 <td style="text-align:left;">
-mlr3
+mlr3 , mlr3proba
 </td>
 <td style="text-align:left;">
 lp
@@ -4538,7 +4538,7 @@ surv.chambless_auc
 surv
 </td>
 <td style="text-align:left;">
-mlr3 , survAUC
+mlr3 , mlr3proba, survAUC
 </td>
 <td style="text-align:left;">
 lp
@@ -4554,7 +4554,7 @@ surv.cindex
 surv
 </td>
 <td style="text-align:left;">
-mlr3
+mlr3 , mlr3proba
 </td>
 <td style="text-align:left;">
 crank
@@ -4570,7 +4570,7 @@ surv.dcalib
 surv
 </td>
 <td style="text-align:left;">
-mlr3
+mlr3 , mlr3proba
 </td>
 <td style="text-align:left;">
 distr
@@ -4586,7 +4586,7 @@ surv.graf
 surv
 </td>
 <td style="text-align:left;">
-mlr3
+mlr3 , mlr3proba
 </td>
 <td style="text-align:left;">
 distr
@@ -4602,7 +4602,7 @@ surv.hung_auc
 surv
 </td>
 <td style="text-align:left;">
-mlr3 , survAUC
+mlr3 , mlr3proba, survAUC
 </td>
 <td style="text-align:left;">
 lp
@@ -4618,7 +4618,7 @@ surv.intlogloss
 surv
 </td>
 <td style="text-align:left;">
-mlr3 , distr6
+mlr3 , mlr3proba, distr6
 </td>
 <td style="text-align:left;">
 distr
@@ -4634,7 +4634,7 @@ surv.logloss
 surv
 </td>
 <td style="text-align:left;">
-mlr3 , distr6
+mlr3 , mlr3proba, distr6
 </td>
 <td style="text-align:left;">
 distr
@@ -4650,7 +4650,7 @@ surv.mae
 surv
 </td>
 <td style="text-align:left;">
-mlr3
+mlr3 , mlr3proba
 </td>
 <td style="text-align:left;">
 response
@@ -4666,7 +4666,7 @@ surv.mse
 surv
 </td>
 <td style="text-align:left;">
-mlr3
+mlr3 , mlr3proba
 </td>
 <td style="text-align:left;">
 response
@@ -4682,7 +4682,7 @@ surv.nagelk_r2
 surv
 </td>
 <td style="text-align:left;">
-mlr3 , survAUC
+mlr3 , mlr3proba, survAUC
 </td>
 <td style="text-align:left;">
 lp
@@ -4698,7 +4698,7 @@ surv.oquigley_r2
 surv
 </td>
 <td style="text-align:left;">
-mlr3 , survAUC
+mlr3 , mlr3proba, survAUC
 </td>
 <td style="text-align:left;">
 lp
@@ -4714,7 +4714,7 @@ surv.rmse
 surv
 </td>
 <td style="text-align:left;">
-mlr3
+mlr3 , mlr3proba
 </td>
 <td style="text-align:left;">
 response
@@ -4730,7 +4730,7 @@ surv.schmid
 surv
 </td>
 <td style="text-align:left;">
-mlr3 , distr6
+mlr3 , mlr3proba, distr6
 </td>
 <td style="text-align:left;">
 distr
@@ -4746,7 +4746,7 @@ surv.song_auc
 surv
 </td>
 <td style="text-align:left;">
-mlr3 , survAUC
+mlr3 , mlr3proba, survAUC
 </td>
 <td style="text-align:left;">
 lp
@@ -4762,7 +4762,7 @@ surv.song_tnr
 surv
 </td>
 <td style="text-align:left;">
-mlr3 , survAUC
+mlr3 , mlr3proba, survAUC
 </td>
 <td style="text-align:left;">
 lp
@@ -4778,7 +4778,7 @@ surv.song_tpr
 surv
 </td>
 <td style="text-align:left;">
-mlr3 , survAUC
+mlr3 , mlr3proba, survAUC
 </td>
 <td style="text-align:left;">
 lp
@@ -4794,7 +4794,7 @@ surv.uno_auc
 surv
 </td>
 <td style="text-align:left;">
-mlr3 , survAUC
+mlr3 , mlr3proba, survAUC
 </td>
 <td style="text-align:left;">
 lp
@@ -4810,7 +4810,7 @@ surv.uno_tnr
 surv
 </td>
 <td style="text-align:left;">
-mlr3 , survAUC
+mlr3 , mlr3proba, survAUC
 </td>
 <td style="text-align:left;">
 lp
@@ -4826,7 +4826,7 @@ surv.uno_tpr
 surv
 </td>
 <td style="text-align:left;">
-mlr3 , survAUC
+mlr3 , mlr3proba, survAUC
 </td>
 <td style="text-align:left;">
 lp
@@ -4842,7 +4842,7 @@ surv.xu_r2
 surv
 </td>
 <td style="text-align:left;">
-mlr3 , survAUC
+mlr3 , mlr3proba, survAUC
 </td>
 <td style="text-align:left;">
 lp

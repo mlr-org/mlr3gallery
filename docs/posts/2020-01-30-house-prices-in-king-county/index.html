@@ -20,19 +20,19 @@
 
 <style type="text/css">code{white-space: pre;}</style>
 <style type="text/css" data-origin="pandoc">
-code.sourceCode > span { display: inline-block; line-height: 1.25; }
-code.sourceCode > span { color: inherit; text-decoration: inherit; }
-code.sourceCode > span:empty { height: 1.2em; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
-code.sourceCode { white-space: pre; position: relative; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
 div.sourceCode { margin: 1em 0; }
 pre.sourceCode { margin: 0; }
 @media screen {
 div.sourceCode { overflow: auto; }
 }
 @media print {
-code.sourceCode { white-space: pre-wrap; }
-code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
   { counter-reset: source-line 0; }
@@ -52,7 +52,7 @@ pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-le
 div.sourceCode
   {   }
 @media screen {
-code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 code span.al { color: #ad0000; } /* Alert */
 code span.an { color: #5e5e5e; } /* Annotation */
@@ -2060,6 +2060,7 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 <!--/radix_placeholder_distill-->
+  <script src="../../site_libs/header-attrs-2.11/header-attrs.js"></script>
   <script src="../../site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
   <script src="../../site_libs/popper-2.6.0/popper.min.js"></script>
   <link href="../../site_libs/tippy-6.2.7/tippy.css" rel="stylesheet" />
@@ -2135,7 +2136,8 @@ document.addEventListener('DOMContentLoaded', function() {
 <nav class="l-text toc figcaption" id="TOC">
 <h3>Contents</h3>
 <ul>
-<li><a href="#use-case-regr-houses">House Price Prediction in King County</a><ul>
+<li><a href="#use-case-regr-houses">House Price Prediction in King County</a>
+<ul>
 <li><a href="#exploratory-data-analysis">Exploratory Data Analysis</a></li>
 <li><a href="#splitting-into-train-and-test-data">Splitting into train and test data</a></li>
 <li><a href="#a-first-model-decision-tree">A first model: Decision Tree</a></li>
@@ -2505,18 +2507,18 @@ document.addEventListener('DOMContentLoaded', function() {
 </code></pre>
 </div>
 <pre><code>             task    task_id         learner         learner_id         resampling resampling_id iteration
-1: &lt;TaskRegr[44]&gt; kc_housing &lt;AutoTuner[39]&gt; regr.xgboost.tuned &lt;ResamplingCV[19]&gt;            cv         1
-2: &lt;TaskRegr[44]&gt; kc_housing &lt;AutoTuner[39]&gt; regr.xgboost.tuned &lt;ResamplingCV[19]&gt;            cv         2
-3: &lt;TaskRegr[44]&gt; kc_housing &lt;AutoTuner[39]&gt; regr.xgboost.tuned &lt;ResamplingCV[19]&gt;            cv         3
+1: &lt;TaskRegr[46]&gt; kc_housing &lt;AutoTuner[41]&gt; regr.xgboost.tuned &lt;ResamplingCV[19]&gt;            cv         1
+2: &lt;TaskRegr[46]&gt; kc_housing &lt;AutoTuner[41]&gt; regr.xgboost.tuned &lt;ResamplingCV[19]&gt;            cv         2
+3: &lt;TaskRegr[46]&gt; kc_housing &lt;AutoTuner[41]&gt; regr.xgboost.tuned &lt;ResamplingCV[19]&gt;            cv         3
              prediction regr.rmse
-1: &lt;PredictionRegr[19]&gt;  156.5436
-2: &lt;PredictionRegr[19]&gt;  144.0214
-3: &lt;PredictionRegr[19]&gt;  141.6017</code></pre>
+1: &lt;PredictionRegr[19]&gt;  147.0554
+2: &lt;PredictionRegr[19]&gt;  136.4282
+3: &lt;PredictionRegr[19]&gt;  132.4484</code></pre>
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/sprintf.html'>sprintf</a></span><span class='op'>(</span><span class='st'>"RMSE of the tuned xgboost: %s"</span>, <span class='fu'><a href='https://rdrr.io/r/base/Round.html'>round</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/MathFun.html'>sqrt</a></span><span class='op'>(</span><span class='va'>res</span><span class='op'>$</span><span class='fu'>aggregate</span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span>, <span class='fl'>2</span><span class='op'>)</span><span class='op'>)</span>
 </code></pre>
 </div>
-<pre><code>[1] &quot;RMSE of the tuned xgboost: 147.53&quot;</code></pre>
+<pre><code>[1] &quot;RMSE of the tuned xgboost: 138.78&quot;</code></pre>
 </div>
 <p>We can obtain the resulting parameters in the respective splits by accessing the <a href="https://mlr3.mlr-org.com/reference/ResampleResult.html"><code>ResampleResult</code></a>.</p>
 <div class="layout-chunk" data-layout="l-body">
@@ -2525,13 +2527,13 @@ document.addEventListener('DOMContentLoaded', function() {
 </code></pre>
 </div>
 <pre><code>                  [,1]      [,2]      [,3]     
-nrounds           22        20        23       
+nrounds           25        23        24       
 verbose           0         0         0        
-eta               0.3057334 0.2373166 0.2292658
-min_child_weight  8.992923  7.96808   13.07929 
-subsample         0.7879531 0.7811206 0.7632804
-colsample_bytree  0.9095138 0.9072387 0.9954281
-colsample_bylevel 0.5102104 0.567617  0.6449718</code></pre>
+eta               0.220869  0.3809271 0.2115116
+min_child_weight  1.885109  7.472919  1.910491 
+subsample         0.7542127 0.7884631 0.7000357
+colsample_bytree  0.9032271 0.9675298 0.9120812
+colsample_bylevel 0.5259713 0.6817893 0.630818 </code></pre>
 </div>
 <p><strong>NOTE:</strong> To keep runtime low, we only tune parts of the hyperparameter space of <a href="https://cran.r-project.org/package=xgboost">xgboost</a> in this example. Additionally, we only allow for <span class="math inline">\(10\)</span> random search iterations, which is usually too little for real-world applications. Nonetheless, we are able to obtain an improved performance when comparing to the <a href="https://cran.r-project.org/package=ranger">ranger</a> model.</p>
 <p>In order to further improve our results we have several options:</p>
@@ -2577,18 +2579,18 @@ colsample_bylevel 0.5102104 0.567617  0.6449718</code></pre>
 </code></pre>
 </div>
 <pre><code>             task    task_id            learner               learner_id         resampling resampling_id iteration
-1: &lt;TaskRegr[44]&gt; kc_housing &lt;GraphLearner[34]&gt; encodeimpact.regr.ranger &lt;ResamplingCV[19]&gt;            cv         1
-2: &lt;TaskRegr[44]&gt; kc_housing &lt;GraphLearner[34]&gt; encodeimpact.regr.ranger &lt;ResamplingCV[19]&gt;            cv         2
-3: &lt;TaskRegr[44]&gt; kc_housing &lt;GraphLearner[34]&gt; encodeimpact.regr.ranger &lt;ResamplingCV[19]&gt;            cv         3
+1: &lt;TaskRegr[46]&gt; kc_housing &lt;GraphLearner[37]&gt; encodeimpact.regr.ranger &lt;ResamplingCV[19]&gt;            cv         1
+2: &lt;TaskRegr[46]&gt; kc_housing &lt;GraphLearner[37]&gt; encodeimpact.regr.ranger &lt;ResamplingCV[19]&gt;            cv         2
+3: &lt;TaskRegr[46]&gt; kc_housing &lt;GraphLearner[37]&gt; encodeimpact.regr.ranger &lt;ResamplingCV[19]&gt;            cv         3
              prediction regr.rmse
-1: &lt;PredictionRegr[19]&gt;  125.4431
-2: &lt;PredictionRegr[19]&gt;  122.4995
-3: &lt;PredictionRegr[19]&gt;  152.0627</code></pre>
+1: &lt;PredictionRegr[19]&gt;  119.4389
+2: &lt;PredictionRegr[19]&gt;  146.3303
+3: &lt;PredictionRegr[19]&gt;  125.4191</code></pre>
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/sprintf.html'>sprintf</a></span><span class='op'>(</span><span class='st'>"RMSE of ranger with med_price: %s"</span>, <span class='fu'><a href='https://rdrr.io/r/base/Round.html'>round</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/MathFun.html'>sqrt</a></span><span class='op'>(</span><span class='va'>res</span><span class='op'>$</span><span class='fu'>aggregate</span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span>, <span class='fl'>2</span><span class='op'>)</span><span class='op'>)</span>
 </code></pre>
 </div>
-<pre><code>[1] &quot;RMSE of ranger with med_price: 134&quot;</code></pre>
+<pre><code>[1] &quot;RMSE of ranger with med_price: 130.9&quot;</code></pre>
 </div>
 <h3 id="advanced-obtaining-a-sparser-model">Advanced: Obtaining a sparser model</h3>
 <p>In many cases, we might want to have a sparse model. For this purpose we can use a <a href="https://mlr3filters.mlr-org.com/reference/Filter.html"><code>mlr3filters::Filter</code></a> implemented in <a href="https://mlr3filters.mlr-org.com">mlr3filters</a>. This can prevent our learner from overfitting make it easier for humans to interpret models as fewer variables influence the resulting prediction.</p>
@@ -2620,18 +2622,18 @@ colsample_bylevel 0.5102104 0.567617  0.6449718</code></pre>
 </code></pre>
 </div>
 <pre><code>             task    task_id            learner       learner_id         resampling resampling_id iteration
-1: &lt;TaskRegr[44]&gt; kc_housing &lt;GraphLearner[34]&gt; mrmr.regr.ranger &lt;ResamplingCV[19]&gt;            cv         1
-2: &lt;TaskRegr[44]&gt; kc_housing &lt;GraphLearner[34]&gt; mrmr.regr.ranger &lt;ResamplingCV[19]&gt;            cv         2
-3: &lt;TaskRegr[44]&gt; kc_housing &lt;GraphLearner[34]&gt; mrmr.regr.ranger &lt;ResamplingCV[19]&gt;            cv         3
+1: &lt;TaskRegr[46]&gt; kc_housing &lt;GraphLearner[37]&gt; mrmr.regr.ranger &lt;ResamplingCV[19]&gt;            cv         1
+2: &lt;TaskRegr[46]&gt; kc_housing &lt;GraphLearner[37]&gt; mrmr.regr.ranger &lt;ResamplingCV[19]&gt;            cv         2
+3: &lt;TaskRegr[46]&gt; kc_housing &lt;GraphLearner[37]&gt; mrmr.regr.ranger &lt;ResamplingCV[19]&gt;            cv         3
              prediction regr.rmse
-1: &lt;PredictionRegr[19]&gt;  148.0961
-2: &lt;PredictionRegr[19]&gt;  191.3707
-3: &lt;PredictionRegr[19]&gt;  144.0231</code></pre>
+1: &lt;PredictionRegr[19]&gt;  152.6046
+2: &lt;PredictionRegr[19]&gt;  156.7964
+3: &lt;PredictionRegr[19]&gt;  149.0130</code></pre>
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/sprintf.html'>sprintf</a></span><span class='op'>(</span><span class='st'>"RMSE of ranger with filtering: %s"</span>, <span class='fu'><a href='https://rdrr.io/r/base/Round.html'>round</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/MathFun.html'>sqrt</a></span><span class='op'>(</span><span class='va'>res</span><span class='op'>$</span><span class='fu'>aggregate</span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span>, <span class='fl'>2</span><span class='op'>)</span><span class='op'>)</span>
 </code></pre>
 </div>
-<pre><code>[1] &quot;RMSE of ranger with filtering: 162.58&quot;</code></pre>
+<pre><code>[1] &quot;RMSE of ranger with filtering: 152.84&quot;</code></pre>
 </div>
 <h2 id="summary">Summary:</h2>
 <p>We have seen different ways to improve models with respect to our criteria by:</p>
@@ -2662,7 +2664,7 @@ colsample_bylevel 0.5102104 0.567617  0.6449718</code></pre>
 </code></pre>
 </div>
 <pre><code>regr.rmse 
- 139.3358 </code></pre>
+ 144.9944 </code></pre>
 </div>
 <div class="sourceCode" id="cb15"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
 <!--radix_placeholder_article_footer-->

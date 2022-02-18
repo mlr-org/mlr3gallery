@@ -64,7 +64,7 @@ data("titanic", package = "mlr3data")
 
 # setting up the task
 task = as_task_classif(titanic, target = "survived", positive = "yes")
-task$set_row_roles(892:1309, "validation")
+task$set_row_roles(892:1309, "holdout")
 task$select(cols = setdiff(task$feature_names, c("cabin", "name", "ticket")))
 
 # setting up the learner

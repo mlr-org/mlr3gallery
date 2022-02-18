@@ -20,19 +20,19 @@
 
 <style type="text/css">code{white-space: pre;}</style>
 <style type="text/css" data-origin="pandoc">
-code.sourceCode > span { display: inline-block; line-height: 1.25; }
-code.sourceCode > span { color: inherit; text-decoration: inherit; }
-code.sourceCode > span:empty { height: 1.2em; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
-code.sourceCode { white-space: pre; position: relative; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
 div.sourceCode { margin: 1em 0; }
 pre.sourceCode { margin: 0; }
 @media screen {
 div.sourceCode { overflow: auto; }
 }
 @media print {
-code.sourceCode { white-space: pre-wrap; }
-code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
   { counter-reset: source-line 0; }
@@ -52,7 +52,7 @@ pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-le
 div.sourceCode
   {   }
 @media screen {
-code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 code span.al { color: #ad0000; } /* Alert */
 code span.an { color: #5e5e5e; } /* Annotation */
@@ -85,6 +85,27 @@ code span.vs { color: #20794d; } /* VerbatimString */
 code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 </style>
 
+<style>
+  div.csl-bib-body { }
+  div.csl-entry {
+    clear: both;
+    }
+  .hanging div.csl-entry {
+    margin-left:2em;
+    text-indent:-2em;
+  }
+  div.csl-left-margin {
+    min-width:2em;
+    float:left;
+  }
+  div.csl-right-inline {
+    margin-left:2em;
+    padding-left:1em;
+  }
+  div.csl-indent {
+    margin-left: 2em;
+  }
+</style>
 
   <!--radix_placeholder_meta_tags-->
 <title>mlr3gallery: Liver Patient Classification Based on Diagnostic Measures</title>
@@ -135,9 +156,9 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 <!--/radix_placeholder_meta_tags-->
   
   <meta name="citation_reference" content="citation_title=UCI machine learning repository;citation_publisher=University of California, Irvine, School of Information; Computer Sciences"/>
-  <meta name="citation_reference" content="citation_title=&lt;span class=&quot;nocase&quot;&gt;A review on laboratory liver function tests&lt;/span&gt;;citation_publication_date=2009;citation_volume=3;citation_issn=1937-8688;citation_author=Shivaraj Gowda;citation_author=Prakash B Desai;citation_author=Vinayak V Hull;citation_author=Avinash A K Math;citation_author=Sonal N Vernekar;citation_author=Shruthi S Kulkarni"/>
-  <meta name="citation_reference" content="citation_title=&lt;span class=&quot;nocase&quot;&gt;Causes and evaluation of mildly elevated liver transaminase levels&lt;/span&gt;;citation_publication_date=2011;citation_volume=84;citation_issn=1532-0650;citation_author=Robert C Oh;citation_author=Thomas R Hustead"/>
-  <meta name="citation_reference" content="citation_title=&lt;span class=&quot;nocase&quot;&gt;New Insights About Albumin and Liver Disease&lt;/span&gt;;citation_publication_date=2018;citation_volume=17;citation_doi=10.5604/01.3001.0012.0916;citation_issn=1665-2681;citation_author=Joana R. Carvalho;citation_author=Mariana Verdelho Machado"/>
+  <meta name="citation_reference" content="citation_title=A review on laboratory liver function tests;citation_publication_date=2009;citation_volume=3;citation_issn=1937-8688;citation_author=Shivaraj Gowda;citation_author=Prakash B Desai;citation_author=Vinayak V Hull;citation_author=Avinash A K Math;citation_author=Sonal N Vernekar;citation_author=Shruthi S Kulkarni"/>
+  <meta name="citation_reference" content="citation_title=Causes and evaluation of mildly elevated liver transaminase levels;citation_publication_date=2011;citation_volume=84;citation_issn=1532-0650;citation_author=Robert C Oh;citation_author=Thomas R Hustead"/>
+  <meta name="citation_reference" content="citation_title=New Insights About Albumin and Liver Disease;citation_publication_date=2018;citation_volume=17;citation_doi=10.5604/01.3001.0012.0916;citation_issn=1665-2681;citation_author=Joana R. Carvalho;citation_author=Mariana Verdelho Machado"/>
   <meta name="citation_reference" content="citation_title=Total Protein, Albumin-Globulin (A/G) Ratio"/>
   <!--radix_placeholder_rmarkdown_metadata-->
 
@@ -2074,6 +2095,7 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 <!--/radix_placeholder_distill-->
+  <script src="../../site_libs/header-attrs-2.11/header-attrs.js"></script>
   <script src="../../site_libs/kePrint-0.0.1/kePrint.js"></script>
   <link href="../../site_libs/lightable-0.0.1/lightable.css" rel="stylesheet" />
   <script src="../../site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
@@ -2154,11 +2176,13 @@ document.addEventListener('DOMContentLoaded', function() {
 <nav class="l-text toc figcaption" id="TOC">
 <h3>Contents</h3>
 <ul>
-<li><a href="#preamble">Preamble</a><ul>
+<li><a href="#preamble">Preamble</a>
+<ul>
 <li><a href="#prerequisites">Prerequisites</a></li>
 </ul></li>
 <li><a href="#indian-liver-patient-dataset">Indian Liver Patient Dataset</a></li>
-<li><a href="#data-exporation">Data exporation</a><ul>
+<li><a href="#data-exporation">Data exporation</a>
+<ul>
 <li><a href="#univariate-distribution">Univariate distribution</a></li>
 <li><a href="#features-by-class">Features by class</a></li>
 <li><a href="#correlation">Correlation</a></li>
@@ -2196,7 +2220,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p>Note, that expensive calculations are pre-saved in rds files in this tutorial to save computational time.</p>
 <p>Machine learning (ML), a branch of both computer science and statistics, in conjunction with new computing technologies has been transforming research and industries across the board over the past decade. A prime example for this is the healthcare industry, where applications of ML, as well as artificial intelligence in general, have become more and more popular in recent years. One very frequently researched and applied use of ML in the medical field is the area of disease identification and diagnosis. ML technologies have shown potential in detecting anomalies and diseases through pattern recognition, even though an entirely digital diagnosis by a computer is probably still something for the far future. However, suitable and reliable models estimating the risk of diseases could help real doctors make quicker and better decisions today already. In this use case we examined machine learning algorithms and learners for the specific application of liver disease detection. The task is therefore a binary classification task to predict whether a patient has liver disease or not based on some common diagnostic measurements. This report is organized as follows. Section 1 introduces the data and section 2 provides more in-depth data exploration. Section 3 presents learners and their hyperparameter tuning while section 4, dealing with model fitting and benchmarking, presents results and conclusions.</p>
 <h1 id="indian-liver-patient-dataset">Indian Liver Patient Dataset</h1>
-<p>The data set we used for our project is the “Indian Liver Patient Dataset” which was obtained from the <a href="https://mlr3data.mlr-org.com">mlr3data</a> package. It was donated by three professors from India in 2012 <span class="citation" data-cites="Dua2017">(“UCI Machine Learning Repository,” <a href="#ref-Dua2017" role="doc-biblioref">n.d.</a>)</span>.</p>
+<p>The data set we used for our project is the “Indian Liver Patient Dataset” which was obtained from the <a href="https://mlr3data.mlr-org.com">mlr3data</a> package. It was donated by three professors from India in 2012 <span class="citation" data-cites="Dua2017"><a href="#ref-Dua2017" role="doc-biblioref"><span>“<span>UCI</span> Machine Learning Repository”</span></a> (<a href="#ref-Dua2017" role="doc-biblioref">n.d.</a>)</span>.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='co'># Importing data</span>
@@ -2259,7 +2283,7 @@ document.addEventListener('DOMContentLoaded', function() {
 </tr>
 </tbody>
 </table>
-<p>As one can see, besides age and gender, the dataset contains eight additional numerical features. While the names and corresponding measurements look rather cryptic to the uninformed eye, they are all part of standard blood tests conducted to gather information about the state of a patient’s liver, so-called liver function tests. All of these measurements are frequently used markers for liver disease. For the first five, measuring the chemical compound bilirubin and the three enzymes alkaline phosphatase, alanine transaminase and aspartate transaminase, elevated levels indicate liver disease <span class="citation" data-cites="Gowda2009">Gowda et al. (<a href="#ref-Gowda2009" role="doc-biblioref">2009</a>)</span> <span class="citation" data-cites="Oh2011">Oh and Hustead (<a href="#ref-Oh2011" role="doc-biblioref">2011</a>)</span>. For the remaining three, which concern protein levels, lower-than-normal values suggest a liver problem <span class="citation" data-cites="Carvalho2018">Carvalho and Machado (<a href="#ref-Carvalho2018" role="doc-biblioref">2018</a>)</span> <span class="citation" data-cites="LabTests2019">(“Total Protein, Albumin-Globulin (A/G) Ratio,” <a href="#ref-LabTests2019" role="doc-biblioref">n.d.</a>)</span>. Lastly, one should note that some of the measurements are part of more than one variable. For example, the total serum bilirubin is simply the sum of both the direct and indirect bilirubin levels and the amount of albumin is used to calculate the values of the total serum protein as well as the albumin-to-globulin ratio. So, one might already suspect that some of the features are highly correlated to one another, but more on that kind of analysis in the following section.</p>
+<p>As one can see, besides age and gender, the dataset contains eight additional numerical features. While the names and corresponding measurements look rather cryptic to the uninformed eye, they are all part of standard blood tests conducted to gather information about the state of a patient’s liver, so-called liver function tests. All of these measurements are frequently used markers for liver disease. For the first five, measuring the chemical compound bilirubin and the three enzymes alkaline phosphatase, alanine transaminase and aspartate transaminase, elevated levels indicate liver disease <span class="citation" data-cites="Gowda2009"><a href="#ref-Gowda2009" role="doc-biblioref">Gowda et al.</a> (<a href="#ref-Gowda2009" role="doc-biblioref">2009</a>)</span> <span class="citation" data-cites="Oh2011"><a href="#ref-Oh2011" role="doc-biblioref">Oh and Hustead</a> (<a href="#ref-Oh2011" role="doc-biblioref">2011</a>)</span>. For the remaining three, which concern protein levels, lower-than-normal values suggest a liver problem <span class="citation" data-cites="Carvalho2018"><a href="#ref-Carvalho2018" role="doc-biblioref">Carvalho and Machado</a> (<a href="#ref-Carvalho2018" role="doc-biblioref">2018</a>)</span> <span class="citation" data-cites="LabTests2019"><a href="#ref-LabTests2019" role="doc-biblioref"><span>“<span>Total Protein, Albumin-Globulin (A/G) Ratio</span>”</span></a> (<a href="#ref-LabTests2019" role="doc-biblioref">n.d.</a>)</span>. Lastly, one should note that some of the measurements are part of more than one variable. For example, the total serum bilirubin is simply the sum of both the direct and indirect bilirubin levels and the amount of albumin is used to calculate the values of the total serum protein as well as the albumin-to-globulin ratio. So, one might already suspect that some of the features are highly correlated to one another, but more on that kind of analysis in the following section.</p>
 <h1 id="data-exporation">Data exporation</h1>
 <h2 id="univariate-distribution">Univariate distribution</h2>
 <p>Next, we looked into the univariate distribution of each of the variables. We began with the target and the only discrete feature, gender, which are both binary.</p>
@@ -2596,7 +2620,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <p><img src="2020-09-11-liver-patient-classification_files/figure-html5/2020-09-11-liver-patient-classification-024-1.png" width="1152" /></p>
 </div>
 <p>Random forest is the learner with the best AUC performance, both with and without oversampling. Whereas mean AUC is roughly between 0.65 and 0.75 for all learners, the individual components of AUC might differ substantially.</p>
-<p>As a first step towards “AUC decomposition”, we consider the ROC curve, which provides valuable graphical insights into performance - even more so since AUC is directly derived from it.</p>
+<p>As a first step towards “AUC decomposition,” we consider the ROC curve, which provides valuable graphical insights into performance - even more so since AUC is directly derived from it.</p>
 <div class="layout-chunk" data-layout="l-body">
 <p><img src="2020-09-11-liver-patient-classification_files/figure-html5/2020-09-11-liver-patient-classification-025-1.png" width="85%" style="display: block; margin: auto;" /></p>
 </div>
@@ -3000,21 +3024,21 @@ response   1   0
 <p>The final decision regarding which learner works best - and also whether oversampling should be used or not - strongly depends on the real world implications of sensitivity and specificity. One of the two might outweigh the other many times over in terms of practical importance. Think of the typical HIV rapid diagnostic test example, where high sensitivity at the cost of low specificity might cause an (unwarranted) shock but is otherwise not dangerous, whereas low sensitivity would be highly perilous. As is usually the case, no black and white “best model” exists here - recall that, even with oversampling, none of our models perform well on both sensitivity and specificity. In our case, we would need to ask ourselves: what would be the consequences of high specificity at the cost of low sensitivity, which implies telling many patients with a liver disease that they are healthy; versus what would be the consequences of high sensitivity at the cost of low specificity, which would mean telling many healthy patients they have a liver disease. In absence of further topic-specific information, we can only state the best-performing learners for the particular performance metric chosen. As mentioned above, random forest performs best based on AUC. Random forest is furthermore the learner with the highest sensitivity score (and the lowest FNR), while naive Bayes is the one with the best specificity (and the lowest FPR) These results - and the ranking of learners in general, independent of the performance metric - are not affected by oversampling.</p>
 <p>The analysis we conducted is, however, by no means exhaustive. On the feature level, while we focused almost exclusively on the machine learning and statistical analysis aspect during our analysis, one could also dig deeper into the actual topic (liver disease) and try to understand the variables as well as potential correlations and interactions more thoroughly. This might also mean to consider already thrown out variables again. Furthermore, feature engineering as well as data preprocessing, for instance using principal component analysis, could be applied to the dataset. Regarding hyperparameter tuning, different hyperparameters with larger hyperparameter spaces and numbers of evaluations could be considered. Furthermore, tuning could also be applied to some of those learners that we labeled as baseline learners, though to a lesser extent. Finally, we limited ourselves to those classifiers discussed in detail in the course. More classifiers exist, however; in particular, gradient boosting and support vector machines could additionally be applied to this task and potentially yield better results.</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
-<div id="refs" class="references" role="doc-bibliography">
-<div id="ref-Carvalho2018">
-<p>Carvalho, Joana R., and Mariana Verdelho Machado. 2018. “New Insights About Albumin and Liver Disease.” <em>Annals of Hepatology</em> 17 (4): 547–60. <a href="https://doi.org/10.5604/01.3001.0012.0916">https://doi.org/10.5604/01.3001.0012.0916</a>.</p>
+<div id="refs" class="references csl-bib-body hanging-indent" role="doc-bibliography">
+<div id="ref-Carvalho2018" class="csl-entry" role="doc-biblioentry">
+Carvalho, Joana R., and Mariana Verdelho Machado. 2018. <span>“<span class="nocase">New Insights About Albumin and Liver Disease</span>.”</span> <em>Annals of Hepatology</em> 17 (4): 547–60. <a href="https://doi.org/10.5604/01.3001.0012.0916">https://doi.org/10.5604/01.3001.0012.0916</a>.
 </div>
-<div id="ref-Gowda2009">
-<p>Gowda, Shivaraj, Prakash B Desai, Vinayak V Hull, Avinash A K Math, Sonal N Vernekar, and Shruthi S Kulkarni. 2009. “A review on laboratory liver function tests.” <em>The Pan African Medical Journal</em> 3: 17. <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2984286/">https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2984286/</a>.</p>
+<div id="ref-Gowda2009" class="csl-entry" role="doc-biblioentry">
+Gowda, Shivaraj, Prakash B Desai, Vinayak V Hull, Avinash A K Math, Sonal N Vernekar, and Shruthi S Kulkarni. 2009. <span>“<span class="nocase">A review on laboratory liver function tests</span>.”</span> <em>The Pan African Medical Journal</em> 3: 17. <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2984286/">https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2984286/</a>.
 </div>
-<div id="ref-Oh2011">
-<p>Oh, Robert C, and Thomas R Hustead. 2011. “Causes and evaluation of mildly elevated liver transaminase levels.” <em>American Family Physician</em> 84 (9): 1003–8. <a href="https://www.aafp.org/afp/2011/1101/p1003.html">https://www.aafp.org/afp/2011/1101/p1003.html</a>.</p>
+<div id="ref-Oh2011" class="csl-entry" role="doc-biblioentry">
+Oh, Robert C, and Thomas R Hustead. 2011. <span>“<span class="nocase">Causes and evaluation of mildly elevated liver transaminase levels</span>.”</span> <em>American Family Physician</em> 84: 1003–8. <a href="https://www.aafp.org/afp/2011/1101/p1003.html">https://www.aafp.org/afp/2011/1101/p1003.html</a>.
 </div>
-<div id="ref-LabTests2019">
-<p>“Total Protein, Albumin-Globulin (A/G) Ratio.” n.d. <a href="https://labtestsonline.org/tests/total-protein-albumin-globulin-ag-ratio">https://labtestsonline.org/tests/total-protein-albumin-globulin-ag-ratio</a>.</p>
+<div id="ref-LabTests2019" class="csl-entry" role="doc-biblioentry">
+<span>“<span>Total Protein, Albumin-Globulin (A/G) Ratio</span>.”</span> n.d. <a href="https://labtestsonline.org/tests/total-protein-albumin-globulin-ag-ratio">https://labtestsonline.org/tests/total-protein-albumin-globulin-ag-ratio</a>.
 </div>
-<div id="ref-Dua2017">
-<p>“UCI Machine Learning Repository.” n.d. University of California, Irvine, School of Information; Computer Sciences. <a href="http://archive.ics.uci.edu/ml">http://archive.ics.uci.edu/ml</a>.</p>
+<div id="ref-Dua2017" class="csl-entry" role="doc-biblioentry">
+<span>“<span>UCI</span> Machine Learning Repository.”</span> n.d. University of California, Irvine, School of Information; Computer Sciences. <a href="http://archive.ics.uci.edu/ml">http://archive.ics.uci.edu/ml</a>.
 </div>
 </div>
 <!--radix_placeholder_article_footer-->

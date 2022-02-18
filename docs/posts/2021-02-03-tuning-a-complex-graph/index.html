@@ -20,19 +20,19 @@
 
 <style type="text/css">code{white-space: pre;}</style>
 <style type="text/css" data-origin="pandoc">
-code.sourceCode > span { display: inline-block; line-height: 1.25; }
-code.sourceCode > span { color: inherit; text-decoration: inherit; }
-code.sourceCode > span:empty { height: 1.2em; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
-code.sourceCode { white-space: pre; position: relative; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
 div.sourceCode { margin: 1em 0; }
 pre.sourceCode { margin: 0; }
 @media screen {
 div.sourceCode { overflow: auto; }
 }
 @media print {
-code.sourceCode { white-space: pre-wrap; }
-code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
   { counter-reset: source-line 0; }
@@ -52,7 +52,7 @@ pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-le
 div.sourceCode
   {   }
 @media screen {
-code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 code span.al { color: #ad0000; } /* Alert */
 code span.an { color: #5e5e5e; } /* Annotation */
@@ -85,6 +85,27 @@ code span.vs { color: #20794d; } /* VerbatimString */
 code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 </style>
 
+<style>
+  div.csl-bib-body { }
+  div.csl-entry {
+    clear: both;
+    }
+  .hanging div.csl-entry {
+    margin-left:2em;
+    text-indent:-2em;
+  }
+  div.csl-left-margin {
+    min-width:2em;
+    float:left;
+  }
+  div.csl-right-inline {
+    margin-left:2em;
+    padding-left:1em;
+  }
+  div.csl-indent {
+    margin-left: 2em;
+  }
+</style>
 
   <!--radix_placeholder_meta_tags-->
 <title>mlr3gallery: Tuning a Complex Graph</title>
@@ -2062,6 +2083,7 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 <!--/radix_placeholder_distill-->
+  <script src="../../site_libs/header-attrs-2.11/header-attrs.js"></script>
   <script src="../../site_libs/kePrint-0.0.1/kePrint.js"></script>
   <link href="../../site_libs/lightable-0.0.1/lightable.css" rel="stylesheet" />
   <script src="../../site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
@@ -2201,7 +2223,7 @@ document.addEventListener('DOMContentLoaded', function() {
 </div>
 </div>
 <h2 id="workflow">Workflow</h2>
-<p>Our graph will start with log transforming the features, followed by scaling them. Then, either a <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_pca.html"><code>PCA</code></a> or <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_ica.html"><code>ICA</code></a> is applied to extract principal / independent components followed by fitting a <a href="https://mlr3learners.mlr-org.com/reference/mlr_learners_classif.lda.html"><code>LDA</code></a> or a <a href="https://mlr3learners.mlr-org.com/reference/mlr_learners_classif.ranger.html"><code>ranger random forest</code></a> is fitted without any preprocessing (the log transformation and scaling should most likely affect the <code>LDA</code> more than the <code>ranger random forest</code>). Regarding the <code>PCA</code> and <code>ICA</code>, both the number of principal / independent components are tuning parameters. Regarding the <code>LDA</code>, we can further choose different methods for estimating the mean and variance and regarding the <code>ranger</code>, we want to tune the <code>mtry</code> and <code>num.tree</code> parameters. Note that the <code>PCA-LDA</code> combination has already been successfully applied in different cancer diagnostic contexts when the feature space is of high dimensionality <span class="citation" data-cites="morais2018">(Morais and Lima <a href="#ref-morais2018" role="doc-biblioref">2018</a>)</span>.</p>
+<p>Our graph will start with log transforming the features, followed by scaling them. Then, either a <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_pca.html"><code>PCA</code></a> or <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_ica.html"><code>ICA</code></a> is applied to extract principal / independent components followed by fitting a <a href="https://mlr3learners.mlr-org.com/reference/mlr_learners_classif.lda.html"><code>LDA</code></a> or a <a href="https://mlr3learners.mlr-org.com/reference/mlr_learners_classif.ranger.html"><code>ranger random forest</code></a> is fitted without any preprocessing (the log transformation and scaling should most likely affect the <code>LDA</code> more than the <code>ranger random forest</code>). Regarding the <code>PCA</code> and <code>ICA</code>, both the number of principal / independent components are tuning parameters. Regarding the <code>LDA</code>, we can further choose different methods for estimating the mean and variance and regarding the <code>ranger</code>, we want to tune the <code>mtry</code> and <code>num.tree</code> parameters. Note that the <code>PCA-LDA</code> combination has already been successfully applied in different cancer diagnostic contexts when the feature space is of high dimensionality <span class="citation" data-cites="morais2018">(<a href="#ref-morais2018" role="doc-biblioref">Morais and Lima 2018</a>)</span>.</p>
 <p>To allow for switching between the <code>PCA</code> / <code>ICA</code>-<code>LDA</code> and <code>ranger</code> we can either use branching or proxy pipelines, i.e., <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_branch.html"><code>PipeOpBranch</code></a> and <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_unbranch.html"><code>PipeOpUnbranch</code></a> or <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_proxy.html"><code>PipeOpProxy</code></a>. We will first cover branching in detail and later show how the same can be done using <code>PipeOpProxy</code>.</p>
 <h2 id="baseline">Baseline</h2>
 <p>First, we have a look at the baseline <a href="https://mlr3.mlr-org.com/reference/mlr_measures_classif.acc.html"><code>classification accuracy</code></a> of the <code>LDA</code> and <code>ranger</code> on the training task:</p>
@@ -3058,9 +3080,6 @@ classif.ranger.mtry
 classif.ranger.num.trees
 </th>
 <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
-classif.acc
-</th>
-<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
 runtime_learners
 </th>
 <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
@@ -3068,6 +3087,9 @@ timestamp
 </th>
 <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
 batch_nr
+</th>
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+classif.acc
 </th>
 </tr>
 </thead>
@@ -3095,9 +3117,6 @@ NA
 NA
 </td>
 <td style="text-align:right;">
-0.2380952
-</td>
-<td style="text-align:right;">
 4.443
 </td>
 <td style="text-align:left;">
@@ -3105,6 +3124,9 @@ NA
 </td>
 <td style="text-align:right;">
 3
+</td>
+<td style="text-align:right;">
+0.2380952
 </td>
 </tr>
 <tr>
@@ -3128,9 +3150,6 @@ NA
 </td>
 <td style="text-align:right;">
 NA
-</td>
-<td style="text-align:right;">
-0.2380952
 </td>
 <td style="text-align:right;">
 219.277
@@ -3141,6 +3160,9 @@ NA
 <td style="text-align:right;">
 3
 </td>
+<td style="text-align:right;">
+0.2380952
+</td>
 </tr>
 <tr>
 <td style="text-align:left;">
@@ -3163,9 +3185,6 @@ NA
 </td>
 <td style="text-align:right;">
 NA
-</td>
-<td style="text-align:right;">
-0.2698413
 </td>
 <td style="text-align:right;">
 220.355
@@ -3176,6 +3195,9 @@ NA
 <td style="text-align:right;">
 3
 </td>
+<td style="text-align:right;">
+0.2698413
+</td>
 </tr>
 <tr>
 <td style="text-align:left;">
@@ -3198,9 +3220,6 @@ NA
 </td>
 <td style="text-align:right;">
 NA
-</td>
-<td style="text-align:right;">
-0.8730159
 </td>
 <td style="text-align:right;">
 8.301
@@ -3211,6 +3230,9 @@ NA
 <td style="text-align:right;">
 1
 </td>
+<td style="text-align:right;">
+0.8730159
+</td>
 </tr>
 <tr>
 <td style="text-align:left;">
@@ -3233,9 +3255,6 @@ NA
 </td>
 <td style="text-align:right;">
 NA
-</td>
-<td style="text-align:right;">
-0.8730159
 </td>
 <td style="text-align:right;">
 220.568
@@ -3246,6 +3265,9 @@ NA
 <td style="text-align:right;">
 2
 </td>
+<td style="text-align:right;">
+0.8730159
+</td>
 </tr>
 <tr>
 <td style="text-align:left;">
@@ -3270,9 +3292,6 @@ NA
 NA
 </td>
 <td style="text-align:right;">
-0.8730159
-</td>
-<td style="text-align:right;">
 217.173
 </td>
 <td style="text-align:left;">
@@ -3280,6 +3299,9 @@ NA
 </td>
 <td style="text-align:right;">
 2
+</td>
+<td style="text-align:right;">
+0.8730159
 </td>
 </tr>
 <tr>
@@ -3303,9 +3325,6 @@ NA
 </td>
 <td style="text-align:right;">
 NA
-</td>
-<td style="text-align:right;">
-0.9365079
 </td>
 <td style="text-align:right;">
 222.402
@@ -3316,6 +3335,9 @@ NA
 <td style="text-align:right;">
 3
 </td>
+<td style="text-align:right;">
+0.9365079
+</td>
 </tr>
 <tr>
 <td style="text-align:left;">
@@ -3340,9 +3362,6 @@ NA
 NA
 </td>
 <td style="text-align:right;">
-0.9365079
-</td>
-<td style="text-align:right;">
 222.528
 </td>
 <td style="text-align:left;">
@@ -3350,6 +3369,9 @@ NA
 </td>
 <td style="text-align:right;">
 3
+</td>
+<td style="text-align:right;">
+0.9365079
 </td>
 </tr>
 <tr>
@@ -3373,9 +3395,6 @@ NA
 </td>
 <td style="text-align:right;">
 NA
-</td>
-<td style="text-align:right;">
-0.9682540
 </td>
 <td style="text-align:right;">
 208.040
@@ -3386,6 +3405,9 @@ NA
 <td style="text-align:right;">
 1
 </td>
+<td style="text-align:right;">
+0.9682540
+</td>
 </tr>
 <tr>
 <td style="text-align:left;">
@@ -3410,9 +3432,6 @@ NA
 NA
 </td>
 <td style="text-align:right;">
-0.9682540
-</td>
-<td style="text-align:right;">
 3.685
 </td>
 <td style="text-align:left;">
@@ -3420,6 +3439,9 @@ NA
 </td>
 <td style="text-align:right;">
 2
+</td>
+<td style="text-align:right;">
+0.9682540
 </td>
 </tr>
 <tr>
@@ -3445,9 +3467,6 @@ NA
 NA
 </td>
 <td style="text-align:right;">
-0.9841270
-</td>
-<td style="text-align:right;">
 7.091
 </td>
 <td style="text-align:left;">
@@ -3455,6 +3474,9 @@ NA
 </td>
 <td style="text-align:right;">
 1
+</td>
+<td style="text-align:right;">
+0.9841270
 </td>
 </tr>
 <tr>
@@ -3480,9 +3502,6 @@ NA
 NA
 </td>
 <td style="text-align:right;">
-0.9841270
-</td>
-<td style="text-align:right;">
 217.277
 </td>
 <td style="text-align:left;">
@@ -3490,6 +3509,9 @@ NA
 </td>
 <td style="text-align:right;">
 2
+</td>
+<td style="text-align:right;">
+0.9841270
 </td>
 </tr>
 <tr>
@@ -3513,9 +3535,6 @@ NA
 </td>
 <td style="text-align:right;">
 500
-</td>
-<td style="text-align:right;">
-0.9841270
 </td>
 <td style="text-align:right;">
 7.548
@@ -3526,6 +3545,9 @@ NA
 <td style="text-align:right;">
 3
 </td>
+<td style="text-align:right;">
+0.9841270
+</td>
 </tr>
 <tr>
 <td style="text-align:left;">
@@ -3548,9 +3570,6 @@ NA
 </td>
 <td style="text-align:right;">
 500
-</td>
-<td style="text-align:right;">
-1.0000000
 </td>
 <td style="text-align:right;">
 7.063
@@ -3561,6 +3580,9 @@ NA
 <td style="text-align:right;">
 1
 </td>
+<td style="text-align:right;">
+1.0000000
+</td>
 </tr>
 <tr>
 <td style="text-align:left;">
@@ -3583,9 +3605,6 @@ NA
 </td>
 <td style="text-align:right;">
 1500
-</td>
-<td style="text-align:right;">
-1.0000000
 </td>
 <td style="text-align:right;">
 10.526
@@ -3596,6 +3615,9 @@ NA
 <td style="text-align:right;">
 1
 </td>
+<td style="text-align:right;">
+1.0000000
+</td>
 </tr>
 <tr>
 <td style="text-align:left;">
@@ -3618,9 +3640,6 @@ NA
 </td>
 <td style="text-align:right;">
 1000
-</td>
-<td style="text-align:right;">
-1.0000000
 </td>
 <td style="text-align:right;">
 11.615
@@ -3631,6 +3650,9 @@ NA
 <td style="text-align:right;">
 1
 </td>
+<td style="text-align:right;">
+1.0000000
+</td>
 </tr>
 <tr>
 <td style="text-align:left;">
@@ -3653,9 +3675,6 @@ NA
 </td>
 <td style="text-align:right;">
 1500
-</td>
-<td style="text-align:right;">
-1.0000000
 </td>
 <td style="text-align:right;">
 10.945
@@ -3666,6 +3685,9 @@ NA
 <td style="text-align:right;">
 1
 </td>
+<td style="text-align:right;">
+1.0000000
+</td>
 </tr>
 <tr>
 <td style="text-align:left;">
@@ -3688,9 +3710,6 @@ NA
 </td>
 <td style="text-align:right;">
 2000
-</td>
-<td style="text-align:right;">
-1.0000000
 </td>
 <td style="text-align:right;">
 12.719
@@ -3701,6 +3720,9 @@ NA
 <td style="text-align:right;">
 1
 </td>
+<td style="text-align:right;">
+1.0000000
+</td>
 </tr>
 <tr>
 <td style="text-align:left;">
@@ -3725,9 +3747,6 @@ NA
 1000
 </td>
 <td style="text-align:right;">
-1.0000000
-</td>
-<td style="text-align:right;">
 12.118
 </td>
 <td style="text-align:left;">
@@ -3735,6 +3754,9 @@ NA
 </td>
 <td style="text-align:right;">
 1
+</td>
+<td style="text-align:right;">
+1.0000000
 </td>
 </tr>
 <tr>
@@ -3760,9 +3782,6 @@ NA
 2000
 </td>
 <td style="text-align:right;">
-1.0000000
-</td>
-<td style="text-align:right;">
 18.799
 </td>
 <td style="text-align:left;">
@@ -3770,6 +3789,9 @@ NA
 </td>
 <td style="text-align:right;">
 1
+</td>
+<td style="text-align:right;">
+1.0000000
 </td>
 </tr>
 <tr>
@@ -3795,9 +3817,6 @@ NA
 2000
 </td>
 <td style="text-align:right;">
-1.0000000
-</td>
-<td style="text-align:right;">
 7.391
 </td>
 <td style="text-align:left;">
@@ -3805,6 +3824,9 @@ NA
 </td>
 <td style="text-align:right;">
 2
+</td>
+<td style="text-align:right;">
+1.0000000
 </td>
 </tr>
 <tr>
@@ -3830,9 +3852,6 @@ NA
 500
 </td>
 <td style="text-align:right;">
-1.0000000
-</td>
-<td style="text-align:right;">
 5.676
 </td>
 <td style="text-align:left;">
@@ -3840,6 +3859,9 @@ NA
 </td>
 <td style="text-align:right;">
 2
+</td>
+<td style="text-align:right;">
+1.0000000
 </td>
 </tr>
 <tr>
@@ -3865,9 +3887,6 @@ NA
 500
 </td>
 <td style="text-align:right;">
-1.0000000
-</td>
-<td style="text-align:right;">
 6.293
 </td>
 <td style="text-align:left;">
@@ -3875,6 +3894,9 @@ NA
 </td>
 <td style="text-align:right;">
 2
+</td>
+<td style="text-align:right;">
+1.0000000
 </td>
 </tr>
 <tr>
@@ -3900,9 +3922,6 @@ NA
 2000
 </td>
 <td style="text-align:right;">
-1.0000000
-</td>
-<td style="text-align:right;">
 13.095
 </td>
 <td style="text-align:left;">
@@ -3910,6 +3929,9 @@ NA
 </td>
 <td style="text-align:right;">
 2
+</td>
+<td style="text-align:right;">
+1.0000000
 </td>
 </tr>
 <tr>
@@ -3935,9 +3957,6 @@ NA
 1500
 </td>
 <td style="text-align:right;">
-1.0000000
-</td>
-<td style="text-align:right;">
 13.081
 </td>
 <td style="text-align:left;">
@@ -3945,6 +3964,9 @@ NA
 </td>
 <td style="text-align:right;">
 2
+</td>
+<td style="text-align:right;">
+1.0000000
 </td>
 </tr>
 <tr>
@@ -3970,9 +3992,6 @@ NA
 1000
 </td>
 <td style="text-align:right;">
-1.0000000
-</td>
-<td style="text-align:right;">
 6.328
 </td>
 <td style="text-align:left;">
@@ -3980,6 +3999,9 @@ NA
 </td>
 <td style="text-align:right;">
 3
+</td>
+<td style="text-align:right;">
+1.0000000
 </td>
 </tr>
 <tr>
@@ -4005,9 +4027,6 @@ NA
 1500
 </td>
 <td style="text-align:right;">
-1.0000000
-</td>
-<td style="text-align:right;">
 11.706
 </td>
 <td style="text-align:left;">
@@ -4015,6 +4034,9 @@ NA
 </td>
 <td style="text-align:right;">
 3
+</td>
+<td style="text-align:right;">
+1.0000000
 </td>
 </tr>
 <tr>
@@ -4040,9 +4062,6 @@ NA
 1000
 </td>
 <td style="text-align:right;">
-1.0000000
-</td>
-<td style="text-align:right;">
 10.622
 </td>
 <td style="text-align:left;">
@@ -4050,6 +4069,9 @@ NA
 </td>
 <td style="text-align:right;">
 3
+</td>
+<td style="text-align:right;">
+1.0000000
 </td>
 </tr>
 </tbody>
@@ -4195,9 +4217,9 @@ NULL</code></pre>
 </div>
 </div>
 <div class="sourceCode" id="cb7"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
-<div id="refs" class="references" role="doc-bibliography">
-<div id="ref-morais2018">
-<p>Morais, Camilo LM, and Kássio MG Lima. 2018. “Principal Component Analysis with Linear and Quadratic Discriminant Analysis for Identification of Cancer Samples Based on Mass Spectrometry.” <em>Journal of the Brazilian Chemical Society</em> 29 (3): 472–81. <a href="https://doi.org/10.21577/0103-5053.20170159">https://doi.org/10.21577/0103-5053.20170159</a>.</p>
+<div id="refs" class="references csl-bib-body hanging-indent" role="doc-bibliography">
+<div id="ref-morais2018" class="csl-entry" role="doc-biblioentry">
+Morais, Camilo LM, and Kássio MG Lima. 2018. <span>“Principal Component Analysis with Linear and Quadratic Discriminant Analysis for Identification of Cancer Samples Based on Mass Spectrometry.”</span> <em>Journal of the Brazilian Chemical Society</em> 29 (3): 472–81. <a href="https://doi.org/10.21577/0103-5053.20170159">https://doi.org/10.21577/0103-5053.20170159</a>.
 </div>
 </div>
 <!--radix_placeholder_article_footer-->
