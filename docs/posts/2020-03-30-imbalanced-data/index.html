@@ -20,19 +20,19 @@
 
 <style type="text/css">code{white-space: pre;}</style>
 <style type="text/css" data-origin="pandoc">
-pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
-pre > code.sourceCode > span:empty { height: 1.2em; }
-.sourceCode { overflow: visible; }
+code.sourceCode > span { display: inline-block; line-height: 1.25; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
+code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
 div.sourceCode { margin: 1em 0; }
 pre.sourceCode { margin: 0; }
 @media screen {
 div.sourceCode { overflow: auto; }
 }
 @media print {
-pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+code.sourceCode { white-space: pre-wrap; }
+code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
   { counter-reset: source-line 0; }
@@ -52,7 +52,7 @@ pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-le
 div.sourceCode
   {   }
 @media screen {
-pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 code span.al { color: #ad0000; } /* Alert */
 code span.an { color: #5e5e5e; } /* Annotation */
@@ -85,27 +85,6 @@ code span.vs { color: #20794d; } /* VerbatimString */
 code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 </style>
 
-<style>
-  div.csl-bib-body { }
-  div.csl-entry {
-    clear: both;
-    }
-  .hanging div.csl-entry {
-    margin-left:2em;
-    text-indent:-2em;
-  }
-  div.csl-left-margin {
-    min-width:2em;
-    float:left;
-  }
-  div.csl-right-inline {
-    margin-left:2em;
-    padding-left:1em;
-  }
-  div.csl-indent {
-    margin-left: 2em;
-  }
-</style>
 
   <!--radix_placeholder_meta_tags-->
 <title>mlr3gallery: Imbalanced Data Handling with mlr3</title>
@@ -2083,7 +2062,6 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 <!--/radix_placeholder_distill-->
-  <script src="../../site_libs/header-attrs-2.11/header-attrs.js"></script>
   <script src="../../site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
   <script src="../../site_libs/popper-2.6.0/popper.min.js"></script>
   <link href="../../site_libs/tippy-6.2.7/tippy.css" rel="stylesheet" />
@@ -2164,8 +2142,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <li><a href="#retrieve-data-sets-from-openml">Retrieve data sets from OpenML</a></li>
 <li><a href="#imbalance-correction">Imbalance correction</a></li>
 <li><a href="#construct-autotuner">Construct <code>AutoTuner</code></a></li>
-<li><a href="#benchmark-autotuner">Benchmark <code>AutoTuner</code></a>
-<ul>
+<li><a href="#benchmark-autotuner">Benchmark <code>AutoTuner</code></a><ul>
 <li><a href="#visualize-benchmark-results">Visualize benchmark results</a></li>
 <li><a href="#visualize-the-tuning-path">Visualize the tuning path</a></li>
 </ul></li>
@@ -2174,7 +2151,7 @@ document.addEventListener('DOMContentLoaded', function() {
 </nav>
 </div>
 <h1 id="intro">Intro</h1>
-<p>This use case compares different approaches to handle class imbalance for the <a href="https://mlr3data.mlr-org.com/reference/optdigits.html"><code>Optical Recognition of Handwritten Digits</code></a> (optdigits) binary classification data set using the <a href="https://mlr3.mlr-org.com">mlr3</a> package. We mainly focus on undersampling the majority class, oversampling the minority class, and the SMOTE imbalance correction <span class="citation" data-cites="smote">(<a href="#ref-smote" role="doc-biblioref">Chawla et al. 2002</a>)</span> that enriches the minority class with synthetic data. The use case requires prior knowledge in basic ML concepts (issues imbalanced data, hyperparameter tuning, nested cross-validation). The R packages <a href="https://mlr3.mlr-org.com">mlr3</a>, <a href="https://mlr3pipelines.mlr-org.com">mlr3pipelines</a> and <a href="https://mlr3tuning.mlr-org.com">mlr3tuning</a> will be used. You can find most of the content here also in the <a href="https://mlr3book.mlr-org.com/">mlr3book</a> explained in a more detailed way.</p>
+<p>This use case compares different approaches to handle class imbalance for the <a href="https://mlr3data.mlr-org.com/reference/optdigits.html"><code>Optical Recognition of Handwritten Digits</code></a> (optdigits) binary classification data set using the <a href="https://mlr3.mlr-org.com">mlr3</a> package. We mainly focus on undersampling the majority class, oversampling the minority class, and the SMOTE imbalance correction <span class="citation" data-cites="smote">(Chawla et al. <a href="#ref-smote" role="doc-biblioref">2002</a>)</span> that enriches the minority class with synthetic data. The use case requires prior knowledge in basic ML concepts (issues imbalanced data, hyperparameter tuning, nested cross-validation). The R packages <a href="https://mlr3.mlr-org.com">mlr3</a>, <a href="https://mlr3pipelines.mlr-org.com">mlr3pipelines</a> and <a href="https://mlr3tuning.mlr-org.com">mlr3tuning</a> will be used. You can find most of the content here also in the <a href="https://mlr3book.mlr-org.com/">mlr3book</a> explained in a more detailed way.</p>
 <p>These steps are performed:</p>
 <ul>
 <li>Retrieve data sets from <code>OpenML</code></li>
@@ -2246,7 +2223,8 @@ document.addEventListener('DOMContentLoaded', function() {
 <pre class="sourceCode r"><code class="sourceCode r"><span class='fu'>skimr</span><span class='fu'>::</span><span class='fu'><a href='https://docs.ropensci.org/skimr/reference/skim.html'>skim</a></span><span class='op'>(</span><span class='va'>task</span><span class='op'>$</span><span class='fu'>data</span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span>
 </code></pre>
 </div>
-<table style="width: auto;" class="table table-condensed">
+<table style='width: auto;'
+        class='table table-condensed'>
 <caption>
 <span id="tab:2020-03-30-imbalanced-data-008">Table 1: </span>Data summary
 </caption>
@@ -4873,9 +4851,9 @@ input9
 <h1 id="conclusion">Conclusion</h1>
 <p>In this post, we tuned and compared 5 different settings of sampling ratios for the undersampling method, the oversampling method and different SMOTE variants (using different values of <code>K</code> nearest neighbors during the sampling process). If you want to know more, read the <a href="https://mlr3book.mlr-org.com/">mlr3book</a> and the documentation of the mentioned packages.</p>
 <div class="sourceCode" id="cb7"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
-<div id="refs" class="references csl-bib-body hanging-indent" role="doc-bibliography">
-<div id="ref-smote" class="csl-entry" role="doc-biblioentry">
-Chawla, N. V., K. W. Bowyer, L. O. Hall, and W. P. Kegelmeyer. 2002. <span>“SMOTE: Synthetic Minority over-Sampling Technique.”</span> <em>Journal of Artificial Intelligence Research</em> 16 (June): 321–57. <a href="https://doi.org/10.1613/jair.953">https://doi.org/10.1613/jair.953</a>.
+<div id="refs" class="references" role="doc-bibliography">
+<div id="ref-smote">
+<p>Chawla, N. V., K. W. Bowyer, L. O. Hall, and W. P. Kegelmeyer. 2002. “SMOTE: Synthetic Minority over-Sampling Technique.” <em>Journal of Artificial Intelligence Research</em> 16 (June): 321–57. <a href="https://doi.org/10.1613/jair.953">https://doi.org/10.1613/jair.953</a>.</p>
 </div>
 </div>
 <!--radix_placeholder_article_footer-->
