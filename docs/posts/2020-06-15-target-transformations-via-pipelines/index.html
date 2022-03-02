@@ -20,19 +20,19 @@
 
 <style type="text/css">code{white-space: pre;}</style>
 <style type="text/css" data-origin="pandoc">
-code.sourceCode > span { display: inline-block; line-height: 1.25; }
-code.sourceCode > span { color: inherit; text-decoration: inherit; }
-code.sourceCode > span:empty { height: 1.2em; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
-code.sourceCode { white-space: pre; position: relative; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
 div.sourceCode { margin: 1em 0; }
 pre.sourceCode { margin: 0; }
 @media screen {
 div.sourceCode { overflow: auto; }
 }
 @media print {
-code.sourceCode { white-space: pre-wrap; }
-code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
   { counter-reset: source-line 0; }
@@ -52,7 +52,7 @@ pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-le
 div.sourceCode
   {   }
 @media screen {
-code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 code span.al { color: #ad0000; } /* Alert */
 code span.an { color: #5e5e5e; } /* Annotation */
@@ -2060,6 +2060,7 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 <!--/radix_placeholder_distill-->
+  <script src="../../site_libs/header-attrs-2.11/header-attrs.js"></script>
   <script src="../../site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
   <script src="../../site_libs/popper-2.6.0/popper.min.js"></script>
   <link href="../../site_libs/tippy-6.2.7/tippy.css" rel="stylesheet" />
@@ -2276,8 +2277,8 @@ function (inputs)
     assert_list(inputs, len = 1L, types = &quot;Prediction&quot;)
     list(private$.invert(inputs[[1L]], predict_phase_state))
 }
-&lt;bytecode: 0x55950af1e258&gt;
-&lt;environment: 0x55950af1eb18&gt;
+&lt;bytecode: 0x5586ac537e58&gt;
+&lt;environment: 0x5586ac538788&gt;
 
 $output
 &lt;TaskRegr:mtcars&gt; (32 x 11): Motor Trends
@@ -2357,7 +2358,7 @@ $model$regr.lm$log
 Empty data.table (0 rows and 3 cols): stage,class,msg
 
 $model$regr.lm$train_time
-[1] 0.01
+[1] 0.006
 
 $model$regr.lm$param_vals
 named list()
@@ -2390,12 +2391,12 @@ $log
 Empty data.table (0 rows and 3 cols): stage,class,msg
 
 $train_time
-[1] 0.078
+[1] 0.051
 
 $param_vals
 $param_vals$targetmutate.trafo
 function(x) log(x)
-&lt;bytecode: 0x55950b58db90&gt;
+&lt;bytecode: 0x5586b03d6648&gt;
 
 $param_vals$targetmutate.inverter
 function(x) list(response = exp(x$response))
@@ -2569,31 +2570,31 @@ $train_task
 <p>Second, we overload the four functions as mentioned above.</p>
 <p>We start with <code>.get_state()</code>. We extract the target and apply the Box-Cox transformation to the target. This yields an object of class <code>"boxcox"</code> which we will wrap in a <code>list()</code> and set as the <code>$state</code> (<code>bc$x.t = NULL</code> and <code>bc$x = NULL</code> is done to save some memory because we do not need the transformed original data and original data later):</p>
 <div class="layout-chunk" data-layout="l-body">
-<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1"></a>    .get_state =<span class="st"> </span><span class="cf">function</span>(task) {</span>
-<span id="cb9-2"><a href="#cb9-2"></a>      target =<span class="st"> </span>task<span class="op">$</span><span class="kw">data</span>(<span class="dt">cols =</span> task<span class="op">$</span>target_names)[[1L]]</span>
-<span id="cb9-3"><a href="#cb9-3"></a>      bc =<span class="st"> </span>mlr3misc<span class="op">::</span><span class="kw">invoke</span>(bestNormalize<span class="op">::</span>boxcox, target,</span>
-<span id="cb9-4"><a href="#cb9-4"></a>        <span class="dt">.args =</span> self<span class="op">$</span>param_set<span class="op">$</span><span class="kw">get_values</span>(<span class="dt">tags =</span> <span class="st">&quot;boxcox&quot;</span>))</span>
-<span id="cb9-5"><a href="#cb9-5"></a>      bc<span class="op">$</span>x.t =<span class="st"> </span><span class="ot">NULL</span></span>
-<span id="cb9-6"><a href="#cb9-6"></a>      bc<span class="op">$</span>x =<span class="st"> </span><span class="ot">NULL</span></span>
-<span id="cb9-7"><a href="#cb9-7"></a>      <span class="kw">list</span>(<span class="dt">bc =</span> bc)</span>
-<span id="cb9-8"><a href="#cb9-8"></a>    },</span></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>    .get_state <span class="ot">=</span> <span class="cf">function</span>(task) {</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>      target <span class="ot">=</span> task<span class="sc">$</span><span class="fu">data</span>(<span class="at">cols =</span> task<span class="sc">$</span>target_names)[[1L]]</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>      bc <span class="ot">=</span> mlr3misc<span class="sc">::</span><span class="fu">invoke</span>(bestNormalize<span class="sc">::</span>boxcox, target,</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>        <span class="at">.args =</span> self<span class="sc">$</span>param_set<span class="sc">$</span><span class="fu">get_values</span>(<span class="at">tags =</span> <span class="st">&quot;boxcox&quot;</span>))</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>      bc<span class="sc">$</span>x.t <span class="ot">=</span> <span class="cn">NULL</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>      bc<span class="sc">$</span>x <span class="ot">=</span> <span class="cn">NULL</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>      <span class="fu">list</span>(<span class="at">bc =</span> bc)</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    },</span></code></pre></div>
 </div>
 <p>Next, we tackle <code>.transform()</code>. This is quite straightforward, because objects of class <code>"boxcox"</code> have their own predict method which we can use here to carry out the actual Box-Cox transformation based on the learned <span class="math inline">\(\lambda\)</span> parameter as stored in the <code>"boxcox"</code> object in the <code>$state</code> (both during training and prediction). We then rename the target, add it to the task and finally update the task with respect to this new target:</p>
 <div class="layout-chunk" data-layout="l-body">
-<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1"></a>    .transform =<span class="st"> </span><span class="cf">function</span>(task, phase) {</span>
-<span id="cb10-2"><a href="#cb10-2"></a>      target =<span class="st"> </span>task<span class="op">$</span><span class="kw">data</span>(<span class="dt">cols =</span> task<span class="op">$</span>target_names)[[1L]]</span>
-<span id="cb10-3"><a href="#cb10-3"></a>      new_target =<span class="st"> </span><span class="kw">as.data.table</span>(<span class="kw">predict</span>(self<span class="op">$</span>state<span class="op">$</span>bc, <span class="dt">newdata =</span> target))</span>
-<span id="cb10-4"><a href="#cb10-4"></a>      <span class="kw">colnames</span>(new_target) =<span class="st"> </span><span class="kw">paste0</span>(task<span class="op">$</span>target_names, <span class="st">&quot;.bc&quot;</span>)</span>
-<span id="cb10-5"><a href="#cb10-5"></a>      task<span class="op">$</span><span class="kw">cbind</span>(new_target)</span>
-<span id="cb10-6"><a href="#cb10-6"></a>      <span class="kw">convert_task</span>(task, <span class="dt">target =</span> <span class="kw">colnames</span>(new_target),</span>
-<span id="cb10-7"><a href="#cb10-7"></a>        <span class="dt">drop_original_target =</span> <span class="ot">TRUE</span>)</span>
-<span id="cb10-8"><a href="#cb10-8"></a>    },</span></code></pre></div>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>    .transform <span class="ot">=</span> <span class="cf">function</span>(task, phase) {</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>      target <span class="ot">=</span> task<span class="sc">$</span><span class="fu">data</span>(<span class="at">cols =</span> task<span class="sc">$</span>target_names)[[1L]]</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>      new_target <span class="ot">=</span> <span class="fu">as.data.table</span>(<span class="fu">predict</span>(self<span class="sc">$</span>state<span class="sc">$</span>bc, <span class="at">newdata =</span> target))</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>      <span class="fu">colnames</span>(new_target) <span class="ot">=</span> <span class="fu">paste0</span>(task<span class="sc">$</span>target_names, <span class="st">&quot;.bc&quot;</span>)</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>      task<span class="sc">$</span><span class="fu">cbind</span>(new_target)</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>      <span class="fu">convert_task</span>(task, <span class="at">target =</span> <span class="fu">colnames</span>(new_target),</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>        <span class="at">drop_original_target =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    },</span></code></pre></div>
 </div>
 <p>Time to overload <code>.train_invert()</code>. This is even more straightforward, because the prediction method for objects of class <code>"boxcox"</code> directly allows for inverting the transformation via setting the argument <code>inverse = TRUE</code>. Therefore, we only need the <code>"boxcox"</code> object stored in the <code>$state</code> along the <code>$truth</code> column of the input <a href="https://mlr3.mlr-org.com/reference/Task.html"><code>Task</code></a> (remember that this list will later be available as the <code>predict_phase_state</code> object):</p>
 <div class="layout-chunk" data-layout="l-body">
-<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1"></a>    .train_invert =<span class="st"> </span><span class="cf">function</span>(task) {</span>
-<span id="cb11-2"><a href="#cb11-2"></a>      <span class="kw">list</span>(<span class="dt">truth =</span> task<span class="op">$</span><span class="kw">truth</span>(), <span class="dt">bc =</span> self<span class="op">$</span>state<span class="op">$</span>bc)</span>
-<span id="cb11-3"><a href="#cb11-3"></a>    },</span></code></pre></div>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>    .train_invert <span class="ot">=</span> <span class="cf">function</span>(task) {</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>      <span class="fu">list</span>(<span class="at">truth =</span> task<span class="sc">$</span><span class="fu">truth</span>(), <span class="at">bc =</span> self<span class="sc">$</span>state<span class="sc">$</span>bc)</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    },</span></code></pre></div>
 </div>
 <p>Finally, we overload <code>.invert()</code>. We extract the truth from the <code>predict_phase_state</code> and the response from the <a href="https://mlr3.mlr-org.com/reference/Prediction.html"><code>Prediction</code></a>. We then apply the inverse Box-Cox transformation to the response based on the <span class="math inline">\(\lambda\)</span> parameter and the mean and standard deviation learned during training, relying on the <code>predict_phase_state</code> object. Finally, we construct a new <a href="https://mlr3.mlr-org.com/reference/Prediction.html"><code>Prediction</code></a> object:</p>
 <div class="layout-chunk" data-layout="l-body">
@@ -2654,7 +2655,7 @@ $model$regr.lm$log
 Empty data.table (0 rows and 3 cols): stage,class,msg
 
 $model$regr.lm$train_time
-[1] 0.009
+[1] 0.006
 
 $model$regr.lm$param_vals
 named list()
@@ -2696,7 +2697,7 @@ $log
 Empty data.table (0 rows and 3 cols): stage,class,msg
 
 $train_time
-[1] 0.086
+[1] 0.058
 
 $param_vals
 named list()

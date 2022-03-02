@@ -20,19 +20,19 @@
 
 <style type="text/css">code{white-space: pre;}</style>
 <style type="text/css" data-origin="pandoc">
-code.sourceCode > span { display: inline-block; line-height: 1.25; }
-code.sourceCode > span { color: inherit; text-decoration: inherit; }
-code.sourceCode > span:empty { height: 1.2em; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
-code.sourceCode { white-space: pre; position: relative; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
 div.sourceCode { margin: 1em 0; }
 pre.sourceCode { margin: 0; }
 @media screen {
 div.sourceCode { overflow: auto; }
 }
 @media print {
-code.sourceCode { white-space: pre-wrap; }
-code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
   { counter-reset: source-line 0; }
@@ -52,7 +52,7 @@ pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-le
 div.sourceCode
   {   }
 @media screen {
-code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 code span.al { color: #ad0000; } /* Alert */
 code span.an { color: #5e5e5e; } /* Annotation */
@@ -2070,6 +2070,7 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 <!--/radix_placeholder_distill-->
+  <script src="../../site_libs/header-attrs-2.11/header-attrs.js"></script>
   <script src="../../site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
   <script src="../../site_libs/popper-2.6.0/popper.min.js"></script>
   <link href="../../site_libs/tippy-6.2.7/tippy.css" rel="stylesheet" />
@@ -2210,8 +2211,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <span class='fu'>skimr</span><span class='fu'>::</span><span class='fu'><a href='https://docs.ropensci.org/skimr/reference/skim.html'>skim</a></span><span class='op'>(</span><span class='va'>task</span><span class='op'>$</span><span class='fu'>data</span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span>
 </code></pre>
 </div>
-<table style='width: auto;'
-        class='table table-condensed'>
+<table style="width: auto;" class="table table-condensed">
 <caption>
 <span id="tab:practical-tuning-series-tune-a-preprocessing-pipeline-004">Table 1: </span>Data summary
 </caption>
@@ -2910,8 +2910,8 @@ Output channels &lt;name [train type, predict type]&gt;:
 </div>
 <pre><code>&lt;ArchiveTuning&gt;
    encode.method classif.ce runtime_learners           timestamp batch_nr warnings errors      resample_result
-1:       one-hot       0.27              1.5 2022-03-02 04:50:48        1        0      0 &lt;ResampleResult[22]&gt;
-2:     treatment       0.27              1.5 2022-03-02 04:50:49        2        0      0 &lt;ResampleResult[22]&gt;</code></pre>
+1:       one-hot       0.27             1.01 2022-03-02 21:38:58        1        0      0 &lt;ResampleResult[22]&gt;
+2:     treatment       0.27             0.99 2022-03-02 21:38:59        2        0      0 &lt;ResampleResult[22]&gt;</code></pre>
 </div>
 <h1 id="nested-resampling">Nested Resampling</h1>
 <p>We create one <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_learners_graph.html"><code>GraphLearner</code></a> with <code>imputeoor</code> and test it against a <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_learners_graph.html"><code>GraphLearner</code></a> that uses the internal imputation method of <code>xgboost</code>. Applying nested resampling ensures a fair comparison of the predictive performances.</p>
