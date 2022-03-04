@@ -1,18 +1,133 @@
 ---
-title: useR! 2019 Presentation - mlr3
-categories:
-  - video
-  - mlr3
-author:
-  - name: Michel Lang
-date: 08-03-2019
+title: "Introduction to mlr3tuningspaces"
 description: |
-  Short presentation of the mlr3 package at the useR! 2019 in Toulouse.
+  We teach how to use the package mlr3tuningspaces.
+categories:
+  - mlr3tuning
+  - tuning
+  - optimization
+  - pima data set
+  - classification
+author:
+  - name: Marc Becker
+date: 07-06-2021
 output:
   distill::distill_article:
     toc: true
     self_contained: false
+    highlight_downlit: true
     css: ../../custom.css
 ---
 
-Post moved to [https://mlr-org.com/gallery/introduction-to-mlr3tuningspaces/](mlr-org.com/gallery/introduction-to-mlr3tuningspaces/).
+```{r tuningspaces-001, include=FALSE}
+ knitr::opts_chunk$set(
+  echo = TRUE,
+  R.options = list(width = 120)
+)
+library(mlr3book)
+```
+
+# Scope
+
+The package `r mlr_pkg("mlr3tuningspaces")` offers a selection of published search spaces for many popular machine learning algorithms.
+In this post, we show how to tune a `r ref("Learner", "mlr3 learners")` with these search spaces.
+
+# Prerequisites
+
+The packages `r mlr_pkg("mlr3verse")` and `r mlr_pkg("mlr3tuningspaces")` are required for this demonstration:
+
+```{r tuningspaces-002, message = FALSE}
+library(mlr3verse)
+library(mlr3tuningspaces)
+```
+
+We initialize the random number generator with a fixed seed for reproducibility, and decrease the verbosity of the logger to keep the output clearly represented.
+
+```{r tuningspaces-003}
+set.seed(7832)
+lgr::get_logger("mlr3")$set_threshold("warn")
+lgr::get_logger("bbotk")$set_threshold("warn")
+```
+
+In the example, we use the `r ref("mlr_tasks_pima", text = "pima indian diabetes data set")` which is used to predict whether or not a patient has diabetes.
+The patients are characterized by 8 numeric features, some of them have missing values.
+
+```{r tuningspaces-004}
+# retrieve the task from mlr3
+task = tsk("pima")
+
+# generate a quick textual overview using the skimr package
+skimr::skim(task$data())
+```
+
+# Tuning Search Space
+
+For tuning, it is important to create a search space that defines the type and range of the hyperparameters.
+A learner stores all information about its hyperparameters in the slot `$param_set`.
+Usually, we have to chose a subset of hyperparameters we want to tune.
+
+```{r tuningspaces-005}
+lrn("classif.rpart")$param_set
+```
+
+# Package
+
+At the heart of `r mlr_pkg("mlr3tuningspaces")` is the R6 class `r ref("TuningSpace")`.
+It stores a list of `r ref("TuneToken")`, helper functions and additional meta information.
+The list of `r ref("TuneToken")` can be directly applied to the `$values` slot of a learner's `r ref("ParamSet")`.
+The search spaces are stored in the `r ref("mlr_tuning_spaces")` dictionary.
+
+```{r tuningspaces-006}
+as.data.table(mlr_tuning_spaces)
+```
+
+We can use the sugar function `r ref("lts()")` to retrieve a `r ref("TuningSpace")`.
+
+```{r tuningspaces-007}
+tuning_space_rpart = lts("classif.rpart.default")
+```
+
+The `$values` slot contains the list of of `r ref("TuneToken")`.
+
+```{r tuningspaces-008}
+tuning_space_rpart$values
+```
+
+We apply the search space and tune the `r ref("Learner", "learner")`.
+
+```{r tuningspaces-009}
+learner = lrn("classif.rpart")
+
+learner$param_set$values = tuning_space_rpart$values
+
+instance = tune(
+  method = "random_search",
+  task = tsk("pima"),
+  learner = learner,
+  resampling = rsmp ("holdout"),
+  measure = msr("classif.ce"),
+  term_evals = 10)
+
+instance$result
+```
+
+We can also get the `r ref("Learner", "learner")` with search space already applied from the `r ref("TuningSpace")`.
+
+```{r tuningspaces-010}
+learner = tuning_space_rpart$get_learner()
+print(learner$param_set)
+```
+
+This method also allows to set constant parameters.
+
+```{r tuningspaces-011}
+learner = tuning_space_rpart$get_learner(maxdepth = 15)
+print(learner$param_set)
+```
+
+The `r ref("lts()")` function sets the default search space directly to a `r ref("Learner", "learner")`.
+
+```{r tuningspaces-012}
+learner = lts(lrn("classif.rpart", maxdepth = 15))
+print(learner$param_set)
+```
