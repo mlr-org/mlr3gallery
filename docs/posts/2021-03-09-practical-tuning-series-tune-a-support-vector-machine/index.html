@@ -2903,15 +2903,10 @@ NA
 * State:  Not optimized
 * Objective: &lt;ObjectiveTuning:classif.svm_on_iris&gt;
 * Search Space:
-&lt;ParamSet&gt;
-      id    class lower upper nlevels        default value
-1:  cost ParamDbl   0.1    10     Inf &lt;NoDefault[3]&gt;      
-2: gamma ParamDbl   0.0     5     Inf &lt;NoDefault[3]&gt;      
-* Terminator: &lt;TerminatorNone&gt;
-* Terminated: FALSE
-* Archive:
-&lt;ArchiveTuning&gt;
-Null data.table (0 rows and 0 cols)</code></pre>
+      id    class lower upper nlevels
+1:  cost ParamDbl   0.1    10     Inf
+2: gamma ParamDbl   0.0     5     Inf
+* Terminator: &lt;TerminatorNone&gt;</code></pre>
 </div>
 <p>Finally, we have to choose a <a href="https://mlr3tuning.mlr-org.com/reference/Tuner.html"><code>Tuner</code></a>. <a href="https://mlr3tuning.mlr-org.com/reference/mlr_tuners_grid_search.html">Grid Search</a> discretizes numeric parameters into a given resolution and constructs a grid from the Cartesian product of these sets. Categorical parameters produce a grid over all levels specified in the search space. In this example, we only use a resolution of 5 to keep the runtime low. Usually, a higher resolution is used to create a denser grid.</p>
 <div class="layout-chunk" data-layout="l-body">
@@ -2921,7 +2916,7 @@ Null data.table (0 rows and 0 cols)</code></pre>
 <span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span><span class='op'>(</span><span class='va'>tuner</span><span class='op'>)</span>
 </code></pre>
 </div>
-<pre><code>&lt;TunerGridSearch&gt;
+<pre><code>&lt;TunerGridSearch&gt;: Grid Search
 * Parameters: resolution=5, batch_size=1
 * Parameter classes: ParamLgl, ParamInt, ParamDbl, ParamFct
 * Properties: dependencies, single-crit, multi-crit
