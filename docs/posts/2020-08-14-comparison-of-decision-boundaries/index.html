@@ -103,20 +103,14 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 <meta property="og:type" content="article"/>
 <meta property="og:description" content="Visuzalizes the decision boundaries of multiple classification learners on some artificial data sets."/>
 <meta property="og:url" content="https://mlr3gallery.mlr-org.com/posts/2020-08-14-comparison-of-decision-boundaries/"/>
-<meta property="og:image" content="https://mlr3gallery.mlr-org.com/posts/2020-08-14-comparison-of-decision-boundaries/comparison-of-decision-boundaries_files/figure-html5/comparison-of-decision-boundaries-005-1.png"/>
-<meta property="og:image:width" content="1248"/>
-<meta property="og:image:height" content="768"/>
 <meta property="og:locale" content="en_US"/>
 <meta property="og:site_name" content="mlr3gallery"/>
 
 <!--  https://dev.twitter.com/cards/types/summary -->
-<meta property="twitter:card" content="summary_large_image"/>
+<meta property="twitter:card" content="summary"/>
 <meta property="twitter:title" content="mlr3gallery: Comparison of Decision Boundaries of Classification Learners"/>
 <meta property="twitter:description" content="Visuzalizes the decision boundaries of multiple classification learners on some artificial data sets."/>
 <meta property="twitter:url" content="https://mlr3gallery.mlr-org.com/posts/2020-08-14-comparison-of-decision-boundaries/"/>
-<meta property="twitter:image" content="https://mlr3gallery.mlr-org.com/posts/2020-08-14-comparison-of-decision-boundaries/comparison-of-decision-boundaries_files/figure-html5/comparison-of-decision-boundaries-005-1.png"/>
-<meta property="twitter:image:width" content="1248"/>
-<meta property="twitter:image:height" content="768"/>
 
 <!--  https://scholar.google.com/intl/en/scholar/inclusion.html#indexing -->
 <meta name="citation_title" content="mlr3gallery: Comparison of Decision Boundaries of Classification Learners"/>
@@ -133,7 +127,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 <!--/radix_placeholder_rmarkdown_metadata-->
   
   <script type="text/json" id="radix-resource-manifest">
-  {"type":"character","attributes":{},"value":["comparison-of-decision-boundaries_files/figure-html5/comparison-of-decision-boundaries-005-1.png","comparison-of-decision-boundaries_files/figure-html5/comparison-of-decision-boundaries-006-1.png","comparison-of-decision-boundaries_files/figure-html5/comparison-of-decision-boundaries-007-1.png","comparison-of-decision-boundaries_files/figure-html5/comparison-of-decision-boundaries-013-1.png","plot_learner_prediction.pdf"]}
+  {"type":"character","attributes":{},"value":["plot_learner_prediction.pdf"]}
   </script>
   <!--radix_placeholder_navigation_in_header-->
 <meta name="distill:offset" content="../.."/>
@@ -2061,8 +2055,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
 <!--/radix_placeholder_distill-->
   <script src="../../site_libs/header-attrs-2.13/header-attrs.js"></script>
-  <script src="../../site_libs/kePrint-0.0.1/kePrint.js"></script>
-  <link href="../../site_libs/lightable-0.0.1/lightable.css" rel="stylesheet" />
   <script src="../../site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
   <script src="../../site_libs/popper-2.6.0/popper.min.js"></script>
   <link href="../../site_libs/tippy-6.2.7/tippy.css" rel="stylesheet" />
@@ -2129,373 +2121,7 @@ document.addEventListener('DOMContentLoaded', function() {
 </div>
 
 <div class="d-article">
-<div class="d-contents d-contents-float">
-<nav class="l-text toc figcaption" id="TOC">
-<h3>Contents</h3>
-<ul>
-<li><a href="#artificial-data-sets">Artificial Data Sets</a>
-<ul>
-<li><a href="#xor">XOR</a></li>
-<li><a href="#circle">Circle</a></li>
-<li><a href="#moons">Moons</a></li>
-</ul></li>
-<li><a href="#learners">Learners</a></li>
-<li><a href="#fitting-the-models">Fitting the Models</a></li>
-<li><a href="#plotting">Plotting</a></li>
-</ul>
-</nav>
-</div>
-<p>The visualization of decision boundaries helps to understand what the pros and cons of individual classification learners are. This posts demonstrates how to create such plots.</p>
-<p>We load the <a href="https://mlr3.mlr-org.com">mlr3</a> package.</p>
-<div class="layout-chunk" data-layout="l-body">
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='st'><a href='https://mlr3.mlr-org.com'>"mlr3"</a></span><span class='op'>)</span>
-</code></pre>
-</div>
-</div>
-<p>We initialize the random number generator with a fixed seed for reproducibility, and decrease the verbosity of the logger to keep the output clearly represented.</p>
-<div class="layout-chunk" data-layout="l-body">
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/Random.html'>set.seed</a></span><span class='op'>(</span><span class='fl'>7832</span><span class='op'>)</span>
-<span class='fu'>lgr</span><span class='fu'>::</span><span class='fu'><a href='https://s-fleck.github.io/lgr/reference/get_logger.html'>get_logger</a></span><span class='op'>(</span><span class='st'>"mlr3"</span><span class='op'>)</span><span class='op'>$</span><span class='fu'>set_threshold</span><span class='op'>(</span><span class='st'>"warn"</span><span class='op'>)</span>
-</code></pre>
-</div>
-</div>
-<h2 id="artificial-data-sets">Artificial Data Sets</h2>
-<p>The three artificial data sets are generated by <a href="https://mlr3.mlr-org.com/reference/TaskGenerator.html"><code>task generators</code></a> (implemented in <a href="https://mlr3.mlr-org.com">mlr3</a>):</p>
-<div class="layout-chunk" data-layout="l-body">
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>N</span> <span class='op'>=</span> <span class='fl'>200</span>
-<span class='va'>tasks</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>
-  <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>tgen</a></span><span class='op'>(</span><span class='st'>"xor"</span><span class='op'>)</span><span class='op'>$</span><span class='fu'>generate</span><span class='op'>(</span><span class='va'>N</span><span class='op'>)</span>,
-  <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>tgen</a></span><span class='op'>(</span><span class='st'>"moons"</span><span class='op'>)</span><span class='op'>$</span><span class='fu'>generate</span><span class='op'>(</span><span class='va'>N</span><span class='op'>)</span>,
-  <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>tgen</a></span><span class='op'>(</span><span class='st'>"circle"</span><span class='op'>)</span><span class='op'>$</span><span class='fu'>generate</span><span class='op'>(</span><span class='va'>N</span><span class='op'>)</span>
-<span class='op'>)</span>
-</code></pre>
-</div>
-</div>
-<h3 id="xor">XOR</h3>
-<p>Points are distributed on a 2-dimensional cube with corners <span class="math inline">\((\pm 1, \pm 1)\)</span>. Class is <code>"red"</code> if <span class="math inline">\(x\)</span> and <span class="math inline">\(y\)</span> have the same sign, and <code>"black"</code> otherwise.</p>
-<div class="layout-chunk" data-layout="l-body">
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/graphics/plot.default.html'>plot</a></span><span class='op'>(</span><span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>tgen</a></span><span class='op'>(</span><span class='st'>"xor"</span><span class='op'>)</span><span class='op'>)</span>
-</code></pre>
-</div>
-<p><img src="comparison-of-decision-boundaries_files/figure-html5/comparison-of-decision-boundaries-005-1.png" width="624" /></p>
-</div>
-<h3 id="circle">Circle</h3>
-<p>Two circles with same center but different radii. Points in the smaller circle are <code>"black"</code>, points only in the larger circle are <code>"red"</code>.</p>
-<div class="layout-chunk" data-layout="l-body">
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/graphics/plot.default.html'>plot</a></span><span class='op'>(</span><span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>tgen</a></span><span class='op'>(</span><span class='st'>"circle"</span><span class='op'>)</span><span class='op'>)</span>
-</code></pre>
-</div>
-<p><img src="comparison-of-decision-boundaries_files/figure-html5/comparison-of-decision-boundaries-006-1.png" width="624" /></p>
-</div>
-<h3 id="moons">Moons</h3>
-<p>Two interleaving half circles (“moons”).</p>
-<div class="layout-chunk" data-layout="l-body">
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/graphics/plot.default.html'>plot</a></span><span class='op'>(</span><span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>tgen</a></span><span class='op'>(</span><span class='st'>"moons"</span><span class='op'>)</span><span class='op'>)</span>
-</code></pre>
-</div>
-<p><img src="comparison-of-decision-boundaries_files/figure-html5/comparison-of-decision-boundaries-007-1.png" width="624" /></p>
-</div>
-<h2 id="learners">Learners</h2>
-<p>We consider the following learners:</p>
-<div class="layout-chunk" data-layout="l-body">
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='st'><a href='https://mlr3learners.mlr-org.com'>"mlr3learners"</a></span><span class='op'>)</span>
-
-<span class='va'>learners</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>
-  <span class='co'># k-nearest neighbours classifier</span>
-  <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>lrn</a></span><span class='op'>(</span><span class='st'>"classif.kknn"</span>, id <span class='op'>=</span> <span class='st'>"kkn"</span>, predict_type <span class='op'>=</span> <span class='st'>"prob"</span>, k <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span>,
-
-  <span class='co'># linear svm</span>
-  <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>lrn</a></span><span class='op'>(</span><span class='st'>"classif.svm"</span>, id <span class='op'>=</span> <span class='st'>"lin. svm"</span>, predict_type <span class='op'>=</span> <span class='st'>"prob"</span>, kernel <span class='op'>=</span> <span class='st'>"linear"</span><span class='op'>)</span>,
-
-  <span class='co'># radial-basis function svm</span>
-  <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>lrn</a></span><span class='op'>(</span><span class='st'>"classif.svm"</span>, id <span class='op'>=</span> <span class='st'>"rbf svm"</span>, predict_type <span class='op'>=</span> <span class='st'>"prob"</span>, kernel <span class='op'>=</span> <span class='st'>"radial"</span>,
-    gamma <span class='op'>=</span> <span class='fl'>2</span>, cost <span class='op'>=</span> <span class='fl'>1</span>, type <span class='op'>=</span> <span class='st'>"C-classification"</span><span class='op'>)</span>,
-
-  <span class='co'># naive bayes</span>
-  <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>lrn</a></span><span class='op'>(</span><span class='st'>"classif.naive_bayes"</span>, id <span class='op'>=</span> <span class='st'>"naive bayes"</span>, predict_type <span class='op'>=</span> <span class='st'>"prob"</span><span class='op'>)</span>,
-
-  <span class='co'># single decision tree</span>
-  <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>lrn</a></span><span class='op'>(</span><span class='st'>"classif.rpart"</span>, id <span class='op'>=</span> <span class='st'>"tree"</span>, predict_type <span class='op'>=</span> <span class='st'>"prob"</span>, cp <span class='op'>=</span> <span class='fl'>0</span>, maxdepth <span class='op'>=</span> <span class='fl'>5</span><span class='op'>)</span>,
-
-  <span class='co'># random forest</span>
-  <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>lrn</a></span><span class='op'>(</span><span class='st'>"classif.ranger"</span>, id <span class='op'>=</span> <span class='st'>"random forest"</span>, predict_type <span class='op'>=</span> <span class='st'>"prob"</span><span class='op'>)</span>
-<span class='op'>)</span>
-</code></pre>
-</div>
-</div>
-<p>The hyperparameters are chosen in a way that the decision boundaries look “typical” for the respective classifier. Of course, with different hyperparameters, results may look very different.</p>
-<h2 id="fitting-the-models">Fitting the Models</h2>
-<p>To apply each learner on each task, we first build an exhaustive grid design of experiments with <a href="https://mlr3.mlr-org.com/reference/benchmark_grid.html"><code>benchmark_grid()</code></a> and then pass it to <a href="https://mlr3.mlr-org.com/reference/benchmark.html"><code>benchmark()</code></a> to do the actual work. A simple holdout resampling is used here:</p>
-<div class="layout-chunk" data-layout="l-body">
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>design</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/benchmark_grid.html'>benchmark_grid</a></span><span class='op'>(</span>
-  tasks <span class='op'>=</span> <span class='va'>tasks</span>,
-  learners <span class='op'>=</span> <span class='va'>learners</span>,
-  resamplings <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>rsmp</a></span><span class='op'>(</span><span class='st'>"holdout"</span><span class='op'>)</span>
-<span class='op'>)</span>
-
-<span class='va'>bmr</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/benchmark.html'>benchmark</a></span><span class='op'>(</span><span class='va'>design</span>, store_models <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>
-</code></pre>
-</div>
-</div>
-<p>A quick look into the performance values:</p>
-<div class="layout-chunk" data-layout="l-body">
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>perf</span> <span class='op'>=</span> <span class='va'>bmr</span><span class='op'>$</span><span class='fu'>aggregate</span><span class='op'>(</span><span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>msr</a></span><span class='op'>(</span><span class='st'>"classif.acc"</span><span class='op'>)</span><span class='op'>)</span><span class='op'>[</span>, <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"task_id"</span>, <span class='st'>"learner_id"</span>, <span class='st'>"classif.acc"</span><span class='op'>)</span><span class='op'>]</span>
-<span class='va'>perf</span>
-</code></pre>
-</div>
-</div>
-<div class="layout-chunk" data-layout="l-body">
-<table class="table" style="margin-left: auto; margin-right: auto;">
-<thead>
-<tr>
-<th style="text-align:left;">
-task_id
-</th>
-<th style="text-align:left;">
-learner_id
-</th>
-<th style="text-align:right;">
-classif.acc
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:left;">
-xor_200
-</td>
-<td style="text-align:left;">
-kkn
-</td>
-<td style="text-align:right;">
-0.9402985
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-xor_200
-</td>
-<td style="text-align:left;">
-lin. svm
-</td>
-<td style="text-align:right;">
-0.5223881
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-xor_200
-</td>
-<td style="text-align:left;">
-rbf svm
-</td>
-<td style="text-align:right;">
-0.9701493
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-xor_200
-</td>
-<td style="text-align:left;">
-naive bayes
-</td>
-<td style="text-align:right;">
-0.4328358
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-xor_200
-</td>
-<td style="text-align:left;">
-tree
-</td>
-<td style="text-align:right;">
-0.9402985
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-xor_200
-</td>
-<td style="text-align:left;">
-random forest
-</td>
-<td style="text-align:right;">
-1.0000000
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-moons_200
-</td>
-<td style="text-align:left;">
-kkn
-</td>
-<td style="text-align:right;">
-1.0000000
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-moons_200
-</td>
-<td style="text-align:left;">
-lin. svm
-</td>
-<td style="text-align:right;">
-0.8805970
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-moons_200
-</td>
-<td style="text-align:left;">
-rbf svm
-</td>
-<td style="text-align:right;">
-1.0000000
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-moons_200
-</td>
-<td style="text-align:left;">
-naive bayes
-</td>
-<td style="text-align:right;">
-0.8955224
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-moons_200
-</td>
-<td style="text-align:left;">
-tree
-</td>
-<td style="text-align:right;">
-0.8955224
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-moons_200
-</td>
-<td style="text-align:left;">
-random forest
-</td>
-<td style="text-align:right;">
-0.9552239
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-circle_200
-</td>
-<td style="text-align:left;">
-kkn
-</td>
-<td style="text-align:right;">
-0.8805970
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-circle_200
-</td>
-<td style="text-align:left;">
-lin. svm
-</td>
-<td style="text-align:right;">
-0.4925373
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-circle_200
-</td>
-<td style="text-align:left;">
-rbf svm
-</td>
-<td style="text-align:right;">
-0.8955224
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-circle_200
-</td>
-<td style="text-align:left;">
-naive bayes
-</td>
-<td style="text-align:right;">
-0.7014925
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-circle_200
-</td>
-<td style="text-align:left;">
-tree
-</td>
-<td style="text-align:right;">
-0.7462687
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-circle_200
-</td>
-<td style="text-align:left;">
-random forest
-</td>
-<td style="text-align:right;">
-0.7761194
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-<h2 id="plotting">Plotting</h2>
-<p>To generate the plots, we iterate over the individual <a href="https://mlr3.mlr-org.com/reference/ResampleResult.html"><code>ResampleResult</code></a> objects stored in the <a href="https://mlr3.mlr-org.com/reference/BenchmarkResult.html"><code>BenchmarkResult</code></a>, and in each iteration we store the plot of the learner prediction generated by the <a href="https://mlr3viz.mlr-org.com">mlr3viz</a> package.</p>
-<div class="layout-chunk" data-layout="l-body">
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='st'><a href='https://mlr3viz.mlr-org.com'>"mlr3viz"</a></span><span class='op'>)</span>
-
-<span class='va'>n</span> <span class='op'>=</span> <span class='va'>bmr</span><span class='op'>$</span><span class='va'>n_resample_results</span>
-<span class='va'>plots</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/vector.html'>vector</a></span><span class='op'>(</span><span class='st'>"list"</span>, <span class='va'>n</span><span class='op'>)</span>
-<span class='kw'>for</span> <span class='op'>(</span><span class='va'>i</span> <span class='kw'>in</span> <span class='fu'><a href='https://rdrr.io/r/base/seq.html'>seq_len</a></span><span class='op'>(</span><span class='va'>n</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>{</span>
-  <span class='va'>rr</span> <span class='op'>=</span> <span class='va'>bmr</span><span class='op'>$</span><span class='fu'>resample_result</span><span class='op'>(</span><span class='va'>i</span><span class='op'>)</span>
-  <span class='va'>plots</span><span class='op'>[[</span><span class='va'>i</span><span class='op'>]</span><span class='op'>]</span> <span class='op'>=</span> <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/autoplot.html'>autoplot</a></span><span class='op'>(</span><span class='va'>rr</span>, type <span class='op'>=</span> <span class='st'>"prediction"</span><span class='op'>)</span>
-<span class='op'>}</span>
-</code></pre>
-</div>
-</div>
-<p>We now have a list of plots. Each one can be printed individually:</p>
-<div class="layout-chunk" data-layout="l-body">
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span><span class='op'>(</span><span class='va'>plots</span><span class='op'>[[</span><span class='fl'>1</span><span class='op'>]</span><span class='op'>]</span><span class='op'>)</span>
-</code></pre>
-</div>
-<p><img src="comparison-of-decision-boundaries_files/figure-html5/comparison-of-decision-boundaries-013-1.png" width="624" /></p>
-</div>
-<p>Note that only observations from the test data is plotted as points.</p>
-<p>To get a nice annotated overview, we arranged all plots together in a single <a href="plot_learner_prediction.pdf">PDF file</a>. The number in the upper right is the respective accuracy on the test set.</p>
-<p>As you can see, the decision boundaries look very different. Some are linear, others are parallel to the axis, and yet others are highly non-linear. The boundaries are partly very smooth with a slow transition of probabilities, others are very abrupt. All these properties are important during model selection, and should be considered for your problem at hand.</p>
+<p>Post moved to <a href="https://mlr-org.com/gallery/comparison-of-decision-boundaries/">mlr-org.com/gallery/comparison-of-decision-boundaries/</a>.</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
 <!--radix_placeholder_article_footer-->
 <!--/radix_placeholder_article_footer-->
@@ -2504,15 +2130,6 @@ random forest
 <div class="d-appendix">
 </div>
 
-<!-- dynamically load mathjax for compatibility with self-contained -->
-<script>
-  (function () {
-    var script = document.createElement("script");
-    script.type = "text/javascript";
-    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
-    document.getElementsByTagName("head")[0].appendChild(script);
-  })();
-</script>
 
 <!--radix_placeholder_site_after_body-->
 <!--/radix_placeholder_site_after_body-->
