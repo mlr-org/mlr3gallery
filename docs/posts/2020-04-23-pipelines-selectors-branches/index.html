@@ -2128,8 +2128,2545 @@ document.addEventListener('DOMContentLoaded', function() {
 </div>
 
 <div class="d-article">
+<<<<<<< HEAD
 <p>Post moved to <a href="https://mlr-org.com/gallery/2020-04-23-pipelines-selectors-branches/">mlr-org.com/gallery/2020-04-23-pipelines-selectors-branches/</a>.</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
+=======
+<div class="d-contents d-contents-float">
+<nav class="l-text toc figcaption" id="TOC">
+<h3>Contents</h3>
+<ul>
+<li><a href="#intro">Intro</a></li>
+<li><a href="#prerequisites">Prerequisites</a></li>
+<li><a href="#selection-of-features-for-preprocessing-steps">Selection of features for preprocessing steps</a>
+<ul>
+<li><a href="#consider-all-features-and-apply-the-preprocessing-step-only-to-certain-features">1. Consider all features and apply the preprocessing step only to certain features</a></li>
+<li><a href="#select-the-features-for-each-preprocessing-step-and-apply-the-preprocessing-steps-to-this-subset">2. Select the features for each preprocessing step and apply the preprocessing steps to this subset</a></li>
+</ul></li>
+<li><a href="#branching">Branching</a></li>
+<li><a href="#tuning-the-pipeline">Tuning the pipeline</a></li>
+<li><a href="#conclusion">Conclusion</a></li>
+</ul>
+</nav>
+</div>
+<h2 id="intro">Intro</h2>
+<p><a href="https://mlr3pipelines.mlr-org.com">mlr3pipelines</a> offers a very flexible way to create data preprocessing steps. This is achieved by a modular approach using <a href="https://mlr3pipelines.mlr-org.com/reference/PipeOp.html"><code>PipeOp</code></a>s. For detailed overview check the <a href="https://mlr3book.mlr-org.com/pipelines.html">mlr3book</a>.</p>
+<p>Recommended prior readings:</p>
+<ul>
+<li><a href="https://mlr3gallery.mlr-org.com/posts/2020-03-11-mlr3pipelines-tutorial-german-credit/">mlr3pipelines tutorial - german credit</a></li>
+<li><a href="https://mlr3gallery.mlr-org.com/posts/2020-01-30-impute-missing-levels/">Impute missing variables</a> .</li>
+</ul>
+<p>This post covers:</p>
+<ol type="1">
+<li>How to apply different preprocessing steps on different features</li>
+<li>How to branch different preprocessing steps, which allows to select the best performing path</li>
+<li>How to tune the whole pipeline</li>
+</ol>
+<h2 id="prerequisites">Prerequisites</h2>
+<p>We load the <a href="https://mlr3verse.mlr-org.com">mlr3verse</a> package which pulls in the most important packages for this example.</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://mlr3verse.mlr-org.com'>mlr3verse</a></span><span class='op'>)</span>
+</code></pre>
+</div>
+</div>
+<p>We initialize the random number generator with a fixed seed for reproducibility, and decrease the verbosity of the logger to keep the output clearly represented.</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/Random.html'>set.seed</a></span><span class='op'>(</span><span class='fl'>7832</span><span class='op'>)</span>
+<span class='fu'>lgr</span><span class='fu'>::</span><span class='fu'><a href='https://s-fleck.github.io/lgr/reference/get_logger.html'>get_logger</a></span><span class='op'>(</span><span class='st'>"mlr3"</span><span class='op'>)</span><span class='op'>$</span><span class='fu'>set_threshold</span><span class='op'>(</span><span class='st'>"warn"</span><span class='op'>)</span>
+<span class='fu'>lgr</span><span class='fu'>::</span><span class='fu'><a href='https://s-fleck.github.io/lgr/reference/get_logger.html'>get_logger</a></span><span class='op'>(</span><span class='st'>"bbotk"</span><span class='op'>)</span><span class='op'>$</span><span class='fu'>set_threshold</span><span class='op'>(</span><span class='st'>"warn"</span><span class='op'>)</span>
+</code></pre>
+</div>
+</div>
+<p>The <a href="https://mlr3.mlr-org.com/reference/mlr_tasks_pima.html"><code>Pima Indian Diabetes classification task</code></a> will be used.</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>task_pima</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>tsk</a></span><span class='op'>(</span><span class='st'>"pima"</span><span class='op'>)</span>
+<span class='fu'>skimr</span><span class='fu'>::</span><span class='fu'><a href='https://docs.ropensci.org/skimr/reference/skim.html'>skim</a></span><span class='op'>(</span><span class='va'>task_pima</span><span class='op'>$</span><span class='fu'>data</span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span>
+</code></pre>
+</div>
+<table style="width: auto;" class="table table-condensed">
+<caption>
+<span id="tab:2020-04-23-pipelines-selectors-branches-004">Table 1: </span>Data summary
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:left;">
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Name
+</td>
+<td style="text-align:left;">
+task_pima$data()
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Number of rows
+</td>
+<td style="text-align:left;">
+768
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Number of columns
+</td>
+<td style="text-align:left;">
+9
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Key
+</td>
+<td style="text-align:left;">
+NULL
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+_______________________
+</td>
+<td style="text-align:left;">
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Column type frequency:
+</td>
+<td style="text-align:left;">
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+factor
+</td>
+<td style="text-align:left;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+numeric
+</td>
+<td style="text-align:left;">
+8
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+________________________
+</td>
+<td style="text-align:left;">
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Group variables
+</td>
+<td style="text-align:left;">
+None
+</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Variable type: factor</strong></p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+skim_variable
+</th>
+<th style="text-align:right;">
+n_missing
+</th>
+<th style="text-align:right;">
+complete_rate
+</th>
+<th style="text-align:left;">
+ordered
+</th>
+<th style="text-align:right;">
+n_unique
+</th>
+<th style="text-align:left;">
+top_counts
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+diabetes
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:left;">
+neg: 500, pos: 268
+</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Variable type: numeric</strong></p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+skim_variable
+</th>
+<th style="text-align:right;">
+n_missing
+</th>
+<th style="text-align:right;">
+complete_rate
+</th>
+<th style="text-align:right;">
+mean
+</th>
+<th style="text-align:right;">
+sd
+</th>
+<th style="text-align:right;">
+p0
+</th>
+<th style="text-align:right;">
+p25
+</th>
+<th style="text-align:right;">
+p50
+</th>
+<th style="text-align:right;">
+p75
+</th>
+<th style="text-align:right;">
+p100
+</th>
+<th style="text-align:left;">
+hist
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+age
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1.00
+</td>
+<td style="text-align:right;">
+33.24
+</td>
+<td style="text-align:right;">
+11.76
+</td>
+<td style="text-align:right;">
+21.00
+</td>
+<td style="text-align:right;">
+24.00
+</td>
+<td style="text-align:right;">
+29.00
+</td>
+<td style="text-align:right;">
+41.00
+</td>
+<td style="text-align:right;">
+81.00
+</td>
+<td style="text-align:left;">
+▇▃▁▁▁
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+glucose
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+0.99
+</td>
+<td style="text-align:right;">
+121.69
+</td>
+<td style="text-align:right;">
+30.54
+</td>
+<td style="text-align:right;">
+44.00
+</td>
+<td style="text-align:right;">
+99.00
+</td>
+<td style="text-align:right;">
+117.00
+</td>
+<td style="text-align:right;">
+141.00
+</td>
+<td style="text-align:right;">
+199.00
+</td>
+<td style="text-align:left;">
+▁▇▇▃▂
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+insulin
+</td>
+<td style="text-align:right;">
+374
+</td>
+<td style="text-align:right;">
+0.51
+</td>
+<td style="text-align:right;">
+155.55
+</td>
+<td style="text-align:right;">
+118.78
+</td>
+<td style="text-align:right;">
+14.00
+</td>
+<td style="text-align:right;">
+76.25
+</td>
+<td style="text-align:right;">
+125.00
+</td>
+<td style="text-align:right;">
+190.00
+</td>
+<td style="text-align:right;">
+846.00
+</td>
+<td style="text-align:left;">
+▇▂▁▁▁
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+mass
+</td>
+<td style="text-align:right;">
+11
+</td>
+<td style="text-align:right;">
+0.99
+</td>
+<td style="text-align:right;">
+32.46
+</td>
+<td style="text-align:right;">
+6.92
+</td>
+<td style="text-align:right;">
+18.20
+</td>
+<td style="text-align:right;">
+27.50
+</td>
+<td style="text-align:right;">
+32.30
+</td>
+<td style="text-align:right;">
+36.60
+</td>
+<td style="text-align:right;">
+67.10
+</td>
+<td style="text-align:left;">
+▅▇▃▁▁
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+pedigree
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1.00
+</td>
+<td style="text-align:right;">
+0.47
+</td>
+<td style="text-align:right;">
+0.33
+</td>
+<td style="text-align:right;">
+0.08
+</td>
+<td style="text-align:right;">
+0.24
+</td>
+<td style="text-align:right;">
+0.37
+</td>
+<td style="text-align:right;">
+0.63
+</td>
+<td style="text-align:right;">
+2.42
+</td>
+<td style="text-align:left;">
+▇▃▁▁▁
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+pregnant
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1.00
+</td>
+<td style="text-align:right;">
+3.85
+</td>
+<td style="text-align:right;">
+3.37
+</td>
+<td style="text-align:right;">
+0.00
+</td>
+<td style="text-align:right;">
+1.00
+</td>
+<td style="text-align:right;">
+3.00
+</td>
+<td style="text-align:right;">
+6.00
+</td>
+<td style="text-align:right;">
+17.00
+</td>
+<td style="text-align:left;">
+▇▃▂▁▁
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+pressure
+</td>
+<td style="text-align:right;">
+35
+</td>
+<td style="text-align:right;">
+0.95
+</td>
+<td style="text-align:right;">
+72.41
+</td>
+<td style="text-align:right;">
+12.38
+</td>
+<td style="text-align:right;">
+24.00
+</td>
+<td style="text-align:right;">
+64.00
+</td>
+<td style="text-align:right;">
+72.00
+</td>
+<td style="text-align:right;">
+80.00
+</td>
+<td style="text-align:right;">
+122.00
+</td>
+<td style="text-align:left;">
+▁▃▇▂▁
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+triceps
+</td>
+<td style="text-align:right;">
+227
+</td>
+<td style="text-align:right;">
+0.70
+</td>
+<td style="text-align:right;">
+29.15
+</td>
+<td style="text-align:right;">
+10.48
+</td>
+<td style="text-align:right;">
+7.00
+</td>
+<td style="text-align:right;">
+22.00
+</td>
+<td style="text-align:right;">
+29.00
+</td>
+<td style="text-align:right;">
+36.00
+</td>
+<td style="text-align:right;">
+99.00
+</td>
+<td style="text-align:left;">
+▆▇▁▁▁
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<h2 id="selection-of-features-for-preprocessing-steps">Selection of features for preprocessing steps</h2>
+<p>Several features of the <code>pima</code> task have missing values:</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>task_pima</span><span class='op'>$</span><span class='fu'>missings</span><span class='op'>(</span><span class='op'>)</span>
+</code></pre>
+</div>
+<pre><code>diabetes      age  glucose  insulin     mass pedigree pregnant pressure  triceps 
+       0        0        5      374       11        0        0       35      227 </code></pre>
+</div>
+<p>A common approach in such situations is to impute the missing values and to add a missing indicator column as explained in the <a href="https://mlr3gallery.mlr-org.com/posts/2020-01-30-impute-missing-levels/">Impute missing variables</a> post. Suppose we want to use</p>
+<ul>
+<li><a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_imputehist.html"><code>PipeOpImputeHist</code></a> on features “glucose”, “mass” and “pressure” which have only few missing values and</li>
+<li><a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_imputemedian.html"><code>PipeOpImputeMedian</code></a> on features “insulin” and “triceps” which have much more missing values.</li>
+</ul>
+<p>In the following subsections, we show two approaches to implement this.</p>
+<h3 id="consider-all-features-and-apply-the-preprocessing-step-only-to-certain-features">1. Consider all features and apply the preprocessing step only to certain features</h3>
+<p>Using the <code>affect_columns</code> argument of a <a href="https://mlr3pipelines.mlr-org.com/reference/PipeOp.html"><code>PipeOp</code></a> to define the variables on which a <a href="https://mlr3pipelines.mlr-org.com/reference/PipeOp.html"><code>PipeOp</code></a> will operate with an appropriate <a href="https://mlr3pipelines.mlr-org.com/reference/Selector.html"><code>Selector</code></a> function:</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='co'># imputes values based on histogram</span>
+<span class='va'>imputer_hist</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"imputehist"</span>,
+  affect_columns <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/Selector.html'>selector_name</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"glucose"</span>, <span class='st'>"mass"</span>, <span class='st'>"pressure"</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>
+<span class='co'># imputes values using the median</span>
+<span class='va'>imputer_median</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"imputemedian"</span>,
+  affect_columns <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/Selector.html'>selector_name</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"insulin"</span>, <span class='st'>"triceps"</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>
+<span class='co'># adds an indicator column for each feature with missing values</span>
+<span class='va'>miss_ind</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"missind"</span><span class='op'>)</span>
+</code></pre>
+</div>
+</div>
+<p>When <a href="https://mlr3pipelines.mlr-org.com/reference/PipeOp.html"><code>PipeOp</code></a>s are constructed this way, they will perform the specified preprocessing step on the appropriate features and pass all the input features to the subsequent steps:</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='co'># no missings in "glucose", "mass" and "pressure"</span>
+<span class='va'>imputer_hist</span><span class='op'>$</span><span class='fu'>train</span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='va'>task_pima</span><span class='op'>)</span><span class='op'>)</span><span class='op'>[[</span><span class='fl'>1</span><span class='op'>]</span><span class='op'>]</span><span class='op'>$</span><span class='fu'>missings</span><span class='op'>(</span><span class='op'>)</span>
+</code></pre>
+</div>
+<pre><code>diabetes      age  insulin pedigree pregnant  triceps  glucose     mass pressure 
+       0        0      374        0        0      227        0        0        0 </code></pre>
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='co'># no missings in "insulin" and "triceps"</span>
+<span class='va'>imputer_median</span><span class='op'>$</span><span class='fu'>train</span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='va'>task_pima</span><span class='op'>)</span><span class='op'>)</span><span class='op'>[[</span><span class='fl'>1</span><span class='op'>]</span><span class='op'>]</span><span class='op'>$</span><span class='fu'>missings</span><span class='op'>(</span><span class='op'>)</span>
+</code></pre>
+</div>
+<pre><code>diabetes      age  glucose     mass pedigree pregnant pressure  insulin  triceps 
+       0        0        5       11        0        0       35        0        0 </code></pre>
+</div>
+<p>We construct a pipeline that combines <code>imputer_hist</code> and <code>imputer_median</code>. Here, <code>imputer_hist</code> will impute the features “glucose”, “mass” and “pressure”, and <code>imputer_median</code> will impute “insulin” and “triceps”. In each preprocessing step, all the input features are passed to the next step. In the end, we obtain a data set without missing values:</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='co'># combine the two impuation methods</span>
+<span class='va'>impute_graph</span> <span class='op'>=</span> <span class='va'>imputer_hist</span> <span class='op'><a href='https://mlr3pipelines.mlr-org.com//reference/grapes-greater-than-greater-than-grapes.html'>%&gt;&gt;%</a></span> <span class='va'>imputer_median</span>
+<span class='va'>impute_graph</span><span class='op'>$</span><span class='fu'>plot</span><span class='op'>(</span><span class='op'>)</span>
+</code></pre>
+</div>
+<img src="2020-04-23-pipelines-selectors-branches_files/figure-html5/2020-04-23-pipelines-selectors-branches-008-1.png" width="960" />
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>impute_graph</span><span class='op'>$</span><span class='fu'>train</span><span class='op'>(</span><span class='va'>task_pima</span><span class='op'>)</span><span class='op'>[[</span><span class='fl'>1</span><span class='op'>]</span><span class='op'>]</span><span class='op'>$</span><span class='fu'>missings</span><span class='op'>(</span><span class='op'>)</span>
+</code></pre>
+</div>
+<pre><code>diabetes      age pedigree pregnant  glucose     mass pressure  insulin  triceps 
+       0        0        0        0        0        0        0        0        0 </code></pre>
+</div>
+<p>The <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_missind.html"><code>PipeOpMissInd</code></a> operator replaces features with missing values with a missing value indicator:</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span><span class='op'>(</span><span class='va'>miss_ind</span><span class='op'>$</span><span class='fu'>train</span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='va'>task_pima</span><span class='op'>)</span><span class='op'>)</span><span class='op'>[[</span><span class='fl'>1</span><span class='op'>]</span><span class='op'>]</span><span class='op'>$</span><span class='fu'>data</span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span>
+</code></pre>
+</div>
+</div>
+<div class="layout-chunk" data-layout="l-body">
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+diabetes
+</th>
+<th style="text-align:left;">
+missing_glucose
+</th>
+<th style="text-align:left;">
+missing_insulin
+</th>
+<th style="text-align:left;">
+missing_mass
+</th>
+<th style="text-align:left;">
+missing_pressure
+</th>
+<th style="text-align:left;">
+missing_triceps
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+pos
+</td>
+<td style="text-align:left;">
+present
+</td>
+<td style="text-align:left;">
+missing
+</td>
+<td style="text-align:left;">
+present
+</td>
+<td style="text-align:left;">
+present
+</td>
+<td style="text-align:left;">
+present
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+neg
+</td>
+<td style="text-align:left;">
+present
+</td>
+<td style="text-align:left;">
+missing
+</td>
+<td style="text-align:left;">
+present
+</td>
+<td style="text-align:left;">
+present
+</td>
+<td style="text-align:left;">
+present
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+pos
+</td>
+<td style="text-align:left;">
+present
+</td>
+<td style="text-align:left;">
+missing
+</td>
+<td style="text-align:left;">
+present
+</td>
+<td style="text-align:left;">
+present
+</td>
+<td style="text-align:left;">
+missing
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+neg
+</td>
+<td style="text-align:left;">
+present
+</td>
+<td style="text-align:left;">
+present
+</td>
+<td style="text-align:left;">
+present
+</td>
+<td style="text-align:left;">
+present
+</td>
+<td style="text-align:left;">
+present
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+pos
+</td>
+<td style="text-align:left;">
+present
+</td>
+<td style="text-align:left;">
+present
+</td>
+<td style="text-align:left;">
+present
+</td>
+<td style="text-align:left;">
+present
+</td>
+<td style="text-align:left;">
+present
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+neg
+</td>
+<td style="text-align:left;">
+present
+</td>
+<td style="text-align:left;">
+missing
+</td>
+<td style="text-align:left;">
+present
+</td>
+<td style="text-align:left;">
+present
+</td>
+<td style="text-align:left;">
+missing
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Obviously, this step can not be applied to the already imputed data as there are no missing values. If we want to combine the previous two imputation steps with a third step that adds missing value indicators, we would need to <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_copy.html"><code>PipeOpCopy</code></a> the data two times and supply the first copy to <code>impute_graph</code> and the second copy to <code>miss_ind</code> using <a href="https://mlr3pipelines.mlr-org.com/reference/gunion.html"><code>gunion()</code></a>. Finally, the two outputs can be combined with <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_featureunion.html"><code>PipeOpFeatureUnion</code></a>:</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>impute_missind</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"copy"</span>, <span class='fl'>2</span><span class='op'>)</span> <span class='op'><a href='https://mlr3pipelines.mlr-org.com//reference/grapes-greater-than-greater-than-grapes.html'>%&gt;&gt;%</a></span>
+  <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/gunion.html'>gunion</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='va'>impute_graph</span>, <span class='va'>miss_ind</span><span class='op'>)</span><span class='op'>)</span> <span class='op'><a href='https://mlr3pipelines.mlr-org.com//reference/grapes-greater-than-greater-than-grapes.html'>%&gt;&gt;%</a></span>
+  <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"featureunion"</span><span class='op'>)</span>
+<span class='va'>impute_missind</span><span class='op'>$</span><span class='fu'>plot</span><span class='op'>(</span><span class='op'>)</span>
+</code></pre>
+</div>
+<p><img src="2020-04-23-pipelines-selectors-branches_files/figure-html5/2020-04-23-pipelines-selectors-branches-011-1.png" width="960" /></p>
+</div>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span><span class='op'>(</span><span class='va'>impute_missind</span><span class='op'>$</span><span class='fu'>train</span><span class='op'>(</span><span class='va'>task_pima</span><span class='op'>)</span><span class='op'>[[</span><span class='fl'>1</span><span class='op'>]</span><span class='op'>]</span><span class='op'>$</span><span class='fu'>data</span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span>
+</code></pre>
+</div>
+</div>
+<div class="layout-chunk" data-layout="l-page">
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+diabetes
+</th>
+<th style="text-align:right;">
+age
+</th>
+<th style="text-align:right;">
+pedigree
+</th>
+<th style="text-align:right;">
+pregnant
+</th>
+<th style="text-align:right;">
+glucose
+</th>
+<th style="text-align:right;">
+mass
+</th>
+<th style="text-align:right;">
+pressure
+</th>
+<th style="text-align:right;">
+insulin
+</th>
+<th style="text-align:right;">
+triceps
+</th>
+<th style="text-align:left;">
+missing_glucose
+</th>
+<th style="text-align:left;">
+missing_insulin
+</th>
+<th style="text-align:left;">
+missing_mass
+</th>
+<th style="text-align:left;">
+missing_pressure
+</th>
+<th style="text-align:left;">
+missing_triceps
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+pos
+</td>
+<td style="text-align:right;">
+50
+</td>
+<td style="text-align:right;">
+0.627
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+148
+</td>
+<td style="text-align:right;">
+33.6
+</td>
+<td style="text-align:right;">
+72
+</td>
+<td style="text-align:right;">
+125
+</td>
+<td style="text-align:right;">
+35
+</td>
+<td style="text-align:left;">
+present
+</td>
+<td style="text-align:left;">
+missing
+</td>
+<td style="text-align:left;">
+present
+</td>
+<td style="text-align:left;">
+present
+</td>
+<td style="text-align:left;">
+present
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+neg
+</td>
+<td style="text-align:right;">
+31
+</td>
+<td style="text-align:right;">
+0.351
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+85
+</td>
+<td style="text-align:right;">
+26.6
+</td>
+<td style="text-align:right;">
+66
+</td>
+<td style="text-align:right;">
+125
+</td>
+<td style="text-align:right;">
+29
+</td>
+<td style="text-align:left;">
+present
+</td>
+<td style="text-align:left;">
+missing
+</td>
+<td style="text-align:left;">
+present
+</td>
+<td style="text-align:left;">
+present
+</td>
+<td style="text-align:left;">
+present
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+pos
+</td>
+<td style="text-align:right;">
+32
+</td>
+<td style="text-align:right;">
+0.672
+</td>
+<td style="text-align:right;">
+8
+</td>
+<td style="text-align:right;">
+183
+</td>
+<td style="text-align:right;">
+23.3
+</td>
+<td style="text-align:right;">
+64
+</td>
+<td style="text-align:right;">
+125
+</td>
+<td style="text-align:right;">
+29
+</td>
+<td style="text-align:left;">
+present
+</td>
+<td style="text-align:left;">
+missing
+</td>
+<td style="text-align:left;">
+present
+</td>
+<td style="text-align:left;">
+present
+</td>
+<td style="text-align:left;">
+missing
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+neg
+</td>
+<td style="text-align:right;">
+21
+</td>
+<td style="text-align:right;">
+0.167
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+89
+</td>
+<td style="text-align:right;">
+28.1
+</td>
+<td style="text-align:right;">
+66
+</td>
+<td style="text-align:right;">
+94
+</td>
+<td style="text-align:right;">
+23
+</td>
+<td style="text-align:left;">
+present
+</td>
+<td style="text-align:left;">
+present
+</td>
+<td style="text-align:left;">
+present
+</td>
+<td style="text-align:left;">
+present
+</td>
+<td style="text-align:left;">
+present
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+pos
+</td>
+<td style="text-align:right;">
+33
+</td>
+<td style="text-align:right;">
+2.288
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+137
+</td>
+<td style="text-align:right;">
+43.1
+</td>
+<td style="text-align:right;">
+40
+</td>
+<td style="text-align:right;">
+168
+</td>
+<td style="text-align:right;">
+35
+</td>
+<td style="text-align:left;">
+present
+</td>
+<td style="text-align:left;">
+present
+</td>
+<td style="text-align:left;">
+present
+</td>
+<td style="text-align:left;">
+present
+</td>
+<td style="text-align:left;">
+present
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+neg
+</td>
+<td style="text-align:right;">
+30
+</td>
+<td style="text-align:right;">
+0.201
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+116
+</td>
+<td style="text-align:right;">
+25.6
+</td>
+<td style="text-align:right;">
+74
+</td>
+<td style="text-align:right;">
+125
+</td>
+<td style="text-align:right;">
+29
+</td>
+<td style="text-align:left;">
+present
+</td>
+<td style="text-align:left;">
+missing
+</td>
+<td style="text-align:left;">
+present
+</td>
+<td style="text-align:left;">
+present
+</td>
+<td style="text-align:left;">
+missing
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<h3 id="select-the-features-for-each-preprocessing-step-and-apply-the-preprocessing-steps-to-this-subset">2. Select the features for each preprocessing step and apply the preprocessing steps to this subset</h3>
+<p>We can use the <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_select.html"><code>PipeOpSelect</code></a> to select the appropriate features and then apply the desired impute <a href="https://mlr3pipelines.mlr-org.com/reference/PipeOp.html"><code>PipeOp</code></a> on them:</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>imputer_hist_2</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"select"</span>,
+  selector <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/Selector.html'>selector_name</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"glucose"</span>, <span class='st'>"mass"</span>, <span class='st'>"pressure"</span><span class='op'>)</span><span class='op'>)</span>,
+  id <span class='op'>=</span> <span class='st'>"slct1"</span><span class='op'>)</span> <span class='op'><a href='https://mlr3pipelines.mlr-org.com//reference/grapes-greater-than-greater-than-grapes.html'>%&gt;&gt;%</a></span> <span class='co'># unique id so we can combine it in a pipeline with other select PipeOps</span>
+  <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"imputehist"</span><span class='op'>)</span>
+
+<span class='va'>imputer_hist_2</span><span class='op'>$</span><span class='fu'>plot</span><span class='op'>(</span><span class='op'>)</span>
+</code></pre>
+</div>
+<p><img src="2020-04-23-pipelines-selectors-branches_files/figure-html5/2020-04-23-pipelines-selectors-branches-014-1.png" width="576" /></p>
+</div>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span><span class='op'>(</span><span class='va'>imputer_hist_2</span><span class='op'>$</span><span class='fu'>train</span><span class='op'>(</span><span class='va'>task_pima</span><span class='op'>)</span><span class='op'>[[</span><span class='fl'>1</span><span class='op'>]</span><span class='op'>]</span><span class='op'>$</span><span class='fu'>data</span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span>
+</code></pre>
+</div>
+</div>
+<div class="layout-chunk" data-layout="l-body">
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+diabetes
+</th>
+<th style="text-align:right;">
+glucose
+</th>
+<th style="text-align:right;">
+mass
+</th>
+<th style="text-align:right;">
+pressure
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+pos
+</td>
+<td style="text-align:right;">
+148
+</td>
+<td style="text-align:right;">
+33.6
+</td>
+<td style="text-align:right;">
+72
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+neg
+</td>
+<td style="text-align:right;">
+85
+</td>
+<td style="text-align:right;">
+26.6
+</td>
+<td style="text-align:right;">
+66
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+pos
+</td>
+<td style="text-align:right;">
+183
+</td>
+<td style="text-align:right;">
+23.3
+</td>
+<td style="text-align:right;">
+64
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+neg
+</td>
+<td style="text-align:right;">
+89
+</td>
+<td style="text-align:right;">
+28.1
+</td>
+<td style="text-align:right;">
+66
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+pos
+</td>
+<td style="text-align:right;">
+137
+</td>
+<td style="text-align:right;">
+43.1
+</td>
+<td style="text-align:right;">
+40
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+neg
+</td>
+<td style="text-align:right;">
+116
+</td>
+<td style="text-align:right;">
+25.6
+</td>
+<td style="text-align:right;">
+74
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>imputer_median_2</span> <span class='op'>=</span>
+  <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"select"</span>, selector <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/Selector.html'>selector_name</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"insulin"</span>, <span class='st'>"triceps"</span><span class='op'>)</span><span class='op'>)</span>, id <span class='op'>=</span> <span class='st'>"slct2"</span><span class='op'>)</span> <span class='op'><a href='https://mlr3pipelines.mlr-org.com//reference/grapes-greater-than-greater-than-grapes.html'>%&gt;&gt;%</a></span>
+  <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"imputemedian"</span><span class='op'>)</span>
+
+<span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span><span class='op'>(</span><span class='va'>imputer_median_2</span><span class='op'>$</span><span class='fu'>train</span><span class='op'>(</span><span class='va'>task_pima</span><span class='op'>)</span><span class='op'>[[</span><span class='fl'>1</span><span class='op'>]</span><span class='op'>]</span><span class='op'>$</span><span class='fu'>data</span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span>
+</code></pre>
+</div>
+</div>
+<div class="layout-chunk" data-layout="l-body">
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+diabetes
+</th>
+<th style="text-align:right;">
+insulin
+</th>
+<th style="text-align:right;">
+triceps
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+pos
+</td>
+<td style="text-align:right;">
+125
+</td>
+<td style="text-align:right;">
+35
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+neg
+</td>
+<td style="text-align:right;">
+125
+</td>
+<td style="text-align:right;">
+29
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+pos
+</td>
+<td style="text-align:right;">
+125
+</td>
+<td style="text-align:right;">
+29
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+neg
+</td>
+<td style="text-align:right;">
+94
+</td>
+<td style="text-align:right;">
+23
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+pos
+</td>
+<td style="text-align:right;">
+168
+</td>
+<td style="text-align:right;">
+35
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+neg
+</td>
+<td style="text-align:right;">
+125
+</td>
+<td style="text-align:right;">
+29
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>To reproduce the result of the fist example (1.), we need to copy the data four times and apply <code>imputer_hist_2</code>, <code>imputer_median_2</code> and <code>miss_ind</code> on each of the three copies. The fourth copy is required to select the features without missing values and to append it to the final result. We can do this as follows:</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>other_features</span> <span class='op'>=</span> <span class='va'>task_pima</span><span class='op'>$</span><span class='va'>feature_names</span><span class='op'>[</span><span class='va'>task_pima</span><span class='op'>$</span><span class='fu'>missings</span><span class='op'>(</span><span class='op'>)</span><span class='op'>[</span><span class='op'>-</span><span class='fl'>1</span><span class='op'>]</span> <span class='op'>==</span> <span class='fl'>0</span><span class='op'>]</span>
+
+<span class='va'>imputer_missind_2</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"copy"</span>, <span class='fl'>4</span><span class='op'>)</span> <span class='op'><a href='https://mlr3pipelines.mlr-org.com//reference/grapes-greater-than-greater-than-grapes.html'>%&gt;&gt;%</a></span>
+  <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/gunion.html'>gunion</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='va'>imputer_hist_2</span>,
+    <span class='va'>imputer_median_2</span>,
+    <span class='va'>miss_ind</span>,
+    <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"select"</span>, selector <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/Selector.html'>selector_name</a></span><span class='op'>(</span><span class='va'>other_features</span><span class='op'>)</span>, id <span class='op'>=</span> <span class='st'>"slct3"</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span> <span class='op'><a href='https://mlr3pipelines.mlr-org.com//reference/grapes-greater-than-greater-than-grapes.html'>%&gt;&gt;%</a></span>
+  <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"featureunion"</span><span class='op'>)</span>
+
+<span class='va'>imputer_missind_2</span><span class='op'>$</span><span class='fu'>plot</span><span class='op'>(</span><span class='op'>)</span>
+</code></pre>
+</div>
+<p><img src="2020-04-23-pipelines-selectors-branches_files/figure-html5/2020-04-23-pipelines-selectors-branches-019-1.png" width="576" /></p>
+</div>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span><span class='op'>(</span><span class='va'>imputer_missind_2</span><span class='op'>$</span><span class='fu'>train</span><span class='op'>(</span><span class='va'>task_pima</span><span class='op'>)</span><span class='op'>[[</span><span class='fl'>1</span><span class='op'>]</span><span class='op'>]</span><span class='op'>$</span><span class='fu'>data</span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span>
+</code></pre>
+</div>
+</div>
+<div class="layout-chunk" data-layout="l-page">
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+diabetes
+</th>
+<th style="text-align:right;">
+glucose
+</th>
+<th style="text-align:right;">
+mass
+</th>
+<th style="text-align:right;">
+pressure
+</th>
+<th style="text-align:right;">
+insulin
+</th>
+<th style="text-align:right;">
+triceps
+</th>
+<th style="text-align:left;">
+missing_glucose
+</th>
+<th style="text-align:left;">
+missing_insulin
+</th>
+<th style="text-align:left;">
+missing_mass
+</th>
+<th style="text-align:left;">
+missing_pressure
+</th>
+<th style="text-align:left;">
+missing_triceps
+</th>
+<th style="text-align:right;">
+age
+</th>
+<th style="text-align:right;">
+pedigree
+</th>
+<th style="text-align:right;">
+pregnant
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+pos
+</td>
+<td style="text-align:right;">
+148
+</td>
+<td style="text-align:right;">
+33.6
+</td>
+<td style="text-align:right;">
+72
+</td>
+<td style="text-align:right;">
+125
+</td>
+<td style="text-align:right;">
+35
+</td>
+<td style="text-align:left;">
+present
+</td>
+<td style="text-align:left;">
+missing
+</td>
+<td style="text-align:left;">
+present
+</td>
+<td style="text-align:left;">
+present
+</td>
+<td style="text-align:left;">
+present
+</td>
+<td style="text-align:right;">
+50
+</td>
+<td style="text-align:right;">
+0.627
+</td>
+<td style="text-align:right;">
+6
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+neg
+</td>
+<td style="text-align:right;">
+85
+</td>
+<td style="text-align:right;">
+26.6
+</td>
+<td style="text-align:right;">
+66
+</td>
+<td style="text-align:right;">
+125
+</td>
+<td style="text-align:right;">
+29
+</td>
+<td style="text-align:left;">
+present
+</td>
+<td style="text-align:left;">
+missing
+</td>
+<td style="text-align:left;">
+present
+</td>
+<td style="text-align:left;">
+present
+</td>
+<td style="text-align:left;">
+present
+</td>
+<td style="text-align:right;">
+31
+</td>
+<td style="text-align:right;">
+0.351
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+pos
+</td>
+<td style="text-align:right;">
+183
+</td>
+<td style="text-align:right;">
+23.3
+</td>
+<td style="text-align:right;">
+64
+</td>
+<td style="text-align:right;">
+125
+</td>
+<td style="text-align:right;">
+29
+</td>
+<td style="text-align:left;">
+present
+</td>
+<td style="text-align:left;">
+missing
+</td>
+<td style="text-align:left;">
+present
+</td>
+<td style="text-align:left;">
+present
+</td>
+<td style="text-align:left;">
+missing
+</td>
+<td style="text-align:right;">
+32
+</td>
+<td style="text-align:right;">
+0.672
+</td>
+<td style="text-align:right;">
+8
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+neg
+</td>
+<td style="text-align:right;">
+89
+</td>
+<td style="text-align:right;">
+28.1
+</td>
+<td style="text-align:right;">
+66
+</td>
+<td style="text-align:right;">
+94
+</td>
+<td style="text-align:right;">
+23
+</td>
+<td style="text-align:left;">
+present
+</td>
+<td style="text-align:left;">
+present
+</td>
+<td style="text-align:left;">
+present
+</td>
+<td style="text-align:left;">
+present
+</td>
+<td style="text-align:left;">
+present
+</td>
+<td style="text-align:right;">
+21
+</td>
+<td style="text-align:right;">
+0.167
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+pos
+</td>
+<td style="text-align:right;">
+137
+</td>
+<td style="text-align:right;">
+43.1
+</td>
+<td style="text-align:right;">
+40
+</td>
+<td style="text-align:right;">
+168
+</td>
+<td style="text-align:right;">
+35
+</td>
+<td style="text-align:left;">
+present
+</td>
+<td style="text-align:left;">
+present
+</td>
+<td style="text-align:left;">
+present
+</td>
+<td style="text-align:left;">
+present
+</td>
+<td style="text-align:left;">
+present
+</td>
+<td style="text-align:right;">
+33
+</td>
+<td style="text-align:right;">
+2.288
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+neg
+</td>
+<td style="text-align:right;">
+116
+</td>
+<td style="text-align:right;">
+25.6
+</td>
+<td style="text-align:right;">
+74
+</td>
+<td style="text-align:right;">
+125
+</td>
+<td style="text-align:right;">
+29
+</td>
+<td style="text-align:left;">
+present
+</td>
+<td style="text-align:left;">
+missing
+</td>
+<td style="text-align:left;">
+present
+</td>
+<td style="text-align:left;">
+present
+</td>
+<td style="text-align:left;">
+missing
+</td>
+<td style="text-align:right;">
+30
+</td>
+<td style="text-align:right;">
+0.201
+</td>
+<td style="text-align:right;">
+5
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Note that when there is one input channel, it is automatically copied as many times as needed for the downstream <a href="https://mlr3pipelines.mlr-org.com/reference/PipeOp.html"><code>PipeOp</code></a>s. In other words, the code above works also without <code>po("copy", 4)</code>:</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>imputer_missind_3</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/gunion.html'>gunion</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='va'>imputer_hist_2</span>,
+  <span class='va'>imputer_median_2</span>,
+  <span class='va'>miss_ind</span>,
+  <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"select"</span>, selector <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/Selector.html'>selector_name</a></span><span class='op'>(</span><span class='va'>other_features</span><span class='op'>)</span>, id <span class='op'>=</span> <span class='st'>"slct3"</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span> <span class='op'><a href='https://mlr3pipelines.mlr-org.com//reference/grapes-greater-than-greater-than-grapes.html'>%&gt;&gt;%</a></span>
+  <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"featureunion"</span><span class='op'>)</span>
+
+<span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span><span class='op'>(</span><span class='va'>imputer_missind_3</span><span class='op'>$</span><span class='fu'>train</span><span class='op'>(</span><span class='va'>task_pima</span><span class='op'>)</span><span class='op'>[[</span><span class='fl'>1</span><span class='op'>]</span><span class='op'>]</span><span class='op'>$</span><span class='fu'>data</span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span>
+</code></pre>
+</div>
+</div>
+<div class="layout-chunk" data-layout="l-page">
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+diabetes
+</th>
+<th style="text-align:right;">
+glucose
+</th>
+<th style="text-align:right;">
+mass
+</th>
+<th style="text-align:right;">
+pressure
+</th>
+<th style="text-align:right;">
+insulin
+</th>
+<th style="text-align:right;">
+triceps
+</th>
+<th style="text-align:left;">
+missing_glucose
+</th>
+<th style="text-align:left;">
+missing_insulin
+</th>
+<th style="text-align:left;">
+missing_mass
+</th>
+<th style="text-align:left;">
+missing_pressure
+</th>
+<th style="text-align:left;">
+missing_triceps
+</th>
+<th style="text-align:right;">
+age
+</th>
+<th style="text-align:right;">
+pedigree
+</th>
+<th style="text-align:right;">
+pregnant
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+pos
+</td>
+<td style="text-align:right;">
+148
+</td>
+<td style="text-align:right;">
+33.6
+</td>
+<td style="text-align:right;">
+72
+</td>
+<td style="text-align:right;">
+125
+</td>
+<td style="text-align:right;">
+35
+</td>
+<td style="text-align:left;">
+present
+</td>
+<td style="text-align:left;">
+missing
+</td>
+<td style="text-align:left;">
+present
+</td>
+<td style="text-align:left;">
+present
+</td>
+<td style="text-align:left;">
+present
+</td>
+<td style="text-align:right;">
+50
+</td>
+<td style="text-align:right;">
+0.627
+</td>
+<td style="text-align:right;">
+6
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+neg
+</td>
+<td style="text-align:right;">
+85
+</td>
+<td style="text-align:right;">
+26.6
+</td>
+<td style="text-align:right;">
+66
+</td>
+<td style="text-align:right;">
+125
+</td>
+<td style="text-align:right;">
+29
+</td>
+<td style="text-align:left;">
+present
+</td>
+<td style="text-align:left;">
+missing
+</td>
+<td style="text-align:left;">
+present
+</td>
+<td style="text-align:left;">
+present
+</td>
+<td style="text-align:left;">
+present
+</td>
+<td style="text-align:right;">
+31
+</td>
+<td style="text-align:right;">
+0.351
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+pos
+</td>
+<td style="text-align:right;">
+183
+</td>
+<td style="text-align:right;">
+23.3
+</td>
+<td style="text-align:right;">
+64
+</td>
+<td style="text-align:right;">
+125
+</td>
+<td style="text-align:right;">
+29
+</td>
+<td style="text-align:left;">
+present
+</td>
+<td style="text-align:left;">
+missing
+</td>
+<td style="text-align:left;">
+present
+</td>
+<td style="text-align:left;">
+present
+</td>
+<td style="text-align:left;">
+missing
+</td>
+<td style="text-align:right;">
+32
+</td>
+<td style="text-align:right;">
+0.672
+</td>
+<td style="text-align:right;">
+8
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+neg
+</td>
+<td style="text-align:right;">
+89
+</td>
+<td style="text-align:right;">
+28.1
+</td>
+<td style="text-align:right;">
+66
+</td>
+<td style="text-align:right;">
+94
+</td>
+<td style="text-align:right;">
+23
+</td>
+<td style="text-align:left;">
+present
+</td>
+<td style="text-align:left;">
+present
+</td>
+<td style="text-align:left;">
+present
+</td>
+<td style="text-align:left;">
+present
+</td>
+<td style="text-align:left;">
+present
+</td>
+<td style="text-align:right;">
+21
+</td>
+<td style="text-align:right;">
+0.167
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+pos
+</td>
+<td style="text-align:right;">
+137
+</td>
+<td style="text-align:right;">
+43.1
+</td>
+<td style="text-align:right;">
+40
+</td>
+<td style="text-align:right;">
+168
+</td>
+<td style="text-align:right;">
+35
+</td>
+<td style="text-align:left;">
+present
+</td>
+<td style="text-align:left;">
+present
+</td>
+<td style="text-align:left;">
+present
+</td>
+<td style="text-align:left;">
+present
+</td>
+<td style="text-align:left;">
+present
+</td>
+<td style="text-align:right;">
+33
+</td>
+<td style="text-align:right;">
+2.288
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+neg
+</td>
+<td style="text-align:right;">
+116
+</td>
+<td style="text-align:right;">
+25.6
+</td>
+<td style="text-align:right;">
+74
+</td>
+<td style="text-align:right;">
+125
+</td>
+<td style="text-align:right;">
+29
+</td>
+<td style="text-align:left;">
+present
+</td>
+<td style="text-align:left;">
+missing
+</td>
+<td style="text-align:left;">
+present
+</td>
+<td style="text-align:left;">
+present
+</td>
+<td style="text-align:left;">
+missing
+</td>
+<td style="text-align:right;">
+30
+</td>
+<td style="text-align:right;">
+0.201
+</td>
+<td style="text-align:right;">
+5
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Usually, <code>po("copy")</code> is required when there are more than one input channels and multiple output channels, and their numbers do not match.</p>
+<h2 id="branching">Branching</h2>
+<p>We can not know if the combination of a learner with this preprocessing graph will benefit from the imputation steps and the added missing value indicators. Maybe it would have been better to just use <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_imputemedian.html"><code>imputemedian</code></a> on all the variables. We could investigate this assumption by adding an alternative path to the graph with the mentioned <code>imputemedian</code>. This is possible using the <a href="https://mlr3pipelines.mlr-org.com/reference/branch.html">“branch”</a> <a href="https://mlr3pipelines.mlr-org.com/reference/PipeOp.html"><code>PipeOp</code></a>:</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>imputer_median_3</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"imputemedian"</span>, id <span class='op'>=</span> <span class='st'>"simple_median"</span><span class='op'>)</span> <span class='co'># add the id so it does not clash with `imputer_median`</span>
+
+<span class='va'>branches</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"impute_missind"</span>, <span class='st'>"simple_median"</span><span class='op'>)</span> <span class='co'># names of the branches</span>
+
+<span class='va'>graph_branch</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"branch"</span>, <span class='va'>branches</span><span class='op'>)</span> <span class='op'><a href='https://mlr3pipelines.mlr-org.com//reference/grapes-greater-than-greater-than-grapes.html'>%&gt;&gt;%</a></span>
+  <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/gunion.html'>gunion</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='va'>impute_missind</span>, <span class='va'>imputer_median_3</span><span class='op'>)</span><span class='op'>)</span> <span class='op'><a href='https://mlr3pipelines.mlr-org.com//reference/grapes-greater-than-greater-than-grapes.html'>%&gt;&gt;%</a></span>
+  <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"unbranch"</span><span class='op'>)</span>
+
+<span class='va'>graph_branch</span><span class='op'>$</span><span class='fu'>plot</span><span class='op'>(</span><span class='op'>)</span>
+</code></pre>
+</div>
+<p><img src="2020-04-23-pipelines-selectors-branches_files/figure-html5/2020-04-23-pipelines-selectors-branches-024-1.png" width="672" /></p>
+</div>
+<h2 id="tuning-the-pipeline">Tuning the pipeline</h2>
+<p>To finalize the graph, we combine it with a rpart learner:</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>graph</span> <span class='op'>=</span> <span class='va'>graph_branch</span> <span class='op'><a href='https://mlr3pipelines.mlr-org.com//reference/grapes-greater-than-greater-than-grapes.html'>%&gt;&gt;%</a></span>
+  <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>lrn</a></span><span class='op'>(</span><span class='st'>"classif.rpart"</span><span class='op'>)</span>
+
+<span class='va'>graph</span><span class='op'>$</span><span class='fu'>plot</span><span class='op'>(</span><span class='op'>)</span>
+</code></pre>
+</div>
+<p><img src="2020-04-23-pipelines-selectors-branches_files/figure-html5/2020-04-23-pipelines-selectors-branches-025-1.png" width="672" /></p>
+</div>
+<p>To define the parameters to be tuned, we first check the available ones in the graph:</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/as.data.table.html'>as.data.table</a></span><span class='op'>(</span><span class='va'>graph</span><span class='op'>$</span><span class='va'>param_set</span><span class='op'>)</span>
+</code></pre>
+</div>
+</div>
+<div class="layout-chunk" data-layout="l-body">
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+id
+</th>
+<th style="text-align:left;">
+class
+</th>
+<th style="text-align:right;">
+lower
+</th>
+<th style="text-align:right;">
+upper
+</th>
+<th style="text-align:right;">
+nlevels
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+branch.selection
+</td>
+<td style="text-align:left;">
+ParamFct
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+imputehist.affect_columns
+</td>
+<td style="text-align:left;">
+ParamUty
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+Inf
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+imputemedian.affect_columns
+</td>
+<td style="text-align:left;">
+ParamUty
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+Inf
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+missind.which
+</td>
+<td style="text-align:left;">
+ParamFct
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+missind.type
+</td>
+<td style="text-align:left;">
+ParamFct
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+4
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+missind.affect_columns
+</td>
+<td style="text-align:left;">
+ParamUty
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+Inf
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+simple_median.affect_columns
+</td>
+<td style="text-align:left;">
+ParamUty
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+Inf
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+classif.rpart.cp
+</td>
+<td style="text-align:left;">
+ParamDbl
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+Inf
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+classif.rpart.keep_model
+</td>
+<td style="text-align:left;">
+ParamLgl
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+classif.rpart.maxcompete
+</td>
+<td style="text-align:left;">
+ParamInt
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+Inf
+</td>
+<td style="text-align:right;">
+Inf
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+classif.rpart.maxdepth
+</td>
+<td style="text-align:left;">
+ParamInt
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+30
+</td>
+<td style="text-align:right;">
+30
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+classif.rpart.maxsurrogate
+</td>
+<td style="text-align:left;">
+ParamInt
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+Inf
+</td>
+<td style="text-align:right;">
+Inf
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+classif.rpart.minbucket
+</td>
+<td style="text-align:left;">
+ParamInt
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+Inf
+</td>
+<td style="text-align:right;">
+Inf
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+classif.rpart.minsplit
+</td>
+<td style="text-align:left;">
+ParamInt
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+Inf
+</td>
+<td style="text-align:right;">
+Inf
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+classif.rpart.surrogatestyle
+</td>
+<td style="text-align:left;">
+ParamInt
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+classif.rpart.usesurrogate
+</td>
+<td style="text-align:left;">
+ParamInt
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+3
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+classif.rpart.xval
+</td>
+<td style="text-align:left;">
+ParamInt
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+Inf
+</td>
+<td style="text-align:right;">
+Inf
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>We decide to jointly tune the <code>"branch.selection"</code>, <code>"classif.rpart.cp"</code> and <code>"classif.rpart.minbucket"</code> hyperparameters:</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>search_space</span> <span class='op'>=</span> <span class='fu'><a href='https://paradox.mlr-org.com/reference/ps.html'>ps</a></span><span class='op'>(</span>
+  branch.selection <span class='op'>=</span> <span class='fu'><a href='https://paradox.mlr-org.com/reference/Domain.html'>p_fct</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"impute_missind"</span>, <span class='st'>"simple_median"</span><span class='op'>)</span><span class='op'>)</span>,
+  classif.rpart.cp <span class='op'>=</span> <span class='fu'><a href='https://paradox.mlr-org.com/reference/Domain.html'>p_dbl</a></span><span class='op'>(</span><span class='fl'>0.001</span>, <span class='fl'>0.1</span><span class='op'>)</span>,
+  classif.rpart.minbucket <span class='op'>=</span> <span class='fu'><a href='https://paradox.mlr-org.com/reference/Domain.html'>p_int</a></span><span class='op'>(</span><span class='fl'>1</span>, <span class='fl'>10</span><span class='op'>)</span><span class='op'>)</span>
+</code></pre>
+</div>
+</div>
+<p>In order to tune the graph, it needs to be converted to a learner:</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>graph_learner</span> <span class='op'>=</span>  <span class='fu'><a href='https://mlr3.mlr-org.com/reference/as_learner.html'>as_learner</a></span><span class='op'>(</span><span class='va'>graph</span><span class='op'>)</span>
+
+<span class='va'>cv3</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>rsmp</a></span><span class='op'>(</span><span class='st'>"cv"</span>, folds <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span>
+
+<span class='va'>cv3</span><span class='op'>$</span><span class='fu'>instantiate</span><span class='op'>(</span><span class='va'>task_pima</span><span class='op'>)</span> <span class='co'># to generate folds for cross validation</span>
+
+<span class='va'>instance</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3tuning.mlr-org.com/reference/tune.html'>tune</a></span><span class='op'>(</span>
+  method <span class='op'>=</span> <span class='st'>"random_search"</span>,
+  task <span class='op'>=</span> <span class='va'>task_pima</span>,
+  learner <span class='op'>=</span> <span class='va'>graph_learner</span>,
+  resampling <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>rsmp</a></span><span class='op'>(</span><span class='st'>"cv"</span>, folds <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span>,
+  measure <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>msr</a></span><span class='op'>(</span><span class='st'>"classif.ce"</span><span class='op'>)</span>,
+  search_space <span class='op'>=</span> <span class='va'>search_space</span>,
+  term_evals <span class='op'>=</span> <span class='fl'>5</span><span class='op'>)</span>
+
+<span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/as.data.table.html'>as.data.table</a></span><span class='op'>(</span><span class='va'>instance</span><span class='op'>$</span><span class='va'>archive</span><span class='op'>)</span>
+</code></pre>
+</div>
+</div>
+<div class="layout-chunk" data-layout="l-body">
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+branch.selection
+</th>
+<th style="text-align:right;">
+classif.rpart.cp
+</th>
+<th style="text-align:right;">
+classif.rpart.minbucket
+</th>
+<th style="text-align:right;">
+classif.ce
+</th>
+<th style="text-align:right;">
+runtime_learners
+</th>
+<th style="text-align:left;">
+timestamp
+</th>
+<th style="text-align:right;">
+batch_nr
+</th>
+<th style="text-align:right;">
+warnings
+</th>
+<th style="text-align:right;">
+errors
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+impute_missind
+</td>
+<td style="text-align:right;">
+0.0210715
+</td>
+<td style="text-align:right;">
+7
+</td>
+<td style="text-align:right;">
+0.2460938
+</td>
+<td style="text-align:right;">
+1.233
+</td>
+<td style="text-align:left;">
+2022-04-09 04:43:48
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+simple_median
+</td>
+<td style="text-align:right;">
+0.0275991
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0.2539062
+</td>
+<td style="text-align:right;">
+0.817
+</td>
+<td style="text-align:left;">
+2022-04-09 04:43:49
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+impute_missind
+</td>
+<td style="text-align:right;">
+0.0760711
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+0.2460938
+</td>
+<td style="text-align:right;">
+1.280
+</td>
+<td style="text-align:left;">
+2022-04-09 04:43:51
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+impute_missind
+</td>
+<td style="text-align:right;">
+0.0860854
+</td>
+<td style="text-align:right;">
+7
+</td>
+<td style="text-align:right;">
+0.2473958
+</td>
+<td style="text-align:right;">
+4.378
+</td>
+<td style="text-align:left;">
+2022-04-09 04:43:55
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+impute_missind
+</td>
+<td style="text-align:right;">
+0.0122969
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0.2539062
+</td>
+<td style="text-align:right;">
+1.178
+</td>
+<td style="text-align:left;">
+2022-04-09 04:43:57
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The best performance in this short tuned experiment was achieved with:</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>instance</span><span class='op'>$</span><span class='va'>result</span>
+</code></pre>
+</div>
+<pre><code>   branch.selection classif.rpart.cp classif.rpart.minbucket learner_param_vals  x_domain classif.ce
+1:   impute_missind       0.02107154                       7          &lt;list[9]&gt; &lt;list[3]&gt;  0.2460938</code></pre>
+</div>
+<h2 id="conclusion">Conclusion</h2>
+<p>This post shows ways on how to specify features on which preprocessing steps are to be performed. In addition it shows how to create alternative paths in the learner graph. The preprocessing steps that can be used are not limited to imputation. Check the list of available <a href="https://mlr3pipelines.mlr-org.com/reference/PipeOp.html"><code>PipeOp</code></a>.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
+>>>>>>> parent of dc9505d9 (Deploy from Github Actions build 2142763313 [ci skip])
 <!--radix_placeholder_article_footer-->
 <!--/radix_placeholder_article_footer-->
 </div>

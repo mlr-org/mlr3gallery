@@ -2122,8 +2122,637 @@ document.addEventListener('DOMContentLoaded', function() {
 </div>
 
 <div class="d-article">
+<<<<<<< HEAD
 <p>Post moved to <a href="https://mlr-org.com/gallery/target-transformations-via-pipelines/">mlr-org.com/gallery/target-transformations-via-pipelines/</a>.</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
+=======
+<div class="d-contents d-contents-float">
+<nav class="l-text toc figcaption" id="TOC">
+<h3>Contents</h3>
+<ul>
+<li><a href="#simple-target-transformations">Simple Target Transformations</a></li>
+<li><a href="#abstract-base-class-pipeoptargettrafo">Abstract Base Class: PipeOpTargetTrafo</a></li>
+<li><a href="#hands-on-pipeoptargettrafoboxcox">Hands on: PipeOpTargetTrafoBoxCox</a></li>
+</ul>
+</nav>
+</div>
+<p>Transforming the target variable often can lead to predictive improvement and is a widely used tool. Typical transformations are for example the <span class="math inline">\(\log\)</span> transformation of the target aiming at minimizing (right) skewness, or the Box Cox and Yeo-Johnson transformations being more flexible but having a similar goal.</p>
+<p>One option to perform, e.g., a <span class="math inline">\(\log\)</span> transformation would be to manually transform the target prior to training a <a href="https://mlr3.mlr-org.com/reference/Learner.html"><code>Learner</code></a> (and also predicting from it) and then manually invert this transformation via <span class="math inline">\(\exp\)</span> after predicting from the <a href="https://mlr3.mlr-org.com/reference/Learner.html"><code>Learner</code></a>. This is quite cumbersome, especially if a transformation and inverse transformation require information about both the training and prediction data.</p>
+<p>In this post, we show how to do various kinds of target transformations using <a href="https://mlr3pipelines.mlr-org.com">mlr3pipelines</a> and explain the design of the target transformation and inversion <a href="https://mlr3pipelines.mlr-org.com/reference/PipeOp.html"><code>PipeOps</code></a>.</p>
+<p>You will:</p>
+<ul>
+<li><p>learn how to do simple target transformations using <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_targetmutate.html"><code>PipeOpTargetMutate</code></a></p></li>
+<li><p>be introduced to the abstract base class to implement custom target transformations, <a href="https://mlr3pipelines.mlr-org.com/reference/PipeOpTargetTrafo.html"><code>PipeOpTargetTrafo</code></a></p></li>
+<li><p>implement a custom target transformation PipeOp, <code>PipeOpTargetTrafoBoxCox</code></p></li>
+</ul>
+<p>As a prerequisite, you should be quite familiar with <a href="https://mlr3pipelines.mlr-org.com">mlr3pipelines</a>, i.e, know about the <code>$state</code> field of <a href="https://mlr3pipelines.mlr-org.com/reference/PipeOp.html"><code>PipeOp</code></a>s, input and output channels, as well as <a href="https://mlr3pipelines.mlr-org.com/reference/Graph.html"><code>Graphs</code></a>. We will start with a <a href="https://mlr3pipelines.mlr-org.com/reference/PipeOp.html"><code>PipeOp</code></a> for simple target transformations, <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_targetmutate.html"><code>PipeOpTargetMutate</code></a>.</p>
+<p>We load the most important packages for this example.</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://mlr3.mlr-org.com'>mlr3</a></span><span class='op'>)</span>
+<span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://mlr3learners.mlr-org.com'>mlr3learners</a></span><span class='op'>)</span>
+<span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://mlr3pipelines.mlr-org.com'>mlr3pipelines</a></span><span class='op'>)</span>
+<span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://paradox.mlr-org.com'>paradox</a></span><span class='op'>)</span>
+</code></pre>
+</div>
+</div>
+<p>We initialize the random number generator with a fixed seed for reproducibility, and decrease the verbosity of the logger to keep the output clearly represented.</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='fu'><a href='https://rdrr.io/r/base/Random.html'>set.seed</a></span><span class='op'>(</span><span class='fl'>7832</span><span class='op'>)</span>
+<span class='fu'>lgr</span><span class='fu'>::</span><span class='fu'><a href='https://s-fleck.github.io/lgr/reference/get_logger.html'>get_logger</a></span><span class='op'>(</span><span class='st'>"mlr3"</span><span class='op'>)</span><span class='op'>$</span><span class='fu'>set_threshold</span><span class='op'>(</span><span class='st'>"warn"</span><span class='op'>)</span>
+</code></pre>
+</div>
+</div>
+<p>In all sections we will use the <a href="https://mlr3.mlr-org.com/reference/mlr_tasks_mtcars.html"><code>mtcars</code></a> regression <a href="https://mlr3.mlr-org.com/reference/Task.html"><code>task</code></a> with <code>mpg</code> being a numerical, positive target:</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>task</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>tsk</a></span><span class='op'>(</span><span class='st'>"mtcars"</span><span class='op'>)</span>
+<span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>task</span><span class='op'>$</span><span class='fu'>data</span><span class='op'>(</span>cols <span class='op'>=</span> <span class='va'>task</span><span class='op'>$</span><span class='va'>target_names</span><span class='op'>)</span><span class='op'>)</span>
+</code></pre>
+</div>
+<pre><code>      mpg       
+ Min.   :10.40  
+ 1st Qu.:15.43  
+ Median :19.20  
+ Mean   :20.09  
+ 3rd Qu.:22.80  
+ Max.   :33.90  </code></pre>
+</div>
+<p>Moreover, as a <a href="https://mlr3.mlr-org.com/reference/Learner.html"><code>Learner</code></a> we will use an <a href="https://mlr3learners.mlr-org.com/reference/mlr_learners_regr.lm.html"><code>ordinary linear regression learner</code></a>:</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>learner_lm</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>lrn</a></span><span class='op'>(</span><span class='st'>"regr.lm"</span><span class='op'>)</span>
+</code></pre>
+</div>
+</div>
+<h1 id="simple-target-transformations">Simple Target Transformations</h1>
+<p>The term <em>simple</em> refers to transformations that are given by a function of the target, relying on no other arguments (constants are of course allowed). The most prominent example is given by the <span class="math inline">\(\log\)</span> transformation which we can later invert by applying the <span class="math inline">\(\exp\)</span> transformation.</p>
+<p>If you are only interested in doing such a transformation and you do not have the time to read more of this post, simply use the following syntactic sugar:</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>g_ppl</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/ppl.html'>ppl</a></span><span class='op'>(</span><span class='st'>"targettrafo"</span>, graph <span class='op'>=</span> <span class='va'>learner_lm</span><span class='op'>)</span>
+<span class='va'>g_ppl</span><span class='op'>$</span><span class='va'>param_set</span><span class='op'>$</span><span class='va'>values</span><span class='op'>$</span><span class='va'>targetmutate.trafo</span> <span class='op'>=</span> <span class='kw'>function</span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span> <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span>
+<span class='va'>g_ppl</span><span class='op'>$</span><span class='va'>param_set</span><span class='op'>$</span><span class='va'>values</span><span class='op'>$</span><span class='va'>targetmutate.inverter</span> <span class='op'>=</span> <span class='kw'>function</span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>response <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>exp</a></span><span class='op'>(</span><span class='va'>x</span><span class='op'>$</span><span class='va'>response</span><span class='op'>)</span><span class='op'>)</span>
+</code></pre>
+</div>
+</div>
+<p>This constructs a <a href="https://mlr3pipelines.mlr-org.com/reference/Graph.html"><code>Graph</code></a> that will <span class="math inline">\(\log\)</span> transform the target prior to training the linear regression learner (or predicting from it) and <span class="math inline">\(\exp\)</span> transform the target after predicting from it. Note that you can supply any other <a href="https://mlr3.mlr-org.com/reference/Learner.html"><code>Learner</code></a> or even a whole <a href="https://mlr3pipelines.mlr-org.com/reference/Graph.html"><code>Graph</code></a> as the <code>graph</code> argument.</p>
+<p>Now, we will go into more detail about how this actually works:</p>
+<p>We can perform a <span class="math inline">\(\log\)</span> transformation of our numerical, positive target, <code>mpg</code>, using <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_targetmutate.html"><code>PipeOpTargetMutate</code></a> (by default, <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_graphs_targettrafo.html"><code>ppl("targettrafo")</code></a> uses this target transformation <a href="https://mlr3pipelines.mlr-org.com/reference/PipeOp.html"><code>PipeOp</code></a>):</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>trafo</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"targetmutate"</span>, param_vals <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>trafo <span class='op'>=</span> <span class='kw'>function</span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span> <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>
+</code></pre>
+</div>
+</div>
+<p>We have to specify the <code>trafo</code> parameter as a function of <code>x</code> (which will internally be evaluated to be the target of the <a href="https://mlr3.mlr-org.com/reference/Task.html"><code>Task</code></a>): <code>trafo = function(x) log(x))</code>. In principle, this is all that is needed to transform the target prior to training a <a href="https://mlr3.mlr-org.com/reference/Learner.html"><code>Learner</code></a> (or predicting from it), i.e., if we now train this <a href="https://mlr3pipelines.mlr-org.com/reference/PipeOp.html"><code>PipeOp</code></a>, we see that the target is transformed as specified:</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>trafo</span><span class='op'>$</span><span class='fu'>train</span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='va'>task</span><span class='op'>)</span><span class='op'>)</span><span class='op'>$</span><span class='va'>output</span><span class='op'>$</span><span class='fu'>data</span><span class='op'>(</span>cols <span class='op'>=</span> <span class='va'>task</span><span class='op'>$</span><span class='va'>target_names</span><span class='op'>)</span>
+</code></pre>
+</div>
+<pre><code>         mpg
+ 1: 3.044522
+ 2: 3.044522
+ 3: 3.126761
+ 4: 3.063391
+ 5: 2.928524
+ 6: 2.895912
+ 7: 2.660260
+ 8: 3.194583
+ 9: 3.126761
+10: 2.954910
+11: 2.879198
+12: 2.797281
+13: 2.850707
+14: 2.721295
+15: 2.341806
+16: 2.341806
+17: 2.687847
+18: 3.478158
+19: 3.414443
+20: 3.523415
+21: 3.068053
+22: 2.740840
+23: 2.721295
+24: 2.587764
+25: 2.954910
+26: 3.306887
+27: 3.258097
+28: 3.414443
+29: 2.760010
+30: 2.980619
+31: 2.708050
+32: 3.063391
+         mpg</code></pre>
+</div>
+<p>After having predicted from the <a href="https://mlr3.mlr-org.com/reference/Learner.html"><code>Learner</code></a> we could then proceed to apply the inverse transformation function in a similar manner. However, in <a href="https://mlr3pipelines.mlr-org.com">mlr3pipelines</a>, we decided to go with a more unified design of handling target transformations. In all target transformation <a href="https://mlr3pipelines.mlr-org.com/reference/PipeOp.html"><code>PipeOp</code></a>s also the inverse transformation function of the target has to be specified. Therefore, in <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_targetmutate.html"><code>PipeOpTargetMutate</code></a>, the parameter <code>inverter</code> also has to be correctly specified:</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>trafo</span><span class='op'>$</span><span class='va'>param_set</span><span class='op'>$</span><span class='va'>values</span><span class='op'>$</span><span class='va'>inverter</span> <span class='op'>=</span> <span class='kw'>function</span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>response <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>exp</a></span><span class='op'>(</span><span class='va'>x</span><span class='op'>$</span><span class='va'>response</span><span class='op'>)</span><span class='op'>)</span>
+</code></pre>
+</div>
+</div>
+<p>Internally, this function will be applied to the <a href="https://www.rdocumentation.org/packages/data.table/topics/data.table-package"><code>data.table</code></a> downstream of a <a href="https://mlr3.mlr-org.com/reference/Prediction.html"><code>Prediction</code></a> object without the <code>$row_id</code> and <code>$truth</code> columns, and we specify that the <code>$response</code> column should be transformed. Note that applying the inverse transformation will typically only be done to the <code>$response</code> column, because transforming standard errors or probabilities is often not straightforward.</p>
+<p>To actually carry out the inverse transformation function after predicting from the <a href="https://mlr3.mlr-org.com/reference/Learner.html"><code>Learner</code></a>, we then rely on <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_targetinvert.html"><code>PipeOpTargetInvert</code></a>. <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_targetinvert.html"><code>PipeOpTargetInvert</code></a> has an empty <a href="https://paradox.mlr-org.com/reference/ParamSet.html"><code>ParamSet</code></a> and its sole purpose is to apply the inverse transformation function after having predicted from a <a href="https://mlr3.mlr-org.com/reference/Learner.html"><code>Learner</code></a> (note that this whole design of target transformations may seem somewhat over-engineered at first glance, however, we will learn of its advantages when we later move to the advanced section).</p>
+<p><a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_targetinvert.html"><code>PipeOpTargetInvert</code></a> has two input channels named <code>"fun"</code> and <code>"prediction"</code>. During training, both take <code>NULL</code> as input (because this is what a <a href="https://mlr3.mlr-org.com/reference/Learner.html"><code>Learner</code></a>’s <code>"output"</code> output and <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_targetmutate.html"><code>PipeOpTargetMutate</code></a>’s <code>"fun"</code> output will return during training). During prediction, the <code>"prediction"</code> input takes a <a href="https://mlr3.mlr-org.com/reference/Prediction.html"><code>Prediction</code></a>, and the <code>"fun"</code> input takes the <code>"fun"</code> output from <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_targetmutate.html"><code>PipeOpTargetMutate</code></a> (you may have noticed already, that <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_targetmutate.html"><code>PipeOpTargetMutate</code></a> has actually two outputs, <code>"fun"</code> and <code>"output"</code>, with <code>"fun"</code> returning <code>NULL</code> during training and a function during prediction, while <code>"output"</code> always returns the transformed input <a href="https://mlr3.mlr-org.com/reference/Task.html"><code>Task</code></a>). We can see this, if we look at:</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>trafo</span><span class='op'>$</span><span class='va'>output</span>
+</code></pre>
+</div>
+<pre><code>     name train  predict
+1:    fun  NULL function
+2: output  Task     Task</code></pre>
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>trafo</span><span class='op'>$</span><span class='fu'>predict</span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='va'>task</span><span class='op'>)</span><span class='op'>)</span>
+</code></pre>
+</div>
+<pre><code>$fun
+function (inputs) 
+{
+    assert_list(inputs, len = 1L, types = &quot;Prediction&quot;)
+    list(private$.invert(inputs[[1L]], predict_phase_state))
+}
+&lt;bytecode: 0x55cf3cc48b80&gt;
+&lt;environment: 0x55cf3cc45648&gt;
+
+$output
+&lt;TaskRegr:mtcars&gt; (32 x 11): Motor Trends
+* Target: mpg
+* Properties: -
+* Features (10):
+  - dbl (10): am, carb, cyl, disp, drat, gear, hp, qsec, vs, wt</code></pre>
+</div>
+<p>We will talk more about such technical details in the advanced section. For now, to finally construct our target transformation pipeline, we build a <a href="https://mlr3pipelines.mlr-org.com/reference/Graph.html"><code>Graph</code></a>:</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>g</span> <span class='op'>=</span> <span class='va'><a href='https://mlr3pipelines.mlr-org.com//reference/Graph.html'>Graph</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='op'>)</span>
+<span class='va'>g</span><span class='op'>$</span><span class='fu'>add_pipeop</span><span class='op'>(</span><span class='va'>trafo</span><span class='op'>)</span>
+<span class='va'>g</span><span class='op'>$</span><span class='fu'>add_pipeop</span><span class='op'>(</span><span class='va'>learner_lm</span><span class='op'>)</span>
+<span class='va'>g</span><span class='op'>$</span><span class='fu'>add_pipeop</span><span class='op'>(</span><span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/po.html'>po</a></span><span class='op'>(</span><span class='st'>"targetinvert"</span><span class='op'>)</span><span class='op'>)</span>
+</code></pre>
+</div>
+</div>
+<p>Manually connecting the edges is quite cumbersome. First we connect the <code>"output"</code> output of <code>"targetmutate"</code> to the <code>"input"</code> input of <code>"regr.lm"</code>:</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>g</span><span class='op'>$</span><span class='fu'>add_edge</span><span class='op'>(</span>src_id <span class='op'>=</span> <span class='st'>"targetmutate"</span>, dst_id <span class='op'>=</span> <span class='st'>"regr.lm"</span>,
+  src_channel <span class='op'>=</span> <span class='fl'>2</span>, dst_channel <span class='op'>=</span> <span class='fl'>1</span><span class='op'>)</span>
+</code></pre>
+</div>
+</div>
+<p>Then we connect the <code>"output"</code> output of <code>"regr.lm"</code> to the <code>"prediction"</code> input of <code>"targetinvert"</code>:</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>g</span><span class='op'>$</span><span class='fu'>add_edge</span><span class='op'>(</span>src_id <span class='op'>=</span> <span class='st'>"regr.lm"</span>, dst_id <span class='op'>=</span> <span class='st'>"targetinvert"</span>,
+  src_channel <span class='op'>=</span> <span class='fl'>1</span>, dst_channel <span class='op'>=</span> <span class='fl'>2</span><span class='op'>)</span>
+</code></pre>
+</div>
+</div>
+<p>Finally, we connect the <code>"fun"</code> output of <code>"targetmutate"</code> to the <code>"fun"</code> input of <code>"targetinvert"</code>:</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>g</span><span class='op'>$</span><span class='fu'>add_edge</span><span class='op'>(</span>src_id <span class='op'>=</span> <span class='st'>"targetmutate"</span>, dst_id <span class='op'>=</span> <span class='st'>"targetinvert"</span>,
+  src_channel <span class='op'>=</span> <span class='fl'>1</span>, dst_channel <span class='op'>=</span> <span class='fl'>1</span><span class='op'>)</span>
+</code></pre>
+</div>
+</div>
+<p>This graph (which is conceptually the same graph as constructed via the <code>ppl("targettrafo")</code> syntactic sugar above) looks like the following:</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>g</span><span class='op'>$</span><span class='fu'>plot</span><span class='op'>(</span><span class='op'>)</span>
+</code></pre>
+</div>
+<p><img src="target-transformations-via-pipelines_files/figure-html5/target-transformations-via-pipelines-015-1.png" width="624" /></p>
+</div>
+<p>We can then finally call <code>$train()</code> and <code>$predict()</code> (prior to this we wrap the <a href="https://mlr3pipelines.mlr-org.com/reference/Graph.html"><code>Graph</code></a> in a <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_learners_graph.html"><code>GraphLearner</code></a>):</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>gl</span> <span class='op'>=</span> <span class='va'><a href='https://mlr3pipelines.mlr-org.com//reference/mlr_learners_graph.html'>GraphLearner</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='va'>g</span><span class='op'>)</span>
+<span class='va'>gl</span><span class='op'>$</span><span class='fu'>train</span><span class='op'>(</span><span class='va'>task</span><span class='op'>)</span>
+<span class='va'>gl</span><span class='op'>$</span><span class='va'>state</span>
+</code></pre>
+</div>
+<pre><code>$model
+$model$targetmutate
+list()
+
+$model$regr.lm
+$model$regr.lm$model
+
+Call:
+stats::lm(formula = task$formula(), data = task$data())
+
+Coefficients:
+(Intercept)           am         carb          cyl         disp         drat         gear           hp         qsec  
+  2.776e+00    4.738e-02   -2.012e-02    7.657e-03    4.989e-05    2.220e-02    5.925e-02   -8.964e-04    3.077e-02  
+         vs           wt  
+ -2.874e-03   -1.723e-01  
+
+
+$model$regr.lm$log
+Empty data.table (0 rows and 3 cols): stage,class,msg
+
+$model$regr.lm$train_time
+[1] 0.008
+
+$model$regr.lm$param_vals
+named list()
+
+$model$regr.lm$task_hash
+[1] &quot;6ca8c90cdf732078&quot;
+
+$model$regr.lm$data_prototype
+Empty data.table (0 rows and 11 cols): mpg,am,carb,cyl,disp,drat...
+
+$model$regr.lm$task_prototype
+Empty data.table (0 rows and 11 cols): mpg,am,carb,cyl,disp,drat...
+
+$model$regr.lm$mlr3_version
+[1] &#39;0.13.3&#39;
+
+$model$regr.lm$train_task
+&lt;TaskRegr:mtcars&gt; (32 x 11): Motor Trends
+* Target: mpg
+* Properties: -
+* Features (10):
+  - dbl (10): am, carb, cyl, disp, drat, gear, hp, qsec, vs, wt
+
+
+$model$targetinvert
+list()
+
+
+$log
+Empty data.table (0 rows and 3 cols): stage,class,msg
+
+$train_time
+[1] 0.071
+
+$param_vals
+$param_vals$targetmutate.trafo
+function(x) log(x)
+&lt;bytecode: 0x55cf3d19d828&gt;
+
+$param_vals$targetmutate.inverter
+function(x) list(response = exp(x$response))
+
+
+$task_hash
+[1] &quot;58a137d2055e8406&quot;
+
+$data_prototype
+Empty data.table (0 rows and 11 cols): mpg,am,carb,cyl,disp,drat...
+
+$task_prototype
+Empty data.table (0 rows and 11 cols): mpg,am,carb,cyl,disp,drat...
+
+$mlr3_version
+[1] &#39;0.13.3&#39;
+
+$train_task
+&lt;TaskRegr:mtcars&gt; (32 x 11): Motor Trends
+* Target: mpg
+* Properties: -
+* Features (10):
+  - dbl (10): am, carb, cyl, disp, drat, gear, hp, qsec, vs, wt</code></pre>
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>gl</span><span class='op'>$</span><span class='fu'>predict</span><span class='op'>(</span><span class='va'>task</span><span class='op'>)</span>
+</code></pre>
+</div>
+<pre><code>&lt;PredictionRegr&gt; for 32 observations:
+    row_ids truth response
+          1  21.0 21.67976
+          2  21.0 21.10831
+          3  22.8 25.73690
+---                       
+         30  19.7 19.58533
+         31  15.0 14.11015
+         32  21.4 23.11105</code></pre>
+</div>
+<p>and contrast this with <code>$train()</code> and <code>$predict()</code> of the naive linear regression learner (also look at the estimated coefficients of the linear regression contained in <code>$state$model</code>):</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>learner_lm</span><span class='op'>$</span><span class='fu'>train</span><span class='op'>(</span><span class='va'>task</span><span class='op'>)</span>
+<span class='va'>learner_lm</span><span class='op'>$</span><span class='va'>state</span>
+</code></pre>
+</div>
+<pre><code>$model
+
+Call:
+stats::lm(formula = task$formula(), data = task$data())
+
+Coefficients:
+(Intercept)           am         carb          cyl         disp         drat         gear           hp         qsec  
+   12.30337      2.52023     -0.19942     -0.11144      0.01334      0.78711      0.65541     -0.02148      0.82104  
+         vs           wt  
+    0.31776     -3.71530  
+
+
+$log
+Empty data.table (0 rows and 3 cols): stage,class,msg
+
+$train_time
+[1] 0.003
+
+$param_vals
+named list()
+
+$task_hash
+[1] &quot;58a137d2055e8406&quot;
+
+$data_prototype
+Empty data.table (0 rows and 11 cols): mpg,am,carb,cyl,disp,drat...
+
+$task_prototype
+Empty data.table (0 rows and 11 cols): mpg,am,carb,cyl,disp,drat...
+
+$mlr3_version
+[1] &#39;0.13.3&#39;
+
+$train_task
+&lt;TaskRegr:mtcars&gt; (32 x 11): Motor Trends
+* Target: mpg
+* Properties: -
+* Features (10):
+  - dbl (10): am, carb, cyl, disp, drat, gear, hp, qsec, vs, wt</code></pre>
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>learner_lm</span><span class='op'>$</span><span class='fu'>predict</span><span class='op'>(</span><span class='va'>task</span><span class='op'>)</span>
+</code></pre>
+</div>
+<pre><code>&lt;PredictionRegr&gt; for 32 observations:
+    row_ids truth response
+          1  21.0 22.59951
+          2  21.0 22.11189
+          3  22.8 26.25064
+---                       
+         30  19.7 19.69383
+         31  15.0 13.94112
+         32  21.4 24.36827</code></pre>
+</div>
+<p>You should continue reading, if you are interested in more advanced target transformations, i.e., where the transformation and inverse transformation require information about both the training and prediction data.</p>
+<p>First we will introduce the abstract base class for doing target transformations, <a href="https://mlr3pipelines.mlr-org.com/reference/PipeOpTargetTrafo.html"><code>PipeOpTargetTrafo</code></a>, from which <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_targetmutate.html"><code>PipeOpTargetMutate</code></a> inherits.</p>
+<h1 id="abstract-base-class-pipeoptargettrafo">Abstract Base Class: PipeOpTargetTrafo</h1>
+<p>No matter how “complicated” the actual target transformation and inverse transformation may be, applying the inverse transformation function after having predicted from a <a href="https://mlr3.mlr-org.com/reference/Learner.html"><code>Learner</code></a> will always be done via <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_targetinvert.html"><code>PipeOpTargetInvert</code></a> (as already outlined above, <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_targetinvert.html"><code>PipeOpTargetInvert</code></a> has an empty <code>ParamSet</code> and its sole purpose is to apply the inverse transformation function after having predicted from a <a href="https://mlr3.mlr-org.com/reference/Learner.html"><code>Learner</code></a>). All <a href="https://mlr3pipelines.mlr-org.com/reference/Graph.html"><code>Graph</code></a>s for doing target transformations will therefore look similar like the simple one above, i.e., a target transformation <a href="https://mlr3pipelines.mlr-org.com/reference/PipeOp.html"><code>PipeOp</code></a> followed by some <a href="https://mlr3.mlr-org.com/reference/Learner.html"><code>Learner</code></a> or a whole <a href="https://mlr3pipelines.mlr-org.com/reference/Graph.html"><code>Graph</code></a>, followed by <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_targetinvert.html"><code>PipeOpTargetInvert</code></a>. Therefore, using <code>ppl("targettrafo")</code> to construct such <a href="https://mlr3pipelines.mlr-org.com/reference/Graph.html"><code>Graph</code></a>s is highly recommended.</p>
+<p>To allow for more advanced target transformations, we now have a closer look at the abstract base class, <code>PipeOpTargetTrafo</code>:</p>
+<p><code>PipeOpTargetTrafo</code> has one input channel, named <code>"input"</code> taking a <a href="https://mlr3.mlr-org.com/reference/Task.html"><code>Task</code></a> both during training and prediction. It’s two output channels are named <code>"fun"</code> and <code>"output"</code>. During training <code>"fun"</code> returns <code>NULL</code> and during prediction <code>"fun"</code> returns a function that will be used by <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_targetinvert.html"><code>PipeOpTargetInvert</code></a> to perform the inverse target transformation on <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_targetinvert.html"><code>PipeOpTargetInvert</code></a>’s <code>"prediction"</code> input. <code>"output"</code> returns the modified input <a href="https://mlr3.mlr-org.com/reference/Task.html"><code>Task</code></a> both during training and prediction.</p>
+<p>Subclasses can overload up to four functions:</p>
+<ul>
+<li><p><code>.get_state()</code> takes the input <a href="https://mlr3.mlr-org.com/reference/Task.html"><code>Task</code></a> and returns a <code>list()</code> which will internally be used to set the <code>$state</code>. Typically it is sensible to make use of the <code>$state</code> during <code>.transform()</code> and <code>.train_invert()</code>. The base implementation returns <code>list()</code> and should be overloaded if setting the state is desired.</p></li>
+<li><p><code>.transform()</code> takes the input <a href="https://mlr3.mlr-org.com/reference/Task.html"><code>Task</code></a> and returns a modified <a href="https://mlr3.mlr-org.com/reference/Task.html"><code>Task</code></a> (i.e., the <a href="https://mlr3.mlr-org.com/reference/Task.html"><code>Task</code></a> with the transformed target). This is the main function for doing the actual target transformation. Note that <code>.get_state()</code> is evaluated a single time during training right before <code>.transform()</code> and therefore, you can rely on the <code>$state</code> that has been set. To update the input <a href="https://mlr3.mlr-org.com/reference/Task.html"><code>Task</code></a> with respect to the transformed target, subclasses should make use of the <a href="https://mlr3.mlr-org.com/reference/convert_task.html"><code>convert_task()</code></a> function and drop the original target from the <a href="https://mlr3.mlr-org.com/reference/Task.html"><code>Task</code></a>. <code>.transform()</code> also accepts a <code>phase</code> argument that will receive <code>"train"</code> during training and <code>"predict"</code> during prediction. This can be used to enable different behavior during training and prediction. <code>.transform()</code> should always be overloaded by subclasses.</p></li>
+<li><p><code>.train_invert()</code> takes the input <a href="https://mlr3.mlr-org.com/reference/Task.html"><code>Task</code></a> and returns a <code>predict_phase_state</code> object. This can be anything. Note that <code>.train_invert()</code> should not modify the input <a href="https://mlr3.mlr-org.com/reference/Task.html"><code>Task</code></a>. The base implementation returns a list with a single argument, the <code>$truth</code> column of the input <a href="https://mlr3.mlr-org.com/reference/Task.html"><code>Task</code></a> and should be overloaded if a more training-phase-dependent state is desired.</p></li>
+<li><p><code>.invert()</code> takes a <a href="https://mlr3.mlr-org.com/reference/Prediction.html"><code>Prediction</code></a> and a <code>predict_phase_state</code> object as inputs and returns a <a href="https://mlr3.mlr-org.com/reference/Prediction.html"><code>Prediction</code></a>. This is the main function for specifying the actual inverse target transformation that will later be carried out by <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_targetinvert.html"><code>PipeOpTargetInvert</code></a>. Internally a private helper function , <code>.invert_help()</code> will construct the function that will be returned by the <code>"fun"</code> output of <code>PipeOpTargetTrafo</code> so that <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_pipeops_targetinvert.html"><code>PipeOpTargetInvert</code></a> can later simply dispatch this inverse target transformation on its <code>"prediction"</code> input.</p></li>
+</ul>
+<p>The supposed workflow of a class inherited from <code>PipeOpTargetTrafo</code> is given in the following figure:</p>
+<div class="layout-chunk" data-layout="l-body">
+<p><img src="workflow.svg" width="100%" /></p>
+</div>
+<p>To solidify our understanding we will design a new target transformation <a href="https://mlr3pipelines.mlr-org.com/reference/PipeOp.html"><code>PipeOp</code></a> in the next section: <code>PipeOpTargetTrafoBoxCox</code></p>
+<h1 id="hands-on-pipeoptargettrafoboxcox">Hands on: PipeOpTargetTrafoBoxCox</h1>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://r6.r-lib.org'>R6</a></span><span class='op'>)</span>
+</code></pre>
+</div>
+</div>
+<p>The Box-Cox transformation of a target <span class="math inline">\(y_{i}\)</span> is given as:</p>
+<p><span class="math display">\[y_{i}(\lambda) = \begin{cases}
+\frac{y_{i}^{\lambda} - 1}{\lambda} &amp; \text{if}~\lambda \neq 0; \\
+\log(y_{i}) &amp; \text{if}~\lambda = 0
+\end{cases}\]</span></p>
+<p><a href="https://mlr3pipelines.mlr-org.com">mlr3pipelines</a> already supports the Box-Cox transformation for numerical, positive features, see <code>?PipeOpBoxCox</code>.</p>
+<p>Here we will design a <a href="https://mlr3pipelines.mlr-org.com/reference/PipeOp.html"><code>PipeOp</code></a> to apply the Box-Cox transformation as a target transformation. The <span class="math inline">\(\lambda\)</span> parameter of the transformation is estimated during training and used for both the training and prediction transformation. After predicting from a <a href="https://mlr3.mlr-org.com/reference/Learner.html"><code>Learner</code></a> we will as always apply the inverse transformation function. To do the actual transformation we will use <a href="https://www.rdocumentation.org/packages/bestNormalize/topics/boxcox"><code>bestNormalize::boxcox()</code></a>.</p>
+<p>First, we inherit from <code>PipeOpTargetTrafo</code> and overload the <code>initialize()</code> function:</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>PipeOpTargetTrafoBoxCox</span> <span class='op'>=</span> <span class='kw'><a href='https://r6.r-lib.org/reference/R6Class.html'>R6Class</a></span><span class='op'>(</span><span class='st'>"PipeOpTargetTrafoBoxCox"</span>,
+  inherit <span class='op'>=</span> <span class='va'>PipeOpTargetTrafo</span>,
+  public <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>
+    initialize <span class='op'>=</span> <span class='kw'>function</span><span class='op'>(</span><span class='va'>id</span> <span class='op'>=</span> <span class='st'>"targettrafoboxcox"</span>, <span class='va'>param_vals</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>{</span>
+      <span class='va'>param_set</span> <span class='op'>=</span> <span class='fu'><a href='https://paradox.mlr-org.com/reference/ps.html'>ps</a></span><span class='op'>(</span>
+        standardize <span class='op'>=</span> <span class='fu'><a href='https://paradox.mlr-org.com/reference/Domain.html'>p_lgl</a></span><span class='op'>(</span>default <span class='op'>=</span> <span class='cn'>TRUE</span>, tags <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"train"</span>, <span class='st'>"boxcox"</span><span class='op'>)</span><span class='op'>)</span>,
+        eps <span class='op'>=</span> <span class='fu'><a href='https://paradox.mlr-org.com/reference/Domain.html'>p_dbl</a></span><span class='op'>(</span>default <span class='op'>=</span> <span class='fl'>0.001</span>, lower <span class='op'>=</span> <span class='fl'>0</span>, tags <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"train"</span>, <span class='st'>"boxcox"</span><span class='op'>)</span><span class='op'>)</span>,
+        lower <span class='op'>=</span> <span class='fu'><a href='https://paradox.mlr-org.com/reference/Domain.html'>p_dbl</a></span><span class='op'>(</span>default <span class='op'>=</span> <span class='op'>-</span><span class='fl'>1L</span>, tags <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"train"</span>, <span class='st'>"boxcox"</span><span class='op'>)</span><span class='op'>)</span>,
+        upper <span class='op'>=</span> <span class='fu'><a href='https://paradox.mlr-org.com/reference/Domain.html'>p_dbl</a></span><span class='op'>(</span>default <span class='op'>=</span> <span class='fl'>2L</span>, tags <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"train"</span>, <span class='st'>"boxcox"</span><span class='op'>)</span><span class='op'>)</span>
+      <span class='op'>)</span>
+      <span class='va'>super</span><span class='op'>$</span><span class='fu'>initialize</span><span class='op'>(</span>id <span class='op'>=</span> <span class='va'>id</span>, param_set <span class='op'>=</span> <span class='va'>param_set</span>, param_vals <span class='op'>=</span> <span class='va'>param_vals</span>,
+        packages <span class='op'>=</span> <span class='st'>"bestNormalize"</span>, task_type_in <span class='op'>=</span> <span class='st'>"TaskRegr"</span>,
+        task_type_out <span class='op'>=</span> <span class='st'>"TaskRegr"</span><span class='op'>)</span>
+    <span class='op'>}</span>
+  <span class='op'>)</span>,
+  private <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>
+
+    .get_state <span class='op'>=</span> <span class='kw'>function</span><span class='op'>(</span><span class='va'>task</span><span class='op'>)</span> <span class='op'>{</span>
+      <span class='va'>...</span>
+    <span class='op'>}</span>,
+
+    .transform <span class='op'>=</span> <span class='kw'>function</span><span class='op'>(</span><span class='va'>task</span>, <span class='va'>phase</span><span class='op'>)</span> <span class='op'>{</span>
+      <span class='va'>...</span>
+    <span class='op'>}</span>,
+
+    .train_invert <span class='op'>=</span> <span class='kw'>function</span><span class='op'>(</span><span class='va'>task</span><span class='op'>)</span> <span class='op'>{</span>
+      <span class='va'>...</span>
+    <span class='op'>}</span>,
+
+    .invert <span class='op'>=</span> <span class='kw'>function</span><span class='op'>(</span><span class='va'>prediction</span>, <span class='va'>predict_phase_state</span><span class='op'>)</span> <span class='op'>{</span>
+      <span class='va'>...</span>
+    <span class='op'>}</span>
+  <span class='op'>)</span>
+<span class='op'>)</span>
+</code></pre>
+</div>
+</div>
+<p>As parameters, we allow <code>"standardize"</code> (whether to center and scale the transformed values to attempt a standard normal distribution), <code>"eps"</code> (tolerance parameter to identify if the <span class="math inline">\(\lambda\)</span> parameter is equal to zero), <code>"lower"</code> (lower value for the estimation of the <span class="math inline">\(\lambda\)</span> parameter) and <code>"upper"</code> (upper value for the estimation of the <span class="math inline">\(\lambda\)</span> parameter). Note that we set <code>task_type_in = "TaskRegr"</code> and <code>task_type_out = "TaskRegr"</code> to specify that this <a href="https://mlr3pipelines.mlr-org.com/reference/PipeOp.html"><code>PipeOp</code></a> only works for <a href="https://mlr3.mlr-org.com/reference/TaskRegr.html"><code>regression Tasks</code></a>.</p>
+<p>Second, we overload the four functions as mentioned above.</p>
+<p>We start with <code>.get_state()</code>. We extract the target and apply the Box-Cox transformation to the target. This yields an object of class <code>"boxcox"</code> which we will wrap in a <code>list()</code> and set as the <code>$state</code> (<code>bc$x.t = NULL</code> and <code>bc$x = NULL</code> is done to save some memory because we do not need the transformed original data and original data later):</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>    .get_state <span class="ot">=</span> <span class="cf">function</span>(task) {</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>      target <span class="ot">=</span> task<span class="sc">$</span><span class="fu">data</span>(<span class="at">cols =</span> task<span class="sc">$</span>target_names)[[1L]]</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>      bc <span class="ot">=</span> mlr3misc<span class="sc">::</span><span class="fu">invoke</span>(bestNormalize<span class="sc">::</span>boxcox, target,</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>        <span class="at">.args =</span> self<span class="sc">$</span>param_set<span class="sc">$</span><span class="fu">get_values</span>(<span class="at">tags =</span> <span class="st">&quot;boxcox&quot;</span>))</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>      bc<span class="sc">$</span>x.t <span class="ot">=</span> <span class="cn">NULL</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>      bc<span class="sc">$</span>x <span class="ot">=</span> <span class="cn">NULL</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>      <span class="fu">list</span>(<span class="at">bc =</span> bc)</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    },</span></code></pre></div>
+</div>
+<p>Next, we tackle <code>.transform()</code>. This is quite straightforward, because objects of class <code>"boxcox"</code> have their own predict method which we can use here to carry out the actual Box-Cox transformation based on the learned <span class="math inline">\(\lambda\)</span> parameter as stored in the <code>"boxcox"</code> object in the <code>$state</code> (both during training and prediction). We then rename the target, add it to the task and finally update the task with respect to this new target:</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>    .transform <span class="ot">=</span> <span class="cf">function</span>(task, phase) {</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>      target <span class="ot">=</span> task<span class="sc">$</span><span class="fu">data</span>(<span class="at">cols =</span> task<span class="sc">$</span>target_names)[[1L]]</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>      new_target <span class="ot">=</span> <span class="fu">as.data.table</span>(<span class="fu">predict</span>(self<span class="sc">$</span>state<span class="sc">$</span>bc, <span class="at">newdata =</span> target))</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>      <span class="fu">colnames</span>(new_target) <span class="ot">=</span> <span class="fu">paste0</span>(task<span class="sc">$</span>target_names, <span class="st">&quot;.bc&quot;</span>)</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>      task<span class="sc">$</span><span class="fu">cbind</span>(new_target)</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>      <span class="fu">convert_task</span>(task, <span class="at">target =</span> <span class="fu">colnames</span>(new_target),</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>        <span class="at">drop_original_target =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    },</span></code></pre></div>
+</div>
+<p>Time to overload <code>.train_invert()</code>. This is even more straightforward, because the prediction method for objects of class <code>"boxcox"</code> directly allows for inverting the transformation via setting the argument <code>inverse = TRUE</code>. Therefore, we only need the <code>"boxcox"</code> object stored in the <code>$state</code> along the <code>$truth</code> column of the input <a href="https://mlr3.mlr-org.com/reference/Task.html"><code>Task</code></a> (remember that this list will later be available as the <code>predict_phase_state</code> object):</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>    .train_invert <span class="ot">=</span> <span class="cf">function</span>(task) {</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>      <span class="fu">list</span>(<span class="at">truth =</span> task<span class="sc">$</span><span class="fu">truth</span>(), <span class="at">bc =</span> self<span class="sc">$</span>state<span class="sc">$</span>bc)</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    },</span></code></pre></div>
+</div>
+<p>Finally, we overload <code>.invert()</code>. We extract the truth from the <code>predict_phase_state</code> and the response from the <a href="https://mlr3.mlr-org.com/reference/Prediction.html"><code>Prediction</code></a>. We then apply the inverse Box-Cox transformation to the response based on the <span class="math inline">\(\lambda\)</span> parameter and the mean and standard deviation learned during training, relying on the <code>predict_phase_state</code> object. Finally, we construct a new <a href="https://mlr3.mlr-org.com/reference/Prediction.html"><code>Prediction</code></a> object:</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r">    <span class='va'>.invert</span> <span class='op'>=</span> <span class='kw'>function</span><span class='op'>(</span><span class='va'>prediction</span>, <span class='va'>predict_phase_state</span><span class='op'>)</span> <span class='op'>{</span>
+      <span class='va'>truth</span> <span class='op'>=</span> <span class='va'>predict_phase_state</span><span class='op'>$</span><span class='va'>truth</span>
+      <span class='va'>response</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/stats/predict.html'>predict</a></span><span class='op'>(</span><span class='va'>predict_phase_state</span><span class='op'>$</span><span class='va'>bc</span>, newdata <span class='op'>=</span> <span class='va'>prediction</span><span class='op'>$</span><span class='va'>response</span>,
+        inverse <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>
+      <span class='va'><a href='https://mlr3.mlr-org.com/reference/PredictionRegr.html'>PredictionRegr</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span>row_ids <span class='op'>=</span> <span class='va'>prediction</span><span class='op'>$</span><span class='va'>row_ids</span>, truth <span class='op'>=</span> <span class='va'>truth</span>,
+        response <span class='op'>=</span> <span class='va'>response</span><span class='op'>)</span>
+    <span class='op'>}</span>
+</code></pre>
+</div>
+</div>
+<div class="layout-chunk" data-layout="l-body">
+
+</div>
+<p>Note that this <a href="https://mlr3pipelines.mlr-org.com/reference/PipeOp.html"><code>PipeOp</code></a> is ill-equipped to handle the case of <code>predict_type = "se"</code>, i.e., we always only return a <code>response</code> prediction (as outlined above, this is the case for most target transformations, because transforming standard errors or probabilities of a prediction is often not straightforward). We could of course check whether the <code>predict_type</code> is set to <code>"se"</code> and if this is the case, return <code>NA</code> as the standard errors.</p>
+<p>To construct our final target transformation <a href="https://mlr3pipelines.mlr-org.com/reference/Graph.html"><code>Graph</code></a> with our linear regression learner, we again simply make use of <code>ppl("targettrafo")</code>:</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>g_bc</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3pipelines.mlr-org.com//reference/ppl.html'>ppl</a></span><span class='op'>(</span><span class='st'>"targettrafo"</span>, graph <span class='op'>=</span> <span class='va'>learner_lm</span>,
+  trafo_pipeop <span class='op'>=</span> <span class='va'>PipeOpTargetTrafoBoxCox</span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span>
+</code></pre>
+</div>
+</div>
+<p>The following plot should already look quite familiar:</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>g_bc</span><span class='op'>$</span><span class='fu'>plot</span><span class='op'>(</span><span class='op'>)</span>
+</code></pre>
+</div>
+<p><img src="target-transformations-via-pipelines_files/figure-html5/target-transformations-via-pipelines-027-1.png" width="960" /></p>
+</div>
+<p>Finally we <code>$train()</code> and <code>$predict()</code> on the task (again, we wrap the <a href="https://mlr3pipelines.mlr-org.com/reference/Graph.html"><code>Graph</code></a> in a <a href="https://mlr3pipelines.mlr-org.com/reference/mlr_learners_graph.html"><code>GraphLearner</code></a>):</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>gl_bc</span> <span class='op'>=</span> <span class='va'><a href='https://mlr3pipelines.mlr-org.com//reference/mlr_learners_graph.html'>GraphLearner</a></span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='va'>g_bc</span><span class='op'>)</span>
+<span class='va'>gl_bc</span><span class='op'>$</span><span class='fu'>train</span><span class='op'>(</span><span class='va'>task</span><span class='op'>)</span>
+<span class='va'>gl_bc</span><span class='op'>$</span><span class='va'>state</span>
+</code></pre>
+</div>
+<pre><code>$model
+$model$regr.lm
+$model$regr.lm$model
+
+Call:
+stats::lm(formula = task$formula(), data = task$data())
+
+Coefficients:
+(Intercept)           am         carb          cyl         disp         drat         gear           hp         qsec  
+ -0.6272999    0.1670950   -0.0663126    0.0237529    0.0002376    0.0759944    0.1963335   -0.0030367    0.1043210  
+         vs           wt  
+ -0.0080166   -0.5800635  
+
+
+$model$regr.lm$log
+Empty data.table (0 rows and 3 cols): stage,class,msg
+
+$model$regr.lm$train_time
+[1] 0.008
+
+$model$regr.lm$param_vals
+named list()
+
+$model$regr.lm$task_hash
+[1] &quot;612ab4e0ad596159&quot;
+
+$model$regr.lm$data_prototype
+Empty data.table (0 rows and 11 cols): mpg.bc,am,carb,cyl,disp,drat...
+
+$model$regr.lm$task_prototype
+Empty data.table (0 rows and 11 cols): mpg.bc,am,carb,cyl,disp,drat...
+
+$model$regr.lm$mlr3_version
+[1] &#39;0.13.3&#39;
+
+$model$regr.lm$train_task
+&lt;TaskRegr:mtcars&gt; (32 x 11): Motor Trends
+* Target: mpg.bc
+* Properties: -
+* Features (10):
+  - dbl (10): am, carb, cyl, disp, drat, gear, hp, qsec, vs, wt
+
+
+$model$targettrafoboxcox
+$model$targettrafoboxcox$bc
+Standardized Box Cox Transformation with 32 nonmissing obs.:
+ Estimated statistics:
+ - lambda = 0.02955701 
+ - mean (before standardization) = 3.092016 
+ - sd (before standardization) = 0.324959 
+
+
+$model$targetinvert
+list()
+
+
+$log
+Empty data.table (0 rows and 3 cols): stage,class,msg
+
+$train_time
+[1] 0.077
+
+$param_vals
+named list()
+
+$task_hash
+[1] &quot;58a137d2055e8406&quot;
+
+$data_prototype
+Empty data.table (0 rows and 11 cols): mpg,am,carb,cyl,disp,drat...
+
+$task_prototype
+Empty data.table (0 rows and 11 cols): mpg,am,carb,cyl,disp,drat...
+
+$mlr3_version
+[1] &#39;0.13.3&#39;
+
+$train_task
+&lt;TaskRegr:mtcars&gt; (32 x 11): Motor Trends
+* Target: mpg
+* Properties: -
+* Features (10):
+  - dbl (10): am, carb, cyl, disp, drat, gear, hp, qsec, vs, wt</code></pre>
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>gl_bc</span><span class='op'>$</span><span class='fu'>predict</span><span class='op'>(</span><span class='va'>task</span><span class='op'>)</span>
+</code></pre>
+</div>
+<pre><code>&lt;PredictionRegr&gt; for 32 observations:
+    row_ids truth response
+          1  21.0 21.70854
+          2  21.0 21.13946
+          3  22.8 25.75242
+---                       
+         30  19.7 19.58934
+         31  15.0 14.10658
+         32  21.4 23.15263</code></pre>
+</div>
+<p>We could now proceed to benchmark our different target transformations:</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>bg</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/benchmark_grid.html'>benchmark_grid</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='va'>task</span><span class='op'>)</span>, learners <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='va'>learner_lm</span>, <span class='va'>gl</span>, <span class='va'>gl_bc</span><span class='op'>)</span>,
+  resamplings <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>rsmp</a></span><span class='op'>(</span><span class='st'>"cv"</span>, folds <span class='op'>=</span> <span class='fl'>10</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>
+<span class='va'>bmr</span> <span class='op'>=</span> <span class='fu'><a href='https://mlr3.mlr-org.com/reference/benchmark.html'>benchmark</a></span><span class='op'>(</span><span class='va'>bg</span><span class='op'>)</span>
+</code></pre>
+</div>
+</div>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>bmr</span><span class='op'>$</span><span class='fu'>aggregate</span><span class='op'>(</span><span class='fu'><a href='https://mlr3.mlr-org.com/reference/mlr_sugar.html'>msr</a></span><span class='op'>(</span><span class='st'>"regr.mse"</span><span class='op'>)</span><span class='op'>)</span>
+</code></pre>
+</div>
+<pre><code>   nr      resample_result task_id                             learner_id resampling_id iters  regr.mse
+1:  1 &lt;ResampleResult[22]&gt;  mtcars                                regr.lm            cv    10 11.866071
+2:  2 &lt;ResampleResult[22]&gt;  mtcars      targetmutate.regr.lm.targetinvert            cv    10  7.793303
+3:  3 &lt;ResampleResult[22]&gt;  mtcars targettrafoboxcox.regr.lm.targetinvert            cv    10  8.230192</code></pre>
+</div>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
+>>>>>>> parent of dc9505d9 (Deploy from Github Actions build 2142763313 [ci skip])
 <!--radix_placeholder_article_footer-->
 <!--/radix_placeholder_article_footer-->
 </div>
