@@ -1,0 +1,208 @@
+---
+title: "Machine Learning Survival Analysis"
+description: |
+  Introduction to Machine Learning based Survival Analysis using customer churn data.
+author:
+  - name: Andreas Bender
+date: 02-20-2021
+output:
+  distill::distill_article:
+    self_contained: false
+    css: ../../custom.css
+bibliography: biblio.bib
+---
+
+```{r, include = FALSE, warning = FALSE, message = FALSE}
+# Just some preparation
+knitr::opts_chunk$set(
+  echo = TRUE,
+  R.options = list(width = 100)
+)
+if (require("data.table")) data.table::setDTthreads(1)
+lgr::get_logger("mlr3")$set_threshold("warn")
+library(mlr3book)
+set.seed(20210726)
+```
+
+```{r}
+library(mlr3)
+library(mlr3proba)
+library(mlr3pipelines)
+library(mlr3tuning)
+library(mlr3misc)
+library(mlr3learners) # contains surv.glmnet
+library(paradox)
+library(ggplot2)
+theme_set(theme_bw())
+library(mlr3viz)
+library(skimr)
+```
+
+This post illustrates the Survival Analyis capabilities of `r mlr_pkg("mlr3")` and `r mlr_pkg("mlr3proba")`. As an example, we use Telco customer churn data, that was previously part of a [Kaggle challenge](https://www.kaggle.com/blastchar/telco-customer-churn).
+For a more technical introduction to survival analysis related capabilities of the `r mlr_pkg("mlr3")` ecosystem we refer to the respective chapter in the `r mlr_pkg("mlr3book")`, [Chapter 7.1](https://mlr3book.mlr-org.com/survival.html#survival).
+
+
+Customer churn is a term that describes a change in the customers status with a company, e.g., when customers decide to cancel their subscription or contract. Churn data is often analyzed as a binary outcome, i.e., did the customer churn, yes or no, using classification techniques. However, the data could also be viewed as a time-to-event outcome, i.e., how long does it take for a customer to churn. This provides a more detailed analysis, as, for example, we can calculate the probability to churn at different time points. However, since time until churn is the outcome of interest, some of the observations are *censored* (no churn *yet*). Methods for survival analysis therefore require specialized techniques capable of incorporating censoring into the definition of the task, the learner, the prediction and evaluation. Within the `r mlr_pkg("mlr3")` ecosystem, `r mlr_pkg("mlr3proba")` [@sonabend_mlr3proba_2021] provides the respective functionality.
+
+This post
+
+1. [Gives an overview of the customer churn data set](#telco-customer-churn-data)
+2. Introduces the `TaskSurv` and `LearnerSurv*` objects, on which survival analysis in `mlr3` is based on
+3. Illustrates, how different Survival Learners can be tuned and benchmarked using performance measures appropriate for time-to-event data
+4. Shows how predictions and model comparisons can be visualized
+
+
+
+As we will see, using `r mlr_pkg("mlr3proba")`, standard machine learning pipelines can be directly applied in the context of survival analysis.
+
+
+
+## 1. Telco Customer Churn data
+Below the raw data is imported from a Github repository and descriptive statistics are provided using the `skimr` package.
+
+The variables of interest that define the time-to-event outcome (time until the customer churned) are provided in the tuple `(tenure, Churn)`, where
+
+- `tenure` is a continuous variable that specifies the time that has elapsed since the customer signed the contract
+- `Churn` is a binary variable that indicates whether the customer churned (0 = no, 1 = yes)
+
+In the vocabulary of survival analysis `tenure` indicates the duration time and `Churn` is the status indicator. Customers with `Churn = 0` can be considered censored, as the event of interest (churn) was not observed at the end of the observation period for that customer (`tenure`). However, when estimating the probability of remaining a customer at different time points (survival probability $S(t)$), the information that the customer didn't churn up until that point can (and must be) used to obtain unbiased estimates.
+
+
+The features that might affect the survival probability (i.e., the probability that a customer hasn't churned yet) are listed in the Table of factor variables and include customer, contract and service related features. Numeric features include `MonthlyCharges` and `TotalCharges`. Especially the later should not be included as a feature when training the models, as the total charges depend on the time under contract (`tenure`), thus we know that someone with high amount of total charges could not have churned before a certain time-point. Thus we could often make perfect predictions without learning anything about the actual relationship between features and tenure. As a rule of thumb, no future information should be used to estimate or predict the survival probability at time $t$. In the example above, total charges are calculated using the entire time a customer was under contract^[it would be possible to incorporate a (lagged) time-dependent covariate of total charges at $t-1$ to predict the survival probability at time point $t$, but this requires specialized techniques].
+
+Below, we read in the data and create a descriptive overview. We note that there are no missing values and all features are binary or of categorical nature. The feature `SeniorCitizen` is stored as integer, therefore we transform it into a factor variable as well.
+
+```{r}
+churn <- read.csv("https://raw.githubusercontent.com/treselle-systems/customer_churn_analysis/master/WA_Fn-UseC_-Telco-Customer-Churn.csv", stringsAsFactors = TRUE)
+skimr::skim(churn)
+churn$SeniorCitizen = factor(churn$SeniorCitizen, levels = c(0, 1), labels = c("No", "Yes"))
+```
+
+
+## 2. Survival Tasks and Learners
+
+### 2.1 Survival Tasks
+
+Initializing a Survival Task is similar to standard [Regression or Classification tasks](https://mlr3book.mlr-org.com/tasks.html). The only exception is the specification of the target, which depends on the specific survival task at hand, and follows the nomenclature of the `survival::Surv` object. Thus the specification of the survival target requires at least two arguments: `time` and `event`.
+
+In the standard setting these variables indicate the (randomly) right-censored survival times (`time`) and status indicator (`event`: alive/censored = 0, dead = 1).
+
+<!--
+For more complex settings, e.g., for left- or interval-censored data, additional arguments `time2` and `type` can be specified. For example, left-censored observations would be specified using
+
+- `time`: the left-censoring time
+- `time2`: the right-censored survival time
+- `event`: status indicator
+- `type = "left"`: indicates left-censoring as the specification of interval-censored data would be specified equivalently. -->
+
+
+Below we create a `TaskSurv` object for the `churn` data using the `TaskSurv$new()` function. The figure generated by `autoplot` provides a first overview of the data. At the end of the follow-up (72 months), about 35% of the customers churned, the other are still subscribed. We remove all rows where time = 0 as this cannot be handled by survival models.
+
+```{r}
+churn$Churn = 1L * (churn$Churn == "Yes")
+churn$TotalCharges = churn$customerID = churn$MonthlyCharges = NULL
+churn = churn[churn$tenure > 0, ]
+churn_tsk <- TaskSurv$new("churn", backend = churn[sample.int(nrow(churn), 3e3),], time = "tenure", event="Churn" )
+autoplot(churn_tsk) + scale_y_continuous(limits=c(0,1))
+```
+
+### 2.2 Survival Learners
+
+Initializing learners for survival analysis also works similar to standard [regression and classification learners](https://mlr3book.mlr-org.com/learners.html). An overview of the different survival learners available is given [here](https://mlr3extralearners.mlr-org.com/articles/learners/learner_status.html). Below we initialize 4 learners:
+
+- A Kaplan-Meier estimator, a non-parametric, featureless baseline estimator of the survival probability (baseline without features)
+- A Cox proportional hazards model (baseline with features, linear effects, proportional hazards)
+- A Cox proportional hazards model based on GLMnet (non-linear effects, proportional hazards)
+- A random forest based method using implementation from package *`ranger`* (non-linear effects)^[no explicit assumptions about proportionality of the hazard, but splitting rule used has low power in case of non-proportionality]
+
+Below we only define the baseline learners. The other learners will be specified later, as we will also need to set up tuning for these learners.
+
+
+```{r}
+lrn_km = lrn("surv.kaplan")
+lrn_cph = lrn("surv.coxph")
+```
+
+## 3. Tuning and Benchmarking
+
+### 3.1. Tuning
+
+In order to tune the hyperparameters of the `glmnet` and `ranger` learners,
+we will set up `AutoTuner`s, which can be used as stand-alone learners within the outer resampling scheme.
+
+Below we define the inner resampling and tuning scheme for the `AutoTuners`, i.e., we do a 4-fold CV for inner resampling and use random search with 10 evaluations of the Graf Score for parameter selection:
+
+```{r}
+# Set up  GLMnet and ranger Auto Tuners
+# resampling and tuning will have the same settings for both learners
+rsmp_4 = rsmp("cv", folds = 4)
+msr_graf = msr("surv.graf", proper = TRUE)
+tnr_rs   = tnr("random_search")
+trm_e10  = trm("evals", n_evals = 10)# increase for better exploration of search space
+```
+
+In the chunk below, we set up the parameter space for the random search when tuning the algorithm within each outer resampling iteration (defined later). Both baseline models, Kaplan-Meier and Cox PH will be used as is without modifications. For the `glmnet` model, we tune the $\alpha$ and $\lambda$ parameters. Note, that for `glmnet`, we prefix the parameter names with `surv.glmnet`. This is because we will use a so called `GraphLearner` using the `r mlr_pkg("mlr3pipelines")` package^[see [here](https://mlr3book.mlr-org.com/pipelines.html) for details], rather than the learner directly. This `GraphLearner` is a learner defined by a pipeline, where we use a distribution composition to transform the `glmnet` predictions, that only return a continuous rank (`crank`), into a distribution, such that we can also predict survival probabilities^[in more technical terms, we are interested in $\hat{S}(t|\mathbf{x})=\hat{S}_0(t)\exp(\mathbf{x}^\top\hat{\boldsymbol{\beta}})$, whereas `glmnet` predictions only return $\exp(\mathbf{x}^\top\hat{\boldsymbol{\beta}})$]. This is necessary, because we want to use the so-called *Integrated Brier Score* (also Graf Score) as an evaluation measure, which requires the estimation of survival probabilities at different time points.
+For the random forest we tune w.r.t. `mtry` and `min.node.size`:
+
+```{r}
+# define parameter search space
+params_glmnet = ParamSet$new(
+  list(
+    ParamDbl$new("alpha", lower = 0L, upper = 1L)
+  )
+)
+params_ranger = ParamSet$new(
+  list(
+    ParamInt$new("mtry", lower = 2, upper = 5),
+    ParamInt$new("min.node.size", lower = 1L, upper = 50L)
+  )
+)
+```
+
+Using `surv.glmnet` and `surv.ranger` learners and the respective parameter search spaces, we can set up the `AutoTuner`s  for each algorithm:
+
+```{r}
+graph_glmnet = GraphLearner$new(
+  id = "GLMnet",
+  ppl("distrcompositor",
+      po("encode") %>>% lrn("surv.glmnet"),
+      form = "ph"))
+
+# auto tuner glmnet
+lrn_glmnet_auto  = AutoTuner$new(
+  learner      = graph_glmnet,
+  search_space = params_glmnet,
+  resampling   = rsmp_4,
+  measure      = msr_graf,
+  tuner        = tnr_rs,
+  terminator   = trm_e10)
+# auto tuner ranger
+lrn_ranger  = AutoTuner$new(
+  learner      = lrn("surv.ranger", num.trees = 100L),
+  search_space = params_ranger,
+  resampling   = rsmp_4,
+  measure      = msr_graf,
+  tuner        = tnr_rs,
+  terminator   = trm_e10)
+```
+
+## 3.2 Benchmarking
+
+In a final step, we define the benchmark design and perform the benchmark experiment. Here we use a 10-fold repeated cross-validation for the outer resampling^[for illustration, we keep the number of resampling iterations low. For real applications, especially the number of repeats would need to be increased in most cases].
+
+```{r, message = FALSE}
+design <- benchmark_grid(
+  tasks = churn_tsk,
+  learners = list(lrn_km, lrn_cph, graph_glmnet),
+  resamplings = rsmp("repeated_cv", folds = 5, repeats = 2) # outer resampling
+)
+print(design)
+bmr = benchmark(design)
+```
+
+The benchmark results are given below:
+
+```{r}
+bmr$aggregate(msrs(c("surv.graf", "surv.cindex")))
+```
+
